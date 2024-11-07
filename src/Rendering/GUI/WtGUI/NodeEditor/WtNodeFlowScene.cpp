@@ -1,10 +1,13 @@
 #include "WtNodeFlowScene.h"
 
-WtNodeFlowScene::WtNodeFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::SceneGraph> scene)
+WtNodeFlowScene::WtNodeFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::SceneGraph> scene, bool isSelected, int selectNum)
 	: WtFlowScene()
 {
 	_painter = painter;
 	mScene = scene;
+	_selectNum = selectNum;
+	_isSelected = isSelected;
+
 
 	auto classMap = dyno::Object::getClassMap();
 	auto ret = std::make_shared<WtDataModelRegistry>();
@@ -66,11 +69,21 @@ void WtNodeFlowScene::createNodeGraphView()
 	auto addNodeWidget = [&](std::shared_ptr<Node> m) -> void
 		{
 			auto mId = m->objectId();
-			//std::cout << m->objectId() << std::endl;
 
 			auto type = std::make_unique<WtNodeWidget>(m);
 
-			auto& node = this->createNode(std::move(type), _painter);
+			bool b = false;
+			if (_isSelected)
+			{
+				if (_selectNum == mId)
+				{
+					b = true;
+				}
+			}
+
+			//std::cout << b << std::endl;
+			auto& node = this->createNode(std::move(type), _painter, b);
+
 
 			nodeMap[mId] = &node;
 			OutNodeMap[mId] = &node;
@@ -305,7 +318,7 @@ void WtNodeFlowScene::addNodeByString(std::string NodeName)
 
 			auto type = std::make_unique<WtNodeWidget>(m);
 
-			auto& node = this->createNode(std::move(type), _painter);
+			auto& node = this->createNode(std::move(type), _painter, false);
 
 			Wt::WPointF posView(m->bx(), m->by());
 
@@ -348,7 +361,7 @@ void WtNodeFlowScene::createWtNode(std::shared_ptr<dyno::Node> node)
 		return;
 
 	auto qNodeWidget = std::make_unique<WtNodeWidget>(node);
-	auto& qNode = createNode(std::move(qNodeWidget), _painter);
+	auto& qNode = createNode(std::move(qNodeWidget), _painter, false);
 
 	//Calculate the position for the newly create node to avoid overlapping
 	auto& _nodes = this->nodes();

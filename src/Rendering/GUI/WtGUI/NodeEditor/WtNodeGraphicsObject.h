@@ -82,7 +82,7 @@ public:
 class WtNodeGraphicsObject
 {
 public:
-	WtNodeGraphicsObject(WtFlowScene& scene, WtNode& node, Wt::WPainter* painter);
+	WtNodeGraphicsObject(WtFlowScene& scene, WtNode& node, Wt::WPainter* painter, bool isSelected);
 
 	virtual ~WtNodeGraphicsObject();
 
@@ -126,9 +126,9 @@ public:
 
 	Wt::WPointF getPos() const;
 
-	bool isSelected() const { return _selectChecked; }
+	bool isSelected() const { return _isSelected; }
 
-	bool setSelecteChecked(bool s) { _selectChecked = s; }
+	void setSelecteChecked(bool s) { _isSelected = s; }
 
 	Wt::WTransform sceneTransform() const
 	{
@@ -164,7 +164,7 @@ private:
 
 	bool _hotKey2Checked = false;
 
-	bool _selectChecked = false;
+	bool _isSelected;
 
 	int _pressCounter = 0;
 

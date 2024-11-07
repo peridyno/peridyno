@@ -37,6 +37,8 @@ void WtNodePainter::drawNodeRect(
 {
 	WtNodeStyle const& nodeStyle = model->nodeStyle();
 
+
+	//std::cout << graphicsObject.isSelected() << std::endl;
 	auto color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
 
 	if (geom.hovered())
@@ -559,12 +561,13 @@ void WtNodePainter::drawValidationRect(
 
 //WtNodeGraphicsObject
 
-WtNodeGraphicsObject::WtNodeGraphicsObject(WtFlowScene& scene, WtNode& node, Wt::WPainter* painter)
+WtNodeGraphicsObject::WtNodeGraphicsObject(WtFlowScene& scene, WtNode& node, Wt::WPainter* painter, bool isSelected)
 	: _scene(scene)
 	, _node(node)
 	, _painter(painter)
 	, _locked(false)
 	, _flowNodeData(node.flowNodeData())
+	, _isSelected(isSelected)
 {
 
 	//this->mouseWentDown().connect(this, &WtNodeGraphicsObject::onMouseWentDown);

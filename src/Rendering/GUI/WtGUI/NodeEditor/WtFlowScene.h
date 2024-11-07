@@ -48,7 +48,7 @@ public:
 
 	void deleteConnection(WtConnection& connection);
 
-	WtNode& createNode(std::unique_ptr<WtNodeDataModel>&& dataModel, Wt::WPainter* painter);
+	WtNode& createNode(std::unique_ptr<WtNodeDataModel>&& dataModel, Wt::WPainter* painter, bool isSelected);
 
 	//QtNode& restoreNode(QJsonObject const& nodeJson);
 

@@ -33,12 +33,39 @@ void WtFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
 		update();
 		mLastDelta = delta;
 	}
+	else
+	{
+		for (auto it = mScene->begin(); it != mScene->end(); it++)
+		{
+			auto m = it.get();
+			auto node = nodeMap[m->objectId()];
+			auto nodeData = node->flowNodeData();
+			auto mousePoint = Wt::WPointF(event.widget().x, event.widget().y);
+			if (checkMouseInNodeRect(mousePoint, nodeData))
+			{
+				isSelected = true;
+				selectedNum = m->objectId();
+				canMoveNode = true;
+				update();
+				break;
+			}
+			else
+			{
+				isSelected = false;
+				selectedNum = 0;
+				canMoveNode = false;
+				//update();
+			}
+		}
+	}
+
 }
 
 void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 {
 	isDragging = false;
 	mLastDelta = Wt::WPointF(0, 0);
+
 }
 
 void WtFlowWidget::onMouseWheel(const Wt::WMouseEvent& event)
@@ -78,29 +105,19 @@ void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 {
 	Wt::WPainter painter(paintDevice);
 	painter.scale(mZoomFactor, mZoomFactor);
-	//painter.translate(mTranlate);
+	painter.translate(mTranlate);
 
-	node_scene = new WtNodeFlowScene(&painter, mScene);
+	node_scene = new WtNodeFlowScene(&painter, mScene, isSelected, selectedNum);
 
 	nodeMap = node_scene->getNodeMap();
 
-	for (auto it = mScene->begin(); it != mScene->end(); it++)
+	if (isDragging && isSelected)
 	{
-		auto m = it.get();
-		auto node = nodeMap[m->objectId()];
-		if (m->objectId() == 2 || m->objectId() == 364)
-		{
-			moveNode(*node, mTranlate);
-			auto nodeData = node->flowNodeData();
-			auto p = nodeData.getNodeBoundingRect().bottomRight();
-			auto p1 = nodeData.getNodeOrigin();
-			std::cout << p1.x() << std::endl;
-			std::cout << p1.y() << std::endl;
-			std::cout << p.x() << std::endl;
-			std::cout << p.y() << std::endl;
-
-		}
+		auto node = nodeMap[selectedNum];
+		moveNode(*node, mTranlate);
 	}
+
+
 }
 
 void WtFlowWidget::moveNode(WtNode& n, const Wt::WPointF& newLocaton)
@@ -112,4 +129,27 @@ void WtFlowWidget::moveNode(WtNode& n, const Wt::WPointF& newLocaton)
 		auto node = nodeData->getNode();
 		node->setBlockCoord(newLocaton.x(), newLocaton.y());
 	}
+}
+
+bool WtFlowWidget::checkMouseInNodeRect(Wt::WPointF mousePoint, WtFlowNodeData nodeData)
+{
+	Wt::WPointF bottomRight = Wt::WPointF(nodeData.getNodeBoundingRect().bottomRight().x() + nodeData.getNodeOrigin().x()
+		, nodeData.getNodeBoundingRect().bottomRight().y() + nodeData.getNodeOrigin().y());
+	Wt::WRectF rect = Wt::WRectF(nodeData.getNodeOrigin(), bottomRight);
+	return checkMouseInRect(mousePoint, rect);
+}
+
+bool WtFlowWidget::checkMouseInRect(Wt::WPointF mousePoint, Wt::WRectF rect)
+{
+	Wt::WPointF topLeft = Wt::WPointF(rect.topLeft().x() + mTranlate.x(), rect.topLeft().y() + mTranlate.y());
+	Wt::WPointF bottomRight = Wt::WPointF(rect.bottomRight().x() + mTranlate.x(), rect.bottomRight().y() + mTranlate.y());
+
+	if (topLeft.x() <= mousePoint.x() && mousePoint.x() <= bottomRight.x())
+	{
+		if (topLeft.y() <= mousePoint.y() && mousePoint.y() <= bottomRight.y())
+		{
+			return true;
+		}
+	}
+	return false;
 }
