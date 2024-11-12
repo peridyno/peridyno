@@ -36,12 +36,15 @@ private:
 	double mZoomFactor;
 	Wt::WPointF mLastMousePos;
 	Wt::WPointF mLastDelta;
-	Wt::WPointF mTranlate = Wt::WPointF(0, 0);
+	Wt::WPointF mTranslate = Wt::WPointF(0, 0);
+	Wt::WPointF mTranslateNode = Wt::WPointF(0, 0);
 
 	bool isDragging = false;
 	bool isSelected;
 	int selectedNum;
 	bool canMoveNode = false;
+
+	bool reorderFlag = true;
 
 	WtNodeFlowScene* node_scene = nullptr;
 	std::shared_ptr<dyno::SceneGraph> mScene;

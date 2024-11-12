@@ -22,14 +22,26 @@ void WtFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 	isDragging = true;
 	mLastMousePos = Wt::WPointF(event.widget().x, event.widget().y);
 	mLastDelta = Wt::WPointF(0, 0);
+	if (isSelected)
+	{
+		auto origin = nodeMap[selectedNum]->flowNodeData().getNodeOrigin();
+		mTranslateNode = Wt::WPointF(origin.x(), origin.y());
+	}
 }
 
 void WtFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
 {
-	if (isDragging)
+	if (isDragging && !isSelected)
 	{
 		Wt::WPointF delta = Wt::WPointF(event.dragDelta().x, event.dragDelta().y);
-		mTranlate = Wt::WPointF(mTranlate.x() + delta.x() - mLastDelta.x(), mTranlate.y() + delta.y() - mLastDelta.y());
+		mTranslate = Wt::WPointF(mTranslate.x() + delta.x() - mLastDelta.x(), mTranslate.y() + delta.y() - mLastDelta.y());
+		update();
+		mLastDelta = delta;
+	}
+	else if (isDragging && isSelected)
+	{
+		Wt::WPointF delta = Wt::WPointF(event.dragDelta().x, event.dragDelta().y);
+		mTranslateNode = Wt::WPointF(mTranslateNode.x() + delta.x() - mLastDelta.x(), mTranslateNode.y() + delta.y() - mLastDelta.y());
 		update();
 		mLastDelta = delta;
 	}
@@ -58,14 +70,13 @@ void WtFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
 			}
 		}
 	}
-
 }
 
 void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 {
 	isDragging = false;
 	mLastDelta = Wt::WPointF(0, 0);
-
+	mTranslateNode = Wt::WPointF(0, 0);
 }
 
 void WtFlowWidget::onMouseWheel(const Wt::WMouseEvent& event)
@@ -105,19 +116,23 @@ void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 {
 	Wt::WPainter painter(paintDevice);
 	painter.scale(mZoomFactor, mZoomFactor);
-	painter.translate(mTranlate);
+	painter.translate(mTranslate);
 
 	node_scene = new WtNodeFlowScene(&painter, mScene, isSelected, selectedNum);
+
+	if (reorderFlag)
+	{
+		node_scene->reorderAllNodes();
+		reorderFlag = false;
+	}
 
 	nodeMap = node_scene->getNodeMap();
 
 	if (isDragging && isSelected)
 	{
 		auto node = nodeMap[selectedNum];
-		moveNode(*node, mTranlate);
+		moveNode(*node, mTranslateNode);
 	}
-
-
 }
 
 void WtFlowWidget::moveNode(WtNode& n, const Wt::WPointF& newLocaton)
@@ -141,8 +156,8 @@ bool WtFlowWidget::checkMouseInNodeRect(Wt::WPointF mousePoint, WtFlowNodeData n
 
 bool WtFlowWidget::checkMouseInRect(Wt::WPointF mousePoint, Wt::WRectF rect)
 {
-	Wt::WPointF topLeft = Wt::WPointF(rect.topLeft().x() + mTranlate.x(), rect.topLeft().y() + mTranlate.y());
-	Wt::WPointF bottomRight = Wt::WPointF(rect.bottomRight().x() + mTranlate.x(), rect.bottomRight().y() + mTranlate.y());
+	Wt::WPointF topLeft = Wt::WPointF(rect.topLeft().x() + mTranslate.x(), rect.topLeft().y() + mTranslate.y());
+	Wt::WPointF bottomRight = Wt::WPointF(rect.bottomRight().x() + mTranslate.x(), rect.bottomRight().y() + mTranslate.y());
 
 	if (topLeft.x() <= mousePoint.x() && mousePoint.x() <= bottomRight.x())
 	{

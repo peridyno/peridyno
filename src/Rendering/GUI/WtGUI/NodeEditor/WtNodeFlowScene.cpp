@@ -42,7 +42,7 @@ WtNodeFlowScene::WtNodeFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::Sc
 	this->setRegistry(ret);
 
 	createNodeGraphView();
-	reorderAllNodes();
+	//reorderAllNodes();
 
 	//connect(this, &QtFlowScene::nodeMoved, this, &QtNodeFlowScene::moveNode);
 	//connect(this, &QtFlowScene::nodePlaced, this, &QtNodeFlowScene::addNode);

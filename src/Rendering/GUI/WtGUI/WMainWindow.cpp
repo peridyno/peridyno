@@ -67,8 +67,6 @@ WMainWindow::WMainWindow()
 	auto widget1 = layout->addWidget(std::make_unique<Wt::WStackedWidget>(), Wt::LayoutPosition::East);
 	auto menu = naviBar->addMenu(std::make_unique<Wt::WMenu>(widget1), Wt::AlignmentFlag::Right);
 	initMenu(menu);
-
-
 }
 
 WMainWindow::~WMainWindow()
@@ -100,7 +98,6 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 			setScene(scene);
 			initLeftPanel(widget0);
 		}
-
 		});
 
 	sampleWidget->clicked().connect([=](Sample* sample)
@@ -146,8 +143,6 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 		setScene(scn);
 	}
 	panel0->setCentralWidget(std::make_unique<WtFlowWidget>(mScene));
-
-
 
 	return panel0;
 }
@@ -227,8 +222,6 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeTree()
 
 void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 {
-
-
 	// vertical layout
 	auto layout = parent->setLayout(std::make_unique<Wt::WVBoxLayout>());
 	layout->setContentsMargins(0, 0, 0, 0);
@@ -237,9 +230,8 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	auto widget0 = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), 1);
 	Wt::WTabWidget* tab = widget0->addNew<Wt::WTabWidget>();
 	tab->setHeight(900);
-	tab->addTab(initNodeTree(), "NodeTree", Wt::ContentLoading::Lazy);
+	//tab->addTab(initNodeTree(), "NodeTree", Wt::ContentLoading::Lazy);
 	tab->addTab(initNodeGraphics(), "NodeGraphics", Wt::ContentLoading::Lazy);
-
 
 	// simulation control
 	auto panel3 = layout->addWidget(std::make_unique<Wt::WPanel>());
