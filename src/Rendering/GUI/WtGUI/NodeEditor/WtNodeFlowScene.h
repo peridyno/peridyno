@@ -44,12 +44,6 @@ public:
 
 	void fieldUpdated(dyno::FBase* field, int status);
 
-	void addNode(WtNode& n);
-
-	void deleteNode(WtNode& n);
-
-	void moveNode(WtNode& n, const Wt::WPointF& newLocation);
-
 	void createWtNode(std::shared_ptr<dyno::Node> node);
 
 	void enableRendering(WtNode& n, bool checked);

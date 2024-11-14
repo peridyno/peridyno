@@ -8,7 +8,6 @@ WtNodeFlowScene::WtNodeFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::Sc
 	_selectNum = selectNum;
 	_isSelected = isSelected;
 
-
 	auto classMap = dyno::Object::getClassMap();
 	auto ret = std::make_shared<WtDataModelRegistry>();
 	int id = 0;
@@ -84,12 +83,10 @@ void WtNodeFlowScene::createNodeGraphView()
 			//std::cout << b << std::endl;
 			auto& node = this->createNode(std::move(type), _painter, b);
 
-
 			nodeMap[mId] = &node;
 			OutNodeMap[mId] = &node;
 
 			Wt::WPointF posView(m->bx(), m->by());
-
 
 			node.nodeGraphicsObject().setPos(posView);
 			node.nodeGraphicsObject().setHotKey0Checked(m->isVisible());
@@ -270,28 +267,6 @@ void WtNodeFlowScene::disableEditing()
 	}
 }
 
-void WtNodeFlowScene::moveNode(WtNode& n, const Wt::WPointF& newLocaton)
-{
-	auto nodeData = dynamic_cast<WtNodeWidget*>(n.nodeDataModel());
-
-	if (mEditingEnabled && nodeData != nullptr)
-	{
-		auto node = nodeData->getNode();
-		node->setBlockCoord(newLocaton.x(), newLocaton.y());
-	}
-}
-
-void WtNodeFlowScene::addNode(WtNode& n)
-{
-	auto nodeData = dynamic_cast<WtNodeWidget*>(n.nodeDataModel());
-
-	if (mEditingEnabled && nodeData != nullptr)
-	{
-		auto scn = dyno::SceneGraphFactory::instance()->active();
-		scn->addNode(nodeData->getNode());
-	}
-}
-
 void WtNodeFlowScene::addNodeByString(std::string NodeName)
 {
 	Wt::log("info") << NodeName;
@@ -342,17 +317,6 @@ void WtNodeFlowScene::addNodeByString(std::string NodeName)
 		x++;
 	}
 	addNodeWidget(dat->getNode());
-}
-
-void WtNodeFlowScene::deleteNode(WtNode& n)
-{
-	auto nodeData = dynamic_cast<WtNodeWidget*>(n.nodeDataModel());
-
-	if (mEditingEnabled && nodeData != nullptr)
-	{
-		auto scn = dyno::SceneGraphFactory::instance()->active();
-		scn->deleteNode(nodeData->getNode());
-	}
 }
 
 void WtNodeFlowScene::createWtNode(std::shared_ptr<dyno::Node> node)

@@ -23,7 +23,16 @@ public:
 	void onKeyWentDown(const Wt::WKeyEvent& event);
 	void zoomIn();
 	void zoomOut();
+
+	void addNode(WtNode& n);
+
+	void deleteNode(WtNode& n);
+
 	void moveNode(WtNode& n, const Wt::WPointF& newLocaton);
+
+	void enableRendering(WtNode& n, bool checked);
+
+	void enablePhysics(WtNode& n, bool checked);
 
 protected:
 	void paintEvent(Wt::WPaintDevice* paintDevice);
@@ -45,6 +54,8 @@ private:
 	bool canMoveNode = false;
 
 	bool reorderFlag = true;
+
+	bool mEditingEnabled = true;
 
 	WtNodeFlowScene* node_scene = nullptr;
 	std::shared_ptr<dyno::SceneGraph> mScene;

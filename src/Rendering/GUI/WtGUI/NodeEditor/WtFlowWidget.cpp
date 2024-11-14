@@ -135,17 +135,6 @@ void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 	}
 }
 
-void WtFlowWidget::moveNode(WtNode& n, const Wt::WPointF& newLocaton)
-{
-	auto nodeData = dynamic_cast<WtNodeWidget*>(n.nodeDataModel());
-
-	if (true && nodeData != nullptr)
-	{
-		auto node = nodeData->getNode();
-		node->setBlockCoord(newLocaton.x(), newLocaton.y());
-	}
-}
-
 bool WtFlowWidget::checkMouseInNodeRect(Wt::WPointF mousePoint, WtFlowNodeData nodeData)
 {
 	Wt::WPointF bottomRight = Wt::WPointF(nodeData.getNodeBoundingRect().bottomRight().x() + nodeData.getNodeOrigin().x()
@@ -167,4 +156,57 @@ bool WtFlowWidget::checkMouseInRect(Wt::WPointF mousePoint, Wt::WRectF rect)
 		}
 	}
 	return false;
+}
+
+void WtFlowWidget::addNode(WtNode& n)
+{
+	auto nodeData = dynamic_cast<WtNodeWidget*>(n.nodeDataModel());
+
+	if (mEditingEnabled && nodeData != nullptr)
+	{
+		auto scn = dyno::SceneGraphFactory::instance()->active();
+		scn->addNode(nodeData->getNode());
+	}
+}
+
+void WtFlowWidget::deleteNode(WtNode& n)
+{
+	auto nodeData = dynamic_cast<WtNodeWidget*>(n.nodeDataModel());
+
+	if (mEditingEnabled && nodeData != nullptr)
+	{
+		auto scn = dyno::SceneGraphFactory::instance()->active();
+		scn->deleteNode(nodeData->getNode());
+	}
+}
+
+void WtFlowWidget::moveNode(WtNode& n, const Wt::WPointF& newLocaton)
+{
+	auto nodeData = dynamic_cast<WtNodeWidget*>(n.nodeDataModel());
+
+	if (mEditingEnabled && nodeData != nullptr)
+	{
+		auto node = nodeData->getNode();
+		node->setBlockCoord(newLocaton.x(), newLocaton.y());
+	}
+}
+
+void WtFlowWidget::enableRendering(WtNode& n, bool checked)
+{
+	auto nodeData = dynamic_cast<WtNodeWidget*>(n.nodeDataModel());
+
+	if (mEditingEnabled && nodeData != nullptr) {
+		auto node = nodeData->getNode();
+		node->setVisible(checked);
+	}
+}
+
+void WtFlowWidget::enablePhysics(WtNode& n, bool checked)
+{
+	auto nodeData = dynamic_cast<WtNodeWidget*>(n.nodeDataModel());
+
+	if (mEditingEnabled && nodeData != nullptr) {
+		auto node = nodeData->getNode();
+		node->setActive(checked);
+	}
 }
