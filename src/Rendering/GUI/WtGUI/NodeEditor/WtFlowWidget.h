@@ -39,7 +39,10 @@ protected:
 
 private:
 	bool checkMouseInNodeRect(Wt::WPointF mousePoint, WtFlowNodeData nodeData);
-	bool checkMouseInRect(Wt::WPointF mousePoint, Wt::WRectF rect);
+
+	bool checkMouseInHotKey0(Wt::WPointF mousePoint, WtFlowNodeData nodeData);
+
+	bool checkMouseInHotKey1(Wt::WPointF mousePoint, WtFlowNodeData nodeData);
 
 private:
 	double mZoomFactor;

@@ -137,6 +137,11 @@ public:
 
 	void setBoundingRect(Wt::WRectF r) const { _flowNodeData.setNodeBoundingRect(r); }
 
+	void setHotKey0BoundingRect(Wt::WRectF r) const { _flowNodeData.setHotKey0BoundingRect(r); }
+
+	void setHotKey1BoundingRect(Wt::WRectF r) const { _flowNodeData.setHotKey1BoundingRect(r); }
+
+
 protected:
 	void paint(Wt::WPainter* painter);
 

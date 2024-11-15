@@ -366,10 +366,6 @@ void WtNodePainter::drawHotKeys(
 
 		float diam = nodeStyle.ConnectionPointDiameter;
 
-		Wt::WRectF key0(geom.width() + diam - 20, -diam, 20, diam + captionHeight);
-
-		double const radius = 6.0;
-
 		Wt::WPen p(color);
 		p.setWidth(nodeStyle.PenWidth);
 		painter->setPen(p);
@@ -399,10 +395,18 @@ void WtNodePainter::drawHotKeys(
 		Wt::WPointF points[4];
 		points[0] = Wt::WPointF(geom.width() + diam - keyWidth - keyOffset, -diam);
 		points[1] = Wt::WPointF(geom.width() + diam - keyOffset, -diam);
-		points[2] = Wt::WPointF(geom.width() + diam - keyShift - keyOffset, captionHeight);
-		points[3] = Wt::WPointF(geom.width() + diam - keyWidth - keyShift - keyOffset, captionHeight);
+		//points[2] = Wt::WPointF(geom.width() + diam - keyShift - keyOffset, captionHeight);
+		//points[3] = Wt::WPointF(geom.width() + diam - keyWidth - keyShift - keyOffset, captionHeight);
+		points[2] = Wt::WPointF(geom.width() + diam - keyOffset, captionHeight);
+		points[3] = Wt::WPointF(geom.width() + diam - keyWidth - keyOffset, captionHeight);
 
-		painter->drawPolygon(points, 4);
+		//painter->drawPolygon(points, 4);
+
+		Wt::WRectF hotKey0Rect = Wt::WRectF(points[0], points[2]);
+
+		painter->drawRect(hotKey0Rect);
+
+		graphicsObject.setHotKey0BoundingRect(hotKey0Rect);
 
 		if (graphicsObject.hotKey1Hovered())
 		{
@@ -427,11 +431,20 @@ void WtNodePainter::drawHotKeys(
 		}
 
 		points[0] = Wt::WPointF(geom.width() + diam - keyWidth - keyOffset, -diam);
-		points[1] = Wt::WPointF(geom.width() + diam - keyWidth - keyShift - keyOffset, captionHeight);
-		points[2] = Wt::WPointF(geom.width() + diam - keyWidth - keyShift - keyWidth - keyOffset, captionHeight);
+		//points[1] = Wt::WPointF(geom.width() + diam - keyWidth - keyShift - keyOffset, captionHeight);
+		//points[2] = Wt::WPointF(geom.width() + diam - keyWidth - keyShift - keyWidth - keyOffset, captionHeight);
 		points[3] = Wt::WPointF(geom.width() + diam - keyWidth - keyWidth - keyOffset, -diam);
 
-		painter->drawPolygon(points, 4);
+		points[1] = Wt::WPointF(geom.width() + diam - keyWidth - keyOffset, captionHeight);
+		points[2] = Wt::WPointF(geom.width() + diam - keyWidth - keyWidth - keyOffset, captionHeight);
+
+		Wt::WRectF hotKey1Rect = Wt::WRectF(points[0], points[2]);
+
+		painter->drawRect(hotKey1Rect);
+
+		graphicsObject.setHotKey1BoundingRect(hotKey1Rect);
+
+		//painter->drawPolygon(points, 4);
 	}
 }
 
