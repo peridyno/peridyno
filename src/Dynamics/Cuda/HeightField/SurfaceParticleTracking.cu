@@ -179,12 +179,10 @@ namespace dyno
 		int g_nx = g_vel.nx();
 		int g_ny = g_vel.ny();
 
-		int k0 = p_pos.index(i, j, k);
-
 		Real w00, w10, w01, w11;
 		int g_ix, g_iy, g_iz;
 
-		Coord3D p_ijk = p_pos[k0];
+		Coord3D p_ijk = p_pos(i, j, k);
 
 		Real g_fx = (i + p_ijk.x) * p_spacing / g_spacing;
 		Real g_fy = (j + p_ijk.y) * p_spacing / g_spacing;
