@@ -1,13 +1,4 @@
-set(TEST_PROJECT Test_Array)
-
-link_libraries(Core)
-
-file(GLOB_RECURSE TEST_SOURCES LIST_DIRECTORIES false *.h *.cpp)
-
-add_executable(${TEST_PROJECT} ${TEST_SOURCES})
-
-add_test(NAME ${TEST_PROJECT} COMMAND ${TEST_PROJECT})
-
-set_target_properties(${TEST_PROJECT} PROPERTIES FOLDER "Tests")
-
-target_link_libraries(${TEST_PROJECT} PUBLIC gtest)
+set(LIB_DEPENDENCY 
+    Core
+    gtest)
+add_peridyno_test(Test_Array LIB_DEPENDENCY)

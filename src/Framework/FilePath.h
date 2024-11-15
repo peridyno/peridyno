@@ -41,3 +41,5 @@ namespace dyno
 		std::vector<std::string> exts;
 	};
 }
+
+#include "FilePath.inl"

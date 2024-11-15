@@ -1,4 +1,6 @@
-#include "FilePath.h"
+#ifndef FILEPATH_SERIALIZATION
+#define FILEPATH_SERIALIZATION
+
 #include "Field.h"
 
 namespace dyno {
@@ -26,3 +28,5 @@ namespace dyno {
 
 	template class FVar<FilePath>;
 }
+
+#endif

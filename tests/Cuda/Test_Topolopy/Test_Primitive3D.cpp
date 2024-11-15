@@ -23,7 +23,7 @@ TEST(Point3D, distance)
 	Point3D point4(0.1, 0.1, 0.1);
 	EXPECT_EQ(point4.distance(tet1), Real(-0.1));
 
-	Point3D point5(0.0, 0.1, 0.0);
+	Point3D point5(0.1, 0.0, 0.0);
 	Capsule3D capsule1;
 	EXPECT_TRUE(abs(point4.distance(capsule1) - (sqrt(Real(0.02)) - Real(1))) <= (std::numeric_limits<Real>::epsilon)());
 	EXPECT_EQ(point5.distance(capsule1), Real(-0.9));
