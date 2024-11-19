@@ -37,8 +37,6 @@ void WtNodePainter::drawNodeRect(
 {
 	WtNodeStyle const& nodeStyle = model->nodeStyle();
 
-
-	//std::cout << graphicsObject.isSelected() << std::endl;
 	auto color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
 
 	if (geom.hovered())
@@ -63,8 +61,6 @@ void WtNodePainter::drawNodeRect(
 
 	graphicsObject.setBoundingRect(boundary);
 
-	//gradient
-
 	if (model->captionVisible())
 	{
 		unsigned int captionHeight = geom.captionHeight();
@@ -85,95 +81,6 @@ void WtNodePainter::drawNodeRect(
 	else
 	{
 		painter->drawRect(boundary);
-	}
-}
-
-void drawHotKeys(
-	Wt::WPainter* painter,
-	WtNodeGeometry const& geom,
-	WtNodeDataModel const* model,
-	WtNodeGraphicsObject const& graphicsObject
-)
-{
-	WtNodeStyle const& nodeStyle = model->nodeStyle();
-
-	auto color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
-
-	const Wt::WPen& pen = painter->pen();
-
-	if (model->captionVisible() && model->hotkeyEnabled())
-	{
-		unsigned int captionHeight = geom.captionHeight();
-		unsigned int keyWidth = geom.hotkeyWidth();
-		unsigned int keyShift = geom.hotkeyIncline();
-		unsigned int keyOffset = geom.hotkeyOffset();
-
-		float diam = nodeStyle.ConnectionPointDiameter;
-
-		//Wt different
-		Wt::WRectF key0(geom.width() + diam - 20, -diam, 20, diam + captionHeight);
-
-		double const radius = 6.0;
-
-		//Wt different
-		Wt::WPen pen = Wt::WPen(color);
-		pen.setWidth(nodeStyle.HoveredPenWidth);
-		painter->setPen(pen);
-
-		if (graphicsObject.hotKey0Hovered())
-		{
-			pen.setWidth(nodeStyle.HoveredPenWidth);
-			painter->setPen(pen);
-		}
-		else
-		{
-			pen.setWidth(nodeStyle.PenWidth);
-			painter->setPen(pen);
-		}
-
-		if (graphicsObject.isHotKey0Checked())
-		{
-			painter->setBrush(nodeStyle.GradientColor0);
-		}
-		else
-		{
-			painter->setBrush(nodeStyle.HotKeyColor0);
-		}
-
-		Wt::WPointF points[4];
-		points[0] = Wt::WPointF(geom.width() + diam - keyWidth - keyOffset, -diam);
-		points[1] = Wt::WPointF(geom.width() + diam - keyOffset, -diam);
-		points[2] = Wt::WPointF(geom.width() + diam - keyShift - keyOffset, captionHeight);
-		points[3] = Wt::WPointF(geom.width() + diam - keyWidth - keyShift - keyOffset, captionHeight);
-
-		painter->drawPolygon(points, 4);
-
-		if (graphicsObject.hotKey1Hovered())
-		{
-			pen.setWidth(nodeStyle.HoveredPenWidth);
-			painter->setPen(pen);
-		}
-		else
-		{
-			pen.setWidth(nodeStyle.PenWidth);
-			painter->setPen(pen);
-		}
-
-		if (graphicsObject.isHotKey1Checked())
-		{
-			painter->setBrush(nodeStyle.GradientColor0);
-		}
-		else
-		{
-			painter->setBrush(nodeStyle.HotKeyColor1);
-		}
-
-		points[0] = Wt::WPointF(geom.width() + diam - keyWidth - keyOffset, -diam);
-		points[1] = Wt::WPointF(geom.width() + diam - keyWidth - keyShift - keyOffset, captionHeight);
-		points[2] = Wt::WPointF(geom.width() + diam - keyWidth - keyShift - keyWidth - keyOffset, captionHeight);
-		points[3] = Wt::WPointF(geom.width() + diam - keyWidth - keyWidth - keyOffset, -diam);
-
-		painter->drawPolygon(points, 4);
 	}
 }
 

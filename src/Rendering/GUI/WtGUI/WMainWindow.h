@@ -26,6 +26,8 @@ public:
 
 	WSimulationCanvas* simCanvas() { return mSceneCanvas; }
 
+	void createLeftPanel();
+
 private:
 	void initMenu(Wt::WMenu*);
 	void initLeftPanel(Wt::WContainerWidget*);

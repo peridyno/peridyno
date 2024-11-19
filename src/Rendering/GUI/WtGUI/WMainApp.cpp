@@ -204,6 +204,8 @@ WMainApp::WMainApp(const Wt::WEnvironment& env) : Wt::WApplication(env)
 
 	window->setScene(SceneGraphFactory::instance()->createDefaultScene());
 
+	window->createLeftPanel();
+
 	this->globalKeyWentDown().connect(window->simCanvas(), &WSimulationCanvas::onKeyWentDown);
 	this->globalKeyWentUp().connect(window->simCanvas(), &WSimulationCanvas::onKeyWentUp);
 

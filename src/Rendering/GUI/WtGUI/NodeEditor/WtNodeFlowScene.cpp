@@ -80,7 +80,6 @@ void WtNodeFlowScene::createNodeGraphView()
 				}
 			}
 
-			//std::cout << b << std::endl;
 			auto& node = this->createNode(std::move(type), _painter, b);
 
 			nodeMap[mId] = &node;
@@ -357,6 +356,7 @@ void WtNodeFlowScene::enableRendering(WtNode& n, bool checked)
 	if (mEditingEnabled && nodeData != nullptr) {
 		auto node = nodeData->getNode();
 		node->setVisible(checked);
+		//node->setForceUpdate(true);
 	}
 }
 

@@ -23,7 +23,7 @@ struct GLFWwindow;
 class ImageEncoder;
 class ImGuiBackendWt;
 
-class WSimulationCanvas 
+class WSimulationCanvas
 	: public Wt::WContainerWidget
 	, public dyno::RenderWindow
 {

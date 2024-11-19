@@ -85,7 +85,8 @@ void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 		if (checkMouseInHotKey0(mousePoint, nodeData))
 		{
 			std::cout << "!!" << std::endl;
-			enableRendering(*node, false);
+			//enableRendering(*node, false);
+
 		}
 	}
 }
@@ -135,6 +136,7 @@ void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 	{
 		node_scene->reorderAllNodes();
 		reorderFlag = false;
+		update();
 	}
 
 	nodeMap = node_scene->getNodeMap();
@@ -143,6 +145,15 @@ void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 	{
 		auto node = nodeMap[selectedNum];
 		moveNode(*node, mTranslateNode);
+
+		enableRendering(*node, false);
+
+	}
+
+	for (auto it = mScene->begin(); it != mScene->end(); it++)
+	{
+		auto node = it.get();
+		std::cout << node->isVisible() << std::endl;
 	}
 }
 
@@ -226,7 +237,6 @@ void WtFlowWidget::enableRendering(WtNode& n, bool checked)
 void WtFlowWidget::enablePhysics(WtNode& n, bool checked)
 {
 	auto nodeData = dynamic_cast<WtNodeWidget*>(n.nodeDataModel());
-
 	if (mEditingEnabled && nodeData != nullptr) {
 		auto node = nodeData->getNode();
 		node->setActive(checked);

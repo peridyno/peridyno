@@ -49,6 +49,7 @@ WMainWindow::WMainWindow()
 
 	// central canvas
 	mSceneCanvas = layout->addWidget(std::make_unique<WSimulationCanvas>(), Wt::LayoutPosition::Center);
+	//mSceneCanvas->setScene(mScene);
 
 	// scene info panel
 	widget0 = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), Wt::LayoutPosition::West);
@@ -72,6 +73,11 @@ WMainWindow::WMainWindow()
 WMainWindow::~WMainWindow()
 {
 	Wt::log("warning") << "stop WMainWindows";
+}
+
+void WMainWindow::createLeftPanel()
+{
+	initLeftPanel(widget0);
 }
 
 void WMainWindow::initMenu(Wt::WMenu* menu)
@@ -137,12 +143,13 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 	panel0->setCollapsible(false);
 	panel0->setMargin(0);
 	//panel0->setHeight(900);
-	auto scn = dyno::SceneGraphFactory::instance()->active();
-	if (!mScene)
+
+	if (mScene)
 	{
-		setScene(scn);
+		//setScene(scn);
+		panel0->setCentralWidget(std::make_unique<WtFlowWidget>(mScene));
 	}
-	panel0->setCentralWidget(std::make_unique<WtFlowWidget>(mScene));
+
 
 	return panel0;
 }
@@ -290,7 +297,9 @@ void WMainWindow::start()
 			mReset = false;
 		}
 		this->bRunFlag = true;
+
 		Wt::WApplication* app = Wt::WApplication::instance();
+
 		while (this->bRunFlag)
 		{
 			mScene->takeOneFrame();
