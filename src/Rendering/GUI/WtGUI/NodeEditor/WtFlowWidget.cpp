@@ -84,9 +84,32 @@ void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 		Wt::WPointF mousePoint = Wt::WPointF(event.widget().x, event.widget().y);
 		if (checkMouseInHotKey0(mousePoint, nodeData))
 		{
-			std::cout << "!!" << std::endl;
-			//enableRendering(*node, false);
+			auto nodeWidget = dynamic_cast<WtNodeWidget*>(node->nodeDataModel());
+			auto m = nodeWidget->getNode();
+			if (m->isVisible())
+			{
+				enableRendering(*node, false);
+			}
+			else
+			{
+				enableRendering(*node, true);
+			}
+			update();
+		}
 
+		if (checkMouseInHotKey1(mousePoint, nodeData))
+		{
+			auto nodeWidget = dynamic_cast<WtNodeWidget*>(node->nodeDataModel());
+			auto m = nodeWidget->getNode();
+			if (m->isActive())
+			{
+				enablePhysics(*node, false);
+			}
+			else
+			{
+				enablePhysics(*node, true);
+			}
+			update();
 		}
 	}
 }
@@ -145,15 +168,6 @@ void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 	{
 		auto node = nodeMap[selectedNum];
 		moveNode(*node, mTranslateNode);
-
-		enableRendering(*node, false);
-
-	}
-
-	for (auto it = mScene->begin(); it != mScene->end(); it++)
-	{
-		auto node = it.get();
-		std::cout << node->isVisible() << std::endl;
 	}
 }
 
@@ -172,22 +186,32 @@ bool WtFlowWidget::checkMouseInNodeRect(Wt::WPointF mousePoint, WtFlowNodeData n
 
 bool WtFlowWidget::checkMouseInHotKey0(Wt::WPointF mousePoint, WtFlowNodeData nodeData)
 {
-	Wt::WPointF bottomRight = Wt::WPointF(nodeData.getHotKey0BoundingRect().bottomRight().x() + nodeData.getNodeOrigin().x()
-		, nodeData.getHotKey0BoundingRect().bottomRight().y() + nodeData.getNodeOrigin().y());
+	Wt::WRectF relativeHotkey = nodeData.getHotKey0BoundingRect();
+	Wt::WPointF origin = nodeData.getNodeOrigin();
 
+	Wt::WPointF topLeft = Wt::WPointF(relativeHotkey.topLeft().x() + origin.x(), relativeHotkey.topLeft().y() + origin.y());
+	Wt::WPointF bottomRight = Wt::WPointF(relativeHotkey.bottomRight().x() + origin.x(), relativeHotkey.bottomRight().y() + origin.y());
 
-	Wt::WPointF absTopLeft = Wt::WPointF((nodeData.getNodeOrigin().x() + mTranslate.x()) * mZoomFactor, (nodeData.getNodeOrigin().y() + mTranslate.y()) * mZoomFactor);
-	Wt::WPointF absBottomRight = Wt::WPointF((bottomRight.x() + mTranslate.x()) * mZoomFactor, (bottomRight.y() + mTranslate.y()) * mZoomFactor);
+	Wt::WRectF absRect = Wt::WRectF(topLeft, bottomRight);
 
-	Wt::WRectF absRect = Wt::WRectF(absTopLeft, absBottomRight);
+	Wt::WPointF	trueMouse = Wt::WPointF(mousePoint.x() / mZoomFactor - mTranslate.x(), mousePoint.y() / mZoomFactor - mTranslate.y());
 
-	return absRect.contains(mousePoint);
-
+	return absRect.contains(trueMouse);
 }
 
 bool WtFlowWidget::checkMouseInHotKey1(Wt::WPointF mousePoint, WtFlowNodeData nodeData)
 {
-	return true;
+	Wt::WRectF relativeHotkey = nodeData.getHotKey1BoundingRect();
+	Wt::WPointF origin = nodeData.getNodeOrigin();
+
+	Wt::WPointF topLeft = Wt::WPointF(relativeHotkey.topLeft().x() + origin.x(), relativeHotkey.topLeft().y() + origin.y());
+	Wt::WPointF bottomRight = Wt::WPointF(relativeHotkey.bottomRight().x() + origin.x(), relativeHotkey.bottomRight().y() + origin.y());
+
+	Wt::WRectF absRect = Wt::WRectF(topLeft, bottomRight);
+
+	Wt::WPointF	trueMouse = Wt::WPointF(mousePoint.x() / mZoomFactor - mTranslate.x(), mousePoint.y() / mZoomFactor - mTranslate.y());
+
+	return absRect.contains(trueMouse);
 }
 
 

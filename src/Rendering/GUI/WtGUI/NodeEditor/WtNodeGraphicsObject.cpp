@@ -345,7 +345,7 @@ void WtNodePainter::drawHotKeys(
 		points[1] = Wt::WPointF(geom.width() + diam - keyWidth - keyOffset, captionHeight);
 		points[2] = Wt::WPointF(geom.width() + diam - keyWidth - keyWidth - keyOffset, captionHeight);
 
-		Wt::WRectF hotKey1Rect = Wt::WRectF(points[0], points[2]);
+		Wt::WRectF hotKey1Rect = Wt::WRectF(points[3], points[1]);
 
 		painter->drawRect(hotKey1Rect);
 

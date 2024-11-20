@@ -87,9 +87,10 @@ void WtNodeFlowScene::createNodeGraphView()
 
 			Wt::WPointF posView(m->bx(), m->by());
 
-			node.nodeGraphicsObject().setPos(posView);
 			node.nodeGraphicsObject().setHotKey0Checked(m->isVisible());
 			node.nodeGraphicsObject().setHotKey1Checked(m->isActive());
+			node.nodeGraphicsObject().setPos(posView);
+
 		};
 
 	for (auto it = scn->begin(); it != scn->end(); it++)

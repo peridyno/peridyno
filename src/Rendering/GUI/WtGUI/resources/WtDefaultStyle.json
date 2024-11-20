@@ -7,7 +7,7 @@
   "NodeStyle": {
     "NormalBoundaryColor": "black",
     "SelectedBoundaryColor": "yellow",
-    "GradientColor0": [ 145, 145, 145 ],
+    "GradientColor0": [ 255, 255, 255 ],
     "GradientColor1": [ 73, 73, 73 ],
     "GradientColor2": [ 73, 73, 73 ],
     "GradientColor3": [ 73, 73, 73 ],

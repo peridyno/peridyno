@@ -237,8 +237,9 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	auto widget0 = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), 1);
 	Wt::WTabWidget* tab = widget0->addNew<Wt::WTabWidget>();
 	tab->setHeight(900);
-	//tab->addTab(initNodeTree(), "NodeTree", Wt::ContentLoading::Lazy);
 	tab->addTab(initNodeGraphics(), "NodeGraphics", Wt::ContentLoading::Lazy);
+	tab->addTab(initNodeTree(), "NodeTree", Wt::ContentLoading::Lazy);
+
 
 	// simulation control
 	auto panel3 = layout->addWidget(std::make_unique<Wt::WPanel>());

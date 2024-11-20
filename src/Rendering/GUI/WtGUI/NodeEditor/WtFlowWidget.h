@@ -60,6 +60,8 @@ private:
 
 	bool mEditingEnabled = true;
 
+
+
 	WtNodeFlowScene* node_scene = nullptr;
 	std::shared_ptr<dyno::SceneGraph> mScene;
 	std::map<dyno::ObjectId, WtNode*> nodeMap;
