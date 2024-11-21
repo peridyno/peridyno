@@ -1,9 +1,12 @@
 #include "WtFlowWidget.h"
 
-WtFlowWidget::WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene) :Wt::WPaintedWidget()
+WtFlowWidget::WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene, WMainWindow* mainWindow) :Wt::WPaintedWidget()
 {
 	mZoomFactor = 1.0;
 	mScene = scene;
+
+	mMainWindow = mainWindow;
+
 	resize(600, 900);
 
 	setPreferredMethod(Wt::RenderMethod::HtmlCanvas);
@@ -94,6 +97,7 @@ void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 			{
 				enableRendering(*node, true);
 			}
+			mMainWindow->updateCanvas();
 			update();
 		}
 
@@ -109,6 +113,7 @@ void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 			{
 				enablePhysics(*node, true);
 			}
+			mMainWindow->updateCanvas();
 			update();
 		}
 	}
@@ -153,14 +158,14 @@ void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 	painter.scale(mZoomFactor, mZoomFactor);
 	painter.translate(mTranslate);
 
-	node_scene = new WtNodeFlowScene(&painter, mScene, isSelected, selectedNum);
-
 	if (reorderFlag)
 	{
+		node_scene = new WtNodeFlowScene(&painter, mScene, isSelected, selectedNum);
 		node_scene->reorderAllNodes();
 		reorderFlag = false;
-		update();
 	}
+
+	node_scene = new WtNodeFlowScene(&painter, mScene, isSelected, selectedNum);
 
 	nodeMap = node_scene->getNodeMap();
 

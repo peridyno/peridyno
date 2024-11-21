@@ -147,7 +147,7 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 	if (mScene)
 	{
 		//setScene(scn);
-		panel0->setCentralWidget(std::make_unique<WtFlowWidget>(mScene));
+		panel0->setCentralWidget(std::make_unique<WtFlowWidget>(mScene, this));
 	}
 
 

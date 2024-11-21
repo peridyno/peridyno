@@ -6,13 +6,16 @@
 #include "WtNodeFlowScene.h"
 #include "WtNodeGraphicsObject.h"
 #include "WtFlowNodeData.h"
+#include "WMainWindow.h"
 
 class WGridLayout;
+class WMainWindow;
 
 class WtFlowWidget : public Wt::WPaintedWidget
 {
 public:
-	WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene);
+	//WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene);
+	WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene, WMainWindow* mainWindow);
 	~WtFlowWidget();
 
 public:
@@ -52,15 +55,15 @@ private:
 	Wt::WPointF mTranslateNode = Wt::WPointF(0, 0);
 
 	bool isDragging = false;
-	bool isSelected;
-	int selectedNum;
+	bool isSelected = false;
+	int selectedNum = 0;
 	bool canMoveNode = false;
 
 	bool reorderFlag = true;
 
 	bool mEditingEnabled = true;
 
-
+	WMainWindow* mMainWindow = nullptr;
 
 	WtNodeFlowScene* node_scene = nullptr;
 	std::shared_ptr<dyno::SceneGraph> mScene;

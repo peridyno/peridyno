@@ -28,6 +28,8 @@ public:
 
 	void createLeftPanel();
 
+	void updateCanvas();
+
 private:
 	void initMenu(Wt::WMenu*);
 	void initLeftPanel(Wt::WContainerWidget*);
@@ -38,7 +40,7 @@ private:
 	void stop();
 	void step();
 	void reset();
-	void updateCanvas();
+
 
 private:
 
