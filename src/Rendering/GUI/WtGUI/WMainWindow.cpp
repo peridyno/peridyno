@@ -150,7 +150,6 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 		panel0->setCentralWidget(std::make_unique<WtFlowWidget>(mScene, this));
 	}
 
-
 	return panel0;
 }
 
@@ -239,7 +238,6 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	tab->setHeight(900);
 	tab->addTab(initNodeGraphics(), "NodeGraphics", Wt::ContentLoading::Lazy);
 	tab->addTab(initNodeTree(), "NodeTree", Wt::ContentLoading::Lazy);
-
 
 	// simulation control
 	auto panel3 = layout->addWidget(std::make_unique<Wt::WPanel>());

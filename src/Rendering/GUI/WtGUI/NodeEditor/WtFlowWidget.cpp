@@ -7,6 +7,8 @@ WtFlowWidget::WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene, WMainWindow*
 
 	mMainWindow = mainWindow;
 
+	mainWindow->setFlowWidget(this);
+
 	resize(600, 900);
 
 	setPreferredMethod(Wt::RenderMethod::HtmlCanvas);
@@ -15,7 +17,6 @@ WtFlowWidget::WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene, WMainWindow*
 	this->mouseMoved().connect(this, &WtFlowWidget::onMouseMove);
 	this->mouseWentUp().connect(this, &WtFlowWidget::onMouseWentUp);
 	this->mouseWheel().connect(this, &WtFlowWidget::onMouseWheel);
-	this->keyWentDown().connect(this, &WtFlowWidget::onKeyWentDown);
 }
 
 WtFlowWidget::~WtFlowWidget() {};
@@ -134,9 +135,17 @@ void WtFlowWidget::onMouseWheel(const Wt::WMouseEvent& event)
 void WtFlowWidget::onKeyWentDown(const Wt::WKeyEvent& event)
 {
 	std::cout << "aaa" << std::endl;
-	if (event.key() == Wt::Key::Up)
+	if (event.key() == Wt::Key::Delete || event.key() == Wt::Key::Backspace)
 	{
-		std::cout << "!!!" << std::endl;
+		if (isSelected)
+		{
+			auto node = nodeMap[selectedNum];
+			deleteNode(*node);
+			isSelected = false;
+			selectedNum = 0;
+			mMainWindow->updateCanvas();
+			update();
+		}
 	}
 }
 
@@ -252,8 +261,8 @@ void WtFlowWidget::deleteNode(WtNode& n)
 
 	if (mEditingEnabled && nodeData != nullptr)
 	{
-		auto scn = dyno::SceneGraphFactory::instance()->active();
-		scn->deleteNode(nodeData->getNode());
+		//auto scn = dyno::SceneGraphFactory::instance()->active();
+		mScene->deleteNode(nodeData->getNode());
 	}
 }
 

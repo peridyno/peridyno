@@ -16,6 +16,8 @@ class WModuleDataModel;
 class WParameterDataNode;
 class WSimulationCanvas;
 class WPushButton;
+class WtFlowWidget;
+
 class WMainWindow : public Wt::WContainerWidget
 {
 public:
@@ -30,6 +32,10 @@ public:
 
 	void updateCanvas();
 
+	void setFlowWidget(WtFlowWidget* flowWidget) { mFlowWidget = flowWidget; }
+
+	WtFlowWidget* getFlowWidget() { return mFlowWidget; }
+
 private:
 	void initMenu(Wt::WMenu*);
 	void initLeftPanel(Wt::WContainerWidget*);
@@ -41,10 +47,10 @@ private:
 	void step();
 	void reset();
 
-
 private:
 
 	WSimulationCanvas* mSceneCanvas;
+	WtFlowWidget* mFlowWidget;
 
 	// data models
 	std::shared_ptr<WNodeDataModel>		mNodeDataModel;

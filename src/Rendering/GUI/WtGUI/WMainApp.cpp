@@ -208,7 +208,7 @@ WMainApp::WMainApp(const Wt::WEnvironment& env) : Wt::WApplication(env)
 
 	this->globalKeyWentDown().connect(window->simCanvas(), &WSimulationCanvas::onKeyWentDown);
 	this->globalKeyWentUp().connect(window->simCanvas(), &WSimulationCanvas::onKeyWentUp);
-
+	this->globalKeyWentDown().connect(window->getFlowWidget(), &WtFlowWidget::onKeyWentDown);
 }
 
 WMainApp::~WMainApp()
