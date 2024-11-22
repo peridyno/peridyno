@@ -62,7 +62,8 @@ public:
 		WtNodeGeometry const& geom,
 		WtNodeState const& state,
 		WtNodeDataModel const* model,
-		WtFlowScene const& scene
+		WtFlowScene const& scene,
+		WtNodeGraphicsObject const& graphicsObject
 	);
 
 	//static void drawFilledConnectionPoints(Wt::WPainter* painter);
@@ -141,6 +142,7 @@ public:
 
 	void setHotKey1BoundingRect(Wt::WRectF r) const { _flowNodeData.setHotKey1BoundingRect(r); }
 
+	void setPointsData(std::vector<connectionPointData> p) const { _flowNodeData.setPointsData(p); }
 
 protected:
 	void paint(Wt::WPainter* painter);
@@ -180,8 +182,6 @@ private:
 	Wt::WPointF _origin = Wt::WPointF(0, 0);
 
 	WtFlowNodeData& _flowNodeData;
-
-
 
 	// either nullptr or owned by parent QGraphicsItem
 	//QGraphicsProxyWidget* _proxyWidget;

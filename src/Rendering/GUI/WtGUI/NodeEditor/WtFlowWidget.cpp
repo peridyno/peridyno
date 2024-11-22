@@ -173,6 +173,22 @@ void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 	{
 		auto node = nodeMap[selectedNum];
 		moveNode(*node, mTranslateNode);
+
+		auto pointsData = node->flowNodeData().getPointsData();
+		for (connectionPointData pointData : pointsData) {
+			if (pointData.portShape == PortShape::Bullet)
+			{
+				painter.drawPolygon(pointData.diamond_out, 4);
+			}
+			else if (pointData.portShape == PortShape::Diamond)
+			{
+				painter.drawPolygon(pointData.diamond, 4);
+			}
+			else if (pointData.portShape == PortShape::Point)
+			{
+				painter.drawEllipse(pointData.pointRect);
+			}
+		}
 	}
 }
 
@@ -218,7 +234,6 @@ bool WtFlowWidget::checkMouseInHotKey1(Wt::WPointF mousePoint, WtFlowNodeData no
 
 	return absRect.contains(trueMouse);
 }
-
 
 void WtFlowWidget::addNode(WtNode& n)
 {

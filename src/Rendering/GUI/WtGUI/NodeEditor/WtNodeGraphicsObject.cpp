@@ -18,7 +18,7 @@ void WtNodePainter::paint(Wt::WPainter* painter, WtNode& node, WtFlowScene const
 
 	drawHotKeys(painter, geom, model, graphicsObject);
 
-	drawConnectionPoints(painter, geom, state, model, scene);
+	drawConnectionPoints(painter, geom, state, model, scene, graphicsObject);
 
 	drawModelName(painter, geom, state, model);
 
@@ -58,7 +58,6 @@ void WtNodePainter::drawNodeRect(
 	Wt::WRectF boundary = model->captionVisible() ? Wt::WRectF(-diam, -diam, 2.0 * diam + geom.width(), 2.0 * diam + geom.height())
 		: Wt::WRectF(-diam, 0.0f, 2.0 * diam + geom.width(), diam + geom.height());
 
-
 	graphicsObject.setBoundingRect(boundary);
 
 	if (model->captionVisible())
@@ -89,7 +88,8 @@ void WtNodePainter::drawConnectionPoints(
 	WtNodeGeometry const& geom,
 	WtNodeState const& state,
 	WtNodeDataModel const* model,
-	WtFlowScene const& scene
+	WtFlowScene const& scene,
+	WtNodeGraphicsObject const& graphicsObject
 )
 {
 	WtNodeStyle const& nodeStyle = model->nodeStyle();
@@ -100,12 +100,18 @@ void WtNodePainter::drawConnectionPoints(
 
 	auto reducedDiameter = diameter * 0.6;
 
+	std::vector<connectionPointData> pointsData;
+
 	for (PortType portType : {PortType::Out, PortType::In})
 	{
 		size_t n = state.getEntries(portType).size();
 
 		for (unsigned int i = 0; i < n; i++)
 		{
+			connectionPointData pointData;
+			pointData.portType = portType;
+			pointData.id = i;
+
 			Wt::WPointF p = geom.portScenePosition(i, portType);
 
 			//TODO:Bug
@@ -199,22 +205,38 @@ void WtNodePainter::drawConnectionPoints(
 			switch (dataType.shape)
 			{
 			case PortShape::Point:
-				painter->drawEllipse(drawRect);
+				//painter->drawEllipse(drawRect);
+				pointData.portShape = PortShape::Point;
+				pointData.pointRect = drawRect;
 				break;
 			case PortShape::Bullet:
-				painter->drawPolygon(diamond_out, 4);
-				painter->setBrush(Wt::StandardColor::White);
-				painter->drawPolygon(diamond_inner, 4);
+				//painter->drawPolygon(diamond_out, 4);
+				//painter->setBrush(Wt::StandardColor::White);
+				//painter->drawPolygon(diamond_inner, 4);
+				pointData.portShape = PortShape::Bullet;
+				pointData.diamond_out[0] = diamond_out[0];
+				pointData.diamond_out[1] = diamond_out[1];
+				pointData.diamond_out[2] = diamond_out[2];
+				pointData.diamond_out[3] = diamond_out[3];
 				break;
 			case PortShape::Diamond:
-				painter->drawPolygon(diamond, 4);
+				//painter->drawPolygon(diamond, 4);
+				pointData.portShape = PortShape::Diamond;
+				pointData.diamond[0] = diamond[0];
+				pointData.diamond[1] = diamond[1];
+				pointData.diamond[2] = diamond[2];
+				pointData.diamond[3] = diamond[3];
 				break;
 
 			default:
 				break;
 			}
+
+			pointsData.push_back(pointData);
 		}
 	};
+
+	graphicsObject.setPointsData(pointsData);
 }
 
 void WtNodePainter::drawModelName(
@@ -406,8 +428,6 @@ void WtNodePainter::drawEntryLabels(
 			default:
 				break;
 			}
-
-
 		}
 	}
 }
@@ -489,7 +509,6 @@ WtNodeGraphicsObject::WtNodeGraphicsObject(WtFlowScene& scene, WtNode& node, Wt:
 	, _flowNodeData(node.flowNodeData())
 	, _isSelected(isSelected)
 {
-
 	//this->mouseWentDown().connect(this, &WtNodeGraphicsObject::onMouseWentDown);
 	//this->mouseMoved().connect(this, &WtNodeGraphicsObject::onMouseMove);
 	//this->mouseWentUp().connect(this, &WtNodeGraphicsObject::onMouseWentUp);
