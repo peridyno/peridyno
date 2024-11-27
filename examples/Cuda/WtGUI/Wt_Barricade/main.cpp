@@ -14,6 +14,7 @@
 #include "Collision/NeighborPointQuery.h"
 
 #include "Module/CalculateNorm.h"
+#include "BasicShapes/CubeModel.h"
 
 #include <ColorMapping.h>
 
@@ -37,6 +38,8 @@ std::shared_ptr<SceneGraph> createScene()
 	scn->setGravity(Vec3f(0.0f, -9.8f, 0.0f));
 	scn->setLowerBound(Vec3f(-1.0f, 0.0f, 0.0f));
 	scn->setUpperBound(Vec3f(1.0f, 1.0f, 1.0f));
+
+	//auto cube = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
 
 	//Create a particle emitter
 	auto emitter = scn->addNode(std::make_shared<SquareEmitter<DataType3f>>());

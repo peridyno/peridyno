@@ -1,5 +1,10 @@
 #pragma once
 
+#include <Wt/WLineEdit.h>
+#include <Wt/WPushButton.h>
+#include <Wt/WTemplate.h>
+#include <Wt/WText.h>
+
 #include <Wt/WContainerWidget.h>
 #include "WParameterDataNode.h"
 #include "NodeEditor/WtFlowWidget.h"
@@ -32,9 +37,10 @@ public:
 
 	void updateCanvas();
 
-	void setFlowWidget(WtFlowWidget* flowWidget) { mFlowWidget = flowWidget; }
+	WtFlowWidget* getFlowWidget() {
 
-	WtFlowWidget* getFlowWidget() { return mFlowWidget; }
+		return mFlowWidget;
+	}
 
 private:
 	void initMenu(Wt::WMenu*);

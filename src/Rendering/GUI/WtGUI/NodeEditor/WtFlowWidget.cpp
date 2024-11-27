@@ -7,8 +7,6 @@ WtFlowWidget::WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene, WMainWindow*
 
 	mMainWindow = mainWindow;
 
-	mainWindow->setFlowWidget(this);
-
 	resize(600, 900);
 
 	setPreferredMethod(Wt::RenderMethod::HtmlCanvas);
@@ -134,7 +132,6 @@ void WtFlowWidget::onMouseWheel(const Wt::WMouseEvent& event)
 
 void WtFlowWidget::onKeyWentDown(const Wt::WKeyEvent& event)
 {
-	std::cout << "aaa" << std::endl;
 	if (event.key() == Wt::Key::Delete || event.key() == Wt::Key::Backspace)
 	{
 		if (isSelected)
@@ -175,6 +172,7 @@ void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 	}
 
 	node_scene = new WtNodeFlowScene(&painter, mScene, isSelected, selectedNum);
+	//node_scene->addNodeByString("SquareEmitter<DataType3f>");
 
 	nodeMap = node_scene->getNodeMap();
 
@@ -244,14 +242,11 @@ bool WtFlowWidget::checkMouseInHotKey1(Wt::WPointF mousePoint, WtFlowNodeData no
 	return absRect.contains(trueMouse);
 }
 
-void WtFlowWidget::addNode(WtNode& n)
+void WtFlowWidget::addNodeByString(std::string s)
 {
-	auto nodeData = dynamic_cast<WtNodeWidget*>(n.nodeDataModel());
-
-	if (mEditingEnabled && nodeData != nullptr)
+	if (node_scene != nullptr)
 	{
-		auto scn = dyno::SceneGraphFactory::instance()->active();
-		scn->addNode(nodeData->getNode());
+		node_scene->addNodeByString(s);
 	}
 }
 
@@ -294,4 +289,13 @@ void WtFlowWidget::enablePhysics(WtNode& n, bool checked)
 		auto node = nodeData->getNode();
 		node->setActive(checked);
 	}
+}
+
+void WtFlowWidget::updateForAddNode()
+{
+	reorderFlag = true;
+	update();
+	mScene->setFrameNumber(0);
+	mScene->reset();
+	mMainWindow->updateCanvas();
 }

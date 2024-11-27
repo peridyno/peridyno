@@ -319,6 +319,17 @@ void WtNodeFlowScene::addNodeByString(std::string NodeName)
 	addNodeWidget(dat->getNode());
 }
 
+void WtNodeFlowScene::addNode(WtNode& n)
+{
+	auto nodeData = dynamic_cast<WtNodeWidget*>(n.nodeDataModel());
+
+	if (mEditingEnabled && nodeData != nullptr)
+	{
+		auto scn = dyno::SceneGraphFactory::instance()->active();
+		scn->addNode(nodeData->getNode());
+	}
+}
+
 void WtNodeFlowScene::createWtNode(std::shared_ptr<dyno::Node> node)
 {
 	if (node == nullptr)

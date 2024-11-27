@@ -27,7 +27,7 @@ public:
 	void zoomIn();
 	void zoomOut();
 
-	void addNode(WtNode& n);
+	void addNodeByString(std::string s);
 
 	void deleteNode(WtNode& n);
 
@@ -36,6 +36,8 @@ public:
 	void enableRendering(WtNode& n, bool checked);
 
 	void enablePhysics(WtNode& n, bool checked);
+
+	void updateForAddNode();
 
 protected:
 	void paintEvent(Wt::WPaintDevice* paintDevice);

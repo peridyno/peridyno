@@ -20,6 +20,8 @@ public:
 	WtNodeFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::SceneGraph> scene, bool isSelected, int selectNum);
 	~WtNodeFlowScene();
 
+	void addNode(WtNode& n);
+
 	void addNodeByString(std::string NodeName);
 
 	void enableEditing();

@@ -147,7 +147,7 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 	if (mScene)
 	{
 		//setScene(scn);
-		panel0->setCentralWidget(std::make_unique<WtFlowWidget>(mScene, this));
+		mFlowWidget = panel0->setCentralWidget(std::make_unique<WtFlowWidget>(mScene, this));
 	}
 
 	return panel0;
@@ -238,6 +238,29 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	tab->setHeight(900);
 	tab->addTab(initNodeGraphics(), "NodeGraphics", Wt::ContentLoading::Lazy);
 	tab->addTab(initNodeTree(), "NodeTree", Wt::ContentLoading::Lazy);
+
+	// add node
+	auto panel = layout->addWidget(std::make_unique<Wt::WPanel>());
+	panel->setTitle("Add Node");
+	panel->setCollapsible(false);
+
+	auto widget3 = panel->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
+
+	auto layout3 = widget3->setLayout(std::make_unique<Wt::WHBoxLayout>());
+	layout3->setContentsMargins(0, 0, 0, 0);
+
+	auto name = layout3->addWidget(std::make_unique<Wt::WLineEdit>());
+	name->setPlaceholderText("node name");
+
+	auto addNodeButton = layout3->addWidget(std::make_unique<Wt::WPushButton>("Add"));
+
+	addNodeButton->clicked().connect([=] {
+		auto node_obj = dyno::Object::createObject(name->text().toUTF8());
+		std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
+		mScene->addNode(new_node);
+		mFlowWidget->updateForAddNode();
+		name->setText("");
+		});
 
 	// simulation control
 	auto panel3 = layout->addWidget(std::make_unique<Wt::WPanel>());
