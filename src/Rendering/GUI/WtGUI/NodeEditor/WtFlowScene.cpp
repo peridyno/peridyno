@@ -34,16 +34,6 @@ std::shared_ptr<WtConnection> WtFlowScene::createConnection(
 
 	_connections[connection->id()] = connection;
 
-	// Note: this connection isn't truly created yet. It's only partially created.
-	// Thus, don't send the connectionCreated(...) signal.
-
-	/*connect(connection.get(),
-		&QtConnection::connectionCompleted,
-		this,
-		[this](QtConnection const& c) {
-			connectionCreated(c);
-		});*/
-
 	return connection;
 }
 

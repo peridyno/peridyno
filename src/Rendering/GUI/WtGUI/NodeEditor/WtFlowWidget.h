@@ -50,6 +50,12 @@ private:
 
 	bool checkMouseInHotKey1(Wt::WPointF mousePoint, WtFlowNodeData nodeData);
 
+	bool checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nodeData);
+
+	Wt::WPainterPath cubicPath(Wt::WPointF source, Wt::WPointF sink);
+	std::pair<Wt::WPointF, Wt::WPointF> pointsC1C2(Wt::WPointF source, Wt::WPointF sink);
+	void drawSketchLine(Wt::WPainter* painter, Wt::WPointF source, Wt::WPointF sink);
+
 private:
 	double mZoomFactor;
 	Wt::WPointF mLastMousePos;
@@ -71,4 +77,6 @@ private:
 	WtNodeFlowScene* node_scene = nullptr;
 	std::shared_ptr<dyno::SceneGraph> mScene;
 	std::map<dyno::ObjectId, WtNode*> nodeMap;
+
+	Wt::WPointF mMousePoint = Wt::WPointF(0, 0);
 };

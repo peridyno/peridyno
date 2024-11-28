@@ -33,6 +33,7 @@ public:
 	float dx() { return mDx; }
 	float dy() { return mDy; }
 
+
 public:
 	/**
  * @brief create a QT-based view for the active scene graph.
@@ -89,4 +90,7 @@ private:
 
 	bool _isSelected;
 	int _selectNum;
+
+	bool _isSelectedPoint;
+	Wt::WPointF _mousePoint = Wt::WPointF(0, 0);
 };

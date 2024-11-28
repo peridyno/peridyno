@@ -170,7 +170,6 @@ void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 	}
 
 	node_scene = new WtNodeFlowScene(&painter, mScene, isSelected, selectedNum);
-	//node_scene->addNodeByString("SquareEmitter<DataType3f>");
 
 	nodeMap = node_scene->getNodeMap();
 
@@ -195,6 +194,8 @@ void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 			}
 		}
 	}
+
+	drawSketchLine(&painter, Wt::WPointF(0, 0), Wt::WPointF(100, 100));
 }
 
 bool WtFlowWidget::checkMouseInNodeRect(Wt::WPointF mousePoint, WtFlowNodeData nodeData)
@@ -238,6 +239,22 @@ bool WtFlowWidget::checkMouseInHotKey1(Wt::WPointF mousePoint, WtFlowNodeData no
 	Wt::WPointF	trueMouse = Wt::WPointF(mousePoint.x() / mZoomFactor - mTranslate.x(), mousePoint.y() / mZoomFactor - mTranslate.y());
 
 	return absRect.contains(trueMouse);
+}
+
+bool WtFlowWidget::checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nodeData)
+{
+	auto pointsData = nodeData.getPointsData();
+	Wt::WPointF origin = nodeData.getNodeOrigin();
+	Wt::WPointF	trueMouse = Wt::WPointF(mousePoint.x() / mZoomFactor - mTranslate.x(), mousePoint.y() / mZoomFactor - mTranslate.y());
+
+	for (connectionPointData pointData : pointsData)
+	{
+		if (pointData.portShape == PortShape::Bullet)
+		{
+			Wt::WPointF topLeft = Wt::WPointF(1, 1);
+		}
+	}
+	return false;
 }
 
 void WtFlowWidget::deleteNode(WtNode& n)
@@ -297,4 +314,66 @@ void WtFlowWidget::reorderNode()
 	reorderFlag = true;
 	mTranslate = Wt::WPointF(0, 0);
 	update();
+}
+
+void WtFlowWidget::drawSketchLine(Wt::WPainter* painter, Wt::WPointF source, Wt::WPointF sink)
+{
+
+	auto const& connectionStyle = WtStyleCollection::connectionStyle();
+
+	Wt::WPen p;
+	p.setWidth(connectionStyle.constructionLineWidth());
+	p.setColor(connectionStyle.constructionColor());
+	p.setStyle(Wt::PenStyle::DashLine);
+
+	painter->setPen(p);
+	painter->setBrush(Wt::BrushStyle::None);
+
+	auto cubic = cubicPath(source, sink);
+
+	painter->drawPath(cubic);
+
+}
+
+Wt::WPainterPath WtFlowWidget::cubicPath(Wt::WPointF source, Wt::WPointF sink)
+{
+	auto c1c2 = pointsC1C2(source, sink);
+
+	//cubic spline
+	Wt::WPainterPath cubic(source);
+
+	cubic.cubicTo(c1c2.first, c1c2.second, sink);
+
+	return cubic;
+}
+
+std::pair<Wt::WPointF, Wt::WPointF> WtFlowWidget::pointsC1C2(Wt::WPointF source, Wt::WPointF sink)
+{
+	const double defaultOffset = 200;
+
+	double xDistance = sink.x() - source.x();
+
+	double horizontalOffset = std::min(defaultOffset, std::abs(xDistance));
+
+	double verticalOffset = 0;
+
+	double ratioX = 0.5;
+
+	if (xDistance <= 0)
+	{
+		double yDistance = sink.y() - source.y();
+
+		double vector = yDistance < 0 ? -1.0 : 1.0;
+
+		verticalOffset = std::min(defaultOffset, std::abs(yDistance)) * vector;
+
+		ratioX = 1.0;
+	}
+
+	horizontalOffset *= ratioX;
+
+	Wt::WPointF c1(source.x() + horizontalOffset, source.y() + verticalOffset);
+	Wt::WPointF c2(sink.x() - horizontalOffset, sink.y() - verticalOffset);
+
+	return std::make_pair(c1, c2);
 }
