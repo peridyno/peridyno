@@ -23,11 +23,10 @@ public:
 	void onMouseWentDown(const Wt::WMouseEvent& event);
 	void onMouseWentUp(const Wt::WMouseEvent& event);
 	void onMouseWheel(const Wt::WMouseEvent& event);
-	void onKeyWentDown(const Wt::WKeyEvent& event);
 	void zoomIn();
 	void zoomOut();
 
-	void addNodeByString(std::string s);
+	void onKeyWentDown();
 
 	void deleteNode(WtNode& n);
 
@@ -38,6 +37,8 @@ public:
 	void enablePhysics(WtNode& n, bool checked);
 
 	void updateForAddNode();
+
+	void reorderNode();
 
 protected:
 	void paintEvent(Wt::WPaintDevice* paintDevice);

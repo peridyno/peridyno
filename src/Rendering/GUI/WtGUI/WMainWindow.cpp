@@ -53,7 +53,7 @@ WMainWindow::WMainWindow()
 
 	// scene info panel
 	widget0 = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), Wt::LayoutPosition::West);
-	widget0->setWidth(600);
+	widget0->setWidth(900);
 
 	// create data model
 	mNodeDataModel = std::make_shared<WNodeDataModel>();
@@ -62,12 +62,12 @@ WMainWindow::WMainWindow()
 
 	mParameterDataNode->changeValue().connect(this, &WMainWindow::updateCanvas);
 
-	initLeftPanel(widget0);
-
 	// menu
 	auto widget1 = layout->addWidget(std::make_unique<Wt::WStackedWidget>(), Wt::LayoutPosition::East);
 	auto menu = naviBar->addMenu(std::make_unique<Wt::WMenu>(widget1), Wt::AlignmentFlag::Right);
 	initMenu(menu);
+
+	std::cout << " WmainWindow" << std::endl;
 }
 
 WMainWindow::~WMainWindow()
@@ -101,6 +101,7 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 	pythonWidget->updateSceneGraph().connect([=](std::shared_ptr<dyno::SceneGraph> scene) {
 		if (scene)
 		{
+			std::cout << "delete" << std::endl;
 			setScene(scene);
 			initLeftPanel(widget0);
 		}
@@ -161,6 +162,8 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeTree()
 	auto layout = rootWidget->setLayout(std::make_unique<Wt::WVBoxLayout>());
 	layout->setContentsMargins(0, 0, 0, 0);
 	rootWidget->setMargin(0);
+
+
 
 	// node tree
 	auto panel0 = layout->addWidget(std::make_unique<Wt::WPanel>());
@@ -236,8 +239,9 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	auto widget0 = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), 1);
 	Wt::WTabWidget* tab = widget0->addNew<Wt::WTabWidget>();
 	tab->setHeight(900);
+	tab->setWidth(900);
 	tab->addTab(initNodeGraphics(), "NodeGraphics", Wt::ContentLoading::Lazy);
-	tab->addTab(initNodeTree(), "NodeTree", Wt::ContentLoading::Lazy);
+	tab->addTab(initNodeTree(), "NodeTree", Wt::ContentLoading::Eager);
 
 	// add node
 	auto panel = layout->addWidget(std::make_unique<Wt::WPanel>());
@@ -259,7 +263,14 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 		std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
 		mScene->addNode(new_node);
 		mFlowWidget->updateForAddNode();
+		mNodeDataModel->setScene(mScene);
 		name->setText("");
+		});
+
+	auto reorderNodeButton = layout3->addWidget(std::make_unique<Wt::WPushButton>("Reorder"));
+
+	reorderNodeButton->clicked().connect([=] {
+		mFlowWidget->reorderNode();
 		});
 
 	// simulation control
@@ -380,6 +391,14 @@ void WMainWindow::updateCanvas()
 	Wt::log("info") << mScene->getFrameNumber();
 }
 
+void WMainWindow::onKeyWentDown(const Wt::WKeyEvent& event)
+{
+	if (event.key() == Wt::Key::Delete || event.key() == Wt::Key::Backspace)
+	{
+		mFlowWidget->onKeyWentDown();
+	}
+}
+
 void WMainWindow::setScene(std::shared_ptr<dyno::SceneGraph> scene)
 {
 	// try to stop the simulation
@@ -391,3 +410,4 @@ void WMainWindow::setScene(std::shared_ptr<dyno::SceneGraph> scene)
 	mNodeDataModel->setScene(mScene);
 	mModuleDataModel->setNode(NULL);
 }
+

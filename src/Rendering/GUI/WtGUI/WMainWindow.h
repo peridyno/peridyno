@@ -37,10 +37,17 @@ public:
 
 	void updateCanvas();
 
-	WtFlowWidget* getFlowWidget() {
+	void onKeyWentDown(const Wt::WKeyEvent& event);
 
+	WtFlowWidget* getFlowWidget() {
 		return mFlowWidget;
 	}
+
+public:
+	// data models
+	std::shared_ptr<WNodeDataModel>		mNodeDataModel;
+	std::shared_ptr<WModuleDataModel>	mModuleDataModel;
+	std::shared_ptr<WParameterDataNode> mParameterDataNode;
 
 private:
 	void initMenu(Wt::WMenu*);
@@ -57,11 +64,6 @@ private:
 
 	WSimulationCanvas* mSceneCanvas;
 	WtFlowWidget* mFlowWidget;
-
-	// data models
-	std::shared_ptr<WNodeDataModel>		mNodeDataModel;
-	std::shared_ptr<WModuleDataModel>	mModuleDataModel;
-	std::shared_ptr<WParameterDataNode> mParameterDataNode;
 
 	bool	bRunFlag;
 	bool	mReset;

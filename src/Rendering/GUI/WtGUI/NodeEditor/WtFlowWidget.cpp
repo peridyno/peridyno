@@ -7,7 +7,9 @@ WtFlowWidget::WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene, WMainWindow*
 
 	mMainWindow = mainWindow;
 
-	resize(600, 900);
+	resize(900, 1200);
+
+	std::cout << "WtFlowWidget" << std::endl;
 
 	setPreferredMethod(Wt::RenderMethod::HtmlCanvas);
 
@@ -130,19 +132,15 @@ void WtFlowWidget::onMouseWheel(const Wt::WMouseEvent& event)
 	}
 }
 
-void WtFlowWidget::onKeyWentDown(const Wt::WKeyEvent& event)
+void WtFlowWidget::onKeyWentDown()
 {
-	if (event.key() == Wt::Key::Delete || event.key() == Wt::Key::Backspace)
+	if (isSelected)
 	{
-		if (isSelected)
-		{
-			auto node = nodeMap[selectedNum];
-			deleteNode(*node);
-			isSelected = false;
-			selectedNum = 0;
-			mMainWindow->updateCanvas();
-			update();
-		}
+		auto node = nodeMap[selectedNum];
+		deleteNode(*node);
+		isSelected = false;
+		selectedNum = 0;
+		updateForAddNode();
 	}
 }
 
@@ -242,14 +240,6 @@ bool WtFlowWidget::checkMouseInHotKey1(Wt::WPointF mousePoint, WtFlowNodeData no
 	return absRect.contains(trueMouse);
 }
 
-void WtFlowWidget::addNodeByString(std::string s)
-{
-	if (node_scene != nullptr)
-	{
-		node_scene->addNodeByString(s);
-	}
-}
-
 void WtFlowWidget::deleteNode(WtNode& n)
 {
 	auto nodeData = dynamic_cast<WtNodeWidget*>(n.nodeDataModel());
@@ -298,4 +288,13 @@ void WtFlowWidget::updateForAddNode()
 	mScene->setFrameNumber(0);
 	mScene->reset();
 	mMainWindow->updateCanvas();
+	mMainWindow->setScene(mScene);
+}
+
+void WtFlowWidget::reorderNode()
+{
+	mZoomFactor = 1;
+	reorderFlag = true;
+	mTranslate = Wt::WPointF(0, 0);
+	update();
 }
