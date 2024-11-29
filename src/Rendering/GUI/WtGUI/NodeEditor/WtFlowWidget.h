@@ -72,6 +72,10 @@ private:
 
 	bool mEditingEnabled = true;
 
+	bool drawLineFlag = false;
+	Wt::WPointF sourcePoint;
+	Wt::WPointF sinkPoint;
+
 	WMainWindow* mMainWindow = nullptr;
 
 	WtNodeFlowScene* node_scene = nullptr;

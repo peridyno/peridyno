@@ -30,11 +30,17 @@ void WtFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 	{
 		auto origin = nodeMap[selectedNum]->flowNodeData().getNodeOrigin();
 		mTranslateNode = Wt::WPointF(origin.x(), origin.y());
+		if (checkMouseInPoints(mLastMousePos, nodeMap[selectedNum]->flowNodeData()))
+		{
+
+		}
 	}
+
 }
 
 void WtFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
 {
+	sinkPoint = Wt::WPointF(event.widget().x / mZoomFactor - mTranslate.x(), event.widget().y / mZoomFactor - mTranslate.y());
 	if (isDragging && !isSelected)
 	{
 		Wt::WPointF delta = Wt::WPointF(event.dragDelta().x, event.dragDelta().y);
@@ -79,6 +85,7 @@ void WtFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
 void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 {
 	isDragging = false;
+	drawLineFlag = false;
 	mLastDelta = Wt::WPointF(0, 0);
 	mTranslateNode = Wt::WPointF(0, 0);
 	if (isSelected)
@@ -118,6 +125,7 @@ void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 			update();
 		}
 	}
+	update();
 }
 
 void WtFlowWidget::onMouseWheel(const Wt::WMouseEvent& event)
@@ -173,29 +181,16 @@ void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 
 	nodeMap = node_scene->getNodeMap();
 
-	if (isDragging && isSelected)
+	if (isDragging && isSelected && !drawLineFlag)
 	{
 		auto node = nodeMap[selectedNum];
 		moveNode(*node, mTranslateNode);
-
-		auto pointsData = node->flowNodeData().getPointsData();
-		for (connectionPointData pointData : pointsData) {
-			if (pointData.portShape == PortShape::Bullet)
-			{
-				painter.drawPolygon(pointData.diamond_out, 4);
-			}
-			else if (pointData.portShape == PortShape::Diamond)
-			{
-				painter.drawPolygon(pointData.diamond, 4);
-			}
-			else if (pointData.portShape == PortShape::Point)
-			{
-				painter.drawEllipse(pointData.pointRect);
-			}
-		}
 	}
 
-	drawSketchLine(&painter, Wt::WPointF(0, 0), Wt::WPointF(100, 100));
+	if (drawLineFlag)
+	{
+		drawSketchLine(&painter, sinkPoint, sourcePoint);
+	}
 }
 
 bool WtFlowWidget::checkMouseInNodeRect(Wt::WPointF mousePoint, WtFlowNodeData nodeData)
@@ -251,7 +246,41 @@ bool WtFlowWidget::checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nod
 	{
 		if (pointData.portShape == PortShape::Bullet)
 		{
-			Wt::WPointF topLeft = Wt::WPointF(1, 1);
+			Wt::WPointF topLeft = Wt::WPointF(pointData.diamond_out[3].x() + origin.x(), pointData.diamond_out[2].y() + origin.y());
+			Wt::WPointF bottomRight = Wt::WPointF(pointData.diamond_out[1].x() + origin.x(), pointData.diamond_out[0].y() + origin.y());
+			Wt::WRectF diamondBoundingRect = Wt::WRectF(topLeft, bottomRight);
+			if (diamondBoundingRect.contains(trueMouse))
+			{
+				sourcePoint = Wt::WPointF((topLeft.x() + bottomRight.x()) / 2, (topLeft.y() + bottomRight.y()) / 2);
+				drawLineFlag = true;
+				return true;
+			}
+		}
+		else if (pointData.portShape == PortShape::Diamond)
+		{
+			Wt::WPointF topLeft = Wt::WPointF(pointData.diamond[3].x() + origin.x(), pointData.diamond[2].y() + origin.y());
+			Wt::WPointF bottomRight = Wt::WPointF(pointData.diamond[1].x() + origin.x(), pointData.diamond[0].y() + origin.y());
+			Wt::WRectF diamondBoundingRect = Wt::WRectF(topLeft, bottomRight);
+			if (diamondBoundingRect.contains(trueMouse))
+			{
+				sourcePoint = Wt::WPointF((topLeft.x() + bottomRight.x()) / 2, (topLeft.y() + bottomRight.y()) / 2);
+				drawLineFlag = true;
+				return true;
+			}
+		}
+		else if (pointData.portShape == PortShape::Point)
+		{
+			auto rectTopLeft = pointData.pointRect.topLeft();
+			auto rectBottomRight = pointData.pointRect.bottomRight();
+			Wt::WPointF topLeft = Wt::WPointF(rectTopLeft.x() + origin.x(), rectTopLeft.y() + origin.y());
+			Wt::WPointF bottomRight = Wt::WPointF(rectBottomRight.x() + origin.x(), rectBottomRight.y() + origin.y());
+			Wt::WRectF diamondBoundingRect = Wt::WRectF(topLeft, bottomRight);
+			if (diamondBoundingRect.contains(trueMouse))
+			{
+				sourcePoint = Wt::WPointF((topLeft.x() + bottomRight.x()) / 2, (topLeft.y() + bottomRight.y()) / 2);
+				drawLineFlag = true;
+				return true;
+			}
 		}
 	}
 	return false;

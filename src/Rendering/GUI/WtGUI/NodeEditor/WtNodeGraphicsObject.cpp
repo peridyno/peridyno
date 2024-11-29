@@ -205,14 +205,14 @@ void WtNodePainter::drawConnectionPoints(
 			switch (dataType.shape)
 			{
 			case PortShape::Point:
-				//painter->drawEllipse(drawRect);
+				painter->drawEllipse(drawRect);
 				pointData.portShape = PortShape::Point;
 				pointData.pointRect = drawRect;
 				break;
 			case PortShape::Bullet:
-				//painter->drawPolygon(diamond_out, 4);
-				//painter->setBrush(Wt::StandardColor::White);
-				//painter->drawPolygon(diamond_inner, 4);
+				painter->drawPolygon(diamond_out, 4);
+				painter->setBrush(Wt::StandardColor::White);
+				painter->drawPolygon(diamond_inner, 4);
 				pointData.portShape = PortShape::Bullet;
 				pointData.diamond_out[0] = diamond_out[0];
 				pointData.diamond_out[1] = diamond_out[1];
@@ -220,7 +220,7 @@ void WtNodePainter::drawConnectionPoints(
 				pointData.diamond_out[3] = diamond_out[3];
 				break;
 			case PortShape::Diamond:
-				//painter->drawPolygon(diamond, 4);
+				painter->drawPolygon(diamond, 4);
 				pointData.portShape = PortShape::Diamond;
 				pointData.diamond[0] = diamond[0];
 				pointData.diamond[1] = diamond[1];
