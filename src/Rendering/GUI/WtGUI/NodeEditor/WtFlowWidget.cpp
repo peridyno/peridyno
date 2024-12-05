@@ -30,12 +30,11 @@ void WtFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 	{
 		auto origin = nodeMap[selectedNum]->flowNodeData().getNodeOrigin();
 		mTranslateNode = Wt::WPointF(origin.x(), origin.y());
-		if (checkMouseInPoints(mLastMousePos, nodeMap[selectedNum]->flowNodeData()))
+		if (checkMouseInPoints(mLastMousePos, nodeMap[selectedNum]->flowNodeData(), outPoint))
 		{
-
+			drawLineFlag = true;
 		}
 	}
-
 }
 
 void WtFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
@@ -66,6 +65,7 @@ void WtFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
 			if (checkMouseInNodeRect(mousePoint, nodeData))
 			{
 				isSelected = true;
+				connectionOutNode = m;
 				selectedNum = m->objectId();
 				canMoveNode = true;
 				update();
@@ -85,7 +85,6 @@ void WtFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
 void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 {
 	isDragging = false;
-	drawLineFlag = false;
 	mLastDelta = Wt::WPointF(0, 0);
 	mTranslateNode = Wt::WPointF(0, 0);
 	if (isSelected)
@@ -125,6 +124,26 @@ void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 			update();
 		}
 	}
+
+	if (drawLineFlag = true)
+	{
+		for (auto it = mScene->begin(); it != mScene->end(); it++)
+		{
+			auto m = it.get();
+			auto node = nodeMap[m->objectId()];
+			auto nodeData = node->flowNodeData();
+			if (checkMouseInPoints(mLastMousePos, nodeData, inPoint))
+			{
+				std::cout << "node data" << std::endl;
+				auto connectionInNoed = m;
+
+				std::cout << outPoint.id << std::endl;
+				std::cout << inPoint.id << std::endl;
+			}
+		}
+	}
+
+	drawLineFlag = false;
 	update();
 }
 
@@ -189,7 +208,7 @@ void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 
 	if (drawLineFlag)
 	{
-		drawSketchLine(&painter, sinkPoint, sourcePoint);
+		drawSketchLine(&painter, sourcePoint, sinkPoint);
 	}
 }
 
@@ -236,7 +255,7 @@ bool WtFlowWidget::checkMouseInHotKey1(Wt::WPointF mousePoint, WtFlowNodeData no
 	return absRect.contains(trueMouse);
 }
 
-bool WtFlowWidget::checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nodeData)
+bool WtFlowWidget::checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nodeData, connectionPointData p)
 {
 	auto pointsData = nodeData.getPointsData();
 	Wt::WPointF origin = nodeData.getNodeOrigin();
@@ -252,7 +271,7 @@ bool WtFlowWidget::checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nod
 			if (diamondBoundingRect.contains(trueMouse))
 			{
 				sourcePoint = Wt::WPointF((topLeft.x() + bottomRight.x()) / 2, (topLeft.y() + bottomRight.y()) / 2);
-				drawLineFlag = true;
+				p = pointData;
 				return true;
 			}
 		}
@@ -264,7 +283,7 @@ bool WtFlowWidget::checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nod
 			if (diamondBoundingRect.contains(trueMouse))
 			{
 				sourcePoint = Wt::WPointF((topLeft.x() + bottomRight.x()) / 2, (topLeft.y() + bottomRight.y()) / 2);
-				drawLineFlag = true;
+				p = pointData;
 				return true;
 			}
 		}
@@ -278,7 +297,7 @@ bool WtFlowWidget::checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nod
 			if (diamondBoundingRect.contains(trueMouse))
 			{
 				sourcePoint = Wt::WPointF((topLeft.x() + bottomRight.x()) / 2, (topLeft.y() + bottomRight.y()) / 2);
-				drawLineFlag = true;
+				p = pointData;
 				return true;
 			}
 		}
@@ -347,7 +366,6 @@ void WtFlowWidget::reorderNode()
 
 void WtFlowWidget::drawSketchLine(Wt::WPainter* painter, Wt::WPointF source, Wt::WPointF sink)
 {
-
 	auto const& connectionStyle = WtStyleCollection::connectionStyle();
 
 	Wt::WPen p;
@@ -361,7 +379,6 @@ void WtFlowWidget::drawSketchLine(Wt::WPainter* painter, Wt::WPointF source, Wt:
 	auto cubic = cubicPath(source, sink);
 
 	painter->drawPath(cubic);
-
 }
 
 Wt::WPainterPath WtFlowWidget::cubicPath(Wt::WPointF source, Wt::WPointF sink)
