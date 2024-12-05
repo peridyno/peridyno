@@ -423,3 +423,5 @@ std::pair<Wt::WPointF, Wt::WPointF> WtFlowWidget::pointsC1C2(Wt::WPointF source,
 
 	return std::make_pair(c1, c2);
 }
+
+bool

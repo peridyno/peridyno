@@ -56,6 +56,8 @@ private:
 	std::pair<Wt::WPointF, Wt::WPointF> pointsC1C2(Wt::WPointF source, Wt::WPointF sink);
 	void drawSketchLine(Wt::WPainter* painter, Wt::WPointF source, Wt::WPointF sink);
 
+	bool canConnect();
+
 private:
 	double mZoomFactor;
 	Wt::WPointF mLastMousePos;
