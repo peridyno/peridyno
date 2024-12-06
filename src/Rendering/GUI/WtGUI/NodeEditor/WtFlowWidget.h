@@ -7,9 +7,12 @@
 #include "WtNodeGraphicsObject.h"
 #include "WtFlowNodeData.h"
 #include "WMainWindow.h"
+#include "WtInteraction.h"
 
 class WGridLayout;
 class WMainWindow;
+
+enum PortState { in, out };
 
 class WtFlowWidget : public Wt::WPaintedWidget
 {
@@ -50,13 +53,11 @@ private:
 
 	bool checkMouseInHotKey1(Wt::WPointF mousePoint, WtFlowNodeData nodeData);
 
-	bool checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nodeData, connectionPointData p);
+	bool checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nodeData, PortState portState);
 
 	Wt::WPainterPath cubicPath(Wt::WPointF source, Wt::WPointF sink);
 	std::pair<Wt::WPointF, Wt::WPointF> pointsC1C2(Wt::WPointF source, Wt::WPointF sink);
 	void drawSketchLine(Wt::WPainter* painter, Wt::WPointF source, Wt::WPointF sink);
-
-	bool canConnect();
 
 private:
 	double mZoomFactor;
@@ -86,7 +87,7 @@ private:
 	WtNodeFlowScene* node_scene = nullptr;
 	std::shared_ptr<dyno::SceneGraph> mScene;
 	std::map<dyno::ObjectId, WtNode*> nodeMap;
-	std::shared_ptr<dyno::Node> connectionOutNode;
+	WtNode* connectionOutNode;
 
 	Wt::WPointF mMousePoint = Wt::WPointF(0, 0);
 };

@@ -110,7 +110,6 @@ void WtNodePainter::drawConnectionPoints(
 		{
 			connectionPointData pointData;
 			pointData.portType = portType;
-			pointData.id = i;
 
 			Wt::WPointF p = geom.portScenePosition(i, portType);
 
@@ -208,12 +207,14 @@ void WtNodePainter::drawConnectionPoints(
 				painter->drawEllipse(drawRect);
 				pointData.portShape = PortShape::Point;
 				pointData.pointRect = drawRect;
+				pointData.portIndex = (PortIndex)i;
 				break;
 			case PortShape::Bullet:
 				painter->drawPolygon(diamond_out, 4);
 				painter->setBrush(Wt::StandardColor::White);
 				painter->drawPolygon(diamond_inner, 4);
 				pointData.portShape = PortShape::Bullet;
+				pointData.portIndex = (PortIndex)i;
 				pointData.diamond_out[0] = diamond_out[0];
 				pointData.diamond_out[1] = diamond_out[1];
 				pointData.diamond_out[2] = diamond_out[2];
@@ -222,6 +223,7 @@ void WtNodePainter::drawConnectionPoints(
 			case PortShape::Diamond:
 				painter->drawPolygon(diamond, 4);
 				pointData.portShape = PortShape::Diamond;
+				pointData.portIndex = (PortIndex)i;
 				pointData.diamond[0] = diamond[0];
 				pointData.diamond[1] = diamond[1];
 				pointData.diamond[2] = diamond[2];
@@ -231,11 +233,9 @@ void WtNodePainter::drawConnectionPoints(
 			default:
 				break;
 			}
-
 			pointsData.push_back(pointData);
 		}
 	};
-
 	graphicsObject.setPointsData(pointsData);
 }
 

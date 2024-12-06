@@ -2,31 +2,27 @@
 
 #include "WtNode.h"
 #include "WtConnection.h"
+#include "WtNode.h"
+#include "WtNodeFlowScene.h"
 
 class WtDataModelRegistry;
-class WtFlowScene;
+class WtNodeFlowScene;
 class WtNodeDataModel;
 
 class WtInteraction
 {
 public:
-	WtInteraction(WtNode& node, WtConnection& connection, WtFlowScene& scene);
+	WtInteraction(WtNode& node, WtConnection& connection, WtFlowScene& scene, connectionPointData inPoint);
 
-	bool canConnect(PortIndex& portIndex, TypeConverter& converter) const;
+	bool canConnect(PortIndex& portIndex, TypeConverter& converter);
 
-	bool tryConnect() const;
+	bool tryConnect();
 
-	bool disconnect(PortType portToDisconnect) const;
+	bool disconnect(PortType portToDisconnect);
 
 private:
 
 	PortType connectionRequiredPort() const;
-
-	Wt::WPointF connectionEndScenePosition(PortType) const;
-
-	Wt::WPointF nodePortScenePosition(PortType portType, PortIndex portIndex) const;
-
-	PortIndex nodePortIndexUnderScenePoint(PortType portType, Wt::WPointF const& p) const;
 
 	bool isNodePortAccessible(PortType portType, PortIndex portIndex) const;
 
@@ -37,4 +33,6 @@ private:
 	WtConnection* _connection;
 
 	WtFlowScene* _scene;
+
+	connectionPointData _inPoint;
 };

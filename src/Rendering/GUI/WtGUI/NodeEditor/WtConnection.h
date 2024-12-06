@@ -142,6 +142,12 @@ public:
 		TypeConverter converter =
 		TypeConverter{});
 
+	WtConnection(
+		WtNode& nodeIn,
+		PortIndex portIndexIn,
+		WtNode& nodeOut,
+		PortIndex portIndexOut);
+
 	WtConnection(const WtConnection&) = delete;
 	WtConnection operator=(const WtConnection&) = delete;
 

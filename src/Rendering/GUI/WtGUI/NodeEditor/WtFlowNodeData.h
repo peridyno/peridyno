@@ -9,7 +9,7 @@
 struct connectionPointData
 {
 	PortType portType;
-	int id;
+	PortIndex portIndex;
 	PortShape portShape;
 	Wt::WRectF pointRect;
 	Wt::WPointF diamond_out[4];

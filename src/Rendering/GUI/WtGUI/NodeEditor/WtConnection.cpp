@@ -174,6 +174,22 @@ WtConnection::WtConnection(
 	setNodeToPort(nodeOut, PortType::Out, portIndexOut);
 }
 
+WtConnection::WtConnection(
+	WtNode& nodeIn,
+	PortIndex portIndexIn,
+	WtNode& nodeOut,
+	PortIndex portIndexOut)
+	: _uid(Wt::Guid())
+	, _outNode(&nodeOut)
+	, _inNode(&nodeIn)
+	, _outPortIndex(portIndexOut)
+	, _inPortIndex(portIndexIn)
+	, _connectionState()
+{
+	setNodeToPort(nodeIn, PortType::In, portIndexIn);
+	setNodeToPort(nodeOut, PortType::Out, portIndexOut);
+}
+
 WtConnection::~WtConnection()
 {
 	if (complete())

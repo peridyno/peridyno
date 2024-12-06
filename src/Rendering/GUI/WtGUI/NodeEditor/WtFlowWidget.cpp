@@ -30,7 +30,7 @@ void WtFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 	{
 		auto origin = nodeMap[selectedNum]->flowNodeData().getNodeOrigin();
 		mTranslateNode = Wt::WPointF(origin.x(), origin.y());
-		if (checkMouseInPoints(mLastMousePos, nodeMap[selectedNum]->flowNodeData(), outPoint))
+		if (checkMouseInPoints(mLastMousePos, nodeMap[selectedNum]->flowNodeData(), PortState::out))
 		{
 			drawLineFlag = true;
 		}
@@ -65,7 +65,7 @@ void WtFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
 			if (checkMouseInNodeRect(mousePoint, nodeData))
 			{
 				isSelected = true;
-				connectionOutNode = m;
+				connectionOutNode = node;
 				selectedNum = m->objectId();
 				canMoveNode = true;
 				update();
@@ -87,6 +87,7 @@ void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 	isDragging = false;
 	mLastDelta = Wt::WPointF(0, 0);
 	mTranslateNode = Wt::WPointF(0, 0);
+	Wt::WPointF mouseWentUpPosition = Wt::WPointF(event.widget().x, event.widget().y);
 	if (isSelected)
 	{
 		auto node = nodeMap[selectedNum];
@@ -132,13 +133,16 @@ void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 			auto m = it.get();
 			auto node = nodeMap[m->objectId()];
 			auto nodeData = node->flowNodeData();
-			if (checkMouseInPoints(mLastMousePos, nodeData, inPoint))
+			if (checkMouseInPoints(mouseWentUpPosition, nodeData, PortState::in))
 			{
 				std::cout << "node data" << std::endl;
-				auto connectionInNoed = m;
-
-				std::cout << outPoint.id << std::endl;
-				std::cout << inPoint.id << std::endl;
+				auto connectionInNoed = node;
+				WtConnection connection(outPoint.portType, *connectionOutNode, outPoint.portIndex);
+				WtInteraction interaction(*connectionInNoed, connection, *node_scene, inPoint);
+				if (interaction.tryConnect())
+				{
+					std::cout << "connection success" << std::endl;
+				}
 			}
 		}
 	}
@@ -255,7 +259,7 @@ bool WtFlowWidget::checkMouseInHotKey1(Wt::WPointF mousePoint, WtFlowNodeData no
 	return absRect.contains(trueMouse);
 }
 
-bool WtFlowWidget::checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nodeData, connectionPointData p)
+bool WtFlowWidget::checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nodeData, PortState portState)
 {
 	auto pointsData = nodeData.getPointsData();
 	Wt::WPointF origin = nodeData.getNodeOrigin();
@@ -271,7 +275,14 @@ bool WtFlowWidget::checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nod
 			if (diamondBoundingRect.contains(trueMouse))
 			{
 				sourcePoint = Wt::WPointF((topLeft.x() + bottomRight.x()) / 2, (topLeft.y() + bottomRight.y()) / 2);
-				p = pointData;
+				if (portState == PortState::out)
+				{
+					outPoint = pointData;
+				}
+				if (portState == PortState::in)
+				{
+					inPoint = pointData;
+				}
 				return true;
 			}
 		}
@@ -283,7 +294,14 @@ bool WtFlowWidget::checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nod
 			if (diamondBoundingRect.contains(trueMouse))
 			{
 				sourcePoint = Wt::WPointF((topLeft.x() + bottomRight.x()) / 2, (topLeft.y() + bottomRight.y()) / 2);
-				p = pointData;
+				if (portState == PortState::out)
+				{
+					outPoint = pointData;
+				}
+				if (portState == PortState::in)
+				{
+					inPoint = pointData;
+				}
 				return true;
 			}
 		}
@@ -297,7 +315,14 @@ bool WtFlowWidget::checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nod
 			if (diamondBoundingRect.contains(trueMouse))
 			{
 				sourcePoint = Wt::WPointF((topLeft.x() + bottomRight.x()) / 2, (topLeft.y() + bottomRight.y()) / 2);
-				p = pointData;
+				if (portState == PortState::out)
+				{
+					outPoint = pointData;
+				}
+				if (portState == PortState::in)
+				{
+					inPoint = pointData;
+				}
 				return true;
 			}
 		}
@@ -423,5 +448,3 @@ std::pair<Wt::WPointF, Wt::WPointF> WtFlowWidget::pointsC1C2(Wt::WPointF source,
 
 	return std::make_pair(c1, c2);
 }
-
-bool
