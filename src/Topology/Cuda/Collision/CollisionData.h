@@ -7,6 +7,28 @@
 namespace dyno
 {
 #define INVLIDA_ID -1
+	
+	enum CModeMask
+	{
+		CM_Disabled 			= 0x00000000,		
+		CM_OriginDCD_Tet		= 0x00000001,			// Origin DCD for local contact point
+		CM_InputSDF_Tet			= 0x00000002,			// Intergated SDF 
+		CM_RigidSurface_Tet 	= 0x00000004,			// Rigid Surface 
+		CM_TetMesh_Tet			= 0x00000008,			// TetMesh for semi-local contact point
+		CM_SurfaceMesh_Tet 		= 0x00000010, 			// Surface triangle mesh for semi-local contact point
+		CM_OriginDCD_Sphere		= 0x00000020,
+		CM_InputSDF_Sphere		= 0x00000040
+	};
+
+	enum BodyType
+	{
+		Static = 0,
+		Kinematic,
+		Dynamic,
+		NonRotatable,
+		NonGravitative,
+	};
+
 
 	enum CollisionMask
 	{
@@ -27,6 +49,10 @@ namespace dyno
 		CT_BOUDNARY = 0,
 		CT_INTERNAL,
 		CT_NONPENETRATION,
+		CT_SURFACE,
+		CT_VERTEX_SDF,
+		CT_VERTEX_FACE,
+		CT_EDGE_EDGE,
 		CT_UNKNOWN
 	};
 
@@ -59,6 +85,62 @@ namespace dyno
 		CN_JOINT_NO_MOVE_2,
 		CN_JOINT_NO_MOVE_3,
 		CN_UNKNOWN
+	};
+
+	struct BoxInfo
+	{
+		BoxInfo()
+		{
+			center = Vector<Real, 3>(0.0f, 0.0f, 0.0f);
+			halfLength = Vector<Real, 3>(1.0f, 1.0f, 1.0f);
+			rot = Quat<Real>(0.0f, 0.0f, 0.0f, 1.0f);
+		}
+
+		Vector<Real, 3> center;
+		Vector<Real, 3> halfLength;
+
+		Quat<Real> rot;
+	};
+
+	struct SphereInfo
+	{
+		SphereInfo()
+		{
+			center = Vector<Real, 3>(0.0f, 0.0f, 0.0f);
+			radius = 1.0;
+			rot = Quat<Real>(0.0f, 0.0f, 0.0f, 1.0f);
+		}
+		Quat<Real> rot;
+		Vector<Real, 3> center;
+		Real radius;
+	};
+
+	struct TetInfo
+	{
+		TetInfo()
+		{
+			v[0] = Vec3f(0);
+			v[1] = Vec3f(1, 0, 0);
+			v[2] = Vec3f(0, 1, 0);
+			v[3] = Vec3f(0, 0, 1);
+		}
+
+		Vector<Real, 3> v[4];
+	};
+
+	struct CapsuleInfo
+	{
+		CapsuleInfo()
+		{
+			center = Vec3f(0.0f, 0.0f, 0.0f);
+			rot = Quat1f(0.0f, 0.0f, 0.0f, 1.0f);
+			radius = 1.0f;
+			halfLength = 1.0f;
+		}
+		Quat<Real> rot;
+		Vector<Real, 3> center;
+		Real halfLength;
+		Real radius;
 	};
 
 	template<typename Real>
@@ -124,8 +206,8 @@ namespace dyno
 		int bodyId1;
 		int bodyId2;
 		
-// 		int localId1;
-// 		int localId2;
+		int localId1;
+		int localId2;
 // 
 // 		int localTag1;
 // 		int localTag2;

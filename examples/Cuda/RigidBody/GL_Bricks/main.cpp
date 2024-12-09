@@ -1,4 +1,4 @@
-#include <GlfwApp.h>
+#include <UbiApp.h>
 
 #include <SceneGraph.h>
 
@@ -25,32 +25,36 @@ std::shared_ptr<SceneGraph> creatBricks()
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
 	RigidBodyInfo rigidBody;
 	rigidBody.linearVelocity = Vec3f(1.0, 0, 0);
+
 	BoxInfo box;
+	box.halfLength = 0.5f * Vec3f(0.065, 0.065, 0.1);
+
 	for (int i = 8; i > 1; i--)
 		for (int j = 0; j < i + 1; j++)
 		{
-			box.center = 0.5f * Vec3f(0.5f, 1.1 - 0.13 * i, 0.12f + 0.2 * j + 0.1 * (8 - i));
-			box.halfLength = 0.5f * Vec3f(0.065, 0.065, 0.1);
+			rigidBody.position = 0.5f * Vec3f(0.5f, 1.1 - 0.13 * i, 0.12f + 0.2 * j + 0.1 * (8 - i));
+			
 			auto boxAt = rigid->addBox(box, rigidBody);
 		}
 
 
 
 	SphereInfo sphere;
-	sphere.center = Vec3f(0.5f, 0.75f, 0.5f);
 	sphere.radius = 0.025f;
 
 	RigidBodyInfo rigidSphere;
+	rigidSphere.position = Vec3f(0.5f, 0.75f, 0.5f);
 	auto sphereAt1 = rigid->addSphere(sphere, rigidSphere);
 
-	sphere.center = Vec3f(0.5f, 0.95f, 0.5f);
-	sphere.radius = 0.025f;
+	rigidSphere.position = Vec3f(0.5f, 0.95f, 0.5f);
 	auto sphereAt2 = rigid->addSphere(sphere, rigidSphere);
 
-	sphere.center = Vec3f(0.5f, 0.65f, 0.5f);
+	rigidSphere.position = Vec3f(0.5f, 0.65f, 0.5f);
 	sphere.radius = 0.05f;
 	auto sphereAt3 = rigid->addSphere(sphere, rigidSphere);
 
+
+	rigidSphere.position = Vec3f(0.0f);
 	TetInfo tet;
 	tet.v[0] = Vec3f(0.5f, 1.1f, 0.5f);
 	tet.v[1] = Vec3f(0.5f, 1.2f, 0.5f);
@@ -104,7 +108,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 int main()
 {
-	GlfwApp app;
+	UbiApp app;
 	app.setSceneGraph(creatBricks());
 	app.initialize(1280, 768);
 	app.mainLoop();

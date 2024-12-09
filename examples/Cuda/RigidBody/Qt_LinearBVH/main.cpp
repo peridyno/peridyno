@@ -62,30 +62,31 @@ std::shared_ptr<SceneGraph> createBoxes()
 
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
 
-	RigidBodyInfo rigidBody;
-	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
 	BoxInfo box;
-	box.center = Vec3f(-0.3, 0.1, 0.5);
+	box.center = Vec3f(0.0f);
 	box.halfLength = Vec3f(0.1, 0.1, 0.1);
+
+	RigidBodyInfo rigidBody;
+	rigidBody.position = Vec3f(-0.3, 0.1, 0.5);
+	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
 	rigid->addBox(box, rigidBody);
 
+	rigidBody.position = Vec3f(-0.3, 0.3, 0.59);
 	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
-	box.center = Vec3f(-0.3, 0.3, 0.59);
-	box.halfLength = Vec3f(0.1, 0.1, 0.1);
 	rigid->addBox(box, rigidBody);
 
 	SphereInfo sphere;
-	sphere.center = Vec3f(0.5f, 0.75f, 0.5f);
 	sphere.radius = 0.025f;
 
 	RigidBodyInfo rigidSphere;
+	rigidSphere.position = Vec3f(0.5f, 0.75f, 0.5f);
 	rigid->addSphere(sphere, rigidSphere);
 
-	sphere.center = Vec3f(0.7f, 0.95f, 0.5f);
+	rigidSphere.position = Vec3f(0.7f, 0.95f, 0.5f);
 	sphere.radius = 0.025f;
 	rigid->addSphere(sphere, rigidSphere);
 
-	sphere.center = Vec3f(0.3f, 0.65f, 0.5f);
+	rigidSphere.position = Vec3f(0.3f, 0.65f, 0.5f);
 	sphere.radius = 0.05f;
 	rigid->addSphere(sphere, rigidSphere);
 
@@ -94,7 +95,9 @@ std::shared_ptr<SceneGraph> createBoxes()
 	tet.v[1] = Vec3f(0.5f, 1.2f, 0.5f);
 	tet.v[2] = Vec3f(0.6f, 1.1f, 0.5f);
 	tet.v[3] = Vec3f(0.5f, 1.1f, 0.6f);
-	rigid->addTet(tet, rigidSphere);
+
+	RigidBodyInfo tetRigid;
+	rigid->addTet(tet, tetRigid);
 
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
 	rigid->stateTopology()->connect(mapper->inDiscreteElements());

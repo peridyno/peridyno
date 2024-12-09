@@ -25,30 +25,27 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
 
-	BoxInfo newBox, oldBox;
-	RigidBodyInfo rigidBody;
-	rigidBody.bodyId = 1;
-	rigidBody.linearVelocity = Vec3f(1, 0.0, 0.0);
-	oldBox.center = Vec3f(0, 0.1, 0);
-	oldBox.halfLength = Vec3f(0.05, 0.05, 0.05);
-	auto oldBoxActor = rigid->addBox(oldBox, rigidBody);
-
-	
+	BoxInfo box;
+	RigidBodyInfo rA;
+	rA.bodyId = 1;
+	rA.linearVelocity = Vec3f(1, 0.0, 0.0);
+	box.center = Vec3f(0, 0.0, 0);
+	box.halfLength = Vec3f(0.05, 0.05, 0.05);
+	auto oldBoxActor = rigid->addBox(box, rA);
 
 	for (int i = 0; i < 100; i++)
 	{
-		rigidBody.linearVelocity = Vec3f(0, 0, 0);
-		newBox.center = oldBox.center + Vec3f(0.0, 0.12f, 0.0);
-		newBox.halfLength = oldBox.halfLength;
-		auto newBoxActor = rigid->addBox(newBox, rigidBody);
+		RigidBodyInfo rB;
+		rB.position = rA.position + Vec3f(0.0, 0.12f, 0.0);
+		rB.linearVelocity = Vec3f(0, 0, 0);
+		
+		auto newBoxActor = rigid->addBox(box, rB);
 		auto& ballAndSocketJoint = rigid->createBallAndSocketJoint(oldBoxActor, newBoxActor);
-		ballAndSocketJoint.setAnchorPoint((oldBox.center + newBox.center) / 2);
-		oldBox = newBox;
+		ballAndSocketJoint.setAnchorPoint((rA.position + rB.position) / 2);
+
+		rA = rB;
 		oldBoxActor = newBoxActor;
 	}
-
-
-
 
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
 	rigid->stateTopology()->connect(mapper->inDiscreteElements());

@@ -47,11 +47,10 @@ std::shared_ptr<SceneGraph> creatCar()
 
 		BoxInfo box1, box2, box3, box4, box5, box6;
 		//car body
-		box1.center = Vec3f(0, 1.171, -0.011) + tr;
+		//box1.center = Vec3f(0, 1.171, -0.011) + tr;
 		box1.halfLength = Vec3f(1.011, 0.793, 2.4);
 
-
-		box2.center = Vec3f(0, 1.044, -2.254) + tr;
+		//box2.center = Vec3f(0, 1.044, -2.254) + tr;
 		box2.halfLength = Vec3f(0.447, 0.447, 0.15);
 
 		box3.center = Vec3f(0.812, 0.450, 1.722) + tr;
@@ -77,31 +76,27 @@ std::shared_ptr<SceneGraph> creatCar()
 		capsule4.halfLength = 0.1495;
 		capsule4.radius = 0.450;*/
 		SphereInfo sphere1, sphere2, sphere3, sphere4;
-		sphere1.center = Vec3f(0.812, 0.450, 1.722) + tr;
+		//sphere1.center = Vec3f(0.812, 0.450, 1.722) + tr;
 		sphere1.radius = 0.450;
-		sphere2.center = Vec3f(-0.812, 0.450, 1.722) + tr;
+		//sphere2.center = Vec3f(-0.812, 0.450, 1.722) + tr;
 		sphere2.radius = 0.450;
-		sphere3.center = Vec3f(-0.812, 0.450, -1.426) + tr;
+		//sphere3.center = Vec3f(-0.812, 0.450, -1.426) + tr;
 		sphere3.radius = 0.450;
-		sphere4.center = Vec3f(0.812, 0.450, -1.426) + tr;
+		//sphere4.center = Vec3f(0.812, 0.450, -1.426) + tr;
 		sphere4.radius = 0.450;
 
-		box5.center = Vec3f(0, 1.171, 1.722) + tr;
+		//box5.center = Vec3f(0, 1.171, 1.722) + tr;
 		box5.halfLength = Vec3f(0.8, 0.1, 0.1);
-
-
-
 
 		RigidBodyInfo rigidbody;
 
 		rigidbody.bodyId = i;
 
-		Vec3f offset = Vec3f(0.0f, -0.721, 0.159);
-		rigidbody.offset = offset;
+		rigidbody.position = Vec3f(0, 1.171, -0.011) + tr;
 		auto bodyActor = jeep->addBox(box1, rigidbody, 100);
 
-		rigidbody.offset = Vec3f(0.0f);
-
+		box2.center = Vec3f(0.0f);
+		rigidbody.position = Vec3f(0, 1.044, -2.254) + tr;
 		auto spareTireActor = jeep->addBox(box2, rigidbody);
 
 		Real wheel_velocity = 20;
@@ -110,12 +105,20 @@ std::shared_ptr<SceneGraph> creatCar()
 		auto frontRightTireActor = jeep->addCapsule(capsule2, rigidbody, 100);
 		auto rearLeftTireActor = jeep->addCapsule(capsule3, rigidbody, 100);
 		auto rearRightTireActor = jeep->addCapsule(capsule4, rigidbody, 100);*/
+
+		rigidbody.position = Vec3f(0.812, 0.450, 1.722) + tr;
 		auto frontLeftTireActor = jeep->addSphere(sphere1, rigidbody, 50);
+
+		rigidbody.position = Vec3f(-0.812, 0.450, 1.722) + tr;
 		auto frontRightTireActor = jeep->addSphere(sphere2, rigidbody, 50);
+
+		rigidbody.position = Vec3f(-0.812, 0.450, -1.426) + tr;
 		auto rearLeftTireActor = jeep->addSphere(sphere3, rigidbody, 50);
+
+		rigidbody.position = Vec3f(0.812, 0.450, -1.426) + tr;
 		auto rearRightTireActor = jeep->addSphere(sphere4, rigidbody, 50);
 
-
+		rigidbody.position = Vec3f(0, 1.171, 1.722) + tr;
 		auto frontActor = jeep->addBox(box5, rigidbody, 25000);
 		//auto rearActor = jeep->addBox(box6, rigidbody, 25000);
 

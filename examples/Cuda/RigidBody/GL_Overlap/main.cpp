@@ -23,38 +23,37 @@ std::shared_ptr<SceneGraph> creatBricks()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
-	RigidBodyInfo rigidBody;
-	rigidBody.linearVelocity = Vec3f(0, 0, 0);
+	RigidBodyInfo rA, rB, rC, rD;
 	BoxInfo box1, box2, box3;
 
-	box1.center = Vec3f(0, 0.5, 0);
+	rA.position = Vec3f(0, 0.5, 0);
 	box1.halfLength = Vec3f(1.0, 0.05, 1.0);
 
-	box2.center = Vec3f(0, 0.2, 0.8);
+	rB.position = Vec3f(0, 0.2, 0.8);
 	box2.halfLength = Vec3f(0.7, 0.1, 0.1);
 
-	box3.center = Vec3f(0, 0.2, -0.8);
+	rC.position = Vec3f(0, 0.2, -0.8);
 	box3.halfLength = Vec3f(0.7, 0.1, 0.1);
 
-	auto bodyActor = rigid->addBox(box1, rigidBody);
-	auto frontActor = rigid->addBox(box2, rigidBody);
-	auto rearActor = rigid->addBox(box3, rigidBody);
+	auto bodyActor = rigid->addBox(box1, rA);
+	auto frontActor = rigid->addBox(box2, rB);
+	auto rearActor = rigid->addBox(box3, rC);
 
-	SphereInfo sphere1, sphere2, sphere3, sphere4;
+	SphereInfo sphere;
+	sphere.radius = 0.1;
 
-	sphere1.center = Vec3f(0.9, 0.1, 0.8);
-	sphere1.radius = 0.1;
-	sphere2.center = Vec3f(-0.9, 0.1, 0.8);
-	sphere2.radius = 0.1;
-	sphere3.center = Vec3f(0.9, 0.1, -0.8);
-	sphere3.radius = 0.1;
-	sphere4.center = Vec3f(-0.9, 0.1, -0.8);
-	sphere4.radius = 0.1;
+	rA.position = Vec3f(0.9, 0.1, 0.8);
+	
+	rB.position = Vec3f(-0.9, 0.1, 0.8);
 
-	auto frontLeftTire = rigid->addSphere(sphere1, rigidBody);
-	auto frontRightTire = rigid->addSphere(sphere2, rigidBody);
-	auto rearLeftTire = rigid->addSphere(sphere3, rigidBody);
-	auto rearRightTire = rigid->addSphere(sphere4, rigidBody);
+	rC.position = Vec3f(0.9, 0.1, -0.8);
+
+	rD.position = Vec3f(-0.9, 0.1, -0.8);
+
+	auto frontLeftTire = rigid->addSphere(sphere, rA);
+	auto frontRightTire = rigid->addSphere(sphere, rB);
+	auto rearLeftTire = rigid->addSphere(sphere, rC);
+	auto rearRightTire = rigid->addSphere(sphere, rD);
 
 	auto& joint1 = rigid->createHingeJoint(frontLeftTire, frontActor);
 	joint1.setAnchorPoint(frontLeftTire->center);

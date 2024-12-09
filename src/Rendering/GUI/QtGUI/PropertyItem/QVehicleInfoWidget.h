@@ -76,7 +76,7 @@ namespace dyno
 		//Source data
 		VehicleRigidBodyInfo* mRigidBodyData = nullptr;
 		//
-		std::vector<ConfigMotionType> mAllConfigMotionTypes = { Static,Kinematic,Dynamic };
+		std::vector<ConfigMotionType> mAllConfigMotionTypes = { CMT_Static,CMT_Kinematic,CMT_Dynamic };
 	};
 
 

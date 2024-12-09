@@ -63,13 +63,13 @@ namespace dyno
 		{
 			switch (it)
 			{
-			case dyno::ConfigMotionType::Static:
+			case dyno::ConfigMotionType::CMT_Static:
 				mMotionWidget->addItem("Static");
 				break;
-			case dyno::ConfigMotionType::Kinematic:
+			case dyno::ConfigMotionType::CMT_Kinematic:
 				mMotionWidget->addItem("Kinematic");
 				break;
-			case dyno::ConfigMotionType::Dynamic:
+			case dyno::ConfigMotionType::CMT_Dynamic:
 				mMotionWidget->addItem("Dynamic");
 				break;
 			default:

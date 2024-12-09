@@ -419,24 +419,21 @@ namespace dyno
 			//wheel
 			std::vector <int> Wheel_Id = { 0,1,2,3 };
 			std::map<int, CapsuleInfo> wheels;
-			std::map<int, std::shared_ptr<PdActor>> Actors;
+			std::map<int, std::shared_ptr<PdActor>> actors;
 			//Capsule
 			for (auto it : Wheel_Id)
 			{
 				auto up = texMesh->shapes()[it]->boundingBox.v1;
 				auto down = texMesh->shapes()[it]->boundingBox.v0;
 
-				wheels[it].center = texMesh->shapes()[it]->boundingTransform.translation();
+				wheels[it].center = Vec3f(0.0f);
 				wheels[it].rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
 				wheels[it].halfLength = 0.1;
 				wheels[it].radius = std::abs(up.y - down.y) / 2;
-			}
-			//Actor
-			for (auto it : Wheel_Id)
-			{
-				Actors[it] = this->addCapsule(wheels[it], rigidbody, 100);
-			}
 
+				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation();
+				actors[it] = this->addCapsule(wheels[it], rigidbody, 100);
+			}
 
 
 			//body
@@ -451,30 +448,24 @@ namespace dyno
 				auto up = texMesh->shapes()[it]->boundingBox.v1;
 				auto down = texMesh->shapes()[it]->boundingBox.v0;
 
-				auto center = texMesh->shapes()[it]->boundingTransform.translation();
-				boxs[it].center = Vec3f(center.x, center.y, center.z);
+				boxs[it].center = Vec3f(0.0f);
 
 				boxs[it].halfLength = (up - down) / 2;
 
-
+				rigidbody.offset = Vec3f(0.0f, 0.0f, 0.0f);
+				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation();
+				actors[it] = this->addBox(boxs[it], rigidbody, 100);
 			}
-			//Actor
-			for (auto it : box_Id)
-			{
-				Vec3f offset = Vec3f(0.0f, 0.0f, 0.0f);
 
-				rigidbody.offset = offset;
-				Actors[it] = this->addBox(boxs[it], rigidbody, 100);
-			}
 			//bindShapetoActor
 			for (auto it : box_Id)
 			{
-				this->bind(Actors[it], Pair<uint, uint>(it, i));
+				this->bind(actors[it], Pair<uint, uint>(it, i));
 			}
 			//bindShapetoActor
 			for (auto it : Wheel_Id)
 			{
-				this->bind(Actors[it], Pair<uint, uint>(it, i));
+				this->bind(actors[it], Pair<uint, uint>(it, i));
 			}
 
 			rigidbody.offset = Vec3f(0);
@@ -484,15 +475,14 @@ namespace dyno
 			//wheel to Body
 			for (auto it : Wheel_Id)
 			{
-				auto& joint = this->createHingeJoint(Actors[it], Actors[body]);
-				joint.setAnchorPoint(Actors[it]->center);
+				auto& joint = this->createHingeJoint(actors[it], actors[body]);
+				joint.setAnchorPoint(actors[it]->center);
 				joint.setMoter(wheel_velocity);
 				joint.setAxis(Vec3f(1, 0, 0));
 			}
 
-			auto& jointBackWheel_Body = this->createFixedJoint(Actors[backWheel], Actors[body]);
-			jointBackWheel_Body.setAnchorPoint(Actors[backWheel]->center);		//set and offset
-
+			auto& jointBackWheel_Body = this->createFixedJoint(actors[backWheel], actors[body]);
+			jointBackWheel_Body.setAnchorPoint(actors[backWheel]->center);		//set and offset
 		}
 
 		//**************************************************//
@@ -618,10 +608,11 @@ namespace dyno
 					switch (type)
 					{
 					case dyno::Box:
-						currentBox.center = T + rigidInfo[i].transform.translation();;
+						currentBox.center = Vec3f(0.0f);
 						currentBox.halfLength = (up - down) / 2 * rigidInfo[i].mHalfLength;
 						currentBox.rot = Quat1f(transform.rotation());
 
+						rigidbody.position = T + rigidInfo[i].transform.translation();
 						Actors[i] = this->addBox(currentBox, rigidbody, density);
 						break;
 
@@ -630,19 +621,21 @@ namespace dyno
 						break;
 
 					case dyno::Capsule:
-						currentCapsule.center = T + rigidInfo[i].transform.translation();
+						currentCapsule.center = Vec3f(0.0f);
 						currentCapsule.rot = Quat1f(transform.rotation());
 						currentCapsule.halfLength = (up.y - down.y) / 2 * rigidInfo[i].capsuleLength;
 						currentCapsule.radius = std::abs(up.y - down.y) / 2 * rigidInfo[i].radius;
 
+						rigidbody.position = T + rigidInfo[i].transform.translation();
 						Actors[i] = this->addCapsule(currentCapsule, rigidbody, density);
 						break;
 
 					case dyno::Sphere:
-						currentSphere.center = T + rigidInfo[i].transform.translation();
+						currentSphere.center = Vec3f(0.0f);
 						currentSphere.rot = Quat1f(transform.rotation());
 						currentSphere.radius = std::abs(up.y - down.y) / 2 * rigidInfo[i].radius;
 
+						rigidbody.position = T + rigidInfo[i].transform.translation();
 						Actors[i] = this->addSphere(currentSphere, rigidbody, density);
 						break;
 
@@ -665,10 +658,11 @@ namespace dyno
 					switch (type)
 					{
 					case dyno::Box:
-						currentBox.center = rigidInfo[i].transform.translation();
+						currentBox.center = Vec3f(0.0f);
 						currentBox.halfLength = rigidInfo[i].mHalfLength;
 						currentBox.rot = Quat<Real>(rigidInfo[i].transform.rotation());
 
+						rigidbody.position = rigidInfo[i].transform.translation();
 						Actors[i] = this->addBox(currentBox, rigidbody, density);
 						break;
 
@@ -682,19 +676,21 @@ namespace dyno
 						break;
 
 					case dyno::Capsule:
-						currentCapsule.center = rigidInfo[i].transform.translation();
+						currentCapsule.center = Vec3f(0.0f);
 						currentCapsule.rot = Quat<Real>(rigidInfo[i].transform.rotation());
 						currentCapsule.halfLength = rigidInfo[i].capsuleLength;
 						currentCapsule.radius = rigidInfo[i].radius;
 
+						rigidbody.position = rigidInfo[i].transform.translation();
 						Actors[i] = this->addCapsule(currentCapsule, rigidbody, density);
 						break;
 
 					case dyno::Sphere:
-						currentSphere.center = rigidInfo[i].transform.translation();
+						currentSphere.center = Vec3f(0.0f);
 						currentSphere.rot = Quat<Real>(rigidInfo[i].transform.rotation());
 						currentSphere.radius = rigidInfo[i].radius;
 
+						rigidbody.position = rigidInfo[i].transform.translation();
 						Actors[i] = this->addSphere(currentSphere, rigidbody, density);
 						break;
 

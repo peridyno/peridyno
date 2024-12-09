@@ -392,11 +392,14 @@ namespace dyno
 			}
 		}
 
+		void setAnchorAngle(Quat<Real> quat) { q = quat; }
+
 	public:
 		// anchor point position in body1 and body2 local space
 		Vector<Real, 3> r1;
 		Vector<Real, 3> r2;
 		Vector<Real, 3> w;
+		Quat<Real> q;
 	};
 
 
@@ -436,6 +439,45 @@ namespace dyno
 
 	};
 
+	template<typename Real>
+	class DistanceJoint : public Joint<Real>
+	{
+	public:
+		DistanceJoint()
+		{
+			this->bodyId1 = INVALID;
+			this->bodyId2 = INVALID;
+
+			this->bodyType1 = ET_Other;
+			this->bodyType2 = ET_Other;
+
+			this->actor1 = nullptr;
+			this->actor2 = nullptr;
+		}
+		DistanceJoint(PdActor* a1, PdActor* a2)
+		{
+			this->bodyId1 = a1->idx;
+			this->bodyId2 = a2->idx;
+
+			this->bodyType1 = a1->shapeType;
+			this->bodyType2 = a2->shapeType;
+
+			this->actor1 = a1;
+			this->actor2 = a2;
+		}
+		void setDistanceJoint(Vector<Real, 3> r1, Vector<Real, 3> r2, Real distance)
+		{
+			this->r1 = r1;
+			this->r2 = r2;
+			this->distance = distance;
+		}
+	public:
+		// anchor point position in body1 and body2 local space
+		Vector<Real, 3> r1;
+		Vector<Real, 3> r2;
+		Real distance;
+	};
+
 
 	/**
 	 * Discrete elements will arranged in the order of sphere, box, tet, capsule, triangle
@@ -458,6 +500,7 @@ namespace dyno
 		typedef typename HingeJoint<Real> HingeJoint;
 		typedef typename FixedJoint<Real> FixedJoint;
 		typedef typename PointJoint<Real> PointJoint;
+		typedef typename DistanceJoint<Real> DistanceJoint;
 
 		DiscreteElements();
 		~DiscreteElements() override;
@@ -489,11 +532,18 @@ namespace dyno
 		DArray<Capsule3D>&	getCaps() { return m_caps; }
 		DArray<Triangle3D>& getTris() { return m_tris; }
 
+		DArray<Coord>& position() { return mPosition; }
+		DArray<Matrix>& rotation() { return mRotation; }
+
+		void setPosition(const DArray<Coord>& pos) { mPosition.assign(pos); }
+		void setRotation(const DArray<Matrix>& rot) { mRotation.assign(rot); }
+
 		DArray<BallAndSocketJoint>& ballAndSocketJoints() { return mBallAndSocketJoints; };
 		DArray<SliderJoint>& sliderJoints() { return mSliderJoints; };
 		DArray<HingeJoint>& hingeJoints() { return mHingeJoints; };
 		DArray<FixedJoint>& fixedJoints() { return mFixedJoints; };
 		DArray<PointJoint>& pointJoints() { return mPointJoints; };
+		DArray<DistanceJoint>& distanceJoints() { return mDistanceJoints; };
 
 		void setTetBodyId(DArray<int>& body_id);
 		void setTetElementId(DArray<TopologyModule::Tetrahedron>& element_id);
@@ -501,6 +551,20 @@ namespace dyno
 		DArray<Real>&		getTetSDF() { return m_tet_sdf; }
 		DArray<int>&		getTetBodyMapping() { return m_tet_body_mapping; }
 		DArray<TopologyModule::Tetrahedron>& getTetElementMapping() { return m_tet_element_id; }
+
+		void copyFrom(DiscreteElements<TDataType>& de);
+
+
+		void requestDiscreteElementsInGlobal(
+			DArray<Box3D>& boxInGlobal,
+			DArray<Sphere3D>& sphereInGlobal,
+			DArray<Tet3D>& tetInGlobal,
+			DArray<Capsule3D>& capInGlobal);
+
+		void requestBoxInGlobal(DArray<Box3D>& boxInGlobal);
+		void requestSphereInGlobal(DArray<Sphere3D>& sphereInGlobal);
+		void requestTetInGlobal(DArray<Tet3D>& tetInGlobal);
+		void requestCapsuleInGlobal(DArray<Capsule3D>& capInGlobal);
 
 	protected:
 		DArray<Sphere3D> m_spheres;
@@ -514,10 +578,64 @@ namespace dyno
 		DArray<HingeJoint> mHingeJoints;
 		DArray<FixedJoint> mFixedJoints;
 		DArray<PointJoint> mPointJoints;
-		
+		DArray<DistanceJoint> mDistanceJoints;
+
+		DArray<Coord> mPosition;
+		DArray<Matrix> mRotation;
+
 		DArray<Real> m_tet_sdf;
 		DArray<int> m_tet_body_mapping;
 		DArray<TopologyModule::Tetrahedron> m_tet_element_id;
 	};
+
+	// Some useful tools to to do transformation for discrete element
+
+	template<typename Real>
+	DYN_FUNC TOrientedBox3D<Real> local2Global(const TOrientedBox3D<Real>& box, const Vector<Real, 3>& t, const SquareMatrix<Real, 3>& r)
+	{
+		TOrientedBox3D<Real> ret;
+		ret.center = t + box.center;
+		ret.u = r * box.u;
+		ret.v = r * box.v;
+		ret.w = r * box.w;
+		ret.extent = box.extent;
+
+		return ret;
+	}
+
+	template<typename Real>
+	DYN_FUNC TSphere3D<Real> local2Global(const TSphere3D<Real>& sphere, const Vector<Real, 3>& t, const SquareMatrix<Real, 3>& r)
+	{
+		TSphere3D<Real> ret;
+		ret.center = t + sphere.center;
+		ret.radius = sphere.radius;
+		ret.rotation = Quat<Real>(r * sphere.rotation.toMatrix3x3());
+
+		return ret;
+	}
+
+	template<typename Real>
+	DYN_FUNC TCapsule3D<Real> local2Global(const TCapsule3D<Real>& capsule, const Vector<Real, 3>& t, const SquareMatrix<Real, 3>& r)
+	{
+		TCapsule3D<Real> ret;
+		ret.center = t + capsule.center;
+		ret.radius = capsule.radius;
+		ret.halfLength = capsule.halfLength;
+		ret.rotation = Quat<Real>(r * capsule.rotation.toMatrix3x3());
+
+		return ret;
+	}
+
+	template<typename Real>
+	DYN_FUNC TTet3D<Real> local2Global(const TTet3D<Real>& tet, const Vector<Real, 3>& t, const SquareMatrix<Real, 3>& r)
+	{
+		TTet3D<Real> ret;
+		ret.v[0] = t + r * tet.v[0];
+		ret.v[1] = t + r * tet.v[1];
+		ret.v[2] = t + r * tet.v[2];
+		ret.v[3] = t + r * tet.v[3];
+
+		return ret;
+	}
 }
 

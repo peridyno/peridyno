@@ -106,17 +106,23 @@ namespace dyno
 		float lx = 2.0f * b.halfLength[0];
 		float ly = 2.0f * b.halfLength[1];
 		float lz = 2.0f * b.halfLength[2];
-		bd.position = b.center + bd.offset;
 
 		bd.mass = density * lx * ly * lz;
 		//printf("Box mass : %lf\n", bd.mass);
-		bd.inertia = 1.0f / 12.0f * bd.mass
+
+		// Calculate the inertia of box in the local frame
+		auto localInertia = 1.0f / 12.0f * bd.mass
 			* Mat3f(ly * ly + lz * lz, 0, 0,
 				0, lx * lx + lz * lz, 0,
-				0, 0, lx * lx + ly * ly) + ParallelAxisTheorem(-bd.offset, bd.mass);
+				0, 0, lx * lx + ly * ly);
+
+		// Transform into the rigid body frame
+		auto rotShape = box.rot.toMatrix3x3();
+		auto rotBody = bd.angle.toMatrix3x3();
+
+		bd.inertia = rotBody * (rotShape * localInertia * rotShape.transpose() + ParallelAxisTheorem(box.center, bd.mass)) * rotBody.transpose();
 
 		bd.shapeType = ET_BOX;
-		bd.angle = b.rot;
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size(), bd);
 		mHostBoxes.push_back(b);
@@ -125,8 +131,8 @@ namespace dyno
 		actor->idx = mHostBoxes.size() - 1;
 		actor->shapeType = ET_BOX;
 		actor->center = bd.position;
-		actor->rot = b.rot;
-		
+		actor->rot = bd.angle;
+
 		return actor;
 	}
 
@@ -139,7 +145,7 @@ namespace dyno
 		auto b = sphere;
 		auto bd = bodyDef;
 
-		bd.position = b.center + bd.offset;
+//		bd.position = b.center + bd.offset;
 
 		float r = b.radius;
 		if (bd.mass <= 0.0f) {
@@ -147,13 +153,19 @@ namespace dyno
 		}
 		//printf("Sphere mass : %lf\n", bd.mass);
 		float I11 = r * r;
-		bd.inertia = 0.4f * bd.mass
+
+		// Calculate the inertia of sphere in the local frame
+		auto localInertia = 0.4f * bd.mass
 			* Mat3f(I11, 0, 0,
 				0, I11, 0,
-				0, 0, I11) + ParallelAxisTheorem(-bd.offset, bd.mass);
+				0, 0, I11);
+
+		auto rotShape = sphere.rot.toMatrix3x3();
+		auto rotBody = bd.angle.toMatrix3x3();
+
+		bd.inertia = rotBody * (rotShape * localInertia * rotShape.transpose() + ParallelAxisTheorem(sphere.center, bd.mass)) * rotBody.transpose();
 
 		bd.shapeType = ET_SPHERE;
-		bd.angle = b.rot;
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size(), bd);
 		mHostSpheres.push_back(b);
@@ -162,7 +174,7 @@ namespace dyno
 		actor->idx = mHostSpheres.size() - 1;
 		actor->shapeType = ET_SPHERE;
 		actor->center = bd.position;
-		actor->rot = b.rot;
+		actor->rot = bd.angle;
 
 		return actor;
 	}
@@ -214,7 +226,7 @@ namespace dyno
 		bd.angle = Quat<Real>();
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size(), bd);
-		mHostTets.push_back(tetInfo);
+		mHostTets.push_back(tet);
 
 		std::shared_ptr<PdActor> actor = std::make_shared<PdActor>();
 		actor->idx = mHostTets.size() - 1;
@@ -249,18 +261,18 @@ namespace dyno
 		Real I_1_hemisphere = mass_hemisphere * (2.0 / 5.0 * r * r + h * h / 2 + 3 * h * r / 8.0);
 		Real I_2_hemisphere = 2.0 / 5.0 * mass_hemisphere * r * r;
 
-		bd.position = b.center + bd.offset;
-
 		bd.mass = mass_hemisphere * 2 + mass_cylinder;
 
+		auto localInertia = Mat3f(I_1_cylinder + 2 * I_1_hemisphere, 0, 0,
+			0, I_1_cylinder + 2 * I_1_hemisphere, 0,
+			0, 0, I_2_cylinder + 2 * I_2_hemisphere);
 
-		bd.inertia = Mat3f(I_1_cylinder + 2 * I_1_hemisphere, 0, 0,
-				0, I_1_cylinder + 2 * I_1_hemisphere, 0,
-				0, 0, I_2_cylinder + 2 *I_2_hemisphere) + ParallelAxisTheorem(-bd.offset, bd.mass);
-		
+		auto rotShape = capsule.rot.toMatrix3x3();
+		auto rotBody = bd.angle.toMatrix3x3();
+
+		bd.inertia = rotBody * (rotShape * localInertia * rotShape.transpose() + ParallelAxisTheorem(capsule.center, bd.mass)) * rotBody.transpose();
 
 		bd.shapeType = ET_CAPSULE;
-		bd.angle = b.rot;
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size() + mHostCapsules.size(), bd);
 		mHostCapsules.push_back(b);
@@ -269,7 +281,7 @@ namespace dyno
 		actor->idx = mHostCapsules.size() - 1;
 		actor->shapeType = ET_CAPSULE;
 		actor->center = bd.position;
-		actor->rot = b.rot;
+		actor->rot = bd.angle;
 
 		return actor;
 	}
@@ -583,40 +595,43 @@ namespace dyno
 			return;
 		}
 
-		cuExecute(mDeviceBoxes.size(),
-			UpdateBoxes,
-			discreteSet->getBoxes(),
-			mDeviceBoxes,
-			this->stateCenter()->getData(),
-			this->stateOffset()->getData(),
-			this->stateRotationMatrix()->getData(),
-			offset.boxIndex());
+		discreteSet->setPosition(this->stateCenter()->constData());
+		discreteSet->setRotation(this->stateRotationMatrix()->constData());
 
-		cuExecute(mDeviceSpheres.size(),
-			UpdateSpheres,
-			discreteSet->getSpheres(),
-			mDeviceSpheres,
-			this->stateCenter()->getData(),
-			this->stateOffset()->getData(),
-			this->stateQuaternion()->getData(),
-			offset.sphereIndex());
-
-		cuExecute(mDeviceTets.size(),
-			UpdateTets,
-			discreteSet->getTets(),
-			mDeviceTets,
-			this->stateCenter()->getData(),
-			this->stateRotationMatrix()->getData(),
-			offset.tetIndex());
-
-		cuExecute(mDeviceCapsules.size(),
-			UpdateCapsules,
-			discreteSet->getCaps(),
-			mDeviceCapsules,
-			this->stateCenter()->getData(),
-			this->stateOffset()->getData(),
-			this->stateQuaternion()->getData(),
-			offset.capsuleIndex());
+// 		cuExecute(mDeviceBoxes.size(),
+// 			UpdateBoxes,
+// 			discreteSet->getBoxes(),
+// 			mDeviceBoxes,
+// 			this->stateCenter()->getData(),
+// 			this->stateOffset()->getData(),
+// 			this->stateRotationMatrix()->getData(),
+// 			offset.boxIndex());
+// 
+// 		cuExecute(mDeviceSpheres.size(),
+// 			UpdateSpheres,
+// 			discreteSet->getSpheres(),
+// 			mDeviceSpheres,
+// 			this->stateCenter()->getData(),
+// 			this->stateOffset()->getData(),
+// 			this->stateQuaternion()->getData(),
+// 			offset.sphereIndex());
+// 
+// 		cuExecute(mDeviceTets.size(),
+// 			UpdateTets,
+// 			discreteSet->getTets(),
+// 			mDeviceTets,
+// 			this->stateCenter()->getData(),
+// 			this->stateRotationMatrix()->getData(),
+// 			offset.tetIndex());
+// 
+// 		cuExecute(mDeviceCapsules.size(),
+// 			UpdateCapsules,
+// 			discreteSet->getCaps(),
+// 			mDeviceCapsules,
+// 			this->stateCenter()->getData(),
+// 			this->stateOffset()->getData(),
+// 			this->stateQuaternion()->getData(),
+// 			offset.capsuleIndex());
 	}
 
 	template<typename TDataType>

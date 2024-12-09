@@ -24,32 +24,28 @@ std::shared_ptr<SceneGraph> creatBricks()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
-
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
 
-	
-
-	RigidBodyInfo rigidbody;
+	RigidBodyInfo rA = RigidBodyInfo(Vec3f(0, 0.8, 0));//	rA.angularVelocity = Vec3f(60, 200, 60);
+	RigidBodyInfo rB = RigidBodyInfo(Vec3f(0, 0.3, 0));// rB.angularVelocity = Vec3f(60, 200, 60);
+	RigidBodyInfo rC = RigidBodyInfo(Vec3f(-0.26, 0.55, 0));//	rC.angularVelocity = Vec3f(60, 200, 60);
+	RigidBodyInfo rD = RigidBodyInfo(Vec3f(0.26, 0.55, 0));//		rD.angularVelocity = Vec3f(60, 200, 60);
 	BoxInfo box1, box2, box3, box4;
 
-	box1.center = Vec3f(0, 0.8, 0);
 	box1.halfLength = Vec3f(0.03, 0.2, 0.03);
 	box1.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
 
-	box2.center = Vec3f(0, 0.3, 0);
 	box2.halfLength = Vec3f(0.03, 0.2, 0.03);
 	box2.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
 
-	box3.center = Vec3f(-0.26, 0.55, 0);
 	box3.halfLength = Vec3f(0.03, 0.2, 0.03);
 
-	box4.center = Vec3f(0.26, 0.55, 0);
 	box4.halfLength = Vec3f(0.03, 0.2, 0.03);
-	rigidbody.angularVelocity = Vec3f(60, 200, 60);
-	auto boxActor1 = rigid->addBox(box1, rigidbody);
-	auto boxActor2 = rigid->addBox(box2, rigidbody);
-	auto boxActor3 = rigid->addBox(box3, rigidbody);
-	auto boxActor4 = rigid->addBox(box4, rigidbody);
+	
+	auto boxActor1 = rigid->addBox(box1, rA);
+	auto boxActor2 = rigid->addBox(box2, rB);
+	auto boxActor3 = rigid->addBox(box3, rC);
+	auto boxActor4 = rigid->addBox(box4, rD);
 
 
 	auto& hingeJoint1 = rigid->createHingeJoint(boxActor1, boxActor3);

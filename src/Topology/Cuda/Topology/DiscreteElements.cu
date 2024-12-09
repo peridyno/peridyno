@@ -125,5 +125,236 @@ namespace dyno
 		m_tris.assign(triangles);
 	}
 
+	template<typename TDataType>
+	void dyno::DiscreteElements<TDataType>::copyFrom(DiscreteElements<TDataType>& de)
+	{
+		m_spheres.assign(de.m_spheres);
+		m_boxes.assign(de.m_boxes);
+		m_tets.assign(de.m_tets);
+		m_caps.assign(de.m_caps);
+		m_tris.assign(de.m_tris);
+
+		m_tet_sdf.assign(de.m_tet_sdf);
+		m_tet_body_mapping.assign(de.m_tet_body_mapping);
+		m_tet_element_id.assign(de.m_tet_element_id);
+	}
+
+	template<typename Coord, typename Matrix, typename Box3D>
+	__global__ void DE_Local2Global(
+		DArray<Box3D> boxInGlobal,
+		DArray<Sphere3D> sphereInGlobal,
+		DArray<Tet3D> tetInGlobal,
+		DArray<Capsule3D> capInGlobal,
+		DArray<Box3D> boxInLocal,
+		DArray<Sphere3D> sphereInLocal,
+		DArray<Tet3D> tetInLocal,
+		DArray<Capsule3D> capInLocal,
+		DArray<Coord> positionGlobal,
+		DArray<Matrix> rotationGlobal,
+		ElementOffset elementOffset)
+	{
+		uint tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= rotationGlobal.size()) return;
+
+		ElementType eleType = elementOffset.checkElementType(tId);
+
+		Coord t = positionGlobal[tId];
+		Matrix r = rotationGlobal[tId];
+
+		switch (eleType)
+		{
+		case ET_SPHERE:
+		{
+			sphereInGlobal[tId - elementOffset.sphereIndex()] = local2Global(sphereInLocal[tId - elementOffset.sphereIndex()], t, r);
+			break;
+		}
+		case ET_BOX:
+		{
+			boxInGlobal[tId - elementOffset.boxIndex()] = local2Global(boxInLocal[tId - elementOffset.boxIndex()], t, r);
+			break;
+		}
+		case ET_TET:
+		{
+			tetInGlobal[tId - elementOffset.tetIndex()] = local2Global(tetInLocal[tId - elementOffset.tetIndex()], t, r);
+			break;
+		}
+		case ET_CAPSULE:
+		{
+			capInGlobal[tId - elementOffset.capsuleIndex()] = local2Global(capInLocal[tId - elementOffset.capsuleIndex()], t, r);
+			break;
+		}
+		// 		case ET_TRI:
+		// 		{
+		// 			//TODO:
+		// // 			boundary_expand = 0.01;
+		// // 			box = tris[tId - elementOffset.triangleIndex()].aabb();
+		// 			break;
+		// 		}
+		default:
+			break;
+		}
+	}
+
+	template<typename TDataType>
+	void DiscreteElements<TDataType>::requestDiscreteElementsInGlobal(
+		DArray<Box3D>& boxInGlobal, 
+		DArray<Sphere3D>& sphereInGlobal, 
+		DArray<Tet3D>& tetInGlobal, 
+		DArray<Capsule3D>& capInGlobal)
+	{
+		auto elementOffset = this->calculateElementOffset();
+
+		boxInGlobal.assign(this->getBoxes());
+		sphereInGlobal.assign(this->getSpheres());
+		tetInGlobal.assign(this->getTets());
+		capInGlobal.assign(this->getCaps());
+
+		cuExecute(this->totalSize(),
+			DE_Local2Global,
+			boxInGlobal,
+			sphereInGlobal,
+			tetInGlobal,
+			capInGlobal,
+			this->getBoxes(),
+			this->getSpheres(),
+			this->getTets(),
+			this->getCaps(),
+			mPosition,
+			mRotation,
+			elementOffset);
+	}
+
+	template<typename Coord, typename Matrix, typename Box3D>
+	__global__ void DE_Local2GlobalForBox(
+		DArray<Box3D> boxInGlobal,
+		DArray<Box3D> boxInLocal,
+		DArray<Coord> positionGlobal,
+		DArray<Matrix> rotationGlobal,
+		uint offset)
+	{
+		uint tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= boxInLocal.size()) return;
+
+		Coord t = positionGlobal[tId + offset];
+		Matrix r = rotationGlobal[tId + offset];
+
+		boxInGlobal[tId] = local2Global(boxInLocal[tId], t, r);
+	}
+
+	template<typename Coord, typename Matrix, typename Sphere3D>
+	__global__ void DE_Local2GlobalForSphere(
+		DArray<Sphere3D> sphereInGlobal,
+		DArray<Sphere3D> sphereInLocal,
+		DArray<Coord> positionGlobal,
+		DArray<Matrix> rotationGlobal,
+		uint offset)
+	{
+		uint tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= sphereInLocal.size()) return;
+
+		Coord t = positionGlobal[tId + offset];
+		Matrix r = rotationGlobal[tId + offset];
+
+		sphereInGlobal[tId] = local2Global(sphereInLocal[tId], t, r);
+	}
+
+	template<typename Coord, typename Matrix, typename Tet3D>
+	__global__ void DE_Local2GlobalForTet(
+		DArray<Tet3D> tetInGlobal,
+		DArray<Tet3D> tetInLocal,
+		DArray<Coord> positionGlobal,
+		DArray<Matrix> rotationGlobal,
+		uint offset)
+	{
+		uint tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= tetInLocal.size()) return;
+
+		Coord t = positionGlobal[tId + offset];
+		Matrix r = rotationGlobal[tId + offset];
+
+		tetInGlobal[tId] = local2Global(tetInLocal[tId], t, r);
+	}
+
+	template<typename Coord, typename Matrix, typename Capsule3D>
+	__global__ void DE_Local2GlobalForCapsule(
+		DArray<Capsule3D> capInGlobal,
+		DArray<Capsule3D> capInLocal,
+		DArray<Coord> positionGlobal,
+		DArray<Matrix> rotationGlobal,
+		uint offset)
+	{
+		uint tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= capInLocal.size()) return;
+
+		Coord t = positionGlobal[tId + offset];
+		Matrix r = rotationGlobal[tId + offset];
+
+		capInGlobal[tId] = local2Global(capInLocal[tId], t, r);
+	}
+
+	template<typename TDataType>
+	void DiscreteElements<TDataType>::requestCapsuleInGlobal(DArray<Capsule3D>& capInGlobal)
+	{
+		auto elementOffset = this->calculateElementOffset();
+
+		capInGlobal.assign(this->getCaps());
+
+		cuExecute(capInGlobal.size(),
+			DE_Local2GlobalForCapsule,
+			capInGlobal,
+			this->getCaps(),
+			mPosition,
+			mRotation,
+			elementOffset.capsuleIndex());
+	}
+
+	template<typename TDataType>
+	void DiscreteElements<TDataType>::requestTetInGlobal(DArray<Tet3D>& tetInGlobal)
+	{
+		auto elementOffset = this->calculateElementOffset();
+
+		tetInGlobal.assign(this->getTets());
+
+		cuExecute(tetInGlobal.size(),
+			DE_Local2GlobalForCapsule,
+			tetInGlobal,
+			this->getTets(),
+			mPosition,
+			mRotation,
+			elementOffset.tetIndex());
+	}
+
+	template<typename TDataType>
+	void DiscreteElements<TDataType>::requestSphereInGlobal(DArray<Sphere3D>& sphereInGlobal)
+	{
+		auto elementOffset = this->calculateElementOffset();
+
+		sphereInGlobal.assign(this->getSpheres());
+
+		cuExecute(sphereInGlobal.size(),
+			DE_Local2GlobalForSphere,
+			sphereInGlobal,
+			this->getSpheres(),
+			mPosition,
+			mRotation,
+			elementOffset.sphereIndex());
+	}
+
+	template<typename TDataType>
+	void DiscreteElements<TDataType>::requestBoxInGlobal(DArray<Box3D>& boxInGlobal)
+	{
+		auto elementOffset = this->calculateElementOffset();
+
+		boxInGlobal.assign(this->getBoxes());
+
+		cuExecute(boxInGlobal.size(),
+			DE_Local2GlobalForBox,
+			boxInGlobal,
+			this->getBoxes(),
+			mPosition,
+			mRotation,
+			elementOffset.boxIndex());
+	}
+
 	DEFINE_CLASS(DiscreteElements);
 }

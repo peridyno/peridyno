@@ -257,15 +257,22 @@ namespace dyno
 		if (mQueryAABB.size() != num)
 			mQueryAABB.resize(num);
 
+		DArray<Box3D> boxInGlobal;
+		DArray<Sphere3D> sphereInGlobal;
+		DArray<Tet3D> tetInGlobal;
+		DArray<Capsule3D> capsuleInGlobal;
+
+		de->requestDiscreteElementsInGlobal(boxInGlobal, sphereInGlobal, tetInGlobal, capsuleInGlobal);
+
 		ElementOffset elementOffset = de->calculateElementOffset();
 
 		cuExecute(num,
 			CDTS_SetupAABBForRigidBodies,
 			mQueryAABB,
-			de->getBoxes(),
-			de->getSpheres(),
-			de->getTets(),
-			de->getCaps(),
+			boxInGlobal,
+			sphereInGlobal,
+			tetInGlobal,
+			capsuleInGlobal,
 			elementOffset);
 
 		mBroadPhaseCD->inSource()->assign(mQueryAABB);
@@ -300,10 +307,10 @@ namespace dyno
 			CDTS_CountContacts,
 			mBoundaryContactCounter,
 			mContactBuffer,
-			de->getBoxes(),
-			de->getSpheres(),
-			de->getTets(),
-			de->getCaps(),
+			boxInGlobal,
+			sphereInGlobal,
+			tetInGlobal,
+			capsuleInGlobal,
 			vertices,
 			indices,
 			contactList,
@@ -322,6 +329,11 @@ namespace dyno
 			mContactBuffer,
 			mBoundaryContactCounter,
 			mBoundaryContactCpy);
+
+		boxInGlobal.clear();
+		sphereInGlobal.clear();
+		tetInGlobal.clear();
+		capsuleInGlobal.clear();
 	}
 
 	DEFINE_CLASS(CollistionDetectionTriangleSet);

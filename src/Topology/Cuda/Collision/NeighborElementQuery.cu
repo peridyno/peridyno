@@ -10,7 +10,6 @@
 namespace dyno
 {
 	IMPLEMENT_TCLASS(NeighborElementQuery, TDataType)
-		typedef typename ::dyno::TOrientedBox3D<Real> Box3D;
 
 	struct ContactId
 	{
@@ -90,7 +89,6 @@ namespace dyno
 		case ET_SPHERE:
 		{
 			box = spheres[tId].aabb();
-
 			break;
 		}
 		case ET_BOX:
@@ -100,7 +98,6 @@ namespace dyno
 		}
 		case ET_TET:
 		{
-			
 			box = tets[tId - elementOffset.tetIndex()].aabb();
 			break;
 		}
@@ -244,7 +241,7 @@ namespace dyno
 			auto tetB = tets[ids.bodyId2 - elementOffset.tetIndex()];
 			//CollisionDetection<Real>::request(manifold, tetA, tetB);
 
-			CollisionDetection<Real>::request(manifold, tetA, tetB, dHat, dHat);
+ 			CollisionDetection<Real>::request(manifold, tetA, tetB, dHat, dHat);
 		}
 		else if (eleType_i == ET_TET && eleType_j == ET_BOX && checkCollision(mask_i, mask_j, ET_TET, ET_BOX))
 		{
@@ -514,13 +511,23 @@ namespace dyno
 
 		Real dHat = this->varDHead()->getValue();
 
+		auto& position = inTopo->position();
+		auto& rotation = inTopo->rotation();
+
+		DArray<Box3D> boxInGlobal;
+		DArray<Sphere3D> sphereInGlobal;
+		DArray<Tet3D> tetInGlobal;
+		DArray<Capsule3D> capsuleInGlobal;
+
+		inTopo->requestDiscreteElementsInGlobal(boxInGlobal, sphereInGlobal, tetInGlobal, capsuleInGlobal);
+
 		cuExecute(t_num,
 			NEQ_SetupAABB,
 			mQueriedAABB,
-			inTopo->getBoxes(),
-			inTopo->getSpheres(),
-			inTopo->getTets(),
-			inTopo->getCaps(),
+			boxInGlobal,
+			sphereInGlobal,
+			tetInGlobal,
+			capsuleInGlobal,
 			inTopo->getTris(),
 			elementOffset,
 			dHat);
@@ -585,13 +592,13 @@ namespace dyno
 					nbr_cons_tmp,
 					deviceIds,
 					dummyCollisionMask,
-					inTopo->getBoxes(),
-					inTopo->getSpheres(),
-					inTopo->getTets(),
+					boxInGlobal,
+					sphereInGlobal,
+					tetInGlobal,
 					inTopo->getTetSDF(),
 					inTopo->getTetBodyMapping(),
 					inTopo->getTetElementMapping(),
-					inTopo->getCaps(),
+					capsuleInGlobal,
 					inTopo->getTris(),
 					this->inAttribute()->getData(),
 					elementOffset,
@@ -608,13 +615,13 @@ namespace dyno
 					nbr_cons_tmp,
 					deviceIds,
 					dummyCollisionMask,
-					inTopo->getBoxes(),
-					inTopo->getSpheres(),
-					inTopo->getTets(),
+					boxInGlobal,
+					sphereInGlobal,
+					tetInGlobal,
 					inTopo->getTetSDF(),
 					inTopo->getTetBodyMapping(),
 					inTopo->getTetElementMapping(),
-					inTopo->getCaps(),
+					capsuleInGlobal,
 					inTopo->getTris(),
 					dummyAttribute,
 					elementOffset,
@@ -634,13 +641,13 @@ namespace dyno
 					nbr_cons_tmp,
 					deviceIds,
 					this->inCollisionMask()->getData(),
-					inTopo->getBoxes(),
-					inTopo->getSpheres(),
-					inTopo->getTets(),
+					boxInGlobal,
+					sphereInGlobal,
+					tetInGlobal,
 					inTopo->getTetSDF(),
 					inTopo->getTetBodyMapping(),
 					inTopo->getTetElementMapping(),
-					inTopo->getCaps(),
+					capsuleInGlobal,
 					inTopo->getTris(),
 					this->inAttribute()->getData(),
 					elementOffset,
@@ -657,13 +664,13 @@ namespace dyno
 					nbr_cons_tmp,
 					deviceIds,
 					this->inCollisionMask()->getData(),
-					inTopo->getBoxes(),
-					inTopo->getSpheres(),
-					inTopo->getTets(),
+					boxInGlobal,
+					sphereInGlobal,
+					tetInGlobal,
 					inTopo->getTetSDF(),
 					inTopo->getTetBodyMapping(),
 					inTopo->getTetElementMapping(),
-					inTopo->getCaps(),
+					capsuleInGlobal,
 					inTopo->getTris(),
 					dummyAttribute,
 					elementOffset,
@@ -691,10 +698,16 @@ namespace dyno
 				contactNum,
 				contactNumCpy);
 		}
+
 		contactNumCpy.clear();
 		contactNum.clear();
 		deviceIds.clear();
 		nbr_cons_tmp.clear();
+
+		boxInGlobal.clear();
+		sphereInGlobal.clear();
+		tetInGlobal.clear();
+		capsuleInGlobal.clear();
 	}
 
 	DEFINE_CLASS(NeighborElementQuery);

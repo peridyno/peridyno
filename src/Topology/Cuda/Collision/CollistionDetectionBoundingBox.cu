@@ -651,6 +651,13 @@ namespace dyno
 		auto discreteSet = this->inDiscreteElements()->getDataPtr();
 		uint totalSize = discreteSet->totalSize();
 
+		DArray<Box3D> boxInGlobal;
+		DArray<Sphere3D> sphereInGlobal;
+		DArray<Tet3D> tetInGlobal;
+		DArray<Capsule3D> capsuleInGlobal;
+
+		discreteSet->requestDiscreteElementsInGlobal(boxInGlobal, sphereInGlobal, tetInGlobal, capsuleInGlobal);
+
 		ElementOffset offset = discreteSet->calculateElementOffset();
 
 		mBoundaryContactCounter.resize(discreteSet->totalSize());
@@ -659,10 +666,10 @@ namespace dyno
 		{
 			cuExecute(totalSize,
 				CountContactsWithBoundary,
-				discreteSet->getSpheres(),
-				discreteSet->getBoxes(),
-				discreteSet->getTets(),
-				discreteSet->getCaps(),
+				sphereInGlobal,
+				boxInGlobal,
+				tetInGlobal,
+				capsuleInGlobal,
 				mBoundaryContactCounter,
 				upperBound,
 				lowerBound,
@@ -676,10 +683,10 @@ namespace dyno
 			if (sum > 0) {
 				cuExecute(totalSize,
 					SetupContactsWithBoundary,
-					discreteSet->getSpheres(),
-					discreteSet->getBoxes(),
-					discreteSet->getTets(),
-					discreteSet->getCaps(),
+					sphereInGlobal,
+					boxInGlobal,
+					tetInGlobal,
+					capsuleInGlobal,
 					mBoundaryContactCounter,
 					this->outContacts()->getData(),
 					upperBound,
@@ -689,6 +696,11 @@ namespace dyno
 		}
 		else
 			this->outContacts()->resize(0);
+
+		boxInGlobal.clear();
+		sphereInGlobal.clear();
+		tetInGlobal.clear();
+		capsuleInGlobal.clear();
 	}
 
 	DEFINE_CLASS(CollistionDetectionBoundingBox);
