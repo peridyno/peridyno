@@ -505,7 +505,10 @@ namespace dyno
 			topo->pointJoints(),
 			eleOffset);
 
-		updateTopology();
+		//updateTopology();
+
+		topo->setPosition(this->stateCenter()->constData());
+		topo->setRotation(this->stateRotationMatrix()->constData());
 	}
 	
 	template <typename Real, typename Coord>
@@ -584,7 +587,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void RigidBodySystem<TDataType>::updateTopology()
+	void RigidBodySystem<TDataType>::postUpdateStates()
 	{
 		auto discreteSet = TypeInfo::cast<DiscreteElements<DataType3f>>(this->stateTopology()->getDataPtr());
 

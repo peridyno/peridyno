@@ -140,7 +140,7 @@ namespace dyno
 	protected:
 		void resetStates() override;
 
-		void updateTopology() override;
+		void postUpdateStates() override;
 
 		void clearRigidBodySystem();
 

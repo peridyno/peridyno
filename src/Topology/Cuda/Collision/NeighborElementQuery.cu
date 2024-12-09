@@ -540,7 +540,10 @@ namespace dyno
 		mBroadPhaseCD->update();
 
 		auto& contactList = mBroadPhaseCD->outContactList()->getData();
-		if (contactList.size() == 0) return;
+		if (contactList.elementSize() == 0) {
+
+			return;
+		}
 
 		DArray<int> count(contactList.size());
 		cuExecute(contactList.size(),
