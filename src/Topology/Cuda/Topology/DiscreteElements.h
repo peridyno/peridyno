@@ -2,6 +2,8 @@
 #include "Module/TopologyModule.h"
 #include "Primitive/Primitive3D.h"
 
+#include "STL/Pair.h"
+
 namespace dyno
 {
 	enum ElementType
@@ -11,6 +13,7 @@ namespace dyno
 		ET_CAPSULE = 4,
 		ET_SPHERE = 8,
 		ET_TRI = 16,
+		ET_COMPOUND = 32,
 		ET_Other = 0x80000000
 	};
 
@@ -532,6 +535,8 @@ namespace dyno
 		DArray<Capsule3D>&	getCaps() { return m_caps; }
 		DArray<Triangle3D>& getTris() { return m_tris; }
 
+		DArray<Pair<uint, uint>>& shape2RigidBodyMapping() { return mShape2RigidBody; };
+
 		DArray<Coord>& position() { return mPosition; }
 		DArray<Matrix>& rotation() { return mRotation; }
 
@@ -580,6 +585,8 @@ namespace dyno
 		DArray<PointJoint> mPointJoints;
 		DArray<DistanceJoint> mDistanceJoints;
 
+		DArray<Pair<uint, uint>> mShape2RigidBody;
+
 		DArray<Coord> mPosition;
 		DArray<Matrix> mRotation;
 
@@ -587,55 +594,5 @@ namespace dyno
 		DArray<int> m_tet_body_mapping;
 		DArray<TopologyModule::Tetrahedron> m_tet_element_id;
 	};
-
-	// Some useful tools to to do transformation for discrete element
-
-	template<typename Real>
-	DYN_FUNC TOrientedBox3D<Real> local2Global(const TOrientedBox3D<Real>& box, const Vector<Real, 3>& t, const SquareMatrix<Real, 3>& r)
-	{
-		TOrientedBox3D<Real> ret;
-		ret.center = t + box.center;
-		ret.u = r * box.u;
-		ret.v = r * box.v;
-		ret.w = r * box.w;
-		ret.extent = box.extent;
-
-		return ret;
-	}
-
-	template<typename Real>
-	DYN_FUNC TSphere3D<Real> local2Global(const TSphere3D<Real>& sphere, const Vector<Real, 3>& t, const SquareMatrix<Real, 3>& r)
-	{
-		TSphere3D<Real> ret;
-		ret.center = t + sphere.center;
-		ret.radius = sphere.radius;
-		ret.rotation = Quat<Real>(r * sphere.rotation.toMatrix3x3());
-
-		return ret;
-	}
-
-	template<typename Real>
-	DYN_FUNC TCapsule3D<Real> local2Global(const TCapsule3D<Real>& capsule, const Vector<Real, 3>& t, const SquareMatrix<Real, 3>& r)
-	{
-		TCapsule3D<Real> ret;
-		ret.center = t + capsule.center;
-		ret.radius = capsule.radius;
-		ret.halfLength = capsule.halfLength;
-		ret.rotation = Quat<Real>(r * capsule.rotation.toMatrix3x3());
-
-		return ret;
-	}
-
-	template<typename Real>
-	DYN_FUNC TTet3D<Real> local2Global(const TTet3D<Real>& tet, const Vector<Real, 3>& t, const SquareMatrix<Real, 3>& r)
-	{
-		TTet3D<Real> ret;
-		ret.v[0] = t + r * tet.v[0];
-		ret.v[1] = t + r * tet.v[1];
-		ret.v[2] = t + r * tet.v[2];
-		ret.v[3] = t + r * tet.v[3];
-
-		return ret;
-	}
 }
 

@@ -146,6 +146,7 @@ namespace dyno
 		DArray<Capsule3D> caps,
 		DArray<Triangle3D> triangles,
 		DArray<Attribute> attribute,
+		DArray<Pair<uint, uint>> shape2RigidBodyMapping,
 		ElementOffset elementOffset,
 		Real dHat,
 		bool enableSelfCollision,
@@ -421,8 +422,8 @@ namespace dyno
 			cp.pos2 = manifold.contacts[n].position;
 			cp.normal1 = -manifold.normal;
 			cp.normal2 = manifold.normal;
-			cp.bodyId1 = ids.bodyId1;
-			cp.bodyId2 = ids.bodyId2;
+			cp.bodyId1 = ids.bodyId1 == INVALID ? ids.bodyId1 : shape2RigidBodyMapping[ids.bodyId1].second;
+			cp.bodyId2 = ids.bodyId2 == INVALID ? ids.bodyId2 : shape2RigidBodyMapping[ids.bodyId2].second;
 			cp.contactType = ContactType::CT_NONPENETRATION;
 			//cp.interpenetration = -manifold.contacts[n].penetration - 2 * dHat;
 			cp.interpenetration = -manifold.contacts[n].penetration;
@@ -604,6 +605,7 @@ namespace dyno
 					capsuleInGlobal,
 					inTopo->getTris(),
 					this->inAttribute()->getData(),
+					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
 					dHat,
 					false,
@@ -627,6 +629,7 @@ namespace dyno
 					capsuleInGlobal,
 					inTopo->getTris(),
 					dummyAttribute,
+					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
 					dHat,
 					true,
@@ -653,6 +656,7 @@ namespace dyno
 					capsuleInGlobal,
 					inTopo->getTris(),
 					this->inAttribute()->getData(),
+					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
 					dHat,
 					false,
@@ -676,6 +680,7 @@ namespace dyno
 					capsuleInGlobal,
 					inTopo->getTris(),
 					dummyAttribute,
+					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
 					dHat,
 					true,

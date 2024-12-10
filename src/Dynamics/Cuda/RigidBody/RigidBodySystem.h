@@ -73,7 +73,27 @@ namespace dyno
 			const RigidBodyInfo& bodyDef,
 			const Real density = Real(100));
 
+		std::shared_ptr<PdActor> createRigidBody(
+			const Coord& p,
+			const TQuat& q);
 
+		std::shared_ptr<PdActor> createRigidBody(
+			const RigidBodyInfo& bodyDef);
+
+		void bindBox(
+			const std::shared_ptr<PdActor> actor,
+			const BoxInfo& box,
+			const Real density = Real(100));
+
+		void bindSphere(
+			const std::shared_ptr<PdActor> actor,
+			const SphereInfo& sphere,
+			const Real density = Real(100));
+
+		void bindCapsule(
+			const std::shared_ptr<PdActor> actor,
+			const CapsuleInfo& capsule,
+			const Real density = Real(100));
 
 		BallAndSocketJoint& createBallAndSocketJoint(
 			std::shared_ptr<PdActor> actor1,
@@ -198,6 +218,8 @@ namespace dyno
 		DEF_ARRAY_STATE(Matrix, InitialInertia, DeviceType::GPU, "Initial inertia matrix");
 
 	private:
+		void setupShape2RigidBodyMapping();
+
 		std::vector<RigidBodyInfo> mHostRigidBodyStates;
 
 		std::vector<SphereInfo> mHostSpheres;
@@ -217,6 +239,8 @@ namespace dyno
 		std::vector<HingeJoint> mHostJointsHinge;
 		std::vector<FixedJoint> mHostJointsFixed;
 		std::vector<PointJoint> mHostJointsPoint;
+
+		std::vector<Pair<uint, uint>> mHostShape2RigidBodyMapping;
 
 	public:
 		int m_numOfSamples;

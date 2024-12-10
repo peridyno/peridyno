@@ -139,6 +139,56 @@ namespace dyno
 		m_tet_element_id.assign(de.m_tet_element_id);
 	}
 
+	// Some useful tools to to do transformation for discrete element
+
+	template<typename Real>
+	DYN_FUNC TOrientedBox3D<Real> local2Global(const TOrientedBox3D<Real>& box, const Vector<Real, 3>& t, const SquareMatrix<Real, 3>& r)
+	{
+		TOrientedBox3D<Real> ret;
+		ret.center = t + r * box.center;
+		ret.u = r * box.u;
+		ret.v = r * box.v;
+		ret.w = r * box.w;
+		ret.extent = box.extent;
+
+		return ret;
+	}
+
+	template<typename Real>
+	DYN_FUNC TSphere3D<Real> local2Global(const TSphere3D<Real>& sphere, const Vector<Real, 3>& t, const SquareMatrix<Real, 3>& r)
+	{
+		TSphere3D<Real> ret;
+		ret.center = t + r * sphere.center;
+		ret.radius = sphere.radius;
+		ret.rotation = Quat<Real>(r * sphere.rotation.toMatrix3x3());
+
+		return ret;
+	}
+
+	template<typename Real>
+	DYN_FUNC TCapsule3D<Real> local2Global(const TCapsule3D<Real>& capsule, const Vector<Real, 3>& t, const SquareMatrix<Real, 3>& r)
+	{
+		TCapsule3D<Real> ret;
+		ret.center = t + r * capsule.center;
+		ret.radius = capsule.radius;
+		ret.halfLength = capsule.halfLength;
+		ret.rotation = Quat<Real>(r * capsule.rotation.toMatrix3x3());
+
+		return ret;
+	}
+
+	template<typename Real>
+	DYN_FUNC TTet3D<Real> local2Global(const TTet3D<Real>& tet, const Vector<Real, 3>& t, const SquareMatrix<Real, 3>& r)
+	{
+		TTet3D<Real> ret;
+		ret.v[0] = t + r * tet.v[0];
+		ret.v[1] = t + r * tet.v[1];
+		ret.v[2] = t + r * tet.v[2];
+		ret.v[3] = t + r * tet.v[3];
+
+		return ret;
+	}
+
 	template<typename Coord, typename Matrix, typename Box3D>
 	__global__ void DE_Local2Global(
 		DArray<Box3D> boxInGlobal,
@@ -151,6 +201,7 @@ namespace dyno
 		DArray<Capsule3D> capInLocal,
 		DArray<Coord> positionGlobal,
 		DArray<Matrix> rotationGlobal,
+		DArray<Pair<uint, uint>> mapping,
 		ElementOffset elementOffset)
 	{
 		uint tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -158,8 +209,10 @@ namespace dyno
 
 		ElementType eleType = elementOffset.checkElementType(tId);
 
-		Coord t = positionGlobal[tId];
-		Matrix r = rotationGlobal[tId];
+		uint rigidbodyId = mapping[tId].second;
+
+		Coord t = positionGlobal[rigidbodyId];
+		Matrix r = rotationGlobal[rigidbodyId];
 
 		switch (eleType)
 		{
@@ -221,6 +274,7 @@ namespace dyno
 			this->getCaps(),
 			mPosition,
 			mRotation,
+			this->shape2RigidBodyMapping(),
 			elementOffset);
 	}
 
@@ -230,13 +284,16 @@ namespace dyno
 		DArray<Box3D> boxInLocal,
 		DArray<Coord> positionGlobal,
 		DArray<Matrix> rotationGlobal,
+		DArray<Pair<uint, uint>> mapping,
 		uint offset)
 	{
 		uint tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= boxInLocal.size()) return;
 
-		Coord t = positionGlobal[tId + offset];
-		Matrix r = rotationGlobal[tId + offset];
+		uint rigidbodyId = mapping[tId + offset].second;
+
+		Coord t = positionGlobal[rigidbodyId];
+		Matrix r = rotationGlobal[rigidbodyId];
 
 		boxInGlobal[tId] = local2Global(boxInLocal[tId], t, r);
 	}
@@ -247,13 +304,16 @@ namespace dyno
 		DArray<Sphere3D> sphereInLocal,
 		DArray<Coord> positionGlobal,
 		DArray<Matrix> rotationGlobal,
+		DArray<Pair<uint, uint>> mapping,
 		uint offset)
 	{
 		uint tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= sphereInLocal.size()) return;
 
-		Coord t = positionGlobal[tId + offset];
-		Matrix r = rotationGlobal[tId + offset];
+		uint rigidbodyId = mapping[tId + offset].second;
+
+		Coord t = positionGlobal[rigidbodyId];
+		Matrix r = rotationGlobal[rigidbodyId];
 
 		sphereInGlobal[tId] = local2Global(sphereInLocal[tId], t, r);
 	}
@@ -264,13 +324,16 @@ namespace dyno
 		DArray<Tet3D> tetInLocal,
 		DArray<Coord> positionGlobal,
 		DArray<Matrix> rotationGlobal,
+		DArray<Pair<uint, uint>> mapping,
 		uint offset)
 	{
 		uint tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= tetInLocal.size()) return;
 
-		Coord t = positionGlobal[tId + offset];
-		Matrix r = rotationGlobal[tId + offset];
+		uint rigidbodyId = mapping[tId + offset].second;
+
+		Coord t = positionGlobal[rigidbodyId];
+		Matrix r = rotationGlobal[rigidbodyId];
 
 		tetInGlobal[tId] = local2Global(tetInLocal[tId], t, r);
 	}
@@ -281,13 +344,16 @@ namespace dyno
 		DArray<Capsule3D> capInLocal,
 		DArray<Coord> positionGlobal,
 		DArray<Matrix> rotationGlobal,
+		DArray<Pair<uint, uint>> mapping,
 		uint offset)
 	{
 		uint tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= capInLocal.size()) return;
 
-		Coord t = positionGlobal[tId + offset];
-		Matrix r = rotationGlobal[tId + offset];
+		uint rigidbodyId = mapping[tId + offset].second;
+
+		Coord t = positionGlobal[rigidbodyId];
+		Matrix r = rotationGlobal[rigidbodyId];
 
 		capInGlobal[tId] = local2Global(capInLocal[tId], t, r);
 	}
@@ -305,6 +371,7 @@ namespace dyno
 			this->getCaps(),
 			mPosition,
 			mRotation,
+			this->shape2RigidBodyMapping(),
 			elementOffset.capsuleIndex());
 	}
 
@@ -321,6 +388,7 @@ namespace dyno
 			this->getTets(),
 			mPosition,
 			mRotation,
+			this->shape2RigidBodyMapping(),
 			elementOffset.tetIndex());
 	}
 
@@ -337,6 +405,7 @@ namespace dyno
 			this->getSpheres(),
 			mPosition,
 			mRotation,
+			this->shape2RigidBodyMapping(),
 			elementOffset.sphereIndex());
 	}
 
@@ -353,6 +422,7 @@ namespace dyno
 			this->getBoxes(),
 			mPosition,
 			mRotation,
+			this->shape2RigidBodyMapping(),
 			elementOffset.boxIndex());
 	}
 

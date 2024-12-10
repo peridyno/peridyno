@@ -16,8 +16,6 @@ namespace dyno
 	__global__ void SetupCubeInstances(
 		DArray<Vec3f> vertices,
 		DArray<Triangle> indices,
-		DArray<Vec3f> centers,
-		DArray<Mat3f> rotations,
 		DArray<Box3D> boxes,
 		uint pointOffset,
 		uint indexOffset,
@@ -49,20 +47,14 @@ namespace dyno
 		Vec3f v6 = c + hx + hyz;
 		Vec3f v7 = c - hx + hyz;
 
-		// Rigid body center
-		Vec3f rc = centers[tId + cubeOffset];
-
-		// Rigid body rotation
-		Mat3f R = rotations[tId + cubeOffset];
-
-		vertices[pointOffset + idx * 8] = rc + R * v0;
-		vertices[pointOffset + idx * 8 + 1] = rc + R * v1;
-		vertices[pointOffset + idx * 8 + 2] = rc + R * v2;
-		vertices[pointOffset + idx * 8 + 3] = rc + R * v3;
-		vertices[pointOffset + idx * 8 + 4] = rc + R * v4;
-		vertices[pointOffset + idx * 8 + 5] = rc + R * v5;
-		vertices[pointOffset + idx * 8 + 6] = rc + R * v6;
-		vertices[pointOffset + idx * 8 + 7] = rc + R * v7;
+		vertices[pointOffset + idx * 8] = v0;
+		vertices[pointOffset + idx * 8 + 1] = v1;
+		vertices[pointOffset + idx * 8 + 2] = v2;
+		vertices[pointOffset + idx * 8 + 3] = v3;
+		vertices[pointOffset + idx * 8 + 4] = v4;
+		vertices[pointOffset + idx * 8 + 5] = v5;
+		vertices[pointOffset + idx * 8 + 6] = v6;
+		vertices[pointOffset + idx * 8 + 7] = v7;
 
 		uint offset = idx * 8 + pointOffset;
 
@@ -89,8 +81,6 @@ namespace dyno
 	__global__ void SetupTetInstances(
 		DArray<Vec3f> vertices,
 		DArray<Triangle> indices,
-		DArray<Vec3f> centers,
-		DArray<Mat3f> rotations,
 		DArray<Tet3D> tets,
 		uint pointOffset,
 		uint indexOffset,
@@ -107,16 +97,10 @@ namespace dyno
 		Vec3f v2 = tet.v[2];
 		Vec3f v3 = tet.v[3];
 
-		// Rigid body center
-		Vec3f rc = centers[tId + tetOffset];
-
-		// Rigid body rotation
-		Mat3f R = rotations[tId + tetOffset];
-
-		vertices[pointOffset + idx * 4] = rc + R * v0;
-		vertices[pointOffset + idx * 4 + 1] = rc + R * v1;
-		vertices[pointOffset + idx * 4 + 2] = rc + R * v2;
-		vertices[pointOffset + idx * 4 + 3] = rc + R * v3;
+		vertices[pointOffset + idx * 4] = v0;
+		vertices[pointOffset + idx * 4 + 1] = v1;
+		vertices[pointOffset + idx * 4 + 2] = v2;
+		vertices[pointOffset + idx * 4 + 3] = v3;
 
 		uint offset = idx * 4 + pointOffset;
 
@@ -128,8 +112,6 @@ namespace dyno
 
 	__global__ void SetupVerticesForSphereInstances(
 		DArray<Vec3f> vertices,
-		DArray<Vec3f> centers,
-		DArray<Mat3f> rotations,
 		DArray<Vec3f> sphereVertices,
 		DArray<Sphere3D> sphereInstances,
 		uint pointOffset,
@@ -143,14 +125,8 @@ namespace dyno
 
 		Sphere3D sphere = sphereInstances[instanceId];
 
-		// Rigid body center
-		Vec3f rc = centers[instanceId + sphereOffset];
-
-		// Rigid body rotation
-		Mat3f R = rotations[instanceId + sphereOffset];
-
 		Vec3f v = sphereVertices[vertexId];
-		vertices[pointOffset + tId] = rc + R * (sphere.center + sphere.radius * sphere.rotation.rotate(v));
+		vertices[pointOffset + tId] = sphere.center + sphere.radius * sphere.rotation.rotate(v);
 	}
 
 	template<typename Triangle>
@@ -175,8 +151,6 @@ namespace dyno
 
 	__global__ void SetupVerticesForCapsuleInstances(
 		DArray<Vec3f> vertices,
-		DArray<Vec3f> centers,
-		DArray<Mat3f> rotations,
 		DArray<Vec3f> capsuleVertices,
 		DArray<Capsule3D> capsuleInstances,
 		uint pointOffset,
@@ -198,23 +172,17 @@ namespace dyno
 		Vec3f orignZ = Vec3f(0, 1, 0);
 		Vec3f newZ = Vec3f(0, h, 0);
 
-		// Rigid body center
-		Vec3f rc = centers[instanceId + capsuleOffset];
-
-		// Rigid body rotation
-		Mat3f R = rotations[instanceId + capsuleOffset];
-
 		if (v.y >= 1) // 上半球
 		{
-			vertices[pointOffset + tId] = rc + R * (rot * ((v - orignZ) * r + newZ) + center);
+			vertices[pointOffset + tId] = rot * ((v - orignZ) * r + newZ) + center;
 		}
 		else if (v.y <= -1) // 下半球
 		{
-			vertices[pointOffset + tId] = rc + R * (rot * ((v + orignZ) * r - newZ) + center);
+			vertices[pointOffset + tId] = rot * ((v + orignZ) * r - newZ) + center;
 		}
 		else // 圆柱
 		{
-			vertices[pointOffset + tId] = rc + R * (rot * (v * Vec3f(r, h, r)) + center);
+			vertices[pointOffset + tId] = rot * (v * Vec3f(r, h, r)) + center;
 		}	
 	}
 
@@ -249,23 +217,19 @@ namespace dyno
 
 		auto inTopo = this->inDiscreteElements()->constDataPtr();
 
-		auto& position = inTopo->position();
-		auto& rotation = inTopo->rotation();
+		DArray<Box3D> boxInGlobal;
+		DArray<Sphere3D> sphereInGlobal;
+		DArray<Tet3D> tetInGlobal;
+		DArray<Capsule3D> capsuleInGlobal;
 
-		//printf("====================================================== inside box update\n");
-		auto& sphereInstances = inTopo->getSpheres();
-		auto& capsuleInstances = inTopo->getCaps();
-		auto& boxes = inTopo->getBoxes();
-		auto& tets = inTopo->getTets();
-		auto& tris = inTopo->getTris();
-		// TODO : caps
+		inTopo->requestDiscreteElementsInGlobal(boxInGlobal, sphereInGlobal, tetInGlobal, capsuleInGlobal);
 
 		ElementOffset elementOffset = inTopo->calculateElementOffset();
 
-		int numOfSpheres = sphereInstances.size();
-		int numofCaps = capsuleInstances.size();
-		int numOfBoxes = boxes.size();
-		int numOfTets = tets.size();
+		int numOfSpheres = sphereInGlobal.size();
+		int numofCaps = capsuleInGlobal.size();
+		int numOfBoxes = boxInGlobal.size();
+		int numOfTets = tetInGlobal.size();
 		
 		auto triSet = this->outTriangleSet()->getDataPtr();
 
@@ -291,10 +255,8 @@ namespace dyno
 		cuExecute(numOfSpheres * sphereVertices.size(),
 			SetupVerticesForSphereInstances,
 			vertices,
-			position,
-			rotation,
 			sphereVertices,
-			sphereInstances,
+			sphereInGlobal,
 			vertexOffset,
 			elementOffset.sphereIndex());
 
@@ -302,7 +264,7 @@ namespace dyno
 			SetupIndicesForSphereInstances,
 			indices,
 			sphereIndices,
-			sphereInstances,
+			sphereInGlobal,
 			sphereVertices.size(),
 			indexOffset);
 
@@ -314,24 +276,20 @@ namespace dyno
 			SetupCubeInstances,
 			vertices,
 			indices,
-			position,
-			rotation,
-			boxes,
+			boxInGlobal,
 			vertexOffset,
 			indexOffset,
 			elementOffset.boxIndex());
 
-		vertexOffset += boxes.size() * 8;
-		indexOffset += boxes.size() * 12;
+		vertexOffset += numOfBoxes * 8;
+		indexOffset += numOfBoxes * 12;
 
 		//Setup tets
 		cuExecute(numOfTets,
 			SetupTetInstances,
 			vertices,
 			indices,
-			position,
-			rotation,
-			tets,
+			tetInGlobal,
 			vertexOffset,
 			indexOffset,
 			elementOffset.tetIndex());
@@ -342,10 +300,8 @@ namespace dyno
 		cuExecute(numofCaps * capsuleVertices.size(),
 			SetupVerticesForCapsuleInstances,
 			vertices,
-			position,
-			rotation,
 			capsuleVertices,
-			capsuleInstances,
+			capsuleInGlobal,
 			vertexOffset,
 			elementOffset.capsuleIndex());
 
@@ -353,7 +309,7 @@ namespace dyno
 			SetupIndicesForCapsuleInstances,
 			indices,
 			capsuleIndices,
-			capsuleInstances,
+			capsuleInGlobal,
 			capsuleVertices.size(),
 			vertexOffset,
 			indexOffset);
@@ -362,6 +318,11 @@ namespace dyno
 		indexOffset += numofCaps * capsuleIndices.size();
 
 		this->outTriangleSet()->getDataPtr()->update();
+
+		boxInGlobal.clear();
+		sphereInGlobal.clear();
+		tetInGlobal.clear();
+		capsuleInGlobal.clear();
 
 		return true;
 	}

@@ -91,6 +91,7 @@ namespace dyno
 		DArray<Coord> vertices,		//triangle vertices
 		DArray<TopologyModule::Triangle> indices,	//triangle indices
 		DArrayList<int> contactListBroadPhase,
+		DArray<Pair<uint, uint>> mapping,
 		ElementOffset elementOffset)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -212,7 +213,7 @@ namespace dyno
 			if (intersected)
 			{
 				ContactPair contact;
-				contact.bodyId1 = tId;
+				contact.bodyId1 = mapping[tId].second;
 				contact.bodyId2 = -1;
 				contact.normal1 = normal_min;
 				contact.pos1 = proj_min + normal_min * d_min;
@@ -314,6 +315,7 @@ namespace dyno
 			vertices,
 			indices,
 			contactList,
+			de->shape2RigidBodyMapping(),
 			elementOffset);
 
 		mBoundaryContactCpy.assign(mBoundaryContactCounter);
