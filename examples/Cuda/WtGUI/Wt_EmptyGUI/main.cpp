@@ -27,33 +27,32 @@ std::shared_ptr<SceneGraph> createScene()
 
 	//Create a particle-based fluid solver
 	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
-	fluid->loadParticles(Vec3f(0.0f), Vec3f(0.2f), 0.005f);
-	/*emitter->connect(fluid->importParticleEmitters());
+	//fluid->loadParticles(Vec3f(0.0f), Vec3f(0.2f), 0.005f);
+	//emitter->connect(fluid->importParticleEmitters());
 
-	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
-	auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
-	colorMapper->varMax()->setValue(5.0f);
+	//auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
+	//auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
+	//colorMapper->varMax()->setValue(5.0f);
 
-	auto ptRender = std::make_shared<GLPointVisualModule>();
-	ptRender->setColor(Color(1, 0, 0));
-	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
+	//auto ptRender = std::make_shared<GLPointVisualModule>();
+	//ptRender->setColor(Color(1, 0, 0));
+	//ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 
-	fluid->stateVelocity()->connect(calculateNorm->inVec());
-	fluid->statePointSet()->connect(ptRender->inPointSet());
-	calculateNorm->outNorm()->connect(colorMapper->inScalar());
-	colorMapper->outColor()->connect(ptRender->inColor());
+	//fluid->stateVelocity()->connect(calculateNorm->inVec());
+	//fluid->statePointSet()->connect(ptRender->inPointSet());
+	//calculateNorm->outNorm()->connect(colorMapper->inScalar());
+	//colorMapper->outColor()->connect(ptRender->inColor());
 
-	fluid->graphicsPipeline()->pushModule(calculateNorm);
-	fluid->graphicsPipeline()->pushModule(colorMapper);
-	fluid->graphicsPipeline()->pushModule(ptRender);
+	//fluid->graphicsPipeline()->pushModule(calculateNorm);
+	//fluid->graphicsPipeline()->pushModule(colorMapper);
+	//fluid->graphicsPipeline()->pushModule(ptRender);
 
 	//Create a container
-	auto container = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
-	container->loadCube(Vec3f(0.0f), Vec3f(1.0), 0.02, true);
+	//auto container = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
+	//container->loadCube(Vec3f(0.0f), Vec3f(1.0), 0.02, true);
 
-	fluid->connect(container->importParticleSystems());
+	//fluid->connect(container->importParticleSystems());
 
-	return scn;*/
 	return scn;
 }
 

@@ -1,10 +1,13 @@
 #include "WtInteraction.h"
 
-WtInteraction::WtInteraction(WtNode& node, WtConnection& connection, WtFlowScene& scene, connectionPointData inPoint)
+WtInteraction::WtInteraction(WtNode& node, WtConnection& connection, WtFlowScene& scene, connectionPointData inPoint, connectionPointData outPoint, std::shared_ptr<Node> inNode, std::shared_ptr<Node> outNode)
 	: _node(&node)
 	, _connection(&connection)
 	, _scene(&scene)
 	, _inPoint(inPoint)
+	, _outPoint(outPoint)
+	, _inNode(inNode)
+	, _outNode(outNode)
 
 {}
 
@@ -44,8 +47,7 @@ bool WtInteraction::canConnect(PortIndex& portIndex, TypeConverter& converter)
 		return false;
 
 	// 4) WtConnection type equals node port type, or there is a registered type conversion that can translate between the two
-	auto connectionDataType =
-		_connection->dataType(oppositePort(requiredPort));
+	auto connectionDataType = _connection->dataType(oppositePort(requiredPort));
 
 	auto const& modelTarget = _node->nodeDataModel();
 	NodeDataType candidateNodeDataType = modelTarget->dataType(requiredPort, portIndex);
@@ -98,8 +100,12 @@ bool WtInteraction::tryConnect()
 	auto outNode = _connection->getNode(PortType::Out);
 	if (outNode)
 	{
-		PortIndex outPortIndex = _connection->getPortIndex(PortType::Out);
-		outNode->onDataUpdated(outPortIndex);
+		//PortIndex outPortIndex = _connection->getPortIndex(PortType::Out);
+		//outNode->onDataUpdated(outPortIndex);
+
+
+		setInData(_inPoint.portIndex);
+
 	}
 
 	return true;
@@ -129,5 +135,25 @@ bool WtInteraction::isNodePortAccessible(PortType portType, PortIndex portIndex)
 	{
 		const auto inPolicy = _node->nodeDataModel()->portInConnectionPolicy(portIndex);
 		return inPolicy == WtNodeDataModel::ConnectionPolicy::Many;
+	}
+}
+
+
+void WtInteraction::setInData(PortIndex portIndex)
+{
+	// error
+	if (_inPoint.portShape == PortShape::Diamond || _inPoint.portShape == PortShape::Bullet)
+	{
+		_outNode->connect(_inNode->getImportNodes()[portIndex]);
+	}
+	else if (_inPoint.portShape == PortShape::Point)
+	{
+		auto field = _outNode->getOutputFields()[_outPoint.portIndex];
+
+		if (field != NULL)
+		{
+			auto inField = _inNode->getInputFields()[_inPoint.portIndex];
+			field->connect(inField);
+		}
 	}
 }

@@ -33,6 +33,15 @@ void WtFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 		if (checkMouseInPoints(mLastMousePos, nodeMap[selectedNum]->flowNodeData(), PortState::out))
 		{
 			drawLineFlag = true;
+			for (auto it = mScene->begin(); it != mScene->end(); it++)
+			{
+				auto m = it.get();
+				if (m->objectId() == selectedNum)
+				{
+					mOutNode = m;
+				}
+			}
+
 		}
 	}
 }
@@ -138,10 +147,11 @@ void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 				std::cout << "node data" << std::endl;
 				auto connectionInNoed = node;
 				WtConnection connection(outPoint.portType, *connectionOutNode, outPoint.portIndex);
-				WtInteraction interaction(*connectionInNoed, connection, *node_scene, inPoint);
+				WtInteraction interaction(*connectionInNoed, connection, *node_scene, inPoint, outPoint, m, mOutNode);
 				if (interaction.tryConnect())
 				{
-					std::cout << "connection success" << std::endl;
+
+					updateForAddNode();
 				}
 			}
 		}

@@ -12,7 +12,7 @@ class WtNodeDataModel;
 class WtInteraction
 {
 public:
-	WtInteraction(WtNode& node, WtConnection& connection, WtFlowScene& scene, connectionPointData inPoint);
+	WtInteraction(WtNode& node, WtConnection& connection, WtFlowScene& scene, connectionPointData inPoint, connectionPointData outPoint, std::shared_ptr<Node> inNode, std::shared_ptr<Node> outNode);
 
 	bool canConnect(PortIndex& portIndex, TypeConverter& converter);
 
@@ -26,6 +26,8 @@ private:
 
 	bool isNodePortAccessible(PortType portType, PortIndex portIndex) const;
 
+	void setInData(PortIndex portIndex);
+
 private:
 
 	WtNode* _node;
@@ -35,4 +37,10 @@ private:
 	WtFlowScene* _scene;
 
 	connectionPointData _inPoint;
+
+	connectionPointData _outPoint;
+
+	std::shared_ptr<Node> _inNode;
+
+	std::shared_ptr<Node> _outNode;
 };

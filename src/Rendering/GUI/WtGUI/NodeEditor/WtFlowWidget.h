@@ -89,5 +89,7 @@ private:
 	std::map<dyno::ObjectId, WtNode*> nodeMap;
 	WtNode* connectionOutNode;
 
+	std::shared_ptr<Node> mOutNode;
+
 	Wt::WPointF mMousePoint = Wt::WPointF(0, 0);
 };
