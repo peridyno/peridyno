@@ -159,15 +159,24 @@ namespace dyno
 		ElementType eleType_i = elementOffset.checkElementType(ids.bodyId1);
 		ElementType eleType_j = elementOffset.checkElementType(ids.bodyId2);
 
-		CollisionMask mask_i = enableCollisionMask ? mask[ids.bodyId1] : CollisionMask::CT_AllObjects;
-		CollisionMask mask_j = enableCollisionMask ? mask[ids.bodyId2] : CollisionMask::CT_AllObjects;
-
 		TManifold<Real> manifold;
+
+		// Convert primitive id into rigid body id
+		int mappedId1 = ids.bodyId1 == INVALID ? ids.bodyId1 : shape2RigidBodyMapping[ids.bodyId1].second;
+		int mappedId2 = ids.bodyId2 == INVALID ? ids.bodyId2 : shape2RigidBodyMapping[ids.bodyId2].second;
+
+		// TODO: check whether it is plausible to define collision mask on rigid bodies
+		CollisionMask mask_i = enableCollisionMask ? mask[mappedId1] : CollisionMask::CT_AllObjects;
+		CollisionMask mask_j = enableCollisionMask ? mask[mappedId2] : CollisionMask::CT_AllObjects;
+
+		// If two primitives belong to the same rigid body, disable collision detection
+		if (mappedId1 == mappedId2)
+			return;
 
 		if (!enableSelfCollision)
 		{
-			Attribute att_i = attribute[ids.bodyId1];
-			Attribute att_j = attribute[ids.bodyId2];
+			Attribute att_i = attribute[mappedId1];
+			Attribute att_j = attribute[mappedId2];
 
 			if (att_i.objectId() == att_j.objectId())
 				return;
@@ -412,6 +421,8 @@ namespace dyno
 		
 		count[tId] = manifold.contactCount;
 
+		//printf("%d %d; num: %d \n", mappedId1, mappedId2, manifold.contactCount);
+
 		int offset = 8 * tId;
 		for (int n = 0; n < manifold.contactCount; n++)
 		{
@@ -422,8 +433,8 @@ namespace dyno
 			cp.pos2 = manifold.contacts[n].position;
 			cp.normal1 = -manifold.normal;
 			cp.normal2 = manifold.normal;
-			cp.bodyId1 = ids.bodyId1 == INVALID ? ids.bodyId1 : shape2RigidBodyMapping[ids.bodyId1].second;
-			cp.bodyId2 = ids.bodyId2 == INVALID ? ids.bodyId2 : shape2RigidBodyMapping[ids.bodyId2].second;
+			cp.bodyId1 = mappedId1;
+			cp.bodyId2 = mappedId2;
 			cp.contactType = ContactType::CT_NONPENETRATION;
 			//cp.interpenetration = -manifold.contacts[n].penetration - 2 * dHat;
 			cp.interpenetration = -manifold.contacts[n].penetration;
@@ -491,6 +502,8 @@ namespace dyno
 		if (this->outContacts()->isEmpty())
 			this->outContacts()->allocate();
 
+		this->outContacts()->clear();
+
 		int t_num = inTopo->totalSize();
 
 		if (t_num == 0)
@@ -542,6 +555,11 @@ namespace dyno
 
 		auto& contactList = mBroadPhaseCD->outContactList()->getData();
 		if (contactList.elementSize() == 0) {
+
+			boxInGlobal.clear();
+			sphereInGlobal.clear();
+			tetInGlobal.clear();
+			capsuleInGlobal.clear();
 
 			return;
 		}

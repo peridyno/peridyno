@@ -45,7 +45,7 @@ namespace dyno
 
 		this->animationPipeline()->pushModule(merge);
 
-		auto iterSolver = std::make_shared<PJSoftConstraintSolver<TDataType>>();
+		auto iterSolver = std::make_shared<PJSConstraintSolver<TDataType>>();
 		this->stateTimeStep()->connect(iterSolver->inTimeStep());
 		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
 		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
@@ -203,13 +203,13 @@ namespace dyno
 		bd.mass = 0.0f;
 		bd.shapeType = ET_COMPOUND;
 
-		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin(), bd);
+		mHostRigidBodyStates.push_back(bd);
 
 		std::shared_ptr<PdActor> actor = std::make_shared<PdActor>();
 		actor->idx = mHostRigidBodyStates.size() - 1;
 		actor->shapeType = ET_COMPOUND;
 		actor->center = bd.position;
-		actor->rot = Quat<Real>();
+		actor->rot = bd.angle;
 
 		return actor;
 	}
@@ -244,8 +244,8 @@ namespace dyno
 		rigidbody.inertia += rigidbodyInertia;
 		rigidbody.shapeType = ET_COMPOUND;
 
+		mHostShape2RigidBodyMapping.insert(mHostShape2RigidBodyMapping.begin() + mHostSpheres.size() + mHostBoxes.size(), Pair<uint, uint>(mHostBoxes.size(), (uint)actor->idx));
 		mHostBoxes.push_back(box);
-		mHostShape2RigidBodyMapping.push_back(Pair<uint, uint>(mHostBoxes.size() - 1, (uint)actor->idx));
 	}
 
 	template<typename TDataType>
@@ -276,8 +276,8 @@ namespace dyno
 		rigidbody.inertia += rigidbodyInertia;
 		rigidbody.shapeType = ET_COMPOUND;
 
+		mHostShape2RigidBodyMapping.insert(mHostShape2RigidBodyMapping.begin() + mHostSpheres.size(), Pair<uint, uint>(mHostSpheres.size(), (uint)actor->idx));
 		mHostSpheres.push_back(sphere);
-		mHostShape2RigidBodyMapping.push_back(Pair<uint, uint>(mHostSpheres.size() - 1, (uint)actor->idx));
 	}
 
 	template<typename TDataType>
@@ -318,8 +318,8 @@ namespace dyno
 		rigidbody.inertia += rigidbodyInertia;
 		rigidbody.shapeType = ET_COMPOUND;
 
+		mHostShape2RigidBodyMapping.insert(mHostShape2RigidBodyMapping.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size() + mHostCapsules.size(), Pair<uint, uint>(mHostCapsules.size(), (uint)actor->idx));
 		mHostCapsules.push_back(capsule);
-		mHostShape2RigidBodyMapping.push_back(Pair<uint, uint>(mHostCapsules.size() - 1, (uint)actor->idx));
 	}
 
 	template<typename TDataType>
@@ -872,6 +872,8 @@ namespace dyno
 				RBS_UpdateShape2RigidBodyMapping,
 				mapping,
 				topo->calculateElementOffset());
+
+			return;
 		}
 	}
 
