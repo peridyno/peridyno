@@ -29,7 +29,7 @@ std::shared_ptr<SceneGraph> creatRigidCompound()
 
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
 	
-	auto actor = rigid->createRigidBody(Vec3f(0.0f, 0.3f, 0.0f), Quat<float>(0.0, Vec3f(1.0f, 0.0f, 1.0f)));
+	auto actor = rigid->createRigidBody(Vec3f(0.0f, 0.3f, 0.0f), Quat<float>(0.5, Vec3f(1.0f, 0.0f, 1.0f)));
 
 	BoxInfo box;
 	box.center = Vec3f(0.15f, 0.0f, 0.0f);
@@ -37,7 +37,7 @@ std::shared_ptr<SceneGraph> creatRigidCompound()
 	rigid->bindBox(actor, box);
 
 	SphereInfo sphere;
-	sphere.center = Vec3f(0.0f, 0.0f, 0.0f);
+	sphere.center = Vec3f(0.0f, 0.0f, 0.1f);
 	sphere.radius = 0.1f;
 	rigid->bindSphere(actor, sphere);
 
@@ -79,21 +79,21 @@ std::shared_ptr<SceneGraph> creatRigidCompound()
 	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
 	rigid->graphicsPipeline()->pushModule(pointRender);
 
-	//Visualize contact points
-	auto cdBV = std::make_shared<CollistionDetectionBoundingBox<DataType3f>>();
-	rigid->stateTopology()->connect(cdBV->inDiscreteElements());
-	//jeep->inTriangleSet()->connect(cdBV->inTriangleSet());
-	rigid->graphicsPipeline()->pushModule(cdBV);
-
-	auto boundaryContactsMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
-	cdBV->outContacts()->connect(boundaryContactsMapper->inContacts());
-	rigid->graphicsPipeline()->pushModule(boundaryContactsMapper);
-
-	auto boundaryContactsRender = std::make_shared<GLPointVisualModule>();
-	boundaryContactsRender->setColor(Color(0, 1, 0));
-	boundaryContactsRender->varPointSize()->setValue(0.01f);
-	boundaryContactsMapper->outPointSet()->connect(boundaryContactsRender->inPointSet());
-	rigid->graphicsPipeline()->pushModule(boundaryContactsRender);
+// 	//Visualize contact points
+// 	auto cdBV = std::make_shared<CollistionDetectionBoundingBox<DataType3f>>();
+// 	rigid->stateTopology()->connect(cdBV->inDiscreteElements());
+// 	//jeep->inTriangleSet()->connect(cdBV->inTriangleSet());
+// 	rigid->graphicsPipeline()->pushModule(cdBV);
+// 
+// 	auto boundaryContactsMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
+// 	cdBV->outContacts()->connect(boundaryContactsMapper->inContacts());
+// 	rigid->graphicsPipeline()->pushModule(boundaryContactsMapper);
+// 
+// 	auto boundaryContactsRender = std::make_shared<GLPointVisualModule>();
+// 	boundaryContactsRender->setColor(Color(0, 1, 0));
+// 	boundaryContactsRender->varPointSize()->setValue(0.01f);
+// 	boundaryContactsMapper->outPointSet()->connect(boundaryContactsRender->inPointSet());
+// 	rigid->graphicsPipeline()->pushModule(boundaryContactsRender);
 
 	return scn;
 }

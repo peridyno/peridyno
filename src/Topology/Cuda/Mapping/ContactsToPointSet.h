@@ -23,5 +23,8 @@ namespace dyno
 		DEF_ARRAY_IN(TContactPair<Real>, Contacts, DeviceType::GPU, "");
 
 		DEF_INSTANCE_OUT(PointSet<TDataType>, PointSet, "");
+
+	protected:
+		bool validateInputs() override;
 	};
 }

@@ -32,8 +32,15 @@ namespace dyno
 			this->outPointSet()->allocate();
 		}
 
-		auto& inContacts = this->inContacts()->getData();
 		auto outSet = this->outPointSet()->getDataPtr();
+
+		if (this->inContacts()->isEmpty())
+		{
+			outSet->clear();
+			return true;
+		}
+
+		auto& inContacts = this->inContacts()->getData();
 
 		auto& vertices = outSet->getPoints();
 
@@ -45,6 +52,12 @@ namespace dyno
 			vertices,
 			inContacts);
 
+		return true;
+	}
+
+	template<typename TDataType>
+	bool ContactsToPointSet<TDataType>::validateInputs()
+	{
 		return true;
 	}
 
