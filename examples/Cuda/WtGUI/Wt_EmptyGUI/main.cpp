@@ -11,6 +11,8 @@
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
 #include <ColorMapping.h>
+#include "PointsLoader.h"
+#include "ParticleSystem/MakeParticleSystem.h"
 
 using namespace dyno;
 
@@ -27,6 +29,10 @@ std::shared_ptr<SceneGraph> createScene()
 
 	//Create a particle-based fluid solver
 	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
+
+	auto ptsLoader = scn->addNode(std::make_shared<PointsLoader<DataType3f>>());
+
+	auto initialParticles = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
 	//fluid->loadParticles(Vec3f(0.0f), Vec3f(0.2f), 0.005f);
 	//emitter->connect(fluid->importParticleEmitters());
 

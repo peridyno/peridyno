@@ -144,15 +144,47 @@ void WtInteraction::setInData(PortIndex portIndex)
 	// error
 	if (_inPoint.portShape == PortShape::Diamond || _inPoint.portShape == PortShape::Bullet)
 	{
+		if (_inPoint.portShape == PortShape::Bullet)
+		{
+			std::cout << "bullet" << std::endl;
+		}
 		_outNode->connect(_inNode->getImportNodes()[portIndex]);
 	}
 	else if (_inPoint.portShape == PortShape::Point)
 	{
-		auto field = _outNode->getOutputFields()[_outPoint.portIndex];
+		auto outFieldNum = 0;
+		auto outPoints = _connection->getNode(PortType::Out)->flowNodeData().getPointsData();
+		for (auto point : outPoints)
+		{
+			if (point.portShape == PortShape::Point)
+			{
+				outFieldNum = point.portIndex;
+				break;
+			}
+		}
+
+		auto field = _outNode->getOutputFields()[_outPoint.portIndex - outFieldNum];
 
 		if (field != NULL)
 		{
-			auto inField = _inNode->getInputFields()[_inPoint.portIndex];
+			auto node_data = _node->flowNodeData();
+
+			auto points = node_data.getPointsData();
+
+			int fieldNum = 0;
+
+			for (auto point : points)
+			{
+				if (point.portShape == PortShape::Point)
+				{
+					fieldNum = point.portIndex;
+					break;
+				}
+			}
+			auto inField = _inNode->getInputFields()[_inPoint.portIndex - fieldNum];
+
+			std::cout << inField->size() << std::endl;
+
 			field->connect(inField);
 		}
 	}
