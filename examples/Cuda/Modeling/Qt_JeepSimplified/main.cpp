@@ -86,8 +86,9 @@ void importOtherModel(std::shared_ptr<SceneGraph> scn);
 float total_scale = 6;
 
 std::shared_ptr<SceneGraph> creatScene()
-{	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
-
+{
+	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
+	scn->setAsynchronousSimulation(true);
 
 	//***************************************Scene Setting***************************************//
 	// Scene Setting
