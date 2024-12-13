@@ -17,12 +17,15 @@ namespace dyno
 	PAnimationWidget::PAnimationWidget(QWidget *parent) : 
 		QWidget(parent),
 		mStartSim(nullptr),
+		mNextStep(nullptr),
 		mResetSim(nullptr),
 		mStartLabel(nullptr),
+		mNextStepLabel(nullptr),
 		mResetLabel(nullptr),
 		mStartIcon(nullptr),
 		mPauseIcon(nullptr),
 		mResetIcon(nullptr),
+		mNextStepIcon(nullptr),
 		mFinishIcon(nullptr)
 	{
 		mTotalFrame = PSimulationThread::instance()->getTotalFrames();
@@ -48,22 +51,27 @@ namespace dyno
 
 		QHBoxLayout* operationLayout = new QHBoxLayout();
 
-		mStartSim = new QPushButton();								//创建按钮
+		mStartSim = new QPushButton();
+		mNextStep = new QPushButton();
 		mResetSim = new QPushButton();
-		mStartSim->setStyleSheet("padding: 6px;");	
+		mStartSim->setStyleSheet("padding: 6px;");
+		mNextStep->setStyleSheet("padding: 6px;");
 		mResetSim->setStyleSheet("padding: 6px;");
 
-		mStartSim->setShortcut(QKeySequence(Qt::Key_Space));		//设置播放快捷键
+		mStartSim->setShortcut(QKeySequence(Qt::Key_Space));
 
-		mStartIcon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Start.png"));//设置按钮icon
+		mStartIcon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Start.png"));
 		mPauseIcon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Pause.png"));
 		mResetIcon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Reset.png"));
 		mFinishIcon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Finish.png"));
+		mNextStepIcon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/NextFrame.png"));
 
-		mStartLabel = new QLabel;													//创建QLabel以承载icon
-		PAnimationWidget::buildIconLabel(mStartLabel,mStartIcon, mStartSim, 30);		//构建PushButton上的Label样式
+		mStartLabel = new QLabel;
+		PAnimationWidget::buildIconLabel(mStartLabel,mStartIcon, mStartSim, 30);
 		mResetLabel = new QLabel;
 		PAnimationWidget::buildIconLabel(mResetLabel, mResetIcon, mResetSim, 30);
+		mNextStepLabel = new QLabel;
+		PAnimationWidget::buildIconLabel(mNextStepLabel, mNextStepIcon, mNextStep, 30);
 
 		mResetSim->setCheckable(false);
 
@@ -76,6 +84,7 @@ namespace dyno
 		
 		operationLayout->addWidget(mTotalFrameSpinbox, 0);
 		operationLayout->addWidget(mStartSim, 0);
+		operationLayout->addWidget(mNextStep, 0);
 		operationLayout->addWidget(mResetSim, 0);
 		operationLayout->addWidget(mPersistent, 0);
 		operationLayout->setSpacing(0);
@@ -89,11 +98,11 @@ namespace dyno
 		
 		connect(mStartSim, SIGNAL(released()), this, SLOT(toggleSimulation()));
 		connect(mResetSim, SIGNAL(released()), this, SLOT(resetSimulation()));
-		connect(PSimulationThread::instance(), SIGNAL(simulationFinished()), this, SLOT(simulationFinished()));
+		connect(mNextStep, SIGNAL(released()), this, SLOT(takeOneStep()));
 
+		connect(PSimulationThread::instance(), SIGNAL(simulationFinished()), this, SLOT(simulationFinished()));
 		connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished(int)), this, SLOT(updateSlider(int)));
 
-		// 动态改变 Slider
 		connect(mTotalFrameSpinbox, SIGNAL(valueChanged(int)), mFrameSlider, SLOT(maximumChanged(int)));
 		connect(mTotalFrameSpinbox, SIGNAL(valueChanged(int)), this, SLOT(totalFrameChanged(int)));
 
@@ -108,7 +117,7 @@ namespace dyno
 	{
 		PSimulationThread::instance()->stop();
 		PSimulationThread::instance()->deleteLater();
-		PSimulationThread::instance()->wait();  //必须等待线程结束
+		PSimulationThread::instance()->wait();
 	}
 	
 	void PAnimationWidget::toggleSimulation()
@@ -117,10 +126,11 @@ namespace dyno
 		{
 			PSimulationThread::instance()->resume();
 			mStartSim->setText("");
-			//m_startSim->setIcon(*PauseIcon);//更新icon状态
-			mStartLabel->setPixmap(*mPauseIcon);//更新Label上的icon为Pauseicon
+			//m_startSim->setIcon(*PauseIcon);
+			mStartLabel->setPixmap(*mPauseIcon);
 
-			mResetSim->setDisabled(true);
+			mResetSim->setEnabled(false);
+			mNextStep->setEnabled(false);
 			mTotalFrameSpinbox->setEnabled(false);
 			mFrameSlider->setEnabled(false);
 
@@ -130,10 +140,10 @@ namespace dyno
 		{
 			PSimulationThread::instance()->pause();
 			mStartSim->setText("");
-			mResetSim->setDisabled(false);
+			mResetSim->setEnabled(true);
 			mStartLabel->setPixmap(*mStartIcon);		//更新Label上的icon为Starticon
 
-
+			mNextStep->setEnabled(true);
 			mTotalFrameSpinbox->setEnabled(true);
 			mFrameSlider->setEnabled(true);
 
@@ -153,6 +163,11 @@ namespace dyno
 		mTotalFrameSpinbox->setEnabled(true);
 		mFrameSlider->setEnabled(true);
 		mFrameSlider->setValue(0);
+	}
+
+	void PAnimationWidget::takeOneStep()
+	{
+		PSimulationThread::instance()->takeOneStep();
 	}
 
 	void PAnimationWidget::simulationFinished()
@@ -208,6 +223,7 @@ namespace dyno
 		{
 		case Qt::CheckState::Checked:
 			mStartSim->setDisabled(true);
+			mNextStep->setDisabled(true);
 			mResetSim->setDisabled(true);
 			mFrameSlider->setDisabled(true);
 			mTotalFrameSpinbox->setDisabled(true);
@@ -223,6 +239,7 @@ namespace dyno
 
 		case Qt::CheckState::Unchecked:
 			mStartSim->setDisabled(false);
+			mNextStep->setDisabled(false);
 			mResetSim->setDisabled(false);
 			mStartLabel->setPixmap(*mStartIcon);
 			mFrameSlider->setDisabled(false);

@@ -166,6 +166,11 @@ namespace dyno
 
 					this->startUpdatingGraphicsContext();
 
+					if (mOneStep) {
+						mOneStep = false;
+						mPaused = true;
+					}
+					
 					emit oneFrameFinished(scn->getFrameNumber());
 				}
 
@@ -261,6 +266,13 @@ namespace dyno
 	void PSimulationThread::setTotalFrames(int num)
 	{
 		mTotalFrame = num;
+		notify();
+	}
+
+	void PSimulationThread::takeOneStep()
+	{
+		mPaused = false;
+		mOneStep = true;
 		notify();
 	}
 

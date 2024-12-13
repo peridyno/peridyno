@@ -52,6 +52,8 @@ namespace dyno
 		void setTotalFrames(int num);
 		inline int getTotalFrames() { return mTotalFrame; }
 
+		void takeOneStep();
+
 		int getCurrentFrameNum();
 
 		bool isPaused() {
@@ -84,10 +86,12 @@ namespace dyno
 		std::atomic<int> mTotalFrame;
 
 		bool mReset;
+		bool mFinished;
+		bool mOneStep = false;
+
 	 	std::atomic<bool> mPaused;
 		std::atomic<bool> mRunning;
-		bool mFinished;
-
+		
 		std::atomic<bool> mUpdatingGraphicsContext;
 
 		std::shared_ptr<Node> mActiveNode;
