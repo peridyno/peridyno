@@ -55,6 +55,10 @@ private:
 
 	bool checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nodeData, PortState portState);
 
+	Wt::WPointF WtFlowWidget::getPortPosition(Wt::WPointF origin, connectionPointData portData);
+
+	void disconnect(std::shared_ptr<Node> exportNode, std::shared_ptr<Node> inportNode, connectionPointData inPoint, connectionPointData outPoint, WtNode* inWtNode, WtNode* outWtNode);
+
 	Wt::WPainterPath cubicPath(Wt::WPointF source, Wt::WPointF sink);
 	std::pair<Wt::WPointF, Wt::WPointF> pointsC1C2(Wt::WPointF source, Wt::WPointF sink);
 	void drawSketchLine(Wt::WPainter* painter, Wt::WPointF source, Wt::WPointF sink);

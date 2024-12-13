@@ -17,9 +17,6 @@ public:
 	bool canConnect(PortIndex& portIndex, TypeConverter& converter);
 
 	bool tryConnect();
-
-	bool disconnect(PortType portToDisconnect);
-
 private:
 
 	PortType connectionRequiredPort() const;

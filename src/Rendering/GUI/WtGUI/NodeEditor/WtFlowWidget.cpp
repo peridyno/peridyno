@@ -41,6 +41,37 @@ void WtFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 					mOutNode = m;
 				}
 			}
+			if (outPoint.portType == PortType::In)
+			{
+				auto existConnection = nodeMap[selectedNum]->getIndexConnection(outPoint.portIndex);
+				if (existConnection != nullptr)
+				{
+					auto outNode = existConnection->getNode(PortType::Out);
+					for (auto it = mScene->begin(); it != mScene->end(); it++)
+					{
+						auto m = it.get();
+						auto node = nodeMap[m->objectId()];
+						auto outPortIndex = existConnection->getPortIndex(PortType::Out);
+						auto exportPortsData = outNode->flowNodeData().getPointsData();
+						connectionPointData exportPointData;
+						for (auto point : exportPortsData)
+						{
+							if (point.portIndex == outPortIndex)
+							{
+								exportPointData = point;
+								break;
+							}
+						}
+
+						if (node == outNode)
+						{
+							disconnect(m, mOutNode, outPoint, exportPointData, nodeMap[selectedNum], outNode);
+							sourcePoint = getPortPosition(outNode->flowNodeData().getNodeOrigin(), exportPointData);
+						}
+					}
+
+				}
+			}
 		}
 	}
 
@@ -147,13 +178,12 @@ void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 				std::cout << "node data" << std::endl;
 				auto connectionInNode = node;
 
-				if (outPoint.portType == PortType::In)
+				if (outPoint.portType == PortType::Out)
 				{
 					WtConnection connection(outPoint.portType, *connectionOutNode, outPoint.portIndex);
 					WtInteraction interaction(*connectionInNode, connection, *node_scene, inPoint, outPoint, m, mOutNode);
 					if (interaction.tryConnect())
 					{
-
 						updateForAddNode();
 					}
 				}
@@ -236,8 +266,8 @@ bool WtFlowWidget::checkMouseInNodeRect(Wt::WPointF mousePoint, WtFlowNodeData n
 	Wt::WPointF bottomRight = Wt::WPointF(nodeData.getNodeBoundingRect().bottomRight().x() + nodeData.getNodeOrigin().x()
 		, nodeData.getNodeBoundingRect().bottomRight().y() + nodeData.getNodeOrigin().y());
 
-	Wt::WPointF absTopLeft = Wt::WPointF((nodeData.getNodeOrigin().x() + mTranslate.x()) * mZoomFactor, (nodeData.getNodeOrigin().y() + mTranslate.y()) * mZoomFactor);
-	Wt::WPointF absBottomRight = Wt::WPointF((bottomRight.x() + mTranslate.x()) * mZoomFactor, (bottomRight.y() + mTranslate.y()) * mZoomFactor);
+	Wt::WPointF absTopLeft = Wt::WPointF((nodeData.getNodeOrigin().x() + mTranslate.x() - 10) * mZoomFactor, (nodeData.getNodeOrigin().y() + mTranslate.y() - 10) * mZoomFactor);
+	Wt::WPointF absBottomRight = Wt::WPointF((bottomRight.x() + mTranslate.x() + 10) * mZoomFactor, (bottomRight.y() + mTranslate.y() + 10) * mZoomFactor);
 
 	Wt::WRectF absRect = Wt::WRectF(absTopLeft, absBottomRight);
 
@@ -343,6 +373,33 @@ bool WtFlowWidget::checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nod
 		}
 	}
 	return false;
+}
+
+Wt::WPointF WtFlowWidget::getPortPosition(Wt::WPointF origin, connectionPointData portData)
+{
+	if (portData.portShape == PortShape::Bullet)
+	{
+		Wt::WPointF topLeft = Wt::WPointF(portData.diamond_out[3].x() + origin.x(), portData.diamond_out[2].y() + origin.y());
+		Wt::WPointF bottomRight = Wt::WPointF(portData.diamond_out[1].x() + origin.x(), portData.diamond_out[0].y() + origin.y());
+		Wt::WRectF diamondBoundingRect = Wt::WRectF(topLeft, bottomRight);
+		return Wt::WPointF((topLeft.x() + bottomRight.x()) / 2, (topLeft.y() + bottomRight.y()) / 2);
+	}
+	else if (portData.portShape == PortShape::Diamond)
+	{
+		Wt::WPointF topLeft = Wt::WPointF(portData.diamond[3].x() + origin.x(), portData.diamond[2].y() + origin.y());
+		Wt::WPointF bottomRight = Wt::WPointF(portData.diamond[1].x() + origin.x(), portData.diamond[0].y() + origin.y());
+		Wt::WRectF diamondBoundingRect = Wt::WRectF(topLeft, bottomRight);
+		return Wt::WPointF((topLeft.x() + bottomRight.x()) / 2, (topLeft.y() + bottomRight.y()) / 2);
+	}
+	else if (portData.portShape == PortShape::Point)
+	{
+		auto rectTopLeft = portData.pointRect.topLeft();
+		auto rectBottomRight = portData.pointRect.bottomRight();
+		Wt::WPointF topLeft = Wt::WPointF(rectTopLeft.x() + origin.x(), rectTopLeft.y() + origin.y());
+		Wt::WPointF bottomRight = Wt::WPointF(rectBottomRight.x() + origin.x(), rectBottomRight.y() + origin.y());
+		Wt::WRectF diamondBoundingRect = Wt::WRectF(topLeft, bottomRight);
+		return Wt::WPointF((topLeft.x() + bottomRight.x()) / 2, (topLeft.y() + bottomRight.y()) / 2);
+	}
 }
 
 void WtFlowWidget::deleteNode(WtNode& n)
@@ -462,4 +519,51 @@ std::pair<Wt::WPointF, Wt::WPointF> WtFlowWidget::pointsC1C2(Wt::WPointF source,
 	Wt::WPointF c2(sink.x() - horizontalOffset, sink.y() - verticalOffset);
 
 	return std::make_pair(c1, c2);
+}
+
+void WtFlowWidget::disconnect(std::shared_ptr<Node> exportNode, std::shared_ptr<Node> inportNode, connectionPointData inPoint, connectionPointData outPoint, WtNode* inWtNode, WtNode* outWtNode)
+{
+	auto inportIndex = inPoint.portIndex;
+	if (inPoint.portShape == PortShape::Diamond || inPoint.portShape == PortShape::Bullet)
+	{
+		exportNode->disconnect(inportNode->getImportNodes()[inportIndex]);
+	}
+	else if (inPoint.portShape == PortShape::Point)
+	{
+		auto outFieldNum = 0;
+		auto outPoints = outWtNode->flowNodeData().getPointsData();
+		for (auto point : outPoints)
+		{
+			if (point.portShape == PortShape::Point)
+			{
+				outFieldNum = point.portIndex;
+				break;
+			}
+		}
+
+		auto field = exportNode->getOutputFields()[outPoint.portIndex - outFieldNum];
+
+		if (field != NULL)
+		{
+			auto node_data = inWtNode->flowNodeData();
+
+			auto points = node_data.getPointsData();
+
+			int fieldNum = 0;
+
+			for (auto point : points)
+			{
+				if (point.portShape == PortShape::Point)
+				{
+					fieldNum = point.portIndex;
+					break;
+				}
+			}
+			auto inField = inportNode->getInputFields()[inPoint.portIndex - fieldNum];
+
+			std::cout << inField->size() << std::endl;
+
+			field->disconnect(inField);
+		}
+	}
 }

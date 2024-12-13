@@ -52,6 +52,8 @@ std::shared_ptr<WtConnection> WtFlowScene::createConnection(
 		portIndexOut,
 		converter);
 
+	nodeIn.addConnection(portIndexIn, connection);
+
 	auto cgo = detail::make_unique<WtConnectionGraphicsObject>(*this, *connection, painter);
 
 	nodeIn.nodeState().setConnection(PortType::In, portIndexIn, *connection);

@@ -286,6 +286,23 @@ public:
 
 	WtFlowNodeData& flowNodeData() { return _flowNodeData; }
 
+	void addConnection(PortIndex portIndex, std::shared_ptr<WtConnection> connection)
+	{
+		_portConnection.insert(std::make_pair(portIndex, connection));
+	}
+
+	std::shared_ptr<WtConnection> getIndexConnection(PortIndex portIndex)
+	{
+		if (_portConnection.find(portIndex) != _portConnection.end())
+		{
+			return _portConnection[portIndex];
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
+
 public:
 	/// Propagates incoming data to the underlying model.
 	void propagateData(std::shared_ptr<WtNodeData> nodeData, PortIndex inPortIndex) const;
@@ -309,4 +326,6 @@ private:
 	std::unique_ptr<WtNodeGraphicsObject> _nodeGraphicsObject;
 
 	WtFlowNodeData _flowNodeData;
+
+	std::map<PortIndex, std::shared_ptr<WtConnection>> _portConnection;
 };

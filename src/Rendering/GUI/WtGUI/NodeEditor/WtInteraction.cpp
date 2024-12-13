@@ -102,10 +102,7 @@ bool WtInteraction::tryConnect()
 	{
 		//PortIndex outPortIndex = _connection->getPortIndex(PortType::Out);
 		//outNode->onDataUpdated(outPortIndex);
-
-
 		setInData(_inPoint.portIndex);
-
 	}
 
 	return true;
@@ -144,10 +141,6 @@ void WtInteraction::setInData(PortIndex portIndex)
 	// error
 	if (_inPoint.portShape == PortShape::Diamond || _inPoint.portShape == PortShape::Bullet)
 	{
-		if (_inPoint.portShape == PortShape::Bullet)
-		{
-			std::cout << "bullet" << std::endl;
-		}
 		_outNode->connect(_inNode->getImportNodes()[portIndex]);
 	}
 	else if (_inPoint.portShape == PortShape::Point)
