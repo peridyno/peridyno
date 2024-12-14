@@ -528,12 +528,11 @@ namespace dyno
 		auto& position = inTopo->position();
 		auto& rotation = inTopo->rotation();
 
-		DArray<Box3D> boxInGlobal;
-		DArray<Sphere3D> sphereInGlobal;
-		DArray<Tet3D> tetInGlobal;
-		DArray<Capsule3D> capsuleInGlobal;
-
-		inTopo->requestDiscreteElementsInGlobal(boxInGlobal, sphereInGlobal, tetInGlobal, capsuleInGlobal);
+		DArray<Box3D>& boxInGlobal = inTopo->boxesInGlobal();
+		DArray<Sphere3D>& sphereInGlobal = inTopo->spheresInGlobal();
+		DArray<Tet3D>& tetInGlobal = inTopo->tetsInGlobal();
+		DArray<Capsule3D>& capsuleInGlobal = inTopo->capsulesInGlobal();
+		DArray<Triangle3D>& triangleInGlobal = inTopo->trianglesInGlobal();
 
 		cuExecute(t_num,
 			NEQ_SetupAABB,
@@ -542,7 +541,7 @@ namespace dyno
 			sphereInGlobal,
 			tetInGlobal,
 			capsuleInGlobal,
-			inTopo->getTris(),
+			triangleInGlobal,
 			elementOffset,
 			dHat);
 
@@ -555,12 +554,6 @@ namespace dyno
 
 		auto& contactList = mBroadPhaseCD->outContactList()->getData();
 		if (contactList.elementSize() == 0) {
-
-			boxInGlobal.clear();
-			sphereInGlobal.clear();
-			tetInGlobal.clear();
-			capsuleInGlobal.clear();
-
 			return;
 		}
 
@@ -621,7 +614,7 @@ namespace dyno
 					inTopo->getTetBodyMapping(),
 					inTopo->getTetElementMapping(),
 					capsuleInGlobal,
-					inTopo->getTris(),
+					triangleInGlobal,
 					this->inAttribute()->getData(),
 					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
@@ -645,7 +638,7 @@ namespace dyno
 					inTopo->getTetBodyMapping(),
 					inTopo->getTetElementMapping(),
 					capsuleInGlobal,
-					inTopo->getTris(),
+					triangleInGlobal,
 					dummyAttribute,
 					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
@@ -672,7 +665,7 @@ namespace dyno
 					inTopo->getTetBodyMapping(),
 					inTopo->getTetElementMapping(),
 					capsuleInGlobal,
-					inTopo->getTris(),
+					triangleInGlobal,
 					this->inAttribute()->getData(),
 					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
@@ -696,7 +689,7 @@ namespace dyno
 					inTopo->getTetBodyMapping(),
 					inTopo->getTetElementMapping(),
 					capsuleInGlobal,
-					inTopo->getTris(),
+					triangleInGlobal,
 					dummyAttribute,
 					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
@@ -729,11 +722,6 @@ namespace dyno
 		contactNum.clear();
 		deviceIds.clear();
 		nbr_cons_tmp.clear();
-
-		boxInGlobal.clear();
-		sphereInGlobal.clear();
-		tetInGlobal.clear();
-		capsuleInGlobal.clear();
 	}
 
 	DEFINE_CLASS(NeighborElementQuery);

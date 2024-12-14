@@ -201,10 +201,10 @@ namespace dyno
 			//get Elements
 			auto topo = TypeInfo::cast<DiscreteElements<DataType3f>>(this->stateTopology()->getDataPtr());
 
-			auto& boxes = topo->getBoxes();
-			auto& spheres = topo->getSpheres();
-			auto& tets = topo->getTets();
-			auto& caps = topo->getCaps();
+			auto& boxes = topo->boxesInGlobal();
+			auto& spheres = topo->spheresInGlobal();
+			auto& tets = topo->tetsInGlobal();
+			auto& caps = topo->capsulesInGlobal();
 
 			std::vector<Transform3f> vehicleTransform = this->varVehiclesTransform()->getValue();
 

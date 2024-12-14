@@ -217,12 +217,10 @@ namespace dyno
 
 		auto inTopo = this->inDiscreteElements()->constDataPtr();
 
-		DArray<Box3D> boxInGlobal;
-		DArray<Sphere3D> sphereInGlobal;
-		DArray<Tet3D> tetInGlobal;
-		DArray<Capsule3D> capsuleInGlobal;
-
-		inTopo->requestDiscreteElementsInGlobal(boxInGlobal, sphereInGlobal, tetInGlobal, capsuleInGlobal);
+		DArray<Box3D>& boxInGlobal = inTopo->boxesInGlobal();
+		DArray<Sphere3D>& sphereInGlobal = inTopo->spheresInGlobal();
+		DArray<Tet3D>& tetInGlobal = inTopo->tetsInGlobal();
+		DArray<Capsule3D>& capsuleInGlobal = inTopo->capsulesInGlobal();
 
 		ElementOffset elementOffset = inTopo->calculateElementOffset();
 
@@ -318,11 +316,6 @@ namespace dyno
 		indexOffset += numofCaps * capsuleIndices.size();
 
 		this->outTriangleSet()->getDataPtr()->update();
-
-		boxInGlobal.clear();
-		sphereInGlobal.clear();
-		tetInGlobal.clear();
-		capsuleInGlobal.clear();
 
 		return true;
 	}

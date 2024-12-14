@@ -258,12 +258,10 @@ namespace dyno
 		if (mQueryAABB.size() != num)
 			mQueryAABB.resize(num);
 
-		DArray<Box3D> boxInGlobal;
-		DArray<Sphere3D> sphereInGlobal;
-		DArray<Tet3D> tetInGlobal;
-		DArray<Capsule3D> capsuleInGlobal;
-
-		de->requestDiscreteElementsInGlobal(boxInGlobal, sphereInGlobal, tetInGlobal, capsuleInGlobal);
+		DArray<Box3D>& boxInGlobal = de->boxesInGlobal();
+		DArray<Sphere3D>& sphereInGlobal = de->spheresInGlobal();
+		DArray<Tet3D>& tetInGlobal = de->tetsInGlobal();
+		DArray<Capsule3D>& capsuleInGlobal = de->capsulesInGlobal();
 
 		ElementOffset elementOffset = de->calculateElementOffset();
 
@@ -331,11 +329,6 @@ namespace dyno
 			mContactBuffer,
 			mBoundaryContactCounter,
 			mBoundaryContactCpy);
-
-		boxInGlobal.clear();
-		sphereInGlobal.clear();
-		tetInGlobal.clear();
-		capsuleInGlobal.clear();
 	}
 
 	DEFINE_CLASS(CollistionDetectionTriangleSet);

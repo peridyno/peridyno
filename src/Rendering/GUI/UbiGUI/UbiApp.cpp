@@ -38,6 +38,11 @@ namespace dyno
 		mApp->initialize(width, height, usePlugin);
 	}
 
+	RenderWindow* UbiApp::renderWindow()
+	{
+		return mApp->renderWindow();
+	}
+
 	void UbiApp::mainLoop()
 	{
 		mApp->mainLoop();

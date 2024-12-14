@@ -26,7 +26,7 @@ namespace dyno {
          */
         void setWindowTitle(const std::string& str);
 
-        RenderWindow* renderWindow();
+        RenderWindow* renderWindow() override;
 
     private:
         std::shared_ptr<QApplication> mQApp;

@@ -256,6 +256,11 @@ namespace Qt
 		mActivePipeline = pipeline;
 
 		updateModuleGraphView();
+
+		if (mReorderResetPipeline) {
+			reorderAllModules();
+			mReorderResetPipeline = false;
+		}
 	}
 
 	void QtModuleFlowScene::showAnimationPipeline()

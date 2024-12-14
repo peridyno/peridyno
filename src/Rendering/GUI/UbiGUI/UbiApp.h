@@ -45,6 +45,8 @@ namespace dyno
 
 		void initialize(int width, int height, bool usePlugin = false) override;
 
+		RenderWindow* renderWindow();
+
 		void mainLoop() override;
 
 	private:

@@ -64,11 +64,7 @@ void declare_rednder_window(py::module& m);
 
 void declare_construct_tangent_space(py::module& m);
 
-void declare_gl_element_visual_module(py::module& m);
-
 void declare_gl_instance_visual_module(py::module& m);
-
-void declare_gl_element_visual_module(py::module& m);
 
 void declare_gl_photorealistic_render(py::module& m);
 

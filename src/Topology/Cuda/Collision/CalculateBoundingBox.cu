@@ -93,12 +93,11 @@ namespace dyno
 
 		ElementOffset elementOffset = inTopo->calculateElementOffset();
 
-		DArray<Box3D> boxInGlobal;
-		DArray<Sphere3D> sphereInGlobal;
-		DArray<Tet3D> tetInGlobal;
-		DArray<Capsule3D> capsuleInGlobal;
-
-		inTopo->requestDiscreteElementsInGlobal(boxInGlobal, sphereInGlobal, tetInGlobal, capsuleInGlobal);
+		DArray<Box3D>& boxInGlobal = inTopo->boxesInGlobal();
+		DArray<Sphere3D>& sphereInGlobal = inTopo->spheresInGlobal();
+		DArray<Tet3D>& tetInGlobal = inTopo->tetsInGlobal();
+		DArray<Capsule3D>& capsuleInGlobal = inTopo->capsulesInGlobal();
+		DArray<Triangle3D>& triangleInGlobal = inTopo->trianglesInGlobal();
 
 		cuExecute(num,
 			CBB_SetupAABB,
@@ -107,14 +106,9 @@ namespace dyno
 			sphereInGlobal,
 			tetInGlobal,
 			capsuleInGlobal,
-			inTopo->getTris(),
+			triangleInGlobal,
 			elementOffset,
 			margin);
-
-		boxInGlobal.clear();
-		sphereInGlobal.clear();
-		tetInGlobal.clear();
-		capsuleInGlobal.clear();
 	}
 
 	DEFINE_CLASS(CalculateBoundingBox);

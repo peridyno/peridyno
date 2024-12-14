@@ -1,4 +1,4 @@
-#include <GlfwApp.h>
+#include <UbiApp.h>
 
 #include <SceneGraph.h>
 
@@ -214,7 +214,7 @@ std::shared_ptr<SceneGraph> creatCar()
 
 int main()
 {
-	GlfwApp app;
+	UbiApp app(GUIType::GUI_QT);
 	app.setSceneGraph(creatCar());
 	app.initialize(1280, 768);
 

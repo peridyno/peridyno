@@ -654,12 +654,10 @@ namespace dyno
 		auto discreteSet = this->inDiscreteElements()->getDataPtr();
 		uint totalSize = discreteSet->totalSize();
 
-		DArray<Box3D> boxInGlobal;
-		DArray<Sphere3D> sphereInGlobal;
-		DArray<Tet3D> tetInGlobal;
-		DArray<Capsule3D> capsuleInGlobal;
-
-		discreteSet->requestDiscreteElementsInGlobal(boxInGlobal, sphereInGlobal, tetInGlobal, capsuleInGlobal);
+		DArray<Box3D>& boxInGlobal = discreteSet->boxesInGlobal();
+		DArray<Sphere3D>& sphereInGlobal = discreteSet->spheresInGlobal();
+		DArray<Tet3D>& tetInGlobal = discreteSet->tetsInGlobal();
+		DArray<Capsule3D>& capsuleInGlobal = discreteSet->capsulesInGlobal();
 
 		ElementOffset offset = discreteSet->calculateElementOffset();
 
@@ -700,11 +698,6 @@ namespace dyno
 		}
 		else
 			this->outContacts()->resize(0);
-
-		boxInGlobal.clear();
-		sphereInGlobal.clear();
-		tetInGlobal.clear();
-		capsuleInGlobal.clear();
 	}
 
 	DEFINE_CLASS(CollistionDetectionBoundingBox);

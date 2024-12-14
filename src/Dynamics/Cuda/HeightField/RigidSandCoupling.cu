@@ -222,9 +222,9 @@ namespace dyno
 		auto& ele_vel = rigidbody->stateVelocity()->getData();
 		auto& ele_angular_vel = rigidbody->stateAngularVelocity()->getData();
 
-		auto& boxes = elements->getBoxes();
-		auto& spheres = elements->getSpheres();
-		auto& capsules = elements->getCaps();
+		auto& boxes = elements->boxesInGlobal();
+		auto& spheres = elements->spheresInGlobal();
+		auto& capsules = elements->capsulesInGlobal();
 
 		auto offset = elements->calculateElementOffset();
 

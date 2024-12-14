@@ -25,7 +25,7 @@ namespace dyno
 	template<typename TDataType>
 	uint DiscreteElements<TDataType>::totalSize()
 	{
-		return m_boxes.size() + m_spheres.size() + m_tets.size() + m_caps.size() + m_tris.size();
+		return mBoxesInLocal.size() + mSpheresInLocal.size() + mTetsInLocal.size() + mCapsulesInLocal.size() + mTrianglesInLocal.size();
 	}
 
 	template<typename TDataType>
@@ -43,36 +43,36 @@ namespace dyno
 	template<typename TDataType>
 	uint DiscreteElements<TDataType>::triangleIndex()
 	{
-		return capsuleIndex() + this->getCaps().size();
+		return capsuleIndex() + this->capsulesInLocal().size();
 	}
 
 	template<typename TDataType>
 	uint DiscreteElements<TDataType>::tetIndex()
 	{
-		return boxIndex() + this->getBoxes().size();
+		return boxIndex() + this->boxesInLocal().size();
 	}
 
 	template<typename TDataType>
 	uint DiscreteElements<TDataType>::capsuleIndex()
 	{
-		return tetIndex() + this->getTets().size();
+		return tetIndex() + this->tetsInLocal().size();
 	}
 
 	template<typename TDataType>
 	uint DiscreteElements<TDataType>::boxIndex()
 	{
-		return sphereIndex() + this->getSpheres().size();
+		return sphereIndex() + this->spheresInLocal().size();
 	}
 
 	template<typename TDataType>
 	ElementOffset DiscreteElements<TDataType>::calculateElementOffset()
 	{
 		ElementOffset elementOffset;
-		elementOffset.setSphereRange(sphereIndex(), sphereIndex() + this->getSpheres().size());
-		elementOffset.setBoxRange(boxIndex(), boxIndex() + this->getBoxes().size());
-		elementOffset.setTetRange(tetIndex(), tetIndex() + this->getTets().size());
-		elementOffset.setCapsuleRange(capsuleIndex(), capsuleIndex() + this->getCaps().size());
-		elementOffset.setTriangleRange(triangleIndex(), triangleIndex() + this->getTris().size());
+		elementOffset.setSphereRange(sphereIndex(), sphereIndex() + this->spheresInLocal().size());
+		elementOffset.setBoxRange(boxIndex(), boxIndex() + this->boxesInLocal().size());
+		elementOffset.setTetRange(tetIndex(), tetIndex() + this->tetsInLocal().size());
+		elementOffset.setCapsuleRange(capsuleIndex(), capsuleIndex() + this->capsulesInLocal().size());
+		elementOffset.setTriangleRange(triangleIndex(), triangleIndex() + this->trianglesInLocal().size());
 
 		return elementOffset;
 	}
@@ -80,13 +80,13 @@ namespace dyno
 	template<typename TDataType>
 	void DiscreteElements<TDataType>::setBoxes(DArray<Box3D>& boxes)
 	{
-		m_boxes.assign(boxes);
+		mBoxesInLocal.assign(boxes);
 	}
 
 	template<typename TDataType>
 	void DiscreteElements<TDataType>::setSpheres(DArray<Sphere3D>& spheres)
 	{
-		m_spheres.assign(spheres);
+		mSpheresInLocal.assign(spheres);
 	}
 
 	template<typename TDataType>
@@ -98,13 +98,13 @@ namespace dyno
 	template<typename TDataType>
 	void DiscreteElements<TDataType>::setTets(DArray<Tet3D>& tets)
 	{
-		m_tets.assign(tets);
+		mTetsInLocal.assign(tets);
 	}
 
 	template<typename TDataType>
 	void DiscreteElements<TDataType>::setCapsules(DArray<Capsule3D>& capsules)
 	{
-		m_caps.assign(capsules);
+		mCapsulesInLocal.assign(capsules);
 	}
 
 	template<typename TDataType>
@@ -122,17 +122,23 @@ namespace dyno
 	template<typename TDataType>
 	void DiscreteElements<TDataType>::setTriangles(DArray<Triangle3D>& triangles)
 	{
-		m_tris.assign(triangles);
+		mTrianglesInLocal.assign(triangles);
 	}
 
 	template<typename TDataType>
 	void dyno::DiscreteElements<TDataType>::copyFrom(DiscreteElements<TDataType>& de)
 	{
-		m_spheres.assign(de.m_spheres);
-		m_boxes.assign(de.m_boxes);
-		m_tets.assign(de.m_tets);
-		m_caps.assign(de.m_caps);
-		m_tris.assign(de.m_tris);
+		mSpheresInLocal.assign(de.mSpheresInLocal);
+		mBoxesInLocal.assign(de.mBoxesInLocal);
+		mTetsInLocal.assign(de.mTetsInLocal);
+		mCapsulesInLocal.assign(de.mCapsulesInLocal);
+		mTrianglesInLocal.assign(de.mTrianglesInLocal);
+
+		mSphereInGlobal.assign(de.mSphereInGlobal);
+		mBoxInGlobal.assign(de.mBoxInGlobal);
+		mTetInGlobal.assign(de.mTetInGlobal);
+		mCapsuleInGlobal.assign(de.mCapsuleInGlobal);
+		mTriangleInGlobal.assign(de.mTriangleInGlobal);
 
 		m_tet_sdf.assign(de.m_tet_sdf);
 		m_tet_body_mapping.assign(de.m_tet_body_mapping);
@@ -189,16 +195,29 @@ namespace dyno
 		return ret;
 	}
 
+	template<typename Real>
+	DYN_FUNC TTriangle3D<Real> local2Global(const TTriangle3D<Real>& tri, const Vector<Real, 3>& t, const SquareMatrix<Real, 3>& r)
+	{
+		TTriangle3D<Real> ret;
+		ret.v[0] = t + r * tri.v[0];
+		ret.v[1] = t + r * tri.v[1];
+		ret.v[2] = t + r * tri.v[2];
+
+		return ret;
+	}
+
 	template<typename Coord, typename Matrix, typename Box3D>
 	__global__ void DE_Local2Global(
 		DArray<Box3D> boxInGlobal,
 		DArray<Sphere3D> sphereInGlobal,
 		DArray<Tet3D> tetInGlobal,
 		DArray<Capsule3D> capInGlobal,
+		DArray<Triangle3D> triInGlobal,
 		DArray<Box3D> boxInLocal,
 		DArray<Sphere3D> sphereInLocal,
 		DArray<Tet3D> tetInLocal,
 		DArray<Capsule3D> capInLocal,
+		DArray<Triangle3D> triInLocal,
 		DArray<Coord> positionGlobal,
 		DArray<Matrix> rotationGlobal,
 		DArray<Pair<uint, uint>> mapping,
@@ -236,13 +255,11 @@ namespace dyno
 			capInGlobal[tId - elementOffset.capsuleIndex()] = local2Global(capInLocal[tId - elementOffset.capsuleIndex()], t, r);
 			break;
 		}
-		// 		case ET_TRI:
-		// 		{
-		// 			//TODO:
-		// // 			boundary_expand = 0.01;
-		// // 			box = tris[tId - elementOffset.triangleIndex()].aabb();
-		// 			break;
-		// 		}
+		case ET_TRI:
+		{
+			triInGlobal[tId - elementOffset.triangleIndex()] = local2Global(triInLocal[tId - elementOffset.triangleIndex()], t, r);
+			break;
+		}
 		default:
 			break;
 		}
@@ -253,14 +270,16 @@ namespace dyno
 		DArray<Box3D>& boxInGlobal, 
 		DArray<Sphere3D>& sphereInGlobal, 
 		DArray<Tet3D>& tetInGlobal, 
-		DArray<Capsule3D>& capInGlobal)
+		DArray<Capsule3D>& capInGlobal,
+		DArray<Triangle3D>& triInGlobal)
 	{
 		auto elementOffset = this->calculateElementOffset();
 
-		boxInGlobal.assign(this->getBoxes());
-		sphereInGlobal.assign(this->getSpheres());
-		tetInGlobal.assign(this->getTets());
-		capInGlobal.assign(this->getCaps());
+		boxInGlobal.assign(this->boxesInLocal());
+		sphereInGlobal.assign(this->spheresInLocal());
+		tetInGlobal.assign(this->tetsInLocal());
+		capInGlobal.assign(this->capsulesInLocal());
+		triInGlobal.assign(this->trianglesInLocal());
 
 		cuExecute(this->totalSize(),
 			DE_Local2Global,
@@ -268,10 +287,12 @@ namespace dyno
 			sphereInGlobal,
 			tetInGlobal,
 			capInGlobal,
-			this->getBoxes(),
-			this->getSpheres(),
-			this->getTets(),
-			this->getCaps(),
+			triInGlobal,
+			this->boxesInLocal(),
+			this->spheresInLocal(),
+			this->tetsInLocal(),
+			this->capsulesInLocal(),
+			this->trianglesInLocal(),
 			mPosition,
 			mRotation,
 			this->shape2RigidBodyMapping(),
@@ -358,17 +379,37 @@ namespace dyno
 		capInGlobal[tId] = local2Global(capInLocal[tId], t, r);
 	}
 
+	template<typename Coord, typename Matrix, typename Triangle3D>
+	__global__ void DE_Local2GlobalForTriangle(
+		DArray<Triangle3D> triInGlobal,
+		DArray<Triangle3D> triInLocal,
+		DArray<Coord> positionGlobal,
+		DArray<Matrix> rotationGlobal,
+		DArray<Pair<uint, uint>> mapping,
+		uint offset)
+	{
+		uint tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= triInLocal.size()) return;
+
+		uint rigidbodyId = mapping[tId + offset].second;
+
+		Coord t = positionGlobal[rigidbodyId];
+		Matrix r = rotationGlobal[rigidbodyId];
+
+		triInGlobal[tId] = local2Global(triInLocal[tId], t, r);
+	}
+
 	template<typename TDataType>
 	void DiscreteElements<TDataType>::requestCapsuleInGlobal(DArray<Capsule3D>& capInGlobal)
 	{
 		auto elementOffset = this->calculateElementOffset();
 
-		capInGlobal.assign(this->getCaps());
+		capInGlobal.assign(this->capsulesInLocal());
 
 		cuExecute(capInGlobal.size(),
 			DE_Local2GlobalForCapsule,
 			capInGlobal,
-			this->getCaps(),
+			this->capsulesInLocal(),
 			mPosition,
 			mRotation,
 			this->shape2RigidBodyMapping(),
@@ -376,16 +417,24 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	void DiscreteElements<TDataType>::requestTriangleInGlobal(DArray<Triangle3D>& triInGlobal)
+	{
+		auto elementOffset = this->calculateElementOffset();
+
+		triInGlobal.assign(this->trianglesInLocal());
+	}
+
+	template<typename TDataType>
 	void DiscreteElements<TDataType>::requestTetInGlobal(DArray<Tet3D>& tetInGlobal)
 	{
 		auto elementOffset = this->calculateElementOffset();
 
-		tetInGlobal.assign(this->getTets());
+		tetInGlobal.assign(this->tetsInLocal());
 
 		cuExecute(tetInGlobal.size(),
 			DE_Local2GlobalForCapsule,
 			tetInGlobal,
-			this->getTets(),
+			this->tetsInLocal(),
 			mPosition,
 			mRotation,
 			this->shape2RigidBodyMapping(),
@@ -397,12 +446,12 @@ namespace dyno
 	{
 		auto elementOffset = this->calculateElementOffset();
 
-		sphereInGlobal.assign(this->getSpheres());
+		sphereInGlobal.assign(this->spheresInLocal());
 
 		cuExecute(sphereInGlobal.size(),
 			DE_Local2GlobalForSphere,
 			sphereInGlobal,
-			this->getSpheres(),
+			this->spheresInLocal(),
 			mPosition,
 			mRotation,
 			this->shape2RigidBodyMapping(),
@@ -414,16 +463,22 @@ namespace dyno
 	{
 		auto elementOffset = this->calculateElementOffset();
 
-		boxInGlobal.assign(this->getBoxes());
+		boxInGlobal.assign(this->boxesInLocal());
 
 		cuExecute(boxInGlobal.size(),
 			DE_Local2GlobalForBox,
 			boxInGlobal,
-			this->getBoxes(),
+			this->boxesInLocal(),
 			mPosition,
 			mRotation,
 			this->shape2RigidBodyMapping(),
 			elementOffset.boxIndex());
+	}
+
+	template<typename TDataType>
+	void DiscreteElements<TDataType>::updateTopology()
+	{
+		this->requestDiscreteElementsInGlobal(mBoxInGlobal, mSphereInGlobal, mTetInGlobal, mCapsuleInGlobal, mTriangleInGlobal);
 	}
 
 	DEFINE_CLASS(DiscreteElements);

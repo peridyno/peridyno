@@ -539,10 +539,10 @@ namespace dyno
 		mDeviceTets.assign(mHostTets);
 		mDeviceCapsules.assign(mHostCapsules);
 
-		auto& boxes = topo->getBoxes();
-		auto& spheres = topo->getSpheres();
-		auto& tets = topo->getTets();
-		auto& caps = topo->getCaps();
+		auto& boxes = topo->boxesInLocal();
+		auto& spheres = topo->spheresInLocal();
+		auto& tets = topo->tetsInLocal();
+		auto& caps = topo->capsulesInLocal();
 
 		boxes.resize(mDeviceBoxes.size());
 		spheres.resize(mDeviceSpheres.size());
@@ -638,89 +638,13 @@ namespace dyno
 			topo->pointJoints(),
 			eleOffset);
 
-		//updateTopology();
+		setupShape2RigidBodyMapping();
 
 		topo->setPosition(this->stateCenter()->constData());
 		topo->setRotation(this->stateRotationMatrix()->constData());
-
-		setupShape2RigidBodyMapping();
+		topo->update();
 	}
 	
-	template <typename Real, typename Coord>
-	__global__ void UpdateSpheres(
-		DArray<Sphere3D> sphere,
-		DArray<SphereInfo> sphere_init,
-		DArray<Coord> pos,
-		DArray<Coord> bcOffset,
-		DArray<Quat<Real>> quat,
-		int start_sphere)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= sphere.size()) return;
-
-		sphere[pId].center = pos[pId + start_sphere] - quat[pId + start_sphere].rotate(bcOffset[pId + start_sphere]);
-		sphere[pId].rotation = quat[pId + start_sphere];
-	}
-
-	template <typename Coord, typename Matrix>
-	__global__ void UpdateBoxes(
-		DArray<Box3D> box,
-		DArray<BoxInfo> box_init,
-		DArray<Coord> pos,
-		DArray<Coord> bcOffset,
-		DArray<Matrix> rotation,
-		int start_box)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= box.size()) return;
-		box[pId].center = pos[pId + start_box] - rotation[pId + start_box] * bcOffset[pId + start_box];
-
-		box[pId].extent = box_init[pId].halfLength;
-
-		box[pId].u = rotation[pId + start_box] * Coord(1, 0, 0);
-		box[pId].v = rotation[pId + start_box] * Coord(0, 1, 0);
-		box[pId].w = rotation[pId + start_box] * Coord(0, 0, 1);
-	}
-
-	template <typename Coord, typename Matrix>
-	__global__ void UpdateTets(
-		DArray<Tet3D> tet,
-		DArray<TetInfo> tet_init,
-		DArray<Coord> pos,
-		DArray<Matrix> rotation,
-		int start_tet)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= tet.size()) return;
-
-		Coord center_init = (tet_init[pId].v[0] + tet_init[pId].v[1] + tet_init[pId].v[2] + tet_init[pId].v[3]) / 4.0f;
-		tet[pId].v[0] = rotation[pId + start_tet] * (tet_init[pId].v[0] - center_init) + pos[pId + start_tet];
-		tet[pId].v[1] = rotation[pId + start_tet] * (tet_init[pId].v[1] - center_init) + pos[pId + start_tet];
-		tet[pId].v[2] = rotation[pId + start_tet] * (tet_init[pId].v[2] - center_init) + pos[pId + start_tet];
-		tet[pId].v[3] = rotation[pId + start_tet] * (tet_init[pId].v[3] - center_init) + pos[pId + start_tet];
-	}
-
-	template <typename Real, typename Coord>
-	__global__ void UpdateCapsules(
-		DArray<Capsule3D> caps,
-		DArray<CapsuleInfo> cap_init,
-		DArray<Coord> pos,
-		DArray<Coord> bcOffset,
-		DArray<Quat<Real>> quat,
-		int start_cap)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= caps.size()) return;
-
-		Capsule3D cap;
-		cap.radius = cap_init[pId].radius;
-		cap.halfLength = cap_init[pId].halfLength;
-		cap.rotation = quat[pId + start_cap];
-		cap.center = pos[pId + start_cap] - quat[pId + start_cap].rotate(bcOffset[pId + start_cap]);
-
-		caps[pId] = cap;
-	}
-
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::postUpdateStates()
 	{
@@ -735,41 +659,7 @@ namespace dyno
 
 		discreteSet->setPosition(this->stateCenter()->constData());
 		discreteSet->setRotation(this->stateRotationMatrix()->constData());
-
-// 		cuExecute(mDeviceBoxes.size(),
-// 			UpdateBoxes,
-// 			discreteSet->getBoxes(),
-// 			mDeviceBoxes,
-// 			this->stateCenter()->getData(),
-// 			this->stateOffset()->getData(),
-// 			this->stateRotationMatrix()->getData(),
-// 			offset.boxIndex());
-// 
-// 		cuExecute(mDeviceSpheres.size(),
-// 			UpdateSpheres,
-// 			discreteSet->getSpheres(),
-// 			mDeviceSpheres,
-// 			this->stateCenter()->getData(),
-// 			this->stateOffset()->getData(),
-// 			this->stateQuaternion()->getData(),
-// 			offset.sphereIndex());
-// 
-// 		cuExecute(mDeviceTets.size(),
-// 			UpdateTets,
-// 			discreteSet->getTets(),
-// 			mDeviceTets,
-// 			this->stateCenter()->getData(),
-// 			this->stateRotationMatrix()->getData(),
-// 			offset.tetIndex());
-// 
-// 		cuExecute(mDeviceCapsules.size(),
-// 			UpdateCapsules,
-// 			discreteSet->getCaps(),
-// 			mDeviceCapsules,
-// 			this->stateCenter()->getData(),
-// 			this->stateOffset()->getData(),
-// 			this->stateQuaternion()->getData(),
-// 			offset.capsuleIndex());
+		discreteSet->update();
 	}
 
 	template<typename TDataType>

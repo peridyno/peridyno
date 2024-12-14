@@ -17,7 +17,7 @@ namespace dyno
 
         void initialize(int width, int height, bool usePlugin = false) override;
 
-        std::shared_ptr<RenderWindow> renderWindow() { return mRenderWindow; }
+        RenderWindow* renderWindow() override { return mRenderWindow.get(); }
 
         void mainLoop() override;
 
