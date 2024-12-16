@@ -337,8 +337,6 @@ namespace dyno
 		hostQuaternion.clear();
 		hostRotation.clear();
 
-		this->updateTopology();
-
 		this->updateInstanceTransform();
 	}
 
@@ -775,14 +773,12 @@ namespace dyno
 
 			}
 		}
+
+		
 		/***************** Reset *************/
 		Vechicle<TDataType>::resetStates();
 
-
-		this->updateTopology();
-
 		this->updateInstanceTransform();
-
 	}
 
 	DEFINE_CLASS(ConfigurableVehicle);

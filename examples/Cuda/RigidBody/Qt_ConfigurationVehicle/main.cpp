@@ -82,11 +82,23 @@ std::shared_ptr<SceneGraph> creatCar()
 
 	vehicleTransforms.push_back(Transform3f(Vec3f(0), Quat1f(0, Vec3f(0, 1, 0)).toMatrix3x3()));
 	vehicleTransforms.push_back(Transform3f(Vec3f(3, 0.5, -1), Quat1f(M_PI, Vec3f(0, 1, 0)).toMatrix3x3()));
-	vehicleTransforms.push_back(Transform3f(Vec3f(-3, 0.5, -1), Quat1f(M_PI, Vec3f(0, 1, 0)).toMatrix3x3()));
-	vehicleTransforms.push_back(Transform3f(Vec3f(6, 1, -2), Quat1f(0, Vec3f(0, 1, 0)).toMatrix3x3()));
-	vehicleTransforms.push_back(Transform3f(Vec3f(-6, 1, -2), Quat1f(0, Vec3f(0, 1, 0)).toMatrix3x3()));
+// 	vehicleTransforms.push_back(Transform3f(Vec3f(-3, 0.5, -1), Quat1f(M_PI, Vec3f(0, 1, 0)).toMatrix3x3()));
+// 	vehicleTransforms.push_back(Transform3f(Vec3f(6, 1, -2), Quat1f(0, Vec3f(0, 1, 0)).toMatrix3x3()));
+// 	vehicleTransforms.push_back(Transform3f(Vec3f(-6, 1, -2), Quat1f(0, Vec3f(0, 1, 0)).toMatrix3x3()));
 
 	configCar->varVehiclesTransform()->setValue(vehicleTransforms);
+
+	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
+	configCar->stateTopology()->connect(mapper->inDiscreteElements());
+	configCar->graphicsPipeline()->pushModule(mapper);
+
+	auto sRender = std::make_shared<GLSurfaceVisualModule>();
+	sRender->setColor(Color(0.3f, 0.5f, 0.9f));
+	sRender->setAlpha(0.8f);
+	sRender->setRoughness(0.7f);
+	sRender->setMetallic(3.0f);
+	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+	configCar->graphicsPipeline()->pushModule(sRender);
 
 	return scn;
 }
