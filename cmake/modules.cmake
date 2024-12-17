@@ -95,7 +95,9 @@ macro(add_example EXAMPLE_NAME GROUP_NAME LIB_DEPENDENCY)
 
     file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")                  
     set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples/${GROUP_NAME}") 
-    #    set(EXECUTABLE_OUTPUT_PATH  ${CMAKE_CURRENT_BINARY_DIR}/bin/)
+    if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
+        set_target_properties(${PROJECT_NAME} PROPERTIES CUDA_ARCHITECTURES ${CUDA_ARCH_FLAGS})
+    endif()
 
     if(WIN32)
         set_target_properties(${PROJECT_NAME} PROPERTIES
