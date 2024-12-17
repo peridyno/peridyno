@@ -168,15 +168,15 @@ void WtInteraction::setInData(PortIndex portIndex)
 
 			for (auto point : points)
 			{
-				if (point.portShape == PortShape::Point)
+				if (point.portType == PortType::In)
 				{
-					fieldNum = point.portIndex;
-					break;
+					if (point.portShape == PortShape::Bullet || point.portShape == PortShape::Diamond)
+					{
+						fieldNum++;
+					}
 				}
 			}
 			auto inField = _inNode->getInputFields()[_inPoint.portIndex - fieldNum];
-
-			std::cout << inField->size() << std::endl;
 
 			field->connect(inField);
 		}

@@ -184,7 +184,7 @@ void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 					WtInteraction interaction(*connectionInNode, connection, *node_scene, inPoint, outPoint, m, mOutNode);
 					if (interaction.tryConnect())
 					{
-						updateForAddNode();
+						update();
 					}
 				}
 
@@ -553,15 +553,16 @@ void WtFlowWidget::disconnect(std::shared_ptr<Node> exportNode, std::shared_ptr<
 
 			for (auto point : points)
 			{
-				if (point.portShape == PortShape::Point)
+				if (point.portType == PortType::In)
 				{
-					fieldNum = point.portIndex;
-					break;
+					if (point.portShape == PortShape::Bullet || point.portShape == PortShape::Diamond)
+					{
+						fieldNum++;
+					}
 				}
 			}
-			auto inField = inportNode->getInputFields()[inPoint.portIndex - fieldNum];
 
-			std::cout << inField->size() << std::endl;
+			auto inField = inportNode->getInputFields()[inPoint.portIndex - fieldNum];
 
 			field->disconnect(inField);
 		}
