@@ -1,8 +1,6 @@
 #include <GlfwApp.h>
 #include "Peridynamics/Cloth.h"
 #include <SceneGraph.h>
-#include <Log.h>
-#include <ParticleSystem/StaticBoundary.h>
 
 #include <Multiphysics/VolumeBoundary.h>
 
@@ -10,7 +8,13 @@
 #include <GLPointVisualModule.h>
 #include <GLSurfaceVisualModule.h>
 #include "TriangleMeshWriter.h"
+
+#include <Volume/VolumeLoader.h>
+
 #include "Peridynamics/CodimensionalPD.h"
+#include "Peridynamics/Module/DragSurfaceInteraction.h"
+#include "Peridynamics/Module/DragVertexInteraction.h"
+
 #include "StaticTriangularMesh.h"
 using namespace std;
 using namespace dyno;
@@ -23,16 +27,37 @@ std::shared_ptr<SceneGraph> createScene()
 	auto object = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
 	object->varFileName()->setValue(getAssetPath() + "cloth_shell/v2/woman_model_smaller.obj");
 	
+	auto volLoader = scn->addNode(std::make_shared<VolumeLoader<DataType3f>>());
+	volLoader->varFileName()->setValue(getAssetPath() + "cloth_shell/v2/woman_v2.sdf");
 
 	auto boundary = scn->addNode(std::make_shared<VolumeBoundary<DataType3f>>());
-	boundary->loadCube(Vec3f(-1.5,0,-1.5), Vec3f(1.5,3,1.5), 0.005f, true);
-	boundary->loadSDF(getAssetPath() + "cloth_shell/v2/woman_v2.sdf", false);
+	volLoader->connect(boundary->importVolumes());
 
 	auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>());
 	cloth->loadSurface(getAssetPath() + "cloth_shell/v2/cloth_v2.obj");
 	cloth->connect(boundary->importTriangularSystems()); 
-	cloth->setMaxIteNumber(10);
-	cloth->setContactMaxIte(20);
+	{
+		auto solver = cloth->animationPipeline()->findFirstModule<CoSemiImplicitHyperelasticitySolver<DataType3f>>();
+
+		solver->setContactMaxIte(20);
+		solver->varIterationNumber()->setValue(10);
+
+		solver->setS(0.1);
+		solver->setXi(0.15);
+		solver->setE(1000);
+		solver->setK_bend(0.1);
+	}
+
+	{
+		auto interaction = std::make_shared<DragVertexInteraction<DataType3f>>();
+		interaction->varCacheEvent()->setValue(false);
+		cloth->stateTriangleSet()->connect(interaction->inInitialTriangleSet());
+		cloth->statePosition()->connect(interaction->inPosition());
+		cloth->stateVelocity()->connect(interaction->inVelocity());
+		cloth->stateAttribute()->connect(interaction->inAttribute());
+		cloth->stateTimeStep()->connect(interaction->inTimeStep());
+		cloth->animationPipeline()->pushModule(interaction);
+	}
 
 	auto surfaceRendererCloth = std::make_shared<GLSurfaceVisualModule>();
 	surfaceRendererCloth->setColor(Color(0.08,0.021,0.0));

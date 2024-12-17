@@ -63,13 +63,13 @@ namespace dyno
 		{
 			switch (it)
 			{
-			case dyno::ConfigMotionType::Static:
+			case dyno::ConfigMotionType::CMT_Static:
 				mMotionWidget->addItem("Static");
 				break;
-			case dyno::ConfigMotionType::Kinematic:
+			case dyno::ConfigMotionType::CMT_Kinematic:
 				mMotionWidget->addItem("Kinematic");
 				break;
-			case dyno::ConfigMotionType::Dynamic:
+			case dyno::ConfigMotionType::CMT_Dynamic:
 				mMotionWidget->addItem("Dynamic");
 				break;
 			default:
@@ -77,11 +77,14 @@ namespace dyno
 			}
 		}
 
+
+
 		QHBoxLayout* motionLayout = new QHBoxLayout;
 		motionLayout->addWidget(new QLabel("Motion Type", this));
 		motionLayout->addWidget(mMotionWidget);
 		motionLayout->setContentsMargins(9, 0, 8, 0);
 		mainLayout->addItem(motionLayout);
+
 
 		QObject::connect(mTranslationWidget, QOverload<>::of(&mVec3fWidget::vec3fChange), [=]() {updateData(); });
 		QObject::connect(mRotationWidget, QOverload<>::of(&mVec3fWidget::vec3fChange), [=]() {updateData(); });
@@ -143,6 +146,17 @@ namespace dyno
 			}
 		}
 
+		mRigidGroup = new QSpinBox(this);
+		QHBoxLayout* rigidGroupLayout = new QHBoxLayout;
+		rigidGroupLayout->addWidget(new QLabel("Rigidbody Group", this));
+		rigidGroupLayout->addWidget(mRigidGroup);
+		rigidGroupLayout->setContentsMargins(9, 0, 8, 0);
+		mRigidGroup->setValue(mRigidBodyData->rigidGroup);
+		mRigidGroup->setRange(0, 100);
+		mainLayout->addItem(rigidGroupLayout);
+
+		QObject::connect(mRigidGroup, QOverload<int>::of(&QSpinBox::valueChanged), [=]() {updateData(); });
+
 		mainLayout->addStretch();
 
 	}
@@ -156,7 +170,7 @@ namespace dyno
 		Quat<Real> q = Quat<Real>(mRotationWidget->getValue()[2] * M_PI / 180, mRotationWidget->getValue()[1] * M_PI / 180, mRotationWidget->getValue()[0] * M_PI / 180);
 
 		mRigidBodyData->transform = Transform3f(mTranslationWidget->getValue(), q.toMatrix3x3(), mScaleWidget->getValue());
-
+		mRigidBodyData->rigidGroup = mRigidGroup->value();
 
 		switch (mCurrentType)
 		{
@@ -397,6 +411,7 @@ namespace dyno
 		mRigidInfo.tet = v.tet;
 		mRigidInfo.capsuleLength = v.capsuleLength;
 		mRigidInfo.motion = v.motion;
+		mRigidInfo.rigidGroup = v.rigidGroup;
 	}
 
 	void RigidBodyItemLayout::createRigidDetailWidget()

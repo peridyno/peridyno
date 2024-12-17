@@ -18,7 +18,8 @@ namespace dyno
 		DArray<Triangle> indices,
 		DArray<Box3D> boxes,
 		uint pointOffset,
-		uint indexOffset)
+		uint indexOffset,
+		uint cubeOffset)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= boxes.size()) return;
@@ -82,7 +83,8 @@ namespace dyno
 		DArray<Triangle> indices,
 		DArray<Tet3D> tets,
 		uint pointOffset,
-		uint indexOffset)
+		uint indexOffset,
+		uint tetOffset)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= tets.size()) return;
@@ -112,7 +114,8 @@ namespace dyno
 		DArray<Vec3f> vertices,
 		DArray<Vec3f> sphereVertices,
 		DArray<Sphere3D> sphereInstances,
-		uint pointOffset)
+		uint pointOffset,
+		uint sphereOffset)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= sphereInstances.size() * sphereVertices.size()) return;
@@ -150,11 +153,11 @@ namespace dyno
 		DArray<Vec3f> vertices,
 		DArray<Vec3f> capsuleVertices,
 		DArray<Capsule3D> capsuleInstances,
-		uint pointOffset)
+		uint pointOffset,
+		uint capsuleOffset)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= capsuleInstances.size() * capsuleVertices.size()) return;
-
 
 		uint instanceId = tId / capsuleVertices.size();
 		uint vertexId = tId % capsuleVertices.size();
@@ -214,20 +217,17 @@ namespace dyno
 
 		auto inTopo = this->inDiscreteElements()->constDataPtr();
 
-		//printf("====================================================== inside box update\n");
-		auto& sphereInstances = inTopo->getSpheres();
-		auto& capsuleInstances = inTopo->getCaps();
-		auto& boxes = inTopo->getBoxes();
-		auto& tets = inTopo->getTets();
-		auto& tris = inTopo->getTris();
-		// TODO : caps
+		DArray<Box3D>& boxInGlobal = inTopo->boxesInGlobal();
+		DArray<Sphere3D>& sphereInGlobal = inTopo->spheresInGlobal();
+		DArray<Tet3D>& tetInGlobal = inTopo->tetsInGlobal();
+		DArray<Capsule3D>& capsuleInGlobal = inTopo->capsulesInGlobal();
 
 		ElementOffset elementOffset = inTopo->calculateElementOffset();
 
-		int numOfSpheres = sphereInstances.size();
-		int numofCaps = capsuleInstances.size();
-		int numOfBoxes = boxes.size();
-		int numOfTets = tets.size();
+		int numOfSpheres = sphereInGlobal.size();
+		int numofCaps = capsuleInGlobal.size();
+		int numOfBoxes = boxInGlobal.size();
+		int numOfTets = tetInGlobal.size();
 		
 		auto triSet = this->outTriangleSet()->getDataPtr();
 
@@ -254,14 +254,15 @@ namespace dyno
 			SetupVerticesForSphereInstances,
 			vertices,
 			sphereVertices,
-			sphereInstances,
-			vertexOffset);
+			sphereInGlobal,
+			vertexOffset,
+			elementOffset.sphereIndex());
 
 		cuExecute(numOfSpheres * sphereIndices.size(),
 			SetupIndicesForSphereInstances,
 			indices,
 			sphereIndices,
-			sphereInstances,
+			sphereInGlobal,
 			sphereVertices.size(),
 			indexOffset);
 
@@ -273,21 +274,23 @@ namespace dyno
 			SetupCubeInstances,
 			vertices,
 			indices,
-			boxes,
+			boxInGlobal,
 			vertexOffset,
-			indexOffset);
+			indexOffset,
+			elementOffset.boxIndex());
 
-		vertexOffset += boxes.size() * 8;
-		indexOffset += boxes.size() * 12;
+		vertexOffset += numOfBoxes * 8;
+		indexOffset += numOfBoxes * 12;
 
 		//Setup tets
 		cuExecute(numOfTets,
 			SetupTetInstances,
 			vertices,
 			indices,
-			tets,
+			tetInGlobal,
 			vertexOffset,
-			indexOffset);
+			indexOffset,
+			elementOffset.tetIndex());
 
 		vertexOffset += numOfTets * 4;
 		indexOffset += numOfTets * 4;
@@ -296,14 +299,15 @@ namespace dyno
 			SetupVerticesForCapsuleInstances,
 			vertices,
 			capsuleVertices,
-			capsuleInstances,
-			vertexOffset);
+			capsuleInGlobal,
+			vertexOffset,
+			elementOffset.capsuleIndex());
 
 		cuExecute(numofCaps * capsuleIndices.size(),
 			SetupIndicesForCapsuleInstances,
 			indices,
 			capsuleIndices,
-			capsuleInstances,
+			capsuleInGlobal,
 			capsuleVertices.size(),
 			vertexOffset,
 			indexOffset);

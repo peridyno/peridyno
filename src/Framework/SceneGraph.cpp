@@ -51,6 +51,11 @@ namespace dyno
 		mAdvativeInterval = adaptive;
 	}
 
+	void SceneGraph::setAsynchronousSimulation(bool b)
+	{
+		mAsynchronousSimulation = b;
+	}
+
 	void SceneGraph::setGravity(Vec3f g)
 	{
 		mGravity = g;
@@ -125,6 +130,66 @@ namespace dyno
 		mElapsedTime += dt;
 	}
 
+	void SceneGraph::advanceInAsync()
+	{
+		class AsyncAdvanceAct : public Action
+		{
+		public:
+			AsyncAdvanceAct(bool bTiming = false) {
+				mTiming = bTiming;
+			};
+
+			void start(Node* node) override {
+				if (node == NULL)
+					return;
+
+				auto dt = node->getDt();
+				node->stateTimeStep()->setValue(dt);
+			}
+
+			void process(Node* node) override {
+				if (node == NULL)
+				{
+					Log::sendMessage(Log::Error, "Node is invalid!");
+					return;
+				}
+
+				CTimer timer;
+
+				if (mTiming) {
+					timer.start();
+				}
+
+				node->update();
+
+				if (mTiming) {
+					timer.stop();
+
+					std::stringstream name;
+					std::stringstream ss;
+					name << std::setw(40) << node->getClassInfo()->getClassName();
+					ss << std::setprecision(10) << timer.getElapsedTime();
+
+					std::string info = "Node: \t" + name.str() + ": \t " + ss.str() + "ms \n";
+					Log::sendMessage(Log::Info, info);
+				}
+			}
+
+			void end(Node* node) override {
+				if (node == NULL)
+					return;
+
+				auto dt = node->stateTimeStep()->getValue();
+				auto time = node->stateElapsedTime()->getValue();
+				node->stateElapsedTime()->setValue(time + dt);
+			}
+
+			bool mTiming = false;
+		};
+
+		this->traverseForward<AsyncAdvanceAct>(mNodeTiming);
+	}
+
 	void SceneGraph::takeOneFrame()
 	{
 		mSync.lock();
@@ -134,54 +199,51 @@ namespace dyno
 		CTimer timer;
 		timer.start();
 
-		float t = 0.0f;
-		float dt = 0.0f;
-
-		class QueryTimeStep : public Action
+		if (mAsynchronousSimulation)
 		{
-		public:
-			void process(Node* node) override {
-				if(node != nullptr && node->isActive())
-					dt = node->getDt() < dt ? node->getDt() : dt;
-			}
-
-			float dt;
-		} timeStep;
-
-		timeStep.dt = 1.0f / mFrameRate;
-
-		this->traverseForward(&timeStep);
-		dt = timeStep.dt;
-
-		if (mAdvativeInterval)
-		{
-			this->advance(dt);
+			this->advanceInAsync();
 		}
 		else
 		{
-			float interval = 1.0f / mFrameRate;
-			while (t + dt < interval)
+			float t = 0.0f;
+			float dt = 0.0f;
+
+			class QueryTimeStep : public Action
+			{
+			public:
+				void process(Node* node) override {
+					if (node != nullptr && node->isActive())
+						dt = node->getDt() < dt ? node->getDt() : dt;
+				}
+
+				float dt;
+			} timeStep;
+
+			timeStep.dt = 1.0f / mFrameRate;
+
+			this->traverseForward(&timeStep);
+			dt = timeStep.dt;
+
+			if (mAdvativeInterval)
 			{
 				this->advance(dt);
-
-				t += dt;
-				timeStep.dt = 1.0f / mFrameRate;
-				this->traverseForward(&timeStep);
-				dt = timeStep.dt;
 			}
+			else
+			{
+				float interval = 1.0f / mFrameRate;
+				while (t + dt < interval)
+				{
+					this->advance(dt);
 
-			this->advance(interval - t);
+					t += dt;
+					timeStep.dt = 1.0f / mFrameRate;
+					this->traverseForward(&timeStep);
+					dt = timeStep.dt;
+				}
+
+				this->advance(interval - t);
+			}
 		}
-
-		// 		class UpdateGrpahicsContextAct : public Action
-		// 		{
-		// 		public:
-		// 			void process(Node* node) override {
-		// 				node->graphicsPipeline()->update();
-		// 			}
-		// 		};
-		// 
-		// 		m_root->traverseTopDown<UpdateGrpahicsContextAct>();
 
 		this->traverseForward<PostProcessing>();
 

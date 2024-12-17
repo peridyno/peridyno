@@ -1,8 +1,6 @@
 #include <GlfwApp.h>
 #include "Peridynamics/Cloth.h"
 #include <SceneGraph.h>
-#include <Log.h>
-#include <ParticleSystem/StaticBoundary.h>
 
 #include <Multiphysics/VolumeBoundary.h>
 
@@ -23,13 +21,21 @@ std::shared_ptr<SceneGraph> createScene()
 	scn->setUpperBound(Vec3f(1.5, 3, 1.5));
 	scn->setGravity(Vec3f(0));
 	
-	auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>(0.15, 120, 0.001, 0.0005));
+	auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>());
 	cloth->loadSurface(getAssetPath() + "cloth_shell/cylinder400.obj");
-	//can try£º
-	//auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>(0.15, 1200, 0.0001, 0.0005));
-	//cloth->loadSurface(getAssetPath() + "cloth_shell/cylinder800.obj");
-	cloth->setMaxIteNumber(10);
-	cloth->setGrad_ite_eps(0);
+	cloth->setDt(0.0005);
+	{
+		auto solver = cloth->animationPipeline()->findFirstModule<CoSemiImplicitHyperelasticitySolver<DataType3f>>();
+
+		solver->setGrad_res_eps(0);
+		solver->varIterationNumber()->setValue(10);
+
+		solver->setS(0.1);
+		solver->setXi(0.15);
+		solver->setE(120);
+		solver->setK_bend(0.001);
+	}
+
 	auto custom = std::make_shared<ManualControl<DataType3f>>();
 	cloth->statePosition()->connect(custom->inPosition());
 	cloth->stateVelocity()->connect(custom->inVelocity());
@@ -50,27 +56,8 @@ std::shared_ptr<SceneGraph> createScene()
 	return scn;
 }
 
-void RecieveLogMessage(const Log::Message& m)
-{
-	switch (m.type)
-	{
-	case Log::Info:
-		cout << ">>>: " << m.text << endl; break;
-	case Log::Warning:
-		cout << "???: " << m.text << endl; break;
-	case Log::Error:
-		cout << "!!!: " << m.text << endl; break;
-	case Log::User:
-		cout << ">>>: " << m.text << endl; break;
-	default: break;
-	}
-}
-
-
 int main()
 {
-	Log::setUserReceiver(&RecieveLogMessage);
-
 	GlfwApp window;
 	window.setSceneGraph(createScene());
 

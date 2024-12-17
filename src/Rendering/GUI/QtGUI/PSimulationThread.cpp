@@ -166,6 +166,11 @@ namespace dyno
 
 					this->startUpdatingGraphicsContext();
 
+					if (mOneStep) {
+						mOneStep = false;
+						mPaused = true;
+					}
+					
 					emit oneFrameFinished(scn->getFrameNumber());
 				}
 
@@ -264,7 +269,14 @@ namespace dyno
 		notify();
 	}
 
-	int PSimulationThread::getCurrentFrameNum() 
+	void PSimulationThread::takeOneStep()
+	{
+		mPaused = false;
+		mOneStep = true;
+		notify();
+	}
+
+	int PSimulationThread::getCurrentFrameNum()
 	{
 		auto scn = SceneGraphFactory::instance()->active();
 		return scn->getFrameNumber();

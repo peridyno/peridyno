@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 #pragma once
-#include "Module/ConstraintModule.h"
+#include "ParticleApproximation.h"
 
 namespace dyno 
 {
+	/**
+	 * @brief This class implements an implicit solver for artificial viscosity based on the XSPH method.
+	 */
 	template<typename TDataType>
-	class ImplicitViscosity : public ConstraintModule
+	class ImplicitViscosity : public ParticleApproximation<TDataType>
 	{
 		DECLARE_TCLASS(ImplicitViscosity, TDataType)
 	public:
@@ -29,14 +32,10 @@ namespace dyno
 		ImplicitViscosity();
 		~ImplicitViscosity() override;
 		
-		void constrain() override;
-
 	public:
 		DEF_VAR(Real, Viscosity, 0.05, "");
 
 		DEF_VAR(int, InterationNumber, 3, "");
-
-		DEF_VAR_IN(Real, SmoothingLength, "");
 
 		DEF_VAR_IN(Real, TimeStep, "");
 
@@ -45,6 +44,9 @@ namespace dyno
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
 
 		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "");
+
+	public:
+		void compute() override;
 
 	private:
 		DArray<Coord> mVelOld;

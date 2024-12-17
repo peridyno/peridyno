@@ -144,7 +144,7 @@ namespace dyno
 			NTQ_SetupAABB,
 			mQueryAABB,
 			this->inPosition()->constData(),
-			this->inRadius()->getValue() * 0.9);
+			this->inRadius()->getValue());
 
 		cuExecute(tNum,
 			NTQ_SetupAABB,
@@ -209,7 +209,7 @@ namespace dyno
 				triVertex,
 				triIndex,
 				nbrNum,
-				this->inRadius()->getData() * 0.9);
+				this->inRadius()->getData());
 
 			nbrIds.resize(nbrNum);
 
@@ -223,7 +223,7 @@ namespace dyno
 					this->inPosition()->getData(),
 					triVertex,
 					triIndex,
-					this->inRadius()->getData() * 0.9);
+					this->inRadius()->getData());
 
 				nbrNum.clear();
 			}

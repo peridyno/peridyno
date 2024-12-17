@@ -8,6 +8,7 @@ namespace dyno {
 	template<typename TDataType>
 	class FractureModule : public ElastoplasticityModule<TDataType>
 	{
+		DECLARE_TCLASS(ElastoplasticityModule, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

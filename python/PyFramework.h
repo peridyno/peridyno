@@ -10,6 +10,7 @@
 #include "Module/GraphicsPipeline.h"
 #include "Module/MouseInputModule.h"
 #include "Module/OutputModule.h"
+#include "Module/ConstraintModule.h"
 
 #include "Module/CalculateNorm.h"
 #include "Module/ComputeModule.h"
@@ -30,7 +31,7 @@
 #include "ParticleSystem/ParticleSystem.h"
 #include "ParticleSystem/Module/ParticleIntegrator.h"
 #include "ParticleSystem/Module/ImplicitViscosity.h"
-#include "ParticleSystem/ParticleEmitter.h"
+#include "ParticleSystem/Emitters/ParticleEmitter.h"
 
 #include "Peridynamics/TriangularSystem.h"
 
@@ -55,7 +56,6 @@
 #include "GltfLoader.h"
 #include "GeometryLoader.h"
 #include "ParticleSystem/MakeParticleSystem.h"
-#include "ParticleSystem/StaticBoundary.h"
 #include "ParticleSystem/ParticleFluid.h"
 #include "StaticTriangularMesh.h"
 #include "Multiphysics/VolumeBoundary.h"
@@ -91,7 +91,6 @@ using Log = dyno::Log;
 //new
 using Color = dyno::Color;
 using ConstraintModule = dyno::ConstraintModule;
-using NumericalIntegrator = dyno::NumericalIntegrator;
 using InputModule = dyno::InputModule;
 using MouseInputModule = dyno::MouseInputModule;
 using GroupModule = dyno::GroupModule;

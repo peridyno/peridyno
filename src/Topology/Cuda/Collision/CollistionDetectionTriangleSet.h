@@ -37,6 +37,7 @@ namespace dyno {
 		typedef typename TDataType::Coord Coord;
 		typedef typename ::dyno::TAlignedBox3D<Real> AABB;
 		typedef typename ::dyno::TContactPair<Real> ContactPair;
+		typedef typename ::dyno::TOrientedBox3D<Real> Box3D;
 
 		CollistionDetectionTriangleSet();
 		~CollistionDetectionTriangleSet() override;

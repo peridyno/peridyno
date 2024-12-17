@@ -19,7 +19,7 @@
 
 #include "Topology/PointSet.h"
 #include "ParticleSystem/ParticleSystem.h"
-#include "ParticleSystem/ParticleEmitter.h"
+#include "ParticleSystem/Emitters/ParticleEmitter.h"
 #include "./ParticleSystem/Module/IterativeDensitySolver.h"
 #include "./ParticleSystem/Module/ImplicitViscosity.h"
 #include "./ParticleSystem/Module/ParticleIntegrator.h"
@@ -28,7 +28,8 @@
 #include "TriangularMeshConstraint.h"
 #include "Collision/NeighborPointQuery.h"
 #include "Topology/TriangleSet.h"
-#include "../../../Modeling/Commands/PointsBehindMesh.h"
+
+#include "Samplers/PointsBehindMesh.h"
 
 namespace dyno
 {

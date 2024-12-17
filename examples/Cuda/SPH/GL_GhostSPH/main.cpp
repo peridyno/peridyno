@@ -1,11 +1,16 @@
 #include <GlfwApp.h>
-
+#include <QtGUI/QtApp.h>
 #include <SceneGraph.h>
 #include <Log.h>
 
+#include <BasicShapes/CubeModel.h>
+
+#include <Volume/BasicShapeToVolume.h>
+
+#include <Multiphysics/VolumeBoundary.h>
+
 #include <ParticleSystem/ParticleFluid.h>
 #include "ParticleSystem/GhostParticles.h"
-#include <ParticleSystem/StaticBoundary.h>
 #include <ParticleSystem/GhostFluid.h>
 
 #include <Module/CalculateNorm.h>
@@ -21,7 +26,45 @@
 using namespace std;
 using namespace dyno;
 
-bool useVTK = false;
+std::shared_ptr<ParticleSystem<DataType3f>> createFluidParticles()
+{
+	auto fluid = std::make_shared<ParticleSystem<DataType3f>>();
+
+	std::vector<Vec3f> host_pos;
+	std::vector<Vec3f> host_vel;
+
+	Vec3f lo(-0.1, 0.0, -0.1);
+	Vec3f hi(0.1f, 0.1f, 0.1f);
+
+	Real s = 0.005f;
+	int m_iExt = 0;
+
+	float omega = 1.0f;
+	float half_s = -s / 2.0f;
+
+	int num = 0;
+
+	for (float x = lo[0]; x <= hi[0]; x += s)
+	{
+		for (float y = lo[1]; y <= hi[1]; y += s)
+		{
+			for (float z = lo[2]; z <= hi[2]; z += s)
+			{
+				Vec3f p = Vec3f(x, y, z);
+				host_pos.push_back(Vec3f(x, y, z));
+				host_vel.push_back(Vec3f(0));
+			}
+		}
+	}
+
+	fluid->statePosition()->assign(host_pos);
+	fluid->stateVelocity()->assign(host_vel);
+
+	host_pos.clear();
+	host_vel.clear();
+
+	return fluid;
+}
 
 std::shared_ptr<GhostParticles<DataType3f>> createGhostParticles()
 {
@@ -62,14 +105,12 @@ std::shared_ptr<GhostParticles<DataType3f>> createGhostParticles()
 
 	ghost->statePosition()->resize(num);
 	ghost->stateVelocity()->resize(num);
-	ghost->stateForce()->resize(num);
 
 	ghost->stateNormal()->resize(num);
 	ghost->stateAttribute()->resize(num);
 
 	ghost->statePosition()->assign(host_pos);
 	ghost->stateVelocity()->assign(host_vel);
-	ghost->stateForce()->assign(host_force);
 	ghost->stateNormal()->assign(host_normal);
 	ghost->stateAttribute()->assign(host_attribute);
 
@@ -88,17 +129,28 @@ std::shared_ptr<SceneGraph> createScene()
 	scn->setUpperBound(Vec3f(0.5, 1, 0.5));
 	scn->setLowerBound(Vec3f(-0.5, 0, -0.5));
 
-	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
-	boundary->loadCube(Vec3f(-0.1f, 0.0f, -0.1f), Vec3f(0.1f, 1.0f, 0.1f), 0.005, true);
-	//root->loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
 
-	auto fluid = scn->addNode(std::make_shared<ParticleSystem<DataType3f>>());
-	fluid->loadParticles(Vec3f(-0.1, 0.0, -0.1), Vec3f(0.105, 0.1, 0.105), 0.005);
+	//Create a container
+	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
+	cubeBoundary->varLocation()->setValue(Vec3f(0.0f, 0.5f, 0.0f));
+	cubeBoundary->varLength()->setValue(Vec3f(1.0f));
+	cubeBoundary->setVisible(false);
+
+	auto cube2vol = scn->addNode(std::make_shared<BasicShapeToVolume<DataType3f>>());
+	cube2vol->varGridSpacing()->setValue(0.02f);
+	cube2vol->varInerted()->setValue(true);
+	cubeBoundary->connect(cube2vol->importShape());
+
+	auto boundary = scn->addNode(std::make_shared<VolumeBoundary<DataType3f>>());
+	cube2vol->connect(boundary->importVolumes());
+
+	auto fluid = scn->addNode(createFluidParticles());
 
 	auto ghost = scn->addNode(createGhostParticles());
 
 	auto incompressibleFluid = scn->addNode(std::make_shared<GhostFluid<DataType3f>>());
-	fluid->connect(incompressibleFluid->importFluidParticles());
+	incompressibleFluid->setDt(0.001f);
+	fluid->connect(incompressibleFluid->importInitialStates());
 	ghost->connect(incompressibleFluid->importBoundaryParticles());
 // 	incompressibleFluid->setFluidParticles(fluid);
 // 	incompressibleFluid->setBoundaryParticles(ghost);
@@ -112,27 +164,20 @@ std::shared_ptr<SceneGraph> createScene()
 		auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
 		colorMapper->varMax()->setValue(5.0f);
 
-		fluid->stateVelocity()->connect(calculateNorm->inVec());
+		incompressibleFluid->stateVelocity()->connect(calculateNorm->inVec());
 		calculateNorm->outNorm()->connect(colorMapper->inScalar());
 
-		fluid->graphicsPipeline()->pushModule(calculateNorm);
-		fluid->graphicsPipeline()->pushModule(colorMapper);
+		incompressibleFluid->graphicsPipeline()->pushModule(calculateNorm);
+		incompressibleFluid->graphicsPipeline()->pushModule(colorMapper);
 
 		auto ptRender = std::make_shared<GLPointVisualModule>();
 		ptRender->setColor(Color(1, 0, 0));
 		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 
-		fluid->statePointSet()->connect(ptRender->inPointSet());
+		incompressibleFluid->statePointSet()->connect(ptRender->inPointSet());
 		colorMapper->outColor()->connect(ptRender->inColor());
 
-		fluid->graphicsPipeline()->pushModule(ptRender);
-
-		// A simple color bar widget for node
-		auto colorBar = std::make_shared<ImColorbar>();
-		colorBar->varMax()->setValue(5.0f);
-		calculateNorm->outNorm()->connect(colorBar->inScalar());
-		// add the widget to app
-		fluid->graphicsPipeline()->pushModule(colorBar);
+		incompressibleFluid->graphicsPipeline()->pushModule(ptRender);
 	}
 	
 	{
@@ -150,7 +195,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
-	GlfwApp app;
+	QtApp app;
 	app.setSceneGraph(createScene());
 	app.initialize(1024, 768);
 	app.mainLoop();

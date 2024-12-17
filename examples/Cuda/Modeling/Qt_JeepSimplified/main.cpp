@@ -1,115 +1,46 @@
 #include <QtApp.h>
-#include "ObjIO/ObjLoader.h"
-#include <QtApp.h>
-
 #include <SceneGraph.h>
+#include <GLRenderEngine.h>
+
+#include <BasicShapes/CubeModel.h>
+
+#include <Volume/BasicShapeToVolume.h>
+
+#include <Multiphysics/VolumeBoundary.h>
 
 #include <ParticleSystem/ParticleFluid.h>
-#include <ParticleSystem/StaticBoundary.h>
-#include <ParticleSystem/SquareEmitter.h>
+#include <ParticleSystem/MakeParticleSystem.h>
+#include <ParticleSystem/Emitters/SquareEmitter.h>
+#include <ParticleSystem/Module/ParticleIntegrator.h>
+#include <ParticleSystem/Module/IterativeDensitySolver.h>
+#include <ParticleSystem/Module/ImplicitViscosity.h>
 
-//#include <Multiphysics/SolidFluidCoupling.h>
+#include <Collision/NeighborPointQuery.h>
 
+//Rendering
+#include <GLSurfaceVisualModule.h>
+#include <GLPhotorealisticInstanceRender.h>
+
+#include <Commands/Merge.h>
+
+#include <BasicShapes/CubeModel.h>
+#include <Samplers/CubeSampler.h>
+
+#include <Node/GLPointVisualNode.h>
+
+#include <SemiAnalyticalScheme/TriangularMeshBoundary.h>
+
+#include <ColorMapping.h>
 #include <Module/CalculateNorm.h>
-#include <Peridynamics/HyperelasticBody.h>
-#include <Peridynamics/Cloth.h>
-#include <Peridynamics/Thread.h>
 
-
-#include "Node/GLPointVisualNode.h"
-#include "Node/GLSurfaceVisualNode.h"
-
-#include <GLPointVisualModule.h>
-#include <GLSurfaceVisualModule.h>
-
-
-#include "RigidBody/RigidBody.h"
-#include "ParticleSystem/StaticBoundary.h"
-#include "ParticleSystem/SquareEmitter.h"
-#include "ParticleSystem/CircularEmitter.h"
-#include "ParticleSystem/ParticleFluid.h"
-
-#include "RigidBody/Vechicle.h"
-
-#include "Topology/TriangleSet.h"
-#include "Collision/NeighborPointQuery.h"
-
-#include "ParticleWriter.h"
-#include "EigenValueWriter.h"
-
-#include "Module/CalculateNorm.h"
-
-#include <ColorMapping.h>
-
-
-#include "SemiAnalyticalScheme/ComputeParticleAnisotropy.h"
-#include "SemiAnalyticalScheme/SemiAnalyticalSFINode.h"
-#include "SemiAnalyticalScheme/SemiAnalyticalPositionBasedFluidModel.h"
-#include "SemiAnalyticalScheme/TriangularMeshBoundary.h"
-
-
-#include "RigidBody/RigidBody.h"
-#include "ParticleSystem/StaticBoundary.h"
-#include "ParticleSystem/SquareEmitter.h"
-#include "ParticleSystem/CircularEmitter.h"
-#include "ParticleSystem/ParticleFluid.h"
-#include "ParticleSystem/MakeParticleSystem.h"
-
-#include "Topology/TriangleSet.h"
-#include "Collision/NeighborPointQuery.h"
-
-#include "ParticleWriter.h"
-#include "EigenValueWriter.h"
-
-#include "Module/CalculateNorm.h"
-
-#include <ColorMapping.h>
-
-#include <GLPointVisualModule.h>
-#include <GLSurfaceVisualModule.h>
-#include <GLInstanceVisualModule.h>
-
-
-#include <GLRenderEngine.h>
-#include <GLPointVisualModule.h>
-#include <Module/GLPhotorealisticInstanceRender.h>
-
-#include <GLRenderEngine.h>
-
-#include "SemiAnalyticalScheme/ComputeParticleAnisotropy.h"
-#include "SemiAnalyticalScheme/SemiAnalyticalSFINode.h"
-#include "SemiAnalyticalScheme/SemiAnalyticalPositionBasedFluidModel.h"
-
-#include "StaticTriangularMesh.h"
-
-#include "BasicShapes/CubeModel.h"
-#include "BasicShapes/SphereModel.h"
-
-#include "ParticleSystem/CubeSampler.h"
-
-#include "Mapping/MergeTriangleSet.h"
-#include "Mapping/TextureMeshToTriangleSet.h"
-#include "Mapping/MergeTriangleSet.h"
-#include "ColorMapping.h"
-
-#include "ParticleSystem/Module/ParticleIntegrator.h"
-#include "ParticleSystem/Module/ImplicitViscosity.h"
-#include "ParticleSystem/Module/IterativeDensitySolver.h"
-
-//Framework
-#include "Auxiliary/DataSource.h"
-
-#include "Collision/NeighborPointQuery.h"
-#include "Collision/NeighborTriangleQuery.h"
-
-#include "SemiAnalyticalScheme/SemiAnalyticalPBD.h"
-#include "SemiAnalyticalScheme/TriangularMeshConstraint.h"
+#include <GltfLoader.h>
 
 #include "Auxiliary/DataSource.h"
 
-#include "GltfLoader.h"
+#include <RigidBody/Vechicle.h>
 
-#include "Node/GLSurfaceVisualNode.h"
+#include <Mapping/TextureMeshToTriangleSet.h>
+#include <Mapping/MergeTriangleSet.h>
 
 using namespace dyno;
 
@@ -155,8 +86,9 @@ void importOtherModel(std::shared_ptr<SceneGraph> scn);
 float total_scale = 6;
 
 std::shared_ptr<SceneGraph> creatScene()
-{	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
-
+{
+	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
+	scn->setAsynchronousSimulation(true);
 
 	//***************************************Scene Setting***************************************//
 	// Scene Setting
@@ -188,16 +120,6 @@ std::shared_ptr<SceneGraph> creatScene()
 	jeep->stateInstanceTransform()->connect(prRender->inTransform());
 	jeep->graphicsPipeline()->pushModule(prRender);
 
-	// Import Road
-	//auto road = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
-	//road->varFileName()->setValue(getAssetPath() + "Jeep/Road/Road.obj");
-	//road->varScale()->setValue(Vec3f(0.04) * total_scale);
-	//road->varLocation()->setValue(Vec3f(0, 0, 3.5));
-	//auto glRoad = road->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
-	//glRoad->setColor(color);
-
-	//road->outTriangleSet()->connect(jeep->inTriangleSet());
-
 
 	auto gltfRoad = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
 	gltfRoad->varFileName()->setValue(getAssetPath() + "gltf/Road_Gltf/Road_Tex.gltf");
@@ -207,14 +129,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	gltfRoad->stateTextureMesh()->connect(roadMeshConverter->inTextureMesh());
 	gltfRoad->animationPipeline()->pushModule(roadMeshConverter);
 
-// 	auto roadInstance = scn->addNode(std::make_shared<GenerateInstances>());
-// 	gltfRoad->stateTextureMesh()->connect(roadInstance->inTextureMesh());
-// 
-// 	auto texMeshConverterRoad = std::make_shared<TextureMeshToTriangleSet<DataType3f>>();
-// 	roadInstance->inTextureMesh()->connect(texMeshConverterRoad->inTextureMesh());
-// 	//gltfRoad->stateInstanceTransform()->connect(texMeshConverterRoad->inTransform());
-// 	roadInstance->animationPipeline()->pushModule(texMeshConverterRoad);
-// 	roadInstance->stateTransform()->connect(texMeshConverterRoad->inTransform());
+	auto tsJeep = gltfRoad->animationPipeline()->promoteOutputToNode(roadMeshConverter->outTriangleSet());
 
 	auto texMeshConverter = std::make_shared<TextureMeshToTriangleSet<DataType3f>>();
 	jeep->inTextureMesh()->connect(texMeshConverter->inTextureMesh());
@@ -225,8 +140,9 @@ std::shared_ptr<SceneGraph> creatScene()
 	auto tsMerger = scn->addNode(std::make_shared<MergeTriangleSet<DataType3f>>());
 	//texMeshConverter->outTriangleSet()->connect(tsMerger->inFirst());
 	jeep->animationPipeline()->promoteOutputToNode(texMeshConverter->outTriangleSet())->connect(tsMerger->inFirst());
-// 	texMeshConverterRoad->outTriangleSet()->connect(tsMerger->inSecond());
-// 	texMeshConverterRoad->outTriangleSet()->connect(jeep->inTriangleSet());
+	tsJeep->connect(tsMerger->inSecond());
+
+	tsJeep->connect(jeep->inTriangleSet());
 
 	//*************************************** Cube Sample ***************************************//
 	// Cube 
@@ -262,7 +178,6 @@ std::shared_ptr<SceneGraph> creatScene()
 		fluid->stateTimeStep()->connect(integrator->inTimeStep());
 		fluid->statePosition()->connect(integrator->inPosition());
 		fluid->stateVelocity()->connect(integrator->inVelocity());
-		fluid->stateForce()->connect(integrator->inForceDensity());
 		fluid->animationPipeline()->pushModule(integrator);
 
 		auto nbrQuery = std::make_shared<NeighborPointQuery<DataType3f>>();
@@ -286,6 +201,7 @@ std::shared_ptr<SceneGraph> creatScene()
 		viscosity->varViscosity()->setValue(Real(10.0));
 		fluid->stateTimeStep()->connect(viscosity->inTimeStep());
 		smoothingLength->outFloating()->connect(viscosity->inSmoothingLength());
+		samplingDistance->outFloating()->connect(viscosity->inSamplingDistance());
 		fluid->statePosition()->connect(viscosity->inPosition());
 		fluid->stateVelocity()->connect(viscosity->inVelocity());
 		nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());
@@ -324,9 +240,20 @@ std::shared_ptr<SceneGraph> creatScene()
 	tsMerger->stateTriangleSet()->connect(meshBoundary->inTriangleSet());
 
 	//Create a boundary
-	auto staticBoundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>()); ;
-	staticBoundary->loadCube(Vec3f(-4.6, 0, -7.2), Vec3f(4.6, 2, 12), 0.1, true);
-	fluid->connect(staticBoundary->importParticleSystems());
+	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
+	cubeBoundary->varLocation()->setValue(Vec3f(0.0f, 1.0f, 2.4f));
+	cubeBoundary->varLength()->setValue(Vec3f(9.2f, 2.0f, 19.2f));
+	cubeBoundary->setVisible(false);
+
+	auto cube2vol = scn->addNode(std::make_shared<BasicShapeToVolume<DataType3f>>());
+	cube2vol->varGridSpacing()->setValue(0.1f);
+	cube2vol->varInerted()->setValue(true);
+	cubeBoundary->connect(cube2vol->importShape());
+
+	auto container = scn->addNode(std::make_shared<VolumeBoundary<DataType3f>>());
+	cube2vol->connect(container->importVolumes());
+
+	fluid->connect(container->importParticleSystems());
 
 
 	return scn;

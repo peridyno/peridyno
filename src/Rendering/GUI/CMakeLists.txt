@@ -16,3 +16,5 @@ endif()
 if(PERIDYNO_WT_GUI)
     add_subdirectory(WtGUI)
 endif()
+
+add_subdirectory(UbiGUI)

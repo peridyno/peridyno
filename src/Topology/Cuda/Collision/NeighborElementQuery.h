@@ -22,6 +22,7 @@ namespace dyno {
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename ::dyno::TAlignedBox3D<Real> AABB;
+		typedef typename ::dyno::TOrientedBox3D<Real> Box3D;
 
 		NeighborElementQuery();
 		~NeighborElementQuery() override;

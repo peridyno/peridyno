@@ -91,7 +91,7 @@ option(PERIDYNO_LIBRARY_DUALPARTICLESYSTEM "Enable binding the dual-particle sch
 option(PERIDYNO_LIBRARY_MULTIPHYSICS "Enable building the multiphysics library" ON)
 
 if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
-    set(LIB_DEPENDENCY Core IO Framework Topology GLRenderEngine  Volume)
+    set(LIB_DEPENDENCY Core IO Framework Topology Modeling GLRenderEngine  Volume)
     build_library(ParticleSystem LIB_DEPENDENCY)
 endif()
 
@@ -101,12 +101,12 @@ if(PERIDYNO_LIBRARY_PERIDYNAMICS)
 endif()
 
 if(PERIDYNO_LIBRARY_RIGIDBODY)
-    set(LIB_DEPENDENCY Core IO Framework Topology GLRenderEngine)
+    set(LIB_DEPENDENCY Core IO Framework Topology GLRenderEngine Modeling)
     build_library(RigidBody LIB_DEPENDENCY)
 endif()
 
 if(PERIDYNO_LIBRARY_VOLUME)
-    set(LIB_DEPENDENCY Core IO Framework Topology GLRenderEngine)
+    set(LIB_DEPENDENCY Core IO Framework Topology Modeling GLRenderEngine)
     build_library(Volume LIB_DEPENDENCY)
 endif()
 

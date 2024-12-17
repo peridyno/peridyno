@@ -1,5 +1,5 @@
 #include "SdfSampler.h"
-#include "Topology/SignedDistanceField.h"
+#include "Topology/LevelSet.h"
 #include <thrust/scan.h>
 #include <thrust/execution_policy.h>
 

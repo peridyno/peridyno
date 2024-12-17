@@ -1,5 +1,5 @@
 #pragma once
-#include "Node.h"
+#include "ModelEditing.h"
 #include "Topology/TriangleSet.h"
 #include "Field.h"
 #include "FilePath.h"
@@ -15,7 +15,7 @@ namespace dyno
 	*
 	*/
 	template<typename TDataType>
-	class SplineConstraint : public Node
+	class SplineConstraint : public ModelEditing<TDataType>
 	{
 		DECLARE_TCLASS(SplineConstraint, TDataType)
 	public:
@@ -29,7 +29,6 @@ namespace dyno
 		SplineConstraint();
 
 		//void update() override;
-
 	public:
 
 		DEF_INSTANCE_IN(PointSet<TDataType>, Spline, "");

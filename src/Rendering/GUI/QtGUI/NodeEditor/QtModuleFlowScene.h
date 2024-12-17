@@ -67,6 +67,7 @@ namespace Qt
 		float mDx = 100.0f;
 		float mDy = 50.0f;
 
+		bool mReorderResetPipeline = true;
 		bool mReorderGraphicsPipeline = true;
 
 		bool mEditingEnabled = true;

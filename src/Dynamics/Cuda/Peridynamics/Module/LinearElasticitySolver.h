@@ -37,12 +37,12 @@ namespace dyno {
 
 		LinearElasticitySolver();
 		~LinearElasticitySolver() override;
-		
+
+	protected:
 		void constrain() override;
 
 		virtual void solveElasticity();
 
-	protected:
 		void preprocess() override;
 
 		/**
@@ -75,17 +75,15 @@ namespace dyno {
 		DEF_ARRAY_IN(Coord, Y, DeviceType::GPU, "Particle position");
 
 		/**
-			* @brief Particle velocity
-			*/
+		 * @brief Particle velocity
+		 */
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "Particle velocity");
 
+		
 		/**
-		 * @brief Neighboring particles
-		 * 
+		 * @brief Neighboring bonds
 		 */
-		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "Neighboring particles' ids");
-
-		DEF_ARRAYLIST_IN(Bond, Bonds, DeviceType::GPU, "Reference shape");
+		DEF_ARRAYLIST_IN(Bond, Bonds, DeviceType::GPU, "Peridynamic bonds");
 
 	public:
 		/**

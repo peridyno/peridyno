@@ -1,10 +1,10 @@
 #pragma once
-#include "Module/NumericalIntegrator.h"
+#include "Module/ComputeModule.h"
 #include "Collision/Attribute.h"
 
 namespace dyno {
 	template<typename TDataType>
-	class RotatingSquarePatchModule : public NumericalIntegrator
+	class RotatingSquarePatchModule : public ComputeModule
 	{
 		DECLARE_TCLASS(RotatingSquarePatchModule, TDataType)
 
@@ -14,15 +14,7 @@ namespace dyno {
 
 		RotatingSquarePatchModule();
 		~RotatingSquarePatchModule() override {};
-		
-		void begin() override;
-		void end() override;
-
-		bool integrate() override;
-
-		bool updateVelocity();
-		bool updatePosition();
-
+	
 	public:
 
 
@@ -57,7 +49,16 @@ namespace dyno {
 		DEF_VAR(Real, InitialAngularVelocity, 0.667f, "");
 
 	protected:
-		void updateImpl() override;
+		void compute() override;
+
+	private:
+		void begin();
+		void end();
+
+		bool integrate();
+
+		bool updateVelocity();
+		bool updatePosition();
 
 		unsigned int fragNum = 0;
 	private:

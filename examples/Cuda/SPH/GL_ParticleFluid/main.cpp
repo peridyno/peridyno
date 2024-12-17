@@ -1,12 +1,14 @@
-#include <GlfwApp.h>
+#include <UbiApp.h>
 
 #include <SceneGraph.h>
-#include <Log.h>
 
 #include <ParticleSystem/ParticleFluid.h>
-#include <RigidBody/RigidBody.h>
-#include <ParticleSystem/StaticBoundary.h>
-#include "ParticleSystem/MakeParticleSystem.h"
+#include <ParticleSystem/MakeParticleSystem.h>
+
+#include <Volume/VolumeLoader.h>
+#include <Volume/BasicShapeToVolume.h>
+
+#include <Multiphysics/VolumeBoundary.h>
 
 #include <Module/CalculateNorm.h>
 
@@ -20,7 +22,7 @@
 
 #include <StaticTriangularMesh.h>
 
-#include <ParticleSystem/CubeSampler.h>
+#include <Samplers/CubeSampler.h>
 
 using namespace std;
 using namespace dyno;
@@ -52,11 +54,26 @@ std::shared_ptr<SceneGraph> createScene()
 	fluid->varReshuffleParticles()->setValue(true);
 	initialParticles->connect(fluid->importInitialStates());
 
-	//Create a boundary
-	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>()); ;
-	boundary->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(1.5, 2, 1.5), 0.02, true);
-	boundary->loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
-	fluid->connect(boundary->importParticleSystems());
+	auto volLoader = scn->addNode(std::make_shared<VolumeLoader<DataType3f>>());
+	volLoader->varFileName()->setValue(getAssetPath() + "bowl/bowl.sdf");
+
+	auto volBoundary = scn->addNode(std::make_shared<VolumeBoundary<DataType3f>>());
+	volLoader->connect(volBoundary->importVolumes());
+
+	//Connect ParticleFluid to VolumeBoundary
+	fluid->connect(volBoundary->importParticleSystems());
+
+	//Create a cube for boundary
+	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
+	cubeBoundary->varLocation()->setValue(Vec3f(0.5f, 1.0f, 0.5f));
+	cubeBoundary->varLength()->setValue(Vec3f(2.0f));
+	cubeBoundary->setVisible(false);
+
+	auto cube2vol = scn->addNode(std::make_shared<BasicShapeToVolume<DataType3f>>());
+	cube2vol->varGridSpacing()->setValue(0.02f);
+	cube2vol->varInerted()->setValue(true);
+	cubeBoundary->connect(cube2vol->importShape());
+	cube2vol->connect(volBoundary->importVolumes());
 
 	auto staticMesh = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
 	staticMesh->varFileName()->setValue(getAssetPath() + "bowl/bowl.obj");
@@ -92,7 +109,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
-	GlfwApp app;
+	UbiApp app(GUIType::GUI_QT);
 
 	app.setSceneGraph(createScene());
 	// window.createWindow(2048, 1152);

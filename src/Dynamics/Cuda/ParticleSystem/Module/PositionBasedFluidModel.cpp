@@ -19,7 +19,7 @@ namespace dyno
 		this->inTimeStep()->connect(integrator->inTimeStep());
 		this->inPosition()->connect(integrator->inPosition());
 		this->inVelocity()->connect(integrator->inVelocity());
-		this->inForce()->connect(integrator->inForceDensity());
+		this->inAttribute()->connect(integrator->inAttribute());
 		this->pushModule(integrator);
 
 		auto nbrQuery =std::make_shared<NeighborPointQuery<TDataType>>();
@@ -33,6 +33,7 @@ namespace dyno
 		this->inTimeStep()->connect(density->inTimeStep());
 		this->inPosition()->connect(density->inPosition());
 		this->inVelocity()->connect(density->inVelocity());
+		this->inAttribute()->connect(density->inAttribute());
 		nbrQuery->outNeighborIds()->connect(density->inNeighborIds());
 		this->pushModule(density);
 		

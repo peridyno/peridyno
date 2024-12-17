@@ -38,7 +38,6 @@ namespace dyno
 		static void reorderParticles(
 			DArray<Coord>& pos,
 			DArray<Coord>& vel,
-			DArray<Coord>& force,
 			DArray<OcKey>& morton);
 	};
 }

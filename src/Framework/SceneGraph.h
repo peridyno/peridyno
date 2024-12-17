@@ -42,6 +42,7 @@ namespace dyno
 		};
 
 		virtual void advance(float dt);
+		virtual void advanceInAsync();		//Take the simulation asynchronously
 		virtual void takeOneFrame();
 		virtual void updateGraphicsContext();
 		virtual void run();
@@ -126,6 +127,8 @@ namespace dyno
 
 		bool isIntervalAdaptive();
 		void setAdaptiveInterval(bool adaptive);
+
+		void setAsynchronousSimulation(bool b);
 
 		void setGravity(Vec3f g);
 		Vec3f getGravity();
@@ -255,6 +258,7 @@ namespace dyno
 		//std::shared_ptr<Node> mRoot = nullptr;
 
 		bool mQueueUpdateRequired = false;
+		bool mAsynchronousSimulation = false;
 
 		NodeMap mNodeMap;
 

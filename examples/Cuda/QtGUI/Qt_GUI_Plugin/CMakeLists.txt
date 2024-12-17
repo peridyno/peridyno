@@ -2,6 +2,7 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
     set(LIB_DEPENDENCY
         Modeling
         RigidBody
+        HeightField
         ParticleSystem
         Peridynamics
         DualParticleSystem

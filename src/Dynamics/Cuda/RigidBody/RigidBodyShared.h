@@ -16,46 +16,6 @@ namespace dyno
 		MT_Dynamic,
 	};
 
-	struct BoxInfo
-	{
-		BoxInfo()
-		{
-			center = Vector<Real, 3>(0.0f, 0.0f, 0.0f);
-			halfLength = Vector<Real, 3>(1.0f, 1.0f, 1.0f);
-			rot = Quat<Real>(0.0f, 0.0f, 0.0f, 1.0f);
-		}
-
-		Vector<Real, 3> center;
-		Vector<Real, 3> halfLength;
-
-		Quat<Real> rot;
-	};
-
-	struct SphereInfo
-	{
-		SphereInfo()
-		{
-			center = Vector<Real, 3>(0.0f, 0.0f, 0.0f);
-			radius = 1.0;
-			rot = Quat<Real>(0.0f, 0.0f, 0.0f, 1.0f);
-		}
-		Quat<Real> rot;
-		Vector<Real, 3> center;
-		Real radius;
-	};
-
-	struct TetInfo
-	{
-		TetInfo()
-		{
-			v[0] = Vec3f(0);
-			v[1] = Vec3f(1, 0 ,0);
-			v[2] = Vec3f(0, 1, 0);
-			v[3] = Vec3f(0, 0, 1);
-		}
-
-		Vector<Real, 3> v[4];
-	};
 	// Custom get and set functions for v member
 	static void set_v(TetInfo& obj, const std::vector<Vec3f>& values) {
 		if (values.size() != 4) {
@@ -74,21 +34,6 @@ namespace dyno
 		return values;
 	}
 
-	struct CapsuleInfo
-	{
-		CapsuleInfo()
-		{
-			center = Vec3f(0.0f, 0.0f, 0.0f);
-			rot = Quat<Real>(0.0f, 0.0f, 0.0f, 1.0f);
-			radius = 1.0f;
-			halfLength = 1.0f;
-		}
-		Quat<Real> rot;
-		Vector<Real, 3> center;
-		Real halfLength;
-		Real radius;
-	};
-
 	struct RigidBodyInfo
 	{
 		RigidBodyInfo()
@@ -102,10 +47,27 @@ namespace dyno
 			inertia = SquareMatrix<Real, 3>(0.0f);
 			friction = 0.0f;
 			restitution = 0.0f;
-			motionType = MT_Static;
+			motionType = Dynamic;
 			collisionMask = CT_AllObjects;
 			shapeType = ET_Other;
 			angle = Quat<Real>(0.0f, 0.0f, 0.0f, 1.0f);
+		}
+
+		RigidBodyInfo(Vector<Real, 3> p, Quat<Real> q = Quat<Real>(0.0f, 0.0f, 0.0f, 1.0f))
+		{
+			linearVelocity = Vector<Real, 3>(0.0f);
+			angularVelocity = Vector<Real, 3>(0.0f);
+			position = p;
+			offset = Vector<Real, 3>(0.0f);
+			bodyId = 0;
+			mass = -1.0f;
+			inertia = SquareMatrix<Real, 3>(0.0f);
+			friction = 0.0f;
+			restitution = 0.0f;
+			motionType = Dynamic;
+			collisionMask = CT_AllObjects;
+			shapeType = ET_Other;
+			angle = q;
 		}
 
 		Quat<Real> angle;
@@ -133,7 +95,7 @@ namespace dyno
 
 		Real restitution;
 
- 		MotionType motionType;
+ 		BodyType motionType;
 		
 		ElementType shapeType;
 

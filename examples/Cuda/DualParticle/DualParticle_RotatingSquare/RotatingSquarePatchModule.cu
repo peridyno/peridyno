@@ -9,7 +9,7 @@ namespace dyno
 
 	template<typename TDataType>
 	RotatingSquarePatchModule<TDataType>::RotatingSquarePatchModule()
-		: NumericalIntegrator()
+		: ComputeModule()
 	{
 		this->inAttribute()->tagOptional(true);
 	}
@@ -174,7 +174,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void RotatingSquarePatchModule<TDataType>::updateImpl()
+	void RotatingSquarePatchModule<TDataType>::compute()
 	{
 		this->begin();
 		this->integrate();

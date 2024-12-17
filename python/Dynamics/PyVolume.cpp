@@ -32,13 +32,9 @@ void pybind_volume(py::module& m)
 	declare_volume<dyno::DataType3f>(m, "3f");
 	declare_volume_bool<dyno::DataType3f>(m, "3f");
 	declare_volume_generator<dyno::DataType3f>(m, "3f");
-	declare_volume_intersect<dyno::DataType3f>(m, "3f");
-	declare_volume_minus<dyno::DataType3f>(m, "3f");
 	declare_volume_octree<dyno::DataType3f>(m, "3f");
 	//declare_volume_octree_boolean<dyno::DataType3f>(m, "3f");
 	//declare_position_node(m);
 	declare_volume_octree_generator<dyno::DataType3f>(m, "3f");
 	//declare_volume_uniform_generator<dyno::DataType3f>(m, "3f");
-	declare_volume_union<dyno::DataType3f>(m, "3f");
-
 }

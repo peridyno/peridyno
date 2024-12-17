@@ -91,6 +91,7 @@ namespace dyno
 		DArray<Coord> vertices,		//triangle vertices
 		DArray<TopologyModule::Triangle> indices,	//triangle indices
 		DArrayList<int> contactListBroadPhase,
+		DArray<Pair<uint, uint>> mapping,
 		ElementOffset elementOffset)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -212,7 +213,7 @@ namespace dyno
 			if (intersected)
 			{
 				ContactPair contact;
-				contact.bodyId1 = tId;
+				contact.bodyId1 = mapping[tId].second;
 				contact.bodyId2 = -1;
 				contact.normal1 = normal_min;
 				contact.pos1 = proj_min + normal_min * d_min;
@@ -257,15 +258,20 @@ namespace dyno
 		if (mQueryAABB.size() != num)
 			mQueryAABB.resize(num);
 
+		DArray<Box3D>& boxInGlobal = de->boxesInGlobal();
+		DArray<Sphere3D>& sphereInGlobal = de->spheresInGlobal();
+		DArray<Tet3D>& tetInGlobal = de->tetsInGlobal();
+		DArray<Capsule3D>& capsuleInGlobal = de->capsulesInGlobal();
+
 		ElementOffset elementOffset = de->calculateElementOffset();
 
 		cuExecute(num,
 			CDTS_SetupAABBForRigidBodies,
 			mQueryAABB,
-			de->getBoxes(),
-			de->getSpheres(),
-			de->getTets(),
-			de->getCaps(),
+			boxInGlobal,
+			sphereInGlobal,
+			tetInGlobal,
+			capsuleInGlobal,
 			elementOffset);
 
 		mBroadPhaseCD->inSource()->assign(mQueryAABB);
@@ -300,13 +306,14 @@ namespace dyno
 			CDTS_CountContacts,
 			mBoundaryContactCounter,
 			mContactBuffer,
-			de->getBoxes(),
-			de->getSpheres(),
-			de->getTets(),
-			de->getCaps(),
+			boxInGlobal,
+			sphereInGlobal,
+			tetInGlobal,
+			capsuleInGlobal,
 			vertices,
 			indices,
 			contactList,
+			de->shape2RigidBodyMapping(),
 			elementOffset);
 
 		mBoundaryContactCpy.assign(mBoundaryContactCounter);

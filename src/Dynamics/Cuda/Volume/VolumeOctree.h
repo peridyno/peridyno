@@ -22,6 +22,7 @@ namespace dyno
 
 		virtual Real dx() { return Real(0); }
 
+		std::string getNodeType() override;
 	public:
 		DEF_VAR(bool, Inverted, false, "");
 

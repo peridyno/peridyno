@@ -112,6 +112,7 @@ namespace dyno
 		Coord angularVelocity = this->varAngularVelocity()->getData();
 
 		Real dt = 0.001f;
+		//Real dt = this->stateTimeStep()->getData();
 		rotQuat = rotQuat.normalize();
 		rotQuat += dt * 0.5f *
 			Quat<Real>(angularVelocity[0], angularVelocity[1], angularVelocity[2], 0.0) * (rotQuat);

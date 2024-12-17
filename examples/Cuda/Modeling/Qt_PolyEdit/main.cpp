@@ -2,7 +2,8 @@
 
 //#include "TrianglePickerNode.h"
 #include "initializeModeling.h"
-#include "Commands/PointFromCurve.h"
+
+#include "Samplers/PointFromCurve.h"
 
 #include "Commands/Sweep.h"
 #include "BasicShapes/SphereModel.h"

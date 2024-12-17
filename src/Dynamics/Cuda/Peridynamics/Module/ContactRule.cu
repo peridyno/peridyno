@@ -421,7 +421,7 @@ __global__ void CR_UpDate_Contact_Force(
 			this->inOldPosition()->getData(),
 			this->inNewPosition()->getData(),
 			indices,
-			this->inXi()->getData() * this->inUnit()->getData());
+			this->varXi()->getData() * this->inUnit()->getData());
 
 		mBroadPhaseCD->varGridSizeLimit()->setValue(this->inUnit()->getData());
 		mBroadPhaseCD->inSource()->assign(aabb);
@@ -483,7 +483,7 @@ __global__ void CR_UpDate_Contact_Force(
 		
 		DArray<Real> steplengthOfVertex(vNum);
 		DArray<Real> steplengthOfTriangle(tNum);
-		Real d_hat = Real((1.0+15*eps) * this->inXi()->getData() * this->inUnit()->getData());
+		Real d_hat = Real((1.0+15*eps) * this->varXi()->getData() * this->inUnit()->getData());
 
 		cuExecute(tNum,
 			CR_Calculate_Timestep,
@@ -492,8 +492,8 @@ __global__ void CR_UpDate_Contact_Force(
 			this->inNewPosition()->getData(),
 			indices,
 			cList,
-			Real(this->inXi()->getData() * this->inUnit()->getData()),
-			this->inS()->getData(),
+			Real(this->varXi()->getValue() * this->inUnit()->getData()),
+			this->varS()->getData(),
 			this->trueContact,
 			this->trueContactCnt
 			);
@@ -547,7 +547,7 @@ __global__ void CR_UpDate_Contact_Force(
 				this->secondTri,
 				this->outContactForce()->getData(),
 				d_hat,
-				(Real)(this->inXi()->getData() * this->inUnit()->getData()),
+				(Real)(this->varXi()->getData() * this->inUnit()->getData()),
 				indices,
 				this->inNewPosition()->getData(),
 				this->outWeight()->getData());
@@ -577,7 +577,7 @@ __global__ void CR_UpDate_Contact_Force(
 			if (maxforce > 1e16)
 				maxforce = 1e16;
 			
-			Real u_xi = Real(this->inUnit()->getData()* this->inXi()->getData());
+			Real u_xi = Real(this->inUnit()->getData()* this->varXi()->getData());
 			Real max_f = pow(eps * u_xi - d_hat, 2) / (eps * u_xi) + log((eps * u_xi) / d_hat) * 2.0 * (eps * u_xi - d_hat);
 			this->weight = max_f;
 			Real timestep  = minimum(Real( eps * u_xi/((maxWeight*max_f)+0.01)), Real(eps* u_xi / (maxforce)));

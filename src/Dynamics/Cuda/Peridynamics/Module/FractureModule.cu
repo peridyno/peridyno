@@ -5,11 +5,12 @@
 
 namespace dyno
 {
+	IMPLEMENT_TCLASS(FractureModule, TDataType)
+
 	template<typename TDataType>
 	FractureModule<TDataType>::FractureModule()
 		: ElastoplasticityModule<TDataType>()
 	{
-		this->setCohesion(0.001);
 	}
 
 	template <typename Real, typename Coord, typename Bond>

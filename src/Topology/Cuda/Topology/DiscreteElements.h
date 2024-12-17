@@ -2,6 +2,8 @@
 #include "Module/TopologyModule.h"
 #include "Primitive/Primitive3D.h"
 
+#include "STL/Pair.h"
+
 namespace dyno
 {
 	enum ElementType
@@ -11,6 +13,7 @@ namespace dyno
 		ET_CAPSULE = 4,
 		ET_SPHERE = 8,
 		ET_TRI = 16,
+		ET_COMPOUND = 32,
 		ET_Other = 0x80000000
 	};
 
@@ -392,11 +395,14 @@ namespace dyno
 			}
 		}
 
+		void setAnchorAngle(Quat<Real> quat) { q = quat; }
+
 	public:
 		// anchor point position in body1 and body2 local space
 		Vector<Real, 3> r1;
 		Vector<Real, 3> r2;
 		Vector<Real, 3> w;
+		Quat<Real> q;
 	};
 
 
@@ -436,6 +442,44 @@ namespace dyno
 
 	};
 
+	template<typename Real>
+	class DistanceJoint : public Joint<Real>
+	{
+	public:
+		DistanceJoint()
+		{
+			this->bodyId1 = INVALID;
+			this->bodyId2 = INVALID;
+
+			this->bodyType1 = ET_Other;
+			this->bodyType2 = ET_Other;
+
+			this->actor1 = nullptr;
+			this->actor2 = nullptr;
+		}
+		DistanceJoint(PdActor* a1, PdActor* a2)
+		{
+			this->bodyId1 = a1->idx;
+			this->bodyId2 = a2->idx;
+
+			this->bodyType1 = a1->shapeType;
+			this->bodyType2 = a2->shapeType;
+
+			this->actor1 = a1;
+			this->actor2 = a2;
+		}
+		void setDistanceJoint(Vector<Real, 3> r1, Vector<Real, 3> r2, Real distance)
+		{
+			this->r1 = r1;
+			this->r2 = r2;
+			this->distance = distance;
+		}
+	public:
+		// anchor point position in body1 and body2 local space
+		Vector<Real, 3> r1;
+		Vector<Real, 3> r2;
+		Real distance;
+	};
 
 	/**
 	 * Discrete elements will arranged in the order of sphere, box, tet, capsule, triangle
@@ -458,6 +502,7 @@ namespace dyno
 		typedef typename HingeJoint<Real> HingeJoint;
 		typedef typename FixedJoint<Real> FixedJoint;
 		typedef typename PointJoint<Real> PointJoint;
+		typedef typename DistanceJoint<Real> DistanceJoint;
 
 		DiscreteElements();
 		~DiscreteElements() override;
@@ -476,6 +521,7 @@ namespace dyno
 
 		ElementOffset calculateElementOffset();
 
+		//Set basic shapes in local frame
 		void setBoxes(DArray<Box3D>& boxes);
 		void setSpheres(DArray<Sphere3D>& spheres);
 		void setTets(DArray<Tet3D>& tets);
@@ -483,17 +529,32 @@ namespace dyno
 		void setTriangles(DArray<Triangle3D>& triangles);
 		void setTetSDF(DArray<Real>& sdf);
 
-		DArray<Box3D>&		getBoxes() { return m_boxes; }
-		DArray<Sphere3D>&	getSpheres() { return m_spheres; }
-		DArray<Tet3D>&		getTets() { return m_tets; }
-		DArray<Capsule3D>&	getCaps() { return m_caps; }
-		DArray<Triangle3D>& getTris() { return m_tris; }
+		DArray<Box3D>&		boxesInLocal() { return mBoxesInLocal; }
+		DArray<Sphere3D>&	spheresInLocal() { return mSpheresInLocal; }
+		DArray<Tet3D>&		tetsInLocal() { return mTetsInLocal; }
+		DArray<Capsule3D>&	capsulesInLocal() { return mCapsulesInLocal; }
+		DArray<Triangle3D>&	trianglesInLocal() { return mTrianglesInLocal; }
+
+		DArray<Box3D>&		boxesInGlobal() { return mBoxInGlobal; }
+		DArray<Sphere3D>&	spheresInGlobal() { return mSphereInGlobal; }
+		DArray<Tet3D>&		tetsInGlobal() { return mTetInGlobal; }
+		DArray<Capsule3D>&	capsulesInGlobal() { return mCapsuleInGlobal; }
+		DArray<Triangle3D>& trianglesInGlobal() { return mTriangleInGlobal; }
+
+		DArray<Pair<uint, uint>>& shape2RigidBodyMapping() { return mShape2RigidBody; };
+
+		DArray<Coord>& position() { return mPosition; }
+		DArray<Matrix>& rotation() { return mRotation; }
+
+		void setPosition(const DArray<Coord>& pos) { mPosition.assign(pos); }
+		void setRotation(const DArray<Matrix>& rot) { mRotation.assign(rot); }
 
 		DArray<BallAndSocketJoint>& ballAndSocketJoints() { return mBallAndSocketJoints; };
 		DArray<SliderJoint>& sliderJoints() { return mSliderJoints; };
 		DArray<HingeJoint>& hingeJoints() { return mHingeJoints; };
 		DArray<FixedJoint>& fixedJoints() { return mFixedJoints; };
 		DArray<PointJoint>& pointJoints() { return mPointJoints; };
+		DArray<DistanceJoint>& distanceJoints() { return mDistanceJoints; };
 
 		void setTetBodyId(DArray<int>& body_id);
 		void setTetElementId(DArray<TopologyModule::Tetrahedron>& element_id);
@@ -502,19 +563,50 @@ namespace dyno
 		DArray<int>&		getTetBodyMapping() { return m_tet_body_mapping; }
 		DArray<TopologyModule::Tetrahedron>& getTetElementMapping() { return m_tet_element_id; }
 
+		void copyFrom(DiscreteElements<TDataType>& de);
+
+
+		void requestDiscreteElementsInGlobal(
+			DArray<Box3D>& boxInGlobal,
+			DArray<Sphere3D>& sphereInGlobal,
+			DArray<Tet3D>& tetInGlobal,
+			DArray<Capsule3D>& capInGlobal,
+			DArray<Triangle3D>& triInGlobal);
+
+		void requestBoxInGlobal(DArray<Box3D>& boxInGlobal);
+		void requestSphereInGlobal(DArray<Sphere3D>& sphereInGlobal);
+		void requestTetInGlobal(DArray<Tet3D>& tetInGlobal);
+		void requestCapsuleInGlobal(DArray<Capsule3D>& capInGlobal);
+		void requestTriangleInGlobal(DArray<Triangle3D>& triInGlobal);
+
 	protected:
-		DArray<Sphere3D> m_spheres;
-		DArray<Box3D> m_boxes;
-		DArray<Tet3D> m_tets;
-		DArray<Capsule3D> m_caps;
-		DArray<Triangle3D> m_tris;
+		void updateTopology() override;
+
+	protected:
+		DArray<Sphere3D> mSpheresInLocal;
+		DArray<Box3D> mBoxesInLocal;
+		DArray<Tet3D> mTetsInLocal;
+		DArray<Capsule3D> mCapsulesInLocal;
+		DArray<Triangle3D> mTrianglesInLocal;
+
+		DArray<Sphere3D> mSphereInGlobal;
+		DArray<Box3D> mBoxInGlobal;
+		DArray<Tet3D> mTetInGlobal;
+		DArray<Capsule3D> mCapsuleInGlobal;
+		DArray<Triangle3D> mTriangleInGlobal;
 
 		DArray<BallAndSocketJoint> mBallAndSocketJoints;
 		DArray<SliderJoint> mSliderJoints;
 		DArray<HingeJoint> mHingeJoints;
 		DArray<FixedJoint> mFixedJoints;
 		DArray<PointJoint> mPointJoints;
-		
+		DArray<DistanceJoint> mDistanceJoints;
+
+		DArray<Pair<uint, uint>> mShape2RigidBody;
+
+		DArray<Coord> mPosition;
+		DArray<Matrix> mRotation;
+
 		DArray<Real> m_tet_sdf;
 		DArray<int> m_tet_body_mapping;
 		DArray<TopologyModule::Tetrahedron> m_tet_element_id;

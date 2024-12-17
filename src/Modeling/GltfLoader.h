@@ -83,6 +83,8 @@ namespace dyno
 		GltfLoader();
 		~GltfLoader();
 
+		std::string getNodeType() override { return "IO"; }
+
 	public:
 
 		DEF_VAR(FilePath, FileName, "", "");
@@ -112,8 +114,7 @@ namespace dyno
 		DEF_INSTANCE_STATE(PointSet<TDataType>, ShapeCenter, "");
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, JointSet, "");
 
-		
-
+		DEF_INSTANCE_STATE(JointAnimationInfo, Animation,"");
 
 	protected:
 		void resetStates() override
@@ -123,6 +124,11 @@ namespace dyno
 
 		void updateStates() override;
 
+
+
+	public:
+
+		std::map<int, std::string> node_Name;
 
 	private:
 
@@ -154,8 +160,8 @@ namespace dyno
 		std::vector<std::string> Scene_Name;
 		std::map<joint, std::string> joint_Name;
 
-		std::map<joint, Vec3i> joint_output;		// Vec3i[0]  translation ,Vec3i[1]  scale ,Vec3i[2] rotation ,//�����任����
-		std::map<joint, Vec3f> joint_input;			// time Vec3f[0]  translation ,Vec3f[1]  scale ,Vec3f[2] rotation ,//����ʱ���
+		std::map<joint, Vec3i> joint_output;		// Vec3i[0]  translation ,Vec3i[1]  scale ,Vec3i[2] rotation ,
+		std::map<joint, Vec3f> joint_input;			// time Vec3f[0]  translation ,Vec3f[1]  scale ,Vec3f[2] rotation ,
 		
 		std::vector<int> all_Nodes;
 		std::vector<joint> all_Joints;
@@ -164,7 +170,7 @@ namespace dyno
 		std::map<joint, std::vector<int>> nodeId_Dir;
 		std::map<int, std::vector<int>> meshId_Dir;
 
-		std::map<int, std::string> mesh_Name;
+
 		std::map<int, Mat4f> node_matrix;
 
 		CArray<Mat4f> mesh_Matrix;
@@ -195,7 +201,7 @@ namespace dyno
 
 		void InitializationData();
 
-		std::vector<int> getJointDirByJointIndex(int Index);
+
 
 		void updateAnimationMatrix(const std::vector<joint>& all_Joints, int currentframe);
 

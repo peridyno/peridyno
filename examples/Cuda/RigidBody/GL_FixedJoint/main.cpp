@@ -25,28 +25,31 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
 
-	BoxInfo newBox, oldBox;
-	RigidBodyInfo rigidBody;
-	rigidBody.linearVelocity = Vec3f(1.0, 0.0, 1.0);
-	oldBox.center = Vec3f(0, 0.1, 0);
-	oldBox.halfLength = Vec3f(0.02, 0.02, 0.02);
-	auto oldBoxActor = rigid->addBox(oldBox, rigidBody);
+	BoxInfo box;
+	box.center = Vec3f(0.0f);
+	box.halfLength = Vec3f(0.02, 0.02, 0.02);
 
-	rigidBody.linearVelocity = Vec3f(0, 0, 0);
+	RigidBodyInfo rbA;
+	RigidBodyInfo rbB;
+	rbA.position = Vec3f(0.0f, 0.1f, 0.0f);
+	rbA.linearVelocity = Vec3f(1.0, 0.0, 1.0);
+
+	auto oldBoxActor = rigid->addBox(box, rbA);
+
+	rbA.linearVelocity = Vec3f(0, 0, 0);
 
 	for (int i = 0; i < 30; i++)
 	{
-		newBox.center = oldBox.center + Vec3f(0, 0.05f, 0.0);
-		newBox.halfLength = oldBox.halfLength;
-		auto newBoxActor = rigid->addBox(newBox, rigidBody);
+		rbB.position = rbA.position + Vec3f(0, 0.05f, 0.0);
+		auto newBoxActor = rigid->addBox(box, rbB);
 
 		auto& fixedJoint = rigid->createFixedJoint(oldBoxActor, newBoxActor);
-		fixedJoint.setAnchorPoint((oldBox.center + newBox.center) / 2);
+		fixedJoint.setAnchorPoint((rbA.position + rbB.position) / 2);
 
 		/*auto& fixedJoint = rigid->createUnilateralFixedJoint(newBoxActor);
 		fixedJoint.setAnchorPoint(newBox.center);*/
 
-		oldBox = newBox;
+		rbA = rbB;
 		oldBoxActor = newBoxActor;
 	}
 

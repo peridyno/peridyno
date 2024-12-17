@@ -1,12 +1,16 @@
-#include "GlfwGUI/GlfwApp.h"
+#include "UbiApp.h"
 
 #include "SceneGraph.h"
-#include "Log.h"
+
+#include <BasicShapes/CubeModel.h>
+
+#include <Volume/BasicShapeToVolume.h>
+
+#include <Multiphysics/VolumeBoundary.h>
 
 #include "RigidBody/RigidBody.h"
-#include "ParticleSystem/StaticBoundary.h"
-#include "ParticleSystem/SquareEmitter.h"
-#include "ParticleSystem/CircularEmitter.h"
+#include "ParticleSystem/Emitters/SquareEmitter.h"
+#include "ParticleSystem/Emitters/CircularEmitter.h"
 #include "ParticleSystem/ParticleFluid.h"
 
 #include "Topology/TriangleSet.h"
@@ -100,7 +104,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
-	GlfwApp window;
+	UbiApp window;
 	window.setSceneGraph(createScene());
 	window.initialize(1920, 1080);
 	window.mainLoop();

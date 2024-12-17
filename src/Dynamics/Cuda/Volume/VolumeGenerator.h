@@ -55,7 +55,7 @@ namespace dyno {
 	public:
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
 
-		DEF_INSTANCE_OUT(SignedDistanceField<TDataType>, GenSDF, "");
+		DEF_INSTANCE_OUT(LevelSet<TDataType>, GenSDF, "");
 
 		DEF_VAR_IN(Real, Spacing, "");
 

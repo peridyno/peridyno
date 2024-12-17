@@ -13,7 +13,7 @@ namespace dyno
 
 	template<typename TDataType>
 	SplineConstraint<TDataType>::SplineConstraint()
-		: Node()
+		: ModelEditing<TDataType>()
 	{
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
 		

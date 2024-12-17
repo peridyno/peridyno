@@ -9,6 +9,8 @@
 namespace dyno
 {
 	class SceneGraph;
+	class RenderWindow;
+
 	class AppBase {
 	public:
 		AppBase() {};
@@ -16,6 +18,8 @@ namespace dyno
 
 		virtual void initialize(int width, int height, bool usePlugin = false) {};
 		virtual void mainLoop() = 0;
+
+		virtual RenderWindow* renderWindow() { return nullptr; }
 
 		virtual std::shared_ptr<SceneGraph> getSceneGraph() { return SceneGraphFactory::instance()->active(); }
 		virtual void setSceneGraph(std::shared_ptr<SceneGraph> scene) { SceneGraphFactory::instance()->pushScene(scene); }

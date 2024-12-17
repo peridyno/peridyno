@@ -1,8 +1,7 @@
 #include <GlfwApp.h>
 //#include <QtApp.h>
 #include "SceneGraph.h"
-#include <Log.h>
-#include "ParticleSystem/StaticBoundary.h"
+
 #include <Module/CalculateNorm.h>
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
@@ -11,10 +10,11 @@
 #include "DualParticleSystem/DualParticleFluidSystem.h"
 #include "ParticleSystem/MakeParticleSystem.h"
 #include <BasicShapes/CubeModel.h>
-#include <ParticleSystem/CubeSampler.h>
-#include <ParticleSystem/SquareEmitter.h>
+#include <Samplers/CubeSampler.h>
+#include <ParticleSystem/Emitters/SquareEmitter.h>
+#include <ParticleSystem/Emitters/PoissonEmitter.h>
+
 #include "PointsLoader.h"
-#include <ParticleSystem/PoissonEmitter.h>
 
 using namespace std;
 using namespace dyno;

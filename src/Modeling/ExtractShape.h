@@ -15,8 +15,9 @@
  */
 
 #pragma once
-#include "Node.h"
+#include "ModelEditing.h"
 #include "Topology/TextureMesh.h"
+#include "Topology/TriangleSet.h"
 
 
 namespace dyno
@@ -26,7 +27,7 @@ namespace dyno
 	 */
 
 	template<typename TDataType>
-	class ExtractShape: public Node
+	class ExtractShape : public ModelEditing<TDataType>
 	{
 		DECLARE_TCLASS(ExtractShape, TDataType);
 
@@ -45,10 +46,13 @@ namespace dyno
 
 		DEF_VAR(std::vector<int>, ShapeId, std::vector<int>{0},"");
 
-		DEF_INSTANCE_IN(TextureMesh, InTextureMesh, "TextureMesh01");
+		DEF_VAR(std::vector<Transform3f>, ShapeTransform, std::vector<Transform3f>{Transform3f()}, "");
 
-		DEF_INSTANCE_STATE(TextureMesh, Target, "");
+		DEF_VAR(bool, Offset, true, "");
 
+		DEF_INSTANCE_IN(TextureMesh, InTextureMesh, "Input TextureMesh");
+
+		DEF_INSTANCE_STATE(TextureMesh, Result, "Output TextureMesh");
 
 	protected:
 		void resetStates() override;

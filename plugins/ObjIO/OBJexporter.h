@@ -30,6 +30,7 @@ namespace dyno
 
 		OBJExporter();
 
+		std::string getNodeType() override { return "IO"; }
 		//void update() override;
 
 	public:

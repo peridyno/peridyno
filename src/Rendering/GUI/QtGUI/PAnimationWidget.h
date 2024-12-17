@@ -31,6 +31,7 @@ namespace dyno
 	public slots:
 		void toggleSimulation();
 		void resetSimulation();
+		void takeOneStep();
 
 		void simulationFinished();
 
@@ -44,15 +45,18 @@ namespace dyno
 
 	private:
 		QPushButton*	mStartSim;
+		QPushButton*	mNextStep;
 		QPushButton*	mResetSim;
 
 		QPixmap* mStartIcon;
 		QPixmap* mPauseIcon;
 		QPixmap* mResetIcon;
+		QPixmap* mNextStepIcon;
 		QPixmap* mFinishIcon;
 
 		QLabel* mResetLabel;
 		QLabel* mStartLabel;
+		QLabel* mNextStepLabel;
 		
 		QCheckBox* mPersistent;
 		QSpinBox* mTotalFrameSpinbox;

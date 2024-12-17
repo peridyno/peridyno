@@ -23,7 +23,7 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 
 		StaticTriangularMesh();
-
+		std::string getNodeType() override { return "IO"; }
 	public:
 		DEF_VAR(FilePath, FileName, "", "");
 		

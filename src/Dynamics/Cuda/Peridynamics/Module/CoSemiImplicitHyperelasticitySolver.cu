@@ -21,15 +21,15 @@ namespace dyno
 	CoSemiImplicitHyperelasticitySolver<TDataType>::CoSemiImplicitHyperelasticitySolver()
 		: LinearElasticitySolver<TDataType>()
 	{
-		
-		mContactRule = std::make_shared<ContactRule<TDataType>>();
 		this->varIterationNumber()->setValue(30);
-		
-	}
 
-	template<typename TDataType>
-	void CoSemiImplicitHyperelasticitySolver<TDataType>::connectContact() {
-		
+		mContactRule = std::make_shared<ContactRule<TDataType>>();
+
+		this->inTriangularMesh()->connect(mContactRule->inTriangularMesh());
+		this->inOldPosition()->connect(mContactRule->inOldPosition());
+		this->inVelocity()->connect(mContactRule->inVelocity());
+		this->inTimeStep()->connect(mContactRule->inTimeStep());
+		this->inUnit()->connect(mContactRule->inUnit());
 	}
 
 	template<typename TDataType>
@@ -310,50 +310,6 @@ namespace dyno
 			velocity[pId] += (position[pId] - position_old[pId]) / dt;
 		}
 	}
-
-	template <typename Coord>
-	__global__ void test_HM_UpdateVelocity(
-		DArray<Coord> position,
-		DArray<Coord> velocity,
-		DArray<Coord> v_even,
-		DArray<Coord> y_next,
-		DArray<Coord> position_old,
-		DArray<Coord> contactForce,
-		DArray<Coord> contactForce_target,
-		DArray<Coord> forceTarget,
-		DArray<Attribute> att,
-		DArray<Coord> N,
-		DArray<Coord> v_group,
-		DArray<Real> weight,
-		Real s,
-		Real dt)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= position.size()) return;
-
-		forceTarget[pId] = Coord(0.0);
-		auto myNorm = [](Coord v1) {
-			return sqrt(pow(v1[0], 2) + pow(v1[1], 2) + pow(v1[2], 2));
-		};
-
-		if (!att[pId].isFixed()) {
-			contactForce_target[pId] = s * contactForce[pId];
-			if (myNorm(contactForce_target[pId]) >= EPSILON) {
-				Coord contactForce_mom = contactForce_target[pId] * dt;
-				
-				velocity[pId] -= v_even[0];
-				Real alpha = -contactForce_mom.dot(velocity[pId]) / pow(myNorm(contactForce_mom), 2);
-				//printf("alpha %f\n", alpha);
-				//alpha =  minimum(alpha, (Real)10);
-				//alpha = maximum(alpha, (Real)-10);
-				velocity[pId] += alpha * contactForce_mom;
-				velocity[pId] += v_even[0];
-				contactForce_target[pId] *= alpha;
-				
-			}
-		}
-	}
-
 
 	template <typename Real, typename Coord, typename Matrix, typename Bond>
 	__global__ void HM_ComputeF(
@@ -893,6 +849,7 @@ namespace dyno
 		mEnergyGradient.resize(num);
 
 		y_pre.resize(num);
+		y_next.resize(num);
 		y_current.resize(num);
 		y_gradC.resize(num);
 
@@ -941,7 +898,6 @@ namespace dyno
 		/*====================================== Jacobi method ======================================*/
 		// initialize y_now, y_next_iter
 		y_current.assign(this->inY()->getData());
-		this->inMarchPosition()->getData().assign(this->inY()->getData());
 		mPosBuf.assign(this->inY()->getData());
 
 
@@ -952,7 +908,7 @@ namespace dyno
 		Real alpha = 1.0f;
 		Real max_grad_mag = Real(1000.0);
 
-		if (selfContact) {
+		if (true) {
 			while (iterCount < this->varIterationNumber()->getData() && max_grad_mag >= this->grad_res_eps) {
 			
 				m_source.reset();
@@ -997,7 +953,7 @@ namespace dyno
 
 				cuExecute(y_current.size(),
 					HM_ComputeNextPosition,
-					this->inMarchPosition()->getData(),
+					y_next,
 					mPosBuf,
 					m_volume,
 					m_source,
@@ -1009,7 +965,7 @@ namespace dyno
 					m_gradient,
 					m_gradientMagnitude,
 					y_current,
-					this->inMarchPosition()->getData());
+					y_next);
 
 
 				Reduction<Real> reduce;
@@ -1043,7 +999,7 @@ namespace dyno
 						HM_ComputeCurrentPosition,
 						m_gradient,
 						y_current,
-						this->inMarchPosition()->getData(),
+						y_next,
 						m_alpha);
 				}
 				else {
@@ -1052,19 +1008,20 @@ namespace dyno
 						HM_ComputeCurrentPosition,
 						m_gradient,
 						y_current,
-						this->inMarchPosition()->getData(),
+						y_next,
 						alpha);
 				}
 
 				iterCount++;
 
-				y_current.assign(this->inMarchPosition()->getData());
+				y_current.assign(y_next);
 			}
 
 			// do Jacobi method Loop
+			mContactRule->inNewPosition()->assign(y_next);
 			mContactRule->initCCDBroadPhase();
 
-			this->inMarchPosition()->getData().assign(mPosBuf);
+			mContactRule->inNewPosition()->assign(mPosBuf);
 			convergeFlag = false; // converge or not
 			iterCount = 0;
 			alpha = 1.0f;
@@ -1072,10 +1029,12 @@ namespace dyno
 	}
 		mPosBuf_March.assign(mPosBuf);
 
+
+		auto& cntPos = mContactRule->inNewPosition()->getData();
 		while (iterCount < this->varIterationNumber()->getData() && max_grad_mag >= this->grad_res_eps) {
 			m_source.reset();
 			m_A.reset();
-			y_current.assign(this->inMarchPosition()->getData());
+			y_current.assign(cntPos);
 
 			HM_ComputeF << <pDims, BLOCK_SIZE >> > (
 				m_F,
@@ -1114,9 +1073,9 @@ namespace dyno
 				this->varNeighborSearchingAdjacent()->getData());
 			cuSynchronize();
 
-			cuExecute(this->inMarchPosition()->getData().size(),
+			cuExecute(cntPos.size(),
 				HM_ComputeNextPosition,
-				this->inMarchPosition()->getData(),
+				cntPos,
 				mPosBuf_March,
 				m_volume,
 				m_source,
@@ -1128,7 +1087,7 @@ namespace dyno
 				m_gradient,
 				m_gradientMagnitude,
 				y_current,
-				this->inMarchPosition()->getData());
+				cntPos);
 
 			Reduction<Real> reduce;
 			max_grad_mag = reduce.maximum(m_gradientMagnitude.begin(), m_gradientMagnitude.size());
@@ -1161,7 +1120,7 @@ namespace dyno
 					HM_ComputeCurrentPosition,
 					m_gradient,
 					y_current,
-					this->inMarchPosition()->getData(),
+					cntPos,
 					m_alpha);
 			}
 			else {
@@ -1171,7 +1130,7 @@ namespace dyno
 					HM_ComputeCurrentPosition,
 					m_gradient,
 					y_current,
-					this->inMarchPosition()->getData(),
+					cntPos,
 					alpha);
 			}
 			if (this->selfContact) {
@@ -1194,7 +1153,7 @@ namespace dyno
 			test_HM_UpdatePosition,
 			this->inY()->getData(),
 			this->inVelocity()->getData(),
-			this->inMarchPosition()->getData(),
+			cntPos,
 			mPosBuf,
 			this->inAttribute()->getData(),
 			this->inTimeStep()->getData());

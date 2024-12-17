@@ -1,7 +1,5 @@
 #include <GlfwApp.h>
 #include "SceneGraph.h"
-#include <Log.h>
-#include "ParticleSystem/StaticBoundary.h"
 #include <Module/CalculateNorm.h>
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
@@ -10,8 +8,8 @@
 #include "DualParticleSystem/DualParticleFluidSystem.h"
 #include "ParticleSystem/MakeParticleSystem.h"
 #include <BasicShapes/CubeModel.h>
-#include <ParticleSystem/CubeSampler.h>
-#include <ParticleSystem/SquareEmitter.h>
+#include <Samplers/CubeSampler.h>
+#include <ParticleSystem/Emitters/SquareEmitter.h>
 #include "PointsLoader.h"
 
 using namespace std;
@@ -46,12 +44,6 @@ std::shared_ptr<SceneGraph> createScene()
 	fluid->varReshuffleParticles()->setValue(true);
 	initialParticles->connect(fluid->importInitialStates());
 	initialParticles2->connect(fluid->importInitialStates());
-
-	//Create a boundary
-	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>()); ;
-	//boundary->loadCube(Vec3f(-0.5, 0, -0.5), Vec3f(1.5, 2, 1.5), 0.02, true);
-	//boundary->loadSDF(getAssetPath() + "bowl/bowl.sdf", false);
-	fluid->connect(boundary->importParticleSystems());
 
 	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
 	fluid->stateVelocity()->connect(calculateNorm->inVec());

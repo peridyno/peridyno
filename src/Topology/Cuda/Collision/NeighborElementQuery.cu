@@ -10,7 +10,6 @@
 namespace dyno
 {
 	IMPLEMENT_TCLASS(NeighborElementQuery, TDataType)
-		typedef typename ::dyno::TOrientedBox3D<Real> Box3D;
 
 	struct ContactId
 	{
@@ -90,7 +89,6 @@ namespace dyno
 		case ET_SPHERE:
 		{
 			box = spheres[tId].aabb();
-
 			break;
 		}
 		case ET_BOX:
@@ -100,7 +98,6 @@ namespace dyno
 		}
 		case ET_TET:
 		{
-			
 			box = tets[tId - elementOffset.tetIndex()].aabb();
 			break;
 		}
@@ -149,6 +146,7 @@ namespace dyno
 		DArray<Capsule3D> caps,
 		DArray<Triangle3D> triangles,
 		DArray<Attribute> attribute,
+		DArray<Pair<uint, uint>> shape2RigidBodyMapping,
 		ElementOffset elementOffset,
 		Real dHat,
 		bool enableSelfCollision,
@@ -161,15 +159,24 @@ namespace dyno
 		ElementType eleType_i = elementOffset.checkElementType(ids.bodyId1);
 		ElementType eleType_j = elementOffset.checkElementType(ids.bodyId2);
 
-		CollisionMask mask_i = enableCollisionMask ? mask[ids.bodyId1] : CollisionMask::CT_AllObjects;
-		CollisionMask mask_j = enableCollisionMask ? mask[ids.bodyId2] : CollisionMask::CT_AllObjects;
-
 		TManifold<Real> manifold;
+
+		// Convert primitive id into rigid body id
+		int mappedId1 = ids.bodyId1 == INVALID ? ids.bodyId1 : shape2RigidBodyMapping[ids.bodyId1].second;
+		int mappedId2 = ids.bodyId2 == INVALID ? ids.bodyId2 : shape2RigidBodyMapping[ids.bodyId2].second;
+
+		// TODO: check whether it is plausible to define collision mask on rigid bodies
+		CollisionMask mask_i = enableCollisionMask ? mask[mappedId1] : CollisionMask::CT_AllObjects;
+		CollisionMask mask_j = enableCollisionMask ? mask[mappedId2] : CollisionMask::CT_AllObjects;
+
+		// If two primitives belong to the same rigid body, disable collision detection
+		if (mappedId1 == mappedId2)
+			return;
 
 		if (!enableSelfCollision)
 		{
-			Attribute att_i = attribute[ids.bodyId1];
-			Attribute att_j = attribute[ids.bodyId2];
+			Attribute att_i = attribute[mappedId1];
+			Attribute att_j = attribute[mappedId2];
 
 			if (att_i.objectId() == att_j.objectId())
 				return;
@@ -244,7 +251,7 @@ namespace dyno
 			auto tetB = tets[ids.bodyId2 - elementOffset.tetIndex()];
 			//CollisionDetection<Real>::request(manifold, tetA, tetB);
 
-			CollisionDetection<Real>::request(manifold, tetA, tetB, dHat, dHat);
+ 			CollisionDetection<Real>::request(manifold, tetA, tetB, dHat, dHat);
 		}
 		else if (eleType_i == ET_TET && eleType_j == ET_BOX && checkCollision(mask_i, mask_j, ET_TET, ET_BOX))
 		{
@@ -414,6 +421,8 @@ namespace dyno
 		
 		count[tId] = manifold.contactCount;
 
+		//printf("%d %d; num: %d \n", mappedId1, mappedId2, manifold.contactCount);
+
 		int offset = 8 * tId;
 		for (int n = 0; n < manifold.contactCount; n++)
 		{
@@ -424,8 +433,8 @@ namespace dyno
 			cp.pos2 = manifold.contacts[n].position;
 			cp.normal1 = -manifold.normal;
 			cp.normal2 = manifold.normal;
-			cp.bodyId1 = ids.bodyId1;
-			cp.bodyId2 = ids.bodyId2;
+			cp.bodyId1 = mappedId1;
+			cp.bodyId2 = mappedId2;
 			cp.contactType = ContactType::CT_NONPENETRATION;
 			//cp.interpenetration = -manifold.contacts[n].penetration - 2 * dHat;
 			cp.interpenetration = -manifold.contacts[n].penetration;
@@ -493,6 +502,8 @@ namespace dyno
 		if (this->outContacts()->isEmpty())
 			this->outContacts()->allocate();
 
+		this->outContacts()->clear();
+
 		int t_num = inTopo->totalSize();
 
 		if (t_num == 0)
@@ -514,14 +525,23 @@ namespace dyno
 
 		Real dHat = this->varDHead()->getValue();
 
+		auto& position = inTopo->position();
+		auto& rotation = inTopo->rotation();
+
+		DArray<Box3D>& boxInGlobal = inTopo->boxesInGlobal();
+		DArray<Sphere3D>& sphereInGlobal = inTopo->spheresInGlobal();
+		DArray<Tet3D>& tetInGlobal = inTopo->tetsInGlobal();
+		DArray<Capsule3D>& capsuleInGlobal = inTopo->capsulesInGlobal();
+		DArray<Triangle3D>& triangleInGlobal = inTopo->trianglesInGlobal();
+
 		cuExecute(t_num,
 			NEQ_SetupAABB,
 			mQueriedAABB,
-			inTopo->getBoxes(),
-			inTopo->getSpheres(),
-			inTopo->getTets(),
-			inTopo->getCaps(),
-			inTopo->getTris(),
+			boxInGlobal,
+			sphereInGlobal,
+			tetInGlobal,
+			capsuleInGlobal,
+			triangleInGlobal,
 			elementOffset,
 			dHat);
 
@@ -533,7 +553,9 @@ namespace dyno
 		mBroadPhaseCD->update();
 
 		auto& contactList = mBroadPhaseCD->outContactList()->getData();
-		if (contactList.size() == 0) return;
+		if (contactList.elementSize() == 0) {
+			return;
+		}
 
 		DArray<int> count(contactList.size());
 		cuExecute(contactList.size(),
@@ -585,15 +607,16 @@ namespace dyno
 					nbr_cons_tmp,
 					deviceIds,
 					dummyCollisionMask,
-					inTopo->getBoxes(),
-					inTopo->getSpheres(),
-					inTopo->getTets(),
+					boxInGlobal,
+					sphereInGlobal,
+					tetInGlobal,
 					inTopo->getTetSDF(),
 					inTopo->getTetBodyMapping(),
 					inTopo->getTetElementMapping(),
-					inTopo->getCaps(),
-					inTopo->getTris(),
+					capsuleInGlobal,
+					triangleInGlobal,
 					this->inAttribute()->getData(),
+					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
 					dHat,
 					false,
@@ -608,15 +631,16 @@ namespace dyno
 					nbr_cons_tmp,
 					deviceIds,
 					dummyCollisionMask,
-					inTopo->getBoxes(),
-					inTopo->getSpheres(),
-					inTopo->getTets(),
+					boxInGlobal,
+					sphereInGlobal,
+					tetInGlobal,
 					inTopo->getTetSDF(),
 					inTopo->getTetBodyMapping(),
 					inTopo->getTetElementMapping(),
-					inTopo->getCaps(),
-					inTopo->getTris(),
+					capsuleInGlobal,
+					triangleInGlobal,
 					dummyAttribute,
+					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
 					dHat,
 					true,
@@ -634,15 +658,16 @@ namespace dyno
 					nbr_cons_tmp,
 					deviceIds,
 					this->inCollisionMask()->getData(),
-					inTopo->getBoxes(),
-					inTopo->getSpheres(),
-					inTopo->getTets(),
+					boxInGlobal,
+					sphereInGlobal,
+					tetInGlobal,
 					inTopo->getTetSDF(),
 					inTopo->getTetBodyMapping(),
 					inTopo->getTetElementMapping(),
-					inTopo->getCaps(),
-					inTopo->getTris(),
+					capsuleInGlobal,
+					triangleInGlobal,
 					this->inAttribute()->getData(),
+					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
 					dHat,
 					false,
@@ -657,15 +682,16 @@ namespace dyno
 					nbr_cons_tmp,
 					deviceIds,
 					this->inCollisionMask()->getData(),
-					inTopo->getBoxes(),
-					inTopo->getSpheres(),
-					inTopo->getTets(),
+					boxInGlobal,
+					sphereInGlobal,
+					tetInGlobal,
 					inTopo->getTetSDF(),
 					inTopo->getTetBodyMapping(),
 					inTopo->getTetElementMapping(),
-					inTopo->getCaps(),
-					inTopo->getTris(),
+					capsuleInGlobal,
+					triangleInGlobal,
 					dummyAttribute,
+					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
 					dHat,
 					true,
@@ -691,6 +717,7 @@ namespace dyno
 				contactNum,
 				contactNumCpy);
 		}
+
 		contactNumCpy.clear();
 		contactNum.clear();
 		deviceIds.clear();

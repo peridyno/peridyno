@@ -29,6 +29,8 @@ namespace dyno
 		SparseVolumeClipper();
 		~SparseVolumeClipper() override;
 
+		std::string getNodeType() override { return "Volume"; }
+
 	public:
 		DEF_VAR(Coord, Translation, Coord(0), "");
 		DEF_VAR(Coord, Rotation, Coord(0), "");

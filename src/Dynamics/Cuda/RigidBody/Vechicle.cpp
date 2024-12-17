@@ -61,7 +61,7 @@ namespace dyno
 		cdBV->outContacts()->connect(merge->inContactsB());
 		this->animationPipeline()->pushModule(merge);
 
-		auto iterSolver = std::make_shared<PCGConstraintSolver<TDataType>>();
+		auto iterSolver = std::make_shared<TJConstraintSolver<TDataType>>();
 		this->stateTimeStep()->connect(iterSolver->inTimeStep());
 		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
 		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
@@ -201,10 +201,10 @@ namespace dyno
 			//get Elements
 			auto topo = TypeInfo::cast<DiscreteElements<DataType3f>>(this->stateTopology()->getDataPtr());
 
-			auto& boxes = topo->getBoxes();
-			auto& spheres = topo->getSpheres();
-			auto& tets = topo->getTets();
-			auto& caps = topo->getCaps();
+			auto& boxes = topo->boxesInGlobal();
+			auto& spheres = topo->spheresInGlobal();
+			auto& tets = topo->tetsInGlobal();
+			auto& caps = topo->capsulesInGlobal();
 
 			std::vector<Transform3f> vehicleTransform = this->varVehiclesTransform()->getValue();
 
@@ -337,8 +337,6 @@ namespace dyno
 		hostQuaternion.clear();
 		hostRotation.clear();
 
-		this->updateTopology();
-
 		this->updateInstanceTransform();
 	}
 
@@ -419,24 +417,21 @@ namespace dyno
 			//wheel
 			std::vector <int> Wheel_Id = { 0,1,2,3 };
 			std::map<int, CapsuleInfo> wheels;
-			std::map<int, std::shared_ptr<PdActor>> Actors;
+			std::map<int, std::shared_ptr<PdActor>> actors;
 			//Capsule
 			for (auto it : Wheel_Id)
 			{
 				auto up = texMesh->shapes()[it]->boundingBox.v1;
 				auto down = texMesh->shapes()[it]->boundingBox.v0;
 
-				wheels[it].center = texMesh->shapes()[it]->boundingTransform.translation();
+				wheels[it].center = Vec3f(0.0f);
 				wheels[it].rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
 				wheels[it].halfLength = 0.1;
 				wheels[it].radius = std::abs(up.y - down.y) / 2;
-			}
-			//Actor
-			for (auto it : Wheel_Id)
-			{
-				Actors[it] = this->addCapsule(wheels[it], rigidbody, 100);
-			}
 
+				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation();
+				actors[it] = this->addCapsule(wheels[it], rigidbody, 100);
+			}
 
 
 			//body
@@ -451,30 +446,24 @@ namespace dyno
 				auto up = texMesh->shapes()[it]->boundingBox.v1;
 				auto down = texMesh->shapes()[it]->boundingBox.v0;
 
-				auto center = texMesh->shapes()[it]->boundingTransform.translation();
-				boxs[it].center = Vec3f(center.x, center.y, center.z);
+				boxs[it].center = Vec3f(0.0f);
 
 				boxs[it].halfLength = (up - down) / 2;
 
-
+				rigidbody.offset = Vec3f(0.0f, 0.0f, 0.0f);
+				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation();
+				actors[it] = this->addBox(boxs[it], rigidbody, 100);
 			}
-			//Actor
-			for (auto it : box_Id)
-			{
-				Vec3f offset = Vec3f(0.0f, 0.0f, 0.0f);
 
-				rigidbody.offset = offset;
-				Actors[it] = this->addBox(boxs[it], rigidbody, 100);
-			}
 			//bindShapetoActor
 			for (auto it : box_Id)
 			{
-				this->bind(Actors[it], Pair<uint, uint>(it, i));
+				this->bind(actors[it], Pair<uint, uint>(it, i));
 			}
 			//bindShapetoActor
 			for (auto it : Wheel_Id)
 			{
-				this->bind(Actors[it], Pair<uint, uint>(it, i));
+				this->bind(actors[it], Pair<uint, uint>(it, i));
 			}
 
 			rigidbody.offset = Vec3f(0);
@@ -484,15 +473,14 @@ namespace dyno
 			//wheel to Body
 			for (auto it : Wheel_Id)
 			{
-				auto& joint = this->createHingeJoint(Actors[it], Actors[body]);
-				joint.setAnchorPoint(Actors[it]->center);
+				auto& joint = this->createHingeJoint(actors[it], actors[body]);
+				joint.setAnchorPoint(actors[it]->center);
 				joint.setMoter(wheel_velocity);
 				joint.setAxis(Vec3f(1, 0, 0));
 			}
 
-			auto& jointBackWheel_Body = this->createFixedJoint(Actors[backWheel], Actors[body]);
-			jointBackWheel_Body.setAnchorPoint(Actors[backWheel]->center);		//set and offset
-
+			auto& jointBackWheel_Body = this->createFixedJoint(actors[backWheel], actors[body]);
+			jointBackWheel_Body.setAnchorPoint(actors[backWheel]->center);		//set and offset
 		}
 
 		//**************************************************//
@@ -561,22 +549,32 @@ namespace dyno
 
 		// **************************** Create RigidBody  **************************** //
 		int vehicleNum = this->varVehiclesTransform()->getValue().size();
+		int maxGroup = 0;
+		for (size_t i = 0; i < rigidInfo.size(); i++)
+		{
+			if (rigidInfo[i].rigidGroup > maxGroup)
+				maxGroup = rigidInfo[i].rigidGroup;
+		}
+
 		for (size_t j = 0; j < vehicleNum; j++)
 		{
 			RigidBodyInfo rigidbody;
-			rigidbody.bodyId = j;
+
 			std::vector<std::shared_ptr<PdActor>> Actors;
 
 			Actors.resize(rigidInfo.size());
 
+
 			for (size_t i = 0; i < rigidInfo.size(); i++)
 			{
+				rigidbody.bodyId = j * (maxGroup+1) + rigidInfo[i].rigidGroup;
 
 				rigidbody.offset = rigidInfo[i].Offset;
 
 				auto type = rigidInfo[i].shapeType;
 				auto shapeId = rigidInfo[i].meshShapeId;
 				auto transform = rigidInfo[i].transform;
+				Real density = rigidInfo[i].mDensity;
 
 				if (shapeId > texMesh->shapes().size() - 1)
 					continue;
@@ -608,11 +606,12 @@ namespace dyno
 					switch (type)
 					{
 					case dyno::Box:
-						currentBox.center = T + rigidInfo[i].transform.translation();;
+						currentBox.center = Vec3f(0.0f);
 						currentBox.halfLength = (up - down) / 2 * rigidInfo[i].mHalfLength;
 						currentBox.rot = Quat1f(transform.rotation());
 
-						Actors[i] = this->addBox(currentBox, rigidbody, 100);
+						rigidbody.position = T + rigidInfo[i].transform.translation();
+						Actors[i] = this->addBox(currentBox, rigidbody, density);
 						break;
 
 					case dyno::Tet:
@@ -620,20 +619,22 @@ namespace dyno
 						break;
 
 					case dyno::Capsule:
-						currentCapsule.center = T + rigidInfo[i].transform.translation();
+						currentCapsule.center = Vec3f(0.0f);
 						currentCapsule.rot = Quat1f(transform.rotation());
 						currentCapsule.halfLength = (up.y - down.y) / 2 * rigidInfo[i].capsuleLength;
 						currentCapsule.radius = std::abs(up.y - down.y) / 2 * rigidInfo[i].radius;
 
-						Actors[i] = this->addCapsule(currentCapsule, rigidbody, 100);
+						rigidbody.position = T + rigidInfo[i].transform.translation();
+						Actors[i] = this->addCapsule(currentCapsule, rigidbody, density);
 						break;
 
 					case dyno::Sphere:
-						currentSphere.center = T + rigidInfo[i].transform.translation();
+						currentSphere.center = Vec3f(0.0f);
 						currentSphere.rot = Quat1f(transform.rotation());
 						currentSphere.radius = std::abs(up.y - down.y) / 2 * rigidInfo[i].radius;
 
-						Actors[i] = this->addSphere(currentSphere, rigidbody, 100);
+						rigidbody.position = T + rigidInfo[i].transform.translation();
+						Actors[i] = this->addSphere(currentSphere, rigidbody, density);
 						break;
 
 					case dyno::Tri:
@@ -655,11 +656,12 @@ namespace dyno
 					switch (type)
 					{
 					case dyno::Box:
-						currentBox.center = rigidInfo[i].transform.translation();
+						currentBox.center = Vec3f(0.0f);
 						currentBox.halfLength = rigidInfo[i].mHalfLength;
 						currentBox.rot = Quat<Real>(rigidInfo[i].transform.rotation());
 
-						Actors[i] = this->addBox(currentBox, rigidbody, 100);
+						rigidbody.position = rigidInfo[i].transform.translation();
+						Actors[i] = this->addBox(currentBox, rigidbody, density);
 						break;
 
 					case dyno::Tet:
@@ -672,20 +674,22 @@ namespace dyno
 						break;
 
 					case dyno::Capsule:
-						currentCapsule.center = rigidInfo[i].transform.translation();
+						currentCapsule.center = Vec3f(0.0f);
 						currentCapsule.rot = Quat<Real>(rigidInfo[i].transform.rotation());
 						currentCapsule.halfLength = rigidInfo[i].capsuleLength;
 						currentCapsule.radius = rigidInfo[i].radius;
 
-						Actors[i] = this->addCapsule(currentCapsule, rigidbody, 100);
+						rigidbody.position = rigidInfo[i].transform.translation();
+						Actors[i] = this->addCapsule(currentCapsule, rigidbody, density);
 						break;
 
 					case dyno::Sphere:
-						currentSphere.center = rigidInfo[i].transform.translation();
+						currentSphere.center = Vec3f(0.0f);
 						currentSphere.rot = Quat<Real>(rigidInfo[i].transform.rotation());
 						currentSphere.radius = rigidInfo[i].radius;
 
-						Actors[i] = this->addSphere(currentSphere, rigidbody, 100);
+						rigidbody.position = rigidInfo[i].transform.translation();
+						Actors[i] = this->addSphere(currentSphere, rigidbody, density);
 						break;
 
 					case dyno::Tri:
@@ -724,7 +728,7 @@ namespace dyno
 				if (Actors[first] == NULL || Actors[second] == NULL)
 					continue;
 
-				//joint (Actor,Actor)
+
 				if (type == Hinge)
 				{
 					auto& joint = this->createHingeJoint(Actors[first], Actors[second]);
@@ -734,6 +738,7 @@ namespace dyno
 						joint.setMoter(speed);
 					if (jointInfo[i].mUseRange)
 						joint.setRange(jointInfo[i].mMin, jointInfo[i].mMax);
+
 				}
 				if (type == Slider)
 				{
@@ -762,18 +767,18 @@ namespace dyno
 				}
 
 				//Joint(Actor)
+		
+				
 
 
 			}
 		}
+
+		
 		/***************** Reset *************/
 		Vechicle<TDataType>::resetStates();
 
-
-		this->updateTopology();
-
 		this->updateInstanceTransform();
-
 	}
 
 	DEFINE_CLASS(ConfigurableVehicle);

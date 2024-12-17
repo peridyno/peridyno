@@ -19,7 +19,6 @@ namespace dyno
 		this->inTimeStep()->connect(integrator->inTimeStep());
 		this->inPosition()->connect(integrator->inPosition());
 		this->inVelocity()->connect(integrator->inVelocity());
-		this->inForce()->connect(integrator->inForceDensity());
 		this->inAttribute()->connect(integrator->inAttribute());
 		this->pushModule(integrator);
 

@@ -27,7 +27,6 @@ namespace dyno
 		this->inTimeStep()->connect(integrator->inTimeStep());
 		this->inPosition()->connect(integrator->inPosition());
 		this->inVelocity()->connect(integrator->inVelocity());
-		this->inForceDensity()->connect(integrator->inForceDensity());
 		this->pushModule(integrator);
 
 		//neighbor query
@@ -71,7 +70,6 @@ namespace dyno
 		this->inVelocity()->connect(pshiftModule->inVelocity());
 		nbrQuery->outNeighborIds()->connect(pshiftModule->inNeighborIds());
 		this->inTriangleSet()->connect(pshiftModule->inTriangleSet());
-		this->inAttribute()->connect(pshiftModule->inAttribute());
 		nbrQueryTri->outNeighborIds()->connect(pshiftModule->inNeighborTriIds());
 		this->varSurfaceTension()->connect(pshiftModule->varSurfaceTension());
 		this->varAdhesionIntensity()->connect(pshiftModule->varAdhesionIntensity());

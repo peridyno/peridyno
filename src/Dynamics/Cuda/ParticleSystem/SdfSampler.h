@@ -15,12 +15,12 @@
  */
 #pragma once
 #include "Node.h"
-#include "Topology/SignedDistanceField.h"
+#include "Topology/LevelSet.h"
 #include "Topology/HexahedronSet.h"
 #include <cmath>
 #include <Volume/VolumeOctree.h>
 
-#include "Sampler.h"
+#include "Samplers/Sampler.h"
 
 namespace dyno {
 

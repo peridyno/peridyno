@@ -37,7 +37,6 @@ namespace dyno {
 		m_integrator = std::make_shared<ParticleIntegrator<TDataType>>();
 		m_particle_position.connect(m_integrator->inPosition());
 		m_particle_velocity.connect(m_integrator->inVelocity());
-		m_particle_force_density.connect(m_integrator->inForceDensity());
 		//m_integrator->initialize();
 
 		m_nbrQueryTri = std::make_shared<NeighborTriangleQuery<TDataType>>();
@@ -123,7 +122,7 @@ namespace dyno {
 
 		//m_integrator->begin();
 
-		m_integrator->integrate();
+		m_integrator->update();
 
 		m_nbrQueryPoint->update();
 
@@ -134,8 +133,6 @@ namespace dyno {
 		m_visModule->update();
 
 		m_pbdModule->update();
-
-		m_integrator->end();
 	}
 
 	DEFINE_CLASS(SemiAnalyticalIncompressibleFluidModel);

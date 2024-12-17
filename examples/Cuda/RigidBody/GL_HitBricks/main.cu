@@ -53,15 +53,21 @@ protected:
 
 		ElementOffset offset = elements->calculateElementOffset();
 
+		DArray<TOrientedBox3D<float>> boxInGlobal;
+
+		elements->requestBoxInGlobal(boxInGlobal);
+
 		if (event.actionType == AT_PRESS)
 		{
 			cuExecute(velocities.size(),
 				HitBoxes,
-				elements->getBoxes(),
+				boxInGlobal,
 				velocities,
 				event.ray,
 				offset.boxIndex());
 		}
+
+		boxInGlobal.clear();
 	}
 };
 
@@ -74,35 +80,37 @@ std::shared_ptr<SceneGraph> creatBricks()
 	RigidBodyInfo rigidBody;
 	rigidBody.linearVelocity = Vec3f(0.5, 0, 0);
 	BoxInfo box;
+	box.halfLength = 0.5f * Vec3f(0.065, 0.065, 0.1);
 	for (int i = 8; i > 1; i--)
 		for (int j = 0; j < i + 1; j++)
 		{
-			box.center = 0.5f * Vec3f(0.5f, 1.1 - 0.13 * i, 0.12f + 0.21 * j + 0.1 * (8 - i));
-			box.halfLength = 0.5f * Vec3f(0.065, 0.065, 0.1);
+			rigidBody.position = 0.5f * Vec3f(0.5f, 1.1 - 0.13 * i, 0.12f + 0.21 * j + 0.1 * (8 - i));
+			
 			rigid->addBox(box, rigidBody);
 		}
 
 	SphereInfo sphere;
-	sphere.center = Vec3f(0.5f, 0.75f, 0.5f);
 	sphere.radius = 0.025f;
 
 	RigidBodyInfo rigidSphere;
+	rigidSphere.position = Vec3f(0.5f, 0.75f, 0.5f);
 	rigid->addSphere(sphere, rigidSphere);
 
-	sphere.center = Vec3f(0.5f, 0.95f, 0.5f);
+	rigidSphere.position = Vec3f(0.5f, 0.95f, 0.5f);
 	sphere.radius = 0.025f;
 	rigid->addSphere(sphere, rigidSphere);
 
-	sphere.center = Vec3f(0.5f, 0.65f, 0.5f);
+	rigidSphere.position = Vec3f(0.5f, 0.65f, 0.5f);
 	sphere.radius = 0.05f;
 	rigid->addSphere(sphere, rigidSphere);
 
 	TetInfo tet;
+	RigidBodyInfo rigidTet;
 	tet.v[0] = Vec3f(0.5f, 1.1f, 0.5f);
 	tet.v[1] = Vec3f(0.5f, 1.2f, 0.5f);
 	tet.v[2] = Vec3f(0.6f, 1.1f, 0.5f);
 	tet.v[3] = Vec3f(0.5f, 1.1f, 0.6f);
-	rigid->addTet(tet, rigidSphere);
+	rigid->addTet(tet, rigidTet);
 
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
 	rigid->stateTopology()->connect(mapper->inDiscreteElements());

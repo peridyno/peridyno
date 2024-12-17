@@ -21,7 +21,7 @@ namespace dyno
 
 		Mat3f rot = rotation[tId] * rotationInit[tId].transpose();
 
-		Transform3f ti = Transform3f(translate[tId] - rot * offset[tId], rot);
+		Transform3f ti = Transform3f(translate[tId] + rot * offset[tId], rot);
 
 		instanceTransform[pair.first][pair.second] = ti;
 	}

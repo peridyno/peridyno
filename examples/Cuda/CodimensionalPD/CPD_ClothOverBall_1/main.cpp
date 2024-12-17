@@ -1,7 +1,7 @@
 #include <GlfwApp.h>
 #include "Peridynamics/Cloth.h"
 #include <SceneGraph.h>
-#include <Log.h>
+#include <Volume/VolumeLoader.h>
 #include <Multiphysics/VolumeBoundary.h>
 
 #include <GLRenderEngine.h>
@@ -21,17 +21,28 @@ std::shared_ptr<SceneGraph> createScene()
 	auto object = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
 	object->varFileName()->setValue(getAssetPath() + "cloth_shell/ball/ball_model.obj");
 
+	auto volLoader = scn->addNode(std::make_shared<VolumeLoader<DataType3f>>());
+	volLoader->varFileName()->setValue(getAssetPath() + "cloth_shell/ball/ball_small_size_15.sdf");
 
 	auto boundary = scn->addNode(std::make_shared<VolumeBoundary<DataType3f>>());
-	boundary->loadCube(Vec3f(-1.5, 0, -1.5), Vec3f(1.5, 3, 1.5), 0.005f, true);
-	boundary->loadSDF(getAssetPath() + "cloth_shell/ball/ball_small_size_15.sdf", false);
+	volLoader->connect(boundary->importVolumes());
 
-	auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>(0.15, 500, 0.0005, 1e-3));
+	auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>());
 	cloth->setDt(0.001f);
 	cloth->loadSurface(getAssetPath() + "cloth_shell/cloth_size_17_alt/cloth_40k_1.obj");
 	cloth->connect(boundary->importTriangularSystems());
-	cloth->setGrad_ite_eps(0);
-	cloth->setMaxIteNumber(10);
+	{
+		auto solver = cloth->animationPipeline()->findFirstModule<CoSemiImplicitHyperelasticitySolver<DataType3f>>();
+
+		solver->setGrad_res_eps(0);
+		solver->varIterationNumber()->setValue(10);
+
+		solver->setS(0.1);
+		solver->setXi(0.15);
+		solver->setE(500);
+		solver->setK_bend(0.0005);
+	}
+
 	auto surfaceRendererCloth = std::make_shared<GLSurfaceVisualModule>();
 	surfaceRendererCloth->setColor(Color(0.4, 0.4, 1.0));
 

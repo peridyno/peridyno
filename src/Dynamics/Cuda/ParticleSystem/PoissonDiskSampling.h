@@ -19,7 +19,7 @@
 
 #include "Primitive/Primitive3D.h"
 #include "Topology/PointSet.h"
-#include "Sampler.h"
+#include "Samplers/Sampler.h"
 #include "FilePath.h"
 #include "Topology/DistanceField3D.h"
 #include <Volume/VolumeOctree.h>

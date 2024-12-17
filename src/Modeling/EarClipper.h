@@ -15,14 +15,14 @@
  */
 
 #pragma once
-#include "Node/ParametricModel.h"
+#include "ModelEditing.h"
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
 
 namespace dyno
 {
 	template<typename TDataType>
-	class EarClipper : public Node
+	class EarClipper : public ModelEditing<TDataType>
 	{
 
 		DECLARE_TCLASS(EarClipper, TDataType);

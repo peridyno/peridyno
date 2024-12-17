@@ -7,9 +7,11 @@
 #include "Commands/Turning.h"
 #include "Commands/Extrude.h"
 #include "Commands/Sweep.h"
-#include "Commands/PointFromCurve.h"
+
+#include "Samplers/PointFromCurve.h"
 
 #include "ObjIO/ObjPointLoader.h"
+#include "ConvertToTextureMesh.h"
 
 
 using namespace dyno;
@@ -116,6 +118,10 @@ int main()
 
 	sweepFromOBJ->varLocation()->setValue(Vec3f(-1, 0, 0));
 
+	auto toTextureMesh = scn->addNode(std::make_shared <ConvertToTextureMesh<DataType3f>>());
+	toTextureMesh->varDiffuseTexture()->setValue(getAssetPath()+"Texture/Checkerboard.png");
+
+	Turn->stateTriangleSet()->connect(toTextureMesh->inTopology());
 
 	Modeling::initStaticPlugin();
 

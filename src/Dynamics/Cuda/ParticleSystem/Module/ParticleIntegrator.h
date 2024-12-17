@@ -1,11 +1,11 @@
 #pragma once
-#include "Module/NumericalIntegrator.h"
+#include "Module/ComputeModule.h"
 
 #include "Collision/Attribute.h"
 
 namespace dyno {
 	template<typename TDataType>
-	class ParticleIntegrator : public NumericalIntegrator
+	class ParticleIntegrator : public ComputeModule
 	{
 		DECLARE_TCLASS(ParticleIntegrator, TDataType)
 
@@ -16,14 +16,6 @@ namespace dyno {
 		ParticleIntegrator();
 		~ParticleIntegrator() override {};
 		
-		void begin() override;
-		void end() override;
-
-		bool integrate() override;
-
-		bool updateVelocity();
-		bool updatePosition();
-
 	public:
 
 		DEF_VAR_IN(Real, TimeStep, "Time step size");
@@ -46,17 +38,11 @@ namespace dyno {
 		*/
 		DEF_ARRAY_IN(Attribute, Attribute, DeviceType::GPU, "Particle attribute");
 
-		/**
-		* @brief Force density
-		* Force density on each particle
-		*/
-		DEF_ARRAY_IN(Coord, ForceDensity, DeviceType::GPU, "Force density on each particle");
-
 	protected:
-		void updateImpl() override;
+		void compute() override;
 
-	
+	private:
+		bool updateVelocity();
+		bool updatePosition();
 	};
-
-	IMPLEMENT_TCLASS(ParticleIntegrator, TDataType)
 }

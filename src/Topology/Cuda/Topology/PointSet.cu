@@ -68,7 +68,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void PointSet<TDataType>::setPoints(std::vector<Coord>& pos)
+	void PointSet<TDataType>::setPoints(const std::vector<Coord>& pos)
 	{
 		mCoords.resize(pos.size());
 		mCoords.assign(pos);
@@ -77,7 +77,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void PointSet<TDataType>::setPoints(DArray<Coord>& pos)
+	void PointSet<TDataType>::setPoints(const DArray<Coord>& pos)
 	{
 		mCoords.resize(pos.size());
 		mCoords.assign(pos);

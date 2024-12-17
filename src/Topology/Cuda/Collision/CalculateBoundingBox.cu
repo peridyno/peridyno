@@ -93,14 +93,20 @@ namespace dyno
 
 		ElementOffset elementOffset = inTopo->calculateElementOffset();
 
+		DArray<Box3D>& boxInGlobal = inTopo->boxesInGlobal();
+		DArray<Sphere3D>& sphereInGlobal = inTopo->spheresInGlobal();
+		DArray<Tet3D>& tetInGlobal = inTopo->tetsInGlobal();
+		DArray<Capsule3D>& capsuleInGlobal = inTopo->capsulesInGlobal();
+		DArray<Triangle3D>& triangleInGlobal = inTopo->trianglesInGlobal();
+
 		cuExecute(num,
 			CBB_SetupAABB,
 			aabbs,
-			inTopo->getBoxes(),
-			inTopo->getSpheres(),
-			inTopo->getTets(),
-			inTopo->getCaps(),
-			inTopo->getTris(),
+			boxInGlobal,
+			sphereInGlobal,
+			tetInGlobal,
+			capsuleInGlobal,
+			triangleInGlobal,
 			elementOffset,
 			margin);
 	}

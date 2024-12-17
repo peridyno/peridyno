@@ -9,18 +9,6 @@ void declare_particle_system_initializer(py::module& m) {
 		.def("instance", &Class::instance);
 }
 
-#include "ParticleSystem/ParticleType.h"
-void declare_particle_type(py::module& m) {
-	using Class = dyno::ParticleType;
-	std::string pyclass_name = std::string("ParticleType");
-	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("set_particle_type", &Class::SetParticleType)
-		.def("get_particle_type", &Class::GetParticleType)
-		.def("is_virtual", &Class::IsVirtual)
-		.def("is_real", &Class::IsReal);
-}
-
 void pybind_particle_system(py::module& m)
 {
 	declare_approximate_implicit_viscosity<dyno::DataType3f>(m, "3f");
@@ -29,7 +17,6 @@ void pybind_particle_system(py::module& m)
 	declare_particle_approximation<dyno::DataType3f>(m, "3f");
 	declare_iterative_densitySolver<dyno::DataType3f>(m, "3f");
 	declare_linear_damping<dyno::DataType3f>(m, "3f");
-	declare_particle_integrator<dyno::DataType3f>(m, "3f");
 	declare_poisson_plane<dyno::DataType3f>(m, "3f");
 	declare_position_based_fluid_model<dyno::DataType3f>(m, "3f");
 	declare_projection_based_fluid_model<dyno::DataType3f>(m, "3f");
@@ -48,11 +35,8 @@ void pybind_particle_system(py::module& m)
 	declare_make_particle_system<dyno::DataType3f>(m, "3f");
 	declare_particle_fluid<dyno::DataType3f>(m, "3f");
 	declare_particle_system_helper<dyno::DataType3f>(m, "3f");
-	declare_particle_type(m);
 	declare_poisson_disk_sampling<dyno::DataType3f>(m, "3f");
 	declare_poisson_emitter<dyno::DataType3f>(m, "3f");
-	declare_sampling_points<dyno::DataType3f>(m, "3f");
 	declare_sphere_sampler<dyno::DataType3f>(m, "3f");
 	declare_square_emitter<dyno::DataType3f>(m, "3f");
-	declare_static_boundary<dyno::DataType3f>(m, "3f");
 }

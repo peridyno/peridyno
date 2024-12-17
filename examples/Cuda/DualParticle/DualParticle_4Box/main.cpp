@@ -1,7 +1,10 @@
 #include <GlfwApp.h>
 #include "SceneGraph.h"
-#include <Log.h>
-#include "ParticleSystem/StaticBoundary.h"
+#include <BasicShapes/CubeModel.h>
+
+#include <Volume/BasicShapeToVolume.h>
+
+#include <Multiphysics/VolumeBoundary.h>
 #include <Module/CalculateNorm.h>
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
@@ -10,8 +13,8 @@
 #include "DualParticleSystem/DualParticleFluidSystem.h"
 #include "ParticleSystem/MakeParticleSystem.h"
 #include <BasicShapes/CubeModel.h>
-#include <ParticleSystem/CubeSampler.h>
-#include <ParticleSystem/SquareEmitter.h>
+#include <Samplers/CubeSampler.h>
+#include <ParticleSystem/Emitters/SquareEmitter.h>
 #include "PointsLoader.h"
 
 using namespace std;
@@ -79,9 +82,20 @@ std::shared_ptr<SceneGraph> createScene()
 	initialParticles4->connect(fluid->importInitialStates());
 
 	//Create a boundary
-	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
-	boundary->loadCube(Vec3f(-0.25, 0, -0.25), Vec3f(0.25, 2, 0.25), 0.02, true);
-	fluid->connect(boundary->importParticleSystems());
+	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
+	cubeBoundary->varLocation()->setValue(Vec3f(0.0f, 1.0f, 0.0f));
+	cubeBoundary->varLength()->setValue(Vec3f(0.5f, 2.0f, 0.5f));
+	cubeBoundary->setVisible(false);
+
+	auto cube2vol = scn->addNode(std::make_shared<BasicShapeToVolume<DataType3f>>());
+	cube2vol->varGridSpacing()->setValue(0.02f);
+	cube2vol->varInerted()->setValue(true);
+	cubeBoundary->connect(cube2vol->importShape());
+
+	auto container = scn->addNode(std::make_shared<VolumeBoundary<DataType3f>>());
+	cube2vol->connect(container->importVolumes());
+
+	fluid->connect(container->importParticleSystems());
 
 	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
 	fluid->stateVelocity()->connect(calculateNorm->inVec());

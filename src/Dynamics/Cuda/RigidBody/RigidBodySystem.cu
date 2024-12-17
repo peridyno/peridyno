@@ -106,17 +106,23 @@ namespace dyno
 		float lx = 2.0f * b.halfLength[0];
 		float ly = 2.0f * b.halfLength[1];
 		float lz = 2.0f * b.halfLength[2];
-		bd.position = b.center + bd.offset;
 
 		bd.mass = density * lx * ly * lz;
 		//printf("Box mass : %lf\n", bd.mass);
-		bd.inertia = 1.0f / 12.0f * bd.mass
+
+		// Calculate the inertia of box in the local frame
+		auto localInertia = 1.0f / 12.0f * bd.mass
 			* Mat3f(ly * ly + lz * lz, 0, 0,
 				0, lx * lx + lz * lz, 0,
-				0, 0, lx * lx + ly * ly) + ParallelAxisTheorem(-bd.offset, bd.mass);
+				0, 0, lx * lx + ly * ly);
+
+		// Transform into the rigid body frame
+		auto rotShape = box.rot.toMatrix3x3();
+		auto rotBody = bd.angle.toMatrix3x3();
+
+		bd.inertia = rotBody * (rotShape * localInertia * rotShape.transpose() + ParallelAxisTheorem(box.center, bd.mass)) * rotBody.transpose();
 
 		bd.shapeType = ET_BOX;
-		bd.angle = b.rot;
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size(), bd);
 		mHostBoxes.push_back(b);
@@ -125,8 +131,8 @@ namespace dyno
 		actor->idx = mHostBoxes.size() - 1;
 		actor->shapeType = ET_BOX;
 		actor->center = bd.position;
-		actor->rot = b.rot;
-		
+		actor->rot = bd.angle;
+
 		return actor;
 	}
 
@@ -139,7 +145,7 @@ namespace dyno
 		auto b = sphere;
 		auto bd = bodyDef;
 
-		bd.position = b.center + bd.offset;
+//		bd.position = b.center + bd.offset;
 
 		float r = b.radius;
 		if (bd.mass <= 0.0f) {
@@ -147,13 +153,19 @@ namespace dyno
 		}
 		//printf("Sphere mass : %lf\n", bd.mass);
 		float I11 = r * r;
-		bd.inertia = 0.4f * bd.mass
+
+		// Calculate the inertia of sphere in the local frame
+		auto localInertia = 0.4f * bd.mass
 			* Mat3f(I11, 0, 0,
 				0, I11, 0,
-				0, 0, I11) + ParallelAxisTheorem(-bd.offset, bd.mass);
+				0, 0, I11);
+
+		auto rotShape = sphere.rot.toMatrix3x3();
+		auto rotBody = bd.angle.toMatrix3x3();
+
+		bd.inertia = rotBody * (rotShape * localInertia * rotShape.transpose() + ParallelAxisTheorem(sphere.center, bd.mass)) * rotBody.transpose();
 
 		bd.shapeType = ET_SPHERE;
-		bd.angle = b.rot;
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size(), bd);
 		mHostSpheres.push_back(b);
@@ -162,7 +174,7 @@ namespace dyno
 		actor->idx = mHostSpheres.size() - 1;
 		actor->shapeType = ET_SPHERE;
 		actor->center = bd.position;
-		actor->rot = b.rot;
+		actor->rot = bd.angle;
 
 		return actor;
 	}
@@ -176,6 +188,139 @@ namespace dyno
 		return Mat3f(y * y + z * z, -x * y, -x * z, -y * x, x * x + z * z, -y * z, -z * x, -z * y, x * x + y * y);
 	}
 
+	template<typename TDataType>
+	std::shared_ptr<dyno::PdActor> RigidBodySystem<TDataType>::createRigidBody(
+		const Coord& p, 
+		const TQuat& q)
+	{
+		return createRigidBody(RigidBodyInfo(p, q));
+	}
+
+	template<typename TDataType>
+	std::shared_ptr<PdActor> RigidBodySystem<TDataType>::createRigidBody(const RigidBodyInfo& bodyDef)
+	{
+		auto bd = bodyDef;
+		bd.mass = 0.0f;
+		bd.shapeType = ET_COMPOUND;
+
+		mHostRigidBodyStates.push_back(bd);
+
+		std::shared_ptr<PdActor> actor = std::make_shared<PdActor>();
+		actor->idx = mHostRigidBodyStates.size() - 1;
+		actor->shapeType = ET_COMPOUND;
+		actor->center = bd.position;
+		actor->rot = bd.angle;
+
+		return actor;
+	}
+
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::bindBox(
+		const std::shared_ptr<PdActor> actor, 
+		const BoxInfo& box,
+		const Real density /*= Real(100)*/)
+	{
+		auto& rigidbody = mHostRigidBodyStates[actor->idx];
+
+		float lx = 2.0f * box.halfLength[0];
+		float ly = 2.0f * box.halfLength[1];
+		float lz = 2.0f * box.halfLength[2];
+
+		Real mass = density * lx * ly * lz;
+
+		// Calculate the inertia of box in the local frame
+		auto localInertia = 1.0f / 12.0f * mass
+			* Mat3f(ly * ly + lz * lz, 0, 0,
+				0, lx * lx + lz * lz, 0,
+				0, 0, lx * lx + ly * ly);
+
+		// Transform into the rigid body frame
+		auto rotShape = box.rot.toMatrix3x3();
+		auto rotBody = rigidbody.angle.toMatrix3x3();
+
+		auto rigidbodyInertia = rotBody * (rotShape * localInertia * rotShape.transpose() + ParallelAxisTheorem(box.center, mass)) * rotBody.transpose();
+		
+		rigidbody.mass += mass;
+		rigidbody.inertia += rigidbodyInertia;
+		rigidbody.shapeType = ET_COMPOUND;
+
+		mHostShape2RigidBodyMapping.insert(mHostShape2RigidBodyMapping.begin() + mHostSpheres.size() + mHostBoxes.size(), Pair<uint, uint>(mHostBoxes.size(), (uint)actor->idx));
+		mHostBoxes.push_back(box);
+	}
+
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::bindSphere(
+		const std::shared_ptr<PdActor> actor, 
+		const SphereInfo& sphere, 
+		const Real density /*= Real(100)*/)
+	{
+		auto& rigidbody = mHostRigidBodyStates[actor->idx];
+
+		float r = sphere.radius;
+		Real mass = 4 / 3.0f * M_PI * r * r * r * density;
+
+		float I11 = r * r;
+
+		// Calculate the inertia of sphere in the local frame
+		auto localInertia = 0.4f * mass
+			* Mat3f(I11, 0, 0,
+				0, I11, 0,
+				0, 0, I11);
+
+		auto rotShape = sphere.rot.toMatrix3x3();
+		auto rotBody = rigidbody.angle.toMatrix3x3();
+
+		auto rigidbodyInertia = rotBody * (rotShape * localInertia * rotShape.transpose() + ParallelAxisTheorem(sphere.center, mass)) * rotBody.transpose();
+
+		rigidbody.mass += mass;
+		rigidbody.inertia += rigidbodyInertia;
+		rigidbody.shapeType = ET_COMPOUND;
+
+		mHostShape2RigidBodyMapping.insert(mHostShape2RigidBodyMapping.begin() + mHostSpheres.size(), Pair<uint, uint>(mHostSpheres.size(), (uint)actor->idx));
+		mHostSpheres.push_back(sphere);
+	}
+
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::bindCapsule(
+		const std::shared_ptr<PdActor> actor, 
+		const CapsuleInfo& capsule,
+		const Real density /*= Real(100)*/)
+	{
+		auto& rigidbody = mHostRigidBodyStates[actor->idx];
+
+		Real r = capsule.radius;
+		Real h = capsule.halfLength * 2;
+
+
+		Real mass_hemisphere = 2.0 / 3.0 * M_PI * r * r * r * density;
+		Real mass_cylinder = M_PI * r * r * h * density;
+
+		Real I_1_cylinder = 1.0 / 12.0 * mass_cylinder * (3 * r * r + h * h);
+		Real I_2_cylinder = 1.0 / 2.0 * mass_cylinder * r * r;
+
+
+		Real tmp = h / 2 + 3.0 / 8.0 * r;
+		Real I_1_hemisphere = mass_hemisphere * (2.0 / 5.0 * r * r + h * h / 2 + 3 * h * r / 8.0);
+		Real I_2_hemisphere = 2.0 / 5.0 * mass_hemisphere * r * r;
+
+		Real mass = mass_hemisphere * 2 + mass_cylinder;
+
+		auto localInertia = Mat3f(I_1_cylinder + 2 * I_1_hemisphere, 0, 0,
+			0, I_1_cylinder + 2 * I_1_hemisphere, 0,
+			0, 0, I_2_cylinder + 2 * I_2_hemisphere);
+
+		auto rotShape = capsule.rot.toMatrix3x3();
+		auto rotBody = rigidbody.angle.toMatrix3x3();
+
+		auto rigidbodyInertia = rotBody * (rotShape * localInertia * rotShape.transpose() + ParallelAxisTheorem(capsule.center, mass)) * rotBody.transpose();
+
+		rigidbody.mass += mass;
+		rigidbody.inertia += rigidbodyInertia;
+		rigidbody.shapeType = ET_COMPOUND;
+
+		mHostShape2RigidBodyMapping.insert(mHostShape2RigidBodyMapping.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size() + mHostCapsules.size(), Pair<uint, uint>(mHostCapsules.size(), (uint)actor->idx));
+		mHostCapsules.push_back(capsule);
+	}
 
 	template<typename TDataType>
 	std::shared_ptr<PdActor> RigidBodySystem<TDataType>::addTet(
@@ -214,7 +359,7 @@ namespace dyno
 		bd.angle = Quat<Real>();
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size(), bd);
-		mHostTets.push_back(tetInfo);
+		mHostTets.push_back(tet);
 
 		std::shared_ptr<PdActor> actor = std::make_shared<PdActor>();
 		actor->idx = mHostTets.size() - 1;
@@ -249,18 +394,18 @@ namespace dyno
 		Real I_1_hemisphere = mass_hemisphere * (2.0 / 5.0 * r * r + h * h / 2 + 3 * h * r / 8.0);
 		Real I_2_hemisphere = 2.0 / 5.0 * mass_hemisphere * r * r;
 
-		bd.position = b.center + bd.offset;
-
 		bd.mass = mass_hemisphere * 2 + mass_cylinder;
 
+		auto localInertia = Mat3f(I_1_cylinder + 2 * I_1_hemisphere, 0, 0,
+			0, I_1_cylinder + 2 * I_1_hemisphere, 0,
+			0, 0, I_2_cylinder + 2 * I_2_hemisphere);
 
-		bd.inertia = Mat3f(I_1_cylinder + 2 * I_1_hemisphere, 0, 0,
-				0, I_1_cylinder + 2 * I_1_hemisphere, 0,
-				0, 0, I_2_cylinder + 2 *I_2_hemisphere) + ParallelAxisTheorem(-bd.offset, bd.mass);
-		
+		auto rotShape = capsule.rot.toMatrix3x3();
+		auto rotBody = bd.angle.toMatrix3x3();
+
+		bd.inertia = rotBody * (rotShape * localInertia * rotShape.transpose() + ParallelAxisTheorem(capsule.center, bd.mass)) * rotBody.transpose();
 
 		bd.shapeType = ET_CAPSULE;
-		bd.angle = b.rot;
 
 		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size() + mHostCapsules.size(), bd);
 		mHostCapsules.push_back(b);
@@ -269,7 +414,7 @@ namespace dyno
 		actor->idx = mHostCapsules.size() - 1;
 		actor->shapeType = ET_CAPSULE;
 		actor->center = bd.position;
-		actor->rot = b.rot;
+		actor->rot = bd.angle;
 
 		return actor;
 	}
@@ -394,10 +539,10 @@ namespace dyno
 		mDeviceTets.assign(mHostTets);
 		mDeviceCapsules.assign(mHostCapsules);
 
-		auto& boxes = topo->getBoxes();
-		auto& spheres = topo->getSpheres();
-		auto& tets = topo->getTets();
-		auto& caps = topo->getCaps();
+		auto& boxes = topo->boxesInLocal();
+		auto& spheres = topo->spheresInLocal();
+		auto& tets = topo->tetsInLocal();
+		auto& caps = topo->capsulesInLocal();
 
 		boxes.resize(mDeviceBoxes.size());
 		spheres.resize(mDeviceSpheres.size());
@@ -493,86 +638,15 @@ namespace dyno
 			topo->pointJoints(),
 			eleOffset);
 
-		updateTopology();
+		setupShape2RigidBodyMapping();
+
+		topo->setPosition(this->stateCenter()->constData());
+		topo->setRotation(this->stateRotationMatrix()->constData());
+		topo->update();
 	}
 	
-	template <typename Real, typename Coord>
-	__global__ void UpdateSpheres(
-		DArray<Sphere3D> sphere,
-		DArray<SphereInfo> sphere_init,
-		DArray<Coord> pos,
-		DArray<Coord> bcOffset,
-		DArray<Quat<Real>> quat,
-		int start_sphere)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= sphere.size()) return;
-
-		sphere[pId].center = pos[pId + start_sphere] - quat[pId + start_sphere].rotate(bcOffset[pId + start_sphere]);
-		sphere[pId].rotation = quat[pId + start_sphere];
-	}
-
-	template <typename Coord, typename Matrix>
-	__global__ void UpdateBoxes(
-		DArray<Box3D> box,
-		DArray<BoxInfo> box_init,
-		DArray<Coord> pos,
-		DArray<Coord> bcOffset,
-		DArray<Matrix> rotation,
-		int start_box)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= box.size()) return;
-		box[pId].center = pos[pId + start_box] - rotation[pId + start_box] * bcOffset[pId + start_box];
-
-		box[pId].extent = box_init[pId].halfLength;
-
-		box[pId].u = rotation[pId + start_box] * Coord(1, 0, 0);
-		box[pId].v = rotation[pId + start_box] * Coord(0, 1, 0);
-		box[pId].w = rotation[pId + start_box] * Coord(0, 0, 1);
-	}
-
-	template <typename Coord, typename Matrix>
-	__global__ void UpdateTets(
-		DArray<Tet3D> tet,
-		DArray<TetInfo> tet_init,
-		DArray<Coord> pos,
-		DArray<Matrix> rotation,
-		int start_tet)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= tet.size()) return;
-
-		Coord center_init = (tet_init[pId].v[0] + tet_init[pId].v[1] + tet_init[pId].v[2] + tet_init[pId].v[3]) / 4.0f;
-		tet[pId].v[0] = rotation[pId + start_tet] * (tet_init[pId].v[0] - center_init) + pos[pId + start_tet];
-		tet[pId].v[1] = rotation[pId + start_tet] * (tet_init[pId].v[1] - center_init) + pos[pId + start_tet];
-		tet[pId].v[2] = rotation[pId + start_tet] * (tet_init[pId].v[2] - center_init) + pos[pId + start_tet];
-		tet[pId].v[3] = rotation[pId + start_tet] * (tet_init[pId].v[3] - center_init) + pos[pId + start_tet];
-	}
-
-	template <typename Real, typename Coord>
-	__global__ void UpdateCapsules(
-		DArray<Capsule3D> caps,
-		DArray<CapsuleInfo> cap_init,
-		DArray<Coord> pos,
-		DArray<Coord> bcOffset,
-		DArray<Quat<Real>> quat,
-		int start_cap)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= caps.size()) return;
-
-		Capsule3D cap;
-		cap.radius = cap_init[pId].radius;
-		cap.halfLength = cap_init[pId].halfLength;
-		cap.rotation = quat[pId + start_cap];
-		cap.center = pos[pId + start_cap] - quat[pId + start_cap].rotate(bcOffset[pId + start_cap]);
-
-		caps[pId] = cap;
-	}
-
 	template<typename TDataType>
-	void RigidBodySystem<TDataType>::updateTopology()
+	void RigidBodySystem<TDataType>::postUpdateStates()
 	{
 		auto discreteSet = TypeInfo::cast<DiscreteElements<DataType3f>>(this->stateTopology()->getDataPtr());
 
@@ -583,40 +657,9 @@ namespace dyno
 			return;
 		}
 
-		cuExecute(mDeviceBoxes.size(),
-			UpdateBoxes,
-			discreteSet->getBoxes(),
-			mDeviceBoxes,
-			this->stateCenter()->getData(),
-			this->stateOffset()->getData(),
-			this->stateRotationMatrix()->getData(),
-			offset.boxIndex());
-
-		cuExecute(mDeviceSpheres.size(),
-			UpdateSpheres,
-			discreteSet->getSpheres(),
-			mDeviceSpheres,
-			this->stateCenter()->getData(),
-			this->stateOffset()->getData(),
-			this->stateQuaternion()->getData(),
-			offset.sphereIndex());
-
-		cuExecute(mDeviceTets.size(),
-			UpdateTets,
-			discreteSet->getTets(),
-			mDeviceTets,
-			this->stateCenter()->getData(),
-			this->stateRotationMatrix()->getData(),
-			offset.tetIndex());
-
-		cuExecute(mDeviceCapsules.size(),
-			UpdateCapsules,
-			discreteSet->getCaps(),
-			mDeviceCapsules,
-			this->stateCenter()->getData(),
-			this->stateOffset()->getData(),
-			this->stateQuaternion()->getData(),
-			offset.capsuleIndex());
+		discreteSet->setPosition(this->stateCenter()->constData());
+		discreteSet->setRotation(this->stateRotationMatrix()->constData());
+		discreteSet->update();
 	}
 
 	template<typename TDataType>
@@ -641,6 +684,7 @@ namespace dyno
 		mHostJointsHinge.clear();
 		mHostJointsFixed.clear();
 		mHostJointsPoint.clear();
+		mHostShape2RigidBodyMapping.clear();
 
 		m_numOfSamples = 0;
 
@@ -649,6 +693,78 @@ namespace dyno
 
 		samples.clear();
 		normals.clear();
+	}
+
+	__global__ void RBS_ConstructShape2RigidBodyMapping(
+		DArray<Pair<uint, uint>> mapping)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= mapping.size()) return;
+
+		mapping[pId] = Pair<uint, uint>(pId, pId);
+	}
+
+	__global__ void RBS_UpdateShape2RigidBodyMapping(
+		DArray<Pair<uint, uint>> mapping,
+		ElementOffset offset)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= mapping.size()) return;
+
+		Pair<uint, uint> pair = mapping[pId];
+
+		uint first = pair.first;
+
+		if (pId < offset.boxIndex())
+		{
+		}
+		else if (pId < offset.tetIndex())
+		{
+			first += offset.boxIndex();
+		}
+		else if (pId < offset.capsuleIndex())
+		{
+			first += offset.tetIndex();
+		}
+		else if (pId < offset.triangleIndex())
+		{
+			first += offset.capsuleIndex();
+		}
+		else
+		{
+			first += offset.triangleIndex();
+		}
+
+		mapping[pId] = Pair<uint, uint>(first, pair.second);
+	}
+
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::setupShape2RigidBodyMapping()
+	{
+		auto topo = this->stateTopology()->getDataPtr();
+		auto& mapping = topo->shape2RigidBodyMapping();
+
+		uint totalSize = topo->totalSize();
+
+		if (mHostShape2RigidBodyMapping.size() == 0)
+		{
+			mapping.resize(totalSize);
+
+			cuExecute(totalSize,
+				RBS_ConstructShape2RigidBodyMapping,
+				mapping);
+		}
+		else
+		{
+			mapping.assign(mHostShape2RigidBodyMapping);
+
+			cuExecute(totalSize,
+				RBS_UpdateShape2RigidBodyMapping,
+				mapping,
+				topo->calculateElementOffset());
+
+			return;
+		}
 	}
 
 	DEFINE_CLASS(RigidBodySystem);

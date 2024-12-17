@@ -65,8 +65,7 @@ void declare_volume(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("Volume") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("state_sdf", &Class::stateSDF, py::return_value_policy::reference)
-		.def("state_topology", &Class::stateTopology, py::return_value_policy::reference);
+		.def("state_levelset", &Class::stateLevelSet, py::return_value_policy::reference);
 }
 
 #include "Volume/VolumeBool.h"
@@ -105,34 +104,6 @@ void declare_volume_generator(py::module& m, std::string typestr) {
 		.def("in_spacing", &Class::inSpacing, py::return_value_policy::reference)
 		.def("in_padding", &Class::inPadding, py::return_value_policy::reference)
 		.def("make_level_set", &Class::makeLevelSet);
-}
-
-#include "Volume/VolumeIntersect.h"
-template <typename TDataType>
-void declare_volume_intersect(py::module& m, std::string typestr) {
-	using Class = dyno::VolumeIntersect<TDataType>;
-	using Parent = dyno::Volume<TDataType>;
-	std::string pyclass_name = std::string("VolumeIntersect") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("get_a", &Class::getA)
-		.def("import_a", &Class::importA, py::return_value_policy::reference)
-		.def("get_b", &Class::getB)
-		.def("import_b", &Class::importB, py::return_value_policy::reference);
-}
-
-#include "Volume/VolumeMinus.h"
-template <typename TDataType>
-void declare_volume_minus(py::module& m, std::string typestr) {
-	using Class = dyno::VolumeMinus<TDataType>;
-	using Parent = dyno::Volume<TDataType>;
-	std::string pyclass_name = std::string("VolumeMinus") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("get_a", &Class::getA)
-		.def("import_a", &Class::importA, py::return_value_policy::reference)
-		.def("get_b", &Class::getB)
-		.def("import_b", &Class::importB, py::return_value_policy::reference);
 }
 
 #include "Volume/VolumeOctree.h"
@@ -206,21 +177,6 @@ void declare_volume_octree_generator(py::module& m, std::string typestr) {
 //		.def("nz", &Class::nz)
 //		.def("get_sign_distance", &Class::getSignDistance);
 //}
-
-#include "Volume/VolumeUnion.h"
-template <typename TDataType>
-void declare_volume_union(py::module& m, std::string typestr) {
-	using Class = dyno::VolumeUnion<TDataType>;
-	using Parent = dyno::Volume<TDataType>;
-	std::string pyclass_name = std::string("VolumeUnion") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("get_a", &Class::getA)
-		.def("import_a", &Class::importA, py::return_value_policy::reference)
-		.def("get_b", &Class::getB)
-		.def("import_b", &Class::importB, py::return_value_policy::reference);
-}
-
 
 void declare_volume_initializer(py::module& m);
 

@@ -28,7 +28,12 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		DYN_FUNC TBond() {};
+		DYN_FUNC TBond() 
+		{
+			idx = -1;
+			mu = Real(1);
+		};
+
 		DYN_FUNC TBond(int id, Coord _xi)
 		{
 			idx = id;
@@ -36,6 +41,7 @@ namespace dyno
 		}
 
 		int idx;	// index of x'
+		Real mu = Real(1);	// A history-dependent scalar-valued function whose value belongs to [0, 1]
 		Coord xi;	// x' - x
 	};
 }

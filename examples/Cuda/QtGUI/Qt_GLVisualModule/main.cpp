@@ -2,9 +2,8 @@
 
 #include <SceneGraph.h>
 
+#include <ParticleSystem/Emitters/SquareEmitter.h>
 #include <ParticleSystem/ParticleFluid.h>
-#include <ParticleSystem/StaticBoundary.h>
-#include <ParticleSystem/SquareEmitter.h>
 #include <ParticleSystem/MakeParticleSystem.h>
 
 #include <Module/CalculateNorm.h>
@@ -33,7 +32,7 @@
 #include "Collision/NeighborElementQuery.h"
 
 #include "BasicShapes/SphereModel.h"
-#include "ParticleSystem/SphereSampler.h"
+#include "Samplers/SphereSampler.h"
 
 #include "Plugin/PluginManager.h"
 

@@ -33,6 +33,7 @@ namespace dyno
 		RigidWaterCoupling();
 		~RigidWaterCoupling() override;
 
+		std::string getNodeType() override { return "Height Fields"; }
 	public:
 		DEF_VAR(Real, Damping, Real(0.98), "Translational damping");
 		DEF_VAR(Real, RotationalDamping, Real(0.9), "Rotational damping");

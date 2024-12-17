@@ -6,6 +6,7 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
         Peridynamics
         SemiAnalyticalScheme
         Multiphysics
+        SkeletonLoader
         QtGUI)
     add_example(Qt_Robot Modeling LIB_DEPENDENCY)
 endif()

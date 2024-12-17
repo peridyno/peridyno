@@ -117,7 +117,6 @@ namespace dyno
 		this->statePosition()->connect(m_integrator->inPosition());
 		this->stateVelocity()->connect(m_integrator->inVelocity());
 		this->stateParticleAttribute()->connect(m_integrator->inAttribute());
-		this->stateForce()->connect(m_integrator->inForceDensity());
 		this->animationPipeline()->pushModule(m_integrator);
 
 		auto m_visModule = std::make_shared<ImplicitViscosity<TDataType>>();

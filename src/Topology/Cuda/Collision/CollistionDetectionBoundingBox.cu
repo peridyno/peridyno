@@ -249,6 +249,7 @@ namespace dyno
 		DArray<Capsule3D> cap,
 		DArray<int> count,
 		DArray<ContactPair> nbq,
+		DArray<Pair<uint, uint>> mapping,
 		Coord hi,
 		Coord lo,
 		ElementOffset elementOffset)
@@ -257,6 +258,8 @@ namespace dyno
 		if (pId >= count.size()) return;
 
 		ElementType eleType = elementOffset.checkElementType(pId);
+
+		uint rbId = mapping[pId].second;
 
 		if (eleType == ET_SPHERE)//sphere
 		{
@@ -270,7 +273,7 @@ namespace dyno
 
 			if (center.x + radius >= hi.x)
 			{
-				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId1 = rbId;
 				nbq[cnt + start_i].bodyId2 = -1;
 				nbq[cnt + start_i].normal1 = Coord(-1, 0, 0);
 				nbq[cnt + start_i].pos1 = center + Coord(radius, 0, 0);
@@ -280,7 +283,7 @@ namespace dyno
 			}
 			if (center.x - radius <= lo.x)
 			{
-				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId1 = rbId;
 				nbq[cnt + start_i].bodyId2 = -1;
 				nbq[cnt + start_i].normal1 = Coord(1, 0, 0);
 				nbq[cnt + start_i].pos1 = center - Coord(radius, 0, 0);
@@ -291,7 +294,7 @@ namespace dyno
 
 			if (center.y + radius >= hi.y)
 			{
-				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId1 = rbId;
 				nbq[cnt + start_i].bodyId2 = -1;
 				nbq[cnt + start_i].normal1 = Coord(0, -1, 0);
 				nbq[cnt + start_i].pos1 = center + Coord(0, radius, 0);
@@ -301,7 +304,7 @@ namespace dyno
 			}
 			if (center.y - radius <= lo.y)
 			{
-				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId1 = rbId;
 				nbq[cnt + start_i].bodyId2 = -1;
 				nbq[cnt + start_i].normal1 = Coord(0, 1, 0);
 				nbq[cnt + start_i].pos1 = center - Coord(0, radius, 0);
@@ -312,7 +315,7 @@ namespace dyno
 
 			if (center.z + radius >= hi.z)
 			{
-				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId1 = rbId;
 				nbq[cnt + start_i].bodyId2 = -1;
 				nbq[cnt + start_i].normal1 = Coord(0, 0, -1);
 				nbq[cnt + start_i].pos1 = center + Coord(0, 0, radius);
@@ -322,7 +325,7 @@ namespace dyno
 			}
 			if (center.z - radius <= lo.z)
 			{
-				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId1 = rbId;
 				nbq[cnt + start_i].bodyId2 = -1;
 				nbq[cnt + start_i].normal1 = Coord(0, 0, 1);
 				nbq[cnt + start_i].pos1 = center - Coord(0, 0, radius);
@@ -358,7 +361,7 @@ namespace dyno
 				if (pos[0] > hi[0] && c1)
 				{
 					c1 = true;
-					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId1 = rbId;
 					nbq[cnt + start_i].bodyId2 = -1;
 					nbq[cnt + start_i].normal1 = Coord(-1, 0, 0);
 					nbq[cnt + start_i].pos1 = pos;
@@ -369,7 +372,7 @@ namespace dyno
 				if (pos[1] > hi[1] && c2)
 				{
 					c2 = true;
-					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId1 = rbId;
 					nbq[cnt + start_i].bodyId2 = -1;
 					nbq[cnt + start_i].normal1 = Coord(0, -1, 0);
 					nbq[cnt + start_i].pos1 = pos;
@@ -380,7 +383,7 @@ namespace dyno
 				if (pos[2] > hi[2] && c3)
 				{
 					c3 = true;
-					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId1 = rbId;
 					nbq[cnt + start_i].bodyId2 = -1;
 					nbq[cnt + start_i].normal1 = Coord(0, 0, -1);
 					nbq[cnt + start_i].pos1 = pos;
@@ -391,7 +394,7 @@ namespace dyno
 				if (pos[0] < lo[0] && c4)
 				{
 					c4 = true;
-					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId1 = rbId;
 					nbq[cnt + start_i].bodyId2 = -1;
 					nbq[cnt + start_i].normal1 = Coord(1, 0, 0);
 					nbq[cnt + start_i].pos1 = pos;
@@ -402,7 +405,7 @@ namespace dyno
 				if (pos[1] < lo[1] && c5)
 				{
 					c5 = true;
-					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId1 = rbId;
 					nbq[cnt + start_i].bodyId2 = -1;
 					nbq[cnt + start_i].normal1 = Coord(0, 1, 0);
 					nbq[cnt + start_i].pos1 = pos;
@@ -413,7 +416,7 @@ namespace dyno
 				if (pos[2] < lo[2] && c6)
 				{
 					c6 = true;
-					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId1 = rbId;
 					nbq[cnt + start_i].bodyId2 = -1;
 					nbq[cnt + start_i].normal1 = Coord(0, 0, 1);
 					nbq[cnt + start_i].pos1 = pos;
@@ -436,7 +439,7 @@ namespace dyno
 				Coord vertex = tet_i.v[i];
 				if (vertex.x >= hi.x)
 				{
-					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId1 = rbId;
 					nbq[cnt + start_i].bodyId2 = -1;
 					nbq[cnt + start_i].normal1 = Coord(-1, 0, 0);
 					nbq[cnt + start_i].pos1 = vertex;
@@ -446,7 +449,7 @@ namespace dyno
 				}
 				if (vertex.x <= lo.x)
 				{
-					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId1 = rbId;
 					nbq[cnt + start_i].bodyId2 = -1;
 					nbq[cnt + start_i].normal1 = Coord(1, 0, 0);
 					nbq[cnt + start_i].pos1 = vertex;
@@ -457,7 +460,7 @@ namespace dyno
 
 				if (vertex.y >= hi.y)
 				{
-					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId1 = rbId;
 					nbq[cnt + start_i].bodyId2 = -1;
 					nbq[cnt + start_i].normal1 = Coord(0, -1, 0);
 					nbq[cnt + start_i].pos1 = vertex;
@@ -467,7 +470,7 @@ namespace dyno
 				}
 				if (vertex.y <= lo.y)
 				{
-					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId1 = rbId;
 					nbq[cnt + start_i].bodyId2 = -1;
 					nbq[cnt + start_i].normal1 = Coord(0, 1, 0);
 					nbq[cnt + start_i].pos1 = vertex;
@@ -478,7 +481,7 @@ namespace dyno
 
 				if (vertex.z >= hi.z)
 				{
-					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId1 = rbId;
 					nbq[cnt + start_i].bodyId2 = -1;
 					nbq[cnt + start_i].normal1 = Coord(0, 0, -1);
 					nbq[cnt + start_i].pos1 = vertex;
@@ -488,7 +491,7 @@ namespace dyno
 				}
 				if (vertex.z <= lo.z)
 				{
-					nbq[cnt + start_i].bodyId1 = pId;
+					nbq[cnt + start_i].bodyId1 = rbId;
 					nbq[cnt + start_i].bodyId2 = -1;
 					nbq[cnt + start_i].normal1 = Coord(0, 0, 1);
 					nbq[cnt + start_i].pos1 = vertex;
@@ -513,7 +516,7 @@ namespace dyno
 			//v0
 			if (v0.x + radius >= hi.x)
 			{
-				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId1 = rbId;
 				nbq[cnt + start_i].bodyId2 = -1;
 				nbq[cnt + start_i].normal1 = Coord(-1, 0, 0);
 				nbq[cnt + start_i].pos1 = v0 + Coord(radius, 0, 0);
@@ -523,7 +526,7 @@ namespace dyno
 			}
 			if (v0.x - radius <= lo.x)
 			{
-				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId1 = rbId;
 				nbq[cnt + start_i].bodyId2 = -1;
 				nbq[cnt + start_i].normal1 = Coord(1, 0, 0);
 				nbq[cnt + start_i].pos1 = v0 - Coord(radius, 0, 0);
@@ -534,7 +537,7 @@ namespace dyno
 
 			if (v0.y + radius >= hi.y)
 			{
-				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId1 = rbId;
 				nbq[cnt + start_i].bodyId2 = -1;
 				nbq[cnt + start_i].normal1 = Coord(0, -1, 0);
 				nbq[cnt + start_i].pos1 = v0 + Coord(0, radius, 0);
@@ -544,7 +547,7 @@ namespace dyno
 			}
 			if (v0.y - radius <= lo.y)
 			{
-				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId1 = rbId;
 				nbq[cnt + start_i].bodyId2 = -1;
 				nbq[cnt + start_i].normal1 = Coord(0, 1, 0);
 				nbq[cnt + start_i].pos1 = v0 - Coord(0, radius, 0);
@@ -555,7 +558,7 @@ namespace dyno
 
 			if (v0.z + radius >= hi.z)
 			{
-				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId1 = rbId;
 				nbq[cnt + start_i].bodyId2 = -1;
 				nbq[cnt + start_i].normal1 = Coord(0, 0, -1);
 				nbq[cnt + start_i].pos1 = v0 + Coord(0, 0, radius);
@@ -565,7 +568,7 @@ namespace dyno
 			}
 			if (v0.z - radius <= lo.z)
 			{
-				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId1 = rbId;
 				nbq[cnt + start_i].bodyId2 = -1;
 				nbq[cnt + start_i].normal1 = Coord(0, 0, 1);
 				nbq[cnt + start_i].pos1 = v0 - Coord(0, 0, radius);
@@ -577,7 +580,7 @@ namespace dyno
 			//v1
 			if (v1.x + radius >= hi.x)
 			{
-				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId1 = rbId;
 				nbq[cnt + start_i].bodyId2 = -1;
 				nbq[cnt + start_i].normal1 = Coord(-1, 0, 0);
 				nbq[cnt + start_i].pos1 = v1 + Coord(radius, 0, 0);
@@ -587,7 +590,7 @@ namespace dyno
 			}
 			if (v1.x - radius <= lo.x)
 			{
-				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId1 = rbId;
 				nbq[cnt + start_i].bodyId2 = -1;
 				nbq[cnt + start_i].normal1 = Coord(1, 0, 0);
 				nbq[cnt + start_i].pos1 = v1 - Coord(radius, 0, 0);
@@ -598,7 +601,7 @@ namespace dyno
 
 			if (v1.y + radius >= hi.y)
 			{
-				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId1 = rbId;
 				nbq[cnt + start_i].bodyId2 = -1;
 				nbq[cnt + start_i].normal1 = Coord(0, -1, 0);
 				nbq[cnt + start_i].pos1 = v1 + Coord(0, radius, 0);
@@ -608,7 +611,7 @@ namespace dyno
 			}
 			if (v1.y - radius <= lo.y)
 			{
-				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId1 = rbId;
 				nbq[cnt + start_i].bodyId2 = -1;
 				nbq[cnt + start_i].normal1 = Coord(0, 1, 0);
 				nbq[cnt + start_i].pos1 = v1 - Coord(0, radius, 0);
@@ -619,7 +622,7 @@ namespace dyno
 
 			if (v1.z + radius >= hi.z)
 			{
-				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId1 = rbId;
 				nbq[cnt + start_i].bodyId2 = -1;
 				nbq[cnt + start_i].normal1 = Coord(0, 0, -1);
 				nbq[cnt + start_i].pos1 = v1 + Coord(0, 0, radius);
@@ -629,7 +632,7 @@ namespace dyno
 			}
 			if (v1.z - radius <= lo.z)
 			{
-				nbq[cnt + start_i].bodyId1 = pId;
+				nbq[cnt + start_i].bodyId1 = rbId;
 				nbq[cnt + start_i].bodyId2 = -1;
 				nbq[cnt + start_i].normal1 = Coord(0, 0, 1);
 				nbq[cnt + start_i].pos1 = v1 - Coord(0, 0, radius);
@@ -651,6 +654,11 @@ namespace dyno
 		auto discreteSet = this->inDiscreteElements()->getDataPtr();
 		uint totalSize = discreteSet->totalSize();
 
+		DArray<Box3D>& boxInGlobal = discreteSet->boxesInGlobal();
+		DArray<Sphere3D>& sphereInGlobal = discreteSet->spheresInGlobal();
+		DArray<Tet3D>& tetInGlobal = discreteSet->tetsInGlobal();
+		DArray<Capsule3D>& capsuleInGlobal = discreteSet->capsulesInGlobal();
+
 		ElementOffset offset = discreteSet->calculateElementOffset();
 
 		mBoundaryContactCounter.resize(discreteSet->totalSize());
@@ -659,10 +667,10 @@ namespace dyno
 		{
 			cuExecute(totalSize,
 				CountContactsWithBoundary,
-				discreteSet->getSpheres(),
-				discreteSet->getBoxes(),
-				discreteSet->getTets(),
-				discreteSet->getCaps(),
+				sphereInGlobal,
+				boxInGlobal,
+				tetInGlobal,
+				capsuleInGlobal,
 				mBoundaryContactCounter,
 				upperBound,
 				lowerBound,
@@ -676,12 +684,13 @@ namespace dyno
 			if (sum > 0) {
 				cuExecute(totalSize,
 					SetupContactsWithBoundary,
-					discreteSet->getSpheres(),
-					discreteSet->getBoxes(),
-					discreteSet->getTets(),
-					discreteSet->getCaps(),
+					sphereInGlobal,
+					boxInGlobal,
+					tetInGlobal,
+					capsuleInGlobal,
 					mBoundaryContactCounter,
 					this->outContacts()->getData(),
+					discreteSet->shape2RigidBodyMapping(),
 					upperBound,
 					lowerBound,
 					offset);

@@ -1,15 +1,12 @@
-#include <GlfwApp.h>
-#include "Peridynamics/Cloth.h"
+#include <UbiApp.h>
 #include <SceneGraph.h>
-#include <Log.h>
-#include <ParticleSystem/StaticBoundary.h>
-#include <Multiphysics/VolumeBoundary.h>
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
 #include <GLSurfaceVisualModule.h>
 
 #include "Peridynamics/CodimensionalPD.h"
-#include "../Modeling/StaticTriangularMesh.h"
+#include "StaticTriangularMesh.h"
+
 #include "ManualControl.h"
 
 using namespace std;
@@ -22,7 +19,7 @@ std::shared_ptr<SceneGraph> createScene()
 	scn->setUpperBound(Vec3f(1.5, 3, 1.5));
 	scn->setGravity(Vec3f(0,-200,0));
 
-	auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>(0.15, 120, 0.001, 0.0001));
+	auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>());
 	//also try:
 	//auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>(0.15, 1200, 0.001, 0.0001));
 	//auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>(0.15, 12000, 0.001, 0.0001));
@@ -34,7 +31,7 @@ std::shared_ptr<SceneGraph> createScene()
 	cloth->stateFrameNumber()->connect(custom->inFrameNumber());
 	cloth->stateAttribute()->connect(custom->inAttribute());
 	cloth->animationPipeline()->pushModule(custom);
-	cloth->setSelfContact(false);
+	//cloth->setSelfContact(false);
 	
 	auto surfaceRendererCloth = std::make_shared<GLSurfaceVisualModule>();
 	surfaceRendererCloth->setColor(Color(1, 1, 1));
@@ -49,32 +46,13 @@ std::shared_ptr<SceneGraph> createScene()
 	return scn;
 }
 
-void RecieveLogMessage(const Log::Message& m)
-{
-	switch (m.type)
-	{
-	case Log::Info:
-		cout << ">>>: " << m.text << endl; break;
-	case Log::Warning:
-		cout << "???: " << m.text << endl; break;
-	case Log::Error:
-		cout << "!!!: " << m.text << endl; break;
-	case Log::User:
-		cout << ">>>: " << m.text << endl; break;
-	default: break;
-	}
-}
-
-
 int main()
 {
-	Log::setUserReceiver(&RecieveLogMessage);
+	UbiApp app;
+	app.setSceneGraph(createScene());
 
-	GlfwApp window;
-	window.setSceneGraph(createScene());
-
-	window.initialize(1024, 768);
-	window.mainLoop();
+	app.initialize(1024, 768);
+	app.mainLoop();
 
 	return 0;
 }

@@ -15,7 +15,7 @@
  */
 
 #pragma once
-#include "Node.h"
+#include "ModelEditing.h"
 #include "Topology/TriangleSet.h"
 #include "Topology/TextureMesh.h"
 
@@ -27,7 +27,6 @@
 #include "FilePath.h"
 #include "SkinInfo.h"
 #include "JointInfo.h"
-#include "GltfFunc.h"
 
 namespace dyno
 {
@@ -36,7 +35,7 @@ namespace dyno
 	 */
 
 	template<typename TDataType>
-	class JointDeform : public Node
+	class JointDeform : public ModelEditing<TDataType>
 	{
 		DECLARE_TCLASS(JointDeform, TDataType);
 
@@ -63,111 +62,22 @@ namespace dyno
 
 		DEF_INSTANCE_IN(JointInfo, Joint, "Joint");
 		DEF_INSTANCE_IN(SkinInfo, Skin, "Skin");	
+		DEF_ARRAYLIST_IN(Transform3f, InstanceTransform, DeviceType::GPU, "InstanceTransform");
 		DEF_INSTANCE_STATE(TextureMesh, TextureMesh, "");
 
 	protected:
-		void resetStates() override
-		{
-			auto& joint = this->inJoint()->getData();
-			auto& skin = this->inSkin()->getData();
-
-			if (joint.isEmpty() || skin.isEmpty())
-			{
-				return;
-			}
-			
-			auto textureMesh = this->stateTextureMesh()->getDataPtr();
+		void resetStates() override;
 
 
-			textureMesh->vertices() = skin.mesh->vertices();
-			textureMesh->normals() = skin.mesh->normals();
-			textureMesh->texCoords() = skin.mesh->texCoords();
-			textureMesh->shapeIds() = skin.mesh->shapeIds();
+		void updateStates() override;
 
-			textureMesh->shapes() = skin.mesh->shapes();
-			textureMesh->materials() = skin.mesh->materials();
-
-		}
-
-		void updateStates() override 
-		{
-			int frameNumber = this->stateFrameNumber()->getValue();
-
-
-			auto& joint = this->inJoint()->getData();
-			auto& skin = this->inSkin()->getData();
-
-			if (joint.isEmpty() || skin.isEmpty()) 
-			{
-				return;
-			}
-
-
-			updateAnimation(frameNumber);
-		}
 
 
 
 	private:
 
-		void updateAnimation(int frameNumber) 
-		{
-			//update Points
-			auto& skinInfo = this->inSkin()->getData();
-			auto& jointInfo = this->inJoint()->getData();
+		void updateAnimation(int frameNumber);
 
-			auto textureMesh = this->stateTextureMesh()->getDataPtr();
-
-
-			for (size_t i = 0; i < skinInfo.size(); i++)//
-			{
-				auto& bindJoint0 = skinInfo.V_jointID_0[i];
-				auto& bindJoint1 = skinInfo.V_jointID_1[i];
-
-				auto& bindWeight0 = skinInfo.V_jointWeight_0[i];
-				auto& bindWeight1 = skinInfo.V_jointWeight_1[i];
-
-				for (size_t j = 0; j < skinInfo.skin_VerticeRange[i].size(); j++)
-				{
-					//
-					Vec2u& range = skinInfo.skin_VerticeRange[i][j];
-
-					skinAnimation(skinInfo.initialPosition,
-						textureMesh->vertices(),
-						jointInfo.JointInverseBindMatrix,
-						jointInfo.JointWorldMatrix,
-
-						bindJoint0,
-						bindJoint1,
-						bindWeight0,
-						bindWeight1,
-						Mat4f::identityMatrix(),
-						false,
-						range
-					);
-
-					//update Normals
-
-					skinAnimation(
-						skinInfo.initialNormal,
-						textureMesh->normals(),
-						jointInfo.JointInverseBindMatrix,
-						jointInfo.JointWorldMatrix,
-
-						bindJoint0,
-						bindJoint1,
-						bindWeight0,
-						bindWeight1,
-						Mat4f::identityMatrix(),
-						true,
-						range
-					);
-
-				}
-			}
-			
-			
-		}
 
 	};
 

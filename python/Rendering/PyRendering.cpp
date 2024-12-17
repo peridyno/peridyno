@@ -103,16 +103,6 @@ void declare_construct_tangent_space(py::module& m) {
 		.def("out_bitangent", &Class::outBitangent, py::return_value_policy::reference);
 }
 
-#include "Backend/Cuda/Module/GLElementVisualModule.h"
-void declare_gl_element_visual_module(py::module& m) {
-	using Class = dyno::GLElementVisualModule;
-	using Parent = dyno::GLVisualModule;
-	std::string pyclass_name = std::string("GLElementVisualModule");
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference);
-}
-
 #include "Backend/Cuda/Module/GLInstanceVisualModule.h"
 void declare_gl_instance_visual_module(py::module& m) {
 	using Class = dyno::GLInstanceVisualModule;
@@ -173,8 +163,6 @@ void pybind_rendering(py::module& m)
 	declare_rednder_window(m);
 
 	declare_construct_tangent_space(m);
-
-	declare_gl_element_visual_module(m);
 
 	declare_gl_instance_visual_module(m);
 

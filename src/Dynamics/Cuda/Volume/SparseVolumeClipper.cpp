@@ -1,6 +1,6 @@
 #include "SparseVolumeClipper.h"
 
-#include "Mapping/MarchingCubesHelper.h"
+#include "Module/MarchingCubesHelper.h"
 
 #include "VolumeHelper.h"
 

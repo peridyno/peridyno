@@ -13,9 +13,9 @@ namespace dyno {
 
 	enum ConfigMotionType
 	{
-		Static = 0,
-		Kinematic = 1,
-		Dynamic = 2,
+		CMT_Static = 0,
+		CMT_Kinematic = 1,
+		CMT_Dynamic = 2,
 	};
 
 	enum ConfigShapeType
@@ -61,19 +61,21 @@ namespace dyno {
 	{	
 		VehicleRigidBodyInfo() {};
 
-		VehicleRigidBodyInfo(Name_Shape name, int shapeId, ConfigShapeType type) //
+		VehicleRigidBodyInfo(Name_Shape name, int shapeId, ConfigShapeType type,Real density = 100) //
 		{
 			shapeName = name;
 			meshShapeId = shapeId;
 			shapeType = type;
+			mDensity = density;
 		};
 
-		VehicleRigidBodyInfo(Name_Shape name, int shapeId, ConfigShapeType type, Transform3f trans) //
+		VehicleRigidBodyInfo(Name_Shape name, int shapeId, ConfigShapeType type, Transform3f trans, Real density = 100) //
 		{
 			shapeName = name;
 			meshShapeId = shapeId;
 			shapeType = type;
 			transform = trans;
+			mDensity = density;
 		};
 
 		//Shape:
@@ -88,8 +90,11 @@ namespace dyno {
 		float radius = 1;					//	if(type == Sphere);  if(type == Capsule);
 		std::vector<Vec3f> tet = {Vec3f(0),Vec3f(0),Vec3f(0),Vec3f(0,1,0) };	//	if(type == Tet);
 		float capsuleLength = 1;			// if(type == Capsule);
-		ConfigMotionType motion = ConfigMotionType::Dynamic;
+		ConfigMotionType motion = ConfigMotionType::CMT_Dynamic;
 
+		Real mDensity = 100;
+
+		uint rigidGroup = 0;
 	};
 
 	/**

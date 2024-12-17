@@ -1,4 +1,4 @@
-#include <GlfwApp.h>
+#include <UbiApp.h>
 
 #include <SceneGraph.h>
 
@@ -62,10 +62,11 @@ std::shared_ptr<SceneGraph> creatCar()
 			sphere.radius = std::abs(up.y - down.y) / 2;
 			Actors[it] = jeep->addSphere(sphere, rigidbody, 100);*/
 			CapsuleInfo capsule;
-			capsule.center = texMesh->shapes()[it]->boundingTransform.translation();
+			capsule.center = Vec3f(0.0f);
 			capsule.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
 			capsule.radius = std::abs(up.y - down.y) / 2;
 			capsule.halfLength = 0.1495;
+			rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation();
 			Actors[it] = jeep->addCapsule(capsule, rigidbody, 100);
 			jeep->bind(Actors[it], Pair<uint, uint>(it, 0));
 		}
@@ -74,9 +75,10 @@ std::shared_ptr<SceneGraph> creatCar()
 			auto up = texMesh->shapes()[it]->boundingBox.v1;
 			auto down = texMesh->shapes()[it]->boundingBox.v0;
 			BoxInfo box;
-			box.center = texMesh->shapes()[it]->boundingTransform.translation();
+			box.center = Vec3f(0.0f);
 			Vec3f tmp = (texMesh->shapes()[it]->boundingBox.v1 - texMesh->shapes()[it]->boundingBox.v0) / 2;
 			box.halfLength = Vec3f(abs(tmp.x), abs(tmp.y), abs(tmp.z));
+			rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation();
 			Actors[it] = jeep->addBox(box, rigidbody, 100);
 			jeep->bind(Actors[it], Pair<uint, uint>(it, 0));
 		}
@@ -92,7 +94,7 @@ std::shared_ptr<SceneGraph> creatCar()
 	{
 		if (it == 5)
 		{
-			Vec3f offset = Vec3f(0.0f, -1.00, 0);
+			Vec3f offset = Vec3f(0.0f, 0.00, 0);
 			rigidbody.offset = offset;
 		}
 		if (it == 6)
@@ -108,8 +110,10 @@ std::shared_ptr<SceneGraph> creatCar()
 		auto up = texMesh->shapes()[it]->boundingBox.v1;
 		auto down = texMesh->shapes()[it]->boundingBox.v0;
 		BoxInfo box;
-		box.center = texMesh->shapes()[it]->boundingTransform.translation();
+		box.center = Vec3f(0.0f);
 		Vec3f tmp = (texMesh->shapes()[it]->boundingBox.v1 - texMesh->shapes()[it]->boundingBox.v0) / 2;
+
+		rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation();
 		if (it <= 48)
 		{
 			box.halfLength = Vec3f(abs(tmp.x), abs(tmp.y), abs(tmp.z));
@@ -210,7 +214,7 @@ std::shared_ptr<SceneGraph> creatCar()
 
 int main()
 {
-	GlfwApp app;
+	UbiApp app(GUIType::GUI_QT);
 	app.setSceneGraph(creatCar());
 	app.initialize(1280, 768);
 

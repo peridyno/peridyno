@@ -1,11 +1,9 @@
-#include "GlfwGUI/GlfwApp.h"
+#include "UbiApp.h"
 
 #include "SceneGraph.h"
-#include "Log.h"
 
-#include "ParticleSystem/StaticBoundary.h"
-#include "ParticleSystem/SquareEmitter.h"
-#include "ParticleSystem/CircularEmitter.h"
+#include "ParticleSystem/Emitters/SquareEmitter.h"
+#include "ParticleSystem/Emitters/CircularEmitter.h"
 #include "ParticleSystem/ParticleFluid.h"
 
 #include "Topology/TriangleSet.h"
@@ -330,8 +328,9 @@ public:
 			}
 		}
 
-		auto ptSet = this->statePointSet()->getDataPtr();
-		ptSet->setPoints(vertList);
+		this->statePosition()->assign(vertList);
+		this->stateVelocity()->resize(vertList.size());
+		this->stateVelocity()->reset();
 
 		vertList.clear();
 	};
@@ -375,37 +374,6 @@ std::shared_ptr<SceneGraph> createScene()
 	auto emitter = scn->addNode(std::make_shared<SquareEmitter<DataType3f>>());
 	emitter->varLocation()->setValue(Vec3f(0.0f, 0.5f, 0.5f));
 
-	//**********Fluid Particles
-	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
-	//emitter->connect(fluid->importParticleEmitters());
-	loader->connect(fluid->importInitialStates());
-
-	////neighbor query
-	auto nbrQuery = std::make_shared<NeighborPointQuery<DataType3f>>();
-	nbrQuery->inRadius()->setValue(0.01);
-	fluid->statePosition()->connect(nbrQuery->inPosition());
-	fluid->graphicsPipeline()->pushModule(nbrQuery);
-
-	//**********particle rendering with anisotropic values
-	//anisotropic value calculator
-	auto m_eigenV = std::make_shared<ComputeParticleAnisotropy<DataType3f>>();
-	m_eigenV->varSmoothingLength()->setValue(0.01);
-	fluid->statePosition()->connect(m_eigenV->inPosition());
-	nbrQuery->outNeighborIds()->connect(m_eigenV->inNeighborIds());
-	fluid->graphicsPipeline()->pushModule(m_eigenV);
-
-	auto instanceRender = std::make_shared<GLInstanceVisualModule>();
-	m_eigenV->outTransform()->connect(instanceRender->inInstanceTransform());
-	//instanceRender->inTriangleSet()->allocate();
-	std::shared_ptr<TriangleSet<DataType3f>> triSet = std::make_shared<TriangleSet<DataType3f>>();
-	triSet->loadObjFile(getAssetPath() + "standard/standard_icosahedron.obj");
-	instanceRender->inTriangleSet()->setDataPtr(triSet);
-
-	fluid->graphicsPipeline()->pushModule(instanceRender);
-
-	//**********Add Nodes
-	fluid->setActive(false);
-
 	//**********Boundary 2
 	auto pipe = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
 	pipe->varFileName()->setValue(getAssetPath() + "bar/pipe.obj");
@@ -421,15 +389,41 @@ std::shared_ptr<SceneGraph> createScene()
 	//**********Solid Fluid Interaction Node
 	auto sfi = scn->addNode(std::make_shared<SemiAnalyticalSFINode<DataType3f>>());
 
-	fluid->connect(sfi->importParticleSystems());
+	loader->connect(sfi->importInitialStates());
 	pipe->stateTriangleSet()->connect(sfi->inTriangleSet());
+
+	//Visualize fluid particles in SemiAnalyticalSFINode
+	{
+		////neighbor query
+		auto nbrQuery = std::make_shared<NeighborPointQuery<DataType3f>>();
+		nbrQuery->inRadius()->setValue(0.01);
+		sfi->statePosition()->connect(nbrQuery->inPosition());
+		sfi->graphicsPipeline()->pushModule(nbrQuery);
+
+		//**********particle rendering with anisotropic values
+		//anisotropic value calculator
+		auto m_eigenV = std::make_shared<ComputeParticleAnisotropy<DataType3f>>();
+		m_eigenV->varSmoothingLength()->setValue(0.01);
+		sfi->statePosition()->connect(m_eigenV->inPosition());
+		nbrQuery->outNeighborIds()->connect(m_eigenV->inNeighborIds());
+		sfi->graphicsPipeline()->pushModule(m_eigenV);
+
+		auto instanceRender = std::make_shared<GLInstanceVisualModule>();
+		m_eigenV->outTransform()->connect(instanceRender->inInstanceTransform());
+		//instanceRender->inTriangleSet()->allocate();
+		std::shared_ptr<TriangleSet<DataType3f>> triSet = std::make_shared<TriangleSet<DataType3f>>();
+		triSet->loadObjFile(getAssetPath() + "standard/standard_icosahedron.obj");
+		instanceRender->inTriangleSet()->setDataPtr(triSet);
+
+		sfi->graphicsPipeline()->pushModule(instanceRender);
+	}
 
 	return scn;
 }
 
 int main()
 {
-	GlfwApp window;
+	UbiApp window(GUIType::GUI_QT);
 	window.setSceneGraph(createScene());
 	window.initialize(1024, 768);
 	window.mainLoop();

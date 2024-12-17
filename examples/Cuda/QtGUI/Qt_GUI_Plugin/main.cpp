@@ -8,6 +8,7 @@ using namespace dyno;
 #include "SemiAnalyticalScheme/initializeSemiAnalyticalScheme.h"
 #include "Volume/initializeVolume.h"
 #include "Multiphysics/initializeMultiphysics.h"
+#include "HeightField/initializeHeightField.h"
 #include "initializeModeling.h"
 #include "initializeIO.h"
 
@@ -20,6 +21,7 @@ int main()
 	Modeling::initStaticPlugin();
 	RigidBody::initStaticPlugin();
 	PaticleSystem::initStaticPlugin();
+	HeightFieldLibrary::initStaticPlugin();
 	DualParticleSystem::initStaticPlugin();
 	Peridynamics::initStaticPlugin();
 	SemiAnalyticalScheme::initStaticPlugin();

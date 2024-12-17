@@ -420,7 +420,7 @@ void declare_frame_to_point_set(py::module& m, std::string typestr) {
 		.def("apply", &Class::apply);
 }
 
-#include "Mapping/MarchingCubes.h"
+#include "Volume/MarchingCubes.h"
 template <typename TDataType>
 void declare_marching_cubes(py::module& m, std::string typestr) {
 	using Class = dyno::MarchingCubes<TDataType>;
@@ -434,7 +434,7 @@ void declare_marching_cubes(py::module& m, std::string typestr) {
 		.def("out_triangle_set", &Class::outTriangleSet, py::return_value_policy::reference);
 }
 
-#include "Mapping/MarchingCubesHelper.h"
+#include "Volume/Module/MarchingCubesHelper.h"
 template <typename TDataType>
 void declare_marching_cubes_helper(py::module& m, std::string typestr) {
 	using Class = dyno::MarchingCubesHelper<TDataType>;
@@ -525,7 +525,7 @@ void declare_texture_mesh_to_triangle_set(py::module& m, std::string typestr) {
 		.def("out_triangle_set", &Class::outTriangleSet, py::return_value_policy::reference);
 }
 
-#include "Mapping/VolumeClipper.h"
+#include "Volume/VolumeClipper.h"
 template <typename TDataType>
 void declare_volume_clipper(py::module& m, std::string typestr) {
 	using Class = dyno::VolumeClipper<TDataType>;
@@ -605,11 +605,11 @@ void declare_discrete_elements(py::module& m, std::string typestr) {
 		.def("set_capsules", &Class::setCapsules)
 		.def("set_triangles", &Class::setTriangles)
 		.def("set_tet_sdf", &Class::setTetSDF)
-		.def("get_boxes", &Class::getBoxes, py::return_value_policy::reference)
-		.def("get_spheres", &Class::getSpheres, py::return_value_policy::reference)
-		.def("get_tets", &Class::getTets, py::return_value_policy::reference)
-		.def("get_caps", &Class::getCaps, py::return_value_policy::reference)
-		.def("get_tris", &Class::getTris, py::return_value_policy::reference)
+		.def("get_boxes", &Class::boxesInLocal, py::return_value_policy::reference)
+		.def("get_spheres", &Class::spheresInLocal, py::return_value_policy::reference)
+		.def("get_tets", &Class::tetsInLocal, py::return_value_policy::reference)
+		.def("get_caps", &Class::capsulesInLocal, py::return_value_policy::reference)
+		.def("get_tris", &Class::trianglesInLocal, py::return_value_policy::reference)
 		.def("ball_and_socket_joints", &Class::ballAndSocketJoints, py::return_value_policy::reference)
 		.def("slider_joints", &Class::sliderJoints, py::return_value_policy::reference)
 		.def("hinge_joints", &Class::hingeJoints, py::return_value_policy::reference)
@@ -815,10 +815,10 @@ void declare_quad_set(py::module& m, std::string typestr) {
 		.def("out_vertex_normal", &Class::outVertexNormal, py::return_value_policy::reference);
 }
 
-#include "Topology/SignedDistanceField.h"
+#include "Topology/LevelSet.h"
 template <typename TDataType>
 void declare_signed_distance_fieldt(py::module& m, std::string typestr) {
-	using Class = dyno::SignedDistanceField<TDataType>;
+	using Class = dyno::LevelSet<TDataType>;
 	using Parent = dyno::TopologyModule;
 	std::string pyclass_name = std::string("SignedDistanceField") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())

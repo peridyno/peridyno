@@ -7,6 +7,25 @@ namespace dyno
 {
 	IMPLEMENT_TCLASS(VolumeBool, TDataType)
 		
+	template<typename TDataType>
+	VolumeBool<TDataType>::VolumeBool()
+	{
+		this->inPadding()->setValue(5);
+		this->inSpacing()->setValue(0.01);
+
+	}
+
+	template<typename TDataType>
+	VolumeBool<TDataType>::~VolumeBool()
+	{
+	}
+
+	template<typename TDataType>
+	std::string VolumeBool<TDataType>::getNodeType()
+	{
+		return "Volume";
+	}
+
 	template<typename Real>
 	__global__ void C_FastMarching(
 		DArray3D<Real> bigDistance,
@@ -224,19 +243,6 @@ namespace dyno
 		default:
 			break;
 		}
-	}
-
-	template<typename TDataType>
-	VolumeBool<TDataType>::VolumeBool()
-	{
-		this->inPadding()->setValue(5);
-		this->inSpacing()->setValue(0.01);
-
-	}
-
-	template<typename TDataType>
-	VolumeBool<TDataType>::~VolumeBool()
-	{
 	}
 
 	template<typename TDataType>

@@ -61,8 +61,6 @@ namespace dyno
 
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "Particle velocity");
 
-		DEF_ARRAY_IN(Attribute, Attribute, DeviceType::GPU, "Particle attribute");
-
 		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "");
 
 		DEF_ARRAYLIST_IN(int, NeighborTriIds, DeviceType::GPU, "triangle neighbors");

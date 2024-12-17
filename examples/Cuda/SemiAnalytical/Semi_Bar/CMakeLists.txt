@@ -7,6 +7,6 @@ if(PERIDYNO_LIBRARY_SEMIANALYTICALSCHEME)
         GLRenderEngine 
         SemiAnalyticalScheme 
         RigidBody 
-        GlfwGUI)
+        UbiGUI)
     add_example(Semi_Bar SemiAnalytical LIB_DEPENDENCY)
 endif()

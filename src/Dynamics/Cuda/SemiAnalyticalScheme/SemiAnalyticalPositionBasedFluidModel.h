@@ -52,7 +52,6 @@ namespace dyno
 
 		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "");	//current particle position
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");  //current particle velocity
-		DEF_ARRAY_IN(Coord, Force, DeviceType::GPU, "");
 
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
 	};

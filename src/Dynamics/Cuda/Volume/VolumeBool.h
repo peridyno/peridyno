@@ -31,8 +31,9 @@ namespace dyno {
 		DECLARE_ENUM(BoolType,
 			Intersect = 0,
 			Union = 1,
-			Minus = 2,
-			);
+			Minus = 2);
+
+		std::string getNodeType() override;
 
 	protected:
 		void resetStates() override;
@@ -42,10 +43,10 @@ namespace dyno {
 			DistanceField3D<TDataType>& tDistance);
 
 	public:
-		DEF_INSTANCE_IN(SignedDistanceField<TDataType>, A, "");
-		DEF_INSTANCE_IN(SignedDistanceField<TDataType>, B, "");
+		DEF_INSTANCE_IN(LevelSet<TDataType>, A, "");
+		DEF_INSTANCE_IN(LevelSet<TDataType>, B, "");
 
-		DEF_INSTANCE_OUT(SignedDistanceField<TDataType>, SDF, "");
+		DEF_INSTANCE_OUT(LevelSet<TDataType>, SDF, "");
 
 		DEF_VAR_IN(Real, Spacing, "");
 		DEF_VAR_IN(uint, Padding, "");

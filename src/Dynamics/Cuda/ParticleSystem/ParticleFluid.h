@@ -15,7 +15,8 @@
  */
 #pragma once
 #include "ParticleSystem.h"
-#include "ParticleEmitter.h"
+
+#include "Emitters/ParticleEmitter.h"
 
 #include "Topology/PointSet.h"
 
@@ -41,7 +42,7 @@ namespace dyno
 	protected:
 		void resetStates() override;
 
-		void preUpdateStates();
+		void preUpdateStates() override;
 
 	private:
 		void loadInitialStates();
