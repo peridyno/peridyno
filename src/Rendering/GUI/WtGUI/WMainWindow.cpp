@@ -32,6 +32,8 @@
 
 #include <filesystem>
 
+//#include "Dynamics/Cuda/ParticleSystem/initializeParticleSystem.h"
+
 WMainWindow::WMainWindow()
 	: WContainerWidget(), bRunFlag(false)
 {
@@ -67,7 +69,7 @@ WMainWindow::WMainWindow()
 	auto menu = naviBar->addMenu(std::make_unique<Wt::WMenu>(widget1), Wt::AlignmentFlag::Right);
 	initMenu(menu);
 
-	std::cout << " WmainWindow" << std::endl;
+
 }
 
 WMainWindow::~WMainWindow()
@@ -253,18 +255,75 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	auto layout3 = widget3->setLayout(std::make_unique<Wt::WHBoxLayout>());
 	layout3->setContentsMargins(0, 0, 0, 0);
 
+	Wt::WSuggestionPopup::Options nodeOptions;
+	nodeOptions.highlightBeginTag = "<span class=\"highlight\">";
+	nodeOptions.highlightEndTag = "</span>";
+
+	Wt::WSuggestionPopup* sp = layout3->addChild(std::make_unique<Wt::WSuggestionPopup>(
+		Wt::WSuggestionPopup::generateMatcherJS(nodeOptions),
+		Wt::WSuggestionPopup::generateReplacerJS(nodeOptions)
+	));
+
+
+	auto& pages = dyno::NodeFactory::instance()->nodePages();
+	for (auto iPage = pages.begin(); iPage != pages.end(); iPage++)
+	{
+		auto& groups = iPage->second->groups();
+		{
+			for (auto iGroup = groups.begin(); iGroup != groups.end(); iGroup++)
+			{
+				auto& actions = iGroup->second->actions();
+				for (auto action : actions)
+				{
+					sp->addSuggestion(action->caption());
+				}
+			}
+		}
+	}
+
 	auto name = layout3->addWidget(std::make_unique<Wt::WLineEdit>());
 	name->setPlaceholderText("node name");
+
+	sp->forEdit(name);
 
 	auto addNodeButton = layout3->addWidget(std::make_unique<Wt::WPushButton>("Add"));
 
 	addNodeButton->clicked().connect([=] {
-		auto node_obj = dyno::Object::createObject(name->text().toUTF8());
-		std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
-		mScene->addNode(new_node);
-		mFlowWidget->updateForAddNode();
-		mNodeDataModel->setScene(mScene);
-		name->setText("");
+		bool flag = true;
+
+		for (auto iPage = pages.begin(); iPage != pages.end(); iPage++)
+		{
+			auto& groups = iPage->second->groups();
+			{
+				for (auto iGroup = groups.begin(); iGroup != groups.end(); iGroup++)
+				{
+					auto& actions = iGroup->second->actions();
+					for (auto action : actions)
+					{
+						if (action->caption() == name->text().toUTF8())
+						{
+							mScene->addNode(action->action()());
+							name->setText("");
+							mFlowWidget->updateForAddNode();
+							mNodeDataModel->setScene(mScene);
+							flag = false;
+							std::cout << "add" << std::endl;
+						}
+					}
+				}
+			}
+		}
+
+		if (flag)
+		{
+			auto node_obj = dyno::Object::createObject(name->text().toUTF8());
+			std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
+			mScene->addNode(new_node);
+			mFlowWidget->updateForAddNode();
+			mNodeDataModel->setScene(mScene);
+			name->setText("");
+		}
+
 		});
 
 	auto reorderNodeButton = layout3->addWidget(std::make_unique<Wt::WPushButton>("Reorder"));

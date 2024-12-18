@@ -27,6 +27,7 @@ AutoBuild/*
 build/*
 buildDebug/*
 .vscode/*
+.VSCodeCounter/*
 
 *.ipch
 /docs

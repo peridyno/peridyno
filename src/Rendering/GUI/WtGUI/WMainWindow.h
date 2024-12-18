@@ -9,6 +9,9 @@
 #include "WParameterDataNode.h"
 #include "NodeEditor/WtFlowWidget.h"
 
+#include "NodeFactory.h"
+#include <Wt/WSuggestionPopup.h>
+
 namespace dyno
 {
 	class SceneGraph;
