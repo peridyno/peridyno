@@ -4,9 +4,8 @@
 #include <BasicShapes/PlaneModel.h>
 #include "GltfLoader.h"
 #include "BasicShapes/PlaneModel.h"
-#include "TextureMeshMerge.h"
+#include "MergeTextureMesh.h"
 #include "ExtractShape.h"
-
 
 using namespace std;
 using namespace dyno;
@@ -117,11 +116,11 @@ std::shared_ptr<SceneGraph> creatCar()
 	roadblock->stateTextureMesh()->connect(extractBlock->inInTextureMesh());
 
 
-	auto merge = scn->addNode(std::make_shared<TextureMeshMerge<DataType3f>>());
+	auto merge = scn->addNode(std::make_shared<MergeTextureMesh<DataType3f>>());
 	extractWheel->stateResult()->connect(merge->inFirst());
 	extractBody->stateResult()->connect(merge->inSecond());
 
-	auto mergeRoadblock = scn->addNode(std::make_shared<TextureMeshMerge<DataType3f>>());
+	auto mergeRoadblock = scn->addNode(std::make_shared<MergeTextureMesh<DataType3f>>());
 	merge->stateTextureMesh()->connect(mergeRoadblock->inFirst());
 	extractBlock->stateResult()->connect(mergeRoadblock->inSecond());
 

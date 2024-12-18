@@ -1,4 +1,6 @@
 #include "SquareEmitter.h"
+#include "GLWireframeVisualModule.h"
+
 #include <time.h>
 
 #include <stdlib.h>
@@ -24,6 +26,11 @@ namespace dyno
 
 		this->varWidth()->attach(callback);
 		this->varHeight()->attach(callback);
+
+		auto wireRender = std::make_shared<GLWireframeVisualModule>();
+		wireRender->setColor(Color(0, 1, 0));
+		this->stateOutline()->connect(wireRender->inEdgeSet());
+		this->graphicsPipeline()->pushModule(wireRender);
 	}
 
 	template<typename TDataType>

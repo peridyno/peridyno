@@ -26,7 +26,7 @@ namespace dyno
 	 */
 
 	template<typename TDataType>
-	class TextureMeshMerge : public ModelEditing<TDataType>
+	class MergeTextureMesh : public ModelEditing<TDataType>
 	{
 		DECLARE_TCLASS(TextureMeshMerge, TDataType);
 
@@ -37,9 +37,9 @@ namespace dyno
 
 		typedef typename TopologyModule::Triangle Triangle;
 
-		TextureMeshMerge();
+		MergeTextureMesh();
 
-		~TextureMeshMerge();
+		~MergeTextureMesh();
 
 	public:
 
@@ -52,15 +52,7 @@ namespace dyno
 
 	protected:
 		void resetStates() override;
-
-		void merge(const std::shared_ptr<TextureMesh>& texMesh01,const std::shared_ptr<TextureMesh>& texMesh02, std::shared_ptr<TextureMesh>& out );
-
-	private:
-
-
 	};
 
-
-
-	IMPLEMENT_TCLASS(TextureMeshMerge, TDataType);
+	IMPLEMENT_TCLASS(MergeTextureMesh, TDataType);
 }

@@ -35,12 +35,6 @@ std::shared_ptr<SceneGraph> creatCar()
 
 	auto jeep = scn->addNode(std::make_shared<Vechicle<DataType3f>>());
 
-	auto prRender = std::make_shared<GLPhotorealisticInstanceRender>();
-	jeep->inTextureMesh()->connect(prRender->inTextureMesh());
-	jeep->stateInstanceTransform()->connect(prRender->inTransform());
-	jeep->graphicsPipeline()->pushModule(prRender);
-
-
 	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
 	gltf->setVisible(false);
 	gltf->varFileName()->setValue(getAssetPath() + "jeep_bridge/Jeep_Bridge.gltf");
@@ -214,7 +208,7 @@ std::shared_ptr<SceneGraph> creatCar()
 
 int main()
 {
-	UbiApp app(GUIType::GUI_QT);
+	UbiApp app(GUIType::GUI_GLFW);
 	app.setSceneGraph(creatCar());
 	app.initialize(1280, 768);
 

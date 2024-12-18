@@ -1,8 +1,17 @@
-#include "TextureMeshMerge.h"
-#include "GLPhotorealisticRender.h"
+#include "TextureMesh.h"
 
-namespace dyno 
+namespace dyno
 {
+	TextureMesh::TextureMesh()
+		: TopologyModule()
+	{
+	}
+
+	TextureMesh::~TextureMesh()
+	{
+		this->clear();
+	}
+
 	template<typename Vec3f>
 	__global__ void mergeVec3f(
 		DArray<Vec3f> v0,
@@ -14,9 +23,9 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= target.size()) return;
 
-		if (pId < sizeV0) 
+		if (pId < sizeV0)
 			target[pId] = v0[pId];
-		else 
+		else
 			target[pId] = v1[pId - sizeV0];
 	}
 
@@ -83,73 +92,54 @@ namespace dyno
 		target[pId] = Triangle(v[pId][0] + offset, v[pId][1] + offset, v[pId][2] + offset);
 	}
 
-	template<typename TDataType>
-	TextureMeshMerge<TDataType>::TextureMeshMerge()
-	{
-		this->stateTextureMesh()->setDataPtr(std::make_shared<TextureMesh>());
-		
-		auto render = std::make_shared<GLPhotorealisticRender>();
-		this->stateTextureMesh()->connect(render->inTextureMesh());
-		this->stateTextureMesh()->promoteOuput();
-
-		this->graphicsPipeline()->pushModule(render);
-		this->setForceUpdate(false);
-	}
-
-	template<typename TDataType>
-	TextureMeshMerge<TDataType>::~TextureMeshMerge()
-	{
-	}
-
-	template<typename TDataType>
-	void TextureMeshMerge<TDataType>::merge(const std::shared_ptr<TextureMesh>& texMesh01, const std::shared_ptr<TextureMesh>& texMesh02, std::shared_ptr<TextureMesh>& out)
+	void TextureMesh::merge(const std::shared_ptr<TextureMesh>& texMesh01, const std::shared_ptr<TextureMesh>& texMesh02)
 	{
 		auto vertices01 = texMesh01->vertices();
 		auto vertices02 = texMesh02->vertices();
-	
-		out->vertices().resize(vertices01.size() + vertices02.size());
 
-		cuExecute(out->vertices().size(),
+		this->vertices().resize(vertices01.size() + vertices02.size());
+
+		cuExecute(this->vertices().size(),
 			mergeVec3f,
 			vertices01,
 			vertices02,
-			out->vertices(),
+			this->vertices(),
 			vertices01.size()
 		);
 
 		auto normals01 = texMesh01->normals();
 		auto normals02 = texMesh02->normals();
-		out->normals().resize(normals01.size() + normals02.size());
+		this->normals().resize(normals01.size() + normals02.size());
 
-		cuExecute(out->normals().size(),
+		cuExecute(this->normals().size(),
 			mergeVec3f,
 			normals01,
 			normals02,
-			out->normals(),
+			this->normals(),
 			normals01.size()
 		);
 
 		auto texCoords01 = texMesh01->texCoords();
 		auto texCoords02 = texMesh02->texCoords();
-		out->texCoords().resize(texCoords01.size() + texCoords02.size());
+		this->texCoords().resize(texCoords01.size() + texCoords02.size());
 
-		cuExecute(out->texCoords().size(),
+		cuExecute(this->texCoords().size(),
 			mergeVec2f,
 			texCoords01,
 			texCoords02,
-			out->texCoords(),
+			this->texCoords(),
 			texCoords01.size()
 		);
 
 		auto shapeIds01 = texMesh01->shapeIds();
 		auto shapeIds02 = texMesh02->shapeIds();
-		out->shapeIds().resize(shapeIds01.size() + shapeIds02.size());
+		this->shapeIds().resize(shapeIds01.size() + shapeIds02.size());
 
-		cuExecute(out->texCoords().size(),
+		cuExecute(this->texCoords().size(),
 			mergeShapeId,
 			shapeIds01,
 			shapeIds02,
-			out->shapeIds(),
+			this->shapeIds(),
 			shapeIds01.size(),
 			texMesh01->shapes().size()
 		);
@@ -158,7 +148,7 @@ namespace dyno
 		auto material01 = texMesh01->materials();
 		auto material02 = texMesh02->materials();
 
-		auto outMaterials = out->materials();
+		auto outMaterials = this->materials();
 		outMaterials.clear();
 
 		for (auto it : material01)
@@ -222,24 +212,18 @@ namespace dyno
 
 		}
 
-		out->shapes() = outShapes;
-		out->materials() = outMaterials;
-
-
-		out->vertices();
+		this->shapes() = outShapes;
+		this->materials() = outMaterials;
 	}
 
-	template<typename TDataType>
-	void TextureMeshMerge<TDataType>::resetStates()
+	void TextureMesh::clear()
 	{
-		auto texMesh01 = this->inFirst()->constDataPtr();
-		auto texMesh02 = this->inSecond()->constDataPtr();
-
-		auto out = this->stateTextureMesh()->getDataPtr();
-		
-		this->merge(texMesh01,texMesh02,out);
+		mVertices.clear();
+		mNormals.clear();
+		mTexCoords.clear();
+		mMaterials.clear();
+		mShapeIds.clear();
+		mShapes.clear();
 	}
-
-	DEFINE_CLASS(TextureMeshMerge);
 
 }

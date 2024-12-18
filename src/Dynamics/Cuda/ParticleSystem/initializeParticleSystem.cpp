@@ -69,11 +69,6 @@ namespace dyno
 			"ToolBarIco/ParticleSystem/ParticleEmitterRound.png",
 			[=]()->std::shared_ptr<Node> {
 				auto emitter = std::make_shared<CircularEmitter<DataType3f>>();
-
-				auto wireRender = std::make_shared<GLWireframeVisualModule>();
-				wireRender->setColor(Color(0, 1, 0));
-				emitter->stateOutline()->connect(wireRender->inEdgeSet());
-				emitter->graphicsPipeline()->pushModule(wireRender);
 				return emitter;
 			});
 
@@ -82,11 +77,6 @@ namespace dyno
 			"ToolBarIco/ParticleSystem/ParticleEmitterSquare.png",
 			[=]()->std::shared_ptr<Node> {
 				auto emitter = std::make_shared<SquareEmitter<DataType3f>>();
-
-				auto wireRender = std::make_shared<GLWireframeVisualModule>();
-				wireRender->setColor(Color(0, 1, 0));
-				emitter->stateOutline()->connect(wireRender->inEdgeSet());
-				emitter->graphicsPipeline()->pushModule(wireRender);
 				return emitter;;
 			});
 
@@ -96,11 +86,6 @@ namespace dyno
 			"ToolBarIco/ParticleSystem/ParticleEmitterSquare.png",
 			[=]()->std::shared_ptr<Node> {
 				auto emitter = std::make_shared<PoissonEmitter<DataType3f>>();
-
-				auto wireRender = std::make_shared<GLWireframeVisualModule>();
-				wireRender->setColor(Color(0, 1, 0));
-				emitter->stateOutline()->connect(wireRender->inEdgeSet());
-				emitter->graphicsPipeline()->pushModule(wireRender);
 				return emitter;
 			});
 

@@ -81,16 +81,9 @@ namespace dyno
 		std::vector<std::shared_ptr<Shape>>& shapes() { return mShapes; }
 		std::vector<std::shared_ptr<Material>>& materials() { return mMaterials; }
 
+		void merge(const std::shared_ptr<TextureMesh>& texMesh01, const std::shared_ptr<TextureMesh>& texMesh02);
 
-		virtual void clear() 
-		{
-			mVertices.clear(); 
-			mNormals.clear();
-			mTexCoords.clear();
-			mMaterials.clear();
-			mShapeIds.clear();
-			mShapes.clear();
-		}
+		void clear();
 
 	private:
 		DArray<Vec3f> mVertices;

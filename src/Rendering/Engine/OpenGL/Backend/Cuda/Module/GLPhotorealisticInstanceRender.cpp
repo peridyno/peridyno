@@ -65,7 +65,7 @@ namespace dyno
 	}
 
 	void GLPhotorealisticInstanceRender::paintGL(const RenderParams& rparams)
-	{	
+	{
 		struct {
 			glm::vec3 color;
 			float metallic;
