@@ -87,7 +87,8 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 	menu->setMargin(5, Wt::Side::Right);
 
 	auto sampleWidget = new WSampleWidget();
-	auto pythonWidget = new WPythonWidget;
+	auto pythonWidget = new WPythonWidget();
+	auto saveWidget = new WSaveWidget();
 
 	//auto paramsWidget = new WRenderParamsWidget(&mSceneCanvas->getRenderParams());
 	//menu->addItem("Settings", std::unique_ptr<WRenderParamsWidget>(paramsWidget));
@@ -99,6 +100,8 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 	menu->addItem("Samples", std::unique_ptr<WSampleWidget>(sampleWidget));
 
 	auto pythonItem = menu->addItem("Python", std::unique_ptr<WPythonWidget>(pythonWidget));
+
+
 
 	pythonWidget->updateSceneGraph().connect([=](std::shared_ptr<dyno::SceneGraph> scene) {
 		if (scene)
@@ -131,6 +134,9 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 				}
 			}
 		});
+
+
+	auto saveItem = menu->addItem("Save", std::unique_ptr<WSaveWidget>(saveWidget));
 
 	auto hide = menu->addItem(">>", 0);
 	hide->select();

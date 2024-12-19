@@ -8,6 +8,7 @@
 #include <Wt/WContainerWidget.h>
 #include "WParameterDataNode.h"
 #include "NodeEditor/WtFlowWidget.h"
+#include "WSaveWidget.h"
 
 #include "NodeFactory.h"
 #include <Wt/WSuggestionPopup.h>
