@@ -1,6 +1,5 @@
 #include "WSaveWidget.h"
 
-
 WSaveWidget::WSaveWidget()
 {
 	this->setLayoutSizeAware(true);
@@ -15,15 +14,12 @@ WSaveWidget::WSaveWidget()
 	button->setStyleClass("btn-primary");
 
 	button->clicked().connect(this, &WSaveWidget::save);
-
 }
 
 WSaveWidget::~WSaveWidget() {}
 
-
-
 void WSaveWidget::save()
 {
 	auto scnLoader = dyno::SceneLoaderFactory::getInstance().getEntryByFileExtension("xml");
-	scnLoader->save(dyno::SceneGraphFactory::instance()->active(), mFileName.toStdString());
+	scnLoader->save(dyno::SceneGraphFactory::instance()->active(), "save.xml");
 }
