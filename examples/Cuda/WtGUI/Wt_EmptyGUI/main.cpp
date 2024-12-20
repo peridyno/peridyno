@@ -3,61 +3,107 @@
 #include "SceneGraph.h"
 
 #include <ParticleSystem/ParticleFluid.h>
-#include <ParticleSystem/StaticBoundary.h>
-#include <ParticleSystem/SquareEmitter.h>
+#include <ParticleSystem/MakeParticleSystem.h>
+
+#include <Volume/VolumeLoader.h>
+#include <Volume/BasicShapeToVolume.h>
+
+#include <Multiphysics/VolumeBoundary.h>
 
 #include <Module/CalculateNorm.h>
 
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
+
 #include <ColorMapping.h>
-#include "PointsLoader.h"
-#include "ParticleSystem/MakeParticleSystem.h"
+#include <ImColorbar.h>
+
+#include <BasicShapes/CubeModel.h>
+
+#include <StaticTriangularMesh.h>
+
+#include <Samplers/CubeSampler.h>
+
+
 
 using namespace dyno;
 
 std::shared_ptr<SceneGraph> createScene()
 {
-	//std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
-	//return scn;
-
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
+	scn->setUpperBound(Vec3f(1.5, 1, 1.5));
+	scn->setLowerBound(Vec3f(-0.5, 0, -0.5));
 
-	//Create a particle emitter
-	auto emitter = scn->addNode(std::make_shared<SquareEmitter<DataType3f>>());
-	emitter->varLocation()->setValue(Vec3f(0.5f));
+	//Create a cube
+	auto cube = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
+	cube->varLocation()->setValue(Vec3f(0.6, 0.6, 0.5));
+	cube->varLength()->setValue(Vec3f(0.5, 0.5, 0.5));
+	cube->graphicsPipeline()->disable();
 
-	//Create a particle-based fluid solver
-	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
+	//Create a sampler
+	auto sampler = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
+	sampler->varSamplingDistance()->setValue(0.005);
+	sampler->graphicsPipeline()->disable();
 
-	auto ptsLoader = scn->addNode(std::make_shared<PointsLoader<DataType3f>>());
+	cube->outCube()->connect(sampler->inCube());
 
 	auto initialParticles = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
-	//fluid->loadParticles(Vec3f(0.0f), Vec3f(0.2f), 0.005f);
-	//emitter->connect(fluid->importParticleEmitters());
 
-	//auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
-	//auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
-	//colorMapper->varMax()->setValue(5.0f);
+	sampler->statePointSet()->promoteOuput()->connect(initialParticles->inPoints());
 
-	//auto ptRender = std::make_shared<GLPointVisualModule>();
-	//ptRender->setColor(Color(1, 0, 0));
-	//ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
+	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
+	fluid->varReshuffleParticles()->setValue(true);
+	initialParticles->connect(fluid->importInitialStates());
 
-	//fluid->stateVelocity()->connect(calculateNorm->inVec());
-	//fluid->statePointSet()->connect(ptRender->inPointSet());
-	//calculateNorm->outNorm()->connect(colorMapper->inScalar());
-	//colorMapper->outColor()->connect(ptRender->inColor());
+	auto volLoader = scn->addNode(std::make_shared<VolumeLoader<DataType3f>>());
+	volLoader->varFileName()->setValue(getAssetPath() + "bowl/bowl.sdf");
 
-	//fluid->graphicsPipeline()->pushModule(calculateNorm);
-	//fluid->graphicsPipeline()->pushModule(colorMapper);
-	//fluid->graphicsPipeline()->pushModule(ptRender);
+	auto volBoundary = scn->addNode(std::make_shared<VolumeBoundary<DataType3f>>());
+	volLoader->connect(volBoundary->importVolumes());
 
-	//Create a container
-	//auto container = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());
-	//container->loadCube(Vec3f(0.0f), Vec3f(1.0), 0.02, true);
+	//Connect ParticleFluid to VolumeBoundary
+	fluid->connect(volBoundary->importParticleSystems());
 
-	//fluid->connect(container->importParticleSystems());
+	//Create a cube for boundary
+	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
+	cubeBoundary->varLocation()->setValue(Vec3f(0.5f, 1.0f, 0.5f));
+	cubeBoundary->varLength()->setValue(Vec3f(2.0f));
+	cubeBoundary->setVisible(false);
+
+	auto cube2vol = scn->addNode(std::make_shared<BasicShapeToVolume<DataType3f>>());
+	cube2vol->varGridSpacing()->setValue(0.02f);
+	cube2vol->varInerted()->setValue(true);
+	cubeBoundary->connect(cube2vol->importShape());
+	cube2vol->connect(volBoundary->importVolumes());
+
+	auto staticMesh = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
+	staticMesh->varFileName()->setValue(getAssetPath() + "bowl/bowl.obj");
+
+	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
+	fluid->stateVelocity()->connect(calculateNorm->inVec());
+	fluid->graphicsPipeline()->pushModule(calculateNorm);
+
+	auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
+	colorMapper->varMax()->setValue(5.0f);
+	calculateNorm->outNorm()->connect(colorMapper->inScalar());
+	fluid->graphicsPipeline()->pushModule(colorMapper);
+
+	auto ptRender = std::make_shared<GLPointVisualModule>();
+	ptRender->setColor(Color(1, 0, 0));
+	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
+
+	fluid->statePointSet()->connect(ptRender->inPointSet());
+	colorMapper->outColor()->connect(ptRender->inColor());
+
+	fluid->graphicsPipeline()->pushModule(ptRender);
+
+	// A simple color bar widget for node
+	auto colorBar = std::make_shared<ImColorbar>();
+	colorBar->varMax()->setValue(5.0f);
+	colorBar->varFieldName()->setValue("Velocity");
+	calculateNorm->outNorm()->connect(colorBar->inScalar());
+	// add the widget to app
+	fluid->graphicsPipeline()->pushModule(colorBar);
 
 	return scn;
 }
