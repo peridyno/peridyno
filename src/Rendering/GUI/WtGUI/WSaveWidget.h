@@ -17,6 +17,9 @@
 
 #include <filesystem>
 
+#include "WMainWindow.h"
+#include "SceneGraph.h"
+
 #include <SceneGraphFactory.h>
 #include <SceneLoaderFactory.h>
 
@@ -25,12 +28,15 @@ namespace dyno
 {
 	class SceneLoaderFactory;
 	class SceneGraphFactory;
+
 }
+
+class WMainWindow;
 
 class WSaveWidget : public Wt::WContainerWidget
 {
 public:
-	WSaveWidget();
+	WSaveWidget(WMainWindow* parent);
 	~WSaveWidget();
 
 private:
@@ -49,12 +55,17 @@ private:
 
 	std::string removeXmlExtension(const std::string& filename);
 
+	void updateScene(std::shared_ptr<dyno::SceneGraph> scene);
+
 private:
 
 	Wt::WText* mSaveOut;
 	Wt::WText* mUploadOut;
 
 	Wt::WVBoxLayout* mSaveLayout;
+	WMainWindow* mParent;
+
+	std::shared_ptr<dyno::SceneGraph> mScene;
 };
 
 class downloadResource : public Wt::WFileResource

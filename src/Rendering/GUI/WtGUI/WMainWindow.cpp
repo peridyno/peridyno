@@ -69,7 +69,6 @@ WMainWindow::WMainWindow()
 	auto menu = naviBar->addMenu(std::make_unique<Wt::WMenu>(widget1), Wt::AlignmentFlag::Right);
 	initMenu(menu);
 
-
 }
 
 WMainWindow::~WMainWindow()
@@ -88,7 +87,7 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 
 	auto sampleWidget = new WSampleWidget();
 	auto pythonWidget = new WPythonWidget();
-	auto saveWidget = new WSaveWidget();
+	auto saveWidget = new WSaveWidget(this);
 
 	//auto paramsWidget = new WRenderParamsWidget(&mSceneCanvas->getRenderParams());
 	//menu->addItem("Settings", std::unique_ptr<WRenderParamsWidget>(paramsWidget));
@@ -474,5 +473,10 @@ void WMainWindow::setScene(std::shared_ptr<dyno::SceneGraph> scene)
 	mSceneCanvas->setScene(mScene);
 	mNodeDataModel->setScene(mScene);
 	mModuleDataModel->setNode(NULL);
+}
+
+std::shared_ptr<dyno::SceneGraph> WMainWindow::getScene()
+{
+	return mScene;
 }
 

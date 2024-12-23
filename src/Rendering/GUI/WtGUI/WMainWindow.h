@@ -47,6 +47,8 @@ public:
 		return mFlowWidget;
 	}
 
+	std::shared_ptr<dyno::SceneGraph> getScene();
+
 public:
 	// data models
 	std::shared_ptr<WNodeDataModel>		mNodeDataModel;

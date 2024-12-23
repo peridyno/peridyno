@@ -1,6 +1,7 @@
 #include "WSaveWidget.h"
 
-WSaveWidget::WSaveWidget()
+WSaveWidget::WSaveWidget(WMainWindow* parent)
+	: mParent(parent)
 {
 	this->setLayoutSizeAware(true);
 	this->setOverflow(Wt::Overflow::Auto);
@@ -120,12 +121,16 @@ void WSaveWidget::createUploadPanel()
 		if (!filePath.empty())
 		{
 			auto scnLoader = dyno::SceneLoaderFactory::getInstance().getEntryByFileExtension("xml");
+
 			auto scn = scnLoader->load(filePath);
 
-			if (scn) {
-				// update scn
+			if (scn)
+			{
+				mParent->setScene(scn);
+				mParent->createLeftPanel();
+				mUploadOut->setText("File upload is finished.");
 			}
-			mUploadOut->setText("File upload is finished.");
+
 		}
 		else
 		{
@@ -144,7 +149,8 @@ void WSaveWidget::save(std::string fileName)
 	std::string filePath = removeXmlExtension(fileName) + ".xml";
 
 	auto scnLoader = dyno::SceneLoaderFactory::getInstance().getEntryByFileExtension("xml");
-	scnLoader->save(dyno::SceneGraphFactory::instance()->active(), filePath);
+	//scnLoader->save(dyno::SceneGraphFactory::instance()->active(), filePath);
+	scnLoader->save(mParent->getScene(), filePath);
 
 	if (std::filesystem::exists(filePath))
 	{
@@ -221,7 +227,6 @@ std::string WSaveWidget::uploadFile(Wt::WFileUpload* upload)
 			}
 			src.close();
 			dst.close();
-			return NULL;
 		}
 	}
 }
