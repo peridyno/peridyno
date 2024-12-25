@@ -40,18 +40,29 @@ namespace dyno
 
 		DEF_VAR(std::string, PrimitiveId, "", "Primtive ID");
 
-		DEF_ARRAY_IN(int, PointId, DeviceType::GPU, "PointId");
+		DEF_ARRAY_IN(uint, PointId, DeviceType::GPU, "PointId");
 
-		DEF_ARRAY_IN(int, EdgeId, DeviceType::GPU, "EdgeId");
+		DEF_ARRAY_IN(uint, EdgeId, DeviceType::GPU, "EdgeId");
 
-		DEF_ARRAY_IN(int, PrimitiveId, DeviceType::GPU, "primtive id");
+		DEF_ARRAY_IN(uint, PrimitiveId, DeviceType::GPU, "primtive id");
 
 
 	public:
 
-		std::vector<int> selectedPointID;
-		std::vector<int> selectedEdgeID;
-		std::vector<int> selectedPrimitiveID;
+		std::vector<uint> getSelectPrimitives() 
+		{
+			return selectedPrimitiveID;
+		}
+		std::vector<uint> getSelectEdges()
+		{
+			return selectedEdgeID;
+		}		std::vector<uint> getSelectPoints()
+		{
+			return selectedPointID;
+		}
+		std::vector<uint> selectedPointID;
+		std::vector<uint> selectedEdgeID;
+		std::vector<uint> selectedPrimitiveID;
 
 	protected:
 		void resetStates() override;
@@ -62,7 +73,7 @@ namespace dyno
 
 		void substrFromTwoString(std::string& first, std::string& Second, std::string& line, std::string& MyStr, int& index);
 
-		void updateID(std::string currentString, std::vector<int>& idSet) 
+		void updateID(std::string currentString, std::vector<uint>& idSet) 
 		{
 			std::vector<std::string> parmList;
 			int parmNum = -1;
