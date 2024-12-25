@@ -515,28 +515,28 @@ namespace dyno
 
 		uint sphereIndex();
 		uint boxIndex();
-		uint capsuleIndex();
 		uint tetIndex();
+		uint capsuleIndex();
 		uint triangleIndex();
 
 		ElementOffset calculateElementOffset();
 
 		//Set basic shapes in local frame
-		void setBoxes(DArray<Box3D>& boxes);
 		void setSpheres(DArray<Sphere3D>& spheres);
+		void setBoxes(DArray<Box3D>& boxes);
 		void setTets(DArray<Tet3D>& tets);
 		void setCapsules(DArray<Capsule3D>& capsules);
 		void setTriangles(DArray<Triangle3D>& triangles);
 		void setTetSDF(DArray<Real>& sdf);
 
-		DArray<Box3D>&		boxesInLocal() { return mBoxesInLocal; }
 		DArray<Sphere3D>&	spheresInLocal() { return mSpheresInLocal; }
+		DArray<Box3D>&		boxesInLocal() { return mBoxesInLocal; }
 		DArray<Tet3D>&		tetsInLocal() { return mTetsInLocal; }
 		DArray<Capsule3D>&	capsulesInLocal() { return mCapsulesInLocal; }
 		DArray<Triangle3D>&	trianglesInLocal() { return mTrianglesInLocal; }
 
-		DArray<Box3D>&		boxesInGlobal() { return mBoxInGlobal; }
 		DArray<Sphere3D>&	spheresInGlobal() { return mSphereInGlobal; }
+		DArray<Box3D>&		boxesInGlobal() { return mBoxInGlobal; }
 		DArray<Tet3D>&		tetsInGlobal() { return mTetInGlobal; }
 		DArray<Capsule3D>&	capsulesInGlobal() { return mCapsuleInGlobal; }
 		DArray<Triangle3D>& trianglesInGlobal() { return mTriangleInGlobal; }
@@ -565,6 +565,7 @@ namespace dyno
 
 		void copyFrom(DiscreteElements<TDataType>& de);
 
+		void merge(CArray<std::shared_ptr<DiscreteElements<TDataType>>>& topos);
 
 		void requestDiscreteElementsInGlobal(
 			DArray<Box3D>& boxInGlobal,

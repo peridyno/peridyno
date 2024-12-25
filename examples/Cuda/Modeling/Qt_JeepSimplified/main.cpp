@@ -38,6 +38,7 @@
 #include "Auxiliary/DataSource.h"
 
 #include <RigidBody/Vechicle.h>
+#include <RigidBody/Module/InstanceTransform.h>
 
 #include <Mapping/TextureMeshToTriangleSet.h>
 #include <Mapping/MergeTriangleSet.h>
@@ -115,12 +116,6 @@ std::shared_ptr<SceneGraph> creatScene()
 	auto jeep = scn->addNode(std::make_shared<Jeep<DataType3f>>());
 	gltf->stateTextureMesh()->connect(jeep->inTextureMesh());
 
-	auto prRender = std::make_shared<GLPhotorealisticInstanceRender>();
-	jeep->inTextureMesh()->connect(prRender->inTextureMesh());
-	jeep->stateInstanceTransform()->connect(prRender->inTransform());
-	jeep->graphicsPipeline()->pushModule(prRender);
-
-
 	auto gltfRoad = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
 	gltfRoad->varFileName()->setValue(getAssetPath() + "gltf/Road_Gltf/Road_Tex.gltf");
 	gltfRoad->varLocation()->setValue(Vec3f(0, 0, 3.488));
@@ -131,9 +126,18 @@ std::shared_ptr<SceneGraph> creatScene()
 
 	auto tsJeep = gltfRoad->animationPipeline()->promoteOutputToNode(roadMeshConverter->outTriangleSet());
 
+	auto transformer = std::make_shared<InstanceTransform<DataType3f>>();
+	jeep->stateCenter()->connect(transformer->inCenter());
+	jeep->stateInitialRotation()->connect(transformer->inInitialRotation());
+	jeep->stateRotationMatrix()->connect(transformer->inRotationMatrix());
+	jeep->stateBindingPair()->connect(transformer->inBindingPair());
+	jeep->stateBindingTag()->connect(transformer->inBindingTag());
+	jeep->stateInstanceTransform()->connect(transformer->inInstanceTransform());
+	jeep->animationPipeline()->pushModule(transformer);
+
 	auto texMeshConverter = std::make_shared<TextureMeshToTriangleSet<DataType3f>>();
 	jeep->inTextureMesh()->connect(texMeshConverter->inTextureMesh());
-	jeep->stateInstanceTransform()->connect(texMeshConverter->inTransform());
+	transformer->outInstanceTransform()->connect(texMeshConverter->inTransform());
 	jeep->animationPipeline()->pushModule(texMeshConverter);
 	jeep->varLocation()->setValue(Vec3f(0,0,-2.9));
 
@@ -164,6 +168,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	//*************************************** Fluid ***************************************//
 	//Particle fluid node
 	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
+	fluid->setDt(0.004f);
 
 	{
 		fluid->animationPipeline()->clear();

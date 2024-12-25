@@ -425,7 +425,6 @@ namespace dyno
 	__global__ void RB_SetupInitialStates(
 		DArray<Real> mass,
 		DArray<Coord> pos,
-		DArray<Coord> barycenterOffset,
 		DArray<Matrix> rotation,
 		DArray<Coord> velocity,
 		DArray<Coord> angularVelocity,
@@ -446,7 +445,6 @@ namespace dyno
 		angularVelocity[tId] = rotation[tId] * states[tId].angularVelocity;
 		rotation_q[tId] = states[tId].angle;
 		pos[tId] = states[tId].position;
-		barycenterOffset[tId] = states[tId].offset;
 		inertia[tId] = states[tId].inertia;
 		mask[tId] = states[tId].collisionMask;
 
@@ -572,26 +570,24 @@ namespace dyno
 
 		mDeviceRigidBodyStates.assign(mHostRigidBodyStates);
 
-		int sizeOfRigids = topo->totalSize();
+		int sizeOfRigidBodies = mDeviceRigidBodyStates.size();// topo->totalSize();
 
 		ElementOffset eleOffset = topo->calculateElementOffset();
 
-		this->stateRotationMatrix()->resize(sizeOfRigids);
-		this->stateAngularVelocity()->resize(sizeOfRigids);
-		this->stateCenter()->resize(sizeOfRigids);
-		this->stateOffset()->resize(sizeOfRigids);
-		this->stateVelocity()->resize(sizeOfRigids);
-		this->stateMass()->resize(sizeOfRigids);
-		this->stateInertia()->resize(sizeOfRigids);
-		this->stateQuaternion()->resize(sizeOfRigids);
-		this->stateCollisionMask()->resize(sizeOfRigids);
-		this->stateAttribute()->resize(sizeOfRigids);
+		this->stateRotationMatrix()->resize(sizeOfRigidBodies);
+		this->stateAngularVelocity()->resize(sizeOfRigidBodies);
+		this->stateCenter()->resize(sizeOfRigidBodies);
+		this->stateVelocity()->resize(sizeOfRigidBodies);
+		this->stateMass()->resize(sizeOfRigidBodies);
+		this->stateInertia()->resize(sizeOfRigidBodies);
+		this->stateQuaternion()->resize(sizeOfRigidBodies);
+		this->stateCollisionMask()->resize(sizeOfRigidBodies);
+		this->stateAttribute()->resize(sizeOfRigidBodies);
 
-		cuExecute(sizeOfRigids,
+		cuExecute(sizeOfRigidBodies,
 			RB_SetupInitialStates,
 			this->stateMass()->getData(),
 			this->stateCenter()->getData(),
-			this->stateOffset()->getData(),
 			this->stateRotationMatrix()->getData(),
 			this->stateVelocity()->getData(),
 			this->stateAngularVelocity()->getData(),
@@ -602,7 +598,7 @@ namespace dyno
 			mDeviceRigidBodyStates,
 			eleOffset);
 
-		this->stateInitialInertia()->resize(sizeOfRigids);
+		this->stateInitialInertia()->resize(sizeOfRigidBodies);
 		this->stateInitialInertia()->getDataPtr()->assign(this->stateInertia()->getData());
 
 		topo->ballAndSocketJoints().assign(mHostJointsBallAndSocket);

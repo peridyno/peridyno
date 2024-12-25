@@ -188,11 +188,6 @@ namespace dyno
 		DEF_ARRAY_STATE(Coord, Center, DeviceType::GPU, "Center of rigid bodies");
 
 		/**
-		 * @brief The initial offset of barycenters
-		 */
-		DEF_ARRAY_STATE(Coord, Offset, DeviceType::GPU, "Offset of barycenters");
-
-		/**
 		 * @brief Particle position
 		 */
 		DEF_ARRAY_STATE(Coord, Velocity, DeviceType::GPU, "Velocity of rigid bodies");

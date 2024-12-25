@@ -5,7 +5,7 @@ namespace dyno
 {
 	class SimpleVechicleDriver : virtual public ComputeModule
 	{
-		DECLARE_CLASS(Vechicle)
+		DECLARE_CLASS(ArticulatedBody)
 	public:
 		SimpleVechicleDriver();
 		~SimpleVechicleDriver() override;

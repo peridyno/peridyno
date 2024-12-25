@@ -4,7 +4,6 @@ namespace dyno
 {
 	  __global__ void SF_ApplyTransform(
 		DArrayList<Transform3f> instanceTransform,
-		const DArray<Vec3f> offset,
 		const DArray<Vec3f> translate,
 		const DArray<Mat3f> rotation,
 		const DArray<Mat3f> rotationInit,
@@ -21,14 +20,13 @@ namespace dyno
 
 		Mat3f rot = rotation[tId] * rotationInit[tId].transpose();
 
-		Transform3f ti = Transform3f(translate[tId] + rot * offset[tId], rot);
+		Transform3f ti = Transform3f(translate[tId], rot);
 
 		instanceTransform[pair.first][pair.second] = ti;
 	}
 
 	void ApplyTransform(
 		DArrayList<Transform3f>& instanceTransform, 
-		const DArray<Vec3f>& offset,
 		const DArray<Vec3f>& translate,
 		const DArray<Mat3f>& rotation,
 		const DArray<Mat3f>& rotationInit,
@@ -38,7 +36,6 @@ namespace dyno
 		cuExecute(rotation.size(),
 			SF_ApplyTransform,
 			instanceTransform,
-			offset,
 			translate,
 			rotation,
 			rotationInit,

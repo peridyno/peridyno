@@ -32,7 +32,7 @@ std::shared_ptr<SceneGraph> creatCar()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
-	auto jeep = scn->addNode(std::make_shared<Vechicle<DataType3f>>());
+	auto jeep = scn->addNode(std::make_shared<ArticulatedBody<DataType3f>>());
 
 	auto prRender = std::make_shared<GLPhotorealisticInstanceRender>();
 	jeep->inTextureMesh()->connect(prRender->inTextureMesh());

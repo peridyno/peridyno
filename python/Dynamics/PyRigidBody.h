@@ -99,7 +99,6 @@ void declare_rigid_body_system(py::module& m, std::string typestr) {
 		.def("state_topology", &Class::stateTopology, py::return_value_policy::reference)
 		.def("state_mass", &Class::stateMass, py::return_value_policy::reference)
 		.def("state_center", &Class::stateCenter, py::return_value_policy::reference)
-		.def("state_offset", &Class::stateOffset, py::return_value_policy::reference)
 		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference)
 		.def("state_angular_velocity", &Class::stateAngularVelocity, py::return_value_policy::reference)
 		.def("state_rotation_matrix", &Class::stateRotationMatrix, py::return_value_policy::reference)
@@ -134,7 +133,7 @@ void declare_rigid_mesh(py::module& m, std::string typestr) {
 #include "RigidBody/Vechicle.h"
 template <typename TDataType>
 void declare_vechicle(py::module& m, std::string typestr) {
-	using Class = dyno::Vechicle<TDataType>;
+	using Class = dyno::ArticulatedBody<TDataType>;
 	using Parent = dyno::RigidBodySystem<TDataType>;
 	std::string pyclass_name = std::string("Vechicle") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())

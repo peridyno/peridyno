@@ -1,5 +1,7 @@
 #include "DiscreteElements.h"
 
+#include <thrust/sort.h>
+
 namespace dyno
 {
 	IMPLEMENT_TCLASS(DiscreteElements, TDataType)
@@ -126,7 +128,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void dyno::DiscreteElements<TDataType>::copyFrom(DiscreteElements<TDataType>& de)
+	void DiscreteElements<TDataType>::copyFrom(DiscreteElements<TDataType>& de)
 	{
 		mSpheresInLocal.assign(de.mSpheresInLocal);
 		mBoxesInLocal.assign(de.mBoxesInLocal);
@@ -140,9 +142,264 @@ namespace dyno
 		mCapsuleInGlobal.assign(de.mCapsuleInGlobal);
 		mTriangleInGlobal.assign(de.mTriangleInGlobal);
 
+		mShape2RigidBody.assign(de.mShape2RigidBody);
+		mPosition.assign(de.mPosition);
+		mRotation.assign(de.mRotation);
+
+		mBallAndSocketJoints.assign(de.mBallAndSocketJoints);
+		mSliderJoints.assign(de.mSliderJoints);
+		mHingeJoints.assign(de.mHingeJoints);
+		mFixedJoints.assign(de.mFixedJoints);
+		mPointJoints.assign(de.mPointJoints);
+		mDistanceJoints.assign(de.mDistanceJoints);
+
 		m_tet_sdf.assign(de.m_tet_sdf);
 		m_tet_body_mapping.assign(de.m_tet_body_mapping);
 		m_tet_element_id.assign(de.m_tet_element_id);
+	}
+
+	template<typename Joint>
+	__global__ void DE_UpdateJointIds(
+		DArray<Joint> joints,
+		uint size,
+		uint offsetJoint,
+		uint offsetRigidBody)
+	{
+		uint tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= size) return;
+
+		Joint joint = joints[tId + offsetJoint];
+		joint.bodyId1 += offsetRigidBody;
+		joint.bodyId2 += offsetRigidBody;
+
+		joints[tId + offsetJoint] = joint;
+	}
+
+	__global__ void DE_UpdateShape2RigidBodyMapping(
+		DArray<Pair<uint, uint>> mapping,
+		DArray<uint> offsetShape,	//with a constant array size of 5
+		uint size,
+		uint offsetMapping,
+		uint offsetRigidBody,
+		ElementOffset elementOffset)
+	{
+		uint tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= size) return;
+
+		Pair<uint, uint> pair = mapping[tId + offsetMapping];
+
+		pair.second += offsetRigidBody;
+
+		//Sphere id
+		if (tId < elementOffset.boxIndex())
+		{
+			pair.first = tId + offsetShape[0];
+		}
+		//Box id
+		else if (tId < elementOffset.tetIndex())
+		{
+			pair.first = (tId - elementOffset.boxIndex()) + offsetShape[1];
+		}
+		//Tet id
+		else if (tId < elementOffset.capsuleIndex())
+		{
+			pair.first = (tId - elementOffset.tetIndex()) + offsetShape[2];
+		}
+		//Capsule id
+		else if (tId < elementOffset.triangleIndex())
+		{
+			pair.first = (tId - elementOffset.tetIndex()) + offsetShape[3];
+		}
+		else
+		{
+			pair.first = (tId - elementOffset.triangleIndex()) + offsetShape[4];
+		}
+
+		mapping[tId + offsetMapping] = pair;
+	}
+
+	template<typename TDataType>
+	void DiscreteElements<TDataType>::merge(CArray<std::shared_ptr<DiscreteElements<TDataType>>>& topos)
+	{
+		//Merge shapes
+		uint sizeOfSpheres = 0;
+		uint sizeOfBoxes = 0;
+		uint sizeOfCapsules = 0;
+		uint sizeOfTets = 0;
+		uint sizeOfTriangles = 0;
+
+		for (uint i = 0; i < topos.size(); i++)
+		{
+			auto topo = topos[i];
+
+			sizeOfSpheres += topo->spheresInLocal().size();
+			sizeOfBoxes += topo->boxesInLocal().size();
+			sizeOfCapsules += topo->capsulesInLocal().size();
+			sizeOfTets += topo->tetsInLocal().size();
+			sizeOfTriangles += topo->trianglesInLocal().size();
+		}
+
+		mSpheresInLocal.resize(sizeOfSpheres);
+		mBoxesInLocal.resize(sizeOfBoxes);
+		mCapsulesInLocal.resize(sizeOfCapsules);
+		mTetsInLocal.resize(sizeOfTets);
+		mTrianglesInLocal.resize(sizeOfTriangles);
+
+		uint offsetOfSpheres = 0;
+		uint offsetOfBoxes = 0;
+		uint offsetOfTets = 0;
+		uint offsetOfCapsules = 0;
+		uint offsetOfTriangles = 0;
+		for (uint i = 0; i < topos.size(); i++)
+		{
+			auto topo = topos[i];
+
+			mSpheresInLocal.assign(topo->spheresInLocal(), topo->spheresInLocal().size(), offsetOfSpheres, 0);
+			mBoxesInLocal.assign(topo->boxesInLocal(), topo->boxesInLocal().size(), offsetOfBoxes, 0);
+			mCapsulesInLocal.assign(topo->capsulesInLocal(), topo->capsulesInLocal().size(), offsetOfCapsules, 0);
+			mTetsInLocal.assign(topo->tetsInLocal(), topo->tetsInLocal().size(), offsetOfTets, 0);
+			mTrianglesInLocal.assign(topo->trianglesInLocal(), topo->trianglesInLocal().size(), offsetOfTriangles, 0);
+
+			offsetOfSpheres += topo->spheresInLocal().size();
+			offsetOfBoxes += topo->boxesInLocal().size();
+			offsetOfCapsules += topo->capsulesInLocal().size();
+			offsetOfTets += topo->tetsInLocal().size();
+			offsetOfTriangles += topo->trianglesInLocal().size();
+		}
+
+		//Merge rigid body states
+		uint sizeOfRigidBodies = 0;
+
+		for (uint i = 0; i < topos.size(); i++)
+		{
+			auto topo = topos[i];
+
+			sizeOfRigidBodies += topo->position().size();
+		}
+
+		mPosition.resize(sizeOfRigidBodies);
+		mRotation.resize(sizeOfRigidBodies);
+
+		uint offsetOfRigidBodies = 0;
+		for (uint i = 0; i < topos.size(); i++)
+		{
+			auto topo = topos[i];
+
+			mPosition.assign(topo->position(), topo->position().size(), offsetOfRigidBodies, 0);
+			mRotation.assign(topo->rotation(), topo->rotation().size(), offsetOfRigidBodies, 0);
+
+			offsetOfRigidBodies += topo->position().size();
+		}
+
+		//Merge shape to rigid body mapping
+		uint sizeOfMapping = 0;
+		for (uint i = 0; i < topos.size(); i++)
+		{
+			auto topo = topos[i];
+
+			sizeOfMapping += topo->shape2RigidBodyMapping().size();
+		}
+
+		mShape2RigidBody.resize(sizeOfMapping);
+
+		uint offsetOfMapping = 0;
+		offsetOfRigidBodies = 0;
+		CArray<uint> offsetArrayInHost(5);
+		offsetArrayInHost[0] = 0;
+		offsetArrayInHost[1] = offsetArrayInHost[0] + sizeOfSpheres;
+		offsetArrayInHost[2] = offsetArrayInHost[1] + sizeOfBoxes;
+		offsetArrayInHost[3] = offsetArrayInHost[2] + sizeOfCapsules;
+		offsetArrayInHost[4] = offsetArrayInHost[3] + sizeOfTets;
+
+		DArray<uint> offsetArrayInDevice(5);
+		for (uint i = 0; i < topos.size(); i++)
+		{
+			auto topo = topos[i];
+
+			uint sizeOfShape = topo->shape2RigidBodyMapping().size();
+
+			mShape2RigidBody.assign(topo->shape2RigidBodyMapping(), sizeOfShape, offsetOfMapping, 0);
+
+			offsetArrayInDevice.assign(offsetArrayInHost);
+
+			cuExecute(sizeOfShape, DE_UpdateShape2RigidBodyMapping, mShape2RigidBody, offsetArrayInDevice, sizeOfShape, offsetOfMapping, offsetOfRigidBodies, topo->calculateElementOffset());
+
+			offsetOfMapping += sizeOfShape;
+			offsetOfRigidBodies += topo->position().size();
+
+			offsetArrayInHost[0] += topo->spheresInLocal().size();
+			offsetArrayInHost[1] += topo->boxesInLocal().size();
+			offsetArrayInHost[2] += topo->capsulesInLocal().size();
+			offsetArrayInHost[3] += topo->tetsInLocal().size();
+			offsetArrayInHost[4] += topo->trianglesInLocal().size();
+		}
+
+		thrust::sort(thrust::device, mShape2RigidBody.begin(), mShape2RigidBody.begin() + mShape2RigidBody.size(), thrust::less<Pair<uint, uint>>());
+
+		//Merge joints
+		uint sizeOfBallAndSocketJoints = 0;
+		uint sizeOfSliderJoints = 0;
+		uint sizeOfHingeJoints = 0;
+		uint sizeOfFixedJoints = 0;
+		uint sizeOfPointJoints = 0;
+		uint sizeOfDistanceJoints = 0;
+
+		for (uint i = 0; i < topos.size(); i++)
+		{
+			auto topo = topos[i];
+
+			sizeOfBallAndSocketJoints += topo->ballAndSocketJoints().size();
+			sizeOfSliderJoints += topo->sliderJoints().size();
+			sizeOfHingeJoints += topo->hingeJoints().size();
+			sizeOfFixedJoints += topo->fixedJoints().size();
+			sizeOfPointJoints += topo->pointJoints().size();
+			sizeOfDistanceJoints += topo->distanceJoints().size();
+		}
+
+		mBallAndSocketJoints.resize(sizeOfBallAndSocketJoints);
+		mSliderJoints.resize(sizeOfSliderJoints);
+		mHingeJoints.resize(sizeOfHingeJoints);
+		mFixedJoints.resize(sizeOfFixedJoints);
+		mPointJoints.resize(sizeOfPointJoints);
+		mDistanceJoints.resize(sizeOfDistanceJoints);
+
+		uint offsetOfBallAndSocketJoints = 0;
+		uint offsetOfSliderJoints = 0;
+		uint offsetOfHingeJoints = 0;
+		uint offsetOfFixedJoints = 0;
+		uint offsetOfPointJoints = 0;
+		uint offsetOfDistanceJoints = 0;
+
+		offsetOfRigidBodies = 0;
+		for (uint i = 0; i < topos.size(); i++)
+		{
+			auto topo = topos[i];
+
+			mBallAndSocketJoints.assign(topo->ballAndSocketJoints(), topo->ballAndSocketJoints().size(), offsetOfBallAndSocketJoints, 0);
+			mSliderJoints.assign(topo->sliderJoints(), topo->sliderJoints().size(), offsetOfSliderJoints, 0);
+			mHingeJoints.assign(topo->hingeJoints(), topo->hingeJoints().size(), offsetOfHingeJoints, 0);
+			mFixedJoints.assign(topo->fixedJoints(), topo->fixedJoints().size(), offsetOfFixedJoints, 0);
+			mPointJoints.assign(topo->pointJoints(), topo->pointJoints().size(), offsetOfPointJoints, 0);
+			mDistanceJoints.assign(topo->distanceJoints(), topo->distanceJoints().size(), offsetOfDistanceJoints, 0);
+
+			cuExecute(topo->ballAndSocketJoints().size(), DE_UpdateJointIds, topo->ballAndSocketJoints(), topo->ballAndSocketJoints().size(), offsetOfBallAndSocketJoints, offsetOfRigidBodies);
+			cuExecute(topo->sliderJoints().size(), DE_UpdateJointIds, topo->sliderJoints(), topo->sliderJoints().size(), offsetOfSliderJoints, offsetOfRigidBodies);
+			cuExecute(topo->hingeJoints().size(), DE_UpdateJointIds, topo->hingeJoints(), topo->hingeJoints().size(), offsetOfHingeJoints, offsetOfRigidBodies);
+			cuExecute(topo->fixedJoints().size(), DE_UpdateJointIds, topo->fixedJoints(), topo->fixedJoints().size(), offsetOfFixedJoints, offsetOfRigidBodies);
+			cuExecute(topo->pointJoints().size(), DE_UpdateJointIds, topo->pointJoints(), topo->pointJoints().size(), offsetOfPointJoints, offsetOfRigidBodies);
+			cuExecute(topo->distanceJoints().size(), DE_UpdateJointIds, topo->distanceJoints(), topo->distanceJoints().size(), offsetOfDistanceJoints, offsetOfRigidBodies);
+
+			offsetOfBallAndSocketJoints += topo->ballAndSocketJoints().size();
+			offsetOfSliderJoints += topo->sliderJoints().size();
+			offsetOfHingeJoints += topo->hingeJoints().size();
+			offsetOfFixedJoints += topo->fixedJoints().size();
+			offsetOfPointJoints += topo->pointJoints().size();
+			offsetOfDistanceJoints += topo->distanceJoints().size();
+
+			offsetOfRigidBodies += topo->position().size();
+		}
+
+		this->update();
 	}
 
 	// Some useful tools to to do transformation for discrete element
@@ -221,10 +478,11 @@ namespace dyno
 		DArray<Coord> positionGlobal,
 		DArray<Matrix> rotationGlobal,
 		DArray<Pair<uint, uint>> mapping,
-		ElementOffset elementOffset)
+		ElementOffset elementOffset,
+		uint totalSize)
 	{
 		uint tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= rotationGlobal.size()) return;
+		if (tId >= totalSize) return;
 
 		ElementType eleType = elementOffset.checkElementType(tId);
 
@@ -281,7 +539,9 @@ namespace dyno
 		capInGlobal.assign(this->capsulesInLocal());
 		triInGlobal.assign(this->trianglesInLocal());
 
-		cuExecute(this->totalSize(),
+		uint num = this->totalSize();
+
+		cuExecute(num,
 			DE_Local2Global,
 			boxInGlobal,
 			sphereInGlobal,
@@ -295,8 +555,9 @@ namespace dyno
 			this->trianglesInLocal(),
 			mPosition,
 			mRotation,
-			this->shape2RigidBodyMapping(),
-			elementOffset);
+			mShape2RigidBody,
+			elementOffset,
+			num);
 	}
 
 	template<typename Coord, typename Matrix, typename Box3D>
