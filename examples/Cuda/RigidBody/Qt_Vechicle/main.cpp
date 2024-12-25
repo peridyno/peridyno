@@ -34,11 +34,6 @@ std::shared_ptr<SceneGraph> creatCar()
 
 	auto jeep = scn->addNode(std::make_shared<ArticulatedBody<DataType3f>>());
 
-	auto prRender = std::make_shared<GLPhotorealisticInstanceRender>();
-	jeep->inTextureMesh()->connect(prRender->inTextureMesh());
-	jeep->stateInstanceTransform()->connect(prRender->inTransform());
-	jeep->graphicsPipeline()->pushModule(prRender);
-
 	uint N = 1;
 
 	for (uint i = 0; i < N; i++)

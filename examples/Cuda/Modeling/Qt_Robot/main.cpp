@@ -171,9 +171,6 @@ int main()
 
 	robot->varGravityValue()->setValue(0);
 
-	auto carDriver = robot->animationPipeline()->findFirstModule<CarDriver<DataType3f>>();
-	robot->animationPipeline()->popModule(carDriver);
-
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
 	plane->varScale()->setValue(Vec3f(20));
 
