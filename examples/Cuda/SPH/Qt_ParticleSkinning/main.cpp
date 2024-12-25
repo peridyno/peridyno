@@ -80,13 +80,6 @@ std::shared_ptr<SceneGraph> createScene()
 	marchingCubes->varIsoValue()->setValue(-300000.0);
 	marchingCubes->varGridSpacing()->setValue(0.005f);
 
-	auto ptRender = std::make_shared<GLPointVisualModule>();
-	ptRender->setColor(Color(0.9, 0.9, 0.9));
-	ptRender->varPointSize()->setValue(0.0015);
-	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-	fluid->statePointSet()->connect(ptRender->inPointSet());
-	fluid->graphicsPipeline()->pushModule(ptRender);
-
 	auto surfaceRenderer = std::make_shared<GLSurfaceVisualModule>();
 	surfaceRenderer->setColor(Color(0.1f, 0.1f, 0.9f));
 	marchingCubes->outTriangleSet()->connect(surfaceRenderer->inTriangleSet());

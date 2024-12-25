@@ -7,7 +7,7 @@
 #include <GLPointVisualModule.h>
 #include <ColorMapping.h>
 #include <ImColorbar.h>
-#include "DualParticleSystem/DualParticleFluidSystem.h"
+#include "DualParticleSystem/DualParticleFluid.h"
 #include "ParticleSystem/MakeParticleSystem.h"
 #include <BasicShapes/CubeModel.h>
 #include <Samplers/CubeSampler.h>
@@ -58,7 +58,7 @@ std::shared_ptr<SceneGraph> createScene()
 	//auto initialParticles = scene->addNode(std::make_shared<MakeParticleSystem<DataType3f >>());
 	//ptsLoader->statePointSet()->promoteOuput()->connect(initialParticles->inPoints());
 
-	auto fluid = scene->addNode(std::make_shared<DualParticleFluidSystem<DataType3f>>());
+	auto fluid = scene->addNode(std::make_shared<DualParticleFluid<DataType3f>>());
 	initialParticles->connect(fluid->importInitialStates());
 
 	fluid->animationPipeline()->clear();
@@ -76,7 +76,7 @@ std::shared_ptr<SceneGraph> createScene()
 		std::shared_ptr<VirtualParticleGenerator<DataType3f>> vpGen;
 
 		if (fluid->varVirtualParticleSamplingStrategy()->getDataPtr()->currentKey()
-			== DualParticleFluidSystem<DataType3f>::SpatiallyAdaptiveStrategy)
+			== DualParticleFluid<DataType3f>::SpatiallyAdaptiveStrategy)
 		{
 			auto m_adaptive_virtual_position = std::make_shared<VirtualSpatiallyAdaptiveStrategy<DataType3f>>();
 			fluid->statePosition()->connect(m_adaptive_virtual_position->inRPosition());
@@ -85,7 +85,7 @@ std::shared_ptr<SceneGraph> createScene()
 			vpGen = m_adaptive_virtual_position;
 		}
 		else if (fluid->varVirtualParticleSamplingStrategy()->getDataPtr()->currentKey()
-			== DualParticleFluidSystem<DataType3f>::ParticleShiftingStrategy)
+			== DualParticleFluid<DataType3f>::ParticleShiftingStrategy)
 		{
 			auto m_virtual_particle_shifting = std::make_shared<VirtualParticleShiftingStrategy<DataType3f >>();
 			fluid->stateFrameNumber()->connect(m_virtual_particle_shifting->inFrameNumber());
@@ -95,7 +95,7 @@ std::shared_ptr<SceneGraph> createScene()
 			vpGen = m_virtual_particle_shifting;
 		}
 		else if (fluid->varVirtualParticleSamplingStrategy()->getDataPtr()->currentKey()
-			== DualParticleFluidSystem<DataType3f>::ColocationStrategy)
+			== DualParticleFluid<DataType3f>::ColocationStrategy)
 		{
 			auto m_virtual_equal_to_Real = std::make_shared<VirtualColocationStrategy<DataType3f >>();
 			fluid->statePosition()->connect(m_virtual_equal_to_Real->inRPosition());

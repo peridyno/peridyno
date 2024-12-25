@@ -213,28 +213,6 @@ std::shared_ptr<SceneGraph> creatScene()
 		fluid->animationPipeline()->pushModule(viscosity);
 	}
 
-	//Setup the point render
-	{
-		auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
-		fluid->stateVelocity()->connect(calculateNorm->inVec());
-		fluid->graphicsPipeline()->pushModule(calculateNorm);
-
-		auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
-		colorMapper->varMax()->setValue(5.0f);
-		calculateNorm->outNorm()->connect(colorMapper->inScalar());
-		fluid->graphicsPipeline()->pushModule(colorMapper);
-
-		auto ptRender = std::make_shared<GLPointVisualModule>();
-		ptRender->setColor(Color(1, 0, 0));
-		ptRender->varPointSize()->setValue(0.01);
-		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-
-		fluid->statePointSet()->connect(ptRender->inPointSet());
-		colorMapper->outColor()->connect(ptRender->inColor());
-
-		fluid->graphicsPipeline()->pushModule(ptRender);
-	}
-
 	particleSystem->connect(fluid->importInitialStates());
 
 	//TriangularMeshBoundary

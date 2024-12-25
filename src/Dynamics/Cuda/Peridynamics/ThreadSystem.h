@@ -12,7 +12,6 @@ namespace dyno
 	template<typename TDataType>
 	class ThreadSystem : public Node
 	{
-		DECLARE_TCLASS(ThreadSystem, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

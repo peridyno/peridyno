@@ -159,37 +159,6 @@ std::shared_ptr<SceneGraph> createScene()
 // 	root->addParticleSystem(fluid);
 	incompressibleFluid->connect(boundary->importParticleSystems());
 
-	{
-		auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
-		auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
-		colorMapper->varMax()->setValue(5.0f);
-
-		incompressibleFluid->stateVelocity()->connect(calculateNorm->inVec());
-		calculateNorm->outNorm()->connect(colorMapper->inScalar());
-
-		incompressibleFluid->graphicsPipeline()->pushModule(calculateNorm);
-		incompressibleFluid->graphicsPipeline()->pushModule(colorMapper);
-
-		auto ptRender = std::make_shared<GLPointVisualModule>();
-		ptRender->setColor(Color(1, 0, 0));
-		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-
-		incompressibleFluid->statePointSet()->connect(ptRender->inPointSet());
-		colorMapper->outColor()->connect(ptRender->inColor());
-
-		incompressibleFluid->graphicsPipeline()->pushModule(ptRender);
-	}
-	
-	{
-		auto ghostRender = std::make_shared<GLPointVisualModule>();
-		ghostRender->setColor(Color(1, 0.5, 0));
-		ghostRender->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
-
-		ghost->statePointSet()->connect(ghostRender->inPointSet());
-
-		ghost->graphicsPipeline()->pushModule(ghostRender);
-	}
-
 	return scn;
 }
 

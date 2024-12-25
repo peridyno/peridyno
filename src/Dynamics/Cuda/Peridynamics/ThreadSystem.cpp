@@ -9,8 +9,6 @@
 
 namespace dyno
 {
-	IMPLEMENT_TCLASS(ThreadSystem, TDataType)
-
 	template<typename TDataType>
 	ThreadSystem<TDataType>::ThreadSystem()
 		: Node()

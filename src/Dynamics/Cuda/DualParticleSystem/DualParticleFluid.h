@@ -26,18 +26,18 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class DualParticleFluidSystem : public ParticleFluid<TDataType>
+	class DualParticleFluid : public ParticleFluid<TDataType>
 	{
-		DECLARE_TCLASS(DualParticleFluidSystem, TDataType)
+		DECLARE_TCLASS(DualParticleFluid, TDataType)
 
 	public:
 
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		DualParticleFluidSystem();
-		DualParticleFluidSystem(int key);
-		~DualParticleFluidSystem();
+		DualParticleFluid();
+		DualParticleFluid(int key);
+		~DualParticleFluid();
 
 		DEF_ARRAY_STATE(Attribute, ParticleAttribute, DeviceType::GPU, "Real Particle Attribute");
 
@@ -75,6 +75,6 @@ namespace dyno
 
 	};
 
-	IMPLEMENT_TCLASS(DualParticleFluidSystem, TDataType)
+	IMPLEMENT_TCLASS(DualParticleFluid, TDataType)
 }
 

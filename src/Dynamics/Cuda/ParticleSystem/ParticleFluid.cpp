@@ -1,6 +1,7 @@
 #include "ParticleFluid.h"
 
 //ParticleSystem
+#include "Module/CalculateNorm.h"
 #include "Module/ParticleIntegrator.h"
 #include "Module/ImplicitViscosity.h"
 #include "Module/IterativeDensitySolver.h"
@@ -16,6 +17,9 @@
 //Topology
 #include "Topology/PointSet.h"
 
+//Rendering
+#include "ColorMapping.h"
+#include "GLPointVisualModule.h"
 
 namespace dyno
 {
@@ -60,6 +64,26 @@ namespace dyno
 		this->stateVelocity()->connect(viscosity->inVelocity());
 		nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());
 		this->animationPipeline()->pushModule(viscosity);
+
+		//Setup the default render modules
+		auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
+		this->stateVelocity()->connect(calculateNorm->inVec());
+		this->graphicsPipeline()->pushModule(calculateNorm);
+
+		auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
+		colorMapper->varMax()->setValue(5.0f);
+		calculateNorm->outNorm()->connect(colorMapper->inScalar());
+		this->graphicsPipeline()->pushModule(colorMapper);
+
+		auto ptRender = std::make_shared<GLPointVisualModule>();
+		ptRender->varPointSize()->setValue(0.0035f);
+		ptRender->setColor(Color(1, 0, 0));
+		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
+
+		this->statePointSet()->connect(ptRender->inPointSet());
+		colorMapper->outColor()->connect(ptRender->inColor());
+
+		this->graphicsPipeline()->pushModule(ptRender);
 
 		this->setDt(Real(0.001));
 	}

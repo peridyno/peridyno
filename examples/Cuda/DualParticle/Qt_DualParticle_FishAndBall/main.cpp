@@ -8,7 +8,7 @@
 #include <GLPointVisualModule.h>
 #include <ColorMapping.h>
 #include <ImColorbar.h>
-#include "DualParticleSystem/DualParticleFluidSystem.h"
+#include "DualParticleSystem/DualParticleFluid.h"
 #include "ParticleSystem/MakeParticleSystem.h"
 #include <BasicShapes/SphereModel.h>
 #include <SemiAnalyticalScheme/TriangularMeshBoundary.h>
@@ -34,7 +34,7 @@ std::shared_ptr<SceneGraph> createScene()
 	auto initialParticles = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f >>());
 	ptsLoader->outPointSet()->promoteOuput()->connect(initialParticles->inPoints());
 
-	auto fluid = scn->addNode(std::make_shared<DualParticleFluidSystem<DataType3f>>());
+	auto fluid = scn->addNode(std::make_shared<DualParticleFluid<DataType3f>>());
 	fluid->varReshuffleParticles()->setValue(true);
 	initialParticles->connect(fluid->importInitialStates());
 

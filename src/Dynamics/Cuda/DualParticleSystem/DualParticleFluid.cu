@@ -1,4 +1,4 @@
-#include "DualParticleFluidSystem.h"
+#include "DualParticleFluid.h"
 //DataType
 #include "Auxiliary/DataSource.h"
 //Collision
@@ -22,15 +22,15 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	DualParticleFluidSystem<TDataType>::DualParticleFluidSystem()
+	DualParticleFluid<TDataType>::DualParticleFluid()
 		: ParticleFluid<TDataType>()
 	{
-		this->DualParticleFluidSystem<TDataType>::DualParticleFluidSystem(2);
+		this->DualParticleFluid<TDataType>::DualParticleFluid(2);
 	}
 
 
 	template<typename TDataType>
-	DualParticleFluidSystem<TDataType>::DualParticleFluidSystem(int key)
+	DualParticleFluid<TDataType>::DualParticleFluid(int key)
 		: ParticleFluid<TDataType>()
 	{
 		this->varVirtualParticleSamplingStrategy()->getDataPtr()->setCurrentKey(key);
@@ -132,13 +132,13 @@ namespace dyno
 
 
 	template<typename TDataType>
-	DualParticleFluidSystem<TDataType>::~DualParticleFluidSystem()
+	DualParticleFluid<TDataType>::~DualParticleFluid()
 	{
 	
 	}
 
 	template<typename TDataType>
-	void DualParticleFluidSystem<TDataType>::resetStates()
+	void DualParticleFluid<TDataType>::resetStates()
 	{
 		this->ParticleFluid<TDataType>::resetStates();
 
@@ -173,7 +173,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void DualParticleFluidSystem<TDataType>::preUpdateStates()
+	void DualParticleFluid<TDataType>::preUpdateStates()
 	{
 		this->varReshuffleParticles()->setValue(false);
 		this->ParticleFluid<TDataType>::preUpdateStates();
@@ -188,7 +188,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void DualParticleFluidSystem<TDataType>::postUpdateStates()
+	void DualParticleFluid<TDataType>::postUpdateStates()
 	{
 		this->ParticleSystem<TDataType>::postUpdateStates();
 
@@ -204,7 +204,7 @@ namespace dyno
 		}
 	}
 	
-	DEFINE_CLASS(DualParticleFluidSystem);
+	DEFINE_CLASS(DualParticleFluid);
 }
 
 
