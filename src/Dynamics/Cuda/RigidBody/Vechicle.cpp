@@ -11,9 +11,8 @@ namespace dyno
 	IMPLEMENT_TCLASS(Jeep, TDataType)
 
 	template<typename TDataType>
-	Jeep<TDataType>::Jeep()
-		: ParametricModel<TDataType>()
-		, ArticulatedBody<TDataType>()
+	Jeep<TDataType>::Jeep():
+		ArticulatedBody<TDataType>()
 	{
 		auto driver = std::make_shared<CarDriver<DataType3f>>();
 		this->stateTopology()->connect(driver->inTopology());
@@ -397,8 +396,13 @@ namespace dyno
 		/***************** Reset *************/
 		ArticulatedBody<TDataType>::resetStates();
 
+		RigidBodySystem<TDataType>::postUpdateStates();
+
 		this->updateInstanceTransform();
 	}
 
 	DEFINE_CLASS(ConfigurableVehicle);
+
+
+	
 }
