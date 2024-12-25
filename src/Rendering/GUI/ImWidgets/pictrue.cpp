@@ -1,5 +1,4 @@
 #include "picture.h"
-// 图形加载
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 
