@@ -486,9 +486,8 @@ namespace dyno
 		//**************************************************//
 		Vechicle<TDataType>::resetStates();
 
-
-		this->updateTopology();
-
+		RigidBodySystem<TDataType>::postUpdateStates();
+		
 		this->updateInstanceTransform();
 
 		
@@ -778,8 +777,13 @@ namespace dyno
 		/***************** Reset *************/
 		Vechicle<TDataType>::resetStates();
 
+		RigidBodySystem<TDataType>::postUpdateStates();
+
 		this->updateInstanceTransform();
 	}
 
 	DEFINE_CLASS(ConfigurableVehicle);
+
+
+	
 }
