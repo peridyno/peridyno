@@ -1,10 +1,10 @@
 #pragma once
 #include "../PyCommon.h"
 
-#include "DualParticleSystem/DualParticleFluidSystem.h"
+#include "DualParticleSystem/DualParticleFluid.h"
 template <typename TDataType>
 void declare_dual_particle_fluid_system(py::module& m, std::string typestr) {
-	using Class = dyno::DualParticleFluidSystem<TDataType>;
+	using Class = dyno::DualParticleFluid<TDataType>;
 	using Parent = dyno::ParticleFluid<TDataType>;
 	std::string pyclass_name = std::string("DualParticleFluidSystem") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>DPFS(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());

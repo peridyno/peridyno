@@ -21,7 +21,8 @@ namespace dyno
 
 	template<typename TDataType>
 	ArticulatedBody<TDataType>::ArticulatedBody()
-		: RigidBodySystem<TDataType>()
+		: ParametricModel<TDataType>()
+		, RigidBodySystem<TDataType>()
 	{
 		this->animationPipeline()->clear();
 

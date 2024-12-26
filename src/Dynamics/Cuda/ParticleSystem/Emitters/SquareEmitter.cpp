@@ -66,7 +66,7 @@ namespace dyno
 			for (Real z = -h; z <= h; z += sampling_distance)
 			{
 				Coord p = Coord(x, 0, z);
-				if (rand() % 5 == 0)
+				//if (rand() % 5 == 0)
 				{
 					pos_list.push_back(tr * p);
 					vel_list.push_back(v0);
@@ -130,6 +130,8 @@ namespace dyno
 	template<typename TDataType>
 	void SquareEmitter<TDataType>::resetStates()
 	{
+		ParticleEmitter<TDataType>::resetStates();
+
 		tranformChanged();
 	}
 

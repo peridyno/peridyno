@@ -123,7 +123,7 @@ void declare_cylinder_model(py::module& m, std::string typestr) {
 		.def("out_cylinder", &Class::outCylinder, py::return_value_policy::reference);
 }
 
-#include "EarClipper.h"
+#include "Commands/EarClipper.h"
 template <typename TDataType>
 void declare_ear_clipper(py::module& m, std::string typestr) {
 	using Class = dyno::EarClipper<TDataType>;
@@ -267,7 +267,7 @@ void declare_plane_model(py::module& m, std::string typestr) {
 		.def("state_quad_set", &Class::stateQuadSet, py::return_value_policy::reference);
 }
 
-#include "PointClip.h"
+#include "Commands/PointClip.h"
 template <typename TDataType>
 void declare_point_clip(py::module& m, std::string typestr) {
 	using Class = dyno::PointClip<TDataType>;

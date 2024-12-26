@@ -12,7 +12,6 @@ namespace dyno
 	template<typename TDataType>
 	class TriangularSystem : public Node
 	{
-		DECLARE_TCLASS(TriangularSystem, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

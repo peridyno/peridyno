@@ -78,6 +78,8 @@ std::shared_ptr<SceneGraph> createScene()
 	auto staticMesh = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
 	staticMesh->varFileName()->setValue(getAssetPath() + "bowl/bowl.obj");
 
+	fluid->graphicsPipeline()->clear();
+
 	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
 	fluid->stateVelocity()->connect(calculateNorm->inVec());
 	fluid->graphicsPipeline()->pushModule(calculateNorm);

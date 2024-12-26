@@ -6,7 +6,7 @@
 #include <GLPointVisualModule.h>
 #include <ColorMapping.h>
 #include <ImColorbar.h>
-#include "DualParticleSystem/DualParticleFluidSystem.h"
+#include "DualParticleSystem/DualParticleFluid.h"
 #include "ParticleSystem/MakeParticleSystem.h"
 #include <BasicShapes/CubeModel.h>
 #include <Samplers/CubeSampler.h>
@@ -24,6 +24,7 @@ std::shared_ptr<SceneGraph> createScene()
 	scn->setLowerBound(Vec3f(-3.0, 0, -3.0));
 
 	auto emitter = scn->addNode(std::make_shared<PoissonEmitter<DataType3f>>());
+	emitter->varSpacing()->setValue(0);
 	emitter->varRotation()->setValue(Vec3f(0.0f, 0.0f, -90.0f));
 	emitter->varSamplingDistance()->setValue(0.008f);
 	emitter->varEmitterShape()->getDataPtr()->setCurrentKey(1);
@@ -32,8 +33,8 @@ std::shared_ptr<SceneGraph> createScene()
 	emitter->varVelocityMagnitude()->setValue(1.5);
 	emitter->varLocation()->setValue(Vec3f(0.2f, 0.5f, 0.0f));
 
-
 	auto emitter2 = scn->addNode(std::make_shared<PoissonEmitter<DataType3f>>());
+	emitter2->varSpacing()->setValue(0);
 	emitter2->varRotation()->setValue(Vec3f(0.0f, 0.0f, 90.0f));
 	emitter2->varSamplingDistance()->setValue(0.008f);
 	emitter2->varEmitterShape()->getDataPtr()->setCurrentKey(1);
@@ -42,8 +43,8 @@ std::shared_ptr<SceneGraph> createScene()
 	emitter2->varVelocityMagnitude()->setValue(1.5);
 	emitter2->varLocation()->setValue(Vec3f(-0.2f, 0.5f, -0.0f));
 
-	auto fluid = scn->addNode(std::make_shared<DualParticleFluidSystem<DataType3f>>(
-		DualParticleFluidSystem<DataType3f>::EVirtualParticleSamplingStrategy::SpatiallyAdaptiveStrategy));
+	auto fluid = scn->addNode(std::make_shared<DualParticleFluid<DataType3f>>(
+		DualParticleFluid<DataType3f>::EVirtualParticleSamplingStrategy::SpatiallyAdaptiveStrategy));
 	emitter->connect(fluid->importParticleEmitters());
 	emitter2->connect(fluid->importParticleEmitters());
 

@@ -10,7 +10,7 @@
 #include <GLPointVisualModule.h>
 #include <ColorMapping.h>
 #include <ImColorbar.h>
-#include "DualParticleSystem/DualParticleFluidSystem.h"
+#include "DualParticleSystem/DualParticleFluid.h"
 #include "ParticleSystem/MakeParticleSystem.h"
 #include <BasicShapes/CubeModel.h>
 #include <Samplers/CubeSampler.h>
@@ -74,7 +74,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 
 
-	auto fluid = scn->addNode(std::make_shared<DualParticleFluidSystem<DataType3f>>());
+	auto fluid = scn->addNode(std::make_shared<DualParticleFluid<DataType3f>>());
 	fluid->varReshuffleParticles()->setValue(true);
 	initialParticles1->connect(fluid->importInitialStates());
 	initialParticles2->connect(fluid->importInitialStates());

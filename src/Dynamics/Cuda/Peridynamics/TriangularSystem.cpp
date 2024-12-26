@@ -10,8 +10,6 @@
 
 namespace dyno
 {
-	IMPLEMENT_TCLASS(TriangularSystem, TDataType)
-	
 	template<typename TDataType>
 	TriangularSystem<TDataType>::TriangularSystem()
 		: Node()

@@ -32,23 +32,6 @@ std::shared_ptr<SceneGraph> createScene()
 	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
 	emitter->connect(fluid->importParticleEmitters());
 
-	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
-	auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
-	colorMapper->varMax()->setValue(5.0f);
-
-	auto ptRender = std::make_shared<GLPointVisualModule>();
-	ptRender->setColor(Color(1, 0, 0));
-	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-
-	fluid->stateVelocity()->connect(calculateNorm->inVec());
-	fluid->statePointSet()->connect(ptRender->inPointSet());
-	calculateNorm->outNorm()->connect(colorMapper->inScalar());
-	colorMapper->outColor()->connect(ptRender->inColor());
-
-	fluid->graphicsPipeline()->pushModule(calculateNorm);
-	fluid->graphicsPipeline()->pushModule(colorMapper);
-	fluid->graphicsPipeline()->pushModule(ptRender);
-
 	//Create a container
 	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
 	cubeBoundary->varLocation()->setValue(Vec3f(0.5f));

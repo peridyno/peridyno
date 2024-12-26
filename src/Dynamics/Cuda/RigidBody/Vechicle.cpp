@@ -11,8 +11,8 @@ namespace dyno
 	IMPLEMENT_TCLASS(Jeep, TDataType)
 
 	template<typename TDataType>
-	Jeep<TDataType>::Jeep():
-		ArticulatedBody<TDataType>()
+	Jeep<TDataType>::Jeep()
+		: ArticulatedBody<TDataType>()
 	{
 		auto driver = std::make_shared<CarDriver<DataType3f>>();
 		this->stateTopology()->connect(driver->inTopology());

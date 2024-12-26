@@ -53,25 +53,6 @@ std::shared_ptr<SceneGraph> createScene()
 
 	//SFI node
 	auto sfi = scn->addNode(std::make_shared<SemiAnalyticalSFINode<DataType3f>>());
-	{
-		auto ptRender = std::make_shared<GLPointVisualModule>();
-		ptRender->varPointSize()->setValue(0.002);
-		ptRender->setColor(Color(1, 0, 0));
-		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-
-		auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
-		auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
-		colorMapper->varMax()->setValue(5.0f);
-		sfi->stateVelocity()->connect(calculateNorm->inVec());
-		calculateNorm->outNorm()->connect(colorMapper->inScalar());
-
-		colorMapper->outColor()->connect(ptRender->inColor());
-		sfi->statePointSet()->connect(ptRender->inPointSet());
-
-		sfi->graphicsPipeline()->pushModule(calculateNorm);
-		sfi->graphicsPipeline()->pushModule(colorMapper);
-		sfi->graphicsPipeline()->pushModule(ptRender);
-	}
 
 	emitter->connect(sfi->importParticleEmitters());
 	merge->stateTriangleSet()->connect(sfi->inTriangleSet());
