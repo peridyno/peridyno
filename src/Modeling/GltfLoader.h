@@ -163,25 +163,24 @@ namespace dyno
 		std::map<joint, Vec3i> joint_output;		// Vec3i[0]  translation ,Vec3i[1]  scale ,Vec3i[2] rotation ,
 		std::map<joint, Vec3f> joint_input;			// time Vec3f[0]  translation ,Vec3f[1]  scale ,Vec3f[2] rotation ,
 		
-		std::vector<int> all_Nodes;
+		
 		std::vector<joint> all_Joints;
-		std::vector<int> all_Meshs;
+		
 
-		std::map<joint, std::vector<int>> nodeId_Dir;
+		
 		std::map<int, std::vector<int>> meshId_Dir;
 
 
 		std::map<int, Mat4f> node_matrix;
 
-		CArray<Mat4f> mesh_Matrix;
 
 		std::shared_ptr<GLWireframeVisualModule> jointLineRender;
 		std::shared_ptr<GLPointVisualModule> jointPointRender;
 
 		int maxMeshId = -1;
 		int maxJointId = -1;
-		int jointNum = -1;
-		int meshNum = -1;
+		
+		
 
 		DArray<Mat4f> d_mesh_Matrix;
 		DArray<int> d_shape_meshId;

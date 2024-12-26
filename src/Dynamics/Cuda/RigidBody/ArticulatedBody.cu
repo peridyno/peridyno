@@ -19,7 +19,7 @@ namespace dyno
 {
 	IMPLEMENT_TCLASS(ArticulatedBody, TDataType)
 
-		template<typename TDataType>
+	template<typename TDataType>
 	ArticulatedBody<TDataType>::ArticulatedBody()
 		: RigidBodySystem<TDataType>()
 	{
@@ -110,10 +110,10 @@ namespace dyno
 
 		int sizeOfRigids = this->stateCenter()->size();
 
-		auto texMesh = this->inTextureMesh()->constDataPtr();
+		std::shared_ptr<TextureMesh> texMesh = getTexMeshPtr();
 
 		uint N = 0;
-		if (!this->inTextureMesh()->isEmpty())
+		if (texMesh != NULL);
 			N = texMesh->shapes().size();
 
 		CArrayList<Transform3f> tms;

@@ -3,41 +3,14 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tinyobjloader/tiny_obj_loader.h>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
-
 #include <iostream>
 #include <filesystem>
 
 #include <GLPhotorealisticRender.h>
+#include "ImageLoader.h"
 
 namespace dyno
 {
-
-	bool loadImage(const char* path, dyno::CArray2D<dyno::Vec4f>& img)
-	{
-		int x, y, comp;
-		stbi_set_flip_vertically_on_load(true);
-
-		float* data = stbi_loadf(path, &x, &y, &comp, STBI_default);
-
-		if (data) {
-			img.resize(x, y);
-			for (int x0 = 0; x0 < x; x0++)
-			{
-				for (int y0 = 0; y0 < y; y0++)
-				{
-					int idx = (y0 * x + x0) * comp;
-					for (int c0 = 0; c0 < comp; c0++) {
-						img(x0, y0)[c0] = data[idx + c0];
-					}
-				}
-			}
-			STBI_FREE(data);
-		}
-
-		return data != 0;
-	}
 
 	IMPLEMENT_CLASS(TexturedMesh)
 
@@ -142,11 +115,14 @@ namespace dyno
 			//tMats[mId]->specular = { mtl.specular[0], mtl.specular[1], mtl.specular[2] };
 			//tMats[mId]->roughness = 1.0f - mtl.shininess;
 			tMats[mId]->baseColor = { mtl.diffuse[0], mtl.diffuse[1], mtl.diffuse[2] };
+
+			std::shared_ptr<ImageLoader> loader = std::make_shared<ImageLoader>();
+
 			if (!mtl.diffuse_texname.empty())
 			{
 				auto tex_path = (root / mtl.diffuse_texname).string();
 
-				if (loadImage(tex_path.c_str(), texture))
+				if (loader->loadImage(tex_path.c_str(), texture))
 				{
 					tMats[mId]->texColor.assign(texture);
 				}
@@ -155,7 +131,7 @@ namespace dyno
 			{
 				auto tex_path = (root / mtl.bump_texname).string();
 
-				if (loadImage(tex_path.c_str(), texture))
+				if (loader->loadImage(tex_path.c_str(), texture))
 				{
 					tMats[mId]->texBump.assign(texture);
 					auto texOpt = mtl.bump_texopt;
