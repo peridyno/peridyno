@@ -9,6 +9,8 @@
 #include "Module/MouseInputModule.h"
 #include "Module/KeyboardInputModule.h"
 
+#include "DirectedAcyclicGraph.h"
+
 #include "SceneLoaderFactory.h"
 
 #include "Timer.h"
@@ -492,55 +494,55 @@ namespace dyno
 		this->traverseForward(&eventAct);
 	}
 
-	//Used to traverse the whole scene graph
-	void DFS(Node* node, NodeList& nodeQueue, std::map<ObjectId, bool>& visited) {
-
-		visited[node->objectId()] = true;
-
-		auto imports = node->getImportNodes();
-		for (auto port : imports) {
-			auto& inNodes = port->getNodes();
-			for (auto inNode : inNodes) {
-				if (inNode != nullptr && !visited[inNode->objectId()]) {
-					DFS(inNode, nodeQueue, visited);
-				}
-			}
-		}
-
-		auto inFields = node->getInputFields();
-		for (auto f : inFields) {
-			auto* src = f->getSource();
-			if (src != nullptr) {
-				auto* inNode = dynamic_cast<Node*>(src->parent());
-				if (inNode != nullptr && !visited[inNode->objectId()]) {
-					DFS(inNode, nodeQueue, visited);
-				}
-			}
-		}
-
-		nodeQueue.push_back(node);
-
-		auto exports = node->getExportNodes();
-		for (auto port : exports) {
-			auto exNode = port->getParent();
-			if (exNode != nullptr && !visited[exNode->objectId()]) {
-				DFS(exNode, nodeQueue, visited);
-			}
-		}
-
-		auto outFields = node->getOutputFields();
-		for (auto f : outFields) {
-			auto& sinks = f->getSinks();
-			for (auto sink : sinks) {
-				if (sink != nullptr) {
-					auto exNode = dynamic_cast<Node*>(sink->parent());
-					if (exNode != nullptr && !visited[exNode->objectId()]) {
-						DFS(exNode, nodeQueue, visited);
-					}
-				}
-			}
-		}
-	};
+// 	//Used to traverse the whole scene graph
+// 	void DFS(Node* node, NodeList& nodeQueue, std::map<ObjectId, bool>& visited) {
+// 
+// 		visited[node->objectId()] = true;
+// 
+// 		auto imports = node->getImportNodes();
+// 		for (auto port : imports) {
+// 			auto& inNodes = port->getNodes();
+// 			for (auto inNode : inNodes) {
+// 				if (inNode != nullptr && !visited[inNode->objectId()]) {
+// 					DFS(inNode, nodeQueue, visited);
+// 				}
+// 			}
+// 		}
+// 
+// 		auto inFields = node->getInputFields();
+// 		for (auto f : inFields) {
+// 			auto* src = f->getSource();
+// 			if (src != nullptr) {
+// 				auto* inNode = dynamic_cast<Node*>(src->parent());
+// 				if (inNode != nullptr && !visited[inNode->objectId()]) {
+// 					DFS(inNode, nodeQueue, visited);
+// 				}
+// 			}
+// 		}
+// 
+// 		nodeQueue.push_back(node);
+// 
+// 		auto exports = node->getExportNodes();
+// 		for (auto port : exports) {
+// 			auto exNode = port->getParent();
+// 			if (exNode != nullptr && !visited[exNode->objectId()]) {
+// 				DFS(exNode, nodeQueue, visited);
+// 			}
+// 		}
+// 
+// 		auto outFields = node->getOutputFields();
+// 		for (auto f : outFields) {
+// 			auto& sinks = f->getSinks();
+// 			for (auto sink : sinks) {
+// 				if (sink != nullptr) {
+// 					auto exNode = dynamic_cast<Node*>(sink->parent());
+// 					if (exNode != nullptr && !visited[exNode->objectId()]) {
+// 						DFS(exNode, nodeQueue, visited);
+// 					}
+// 				}
+// 			}
+// 		}
+// 	};
 
 	//Used to traverse the scene graph from a specific node
 	void BFS(Node* node, NodeList& list, std::map<ObjectId, bool>& visited) {
@@ -608,21 +610,58 @@ namespace dyno
 
 		mNodeQueue.clear();
 
-		std::map<ObjectId, bool> visited;
-		for (auto& nm : mNodeMap) {
-			visited[nm.first] = false;
-		}
+		DirectedAcyclicGraph dag;
+
+		auto dummyId = Object::baseId();
 
 		for (auto& n : mNodeMap) {
-			if (!visited[n.first]) {
+			Node* node = n.second.get();
 
-				Node* node = n.second.get();
+			auto outId = node->objectId();
 
-				DFS(node, mNodeQueue, visited);
+			bool hasAncestor = false;
+
+			//Input nodes
+			auto imports = node->getImportNodes();
+			for (auto port : imports) {
+				auto& inNodes = port->getNodes();
+				for (auto inNode : inNodes) {
+					if (inNode != nullptr) {
+						dag.addEdge(inNode->objectId(), outId);
+
+						hasAncestor = true;
+					}
+				}
+			}
+
+			//Input fields
+			auto inFields = node->getInputFields();
+			for (auto f : inFields) {
+				auto* src = f->getSource();
+				if (src != nullptr) {
+					auto* inNode = dynamic_cast<Node*>(src->parent());
+					if (inNode != nullptr) {
+						dag.addEdge(inNode->objectId(), outId);
+
+						hasAncestor = true;
+					}
+				}
+			}
+
+			//In case of an isolated node, add an virtual edge to connect a dummy node and the node
+			if (!hasAncestor)
+			{
+				dag.addEdge(dummyId, outId);
 			}
 		}
 
-		visited.clear();
+		auto& sortedIds = dag.topologicalSort();
+
+		for (auto id : sortedIds)
+		{
+			if (id != dummyId)
+				mNodeQueue.push_back(mNodeMap[id].get());
+		}
 
 		mQueueUpdateRequired = false;
 	}
