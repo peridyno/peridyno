@@ -9,6 +9,7 @@
 #include "WParameterDataNode.h"
 #include "NodeEditor/WtFlowWidget.h"
 #include "WSaveWidget.h"
+#include "WLogWidget.h"
 
 #include "NodeFactory.h"
 #include <Wt/WSuggestionPopup.h>

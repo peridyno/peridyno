@@ -55,8 +55,6 @@ private:
 
 	std::string removeXmlExtension(const std::string& filename);
 
-	void updateScene(std::shared_ptr<dyno::SceneGraph> scene);
-
 private:
 
 	Wt::WText* mSaveOut;

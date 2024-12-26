@@ -88,6 +88,7 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 	auto sampleWidget = new WSampleWidget();
 	auto pythonWidget = new WPythonWidget();
 	auto saveWidget = new WSaveWidget(this);
+	auto logWidget = new WLogWidget();
 
 	//auto paramsWidget = new WRenderParamsWidget(&mSceneCanvas->getRenderParams());
 	//menu->addItem("Settings", std::unique_ptr<WRenderParamsWidget>(paramsWidget));
@@ -136,6 +137,8 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 
 
 	auto saveItem = menu->addItem("Save", std::unique_ptr<WSaveWidget>(saveWidget));
+
+	auto lgoItem = menu->addItem("Log", std::unique_ptr<WLogWidget>(logWidget));
 
 	auto hide = menu->addItem(">>", 0);
 	hide->select();
