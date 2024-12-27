@@ -343,6 +343,7 @@ namespace dyno
 		setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeSelected, mPropertyWidget, &PPropertyWidget::showProperty);
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeDeselected, mPropertyWidget, &PPropertyWidget::clearProperty);
 //		connect(m_moduleFlowView->module_scene, &QtNodes::QtModuleFlowScene::nodeSelected, m_propertyWidget, &PPropertyWidget::showBlockProperty);
 
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeDoubleClicked, this, &PMainWindow::showModuleEditor);
@@ -374,6 +375,12 @@ namespace dyno
 					mOpenGLWidget->select(widget->getNode());
 					mOpenGLWidget->update();
 				}
+			});
+
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeDeselected, [=]()
+			{
+				mOpenGLWidget->select(nullptr);
+				mOpenGLWidget->update();
 			});
 
 		connect(mAnimationWidget, &PAnimationWidget::simulationStarted, [=]()

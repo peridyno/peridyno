@@ -66,6 +66,8 @@ namespace dyno
 
 		void showProperty(Qt::QtNode& block);
 
+		void clearProperty();
+
 		//A slot to receive a message when any field widget is updated
 		void contentUpdated();
 
