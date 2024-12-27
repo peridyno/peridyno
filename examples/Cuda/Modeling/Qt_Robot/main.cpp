@@ -15,7 +15,8 @@
 #include "RigidBody/Module/AnimationDriver.h"
 #include "RigidBody/Module/CarDriver.h"
 #include "BasicShapes/PlaneModel.h"
-#include "RigidBody/Vechicle.h"
+
+#include "RigidBody/ConfigurableBody.h"
 
 
 /**
@@ -32,7 +33,7 @@ int main()
 	fbx->varFileName()->setValue(getAssetPath() + "fbx/HumanoidRobot.fbx");
 	fbx->reset();
 
-	auto robot = scn->addNode(std::make_shared<ConfigurableVehicle<DataType3f>>());
+	auto robot = scn->addNode(std::make_shared<ConfigurableBody<DataType3f>>());
 	fbx->stateTextureMesh()->connect(robot->inTextureMesh());
 	fbx->setVisible(false);
 

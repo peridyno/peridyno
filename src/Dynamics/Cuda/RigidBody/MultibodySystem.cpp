@@ -28,6 +28,7 @@ namespace dyno
 		this->animationPipeline()->clear();
 
 		auto elementQuery = std::make_shared<NeighborElementQuery<TDataType>>();
+		elementQuery->varSelfCollision()->setValue(false);
 		this->stateTopology()->connect(elementQuery->inDiscreteElements());
 		this->stateCollisionMask()->connect(elementQuery->inCollisionMask());
 		this->stateAttribute()->connect(elementQuery->inAttribute());
@@ -131,6 +132,8 @@ namespace dyno
 			{
 				auto vehicle = vehicles[i];
 
+				uint num = vehicle->stateMass()->size();
+
 				stateMass.assign(vehicle->stateMass()->constData(), vehicle->stateMass()->size(), offset, 0);
 				stateCenter.assign(vehicle->stateCenter()->constData(), vehicle->stateCenter()->size(), offset, 0);
 				stateVelocity.assign(vehicle->stateVelocity()->constData(), vehicle->stateVelocity()->size(), offset, 0);
@@ -142,8 +145,38 @@ namespace dyno
 				stateCollisionMask.assign(vehicle->stateCollisionMask()->constData(), vehicle->stateCollisionMask()->size(), offset, 0);
 				stateAttribute.assign(vehicle->stateAttribute()->constData(), vehicle->stateAttribute()->size(), offset, 0);
 
-				offset += vehicle->stateMass()->size();
+				offset += num;
 			}
+
+			//TODO: Replace with a GPU-based algorithm?
+			CArray<Attribute> hAttributes;
+			hAttributes.assign(stateAttribute);
+
+			uint offsetBodyId = 0;
+			uint offsetOfRigidBody = 0;
+			for (uint i = 0; i < vehicles.size(); i++)
+			{
+				auto vehicle = vehicles[i];
+
+				uint num = vehicle->stateMass()->size();
+
+				uint maxBodyId = 0;
+				for (uint j = 0; j < num; j++)
+				{
+					Attribute att = hAttributes[offsetOfRigidBody + j];
+					att.setObjectId(att.objectId() + offsetBodyId);
+
+					hAttributes[offsetOfRigidBody + j] = att;
+
+					maxBodyId = std::max(maxBodyId, att.objectId());
+				}
+
+				offsetOfRigidBody += num;
+				offsetBodyId += (maxBodyId + 1);
+			}
+
+			stateAttribute.assign(hAttributes);
+			hAttributes.clear();
 		}
 	}
 

@@ -31,7 +31,6 @@ namespace dyno
 	template<typename TDataType>
 	class RigidBodySystem : virtual public Node
 	{
-		DECLARE_TCLASS(RigidBodySystem, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

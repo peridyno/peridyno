@@ -1,4 +1,4 @@
-#include "PresetArticulatedBody.h"
+#include "Vehicle.h"
 
 #include "Module/CarDriver.h"
 
@@ -7,8 +7,10 @@
 
 //Modeling
 #include "GltfFunc.h"
+
 //Rigidbody
 #include "Module/InstanceTransform.h"
+
 //Rendering
 #include "Module/GLPhotorealisticInstanceRender.h"
 
@@ -16,85 +18,34 @@
 namespace dyno
 {
 	//Jeep
-	IMPLEMENT_TCLASS(PresetArticulatedBody, TDataType)
+	IMPLEMENT_TCLASS(Jeep, TDataType)
 
 	template<typename TDataType>
-	PresetArticulatedBody<TDataType>::PresetArticulatedBody():
+	Jeep<TDataType>::Jeep() :
 		ArticulatedBody<TDataType>()
-	{
-
-		auto callback = std::make_shared<FCallBackFunc>(std::bind(&PresetArticulatedBody<TDataType>::varChanged, this));
-		this->varFilePath()->attach(callback);
-
-		this->inTextureMesh()->tagOptional(true);
-		this->stateTextureMeshState()->setDataPtr(std::make_shared<TextureMesh>());
-
-
-		auto transformer = this->graphicsPipeline()->findFirstModule<InstanceTransform<DataType3f>>();
-
-		//this->stateCenter()->connect(transformer->inCenter());
-		//this->stateInitialRotation()->connect(transformer->inInitialRotation());
-		//this->stateRotationMatrix()->connect(transformer->inRotationMatrix());
-		//this->stateBindingPair()->connect(transformer->inBindingPair());
-		//this->stateBindingTag()->connect(transformer->inBindingTag());
-		//this->stateInstanceTransform()->connect(transformer->inInstanceTransform());
-
-		auto prRender = std::make_shared<GLPhotorealisticInstanceRender>();
-		this->stateTextureMeshState()->connect(prRender->inTextureMesh());
-		transformer->outInstanceTransform()->connect(prRender->inTransform());
-		this->graphicsPipeline()->pushModule(prRender);
-	}
-
-	template<typename TDataType>
-	PresetArticulatedBody<TDataType>::~PresetArticulatedBody()
-	{
-
-	}
-
-	template<typename TDataType>
-	void PresetArticulatedBody<TDataType>::varChanged()
-	{
-		std::shared_ptr<TextureMesh> texMesh = this->stateTextureMeshState()->getDataPtr();
-		auto filepath = this->varFilePath()->getValue().string();
-		loadGLTFTextureMesh(texMesh, filepath);
-
-
-
-	}
-
-	template<typename TDataType>
-	void PresetArticulatedBody<TDataType>::resetStates()
-	{
-		ArticulatedBody<TDataType>::resetStates();
-	}
-
-	DEFINE_CLASS(PresetArticulatedBody);
-
-	
-	//Jeep
-	IMPLEMENT_TCLASS(PresetJeep, TDataType)
-
-		template<typename TDataType>
-	PresetJeep<TDataType>::PresetJeep() :
-		PresetArticulatedBody<TDataType>()
 	{
 		auto driver = std::make_shared<CarDriver<DataType3f>>();
 		this->stateTopology()->connect(driver->inTopology());
 		this->animationPipeline()->pushModule(driver);
-		this->varFilePath()->setValue(FilePath(getAssetPath() + "Jeep/JeepGltf/jeep.gltf"));
 	}
 
 	template<typename TDataType>
-	PresetJeep<TDataType>::~PresetJeep()
+	Jeep<TDataType>::~Jeep()
 	{
 
 	}
 
 	template<typename TDataType>
-	void PresetJeep<TDataType>::resetStates()
+	void Jeep<TDataType>::resetStates()
 	{
 		this->clearRigidBodySystem();
 		this->clearVechicle();
+
+		std::string filename = getAssetPath() + "Jeep/JeepGltf/jeep.gltf";
+		if (this->varFilePath()->getValue() != filename)
+		{
+			this->varFilePath()->setValue(FilePath(filename));
+		}
 
 		int vehicleNum = this->varVehiclesTransform()->getValue().size();
 		for (size_t i = 0; i < vehicleNum; i++)
@@ -102,7 +53,7 @@ namespace dyno
 			RigidBodyInfo rigidbody;
 			rigidbody.bodyId = i;
 
-			auto texMesh = this->stateTextureMeshState()->constDataPtr();
+			auto texMesh = this->stateTextureMesh()->constDataPtr();
 
 			//wheel
 			std::vector <int> Wheel_Id = { 0,1,2,3 };
@@ -174,36 +125,40 @@ namespace dyno
 		}
 
 		//**************************************************//
-		PresetArticulatedBody<TDataType>::resetStates();
+		ArticulatedBody<TDataType>::resetStates();
 	}
 
-	DEFINE_CLASS(PresetJeep);
+	DEFINE_CLASS(Jeep);
 
 	//Tank
-	IMPLEMENT_TCLASS(PresetTank, TDataType)
+	IMPLEMENT_TCLASS(Tank, TDataType)
 
 		template<typename TDataType>
-	PresetTank<TDataType>::PresetTank() :
-		PresetArticulatedBody<TDataType>()
+	Tank<TDataType>::Tank() :
+		ArticulatedBody<TDataType>()
 	{
 		auto driver = std::make_shared<CarDriver<DataType3f>>();
 		this->stateTopology()->connect(driver->inTopology());
 		this->animationPipeline()->pushModule(driver);
-
-		this->varFilePath()->setValue(FilePath(getAssetPath() + "gltf/Tank/Tank.gltf"));
 	}
 
 	template<typename TDataType>
-	PresetTank<TDataType>::~PresetTank()
+	Tank<TDataType>::~Tank()
 	{
 
 	}
 
 	template<typename TDataType>
-	void PresetTank<TDataType>::resetStates()
+	void Tank<TDataType>::resetStates()
 	{
 		this->clearRigidBodySystem();
 		this->clearVechicle();
+
+		std::string filename = getAssetPath() + "gltf/Tank/Tank.gltf";
+		if (this->varFilePath()->getValue() != filename)
+		{
+			this->varFilePath()->setValue(FilePath(filename));
+		}
 
 		int vehicleNum = this->varVehiclesTransform()->getValue().size();
 		for (size_t i = 0; i < vehicleNum; i++)
@@ -211,7 +166,7 @@ namespace dyno
 			RigidBodyInfo rigidbody;
 			rigidbody.bodyId = i;
 
-			auto texMesh = this->stateTextureMeshState()->constDataPtr();
+			auto texMesh = this->stateTextureMesh()->constDataPtr();
 
 			//wheel
 			std::vector <int> Wheel_Id = { 2,3,4,5,6,7,8,9,10,11,12,13,14,15 };
@@ -283,8 +238,8 @@ namespace dyno
 		}
 
 		//**************************************************//
-		PresetArticulatedBody<TDataType>::resetStates();
+		ArticulatedBody<TDataType>::resetStates();
 	}
 
-	DEFINE_CLASS(PresetTank);
+	DEFINE_CLASS(Tank);
 }

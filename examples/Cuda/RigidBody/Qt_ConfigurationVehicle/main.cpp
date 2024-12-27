@@ -2,7 +2,7 @@
 
 #include <SceneGraph.h>
 
-#include <RigidBody/Vechicle.h>
+#include <RigidBody/ConfigurableBody.h>
 
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
@@ -36,7 +36,7 @@ std::shared_ptr<SceneGraph> creatCar()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
-	auto configCar = scn->addNode(std::make_shared<ConfigurableVehicle<DataType3f>>());
+	auto configCar = scn->addNode(std::make_shared<ConfigurableBody<DataType3f>>());
 
 	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
 	gltf->varFileName()->setValue(getAssetPath() + "Jeep/JeepGltf/jeep.gltf");
@@ -88,17 +88,17 @@ std::shared_ptr<SceneGraph> creatCar()
 
 	configCar->varVehiclesTransform()->setValue(vehicleTransforms);
 
-	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
-	configCar->stateTopology()->connect(mapper->inDiscreteElements());
-	configCar->graphicsPipeline()->pushModule(mapper);
-
-	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Color(0.3f, 0.5f, 0.9f));
-	sRender->setAlpha(0.8f);
-	sRender->setRoughness(0.7f);
-	sRender->setMetallic(3.0f);
-	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
-	configCar->graphicsPipeline()->pushModule(sRender);
+// 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
+// 	configCar->stateTopology()->connect(mapper->inDiscreteElements());
+// 	configCar->graphicsPipeline()->pushModule(mapper);
+// 
+// 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
+// 	sRender->setColor(Color(0.3f, 0.5f, 0.9f));
+// 	sRender->setAlpha(0.8f);
+// 	sRender->setRoughness(0.7f);
+// 	sRender->setMetallic(3.0f);
+// 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+// 	configCar->graphicsPipeline()->pushModule(sRender);
 
 	return scn;
 }

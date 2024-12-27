@@ -21,12 +21,13 @@
 #include "Topology/TriangleSet.h"
 #include "Topology/TextureMesh.h"
 
+#include "FilePath.h"
+
 namespace dyno 
 {
 	template<typename TDataType>
 	class ArticulatedBody : virtual public ParametricModel<TDataType>, virtual public RigidBodySystem<TDataType>
 	{
-		DECLARE_TCLASS(ArticulatedBody, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -39,14 +40,14 @@ namespace dyno
 		void bind(std::shared_ptr<PdActor> actor, Pair<uint, uint> shapeId);
 
 	public:
+		DEF_VAR(FilePath, FilePath, "", "");
+
 		/**
 		 * @brief Creates multiple vehicles and specifies the transformations for each vehicle
 		 */
 		DEF_VAR(std::vector<Transform3f>, VehiclesTransform, std::vector<Transform3f>{Transform3f()}, "");
 
-		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "Texture mesh of the vechicle");
-
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "TriangleSet of the boundary");
+		DEF_INSTANCE_STATE(TextureMesh, TextureMesh, "Texture mesh of the vechicle");
 
 	public:
 		DEF_ARRAYLIST_STATE(Transform3f, InstanceTransform, DeviceType::GPU, "Instance transforms");
@@ -68,13 +69,15 @@ namespace dyno
 
 		void transform();
 
-		virtual std::shared_ptr<TextureMesh> getTexMeshPtr() 
-		{
-			if (this->inTextureMesh()->isEmpty())
-				return NULL;
-			else
-				return this->inTextureMesh()->constDataPtr();
-		};
+		void varChanged();
+
+// 		virtual std::shared_ptr<TextureMesh> getTexMeshPtr() 
+// 		{
+// 			if (this->inTextureMesh()->isEmpty())
+// 				return NULL;
+// 			else
+// 				return this->inTextureMesh()->constDataPtr();
+// 		};
 
 	protected:
 

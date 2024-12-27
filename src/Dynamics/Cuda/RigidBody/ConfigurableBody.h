@@ -19,40 +19,27 @@
 #include "STL/Pair.h"
 #include "VehicleInfo.h"
 
-namespace dyno 
+namespace dyno
 {
 	template<typename TDataType>
-	class Jeep : virtual public ArticulatedBody<TDataType>
+	class ConfigurableBody : virtual public ArticulatedBody<TDataType>
 	{
-		DECLARE_TCLASS(Jeep, TDataType)
+		DECLARE_TCLASS(ConfigurableBody, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		Jeep();
-		~Jeep() override;
+		ConfigurableBody();
+		~ConfigurableBody() override;
 
-	protected:
-		void resetStates() override;
-	};
+		DEF_VAR(VehicleBind, VehicleConfiguration, VehicleBind(4), "");
 
-
-	template<typename TDataType>
-	class ConfigurableVehicle : virtual public ArticulatedBody<TDataType>
-	{
-		DECLARE_TCLASS(ConfigurableVehicle, TDataType)
 	public:
-		typedef typename TDataType::Real Real;
-		typedef typename TDataType::Coord Coord;
+		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "Input TextureMesh");
 
-		ConfigurableVehicle();
-		~ConfigurableVehicle() override;
-
-		DEF_VAR(VehicleBind,VehicleConfiguration, VehicleBind(4), "");
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "TriangleSet of the boundary");
 
 	protected:
 		void resetStates() override;
 	};
-
-
 }

@@ -49,6 +49,11 @@ std::shared_ptr<RigidBodySystem<DataType3f>> createCompound(std::shared_ptr<Scen
 	sphere2.radius = 0.1f;
 	rigid->bindSphere(actor2, sphere2);
 
+// 	auto& hingeJoint = rigid->createHingeJoint(actor, actor2);
+// 	hingeJoint.setAnchorPoint((Vec3f(0.0f, 1.3f, 0.0f) + Vec3f(-0.1f, 1.6f, 0.0f)) / 2);
+// 	hingeJoint.setAxis(Vec3f(0, 0, 1));
+// 	hingeJoint.setRange(-M_PI / 2, M_PI / 2);
+
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
 	rigid->stateTopology()->connect(mapper->inDiscreteElements());
 	rigid->graphicsPipeline()->pushModule(mapper);

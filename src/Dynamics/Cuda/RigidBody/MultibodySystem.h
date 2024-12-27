@@ -15,14 +15,16 @@
  */
 #pragma once
 
-#include "Vechicle.h"
+#include "RigidBodySystem.h"
+
+#include "Topology/TriangleSet.h"
 
 namespace dyno 
 {
 	template<typename TDataType>
 	class MultibodySystem : public RigidBodySystem<TDataType>
 	{
-		DECLARE_TCLASS(ArticulatedBody, TDataType)
+		DECLARE_TCLASS(MultibodySystem, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

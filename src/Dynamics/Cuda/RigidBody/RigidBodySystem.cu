@@ -17,8 +17,6 @@
 
 namespace dyno
 {
-	IMPLEMENT_TCLASS(RigidBodySystem, TDataType)
-
 	typedef typename dyno::TOrientedBox3D<Real> Box3D;
 
 	template<typename TDataType>

@@ -20,70 +20,37 @@
 #include "VehicleInfo.h"
 #include "FilePath.h"
 
-namespace dyno 
+namespace dyno
 {
 	template<typename TDataType>
-	class PresetArticulatedBody : virtual public ArticulatedBody<TDataType>
+	class Jeep : virtual public ArticulatedBody<TDataType>
 	{
-		DECLARE_TCLASS(PresetArticulatedBody, TDataType)
+		DECLARE_TCLASS(Jeep, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		PresetArticulatedBody();
-		~PresetArticulatedBody() override;
-
-		DEF_VAR(FilePath, FilePath, "", "");
-		DEF_INSTANCE_STATE(TextureMesh, TextureMeshState, "Texture mesh of the vechicle");
-
+		Jeep();
+		~Jeep() override;
 
 	protected:
 		void resetStates() override;
-
-		std::shared_ptr<TextureMesh> getTexMeshPtr()override 
-		{
-			if (this->stateTextureMeshState()->isEmpty())
-				return NULL;
-			else
-				return this->stateTextureMeshState()->constDataPtr();
-		};
-
-	private:
-		void varChanged();
-
 	};
 
 	template<typename TDataType>
-	class PresetJeep : virtual public PresetArticulatedBody<TDataType>
+	class Tank : virtual public ArticulatedBody<TDataType>
 	{
-		DECLARE_TCLASS(PresetJeep, TDataType)
+		DECLARE_TCLASS(Tank, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		PresetJeep();
-		~PresetJeep() override;
-
-	protected:
-		void resetStates() override;
-
-
-	};
-
-	template<typename TDataType>
-	class PresetTank : virtual public PresetArticulatedBody<TDataType>
-	{
-		DECLARE_TCLASS(PresetJeep, TDataType)
-	public:
-		typedef typename TDataType::Real Real;
-		typedef typename TDataType::Coord Coord;
-
-		PresetTank();
-		~PresetTank() override;
+		Tank();
+		~Tank() override;
 
 	protected:
 		void resetStates() override;
 
 	};
-
 }
+

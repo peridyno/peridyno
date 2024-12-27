@@ -17,7 +17,8 @@
 #include <BasicShapes/PlaneModel.h>
 
 #include <Collision/NeighborElementQuery.h>
-#include "RigidBody/PresetArticulatedBody.h"
+
+#include "RigidBody/Vehicle.h"
 
 using namespace std;
 using namespace dyno;
@@ -27,9 +28,9 @@ std::shared_ptr<SceneGraph> createSceneGraph()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
-	auto jeep = scn->addNode(std::make_shared<PresetJeep<DataType3f>>());
+	auto jeep = scn->addNode(std::make_shared<Jeep<DataType3f>>());
 	jeep->varLocation()->setValue(Vec3f(4,0,0));
-	auto tank = scn->addNode(std::make_shared<PresetTank<DataType3f>>());
+	auto tank = scn->addNode(std::make_shared<Tank<DataType3f>>());
 
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
 	plane->varLengthX()->setValue(50);
@@ -38,13 +39,23 @@ std::shared_ptr<SceneGraph> createSceneGraph()
 	plane->varSegmentZ()->setValue(10);
 
 	auto convoy = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
-	//jeep->connect(convoy->importVehicles());
-	//tank->connect(convoy->importVehicles());
+	jeep->connect(convoy->importVehicles());
+	tank->connect(convoy->importVehicles());
 
-	plane->stateTriangleSet()->connect(jeep->inTriangleSet());
-	plane->stateTriangleSet()->connect(tank->inTriangleSet());
+// 	plane->stateTriangleSet()->connect(jeep->inTriangleSet());
+// 	plane->stateTriangleSet()->connect(tank->inTriangleSet());
 
 	plane->stateTriangleSet()->connect(convoy->inTriangleSet());
+
+	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
+	jeep->stateTopology()->connect(mapper->inDiscreteElements());
+	jeep->graphicsPipeline()->pushModule(mapper);
+
+	auto sRender = std::make_shared<GLSurfaceVisualModule>();
+	sRender->setColor(Color(1, 1, 0));
+	sRender->setAlpha(0.5f);
+	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+	jeep->graphicsPipeline()->pushModule(sRender);
 
 	return scn;
 }

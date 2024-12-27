@@ -1,166 +1,120 @@
-#include "Vechicle.h"
+#include "ConfigurableBody.h"
 
 #include "Module/CarDriver.h"
 
-#include "Mapping/DiscreteElementsToTriangleSet.h"
-#include "GLSurfaceVisualModule.h"
+//Collision
+#include "Collision/NeighborElementQuery.h"
+#include "Collision/CollistionDetectionTriangleSet.h"
+
+//RigidBody
+#include "Module/ContactsUnion.h"
+#include "Module/TJConstraintSolver.h"
+#include "Module/InstanceTransform.h"
+#include "Module/SharedFuncsForRigidBody.h"
+
+//Rendering
+#include "Module/GLPhotorealisticInstanceRender.h"
 
 namespace dyno
 {
-	//Jeep
-	IMPLEMENT_TCLASS(Jeep, TDataType)
-
-	template<typename TDataType>
-	Jeep<TDataType>::Jeep()
-		: ArticulatedBody<TDataType>()
-	{
-		auto driver = std::make_shared<CarDriver<DataType3f>>();
-		this->stateTopology()->connect(driver->inTopology());
-		this->animationPipeline()->pushModule(driver);
-	}
-
-	template<typename TDataType>
-	Jeep<TDataType>::~Jeep()
-	{
-
-	}
-
-	template<typename TDataType>
-	void Jeep<TDataType>::resetStates()
-	{
-		this->clearRigidBodySystem();
-		this->clearVechicle();
-
-		int vehicleNum = this->varVehiclesTransform()->getValue().size();
-		for (size_t i = 0; i < vehicleNum; i++)
-		{	
-			RigidBodyInfo rigidbody;
-			rigidbody.bodyId = i;
-
-			auto texMesh = this->inTextureMesh()->constDataPtr();
-
-			//wheel
-			std::vector <int> Wheel_Id = { 0,1,2,3 };
-			std::map<int, CapsuleInfo> wheels;
-			std::map<int, std::shared_ptr<PdActor>> actors;
-			//Capsule
-			for (auto it : Wheel_Id)
-			{
-				auto up = texMesh->shapes()[it]->boundingBox.v1;
-				auto down = texMesh->shapes()[it]->boundingBox.v0;
-
-				wheels[it].center = Vec3f(0.0f);
-				wheels[it].rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
-				wheels[it].halfLength = 0.1;
-				wheels[it].radius = std::abs(up.y - down.y) / 2;
-
-				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation();
-				actors[it] = this->addCapsule(wheels[it], rigidbody, 100);
-			}
-
-
-			//body
-			int body = 5;
-			int backWheel = 4;
-
-			std::vector <int> box_Id = { body,backWheel };
-			std::map<int, BoxInfo> boxs;
-			//box
-			for (auto it : box_Id)
-			{
-				auto up = texMesh->shapes()[it]->boundingBox.v1;
-				auto down = texMesh->shapes()[it]->boundingBox.v0;
-
-				boxs[it].center = Vec3f(0.0f);
-
-				boxs[it].halfLength = (up - down) / 2;
-
-				rigidbody.offset = Vec3f(0.0f, 0.0f, 0.0f);
-				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation();
-				actors[it] = this->addBox(boxs[it], rigidbody, 100);
-			}
-
-			//bindShapetoActor
-			for (auto it : box_Id)
-			{
-				this->bind(actors[it], Pair<uint, uint>(it, i));
-			}
-			//bindShapetoActor
-			for (auto it : Wheel_Id)
-			{
-				this->bind(actors[it], Pair<uint, uint>(it, i));
-			}
-
-			rigidbody.offset = Vec3f(0);
-
-			Real wheel_velocity = 10;
-
-			//wheel to Body
-			for (auto it : Wheel_Id)
-			{
-				auto& joint = this->createHingeJoint(actors[it], actors[body]);
-				joint.setAnchorPoint(actors[it]->center);
-				joint.setMoter(wheel_velocity);
-				joint.setAxis(Vec3f(1, 0, 0));
-			}
-
-			auto& jointBackWheel_Body = this->createFixedJoint(actors[backWheel], actors[body]);
-			jointBackWheel_Body.setAnchorPoint(actors[backWheel]->center);		//set and offset
-		}
-
-		//**************************************************//
-		ArticulatedBody<TDataType>::resetStates();
-	}
-
-	DEFINE_CLASS(Jeep);
-
-
-
 	//ConfigurableVehicle
-	IMPLEMENT_TCLASS(ConfigurableVehicle, TDataType)
+	IMPLEMENT_TCLASS(ConfigurableBody, TDataType)
 
-	template<typename TDataType>
-	ConfigurableVehicle<TDataType>::ConfigurableVehicle()
+		template<typename TDataType>
+	ConfigurableBody<TDataType>::ConfigurableBody()
 		: ParametricModel<TDataType>()
 		, ArticulatedBody<TDataType>()
 	{
-		auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
-		this->stateTopology()->connect(mapper->inDiscreteElements());
-		this->graphicsPipeline()->pushModule(mapper);
+		auto elementQuery = std::make_shared<NeighborElementQuery<TDataType>>();
+		elementQuery->varSelfCollision()->setValue(false);
+		this->stateTopology()->connect(elementQuery->inDiscreteElements());
+		this->stateCollisionMask()->connect(elementQuery->inCollisionMask());
+		this->stateAttribute()->connect(elementQuery->inAttribute());
+		this->animationPipeline()->pushModule(elementQuery);
 
-		auto sRender = std::make_shared<GLSurfaceVisualModule>();
-		sRender->setColor(Color(0.3f, 0.5f, 0.9f));
-		sRender->setAlpha(0.2f);
-		sRender->setRoughness(0.7f);
-		sRender->setMetallic(3.0f);
-		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
-		this->graphicsPipeline()->pushModule(sRender);
-		sRender->setVisible(false);
+		auto cdBV = std::make_shared<CollistionDetectionTriangleSet<TDataType>>();
+		this->stateTopology()->connect(cdBV->inDiscreteElements());
+		this->inTriangleSet()->connect(cdBV->inTriangleSet());
+		// 		auto cdBV = std::make_shared<CollistionDetectionBoundingBox<TDataType>>();
+		// 		this->stateTopology()->connect(cdBV->inDiscreteElements());
+		this->animationPipeline()->pushModule(cdBV);
+
+
+		auto merge = std::make_shared<ContactsUnion<TDataType>>();
+		elementQuery->outContacts()->connect(merge->inContactsA());
+		cdBV->outContacts()->connect(merge->inContactsB());
+		this->animationPipeline()->pushModule(merge);
+
+		auto iterSolver = std::make_shared<TJConstraintSolver<TDataType>>();
+		this->stateTimeStep()->connect(iterSolver->inTimeStep());
+		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
+		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
+		this->varGravityValue()->connect(iterSolver->varGravityValue());
+		//this->varFrictionCoefficient()->connect(iterSolver->varFrictionCoefficient());
+		this->varFrictionCoefficient()->setValue(20.0f);
+		this->varSlop()->connect(iterSolver->varSlop());
+		this->stateMass()->connect(iterSolver->inMass());
+		this->stateCenter()->connect(iterSolver->inCenter());
+		this->stateVelocity()->connect(iterSolver->inVelocity());
+		this->stateAngularVelocity()->connect(iterSolver->inAngularVelocity());
+		this->stateRotationMatrix()->connect(iterSolver->inRotationMatrix());
+		this->stateInertia()->connect(iterSolver->inInertia());
+		this->stateQuaternion()->connect(iterSolver->inQuaternion());
+		this->stateInitialInertia()->connect(iterSolver->inInitialInertia());
+
+		this->stateTopology()->connect(iterSolver->inDiscreteElements());
+
+		merge->outContacts()->connect(iterSolver->inContacts());
+
+		this->animationPipeline()->pushModule(iterSolver);
+
+		/*auto driver = std::make_shared<SimpleVechicleDriver>();
+
+		this->stateFrameNumber()->connect(driver->inFrameNumber());
+		this->stateInstanceTransform()->connect(driver->inInstanceTransform());
+
+		this->animationPipeline()->pushModule(driver);*/
 
 		this->inTriangleSet()->tagOptional(true);
-		this->inTextureMesh()->tagOptional(true);
+
+		// 		auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
+		// 		this->stateTopology()->connect(mapper->inDiscreteElements());
+		// 		this->graphicsPipeline()->pushModule(mapper);
+		// 
+		// 		auto sRender = std::make_shared<GLSurfaceVisualModule>();
+		// 		sRender->setColor(Color(0.3f, 0.5f, 0.9f));
+		// 		sRender->setAlpha(0.2f);
+		// 		sRender->setRoughness(0.7f);
+		// 		sRender->setMetallic(3.0f);
+		// 		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+		// 		this->graphicsPipeline()->pushModule(sRender);
+		// 		sRender->setVisible(false);
+
+		this->inTriangleSet()->tagOptional(true);
 	}
 
 	template<typename TDataType>
-	ConfigurableVehicle<TDataType>::~ConfigurableVehicle()
+	ConfigurableBody<TDataType>::~ConfigurableBody()
 	{
 
 	}
 
 	template<typename TDataType>
-	void ConfigurableVehicle<TDataType>::resetStates()
+	void ConfigurableBody<TDataType>::resetStates()
 	{
 		this->clearRigidBodySystem();
 		this->clearVechicle();
 
-		
+		if (!this->inTextureMesh()->isEmpty())
+		{
+			this->stateTextureMesh()->setDataPtr(this->inTextureMesh()->constDataPtr());
+		}
 
-		if (!this->varVehicleConfiguration()->getValue().isValid()&& !bool(this->varVehiclesTransform()->getValue().size())|| this->inTextureMesh()->isEmpty())
+		if (!this->varVehicleConfiguration()->getValue().isValid() && !bool(this->varVehiclesTransform()->getValue().size()) || this->stateTextureMesh()->isEmpty())
 			return;
 
-		
-		auto texMesh = this->inTextureMesh()->constDataPtr();
-		const auto config = this->varVehicleConfiguration()->getValue();		
+		auto texMesh = this->stateTextureMesh()->constDataPtr();
+		const auto config = this->varVehicleConfiguration()->getValue();
 
 		const auto rigidInfo = config.mVehicleRigidBodyInfo;
 		const auto jointInfo = config.mVehicleJointInfo;
@@ -185,7 +139,7 @@ namespace dyno
 
 			for (size_t i = 0; i < rigidInfo.size(); i++)
 			{
-				rigidbody.bodyId = j * (maxGroup+1) + rigidInfo[i].rigidGroup;
+				rigidbody.bodyId = j * (maxGroup + 1) + rigidInfo[i].rigidGroup;
 
 				rigidbody.offset = rigidInfo[i].Offset;
 
@@ -385,14 +339,14 @@ namespace dyno
 				}
 
 				//Joint(Actor)
-		
-				
+
+
 
 
 			}
 		}
 
-		
+
 		/***************** Reset *************/
 		ArticulatedBody<TDataType>::resetStates();
 
@@ -401,8 +355,8 @@ namespace dyno
 		this->updateInstanceTransform();
 	}
 
-	DEFINE_CLASS(ConfigurableVehicle);
+	DEFINE_CLASS(ConfigurableBody);
 
 
-	
+
 }

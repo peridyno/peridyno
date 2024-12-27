@@ -2,7 +2,8 @@
 
 #include <SceneGraph.h>
 
-#include <RigidBody/Vechicle.h>
+#include <RigidBody/ArticulatedBody.h>
+#include <RigidBody/MultibodySystem.h>
 
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
@@ -34,13 +35,17 @@ std::shared_ptr<SceneGraph> creatCar()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	auto jeep = scn->addNode(std::make_shared<ArticulatedBody<DataType3f>>());
+	jeep->varFilePath()->setValue(getAssetPath() + "jeep_bridge/Jeep_Bridge.gltf");
 
-	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
-	gltf->setVisible(false);
-	gltf->varFileName()->setValue(getAssetPath() + "jeep_bridge/Jeep_Bridge.gltf");
+	auto multibody = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
+	jeep->connect(multibody->importVehicles());
 
-	gltf->stateTextureMesh()->connect(jeep->inTextureMesh());
-	auto texMesh = jeep->inTextureMesh()->constDataPtr();
+// 	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
+// 	gltf->setVisible(false);
+// 	gltf->varFileName()->setValue(getAssetPath() + "jeep_bridge/Jeep_Bridge.gltf");
+// 
+// 	gltf->stateTextureMesh()->connect(jeep->inTextureMesh());
+	auto texMesh = jeep->stateTextureMesh()->constDataPtr();
 	std::vector<int> wheel_Id = { 0, 1, 2, 3, 4 };
 	std::map<int, std::shared_ptr<PdActor>> Actors;
 	RigidBodyInfo rigidbody;

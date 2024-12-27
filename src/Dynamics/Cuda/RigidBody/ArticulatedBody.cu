@@ -1,7 +1,5 @@
 #include "ArticulatedBody.h"
 
-#include <GLSurfaceVisualModule.h>
-
 //Collision
 #include "Collision/NeighborElementQuery.h"
 #include "Collision/CollistionDetectionTriangleSet.h"
@@ -15,68 +13,21 @@
 //Rendering
 #include "Module/GLPhotorealisticInstanceRender.h"
 
+#include "GltfFunc.h"
+
 namespace dyno
 {
-	IMPLEMENT_TCLASS(ArticulatedBody, TDataType)
-
 	template<typename TDataType>
 	ArticulatedBody<TDataType>::ArticulatedBody()
 		: ParametricModel<TDataType>()
 		, RigidBodySystem<TDataType>()
 	{
+		this->stateTextureMesh()->setDataPtr(std::make_shared<TextureMesh>());
+
+		auto callback = std::make_shared<FCallBackFunc>(std::bind(&ArticulatedBody<TDataType>::varChanged, this));
+		this->varFilePath()->attach(callback);
+
 		this->animationPipeline()->clear();
-
-		auto elementQuery = std::make_shared<NeighborElementQuery<TDataType>>();
-		elementQuery->varSelfCollision()->setValue(false);
-		this->stateTopology()->connect(elementQuery->inDiscreteElements());
-		this->stateCollisionMask()->connect(elementQuery->inCollisionMask());
-		this->stateAttribute()->connect(elementQuery->inAttribute());
-		this->animationPipeline()->pushModule(elementQuery);
-
-		auto cdBV = std::make_shared<CollistionDetectionTriangleSet<TDataType>>();
-		this->stateTopology()->connect(cdBV->inDiscreteElements());
-		this->inTriangleSet()->connect(cdBV->inTriangleSet());
-		// 		auto cdBV = std::make_shared<CollistionDetectionBoundingBox<TDataType>>();
-		// 		this->stateTopology()->connect(cdBV->inDiscreteElements());
-		this->animationPipeline()->pushModule(cdBV);
-
-
-		auto merge = std::make_shared<ContactsUnion<TDataType>>();
-		elementQuery->outContacts()->connect(merge->inContactsA());
-		cdBV->outContacts()->connect(merge->inContactsB());
-		this->animationPipeline()->pushModule(merge);
-
-		auto iterSolver = std::make_shared<TJConstraintSolver<TDataType>>();
-		this->stateTimeStep()->connect(iterSolver->inTimeStep());
-		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
-		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
-		this->varGravityValue()->connect(iterSolver->varGravityValue());
-		//this->varFrictionCoefficient()->connect(iterSolver->varFrictionCoefficient());
-		this->varFrictionCoefficient()->setValue(20.0f);
-		this->varSlop()->connect(iterSolver->varSlop());
-		this->stateMass()->connect(iterSolver->inMass());
-		this->stateCenter()->connect(iterSolver->inCenter());
-		this->stateVelocity()->connect(iterSolver->inVelocity());
-		this->stateAngularVelocity()->connect(iterSolver->inAngularVelocity());
-		this->stateRotationMatrix()->connect(iterSolver->inRotationMatrix());
-		this->stateInertia()->connect(iterSolver->inInertia());
-		this->stateQuaternion()->connect(iterSolver->inQuaternion());
-		this->stateInitialInertia()->connect(iterSolver->inInitialInertia());
-
-		this->stateTopology()->connect(iterSolver->inDiscreteElements());
-
-		merge->outContacts()->connect(iterSolver->inContacts());
-
-		this->animationPipeline()->pushModule(iterSolver);
-
-		/*auto driver = std::make_shared<SimpleVechicleDriver>();
-
-		this->stateFrameNumber()->connect(driver->inFrameNumber());
-		this->stateInstanceTransform()->connect(driver->inInstanceTransform());
-
-		this->animationPipeline()->pushModule(driver);*/
-
-		this->inTriangleSet()->tagOptional(true);
 
 		auto transformer = std::make_shared<InstanceTransform<DataType3f>>();
 		this->stateCenter()->connect(transformer->inCenter());
@@ -88,7 +39,7 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(transformer);
 
 		auto prRender = std::make_shared<GLPhotorealisticInstanceRender>();
-		this->inTextureMesh()->connect(prRender->inTextureMesh());
+		this->stateTextureMesh()->connect(prRender->inTextureMesh());
 		transformer->outInstanceTransform()->connect(prRender->inTransform());
 		this->graphicsPipeline()->pushModule(prRender);
 
@@ -111,7 +62,7 @@ namespace dyno
 
 		int sizeOfRigids = this->stateCenter()->size();
 
-		std::shared_ptr<TextureMesh> texMesh = getTexMeshPtr();
+		auto texMesh = this->stateTextureMesh()->constDataPtr();
 
 		uint N = 0;
 		if (texMesh != NULL);
@@ -169,6 +120,13 @@ namespace dyno
 		this->transform();
 	}
 
+	template<typename TDataType>
+	void ArticulatedBody<TDataType>::varChanged()
+	{
+		std::shared_ptr<TextureMesh> texMesh = this->stateTextureMesh()->getDataPtr();
+		auto filepath = this->varFilePath()->getValue().string();
+		loadGLTFTextureMesh(texMesh, filepath);
+	}
 
 	template<typename TDataType>
 	void ArticulatedBody<TDataType>::transform()

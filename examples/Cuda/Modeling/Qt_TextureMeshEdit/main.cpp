@@ -1,7 +1,9 @@
 #include <QtApp.h>
 #include <SceneGraph.h>
-#include <RigidBody/Vechicle.h>
+
+#include <RigidBody/ConfigurableBody.h>
 #include <BasicShapes/PlaneModel.h>
+
 #include "GltfLoader.h"
 #include "BasicShapes/PlaneModel.h"
 #include "Commands/TextureMeshMerge.h"
@@ -15,7 +17,8 @@ std::shared_ptr<SceneGraph> creatCar()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
-	auto configCar = scn->addNode(std::make_shared<ConfigurableVehicle<DataType3f>>());
+	auto configCar = scn->addNode(std::make_shared<ConfigurableBody<DataType3f>>());
+	configCar->varFilePath()->setValue(getAssetPath() + "Jeep/JeepGltf/jeep.gltf");
 
 	auto jeep = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
 	jeep->varFileName()->setValue(getAssetPath() + "Jeep/JeepGltf/jeep.gltf");
@@ -26,7 +29,7 @@ std::shared_ptr<SceneGraph> creatCar()
 	extractBody->varShapeTransform()->setValue(std::vector<Transform3f>{Transform3f(),Transform3f()});
 	jeep->stateTextureMesh()->connect(extractBody->inInTextureMesh());
 
-	jeep->stateTextureMesh()->connect(configCar->inTextureMesh());
+	//jeep->stateTextureMesh()->connect(configCar->inTextureMesh());
 
 	auto race = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
 	race->varFileName()->setValue(getAssetPath() + "gltf/RaceGltf/Race_Mesh.gltf");

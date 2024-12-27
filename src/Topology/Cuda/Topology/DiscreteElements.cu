@@ -382,12 +382,12 @@ namespace dyno
 			mPointJoints.assign(topo->pointJoints(), topo->pointJoints().size(), offsetOfPointJoints, 0);
 			mDistanceJoints.assign(topo->distanceJoints(), topo->distanceJoints().size(), offsetOfDistanceJoints, 0);
 
-			cuExecute(topo->ballAndSocketJoints().size(), DE_UpdateJointIds, topo->ballAndSocketJoints(), topo->ballAndSocketJoints().size(), offsetOfBallAndSocketJoints, offsetOfRigidBodies);
-			cuExecute(topo->sliderJoints().size(), DE_UpdateJointIds, topo->sliderJoints(), topo->sliderJoints().size(), offsetOfSliderJoints, offsetOfRigidBodies);
-			cuExecute(topo->hingeJoints().size(), DE_UpdateJointIds, topo->hingeJoints(), topo->hingeJoints().size(), offsetOfHingeJoints, offsetOfRigidBodies);
-			cuExecute(topo->fixedJoints().size(), DE_UpdateJointIds, topo->fixedJoints(), topo->fixedJoints().size(), offsetOfFixedJoints, offsetOfRigidBodies);
-			cuExecute(topo->pointJoints().size(), DE_UpdateJointIds, topo->pointJoints(), topo->pointJoints().size(), offsetOfPointJoints, offsetOfRigidBodies);
-			cuExecute(topo->distanceJoints().size(), DE_UpdateJointIds, topo->distanceJoints(), topo->distanceJoints().size(), offsetOfDistanceJoints, offsetOfRigidBodies);
+			cuExecute(topo->ballAndSocketJoints().size(), DE_UpdateJointIds, mBallAndSocketJoints, topo->ballAndSocketJoints().size(), offsetOfBallAndSocketJoints, offsetOfRigidBodies);
+			cuExecute(topo->sliderJoints().size(), DE_UpdateJointIds, mSliderJoints, topo->sliderJoints().size(), offsetOfSliderJoints, offsetOfRigidBodies);
+			cuExecute(topo->hingeJoints().size(), DE_UpdateJointIds, mHingeJoints, topo->hingeJoints().size(), offsetOfHingeJoints, offsetOfRigidBodies);
+			cuExecute(topo->fixedJoints().size(), DE_UpdateJointIds, mFixedJoints, topo->fixedJoints().size(), offsetOfFixedJoints, offsetOfRigidBodies);
+			cuExecute(topo->pointJoints().size(), DE_UpdateJointIds, mPointJoints, topo->pointJoints().size(), offsetOfPointJoints, offsetOfRigidBodies);
+			cuExecute(topo->distanceJoints().size(), DE_UpdateJointIds, mDistanceJoints, topo->distanceJoints().size(), offsetOfDistanceJoints, offsetOfRigidBodies);
 
 			offsetOfBallAndSocketJoints += topo->ballAndSocketJoints().size();
 			offsetOfSliderJoints += topo->sliderJoints().size();

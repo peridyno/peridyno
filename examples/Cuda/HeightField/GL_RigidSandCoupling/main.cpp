@@ -1,4 +1,4 @@
-#include <GlfwApp.h>
+#include <UbiApp.h>
 
 #include <SceneGraph.h>
 
@@ -13,13 +13,13 @@
 #include <HeightField/RigidSandCoupling.h>
 
 #include "GltfLoader.h"
-#include "RigidBody/Vechicle.h"
 
 #include "Collision/NeighborElementQuery.h"
 #include "Collision/CollistionDetectionBoundingBox.h"
 
+#include "RigidBody/Vehicle.h"
+#include <RigidBody/MultibodySystem.h>
 #include "RigidBody/Module/PJSConstraintSolver.h"
-
 #include "RigidBody/Module/ContactsUnion.h"
 
 #include <Module/GLPhotorealisticInstanceRender.h>
@@ -32,65 +32,69 @@ std::shared_ptr<SceneGraph> createScene()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 
-	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
-	gltf->setVisible(false);
-	gltf->varFileName()->setValue(getAssetPath() + "Jeep/JeepGltf/jeep.gltf");
+// 	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
+// 	gltf->setVisible(false);
+// 	gltf->varFileName()->setValue(getAssetPath() + "Jeep/JeepGltf/jeep.gltf");
 
 
 	auto jeep = scn->addNode(std::make_shared<Jeep<DataType3f>>());
 	jeep->varLocation()->setValue(Vec3f(0.0f, 0.0f, -10.0f));
 
+	auto multibody = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
+
+	jeep->connect(multibody->importVehicles());
+
 	//Replace the animation pipeline for jeep
 	{
-		jeep->animationPipeline()->clear();
+		multibody->animationPipeline()->clear();
 
 		auto defaultTopo = std::make_shared<DiscreteElements<DataType3f>>();
-		jeep->stateTopology()->setDataPtr(std::make_shared<DiscreteElements<DataType3f>>());
+		multibody->stateTopology()->setDataPtr(std::make_shared<DiscreteElements<DataType3f>>());
 
 		auto elementQuery = std::make_shared<NeighborElementQuery<DataType3f>>();
-		jeep->stateTopology()->connect(elementQuery->inDiscreteElements());
-		jeep->stateCollisionMask()->connect(elementQuery->inCollisionMask());
-		jeep->stateAttribute()->connect(elementQuery->inAttribute());
-		jeep->animationPipeline()->pushModule(elementQuery);
+		multibody->stateTopology()->connect(elementQuery->inDiscreteElements());
+		multibody->stateCollisionMask()->connect(elementQuery->inCollisionMask());
+		multibody->stateAttribute()->connect(elementQuery->inAttribute());
+		multibody->animationPipeline()->pushModule(elementQuery);
 		//elementQuery->varSelfCollision()->setValue(false);
 
 		auto cdBV = std::make_shared<CollistionDetectionBoundingBox<DataType3f>>();
-		jeep->stateTopology()->connect(cdBV->inDiscreteElements());
-		jeep->animationPipeline()->pushModule(cdBV);
+		multibody->stateTopology()->connect(cdBV->inDiscreteElements());
+		multibody->animationPipeline()->pushModule(cdBV);
 
 		auto merge = std::make_shared<ContactsUnion<DataType3f>>();
 		elementQuery->outContacts()->connect(merge->inContactsA());
 		cdBV->outContacts()->connect(merge->inContactsB());
 
-		jeep->animationPipeline()->pushModule(merge);
+		multibody->animationPipeline()->pushModule(merge);
 
 		auto iterSolver = std::make_shared<PJSConstraintSolver<DataType3f>>();
-		jeep->stateTimeStep()->connect(iterSolver->inTimeStep());
-		jeep->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
-		jeep->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
-		jeep->varGravityValue()->connect(iterSolver->varGravityValue());
-		jeep->varFrictionCoefficient()->connect(iterSolver->varFrictionCoefficient());
-		jeep->varSlop()->connect(iterSolver->varSlop());
-		jeep->stateMass()->connect(iterSolver->inMass());
+		multibody->stateTimeStep()->connect(iterSolver->inTimeStep());
+		multibody->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
+		multibody->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
+		multibody->varGravityValue()->connect(iterSolver->varGravityValue());
+		multibody->varFrictionCoefficient()->connect(iterSolver->varFrictionCoefficient());
+		multibody->varSlop()->connect(iterSolver->varSlop());
+		multibody->stateMass()->connect(iterSolver->inMass());
 
-		jeep->stateCenter()->connect(iterSolver->inCenter());
-		jeep->stateVelocity()->connect(iterSolver->inVelocity());
-		jeep->stateAngularVelocity()->connect(iterSolver->inAngularVelocity());
-		jeep->stateRotationMatrix()->connect(iterSolver->inRotationMatrix());
-		jeep->stateInertia()->connect(iterSolver->inInertia());
-		jeep->stateQuaternion()->connect(iterSolver->inQuaternion());
-		jeep->stateInitialInertia()->connect(iterSolver->inInitialInertia());
-		jeep->stateTopology()->connect(iterSolver->inDiscreteElements());
+		multibody->stateCenter()->connect(iterSolver->inCenter());
+		multibody->stateVelocity()->connect(iterSolver->inVelocity());
+		multibody->stateAngularVelocity()->connect(iterSolver->inAngularVelocity());
+		multibody->stateRotationMatrix()->connect(iterSolver->inRotationMatrix());
+		multibody->stateInertia()->connect(iterSolver->inInertia());
+		multibody->stateQuaternion()->connect(iterSolver->inQuaternion());
+		multibody->stateInitialInertia()->connect(iterSolver->inInitialInertia());
+		multibody->stateTopology()->connect(iterSolver->inDiscreteElements());
 		merge->outContacts()->connect(iterSolver->inContacts());
-		jeep->animationPipeline()->pushModule(iterSolver);
+		multibody->animationPipeline()->pushModule(iterSolver);
 	}
 
-	gltf->stateTextureMesh()->connect(jeep->inTextureMesh());
+	//gltf->stateTextureMesh()->connect(jeep->inTextureMesh());
 
-	auto prRender = std::make_shared<GLPhotorealisticInstanceRender>();
-	jeep->inTextureMesh()->connect(prRender->inTextureMesh());
-	jeep->stateInstanceTransform()->connect(prRender->inTransform());
-	jeep->graphicsPipeline()->pushModule(prRender);
+// 	auto prRender = std::make_shared<GLPhotorealisticInstanceRender>();
+// 	jeep->inTextureMesh()->connect(prRender->inTextureMesh());
+// 	jeep->stateInstanceTransform()->connect(prRender->inTransform());
+// 	jeep->graphicsPipeline()->pushModule(prRender);
 
 	float spacing = 0.1f;
 	uint res = 128;
@@ -120,7 +124,7 @@ std::shared_ptr<SceneGraph> createScene()
 // 	sand->connect(tracking->importGranularMedia());
 
 	auto coupling = scn->addNode(std::make_shared<RigidSandCoupling<DataType3f>>());
-	jeep->connect(coupling->importRigidBodySystem());
+	multibody->connect(coupling->importRigidBodySystem());
 	sand->connect(coupling->importGranularMedia());
 
 	return scn;
@@ -128,10 +132,12 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
-	GlfwApp app;
-	app.initialize(1024, 768);
+	UbiApp app(GUIType::GUI_GLFW);
 
 	app.setSceneGraph(createScene());
+
+	app.initialize(1024, 768);
+
 	app.renderWindow()->getCamera()->setUnitScale(5);
 
 	app.mainLoop();

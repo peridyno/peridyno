@@ -2,7 +2,8 @@
 
 #include <SceneGraph.h>
 
-#include <RigidBody/Vechicle.h>
+#include <RigidBody/ArticulatedBody.h>
+#include <RigidBody/MultibodySystem.h>
 
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
@@ -33,6 +34,7 @@ std::shared_ptr<SceneGraph> creatCar()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	auto jeep = scn->addNode(std::make_shared<ArticulatedBody<DataType3f>>());
+	jeep->varFilePath()->setValue(getAssetPath() + "Jeep/JeepGltf/jeep.gltf");
 
 	uint N = 1;
 
@@ -52,24 +54,7 @@ std::shared_ptr<SceneGraph> creatCar()
 		box3.halfLength = Vec3f(0.2f);
 		box4.center = Vec3f(-0.812, 0.450, 1.722) + tr;
 		box4.halfLength = Vec3f(0.2f);
-		/*CapsuleInfo capsule1, capsule2, capsule3, capsule4;
 
-		capsule1.center = Vec3f(0.812, 0.450, 1.722) + tr;
-		capsule1.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
-		capsule1.halfLength = 0.1495;
-		capsule1.radius = 0.450;
-		capsule2.center = Vec3f(-0.812, 0.450, 1.722) + tr;
-		capsule2.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
-		capsule2.halfLength = 0.1495;
-		capsule2.radius = 0.450;
-		capsule3.center = Vec3f(-0.812, 0.450, -1.426) + tr;
-		capsule3.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
-		capsule3.halfLength = 0.1495;
-		capsule3.radius = 0.450;
-		capsule4.center = Vec3f(0.812, 0.450, -1.426) + tr;
-		capsule4.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
-		capsule4.halfLength = 0.1495;
-		capsule4.radius = 0.450;*/
 		SphereInfo sphere1, sphere2, sphere3, sphere4;
 		//sphere1.center = Vec3f(0.812, 0.450, 1.722) + tr;
 		sphere1.radius = 0.450;
@@ -158,59 +143,14 @@ std::shared_ptr<SceneGraph> creatCar()
 		jeep->bind(rearRightTireActor, Pair<uint, uint>(3, i));
 	}
 
-	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
-	gltf->setVisible(false);
-	gltf->varFileName()->setValue(getAssetPath() + "Jeep/JeepGltf/jeep.gltf");
+	auto multibody = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
 
-	gltf->stateTextureMesh()->connect(jeep->inTextureMesh());
+	jeep->connect(multibody->importVehicles());
 
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
 	plane->varLocation()->setValue(Vec3f(0, 0, 0));
 	plane->varScale()->setValue(Vec3f(300.0f));
-	plane->stateTriangleSet()->connect(jeep->inTriangleSet());
-
-
-
-	//Visualize contact points
-	auto cdBV = std::make_shared<CollistionDetectionTriangleSet<DataType3f>>();
-	jeep->stateTopology()->connect(cdBV->inDiscreteElements());
-	jeep->inTriangleSet()->connect(cdBV->inTriangleSet());
-	jeep->graphicsPipeline()->pushModule(cdBV);
-
-	auto contactPointMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
-	cdBV->outContacts()->connect(contactPointMapper->inContacts());
-	jeep->graphicsPipeline()->pushModule(contactPointMapper);
-
-	auto contactsRender = std::make_shared<GLPointVisualModule>();
-	contactsRender->setColor(Color(1, 0, 0));
-	contactsRender->varPointSize()->setValue(0.1f);
-	contactPointMapper->outPointSet()->connect(contactsRender->inPointSet());
-	jeep->graphicsPipeline()->pushModule(contactsRender);
-
-	auto contactMapper = std::make_shared<ContactsToEdgeSet<DataType3f>>();
-	cdBV->outContacts()->connect(contactMapper->inContacts());
-	contactMapper->varScale()->setValue(2);
-	jeep->graphicsPipeline()->pushModule(contactMapper);
-
-	auto wireRender = std::make_shared<GLWireframeVisualModule>();
-	wireRender->setColor(Color(1, 0, 0));
-	contactMapper->outEdgeSet()->connect(wireRender->inEdgeSet());
-	jeep->graphicsPipeline()->pushModule(wireRender);
-
-
-	//Visualize rigid bodies
-
-	/*auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
-	jeep->stateTopology()->connect(mapper->inDiscreteElements());
-	jeep->graphicsPipeline()->pushModule(mapper);
-
-	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Color(0.3f, 0.5f, 0.9f));
-	sRender->setAlpha(0.8f);
-	sRender->setRoughness(0.7f);
-	sRender->setMetallic(3.0f);
-	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
-	jeep->graphicsPipeline()->pushModule(sRender);*/
+	plane->stateTriangleSet()->connect(multibody->inTriangleSet());
 
 	return scn;
 }
