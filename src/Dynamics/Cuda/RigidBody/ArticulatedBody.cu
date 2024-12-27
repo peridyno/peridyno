@@ -58,7 +58,7 @@ namespace dyno
 	{
 		RigidBodySystem<TDataType>::resetStates();
 
-		auto topo = this->stateTopology()->constDataPtr();
+		auto topo = this->stateTopology()->getDataPtr();
 
 		int sizeOfRigids = this->stateCenter()->size();
 
@@ -118,6 +118,10 @@ namespace dyno
 		tags.clear();
 
 		this->transform();
+
+		topo->setPosition(this->stateCenter()->constData());
+		topo->setRotation(this->stateRotationMatrix()->constData());
+		topo->update();
 	}
 
 	template<typename TDataType>
