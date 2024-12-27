@@ -52,5 +52,39 @@ namespace dyno
 		void resetStates() override;
 
 	};
+
+	template<typename TDataType>
+	class UAV : virtual public ArticulatedBody<TDataType>
+	{
+		DECLARE_TCLASS(UAV, TDataType)
+	public:
+		typedef typename TDataType::Real Real;
+		typedef typename TDataType::Coord Coord;
+
+		UAV();
+		~UAV() override;
+
+	protected:
+		void resetStates() override;
+
+	};
+
+
+	template<typename TDataType>
+	class UUV : virtual public ArticulatedBody<TDataType>
+	{
+		DECLARE_TCLASS(UUV, TDataType)
+	public:
+		typedef typename TDataType::Real Real;
+		typedef typename TDataType::Coord Coord;
+
+		UUV();
+		~UUV() override;
+
+	protected:
+		void resetStates() override;
+
+	};
+
 }
 

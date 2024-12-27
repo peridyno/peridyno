@@ -66,17 +66,10 @@ namespace dyno
 		);
 
 		articulated->addAction(
-			"Boat",
-			"ToolBarIco/RigidBody/Ship_30.png",
-			[=]()->std::shared_ptr<Node> {
-				return nullptr;
-			}
-		);
-		articulated->addAction(
 			"UAV",
 			"ToolBarIco/RigidBody/UAV_15.png",
 			[=]()->std::shared_ptr<Node> {
-				return nullptr;
+				return std::make_shared<UAV<DataType3f>>();
 			}
 		);
 
@@ -84,7 +77,7 @@ namespace dyno
 			"UUV",
 			"ToolBarIco/RigidBody/UUV_45.png",
 			[=]()->std::shared_ptr<Node> {
-				return nullptr;
+				return std::make_shared<UUV<DataType3f>>();
 			}
 		);
 
