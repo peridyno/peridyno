@@ -1,6 +1,7 @@
 #include "initializeRigidBody.h"
 
 #include "NodeFactory.h"
+#include "PresetArticulatedBody.h"
 
 namespace dyno
 {
@@ -45,6 +46,48 @@ namespace dyno
 			"Rigid Body",
 			"ToolBarIco/RigidBody/RigidBody.png",
 			nullptr);
+
+		auto articulated = page->addGroup("ArticulatedBody");
+
+		articulated->addAction(
+			"Jeep",
+			"ToolBarIco/RigidBody/Jeep_45.png",
+			[=]()->std::shared_ptr<Node> {
+				return std::make_shared<PresetJeep<DataType3f>>();
+			}
+		);
+
+		articulated->addAction(
+			"Tank",
+			"ToolBarIco/RigidBody/Tank_45.png",
+			[=]()->std::shared_ptr<Node> {
+				return std::make_shared<PresetTank<DataType3f>>();
+			}
+		);
+
+		articulated->addAction(
+			"Boat",
+			"ToolBarIco/RigidBody/Ship_30.png",
+			[=]()->std::shared_ptr<Node> {
+				return nullptr;
+			}
+		);
+		articulated->addAction(
+			"UAV",
+			"ToolBarIco/RigidBody/UAV_15.png",
+			[=]()->std::shared_ptr<Node> {
+				return nullptr;
+			}
+		);
+
+		articulated->addAction(
+			"UUV",
+			"ToolBarIco/RigidBody/UUV_45.png",
+			[=]()->std::shared_ptr<Node> {
+				return nullptr;
+			}
+		);
+
 	}
 }
 
