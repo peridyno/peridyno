@@ -8,5 +8,5 @@ if(PERIDYNO_LIBRARY_VOLUME)
 		ObjIO
         UbiGUI
         GLRenderEngine)
-    add_example(GL_SDFUniformBoolean AASDF LIB_DEPENDENCY)
+    add_example(GL_SDFUniformBoolean Volume LIB_DEPENDENCY)
 endif()
