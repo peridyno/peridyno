@@ -1,13 +1,19 @@
 #include "DualParticleFluid.h"
 //DataType
 #include "Auxiliary/DataSource.h"
+
 //Collision
 #include "Collision/NeighborPointQuery.h"
 
 //ParticleSystem
 #include "ParticleSystem/Module/ImplicitViscosity.h"
 #include "ParticleSystem/Module/ParticleIntegrator.h"
-#include "DualParticleIsphModule.h"
+
+//DualParticleSystem
+#include "Module/DualParticleIsphModule.h"
+
+
+
 namespace dyno
 {
 	__global__ void  DPS_AttributeReset(

@@ -37,13 +37,6 @@ namespace dyno {
 		*/
 		DEF_ARRAY_IN(Attribute, Attribute, DeviceType::GPU, "Particle attribute");
 
-		/**
-		* @brief Force density
-		* Force density on each particle
-		*/
-		DEF_ARRAY_IN(Coord, ForceDensity, DeviceType::GPU, "Force density on each particle");
-
-
 		DEF_VAR_IN(uint, FrameNumber, "Frame number");
 
 		DEF_VAR(Real, InitialAngularVelocity, 0.667f, "");

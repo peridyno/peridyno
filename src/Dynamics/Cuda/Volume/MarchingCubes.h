@@ -42,7 +42,7 @@ namespace dyno
 
 		DEF_INSTANCE_IN(LevelSet<TDataType>, LevelSet, "A 3D signed distance field");
 
-		DEF_INSTANCE_OUT(TriangleSet<TDataType>, TriangleSet, "An iso surface");
+		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "An iso surface");
 
 	protected:
 		void resetStates() override;

@@ -1,5 +1,5 @@
 /**
- * Copyright 2017-2021 Xiaowei He
+ * Copyright 2024 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,38 @@
  * limitations under the License.
  */
 #pragma once
-#include "Volume.h"
-#include "Array/Array3D.h"
-
+#include "Topology/LevelSet.h"
 #include "Topology/TriangleSet.h"
 
+#include "Module/ComputeModule.h"
+
 namespace dyno {
+	typedef Vector<unsigned int, 3> Vec3ui;
+	typedef Vector<int, 3> Vec3i;
+
+	typedef CArray3D<unsigned int> CArray3ui;
+	typedef CArray3D<float> CArray3f;
+	typedef CArray3D<int> CArray3i;
+
+	/**
+	 * @brief This is a GPU-based fast sweeping method to generate signed distance field from a mesh.
+	 */
 	template<typename TDataType>
-	class VolumeGenerator : public Volume<TDataType>
+	class FastSweepingMethodGPU : public ComputeModule
 	{
-		DECLARE_TCLASS(VolumeGenerator, TDataType)
+		DECLARE_TCLASS(FastSweepingMethodGPU, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TopologyModule::Triangle Triangle;
 
-		VolumeGenerator();
-		~VolumeGenerator() override;
+		FastSweepingMethodGPU();
+		~FastSweepingMethodGPU() override;
 
 		DEF_VAR(Real, Spacing, 0.05f, "");
 
 		DEF_VAR(uint, Padding, 10, "");
+
+		DEF_VAR(uint, PassNumber, 2, "");
 
 	public:
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
@@ -42,6 +53,15 @@ namespace dyno {
 		DEF_INSTANCE_OUT(LevelSet<TDataType>, LevelSet, "");
 
 	protected:
-		void resetStates() override;
+		void compute() override;
+
+	private:
+		void makeLevelSet();
+
+		int ni;
+		int nj;
+		int nk;
+		Vec3f origin;
+		Vec3f maxPoint;
 	};
 }

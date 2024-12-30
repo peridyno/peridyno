@@ -431,7 +431,7 @@ void declare_marching_cubes(py::module& m, std::string typestr) {
 		.def("var_iso_value", &Class::varIsoValue, py::return_value_policy::reference)
 		.def("var_grid_spacing", &Class::varGridSpacing, py::return_value_policy::reference)
 		.def("in_level_set", &Class::inLevelSet, py::return_value_policy::reference)
-		.def("out_triangle_set", &Class::outTriangleSet, py::return_value_policy::reference);
+		.def("out_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference);
 }
 
 #include "Volume/Module/MarchingCubesHelper.h"

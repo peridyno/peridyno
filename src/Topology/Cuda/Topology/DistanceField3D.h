@@ -16,6 +16,8 @@
 
 namespace dyno {
 
+#define FARWAY_DISTANCE 10^6
+
 	template<typename TDataType>
 	class DistanceField3D {
 	public:
@@ -75,6 +77,11 @@ namespace dyno {
 		 */
 		void loadSDF(std::string filename, bool inverted = false);
 
+		/**
+		 * @brief load signed distance field from a Box (lo, hi)
+		 * 
+		 * @param inverted indicated whether the signed distance field should be positive in outside. default: +[---]+
+		 */
 		void loadBox(Coord& lo, Coord& hi, bool inverted = false);
 
 		void loadCylinder(Coord& center, Real radius, Real height, int axis, bool inverted = false);
@@ -144,8 +151,8 @@ namespace dyno {
 		const int j = (int)floor(fp[1]);
 		const int k = (int)floor(fp[2]);
 		if (i < 0 || i >= m_distance.nx() - 1 || j < 0 || j >= m_distance.ny() - 1 || k < 0 || k >= m_distance.nz() - 1) {
-			if (m_bInverted) d = -100000.0f;
-			else d = 100000.0f;
+			if (m_bInverted) d = -FARWAY_DISTANCE;
+			else d = FARWAY_DISTANCE;
 			normal = Coord(0);
 			return;
 		}

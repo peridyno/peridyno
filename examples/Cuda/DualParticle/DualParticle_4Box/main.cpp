@@ -1,21 +1,20 @@
 #include <GlfwApp.h>
-#include "SceneGraph.h"
-#include <BasicShapes/CubeModel.h>
+#include <SceneGraph.h>
 
 #include <Volume/BasicShapeToVolume.h>
-
 #include <Multiphysics/VolumeBoundary.h>
+
 #include <Module/CalculateNorm.h>
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
 #include <ColorMapping.h>
 #include <ImColorbar.h>
+
 #include "DualParticleSystem/DualParticleFluid.h"
 #include "ParticleSystem/MakeParticleSystem.h"
 #include <BasicShapes/CubeModel.h>
 #include <Samplers/CubeSampler.h>
 #include <ParticleSystem/Emitters/SquareEmitter.h>
-#include "PointsLoader.h"
 
 using namespace std;
 using namespace dyno;

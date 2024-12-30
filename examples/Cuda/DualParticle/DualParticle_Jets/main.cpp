@@ -48,10 +48,6 @@ std::shared_ptr<SceneGraph> createScene()
 	emitter->connect(fluid->importParticleEmitters());
 	emitter2->connect(fluid->importParticleEmitters());
 
-	//auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>()); ;
-	//boundary->loadCube(Vec3f(-0.3, 0, -0.3), Vec3f(0.3, 2.0, 0.3), 0.02, true);
-	//fluid->connect(boundary->importParticleSystems());
-
 	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
 	fluid->stateVelocity()->connect(calculateNorm->inVec());
 	fluid->graphicsPipeline()->pushModule(calculateNorm);

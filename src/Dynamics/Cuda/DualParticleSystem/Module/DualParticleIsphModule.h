@@ -36,7 +36,7 @@ namespace dyno {
 
 	/*
 	*@Brief: Dual particle SPH solver to model free surface flow.
-	*@Note : 1. This solver does not contain the virtual particle generator; 2. The graphic memory of the NVDIA GPU should not be less than 4GB.
+	*@Note : 1. This solver does not contain the virtual particle generator; 2. The graphic memory of the NVDIA GPU should be larger than 4GB.
 	*@Paper: Liu et al., ACM Trans Graph (TOG). 2024. (A Dual-Particle Approach for Incompressible SPH Fluids) doi.org/10.1145/3649888
 	*/
 
@@ -125,8 +125,9 @@ namespace dyno {
 		DEF_ARRAY_OUT(Real, VirtualWeight, DeviceType::GPU, "Virtual Particle's Float Quantity");
 
 
-		DEF_VAR(Real, ResidualThreshold, 0.001f, "Convergence threshold for the pressure Poisson Equation")
-	protected:
+		DEF_VAR(Real, ResidualThreshold, 0.001f, "Convergence threshold for the pressure Poisson Equation");
+
+	private:
 
 		bool initializeImpl() override;
 		bool virtualArraysResize();
@@ -155,18 +156,15 @@ namespace dyno {
 
 		unsigned int virtualNumber_old = 0;
 
-		//DArray<Coord> m_improvedGradient;
 		DArray<Real> m_virtualAirWeight;
 		DArray<Real> m_Aii;
 
 		Reduction<Real>* m_reduce;
 		Arithmetic<Real>* m_arithmetic;
-		Arithmetic<Real>* m_arithmetic_r;
+		//Arithmetic<Real>* m_arithmetic_r;
 
 		unsigned int frag_number = 0;
 		Real max_Aii;
-
-	private:
 
 		std::shared_ptr<SummationDensity<TDataType>> m_summation;
 

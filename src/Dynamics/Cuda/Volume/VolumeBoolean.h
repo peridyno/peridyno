@@ -15,42 +15,34 @@
  */
 #pragma once
 #include "Volume.h"
+#include "Module/VolumeMacros.h"
 
 namespace dyno {
 	template<typename TDataType>
-	class VolumeBool : public Node
+	class VolumeBoolean : public Node
 	{
-		DECLARE_TCLASS(VolumeBool, TDataType)
+		DECLARE_TCLASS(VolumeBoolean, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		VolumeBool();
-		~VolumeBool() override;
-
-		DECLARE_ENUM(BoolType,
-			Intersect = 0,
-			Union = 1,
-			Minus = 2);
+		VolumeBoolean();
+		~VolumeBoolean() override;
 
 		std::string getNodeType() override;
 
-	protected:
-		void resetStates() override;
+		DEF_VAR(Real, Spacing, 0.01, "");
+		DEF_VAR(uint, Padding, 5, "");
 
-		void CalcuSDFGrid(DistanceField3D<TDataType> aDistance,
-			DistanceField3D<TDataType> bDistance,
-			DistanceField3D<TDataType>& tDistance);
+		DEF_ENUM(BoolType, BoolType, BoolType::Union, "Volume Bool Type");
 
 	public:
 		DEF_INSTANCE_IN(LevelSet<TDataType>, A, "");
 		DEF_INSTANCE_IN(LevelSet<TDataType>, B, "");
 
-		DEF_INSTANCE_OUT(LevelSet<TDataType>, SDF, "");
+		DEF_INSTANCE_OUT(LevelSet<TDataType>, LevelSet, "");
 
-		DEF_VAR_IN(Real, Spacing, "");
-		DEF_VAR_IN(uint, Padding, "");
-
-		DEF_ENUM(BoolType, BoolType, BoolType::Union, "Volume Bool Type");
+	protected:
+		void resetStates() override;
 	};
 }

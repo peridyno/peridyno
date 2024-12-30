@@ -645,6 +645,7 @@ namespace dyno
 		cudaDeviceSynchronize();
 		gridSize = this->varSamplingDistance()->getData();
 		int num = this->inRPosition()->size();
+		if (num == 0) return;
 
 		if (num == 0) return;
 
