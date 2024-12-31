@@ -88,7 +88,8 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 	auto sampleWidget = new WSampleWidget();
 	auto pythonWidget = new WPythonWidget();
 	auto saveWidget = new WSaveWidget(this);
-	auto logWidget = new WLogWidget();
+	auto logWidget = new WLogWidget(this);
+	auto logMessage = new WLogMessage();
 
 	//auto paramsWidget = new WRenderParamsWidget(&mSceneCanvas->getRenderParams());
 	//menu->addItem("Settings", std::unique_ptr<WRenderParamsWidget>(paramsWidget));
@@ -101,7 +102,9 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 
 	auto pythonItem = menu->addItem("Python", std::unique_ptr<WPythonWidget>(pythonWidget));
 
+	auto saveItem = menu->addItem("Save", std::unique_ptr<WSaveWidget>(saveWidget));
 
+	auto lgoItem = menu->addItem("Log", std::unique_ptr<WLogWidget>(logWidget));
 
 	pythonWidget->updateSceneGraph().connect([=](std::shared_ptr<dyno::SceneGraph> scene) {
 		if (scene)
@@ -110,6 +113,7 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 			setScene(scene);
 			initLeftPanel(widget0);
 		}
+
 		});
 
 	sampleWidget->clicked().connect([=](Sample* sample)
@@ -136,9 +140,21 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 		});
 
 
-	auto saveItem = menu->addItem("Save", std::unique_ptr<WSaveWidget>(saveWidget));
+	logMessage->updateText().connect([=](std::string message)
+		{
+			std::ostringstream oss;
+			oss << mScene;
+			std::string filename = oss.str() + ".txt";
+			std::ofstream fileStream(filename, std::ios::out | std::ios::trunc);
+			if (fileStream.is_open()) {
+				fileStream << message;
+				fileStream.close();
+			}
+			else {
+				std::cerr << "Unable to open file for writing." << std::endl;
+			}
 
-	auto lgoItem = menu->addItem("Log", std::unique_ptr<WLogWidget>(logWidget));
+		});
 
 	auto hide = menu->addItem(">>", 0);
 	hide->select();

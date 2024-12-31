@@ -4,8 +4,8 @@ WSaveWidget::WSaveWidget(WMainWindow* parent)
 	: mParent(parent)
 {
 	this->setLayoutSizeAware(true);
-	this->setOverflow(Wt::Overflow::Auto);
-	this->setHeight(Wt::WLength("100%"));
+	//this->setOverflow(Wt::Overflow::Auto);
+	//this->setHeight(Wt::WLength("100%"));
 	this->setMargin(10);
 
 	//auto layout = this->setLayout(std::make_unique<Wt::WBorderLayout>());
