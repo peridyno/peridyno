@@ -24,7 +24,7 @@
 #include <BasicShapes/CubeModel.h>
 
 // ParticleSystem
-#include <Samplers/CubeSampler.h>
+#include <Samplers/ShapeSampler.h>
 
 #include "Collision/NeighborPointQuery.h"
 
@@ -50,11 +50,11 @@ std::shared_ptr<SceneGraph> createScene()
 	cube->varSegments()->setValue(Vec3i(10, 10, 10));
 
 	//Create a sampler
-	auto sampler = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
+	auto sampler = scn->addNode(std::make_shared<ShapeSampler<DataType3f>>());
 	sampler->varSamplingDistance()->setValue(0.005);
 	sampler->graphicsPipeline()->disable();
 
-	cube->outCube()->connect(sampler->inCube());
+	cube->connect(sampler->importShape());
 
 	auto initialParticles = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
 
@@ -98,14 +98,6 @@ std::shared_ptr<SceneGraph> createScene()
 		nbrQuery->outNeighborIds()->connect(visModule->inNeighborIds());
 		elastoplasticBody->animationPipeline()->pushModule(visModule);
 	}
-
-	auto elastoplasticBodyRenderer = std::make_shared<GLPointVisualModule>();
-	elastoplasticBodyRenderer->varPointSize()->setValue(0.005);
-	elastoplasticBodyRenderer->setColor(Color(1, 0.2, 1));
-	elastoplasticBodyRenderer->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
-	elastoplasticBody->statePointSet()->connect(elastoplasticBodyRenderer->inPointSet());
-	elastoplasticBody->stateVelocity()->connect(elastoplasticBodyRenderer->inColor());
-	elastoplasticBody->graphicsPipeline()->pushModule(elastoplasticBodyRenderer);
 
 	//Create a container
 	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());

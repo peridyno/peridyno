@@ -106,16 +106,6 @@ std::shared_ptr<SceneGraph> createScene()
 	sand->varDepth()->setValue(0.2);
 	sand->varDepthOfDiluteLayer()->setValue(0.1);
 
-	auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
-	sand->stateHeightField()->connect(mapper->inHeightField());
-	sand->graphicsPipeline()->pushModule(mapper);
-
-	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Color(0.8, 0.8, 0.8));
-	sRender->varUseVertexNormal()->setValue(true);
-	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
-	sand->graphicsPipeline()->pushModule(sRender);
-
 // 	auto tracking = scn->addNode(std::make_shared<SurfaceParticleTracking<DataType3f>>());
 // 
 // 	auto ptRender = tracking->graphicsPipeline()->findFirstModule<GLPointVisualModule>();

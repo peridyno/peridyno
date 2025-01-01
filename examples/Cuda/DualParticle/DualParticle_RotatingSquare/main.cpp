@@ -10,7 +10,7 @@
 #include "DualParticleSystem/DualParticleFluid.h"
 #include "ParticleSystem/MakeParticleSystem.h"
 #include <BasicShapes/CubeModel.h>
-#include <Samplers/CubeSampler.h>
+#include <Samplers/ShapeSampler.h>
 #include <ParticleSystem/Emitters/SquareEmitter.h>
 #include <StaticTriangularMesh.h>
 #include <GLSurfaceVisualModule.h>
@@ -40,10 +40,10 @@ std::shared_ptr<SceneGraph> createScene()
 	cube->graphicsPipeline()->disable();
 
 	//Create a sampler
-	auto sampler = scene->addNode(std::make_shared<CubeSampler<DataType3f>>());
+	auto sampler = scene->addNode(std::make_shared<ShapeSampler<DataType3f>>());
 	sampler->varSamplingDistance()->setValue(0.005);
 	sampler->setVisible(false);
-	cube->outCube()->connect(sampler->inCube());
+	cube->connect(sampler->importShape());
 	auto initialParticles = scene->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
 	sampler->statePointSet()->promoteOuput()->connect(initialParticles->inPoints());
 

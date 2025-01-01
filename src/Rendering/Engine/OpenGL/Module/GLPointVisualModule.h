@@ -54,7 +54,7 @@ namespace dyno
 		DEF_ARRAY_IN(Vec3f, Color, DeviceType::GPU, "");
 
 	public:
-		DEF_VAR(float, PointSize, 0.001f, "Size of rendered particles");
+		DEF_VAR(float, PointSize, 0.005f, "Size of rendered particles");
 
 		DEF_ENUM(ColorMapMode, ColorMode, ColorMapMode::PER_OBJECT_SHADER, "Color Mode");
 

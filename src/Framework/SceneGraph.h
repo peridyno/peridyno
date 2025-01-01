@@ -226,8 +226,8 @@ namespace dyno
 			, mFrameRate(25)
 			, mFrameNumber(0)
 			, mFrameCost(0)
-			, mLowerBound(-1, -1, -1)
-			, mUpperBound(1, 1, 1)
+			, mLowerBound(-10, 0, -10)
+			, mUpperBound(10, 10, 10)
 		{
 			//mRoot = std::make_shared<Node>();
 			mGravity = Vec3f(0.0f, -9.8f, 0.0f);

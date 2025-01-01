@@ -320,10 +320,10 @@ void declare_sampler(py::module& m, std::string typestr) {
 		.def("state_point_set", &Class::statePointSet, py::return_value_policy::reference);
 }
 
-#include "Samplers/CubeSampler.h"
+#include "Samplers/ShapeSampler.h"
 template <typename TDataType>
 void declare_cube_sampler(py::module& m, std::string typestr) {
-	using Class = dyno::CubeSampler<TDataType>;
+	using Class = dyno::ShapeSampler<TDataType>;
 	using Parent = dyno::Sampler<TDataType>;
 	std::string pyclass_name = std::string("CubeSampler") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
@@ -331,7 +331,7 @@ void declare_cube_sampler(py::module& m, std::string typestr) {
 		//DEF_VAR
 		.def("var_sampling_distance", &Class::varSamplingDistance, py::return_value_policy::reference)
 		//DEF_VAR_IN
-		.def("in_cube", &Class::inCube, py::return_value_policy::reference);
+		.def("import_shape", &Class::importShape, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/GhostFluid.h"
@@ -445,18 +445,6 @@ void declare_poisson_emitter(py::module& m, std::string typestr) {
 		.value("Square", Class::EmitterShape::Square)
 		.value("Round", Class::EmitterShape::Round)
 		.export_values();
-}
-
-#include "Samplers/SphereSampler.h"
-template <typename TDataType>
-void declare_sphere_sampler(py::module& m, std::string typestr) {
-	using Class = dyno::SphereSampler<TDataType>;
-	using Parent = dyno::Sampler<TDataType>;
-	std::string pyclass_name = std::string("SphereSampler") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("var_sampling_distance", &Class::varSamplingDistance, py::return_value_policy::reference)
-		.def("in_sphere", &Class::inSphere, py::return_value_policy::reference);
 }
 
 template <typename TDataType>

@@ -13,9 +13,7 @@
 #include "Commands/Merge.h"
 #include "Commands/Turning.h"
 
-#include "Samplers/SphereSampler.h"
-#include "Samplers/CubeSampler.h"
-#include "Samplers/SphereSampler.h"
+#include "Samplers/ShapeSampler.h"
 
 #include "StaticTriangularMesh.h"
 #include "GLWireframeVisualModule.h"
@@ -117,19 +115,18 @@ namespace dyno
 
 		auto samplers = page->addGroup("Samplers");
 
-		samplers->addAction(
-			"Sphere Sampler",
-			"ToolBarIco/Modeling/SphereSampler_v3.png",
-			[=]()->std::shared_ptr<Node> {
-				return std::make_shared<SphereSampler<DataType3f>>();
-			});
+// 		samplers->addAction(
+// 			"Sphere Sampler",
+// 			"ToolBarIco/Modeling/SphereSampler_v3.png",
+// 			[=]()->std::shared_ptr<Node> {
+// 				return std::make_shared<Shape<DataType3f>>();
+// 			});
 
-
 		samplers->addAction(
-			"Cube Sampler",
+			"Sampler",
 			"ToolBarIco/Modeling/CubeSampler.png",
 			[=]()->std::shared_ptr<Node> {
-				return std::make_shared<CubeSampler<DataType3f>>();
+				return std::make_shared<ShapeSampler<DataType3f>>();
 			});
 	}
 }

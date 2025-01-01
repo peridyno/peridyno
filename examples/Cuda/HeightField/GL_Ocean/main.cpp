@@ -25,22 +25,6 @@ std::shared_ptr<SceneGraph> createScene()
 	root->varExtentZ()->setValue(2);
 	oceanPatch->connect(root->importOceanPatch());
 
-	auto waves = scn->addNode(std::make_shared<CapillaryWave<DataType3f>>());
-	waves->connect(root->importCapillaryWaves());
-
-	auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
-// 	mapper->varScale()->setValue(0.01);
-// 	mapper->varTranslation()->setValue(Vec3f(0, 0.2, 0));
-
-	root->stateHeightField()->connect(mapper->inHeightField());
-	root->graphicsPipeline()->pushModule(mapper);
-
-	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Color(0, 0.2, 1.0));
-	sRender->varUseVertexNormal()->setValue(true);
-	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
-	root->graphicsPipeline()->pushModule(sRender);
-
 	return scn;
 }
 

@@ -20,8 +20,12 @@ namespace dyno
 		Cloth();
 		~Cloth() override;
 
+		DEF_VAR(Real, Horizon, 0.01, "Horizon");
+
 	public:
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "Input");
+
+		DEF_VAR_STATE(Real, Horizon, Real(1), "A state field representing horizon");
 
 		DEF_ARRAY_STATE(Coord, RestPosition, DeviceType::GPU, "");
 

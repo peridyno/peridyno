@@ -12,7 +12,7 @@
 #include "BasicShapes/CylinderModel.h"
 #include "BasicShapes/CubeModel.h"
 
-#include "Samplers/CubeSampler.h"
+#include "Samplers/ShapeSampler.h"
 
 #include "initializeModeling.h"
 #include "initializeInteraction.h"
@@ -59,8 +59,8 @@ int main()
 	cube3->varLocation()->setValue(Vec3f(-0.75f, 0.5f, 0.75f));
 	cube3->setVisible(false);
 	cube3->varSegments()->setValue(Vec3i((uint)6, (uint)6, (uint)6));
-	auto cubeSampler = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
-	cube3->outCube()->connect(cubeSampler->inCube());
+	auto cubeSampler = scn->addNode(std::make_shared<ShapeSampler<DataType3f>>());
+	cube3->connect(cubeSampler->importShape());
 	cubeSampler->statePointSet()->connect(pointPickerNode->inTopology());
 	//cubeSampler->statePointSet()->promoteOuput();
 

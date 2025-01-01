@@ -20,7 +20,7 @@
 #include <ImColorbar.h>
 #include "Auxiliary/DataSource.h"
 
-#include <Samplers/CubeSampler.h>
+#include <Samplers/ShapeSampler.h>
 #include "PointsLoader.h"
 using namespace std;
 using namespace dyno;

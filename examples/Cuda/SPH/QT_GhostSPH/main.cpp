@@ -6,7 +6,7 @@
 #include "ParticleSystem/GhostParticles.h"
 #include "ParticleSystem/MakeGhostParticles.h"
 #include <ParticleSystem/GhostFluid.h>
-#include <Samplers/CubeSampler.h>
+#include <Samplers/ShapeSampler.h>
 #include "ParticleSystem/MakeParticleSystem.h"
 
 #include <Module/CalculateNorm.h>
@@ -79,11 +79,11 @@ std::shared_ptr<SceneGraph> createScene()
 	cube->graphicsPipeline()->disable();
 
 	
-	auto sampler = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
+	auto sampler = scn->addNode(std::make_shared<ShapeSampler<DataType3f>>());
 	sampler->varSamplingDistance()->setValue(0.005);
 	sampler->setVisible(false);
 
-	cube->outCube()->connect(sampler->inCube());
+	cube->connect(sampler->importShape());
 
 	auto fluidParticles = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
 

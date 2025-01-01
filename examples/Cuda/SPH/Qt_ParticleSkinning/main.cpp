@@ -4,7 +4,7 @@
 #include <BasicShapes/CubeModel.h>
 #include <Volume/BasicShapeToVolume.h>
 #include <Multiphysics/VolumeBoundary.h>
-#include "Samplers/CubeSampler.h"
+#include "Samplers/ShapeSampler.h"
 #include "Volume/MarchingCubes.h"
 
 #include <ParticleSystem/ParticleFluid.h>
@@ -36,11 +36,11 @@ std::shared_ptr<SceneGraph> createScene()
 	cube->setVisible(false);
 
 	//Create a sampler
-	auto sampler = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
+	auto sampler = scn->addNode(std::make_shared<ShapeSampler<DataType3f>>());
 	sampler->varSamplingDistance()->setValue(0.005);
 	sampler->setVisible(false);
 
-	cube->outCube()->connect(sampler->inCube());
+	cube->connect(sampler->importShape());
 
 	auto initialParticles = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
 	sampler->statePointSet()->promoteOuput()->connect(initialParticles->inPoints());

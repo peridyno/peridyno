@@ -9,7 +9,7 @@
 #include "DualParticleSystem/DualParticleFluid.h"
 #include "ParticleSystem/MakeParticleSystem.h"
 #include <BasicShapes/CubeModel.h>
-#include <Samplers/CubeSampler.h>
+#include <Samplers/ShapeSampler.h>
 #include <ParticleSystem/Emitters/PoissonEmitter.h>
 
 using namespace std;

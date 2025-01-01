@@ -32,7 +32,7 @@
 #include "Collision/NeighborElementQuery.h"
 
 #include "BasicShapes/SphereModel.h"
-#include "Samplers/SphereSampler.h"
+#include "Samplers/ShapeSampler.h"
 
 #include "Plugin/PluginManager.h"
 
@@ -52,11 +52,11 @@ std::shared_ptr<SceneGraph> createScene()
 	sphere->graphicsPipeline()->disable();
 
 	//Create a sampler
-	auto sampler = scn->addNode(std::make_shared<SphereSampler<DataType3f>>());
+	auto sampler = scn->addNode(std::make_shared<ShapeSampler<DataType3f>>());
 	sampler->varSamplingDistance()->setValue(0.005);
 	sampler->graphicsPipeline()->disable();
 
-	sphere->outSphere()->connect(sampler->inSphere());
+	sphere->connect(sampler->importShape());
 
 	auto initialParticles = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
 

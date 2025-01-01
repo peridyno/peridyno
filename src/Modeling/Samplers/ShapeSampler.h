@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Xiaowei He & Shusen Liu
+ * Copyright 2022 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,27 +17,29 @@
 #pragma once
 #include "Sampler.h"
 
+#include "BasicShapes/BasicShape.h"
+
 namespace dyno
 {
 	template<typename TDataType>
-	class SphereSampler : public Sampler<TDataType>
+	class ShapeSampler : public Sampler<TDataType>
 	{
-		DECLARE_TCLASS(SphereSampler, TDataType);
+		DECLARE_TCLASS(ShapeSampler, TDataType);
 
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		SphereSampler();
+		ShapeSampler();
 
 	public:
-		DEF_VAR(Real, SamplingDistance, 0.05, "Sampling distance");
+		DEF_VAR(Real, SamplingDistance, 0.1, "Sampling distance");
 
-		DEF_VAR_IN(TSphere3D<Real>, Sphere,  "");
+		DEF_NODE_PORT(BasicShape<TDataType>, Shape, "");
 
 	protected:
 		void resetStates() override;
 	};
 
-	IMPLEMENT_TCLASS(SphereSampler, TDataType);
+	IMPLEMENT_TCLASS(ShapeSampler, TDataType);
 }

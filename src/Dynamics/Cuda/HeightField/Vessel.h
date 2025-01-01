@@ -41,7 +41,9 @@ namespace dyno
 	public:
 		DEF_VAR(Coord, BarycenterOffset, Coord(0), "The center offset defined in vessel's local frame");
 
-		DEF_VAR(FilePath, EnvelopeName, getAssetPath() + "obj/boat_boundary.obj", "");
+		DEF_VAR(FilePath, EnvelopeName, "", "");
+
+		DEF_VAR(FilePath, TextureMeshName, "", "");
 
 		DEF_VAR(Real, Density, Real(1000), "Density");
 
@@ -49,7 +51,7 @@ namespace dyno
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, Envelope, "Envelope for the vessel");
 
-		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "Texture mesh of the Vessel");
+		DEF_INSTANCE_STATE(TextureMesh, TextureMesh, "Texture mesh of the Vessel");
 
 		DEF_ARRAYLIST_STATE(Transform3f, InstanceTransform, DeviceType::GPU, "Instance transforms");
 

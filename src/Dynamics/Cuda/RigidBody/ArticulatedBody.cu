@@ -22,6 +22,8 @@ namespace dyno
 		: ParametricModel<TDataType>()
 		, RigidBodySystem<TDataType>()
 	{
+		this->setAutoHidden(false);
+
 		this->stateTextureMesh()->setDataPtr(std::make_shared<TextureMesh>());
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&ArticulatedBody<TDataType>::varChanged, this));

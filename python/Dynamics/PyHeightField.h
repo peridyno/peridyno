@@ -154,7 +154,7 @@ void declare_vessel(py::module& m, std::string typestr) {
 		.def("var_density", &Class::varDensity, py::return_value_policy::reference)
 		.def("state_barycenter", &Class::stateBarycenter, py::return_value_policy::reference)
 		.def("state_envelope", &Class::stateEnvelope, py::return_value_policy::reference)
-		.def("in_texture_mesh", &Class::inTextureMesh, py::return_value_policy::reference)
+		.def("state_texture_mesh", &Class::stateTextureMesh, py::return_value_policy::reference)
 		.def("state_instance_transform", &Class::stateInstanceTransform, py::return_value_policy::reference);
 }
 

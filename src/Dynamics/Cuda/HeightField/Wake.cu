@@ -12,6 +12,7 @@ namespace dyno
 	Wake<TDataType>::Wake()
 		: CapillaryWave<TDataType>()
 	{
+		this->setAutoHidden(true);
 	}
 
 	template<typename TDataType>
