@@ -13,10 +13,10 @@ void declare_volume_to_grid_cell(py::module& m, std::string typestr) {
 		.def("out_grid_cell", &Class::outGridCell, py::return_value_policy::reference);
 }
 
-#include "Volume/Module/VolumeToTriangleSet.h"
+#include "Volume/Module/AdaptiveVolumeToTriangleSet.h"
 template <typename TDataType>
 void declare_volume_to_triangle_set(py::module& m, std::string typestr) {
-	using Class = dyno::VolumeToTriangleSet<TDataType>;
+	using Class = dyno::AdaptiveVolumeToTriangleSet<TDataType>;
 	using Parent = dyno::TopologyMapping;
 	std::string pyclass_name = std::string("VolumeToTriangleSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())

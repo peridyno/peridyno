@@ -14,10 +14,10 @@
 
 namespace dyno
 {
-	IMPLEMENT_TCLASS(ObjMesh, TDataType)
+	IMPLEMENT_TCLASS(ObjLoader, TDataType)
 
 		template<typename TDataType>
-	ObjMesh<TDataType>::ObjMesh()
+	ObjLoader<TDataType>::ObjLoader()
 		: Node()
 	{
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
@@ -41,7 +41,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void ObjMesh<TDataType>::resetStates()
+	void ObjLoader<TDataType>::resetStates()
 	{
 		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTopology()->getDataPtr());
 
@@ -83,7 +83,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void ObjMesh<TDataType>::updateStates()
+	void ObjLoader<TDataType>::updateStates()
 	{
 
 		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTopology()->getDataPtr());
@@ -138,7 +138,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void ObjMesh<TDataType>::loadObj(TriangleSet<TDataType>& Triangleset, std::string filename)
+	void ObjLoader<TDataType>::loadObj(TriangleSet<TDataType>& Triangleset, std::string filename)
 	{
 		std::vector<Coord> vertList;
 		std::vector<TopologyModule::Triangle> faceList;
@@ -188,5 +188,5 @@ namespace dyno
 	}
 
 
-	DEFINE_CLASS(ObjMesh);
+	DEFINE_CLASS(ObjLoader);
 }

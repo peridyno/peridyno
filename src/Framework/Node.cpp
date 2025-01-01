@@ -55,9 +55,19 @@ bool Node::isAutoSync()
 	return mAutoSync;
 }
 
+bool Node::isAutoHidden()
+{
+	return mAutoHidden;
+}
+
 void Node::setAutoSync(bool con)
 {
 	mAutoSync = con;
+}
+
+void Node::setAutoHidden(bool con)
+{
+	mAutoHidden = con;
 }
 
 bool Node::isActive()
@@ -432,6 +442,10 @@ bool Node::appendExportNode(NodePort* nodePort)
 
 	mExportNodes.push_back(nodePort);
 
+	//Always show the last node
+	if (mAutoHidden)
+		this->setVisible(false);
+
 	Log::sendMessage(Log::Info, FormatConnectionInfo(this, nodePort, true, true));
 	return nodePort->addNode(this);
 }
@@ -450,6 +464,10 @@ bool Node::removeExportNode(NodePort* nodePort)
 	}
 
 	mExportNodes.erase(it);
+
+	//Recover the visibility
+	if (mAutoHidden)
+		this->setVisible(true);
 
 	Log::sendMessage(Log::Info, FormatConnectionInfo(this, nodePort, false, true));
 	return nodePort->removeNode(this);

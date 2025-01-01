@@ -24,7 +24,7 @@ std::shared_ptr<SceneGraph> createScene()
 	sphere->stateTriangleSet()->connect(volume->inTriangleSet());
 
 	auto clipper = scn->addNode(std::make_shared<VolumeClipper<DataType3f>>()); ;
-	volume->outLevelSet()->connect(clipper->inLevelSet());
+	volume->stateLevelSet()->connect(clipper->inLevelSet());
 
 	return scn;
 }

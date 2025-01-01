@@ -46,9 +46,9 @@ std::shared_ptr<SceneGraph> createScene1()
 	auto clipper = scn->addNode(std::make_shared<VolumeClipper<DataType3f>>());
 	volumeBool1->outLevelSet()->connect(clipper->inLevelSet());
 
-	auto marchingCubes = scn->addNode(std::make_shared<MarchingCubes<DataType3f>>());
-	volumeBool1->outLevelSet()->connect(marchingCubes->inLevelSet());
-	marchingCubes->varIsoValue()->setValue(-0.0f);
+// 	auto marchingCubes = scn->addNode(std::make_shared<MarchingCubes<DataType3f>>());
+// 	volumeBool1->outLevelSet()->connect(marchingCubes->inLevelSet());
+// 	marchingCubes->varIsoValue()->setValue(-0.0f);
 
 	return scn;
 }

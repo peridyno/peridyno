@@ -40,16 +40,16 @@ namespace dyno
 		NodeFactory* factory = NodeFactory::instance();
 
 		auto page = factory->addPage(
-			"Modeling", 
+			"IO", 
 			"ToolBarIco/Modeling/Modeling.png");
 
 		auto group = page->addGroup("Modeling");
 
 		group->addAction(
-			"Import OBJ",
+			"Obj Importer",
 			"ToolBarIco/Modeling/TriangularMesh.png",
 			[=]()->std::shared_ptr<Node> { 
-				auto node = std::make_shared<ObjMesh<DataType3f>>();
+				auto node = std::make_shared<ObjLoader<DataType3f>>();
 
 				//auto pointrender = std::make_shared<GLPointVisualModule>();
 				//pointrender->setVisible(true);
@@ -67,7 +67,7 @@ namespace dyno
 			});
 
 		group->addAction(
-			"OBJ Point Loader",
+			"Obj Point Loader",
 			"ToolBarIco/Modeling/ObjPointLoader.png",
 			[=]()->std::shared_ptr<Node> {
 				auto node = std::make_shared<ObjPoint<DataType3f>>();
@@ -76,10 +76,10 @@ namespace dyno
 			});
 
 		group->addAction(
-			"Export OBJ",
+			"Obj Exporter",
 			"ToolBarIco/Modeling/OBJExport_v3.png",
 			[=]()->std::shared_ptr<Node> {
-				auto node = std::make_shared<OBJExporter<DataType3f>>();
+				auto node = std::make_shared<ObjExporter<DataType3f>>();
 
 				auto module = std::make_shared<GLSurfaceVisualModule>();
 				module->setColor(Color(0.8, 0.52, 0.25));

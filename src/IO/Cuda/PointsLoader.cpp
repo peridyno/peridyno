@@ -19,7 +19,7 @@ namespace dyno
 	template<typename TDataType>
 	void PointsLoader<TDataType>::resetStates()
 	{
-		if (this->varFileName()->getData() == "")
+		if (this->varFileName()->getValue() == "")
 		{
 			Log::sendMessage(Log::Error, "File name is not set!");
 			return;

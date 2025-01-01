@@ -19,7 +19,7 @@
 
 namespace dyno {
 	template<typename TDataType>
-	class VolumeBoolean : public Node
+	class VolumeBoolean : public Volume<TDataType>
 	{
 		DECLARE_TCLASS(VolumeBoolean, TDataType)
 	public:

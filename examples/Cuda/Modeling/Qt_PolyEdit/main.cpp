@@ -40,7 +40,7 @@ int main()
 	
 	////*************************************************************************************////
 
-	auto obj = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
+	auto obj = scn->addNode(std::make_shared<ObjLoader<DataType3f>>());
 
 	obj->varFileName()->setValue(getAssetPath() + "Building/YXH_Poly.obj");
 	obj->varScale()->setValue(Vec3f(0.2,0.2,0.2));
@@ -64,7 +64,7 @@ int main()
 	auto pt = scn->addNode(std::make_shared<ObjPoint<DataType3f>>());
 	pt->varFileName()->setValue(getAssetPath()+"Building/Tree_Scatter.obj");
 
-	auto tree = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
+	auto tree = scn->addNode(std::make_shared<ObjLoader<DataType3f>>());
 	tree->varFileName()->setValue(getAssetPath() + "Building/Tree_Poly.obj");
 
 	auto copy = scn->addNode(std::make_shared<CopyToPoint<DataType3f>>());

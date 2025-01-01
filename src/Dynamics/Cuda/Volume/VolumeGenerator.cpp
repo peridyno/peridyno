@@ -37,6 +37,8 @@ namespace dyno
 	void VolumeGenerator<TDataType>::resetStates()
 	{
 		Volume<TDataType>::resetStates();
+
+		this->stateLevelSet()->setDataPtr(this->outLevelSet()->constDataPtr());
 	}
 
 	DEFINE_CLASS(VolumeGenerator);

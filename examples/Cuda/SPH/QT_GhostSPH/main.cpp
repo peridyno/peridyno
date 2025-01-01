@@ -36,7 +36,7 @@ std::shared_ptr<SceneGraph> createScene()
 	scn->setUpperBound(Vec3f(10.5, 5, 10.5));
 	scn->setLowerBound(Vec3f(-10.5, -5, -10.5));
 
-	auto obj1 = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
+	auto obj1 = scn->addNode(std::make_shared<ObjLoader<DataType3f>>());
 	obj1->varScale()->setValue(Vec3f(0.3));
 	obj1->varFileName()->setValue(getAssetPath() + "plane/plane_lowRes.obj");
 	//obj1->varFileName()->setValue(getAssetPath() + "board/ball.obj");

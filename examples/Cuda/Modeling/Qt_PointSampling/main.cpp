@@ -39,7 +39,7 @@ std::shared_ptr<SceneGraph> createScene()
 	/*
 	*@brief Regular sampling in .sdf
 	*/
-	auto obj1 = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
+	auto obj1 = scn->addNode(std::make_shared<ObjLoader<DataType3f>>());
 	obj1->varScale()->setValue(Vec3f(0.7));
 	obj1->varFileName()->setValue(getAssetPath() + "board/ball.obj");
 	obj1->varLocation()->setValue(Vec3f(0.0, 0.5, 0.0));
@@ -52,7 +52,7 @@ std::shared_ptr<SceneGraph> createScene()
 	volume1->varSpacing()->setValue(0.005);	 /*The grid spacing of the SDF*/
 	obj1->outTriangleSet()->promoteOuput()->connect(volume1->inTriangleSet()); /*Connect the .obj to the SDF convert module*/
 
-	auto obj2 = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
+	auto obj2 = scn->addNode(std::make_shared<ObjLoader<DataType3f>>());
 	obj2->varScale()->setValue(Vec3f(0.45));
 	obj2->varFileName()->setValue(getAssetPath() + "board/ball.obj");
 	obj2->varLocation()->setValue(Vec3f(0.0, 0.5, 0.0));
@@ -122,7 +122,7 @@ std::shared_ptr<SceneGraph> createScene()
 	/*
 	*@brief Poisson disk sampling in .sdf
 	*/
-	auto obj3 = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
+	auto obj3 = scn->addNode(std::make_shared<ObjLoader<DataType3f>>());
 	obj3->varScale()->setValue(Vec3f(0.7));
 	obj3->varFileName()->setValue(getAssetPath() + "board/ball.obj");
 	obj3->varLocation()->setValue(Vec3f(1.0, 0.5, 0.0));
@@ -135,7 +135,7 @@ std::shared_ptr<SceneGraph> createScene()
 	volume3->varSpacing()->setValue(0.005);	 /*The grid spacing of the SDF*/
 	obj3->outTriangleSet()->promoteOuput()->connect(volume3->inTriangleSet()); /*Connect the .obj to the SDF convert module*/
 
-	auto obj4 = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
+	auto obj4 = scn->addNode(std::make_shared<ObjLoader<DataType3f>>());
 	obj4->varScale()->setValue(Vec3f(0.45));
 	obj4->varFileName()->setValue(getAssetPath() + "board/ball.obj");
 	obj4->varLocation()->setValue(Vec3f(1.0, 0.5, 0.0));

@@ -8,7 +8,7 @@ namespace dyno
 		
 	template<typename TDataType>
 	VolumeBoolean<TDataType>::VolumeBoolean()
-		: Node()
+		: Volume<TDataType>()
 	{
 		auto fmm = std::make_shared<FastMarchingMethodGPU<TDataType>>();
 		this->inA()->connect(fmm->inLevelSetA());
@@ -43,6 +43,8 @@ namespace dyno
 	void VolumeBoolean<TDataType>::resetStates()
 	{
 		Node::resetStates();
+
+		this->stateLevelSet()->setDataPtr(this->outLevelSet()->constDataPtr());
 	}
 
 	DEFINE_CLASS(VolumeBoolean);
