@@ -145,14 +145,18 @@ namespace dyno
 		}
 
 #ifdef CUDA_BACKEND
-		mTangentSpaceConstructor->update();
-
-		if (!mTangentSpaceConstructor->outTangent()->isEmpty())
+		auto texMesh = this->inTextureMesh()->constDataPtr();
+		if (texMesh->materials().size() > 0)
 		{
-			mTangent.load(mTangentSpaceConstructor->outTangent()->constData());
-			mBitangent.load(mTangentSpaceConstructor->outBitangent()->constData());
-#endif
+			mTangentSpaceConstructor->update();
+
+			if (!mTangentSpaceConstructor->outTangent()->isEmpty())
+			{
+				mTangent.load(mTangentSpaceConstructor->outTangent()->constData());
+				mBitangent.load(mTangentSpaceConstructor->outBitangent()->constData());
+			}
 		}
+#endif
 	}
 
 	void GLPhotorealisticRender::paintGL(const RenderParams& rparams)
@@ -189,8 +193,6 @@ namespace dyno
 
 		vertices.bindBufferBase(8);
 		texCoords.bindBufferBase(10);
-
-
 
 		auto& shapes = mTextureMesh.shapes();
 		for (int i = 0; i < shapes.size(); i++)
@@ -245,6 +247,30 @@ namespace dyno
 			}
 			else 
 			{
+				RenderParams pm_i = rparams;
+				pm_i.transforms.model = shape->transform;
+
+				// setup uniform buffer
+				mRenderParamsUBlock.load((void*)&rparams, sizeof(RenderParams));
+				mRenderParamsUBlock.bindBufferBase(0);
+
+				// material 
+				{
+					struct {
+						glm::vec3 color;
+						float metallic;
+						float roughness;
+						float alpha;
+					} pbr;
+					auto color = this->varBaseColor()->getValue();
+					pbr.color = { color.r, color.g, color.b };
+					pbr.metallic = this->varMetallic()->getValue();
+					pbr.roughness = this->varRoughness()->getValue();
+					pbr.alpha = this->varAlpha()->getValue();
+					mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
+					mPBRMaterialUBlock.bindBufferBase(1);
+				}
+
 				mShaderProgram->setInt("uColorMode", 0);
 			}
 			
