@@ -446,5 +446,38 @@ namespace dyno
 		triangleIndex.clear();
 	}
 
+	template<typename TDataType>
+	void PolygonSet<TDataType>::triangleSetToPolygonSet(TriangleSet<TDataType>& ts) 
+	{
+		this->setPoints(ts.getPoints());
+		
+		this->mPolygonIndex.resize(ts.getTriangles().size(),3);
+
+		cuExecute(ts.getTriangles().size(),
+			triSet2PolygonSet,
+			ts.getTriangles(),
+			this->mPolygonIndex
+		);
+
+		this->update();
+
+	}
+
+
+	template<typename Triangle>
+	__global__ void triSet2PolygonSet(
+		DArray<Triangle> triangles,
+		DArrayList<uint> polygons
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= triangles.size()) return;
+
+		auto& index = polygons[tId];
+		for (int i = 0; i < 3; i++)
+			index.insert(triangles[tId][i]);
+		
+	}
+
 	DEFINE_CLASS(PolygonSet);
 }
