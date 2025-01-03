@@ -71,14 +71,6 @@ namespace dyno
 
 		void varChanged();
 
-// 		virtual std::shared_ptr<TextureMesh> getTexMeshPtr() 
-// 		{
-// 			if (this->inTextureMesh()->isEmpty())
-// 				return NULL;
-// 			else
-// 				return this->inTextureMesh()->constDataPtr();
-// 		};
-
 	protected:
 
 		DArray<Matrix> mInitialRot;
