@@ -54,7 +54,7 @@ WMainWindow::WMainWindow()
 	//mSceneCanvas->setScene(mScene);
 
 	// scene info panel
-	widget0 = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), Wt::LayoutPosition::West);
+	widget0 = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), Wt::LayoutPosition::East);
 	widget0->setWidth(900);
 
 	// create data model
@@ -65,7 +65,7 @@ WMainWindow::WMainWindow()
 	mParameterDataNode->changeValue().connect(this, &WMainWindow::updateCanvas);
 
 	// menu
-	auto widget1 = layout->addWidget(std::make_unique<Wt::WStackedWidget>(), Wt::LayoutPosition::East);
+	auto widget1 = layout->addWidget(std::make_unique<Wt::WStackedWidget>(), Wt::LayoutPosition::West);
 	auto menu = naviBar->addMenu(std::make_unique<Wt::WMenu>(widget1), Wt::AlignmentFlag::Right);
 	initMenu(menu);
 

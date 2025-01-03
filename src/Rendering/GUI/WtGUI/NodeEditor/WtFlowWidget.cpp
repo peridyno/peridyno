@@ -65,8 +65,21 @@ void WtFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 
 						if (node == outNode)
 						{
+							for (auto it = sceneConnections.begin(); it != sceneConnections.end(); )
+							{
+								if (it->exportNode == mOutNode && it->inportNode == m && it->inPoint.portIndex == outPoint.portIndex && it->outPoint.portIndex == exportPointData.portIndex)
+								{
+									it = sceneConnections.erase(it);
+								}
+								else
+								{
+									++it;
+								}
+							}
+
 							disconnect(m, mOutNode, outPoint, exportPointData, nodeMap[selectedNum], outNode);
 							sourcePoint = getPortPosition(outNode->flowNodeData().getNodeOrigin(), exportPointData);
+
 						}
 					}
 
@@ -184,6 +197,12 @@ void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 					WtInteraction interaction(*connectionInNode, connection, *node_scene, inPoint, outPoint, m, mOutNode);
 					if (interaction.tryConnect())
 					{
+						sceneConnection temp;
+						temp.exportNode = m;
+						temp.inportNode = mOutNode;
+						temp.inPoint = inPoint;
+						temp.outPoint = outPoint;
+						sceneConnections.push_back(temp);
 						update();
 					}
 				}
@@ -408,10 +427,28 @@ void WtFlowWidget::deleteNode(WtNode& n)
 
 	if (mEditingEnabled && nodeData != nullptr)
 	{
-		//auto scn = dyno::SceneGraphFactory::instance()->active();
-		mScene->deleteNode(nodeData->getNode());
+		auto node = nodeData->getNode();
+
+		for (auto c : sceneConnections)
+		{
+			if (c.exportNode == node || c.inportNode == node)
+			{
+				Wt::WMessageBox::show("Error",
+					"<p>Please disconnect before deleting the node </p>",
+					Wt::StandardButton::Ok);
+				return;
+			}
+		}
+
+		mScene->deleteNode(node);
 	}
 }
+
+void WtFlowWidget::disconnectionsFromNode(WtNode& node)
+{
+
+}
+
 
 void WtFlowWidget::moveNode(WtNode& n, const Wt::WPointF& newLocaton)
 {
@@ -520,6 +557,8 @@ std::pair<Wt::WPointF, Wt::WPointF> WtFlowWidget::pointsC1C2(Wt::WPointF source,
 
 	return std::make_pair(c1, c2);
 }
+
+
 
 void WtFlowWidget::disconnect(std::shared_ptr<Node> exportNode, std::shared_ptr<Node> inportNode, connectionPointData inPoint, connectionPointData outPoint, WtNode* inWtNode, WtNode* outWtNode)
 {

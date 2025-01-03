@@ -8,6 +8,7 @@ WtFlowScene::WtFlowScene(std::shared_ptr<WtDataModelRegistry> registry)
 	//connect(this, &QtFlowScene::connectionCreated, this, &QtFlowScene::setupConnectionSignals);
 	//connect(this, &QtFlowScene::connectionCreated, this, &QtFlowScene::sendConnectionCreatedToNodes);
 	//connect(this, &QtFlowScene::connectionDeleted, this, &QtFlowScene::sendConnectionDeletedToNodes);
+
 }
 
 WtFlowScene::WtFlowScene()

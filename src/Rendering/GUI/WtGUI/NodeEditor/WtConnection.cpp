@@ -153,7 +153,6 @@ WtConnection::WtConnection(
 	, _connectionState()
 {
 	setNodeToPort(node, portType, portIndex);
-
 	setRequiredPort(oppositePort(portType));
 }
 

@@ -14,6 +14,13 @@ class WMainWindow;
 
 enum PortState { in, out };
 
+struct sceneConnection {
+	std::shared_ptr<Node> exportNode;
+	std::shared_ptr<Node> inportNode;
+	connectionPointData inPoint;
+	connectionPointData outPoint;
+};
+
 class WtFlowWidget : public Wt::WPaintedWidget
 {
 public:
@@ -32,6 +39,8 @@ public:
 	void onKeyWentDown();
 
 	void deleteNode(WtNode& n);
+
+	void disconnectionsFromNode(WtNode& node);
 
 	void moveNode(WtNode& n, const Wt::WPointF& newLocaton);
 
@@ -96,4 +105,6 @@ private:
 	std::shared_ptr<Node> mOutNode;
 
 	Wt::WPointF mMousePoint = Wt::WPointF(0, 0);
+
+	std::vector<sceneConnection> sceneConnections;
 };
