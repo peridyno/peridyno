@@ -13,10 +13,10 @@ void declare_volume_to_grid_cell(py::module& m, std::string typestr) {
 		.def("out_grid_cell", &Class::outGridCell, py::return_value_policy::reference);
 }
 
-#include "Volume/Module/VolumeToTriangleSet.h"
+#include "Volume/Module/AdaptiveVolumeToTriangleSet.h"
 template <typename TDataType>
 void declare_volume_to_triangle_set(py::module& m, std::string typestr) {
-	using Class = dyno::VolumeToTriangleSet<TDataType>;
+	using Class = dyno::AdaptiveVolumeToTriangleSet<TDataType>;
 	using Parent = dyno::TopologyMapping;
 	std::string pyclass_name = std::string("VolumeToTriangleSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
@@ -68,25 +68,25 @@ void declare_volume(py::module& m, std::string typestr) {
 		.def("state_levelset", &Class::stateLevelSet, py::return_value_policy::reference);
 }
 
-#include "Volume/VolumeBool.h"
+#include "Volume/VolumeBoolean.h"
 template <typename TDataType>
 void declare_volume_bool(py::module& m, std::string typestr) {
-	using Class = dyno::VolumeBool<TDataType>;
+	using Class = dyno::VolumeBoolean<TDataType>;
 	using Parent = dyno::Node;
 	std::string pyclass_name = std::string("VolumeBool") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>VB(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	VB.def(py::init<>())
 		.def("in_a", &Class::inA, py::return_value_policy::reference)
 		.def("in_b", &Class::inB, py::return_value_policy::reference)
-		.def("out_sdf", &Class::outSDF, py::return_value_policy::reference)
-		.def("in_spacing", &Class::inSpacing, py::return_value_policy::reference)
-		.def("in_padding", &Class::inPadding, py::return_value_policy::reference)
+		.def("in_spacing", &Class::varSpacing, py::return_value_policy::reference)
+		.def("in_padding", &Class::varPadding, py::return_value_policy::reference)
 		.def("var_bool_type", &Class::varBoolType, py::return_value_policy::reference);
 
-	py::enum_<typename Class::BoolType>(VB, "BoolType")
-		.value("Intersect", Class::BoolType::Intersect)
-		.value("Union", Class::BoolType::Union)
-		.value("Minus", Class::BoolType::Minus);
+	//TODO: bind the enum
+// 	py::enum_<typename BoolType>(VB, "BoolType")
+// 		.value("Intersect", BoolType::Intersect)
+// 		.value("Union", BoolType::Union)
+// 		.value("Minus", BoolType::Minus);
 }
 
 #include "Volume/VolumeGenerator.h"
@@ -97,13 +97,9 @@ void declare_volume_generator(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("VolumeGenerator") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("load_closed_surface", &Class::loadClosedSurface)
-		.def("load", &Class::load)
 		.def("in_triangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("out_gen_sdf", &Class::outGenSDF, py::return_value_policy::reference)
-		.def("in_spacing", &Class::inSpacing, py::return_value_policy::reference)
-		.def("in_padding", &Class::inPadding, py::return_value_policy::reference)
-		.def("make_level_set", &Class::makeLevelSet);
+		.def("in_spacing", &Class::varSpacing, py::return_value_policy::reference)
+		.def("in_padding", &Class::varPadding, py::return_value_policy::reference);
 }
 
 #include "Volume/VolumeOctree.h"

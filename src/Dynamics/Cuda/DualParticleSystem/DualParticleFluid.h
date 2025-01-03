@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
- //#pragma once
+#pragma once
 #include "ParticleSystem/ParticleFluid.h"
 #include "ParticleSystem/Emitters/ParticleEmitter.h"
 #include "Topology/PointSet.h"
 #include "Collision/Attribute.h"
-#include "VirtualSpatiallyAdaptiveStrategy.h"
-#include "VirtualColocationStrategy.h"
-#include "VirtualParticleShiftingStrategy.h"
+#include "Module/VirtualSpatiallyAdaptiveStrategy.h"
+#include "Module/VirtualColocationStrategy.h"
+#include "Module/VirtualParticleShiftingStrategy.h"
 
 namespace dyno
 {

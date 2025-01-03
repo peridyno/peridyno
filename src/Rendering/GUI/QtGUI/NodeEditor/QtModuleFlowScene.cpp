@@ -470,6 +470,8 @@ namespace Qt
 
 		if (mEditingEnabled && nodeData != nullptr) {
 			mActivePipeline->popModule(nodeData->getModule());
+
+			emit this->nodeDeselected();
 		}
 	}
 }

@@ -24,6 +24,9 @@ namespace dyno
 	template<typename TDataType>
 	void BasicShapeToVolume<TDataType>::resetStates()
 	{
+		if (this->stateLevelSet()->isEmpty()){
+			this->stateLevelSet()->allocate();
+		}
 		convert();
 	}
 

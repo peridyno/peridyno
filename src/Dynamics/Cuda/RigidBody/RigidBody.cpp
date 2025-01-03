@@ -9,6 +9,7 @@ namespace dyno
 	RigidBody<TDataType>::RigidBody()
 		: ParametricModel<TDataType>()
 	{
+		this->setAutoHidden(false);
 		this->setForceUpdate(true);
 	}
 

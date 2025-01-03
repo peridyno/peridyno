@@ -112,6 +112,7 @@ namespace dyno
 			auto mtl = shape->material;
 
 			// material 
+			if(mtl != nullptr)
 			{
 				pbr.color = { mtl->baseColor.x, mtl->baseColor.y, mtl->baseColor.z };
 				pbr.metallic = mtl->metallic;
@@ -119,29 +120,42 @@ namespace dyno
 				pbr.alpha = mtl->alpha;
 				mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
 				mPBRMaterialUBlock.bindBufferBase(1);
-			}
 
-			// bind textures 
+				// bind textures 
+				{
+					// reset 
+					glActiveTexture(GL_TEXTURE10);		// color
+					glBindTexture(GL_TEXTURE_2D, 0);
+					glActiveTexture(GL_TEXTURE11);		// bump map
+					glBindTexture(GL_TEXTURE_2D, 0);
+
+					if (mtl->texColor.isValid()) {
+						mShaderProgram->setInt("uColorMode", 2);
+						mtl->texColor.bind(GL_TEXTURE10);
+					}
+					else {
+						mShaderProgram->setInt("uColorMode", 1);
+					}
+
+					if (mtl->texBump.isValid()) {
+						mtl->texBump.bind(GL_TEXTURE11);
+						mShaderProgram->setFloat("uBumpScale", mtl->bumpScale);
+					}
+				}
+			}
+			else
 			{
-				// reset 
-				glActiveTexture(GL_TEXTURE10);		// color
-				glBindTexture(GL_TEXTURE_2D, 0);
-				glActiveTexture(GL_TEXTURE11);		// bump map
-				glBindTexture(GL_TEXTURE_2D, 0);
+				auto color = this->varBaseColor()->getValue();
+				pbr.color = { color.r, color.g, color.b };
+				pbr.metallic = this->varMetallic()->getValue();
+				pbr.roughness = this->varRoughness()->getValue();
+				pbr.alpha = this->varAlpha()->getValue();
+				mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
+				mPBRMaterialUBlock.bindBufferBase(1);
 
-				if (mtl->texColor.isValid()) {
-					mShaderProgram->setInt("uColorMode", 2);
-					mtl->texColor.bind(GL_TEXTURE10);
-				}
-				else {
-					mShaderProgram->setInt("uColorMode", 1);
-				}
-
-				if (mtl->texBump.isValid()) {
-					mtl->texBump.bind(GL_TEXTURE11);
-					mShaderProgram->setFloat("uBumpScale", mtl->bumpScale);
-				}
+				mShaderProgram->setInt("uColorMode", 1);
 			}
+
 
 			int numTriangles = shape->glVertexIndex.count();
 

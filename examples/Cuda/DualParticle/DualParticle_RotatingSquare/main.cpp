@@ -10,22 +10,21 @@
 #include "DualParticleSystem/DualParticleFluid.h"
 #include "ParticleSystem/MakeParticleSystem.h"
 #include <BasicShapes/CubeModel.h>
-#include <Samplers/CubeSampler.h>
+#include <Samplers/ShapeSampler.h>
 #include <ParticleSystem/Emitters/SquareEmitter.h>
 #include <StaticTriangularMesh.h>
 #include <GLSurfaceVisualModule.h>
 #include "Collision/Attribute.h"
-#include "DualParticleSystem/VirtualSpatiallyAdaptiveStrategy.h"
-#include "DualParticleSystem/VirtualColocationStrategy.h"
-#include "DualParticleSystem/VirtualParticleShiftingStrategy.h"
-#include "DualParticleSystem/DualParticleIsphModule.h"
+#include "DualParticleSystem/Module/VirtualSpatiallyAdaptiveStrategy.h"
+#include "DualParticleSystem/Module/VirtualColocationStrategy.h"
+#include "DualParticleSystem/Module/VirtualParticleShiftingStrategy.h"
+#include "DualParticleSystem/Module/DualParticleIsphModule.h"
 #include "ParticleSystem/Module/ImplicitViscosity.h"
 #include "RotatingSquarePatchModule.h"
 #include "Auxiliary/DataSource.h"
 using namespace std;
 using namespace dyno;
 
-bool useVTK = false;
 
 std::shared_ptr<SceneGraph> createScene()
 {
@@ -34,10 +33,6 @@ std::shared_ptr<SceneGraph> createScene()
 	scene->setUpperBound(Vec3f(3.0));
 	scene->setLowerBound(Vec3f(-3.0));
 
-// 	std::shared_ptr<StaticBoundary<DataType3f>> root = scene->addNode(std::make_shared<StaticBoundary<DataType3f>>());
-// 	root->loadCube(Vec3f(-2.40f, 0.0f, -2.40f), Vec3f(2.40f, 1.0f, 2.40f), 0.02, true);
-
-
 	//Create a cube
 	auto cube = scene->addNode(std::make_shared<CubeModel<DataType3f>>());
 	cube->varLocation()->setValue(Vec3f(0.5, 0.5, 0.0));
@@ -45,10 +40,10 @@ std::shared_ptr<SceneGraph> createScene()
 	cube->graphicsPipeline()->disable();
 
 	//Create a sampler
-	auto sampler = scene->addNode(std::make_shared<CubeSampler<DataType3f>>());
+	auto sampler = scene->addNode(std::make_shared<ShapeSampler<DataType3f>>());
 	sampler->varSamplingDistance()->setValue(0.005);
 	sampler->setVisible(false);
-	cube->outCube()->connect(sampler->inCube());
+	cube->connect(sampler->importShape());
 	auto initialParticles = scene->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
 	sampler->statePointSet()->promoteOuput()->connect(initialParticles->inPoints());
 
@@ -161,8 +156,6 @@ std::shared_ptr<SceneGraph> createScene()
 		fluid->animationPipeline()->pushModule(m_visModule);
 	
 	}
-
-
 
 	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
 	auto colorMapper = std::make_shared<ColorMapping<DataType3f >>();

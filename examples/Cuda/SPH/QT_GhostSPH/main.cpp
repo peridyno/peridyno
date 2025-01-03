@@ -6,7 +6,7 @@
 #include "ParticleSystem/GhostParticles.h"
 #include "ParticleSystem/MakeGhostParticles.h"
 #include <ParticleSystem/GhostFluid.h>
-#include <Samplers/CubeSampler.h>
+#include <Samplers/ShapeSampler.h>
 #include "ParticleSystem/MakeParticleSystem.h"
 
 #include <Module/CalculateNorm.h>
@@ -36,7 +36,7 @@ std::shared_ptr<SceneGraph> createScene()
 	scn->setUpperBound(Vec3f(10.5, 5, 10.5));
 	scn->setLowerBound(Vec3f(-10.5, -5, -10.5));
 
-	auto obj1 = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
+	auto obj1 = scn->addNode(std::make_shared<ObjLoader<DataType3f>>());
 	obj1->varScale()->setValue(Vec3f(0.3));
 	obj1->varFileName()->setValue(getAssetPath() + "plane/plane_lowRes.obj");
 	//obj1->varFileName()->setValue(getAssetPath() + "board/ball.obj");
@@ -79,11 +79,11 @@ std::shared_ptr<SceneGraph> createScene()
 	cube->graphicsPipeline()->disable();
 
 	
-	auto sampler = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
+	auto sampler = scn->addNode(std::make_shared<ShapeSampler<DataType3f>>());
 	sampler->varSamplingDistance()->setValue(0.005);
 	sampler->setVisible(false);
 
-	cube->outCube()->connect(sampler->inCube());
+	cube->connect(sampler->importShape());
 
 	auto fluidParticles = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
 

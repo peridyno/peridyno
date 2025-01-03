@@ -22,7 +22,7 @@ void declare_dual_particle_fluid_system(py::module& m, std::string typestr) {
 		.value("SpatiallyAdaptiveStrategy", Class::EVirtualParticleSamplingStrategy::SpatiallyAdaptiveStrategy);
 }
 
-#include "DualParticleSystem/DualParticleIsphModule.h"
+#include "DualParticleSystem/Module/DualParticleIsphModule.h"
 template <typename TDataType>
 void declare_dual_particle_isph_module(py::module& m, std::string typestr) {
 	using Class = dyno::DualParticleIsphModule<TDataType>;
@@ -49,7 +49,7 @@ void declare_dual_particle_isph_module(py::module& m, std::string typestr) {
 		.def("var_residual_threshold", &Class::varResidualThreshold, py::return_value_policy::reference);
 }
 
-#include "DualParticleSystem/VirtualParticleGenerator.h"
+#include "DualParticleSystem/Module/VirtualParticleGenerator.h"
 template <typename TDataType>
 void declare_virtual_particle_generator(py::module& m, std::string typestr) {
 	using Class = dyno::VirtualParticleGenerator<TDataType>;
@@ -59,7 +59,7 @@ void declare_virtual_particle_generator(py::module& m, std::string typestr) {
 		.def("out_virtual_particles", &Class::outVirtualParticles, py::return_value_policy::reference);
 }
 
-#include "DualParticleSystem/VirtualParticleShiftingStrategy.h"
+#include "DualParticleSystem/Module/VirtualParticleShiftingStrategy.h"
 template <typename TDataType>
 void declare_virtual_particle_shifting_strategy(py::module& m, std::string typestr) {
 	using Class = dyno::VirtualParticleShiftingStrategy<TDataType>;
@@ -81,7 +81,7 @@ void declare_virtual_particle_shifting_strategy(py::module& m, std::string types
 		.def("out_v_density", &Class::outVDensity, py::return_value_policy::reference);
 }
 
-#include "DualParticleSystem/VirtualSpatiallyAdaptiveStrategy.h"
+#include "DualParticleSystem/Module/VirtualSpatiallyAdaptiveStrategy.h"
 template <typename TDataType>
 void declare_virtual_spatially_adaptive_strategy(py::module& m, std::string typestr) {
 	using Class = dyno::VirtualSpatiallyAdaptiveStrategy<TDataType>;

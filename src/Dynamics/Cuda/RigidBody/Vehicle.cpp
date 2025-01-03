@@ -47,7 +47,8 @@ namespace dyno
 			this->varFilePath()->setValue(FilePath(filename));
 		}
 
-		int vehicleNum = this->varVehiclesTransform()->getValue().size();
+		auto instances = this->varVehiclesTransform()->getValue();
+		uint vehicleNum = instances.size();
 		for (size_t i = 0; i < vehicleNum; i++)
 		{
 			RigidBodyInfo rigidbody;
@@ -70,7 +71,7 @@ namespace dyno
 				wheels[it].halfLength = 0.1;
 				wheels[it].radius = std::abs(up.y - down.y) / 2;
 
-				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation();
+				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation() + instances[i].translation();
 				actors[it] = this->addCapsule(wheels[it], rigidbody, 100);
 			}
 
@@ -92,7 +93,8 @@ namespace dyno
 				boxs[it].halfLength = (up - down) / 2;
 
 				rigidbody.offset = Vec3f(0.0f, 0.0f, 0.0f);
-				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation();
+				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.angle = Quat1f(instances[i].rotation());
 				actors[it] = this->addBox(boxs[it], rigidbody, 100);
 			}
 
@@ -160,7 +162,8 @@ namespace dyno
 			this->varFilePath()->setValue(FilePath(filename));
 		}
 
-		int vehicleNum = this->varVehiclesTransform()->getValue().size();
+		auto instances = this->varVehiclesTransform()->getValue();
+		uint vehicleNum = instances.size();
 		for (size_t i = 0; i < vehicleNum; i++)
 		{
 			RigidBodyInfo rigidbody;
@@ -183,7 +186,8 @@ namespace dyno
 				wheels[it].halfLength = 0.1;
 				wheels[it].radius = std::abs(up.y - down.y) / 2;
 
-				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation();
+				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.angle = Quat1f(instances[i].rotation());
 				actors[it] = this->addCapsule(wheels[it], rigidbody, 100);
 			}
 
@@ -205,7 +209,8 @@ namespace dyno
 				boxs[it].halfLength = (up - down) / 2 * 0.5;
 
 				rigidbody.offset = Vec3f(0.0f, 0.0f, 0.0f);
-				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation();
+				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.angle = Quat1f(instances[i].rotation());
 				actors[it] = this->addBox(boxs[it], rigidbody, 100);
 			}
 
@@ -273,7 +278,8 @@ namespace dyno
 			this->varFilePath()->setValue(FilePath(filename));
 		}
 
-		int vehicleNum = this->varVehiclesTransform()->getValue().size();
+		auto instances = this->varVehiclesTransform()->getValue();
+		uint vehicleNum = instances.size();
 		for (size_t i = 0; i < vehicleNum; i++)
 		{
 			RigidBodyInfo rigidbody;
@@ -306,7 +312,8 @@ namespace dyno
 				wheels[it].halfLength = std::abs(up.x - down.x) / 1.5;
 				wheels[it].radius = std::abs(up.y - down.y) / 2;
 
-				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation();
+				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.angle = Quat1f(instances[i].rotation());
 				actors[it] = this->addCapsule(wheels[it], rigidbody, 100);
 			}
 
@@ -327,7 +334,8 @@ namespace dyno
 				boxs[it].halfLength = (up - down) / 2 ;
 
 				rigidbody.offset = Vec3f(0.0f, 0.0f, 0.0f);
-				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation();
+				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.angle = Quat1f(instances[i].rotation());
 				actors[it] = this->addBox(boxs[it], rigidbody, 100);
 			}
 
@@ -396,7 +404,8 @@ namespace dyno
 			this->varFilePath()->setValue(FilePath(filename));
 		}
 
-		int vehicleNum = this->varVehiclesTransform()->getValue().size();
+		auto instances = this->varVehiclesTransform()->getValue();
+		uint vehicleNum = instances.size();
 		for (size_t i = 0; i < vehicleNum; i++)
 		{
 			RigidBodyInfo rigidbody;
@@ -429,7 +438,8 @@ namespace dyno
 				wheels[it].halfLength = 0.13;
 				wheels[it].radius = 0.03;
 
-				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation();
+				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.angle = Quat1f(instances[i].rotation());
 				actors[it] = this->addCapsule(wheels[it], rigidbody, 100);
 			}
 
@@ -450,7 +460,8 @@ namespace dyno
 				boxs[it].halfLength = (up - down) / 2;
 
 				rigidbody.offset = Vec3f(0.0f, 0.0f, 0.0f);
-				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation();
+				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.angle = Quat1f(instances[i].rotation());
 				actors[it] = this->addBox(boxs[it], rigidbody, 100);
 			}
 

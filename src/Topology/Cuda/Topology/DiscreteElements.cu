@@ -308,8 +308,8 @@ namespace dyno
 		offsetArrayInHost[0] = 0;
 		offsetArrayInHost[1] = offsetArrayInHost[0] + sizeOfSpheres;
 		offsetArrayInHost[2] = offsetArrayInHost[1] + sizeOfBoxes;
-		offsetArrayInHost[3] = offsetArrayInHost[2] + sizeOfCapsules;
-		offsetArrayInHost[4] = offsetArrayInHost[3] + sizeOfTets;
+		offsetArrayInHost[3] = offsetArrayInHost[2] + sizeOfTets;
+		offsetArrayInHost[4] = offsetArrayInHost[3] + sizeOfCapsules;
 
 		DArray<uint> offsetArrayInDevice(5);
 		for (uint i = 0; i < topos.size(); i++)
@@ -329,8 +329,8 @@ namespace dyno
 
 			offsetArrayInHost[0] += topo->spheresInLocal().size();
 			offsetArrayInHost[1] += topo->boxesInLocal().size();
-			offsetArrayInHost[2] += topo->capsulesInLocal().size();
-			offsetArrayInHost[3] += topo->tetsInLocal().size();
+			offsetArrayInHost[2] += topo->tetsInLocal().size();
+			offsetArrayInHost[3] += topo->capsulesInLocal().size();
 			offsetArrayInHost[4] += topo->trianglesInLocal().size();
 		}
 

@@ -1,7 +1,9 @@
 #pragma once
+#include "Node.h"
+
 #include "Module/OutputModule.h"
 #include "Module/TopologyModule.h"
-#include "node.h"
+
 #include "Topology/TriangleSet.h"
 #include "TriangleMeshWriter.h"
 #include "Topology/PolygonSet.h"
@@ -11,30 +13,26 @@
 
 namespace dyno
 {
-
 	template<typename TDataType>
-	class OBJExporter : public Node
+	class ObjExporter : public Node
 	{
-		DECLARE_TCLASS(OBJExporter, TDataType)
+		DECLARE_TCLASS(ObjExporter, TDataType)
 	public:
-
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
 
 		typedef typename Quat<Real> TQuat;
 
+		ObjExporter();
+
+		std::string getNodeType() override { return "IO"; }
+
 		DECLARE_ENUM(OutputType,
 			Mesh = 0,
 			PointCloud = 1);
 
-		OBJExporter();
-
-		std::string getNodeType() override { return "IO"; }
-		//void update() override;
-
 	public:
-
 		DEF_VAR(std::string, OutputPath, "D:/File_", "OutputPath");
 		//DEF_VAR(std::string, Filename, "", "Filename");
 		DEF_VAR(unsigned, StartFrame, 1, "StartFrame");
@@ -53,12 +51,7 @@ namespace dyno
 
 		void outputPolygonSet(std::shared_ptr<PolygonSet<TDataType>> polygonSet);
 
-
 	private:
-
-
-
 		std::string file_postfix = ".obj";
-
 	};
 }

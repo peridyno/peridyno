@@ -7,6 +7,7 @@ namespace dyno
 		: Node()
 	{
 		this->setForceUpdate(false);
+		this->setAutoHidden(true);
 
 		this->varScale()->setRange(Real(0.0001), Real(1000));
 	}

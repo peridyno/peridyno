@@ -10,6 +10,10 @@ namespace dyno
 	VolumeLoader<TDataType>::VolumeLoader()
 		: Volume<TDataType>()
 	{
+		if (this->stateLevelSet()->isEmpty()){
+			this->stateLevelSet()->allocate();
+		}
+
 		this->varFileName()->attach(
 			std::make_shared<FCallBackFunc>(std::bind(&VolumeLoader<TDataType>::loadFile, this))
 		);

@@ -22,7 +22,7 @@
 
 #include <StaticTriangularMesh.h>
 
-#include <Samplers/CubeSampler.h>
+#include <Samplers/ShapeSampler.h>
 
 using namespace std;
 using namespace dyno;
@@ -40,11 +40,11 @@ std::shared_ptr<SceneGraph> createScene()
 	cube->graphicsPipeline()->disable();
 
 	//Create a sampler
-	auto sampler = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
+	auto sampler = scn->addNode(std::make_shared<ShapeSampler<DataType3f>>());
 	sampler->varSamplingDistance()->setValue(0.005);
 	sampler->graphicsPipeline()->disable();
 
-	cube->outCube()->connect(sampler->inCube());
+	cube->connect(sampler->importShape());
 
 	auto initialParticles = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
 

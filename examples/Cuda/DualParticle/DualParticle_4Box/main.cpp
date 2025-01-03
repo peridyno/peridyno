@@ -1,21 +1,20 @@
 #include <GlfwApp.h>
-#include "SceneGraph.h"
-#include <BasicShapes/CubeModel.h>
+#include <SceneGraph.h>
 
 #include <Volume/BasicShapeToVolume.h>
-
 #include <Multiphysics/VolumeBoundary.h>
+
 #include <Module/CalculateNorm.h>
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
 #include <ColorMapping.h>
 #include <ImColorbar.h>
+
 #include "DualParticleSystem/DualParticleFluid.h"
 #include "ParticleSystem/MakeParticleSystem.h"
 #include <BasicShapes/CubeModel.h>
-#include <Samplers/CubeSampler.h>
+#include <Samplers/ShapeSampler.h>
 #include <ParticleSystem/Emitters/SquareEmitter.h>
-#include "PointsLoader.h"
 
 using namespace std;
 using namespace dyno;
@@ -32,10 +31,10 @@ std::shared_ptr<SceneGraph> createScene()
 	cube1->varLocation()->setValue(Vec3f(0.125, 0.125, 0.125));
 	cube1->varLength()->setValue(Vec3f(0.15, 0.15, 0.15));
 	cube1->graphicsPipeline()->disable();
-	auto sampler1 = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
+	auto sampler1 = scn->addNode(std::make_shared<ShapeSampler<DataType3f>>());
 	sampler1->varSamplingDistance()->setValue(0.005);
 	sampler1->setVisible(false);
-	cube1->outCube()->connect(sampler1->inCube());
+	cube1->connect(sampler1->importShape());
 	auto initialParticles1 = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
 	sampler1->statePointSet()->promoteOuput()->connect(initialParticles1->inPoints());
 
@@ -43,10 +42,10 @@ std::shared_ptr<SceneGraph> createScene()
 	cube2->varLocation()->setValue(Vec3f(-0.125, 0.125, 0.125));
 	cube2->varLength()->setValue(Vec3f(0.15, 0.15, 0.15));
 	cube2->graphicsPipeline()->disable();
-	auto sampler2 = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
+	auto sampler2 = scn->addNode(std::make_shared<ShapeSampler<DataType3f>>());
 	sampler2->varSamplingDistance()->setValue(0.005);
 	sampler2->setVisible(false);
-	cube2->outCube()->connect(sampler2->inCube());
+	cube2->connect(sampler2->importShape());
 	auto initialParticles2 = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
 	sampler2->statePointSet()->promoteOuput()->connect(initialParticles2->inPoints());
 
@@ -54,10 +53,10 @@ std::shared_ptr<SceneGraph> createScene()
 	cube3->varLocation()->setValue(Vec3f(0.125, 0.125, -0.125));
 	cube3->varLength()->setValue(Vec3f(0.15, 0.15, 0.15));
 	cube3->graphicsPipeline()->disable();
-	auto sampler3 = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
+	auto sampler3 = scn->addNode(std::make_shared<ShapeSampler<DataType3f>>());
 	sampler3->varSamplingDistance()->setValue(0.005);
 	sampler3->setVisible(false);
-	cube3->outCube()->connect(sampler3->inCube());
+	cube3->connect(sampler3->importShape());
 	auto initialParticles3 = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
 	sampler3->statePointSet()->promoteOuput()->connect(initialParticles3->inPoints());
 
@@ -65,10 +64,10 @@ std::shared_ptr<SceneGraph> createScene()
 	cube4->varLocation()->setValue(Vec3f(-0.125, 0.125, -0.125));
 	cube4->varLength()->setValue(Vec3f(0.15, 0.15, 0.15));
 	cube4->graphicsPipeline()->disable();
-	auto sampler4 = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
+	auto sampler4 = scn->addNode(std::make_shared<ShapeSampler<DataType3f>>());
 	sampler4->varSamplingDistance()->setValue(0.005);
 	sampler4->setVisible(false);
-	cube4->outCube()->connect(sampler4->inCube());
+	cube4->connect(sampler4->importShape());
 	auto initialParticles4 = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
 	sampler4->statePointSet()->promoteOuput()->connect(initialParticles4->inPoints());
 

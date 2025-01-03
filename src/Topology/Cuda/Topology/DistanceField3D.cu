@@ -356,7 +356,7 @@ namespace dyno{
 		if (!input.is_open())
 		{
 			std::cout << "Reading file " << filename << " error!" << std::endl;
-			exit(0);
+			return;
 		}
 
 		int nbx, nby, nbz;

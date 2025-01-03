@@ -1,8 +1,7 @@
 #pragma once
 #include "Module/TopologyMapping.h"
 
-#include "Volume/VoxelOctree.h"
-
+#include "Topology/LevelSet.h"
 #include "Topology/TriangleSet.h"
 
 namespace dyno
@@ -10,7 +9,7 @@ namespace dyno
 	template<typename TDataType>
 	class VolumeToTriangleSet : public TopologyMapping
 	{
-		DECLARE_TCLASS(VolumeToTriangleSet, TDataType)
+		DECLARE_TCLASS(AdaptiveVolumeToTriangleSet, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -21,7 +20,7 @@ namespace dyno
 	public:
 		DEF_VAR(Real, IsoValue, Real(0), "Iso value");
 
-		DEF_INSTANCE_IO(VoxelOctree<TDataType>, Volume, "");
+		DEF_INSTANCE_IO(LevelSet<TDataType>, Volume, "");
 
  		DEF_INSTANCE_OUT(TriangleSet<TDataType>, TriangleSet, "");
 

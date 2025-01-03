@@ -2,6 +2,8 @@
 
 #include "Module/MarchingCubesHelper.h"
 
+#include "GLSurfaceVisualModule.h"
+
 namespace dyno
 {
 	template<typename TDataType>
@@ -9,6 +11,10 @@ namespace dyno
 		: Node()
 	{
 		this->varGridSpacing()->setRange(0.001, 1.0);
+
+		auto renderer = std::make_shared<GLSurfaceVisualModule>();
+		this->stateTriangleSet()->connect(renderer->inTriangleSet());
+		this->graphicsPipeline()->pushModule(renderer);
 	}
 
 	template<typename TDataType>
@@ -68,13 +74,14 @@ namespace dyno
 			isoValue,
 			h);
 
-		if (this->outTriangleSet()->isEmpty()) {
-			this->outTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
+		if (this->stateTriangleSet()->isEmpty()) {
+			this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 		}
 
-		auto triSet = this->outTriangleSet()->getDataPtr();
+		auto triSet = this->stateTriangleSet()->getDataPtr();
 		triSet->setPoints(vertices);
 		triSet->setTriangles(triangles);
+		triSet->update();
 
 		distances.clear();
 		voxelVertNum.clear();

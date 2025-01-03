@@ -1,6 +1,6 @@
 #include "MultibodySystem.h"
 
-#include "Module/TJConstraintSolver.h"
+#include "Module/TJSoftConstraintSolver.h"
 #include "Module/ContactsUnion.h"
 
 #include "Collision/NeighborElementQuery.h"
@@ -44,7 +44,7 @@ namespace dyno
 		cdBV->outContacts()->connect(merge->inContactsB());
 		this->animationPipeline()->pushModule(merge);
 
-		auto iterSolver = std::make_shared<TJConstraintSolver<TDataType>>();
+		auto iterSolver = std::make_shared<TJSoftConstraintSolver<TDataType>>();
 		this->stateTimeStep()->connect(iterSolver->inTimeStep());
 		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
 		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());

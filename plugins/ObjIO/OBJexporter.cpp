@@ -5,10 +5,10 @@
 
 namespace dyno
 {
-	IMPLEMENT_TCLASS(OBJExporter, TDataType)
+	IMPLEMENT_TCLASS(ObjExporter, TDataType)
 
 		template<typename TDataType>
-	OBJExporter<TDataType>::OBJExporter()
+	ObjExporter<TDataType>::ObjExporter()
 	{
 		
 		this->varEndFrame()->setRange(0,999999999);
@@ -20,7 +20,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void OBJExporter<TDataType>::updateStates()
+	void ObjExporter<TDataType>::updateStates()
 	{
 
 		auto polySet = this->inPolygonSet()->getDataPtr();
@@ -39,12 +39,12 @@ namespace dyno
 
 	//reset
 	template<typename TDataType>
-	void OBJExporter<TDataType>::resetStates()
+	void ObjExporter<TDataType>::resetStates()
 	{
 	}
 
 	template<typename TDataType>
-	void OBJExporter<TDataType>::outputTriangleMesh(std::shared_ptr<TriangleSet<TDataType>> triangleset)
+	void ObjExporter<TDataType>::outputTriangleMesh(std::shared_ptr<TriangleSet<TDataType>> triangleset)
 	{
 		auto frame_step = this->varFrameStep()->getData();
 		auto current_frame = this->stateFrameNumber()->getData();
@@ -121,7 +121,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void OBJExporter<TDataType>::outputPolygonSet(std::shared_ptr<PolygonSet<TDataType>> polygonSet)
+	void ObjExporter<TDataType>::outputPolygonSet(std::shared_ptr<PolygonSet<TDataType>> polygonSet)
 	{		
 		auto mode = this->varOutputType()->getData();
 
@@ -212,5 +212,5 @@ namespace dyno
 		c_polygons.clear();
 	}
 
-	DEFINE_CLASS(OBJExporter)
+	DEFINE_CLASS(ObjExporter)
 }

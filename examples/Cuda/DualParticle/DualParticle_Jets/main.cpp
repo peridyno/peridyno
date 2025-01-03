@@ -9,7 +9,7 @@
 #include "DualParticleSystem/DualParticleFluid.h"
 #include "ParticleSystem/MakeParticleSystem.h"
 #include <BasicShapes/CubeModel.h>
-#include <Samplers/CubeSampler.h>
+#include <Samplers/ShapeSampler.h>
 #include <ParticleSystem/Emitters/PoissonEmitter.h>
 
 using namespace std;
@@ -47,10 +47,6 @@ std::shared_ptr<SceneGraph> createScene()
 		DualParticleFluid<DataType3f>::EVirtualParticleSamplingStrategy::SpatiallyAdaptiveStrategy));
 	emitter->connect(fluid->importParticleEmitters());
 	emitter2->connect(fluid->importParticleEmitters());
-
-	//auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>()); ;
-	//boundary->loadCube(Vec3f(-0.3, 0, -0.3), Vec3f(0.3, 2.0, 0.3), 0.02, true);
-	//fluid->connect(boundary->importParticleSystems());
 
 	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
 	fluid->stateVelocity()->connect(calculateNorm->inVec());

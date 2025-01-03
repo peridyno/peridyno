@@ -349,6 +349,8 @@ namespace Qt
 		if (mEditingEnabled && nodeData != nullptr) {
 			auto scn = dyno::SceneGraphFactory::instance()->active();
 			scn->deleteNode(nodeData->getNode());
+
+			emit this->nodeDeselected();
 		}
 	}
 

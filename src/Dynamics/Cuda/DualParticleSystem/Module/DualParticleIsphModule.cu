@@ -59,7 +59,18 @@ namespace dyno
 		m_r.clear();
 		m_Aii.clear();
 		m_virtualAirFlag.clear();
+		m_virtualAirWeight.clear();
 		m_pressure.clear();
+		m_solidVirtualPaticleFlag.clear();
+		m_virtualVelocity.clear();
+		m_source.clear();
+		m_Ax.clear();
+		m_r.clear();
+		m_p.clear();
+		m_residual.clear();
+		m_Gp.clear();
+		m_GpNearSolid.clear();
+
 
 		if (m_reduce)
 		{
@@ -175,15 +186,15 @@ namespace dyno
 		if (m_GpNearSolid.size() != num)
 			m_GpNearSolid.resize(num);
 
-		if (m_arithmetic_r)
-		{
-			delete m_arithmetic_r;
-			m_arithmetic_r = Arithmetic<float>::Create(num);
-		}
-		else
-		{
-			m_arithmetic_r = Arithmetic<float>::Create(num);
-		}
+		//if (m_arithmetic_r)
+		//{
+		//	delete m_arithmetic_r;
+		//	m_arithmetic_r = Arithmetic<float>::Create(num);
+		//}
+		//else
+		//{
+		//	m_arithmetic_r = Arithmetic<float>::Create(num);
+		//}
 		return true;
 	}
 
@@ -1121,8 +1132,6 @@ namespace dyno
 
 		auto & m_virtualSolidFlag = this->outVirtualBool()->getData();
 		Real dt = this->inTimeStep()->getData();
-		uint pDims_r = cudaGridSize(inRPosition()->size(), BLOCK_SIZE);
-		uint pDims_v = cudaGridSize(inVPosition()->size(), BLOCK_SIZE);
 		Real h1 = this->varSmoothingLength()->getData();
 		Real h2 = this->varPpeSmoothingLength()->getData();
 
@@ -1474,7 +1483,7 @@ namespace dyno
 
 		m_reduce = Reduction<float>::Create(num_v);
 		m_arithmetic = Arithmetic<float>::Create(num_v);
-		m_arithmetic_r = Arithmetic<float>::Create(num);
+	//	m_arithmetic_r = Arithmetic<float>::Create(num);
 
 		return true;
 	}

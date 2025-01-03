@@ -14,6 +14,7 @@
 #include "Module/GLPhotorealisticInstanceRender.h"
 
 #include "GltfFunc.h"
+#include "TextureMeshLoader.h"
 
 namespace dyno
 {
@@ -22,6 +23,8 @@ namespace dyno
 		: ParametricModel<TDataType>()
 		, RigidBodySystem<TDataType>()
 	{
+		this->setAutoHidden(false);
+
 		this->stateTextureMesh()->setDataPtr(std::make_shared<TextureMesh>());
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&ArticulatedBody<TDataType>::varChanged, this));
@@ -58,7 +61,7 @@ namespace dyno
 	{
 		RigidBodySystem<TDataType>::resetStates();
 
-		auto topo = this->stateTopology()->constDataPtr();
+		auto topo = this->stateTopology()->getDataPtr();
 
 		int sizeOfRigids = this->stateCenter()->size();
 
@@ -118,14 +121,29 @@ namespace dyno
 		tags.clear();
 
 		this->transform();
+
+		topo->setPosition(this->stateCenter()->constData());
+		topo->setRotation(this->stateRotationMatrix()->constData());
+		topo->update();
 	}
 
 	template<typename TDataType>
 	void ArticulatedBody<TDataType>::varChanged()
 	{
 		std::shared_ptr<TextureMesh> texMesh = this->stateTextureMesh()->getDataPtr();
-		auto filepath = this->varFilePath()->getValue().string();
-		loadGLTFTextureMesh(texMesh, filepath);
+		auto filepath = this->varFilePath()->getValue();
+
+		auto ext = filepath.path().extension().string();
+		auto name = filepath.string();
+
+		if (ext == ".gltf")
+		{
+			loadGLTFTextureMesh(texMesh, name);
+		}
+		else if (ext == ".obj")
+		{
+			loadTextureMeshFromObj(texMesh, name);
+		}
 	}
 
 	template<typename TDataType>
@@ -144,116 +162,11 @@ namespace dyno
 		CArray<Mat3f> hostRotation;
 		hostRotation.assign(this->stateRotationMatrix()->constData());
 
-		{
-			//get Elements
-			auto topo = TypeInfo::cast<DiscreteElements<DataType3f>>(this->stateTopology()->getDataPtr());
-
-			auto& boxes = topo->boxesInGlobal();
-			auto& spheres = topo->spheresInGlobal();
-			auto& tets = topo->tetsInGlobal();
-			auto& caps = topo->capsulesInGlobal();
-
-			std::vector<Transform3f> vehicleTransform = this->varVehiclesTransform()->getValue();
-
-			int vehicleNum = vehicleTransform.size();
-
-
-
-			for (size_t i = 0; i < vehicleNum; i++)
-			{
-
-				Quat<Real> q = Quat<Real>(vehicleTransform[i].rotation());
-
-				Vec3f pos = vehicleTransform[i].translation();
-
-
-				int boxesNum = boxes.size() / vehicleNum;
-				int spheresNum = spheres.size() / vehicleNum;
-				int tetsNum = tets.size() / vehicleNum;
-				int capsNum = caps.size() / vehicleNum;
-
-				//***************************** Copy Translation *************************//
-				for (uint j = 0; j < spheresNum; j++)
-				{
-
-					hostCenter[i * spheresNum + j] = q.rotate(hostCenter[i * spheresNum + j]) + pos;
-				}
-
-				for (uint j = 0; j < boxesNum; j++)
-				{
-					int offset = spheres.size();
-					hostCenter[i * boxesNum + j + offset] = q.rotate(hostCenter[i * boxesNum + j + offset]) + pos;
-				}
-
-				for (uint j = 0; j < tetsNum; j++)
-				{
-					int offset = boxes.size() + spheres.size();
-					hostCenter[i * tetsNum + j + offset] = q.rotate(hostCenter[i * tetsNum + j + offset]) + pos;
-				}
-
-				for (uint j = 0; j < capsNum; j++)
-				{
-					int offset = boxes.size() + spheres.size() + tets.size();
-					hostCenter[i * capsNum + j + offset] = q.rotate(hostCenter[i * capsNum + j + offset]) + pos;
-				}
-
-				//***************************** Copy Rotation *************************//
-
-				for (uint j = 0; j < spheresNum; j++)
-				{
-
-					hostQuaternion[i * spheresNum + j] = q * hostQuaternion[i * spheresNum + j];
-				}
-				for (uint j = 0; j < boxesNum; j++)
-				{
-					int offset = spheres.size();
-					hostQuaternion[i * boxesNum + j + offset] = q * hostQuaternion[i * boxesNum + j + offset];
-				}
-				for (uint j = 0; j < tetsNum; j++)
-				{
-					int offset = boxes.size() + spheres.size();
-					hostQuaternion[i * tetsNum + j + offset] = q * hostQuaternion[i * tetsNum + j + offset];
-				}
-				for (uint j = 0; j < capsNum; j++)
-				{
-					int offset = boxes.size() + spheres.size() + tets.size();
-					hostQuaternion[i * capsNum + j + offset] = q * hostQuaternion[i * capsNum + j + offset];
-				}
-
-
-				for (uint j = 0; j < spheresNum; j++)
-				{
-					hostRotation[i * spheresNum + j] = q.toMatrix3x3() * hostRotation[i * spheresNum + j];
-				}
-				for (uint j = 0; j < boxesNum; j++)
-				{
-					int offset = spheres.size();
-					hostRotation[i * boxesNum + j + offset] = q.toMatrix3x3() * hostRotation[i * boxesNum + j + offset];
-				}
-				for (uint j = 0; j < tetsNum; j++)
-				{
-					int offset = boxes.size() + spheres.size();
-					hostRotation[i * tetsNum + j + offset] = q.toMatrix3x3() * hostRotation[i * tetsNum + j + offset];
-				}
-				for (uint j = 0; j < capsNum; j++)
-				{
-					int offset = boxes.size() + spheres.size() + tets.size();
-					hostRotation[i * capsNum + j + offset] = q.toMatrix3x3() * hostRotation[i * capsNum + j + offset];
-				}
-
-
-			}
-
-		}
-
-
+		//for (size_t i = 0; i < vehicleNum; i++)
 		{
 			//get varTransform;
 			auto quat = this->computeQuaternion();
 			Coord location = this->varLocation()->getValue();
-
-			//***************************** Translation *************************//
-
 
 			for (uint i = 0; i < hostCenter.size(); i++)
 			{
@@ -271,9 +184,6 @@ namespace dyno
 			{
 				hostRotation[i] = quat.toMatrix3x3() * hostRotation[i];
 			}
-
-
-
 		}
 
 		this->stateCenter()->assign(hostCenter);

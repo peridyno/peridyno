@@ -1,5 +1,5 @@
 /**
- * Copyright 2017-2021 hanxingyixue
+ * Copyright 2022 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,44 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
-#include "Volume.h"
 
-namespace dyno {
+#pragma once
+#include "Sampler.h"
+
+#include "BasicShapes/BasicShape.h"
+
+namespace dyno
+{
 	template<typename TDataType>
-	class VolumeBool : public Node
+	class ShapeSampler : public Sampler<TDataType>
 	{
-		DECLARE_TCLASS(VolumeBool, TDataType)
+		DECLARE_TCLASS(ShapeSampler, TDataType);
+
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		VolumeBool();
-		~VolumeBool() override;
+		ShapeSampler();
 
-		DECLARE_ENUM(BoolType,
-			Intersect = 0,
-			Union = 1,
-			Minus = 2);
+	public:
+		DEF_VAR(Real, SamplingDistance, 0.1, "Sampling distance");
 
-		std::string getNodeType() override;
+		DEF_NODE_PORT(BasicShape<TDataType>, Shape, "");
 
 	protected:
 		void resetStates() override;
-
-		void CalcuSDFGrid(DistanceField3D<TDataType> aDistance,
-			DistanceField3D<TDataType> bDistance,
-			DistanceField3D<TDataType>& tDistance);
-
-	public:
-		DEF_INSTANCE_IN(LevelSet<TDataType>, A, "");
-		DEF_INSTANCE_IN(LevelSet<TDataType>, B, "");
-
-		DEF_INSTANCE_OUT(LevelSet<TDataType>, SDF, "");
-
-		DEF_VAR_IN(Real, Spacing, "");
-		DEF_VAR_IN(uint, Padding, "");
-
-		DEF_ENUM(BoolType, BoolType, BoolType::Union, "Volume Bool Type");
 	};
+
+	IMPLEMENT_TCLASS(ShapeSampler, TDataType);
 }

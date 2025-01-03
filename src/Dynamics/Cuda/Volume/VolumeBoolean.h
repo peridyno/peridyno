@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Xiaowei He & Shusen Liu
+ * Copyright 2017-2021 hanxingyixue
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,31 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #pragma once
-#include "Sampler.h"
+#include "Volume.h"
+#include "Module/VolumeMacros.h"
 
-namespace dyno
-{
+namespace dyno {
 	template<typename TDataType>
-	class SphereSampler : public Sampler<TDataType>
+	class VolumeBoolean : public Volume<TDataType>
 	{
-		DECLARE_TCLASS(SphereSampler, TDataType);
-
+		DECLARE_TCLASS(VolumeBoolean, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		SphereSampler();
+		VolumeBoolean();
+		~VolumeBoolean() override;
+
+		std::string getNodeType() override;
+
+		DEF_VAR(Real, Spacing, 0.01, "");
+		DEF_VAR(uint, Padding, 5, "");
+
+		DEF_ENUM(BoolType, BoolType, BoolType::Union, "Volume Bool Type");
 
 	public:
-		DEF_VAR(Real, SamplingDistance, 0.05, "Sampling distance");
+		DEF_INSTANCE_IN(LevelSet<TDataType>, A, "");
+		DEF_INSTANCE_IN(LevelSet<TDataType>, B, "");
 
-		DEF_VAR_IN(TSphere3D<Real>, Sphere,  "");
+		DEF_INSTANCE_OUT(LevelSet<TDataType>, LevelSet, "");
 
 	protected:
 		void resetStates() override;
 	};
-
-	IMPLEMENT_TCLASS(SphereSampler, TDataType);
 }

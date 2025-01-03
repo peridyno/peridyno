@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Xiaowei He
+ * Copyright 2024 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,20 @@
  */
 
 #pragma once
-#include "Sampler.h"
+#include "DeclareEnum.h"
 
 namespace dyno
 {
-	template<typename TDataType>
-	class CubeSampler : public Sampler<TDataType>
+	DECLARE_ENUM(BoolType,
+		Intersect = 0,
+		Union = 1,
+		Minus = 2);
+
+	//Typically used in FSM, FMM or FIM
+	enum GridType
 	{
-		DECLARE_TCLASS(CubeSampler, TDataType);
-
-	public:
-		typedef typename TDataType::Real Real;
-		typedef typename TDataType::Coord Coord;
-
-		CubeSampler();
-
-	public:
-		DEF_VAR(Real, SamplingDistance, 0.1, "Sampling distance");
-
-		DEF_VAR_IN(TOrientedBox3D<Real>, Cube, "");
-
-	protected:
-		void resetStates() override;
+		Accepted = 0,
+		Tentative = 1,
+		Infinite = 2
 	};
-
-	IMPLEMENT_TCLASS(CubeSampler, TDataType);
 }

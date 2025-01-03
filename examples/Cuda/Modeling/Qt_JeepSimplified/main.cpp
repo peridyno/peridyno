@@ -24,7 +24,7 @@
 #include <Commands/Merge.h>
 
 #include <BasicShapes/CubeModel.h>
-#include <Samplers/CubeSampler.h>
+#include <Samplers/ShapeSampler.h>
 
 #include <Node/GLPointVisualNode.h>
 
@@ -161,9 +161,9 @@ std::shared_ptr<SceneGraph> creatScene()
 	cube->varScale()->setValue(Vec3f(2, 1, 0.932));
 	cube->graphicsPipeline()->disable();
 
-	auto cubeSmapler = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
+	auto cubeSmapler = scn->addNode(std::make_shared<ShapeSampler<DataType3f>>());
 	cubeSmapler->varSamplingDistance()->setValue(0.004f * total_scale);
-	cube->outCube()->connect(cubeSmapler->inCube());
+	cube->connect(cubeSmapler->importShape());
 	cubeSmapler->graphicsPipeline()->disable();
 
 	//MakeParticleSystem

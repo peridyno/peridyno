@@ -48,14 +48,14 @@ std::shared_ptr<SceneGraph> createSceneGraph()
 	plane->stateTriangleSet()->connect(convoy->inTriangleSet());
 
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
-	jeep->stateTopology()->connect(mapper->inDiscreteElements());
-	jeep->graphicsPipeline()->pushModule(mapper);
+	convoy->stateTopology()->connect(mapper->inDiscreteElements());
+	convoy->graphicsPipeline()->pushModule(mapper);
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
 	sRender->setColor(Color(1, 1, 0));
 	sRender->setAlpha(0.5f);
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
-	jeep->graphicsPipeline()->pushModule(sRender);
+	convoy->graphicsPipeline()->pushModule(sRender);
 
 	return scn;
 }

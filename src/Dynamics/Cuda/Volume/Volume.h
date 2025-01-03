@@ -17,8 +17,6 @@ namespace dyno {
 
 		std::string getNodeType() override;
 
-		virtual void updateVolume() {};
-
 	public:
 		DEF_INSTANCE_STATE(LevelSet<TDataType>, LevelSet, "");
 	};
