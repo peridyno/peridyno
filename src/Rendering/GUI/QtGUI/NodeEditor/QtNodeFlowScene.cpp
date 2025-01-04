@@ -99,8 +99,6 @@ namespace Qt
 			QPointF posView(m->bx(), m->by());
 
 			node.nodeGraphicsObject().setPos(posView);
-			node.nodeGraphicsObject().setHotKey0Checked(m->isVisible());
-			node.nodeGraphicsObject().setHotKey1Checked(m->isActive());
 
 			this->nodePlaced(node);
 		};
