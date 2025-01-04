@@ -433,6 +433,7 @@ namespace dyno
 		}
 
 		updateVelocity(
+			this->inAttribute()->getData(),
 			this->inVelocity()->getData(),
 			this->inAngularVelocity()->getData(),
 			mImpulseExt,
@@ -481,6 +482,7 @@ namespace dyno
 		}
 
 		updateVelocity(
+			this->inAttribute()->getData(),
 			this->inVelocity()->getData(),
 			this->inAngularVelocity()->getData(),
 			mImpulseC,
@@ -490,6 +492,7 @@ namespace dyno
 		);
 
 		updateGesture(
+			this->inAttribute()->getData(),
 			this->inCenter()->getData(),
 			this->inQuaternion()->getData(),
 			this->inRotationMatrix()->getData(),

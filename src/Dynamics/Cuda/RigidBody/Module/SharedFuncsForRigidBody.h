@@ -11,6 +11,9 @@
 
 #include "Algorithm/Reduction.h"
 
+#include "Collision/Attribute.h"
+
+
 namespace dyno 
 {
 	void ApplyTransform(
@@ -22,6 +25,7 @@ namespace dyno
 		const DArray<int>& bindingtag);
 
 	void updateVelocity(
+		DArray<Attribute> attribute,
 		DArray<Vec3f> velocity,
 		DArray<Vec3f> angular_velocity,
 		DArray<Vec3f> impulse,
@@ -31,6 +35,7 @@ namespace dyno
 	);
 
 	void updateGesture(
+		DArray<Attribute> attribute,
 		DArray<Vec3f> pos,
 		DArray<Quat1f> rotQuat,
 		DArray<Mat3f> rotMat,

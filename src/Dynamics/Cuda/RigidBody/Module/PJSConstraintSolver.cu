@@ -486,6 +486,7 @@ namespace dyno
 
 
 		updateVelocity(
+			this->inAttribute()->getData(),
 			this->inVelocity()->getData(),
 			this->inAngularVelocity()->getData(),
 			mImpulseExt,
@@ -534,6 +535,7 @@ namespace dyno
 			errors.push_back(norm);
 
 			updateVelocity(
+				this->inAttribute()->getData(),
 				this->inVelocity()->getData(),
 				this->inAngularVelocity()->getData(),
 				mImpulseC,
@@ -543,6 +545,7 @@ namespace dyno
 			);
 
 			updateGesture(
+				this->inAttribute()->getData(),
 				this->inCenter()->getData(),
 				this->inQuaternion()->getData(),
 				this->inRotationMatrix()->getData(),
@@ -578,6 +581,7 @@ namespace dyno
 				}
 
 				updateVelocity(
+					this->inAttribute()->getData(),
 					this->inVelocity()->getData(),
 					this->inAngularVelocity()->getData(),
 					mImpulseC,
@@ -593,6 +597,7 @@ namespace dyno
 		else
 		{
 			updateGesture(
+				this->inAttribute()->getData(),
 				this->inCenter()->getData(),
 				this->inQuaternion()->getData(),
 				this->inRotationMatrix()->getData(),

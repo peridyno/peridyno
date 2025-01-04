@@ -47,7 +47,7 @@ namespace dyno
 			inertia = SquareMatrix<Real, 3>(0.0f);
 			friction = 0.0f;
 			restitution = 0.0f;
-			motionType = Dynamic;
+			motionType = BodyType::Dynamic;
 			collisionMask = CT_AllObjects;
 			shapeType = ET_Other;
 			angle = Quat<Real>(0.0f, 0.0f, 0.0f, 1.0f);
@@ -64,7 +64,7 @@ namespace dyno
 			inertia = SquareMatrix<Real, 3>(0.0f);
 			friction = 0.0f;
 			restitution = 0.0f;
-			motionType = Dynamic;
+			motionType = BodyType::Dynamic;
 			collisionMask = CT_AllObjects;
 			shapeType = ET_Other;
 			angle = q;

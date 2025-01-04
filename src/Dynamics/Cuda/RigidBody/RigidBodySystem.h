@@ -18,6 +18,7 @@
 #include "RigidBodyShared.h"
 
 #include "Collision/Attribute.h"
+#include "Collision/CollisionData.h"
 
 #include <vector>
 #include <iostream>

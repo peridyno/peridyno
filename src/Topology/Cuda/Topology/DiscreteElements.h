@@ -109,6 +109,8 @@ namespace dyno
 
 		ElementType shapeType = ET_Other;
 
+		
+
 		Vec3f center;
 
 		Quat1f rot;

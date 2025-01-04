@@ -43,7 +43,7 @@ namespace dyno
 
 		this->animationPipeline()->pushModule(merge);
 
-		auto iterSolver = std::make_shared<PJSoftConstraintSolver<TDataType>>();
+		auto iterSolver = std::make_shared<TJSoftConstraintSolver<TDataType>>();
 		this->stateTimeStep()->connect(iterSolver->inTimeStep());
 		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
 		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
@@ -52,6 +52,7 @@ namespace dyno
 		this->varSlop()->connect(iterSolver->varSlop());
 		this->stateMass()->connect(iterSolver->inMass());
 		
+		this->stateAttribute()->connect(iterSolver->inAttribute());
 		this->stateCenter()->connect(iterSolver->inCenter());
 		this->stateVelocity()->connect(iterSolver->inVelocity());
 		this->stateAngularVelocity()->connect(iterSolver->inAngularVelocity());
@@ -448,6 +449,18 @@ namespace dyno
 
 		Attribute att_i;
 		att_i.setObjectId(states[tId].bodyId);
+		if (states[tId].motionType == BodyType::Static)
+		{
+			att_i.setFixed();
+		}
+		else if (states[tId].motionType == BodyType::Kinematic)
+		{
+			att_i.setPassive();
+		}
+		else if (states[tId].motionType == BodyType::Dynamic)
+		{
+			att_i.setDynamic();
+		}
 		atts[tId] = att_i;
 	}
 

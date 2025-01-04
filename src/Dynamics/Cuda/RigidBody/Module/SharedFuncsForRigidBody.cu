@@ -56,6 +56,7 @@ namespace dyno
 	* This function update the velocity of rigids based on impulse
 	*/
 	__global__ void SF_updateVelocity(
+		DArray<Attribute> attribute,
 		DArray<Vec3f> velocity,
 		DArray<Vec3f> angular_velocity,
 		DArray<Vec3f> impulse,
@@ -68,15 +69,18 @@ namespace dyno
 		if (tId >= velocity.size())
 			return;
 
-		velocity[tId] += impulse[2 * tId];
-		angular_velocity[tId] += impulse[2 * tId + 1];
-
-		//Damping
-		velocity[tId] *= 1.0f / (1.0f + dt * linearDamping);
-		angular_velocity[tId] *= 1.0f / (1.0f + dt * angularDamping);
+		if (attribute[tId].isDynamic())
+		{
+			velocity[tId] += impulse[2 * tId];
+			angular_velocity[tId] += impulse[2 * tId + 1];
+			//Damping
+			velocity[tId] *= 1.0f / (1.0f + dt * linearDamping);
+			angular_velocity[tId] *= 1.0f / (1.0f + dt * angularDamping);
+		}
 	}
 
 	void updateVelocity(
+		DArray<Attribute> attribute,
 		DArray<Vec3f> velocity,
 		DArray<Vec3f> angular_velocity,
 		DArray<Vec3f> impulse,
@@ -87,6 +91,7 @@ namespace dyno
 	{
 		cuExecute(velocity.size(),
 			SF_updateVelocity,
+			attribute,
 			velocity,
 			angular_velocity,
 			impulse,
@@ -110,6 +115,7 @@ namespace dyno
 	* This function update the gesture of rigids based on velocity and timeStep
 	*/
 	__global__ void SF_updateGesture(
+		DArray<Attribute> attribute,
 		DArray<Vec3f> pos,
 		DArray<Quat1f> rotQuat,
 		DArray<Mat3f> rotMat,
@@ -124,22 +130,26 @@ namespace dyno
 		if (tId >= pos.size())
 			return;
 
-		pos[tId] += velocity[tId] * dt;
+		if (!attribute[tId].isFixed())
+		{
+			pos[tId] += velocity[tId] * dt;
 
-		rotQuat[tId] = rotQuat[tId].normalize();
+			rotQuat[tId] = rotQuat[tId].normalize();
 
-		rotQuat[tId] += dt * 0.5f *
-			Quat1f(angular_velocity[tId][0], angular_velocity[tId][1], angular_velocity[tId][2], 0.0)
-			* (rotQuat[tId]);
+			rotQuat[tId] += dt * 0.5f *
+				Quat1f(angular_velocity[tId][0], angular_velocity[tId][1], angular_velocity[tId][2], 0.0)
+				* (rotQuat[tId]);
 
-		rotQuat[tId] = rotQuat[tId].normalize();
+			rotQuat[tId] = rotQuat[tId].normalize();
 
-		rotMat[tId] = rotQuat[tId].toMatrix3x3();
+			rotMat[tId] = rotQuat[tId].toMatrix3x3();
 
-		inertia[tId] = rotMat[tId] * inertia_init[tId] * rotMat[tId].inverse();
+			inertia[tId] = rotMat[tId] * inertia_init[tId] * rotMat[tId].inverse();
+		}
 	}
 
 	void updateGesture(
+		DArray<Attribute> attribute,
 		DArray<Vec3f> pos,
 		DArray<Quat1f> rotQuat,
 		DArray<Mat3f> rotMat,
@@ -152,6 +162,7 @@ namespace dyno
 	{
 		cuExecute(pos.size(),
 			SF_updateGesture,
+			attribute,
 			pos,
 			rotQuat,
 			rotMat,

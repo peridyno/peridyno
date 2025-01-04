@@ -60,6 +60,7 @@ namespace dyno
 		this->stateInertia()->connect(iterSolver->inInertia());
 		this->stateQuaternion()->connect(iterSolver->inQuaternion());
 		this->stateInitialInertia()->connect(iterSolver->inInitialInertia());
+		this->stateAttribute()->connect(iterSolver->inAttribute());
 
 		this->stateTopology()->connect(iterSolver->inDiscreteElements());
 

@@ -20,6 +20,8 @@
 #include "RigidBody/RigidBodyShared.h"
 
 #include "Topology/DiscreteElements.h"
+#include "Collision/Attribute.h"
+#include "Collision/CollisionData.h"
 
 namespace dyno
 {
@@ -91,12 +93,14 @@ namespace dyno
 
 		DEF_INSTANCE_IN(DiscreteElements<TDataType>, DiscreteElements, "");
 
+		DEF_ARRAY_IN(Attribute, Attribute, DeviceType::GPU, "Rigid body attributes");
+
+
 	protected:
 		void constrain() override;
 
 	private:
 		void initializeJacobian(Real dt);
-		void initializeRelaxation();
 
 	private:
 		DArray<Coord> mJ;

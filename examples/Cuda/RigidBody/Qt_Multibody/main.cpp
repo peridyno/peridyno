@@ -84,7 +84,7 @@ std::shared_ptr<RigidBodySystem<DataType3f>> createBoxes(std::shared_ptr<SceneGr
 			for (int k = 0; k < dim; k++)
 			{
 				rigidBody.position = Vec3f(2 * i * h - h * dim, h + (2.01f) * j * h, 2 * k * h - h * dim);
-
+				rigidBody.motionType = BodyType::Static;
 				auto boxAt = rigid->addBox(box, rigidBody);
 			}
 		}
