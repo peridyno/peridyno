@@ -306,7 +306,7 @@ namespace dyno
 						mK_2,
 						mK_3,
 						this->inMass()->getData(),
-						this->varFrictionCoefficient()->getValue(),
+						this->inFrictionCoefficients()->getData(),
 						this->varGravityValue()->getValue(),
 						dh,
 						this->varDampingRatio()->getValue(),

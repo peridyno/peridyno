@@ -291,7 +291,7 @@ namespace dyno
 		DArray<Mat2f> K_2,
 		DArray<Mat3f> K_3,
 		DArray<float> mass,
-		float mu,
+		DArray<float> mu,
 		float g,
 		float dt,
 		float zeta,

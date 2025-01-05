@@ -52,6 +52,7 @@ namespace dyno
 		this->varSlop()->connect(iterSolver->varSlop());
 		this->stateMass()->connect(iterSolver->inMass());
 		
+		this->stateFrictionCoefficients()->connect(iterSolver->inFrictionCoefficients());
 		this->stateAttribute()->connect(iterSolver->inAttribute());
 		this->stateCenter()->connect(iterSolver->inCenter());
 		this->stateVelocity()->connect(iterSolver->inVelocity());
@@ -432,6 +433,7 @@ namespace dyno
 		DArray<CollisionMask> mask,
 		DArray<Attribute> atts,
 		DArray<RigidBodyInfo> states,
+		DArray<Real> fricCoeffs,
 		ElementOffset offset)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -446,6 +448,7 @@ namespace dyno
 		pos[tId] = states[tId].position;
 		inertia[tId] = states[tId].inertia;
 		mask[tId] = states[tId].collisionMask;
+		fricCoeffs[tId] = states[tId].friction;
 
 		Attribute att_i;
 		att_i.setObjectId(states[tId].bodyId);
@@ -594,6 +597,7 @@ namespace dyno
 		this->stateQuaternion()->resize(sizeOfRigidBodies);
 		this->stateCollisionMask()->resize(sizeOfRigidBodies);
 		this->stateAttribute()->resize(sizeOfRigidBodies);
+		this->stateFrictionCoefficients()->resize(sizeOfRigidBodies);
 
 		cuExecute(sizeOfRigidBodies,
 			RB_SetupInitialStates,
@@ -607,6 +611,7 @@ namespace dyno
 			this->stateCollisionMask()->getData(),
 			this->stateAttribute()->getData(),
 			mDeviceRigidBodyStates,
+			this->stateFrictionCoefficients()->getData(),
 			eleOffset);
 
 		this->stateInitialInertia()->resize(sizeOfRigidBodies);

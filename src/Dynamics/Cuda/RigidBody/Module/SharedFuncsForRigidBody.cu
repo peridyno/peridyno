@@ -1802,7 +1802,7 @@ namespace dyno
 
 		if (constraints[tId].type == ConstraintType::CN_NONPENETRATION)
 		{
-			error = minimum(constraints[tId].interpenetration + slop, 0.0f);
+			error = minimum(constraints[tId].interpenetration + slop, 0.0f) / substepping;
 		}
 
 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_1)
@@ -2017,7 +2017,7 @@ namespace dyno
 		Real omega = 2.0 * M_PI * hertz;
 		Real a1 = 2.0 * zeta + omega * dt;
 		Real biasRate = omega / a1;
-		eta[tId] -= biasRate * error / substepping;
+		eta[tId] -= biasRate * error;
 	}
 
 	void calculateEtaVectorForPJSoft(
@@ -3997,7 +3997,7 @@ namespace dyno
 		DArray<Matrix2> K_2,
 		DArray<Matrix3> K_3,
 		DArray<Real> mass,
-		Real mu,
+		DArray<Real> mu,
 		Real g,
 		Real dt,
 		Real zeta,
@@ -4057,8 +4057,14 @@ namespace dyno
 			if (constraints[tId].type == ConstraintType::CN_FRICTION)
 			{
 				Real mass_avl = mass[idx1];
-				/*Real lambda_new = minimum(maximum(lambda[tId] + omega * (massCoeff * tmp * K_1[tId] - impulseCoeff * lambda[tId]), -mu * mass_avl * g * dt), mu * mass_avl * g * dt);*/
-				delta_lambda = omega * (massCoeff * tmp * K_1[tId] - impulseCoeff * lambda[tId]);
+				Real mu_i = mu[idx1];
+				if (idx2 != INVALID)
+				{
+					mass_avl = (mass_avl + mass[idx2]) / 2;
+					mu_i = (mu_i + mu[idx2]) / 2;
+				}
+				Real lambda_new = minimum(maximum(lambda[tId] + omega * (massCoeff * tmp * K_1[tId] - impulseCoeff * lambda[tId]), -mu_i * mass_avl * g * dt), mu_i * mass_avl * g * dt);
+				delta_lambda = lambda_new - lambda[tId];
 
 			}
 
@@ -4420,7 +4426,7 @@ namespace dyno
 		DArray<Mat2f> K_2,
 		DArray<Mat3f> K_3,
 		DArray<float> mass,
-		float mu,
+		DArray<float> mu,
 		float g,
 		float dt,
 		float zeta,
