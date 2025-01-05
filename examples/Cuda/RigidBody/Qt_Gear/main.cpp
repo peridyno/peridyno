@@ -27,7 +27,7 @@ using namespace dyno;
 std::shared_ptr<SceneGraph> createSceneGraph()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
-	scn->setGravity(Vec3f(0.0f, 0.0f, 0.0f));
+	scn->setGravity(Vec3f(0.0f, -9.8f, 0.0f));
 
 	auto gear = scn->addNode(std::make_shared<Gear<DataType3f>>());
 

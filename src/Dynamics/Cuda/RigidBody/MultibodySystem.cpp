@@ -49,7 +49,6 @@ namespace dyno
 		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
 		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
 		this->varGravityValue()->connect(iterSolver->varGravityValue());
-		//this->varFrictionCoefficient()->connect(iterSolver->varFrictionCoefficient());
 		this->varFrictionCoefficient()->setValue(20.0f);
 		this->varSlop()->connect(iterSolver->varSlop());
 		this->stateMass()->connect(iterSolver->inMass());
@@ -61,6 +60,7 @@ namespace dyno
 		this->stateQuaternion()->connect(iterSolver->inQuaternion());
 		this->stateInitialInertia()->connect(iterSolver->inInitialInertia());
 		this->stateAttribute()->connect(iterSolver->inAttribute());
+		this->stateFrictionCoefficients()->connect(iterSolver->inFrictionCoefficients());
 
 		this->stateTopology()->connect(iterSolver->inDiscreteElements());
 
@@ -116,6 +116,7 @@ namespace dyno
 			this->stateQuaternion()->resize(sizeOfRigidBodies);
 			this->stateCollisionMask()->resize(sizeOfRigidBodies);
 			this->stateAttribute()->resize(sizeOfRigidBodies);
+			this->stateFrictionCoefficients()->resize(sizeOfRigidBodies);
 
 			auto& stateMass = this->stateMass()->getData();
 			auto& stateCenter = this->stateCenter()->getData();
@@ -127,6 +128,7 @@ namespace dyno
 			auto& stateQuaternion = this->stateQuaternion()->getData();
 			auto& stateCollisionMask = this->stateCollisionMask()->getData();
 			auto& stateAttribute = this->stateAttribute()->getData();
+			auto& stateFrictionCoefficients = this->stateFrictionCoefficients()->getData();
 
 			uint offset = 0;
 			for (uint i = 0; i < vehicles.size(); i++)
@@ -145,7 +147,7 @@ namespace dyno
 				stateQuaternion.assign(vehicle->stateQuaternion()->constData(), vehicle->stateQuaternion()->size(), offset, 0);
 				stateCollisionMask.assign(vehicle->stateCollisionMask()->constData(), vehicle->stateCollisionMask()->size(), offset, 0);
 				stateAttribute.assign(vehicle->stateAttribute()->constData(), vehicle->stateAttribute()->size(), offset, 0);
-
+				stateFrictionCoefficients.assign(vehicle->stateFrictionCoefficients()->constData(), vehicle->stateFrictionCoefficients()->size(), offset, 0);
 				offset += num;
 			}
 
@@ -205,6 +207,7 @@ namespace dyno
 				auto& stateQuaternion = vehicle->stateQuaternion()->getData();
 				auto& stateCollisionMask = vehicle->stateCollisionMask()->getData();
 				auto& stateAttribute = vehicle->stateAttribute()->getData();
+				auto& stateFrictionCoefficients = vehicle->stateFrictionCoefficients()->getData();
 
 
 				stateMass.assign(this->stateMass()->constData(), sizeOfInput, 0, offset);
@@ -217,6 +220,7 @@ namespace dyno
 				stateQuaternion.assign(this->stateQuaternion()->constData(), sizeOfInput, 0, offset);
 				stateCollisionMask.assign(this->stateCollisionMask()->constData(), sizeOfInput, 0, offset);
 				stateAttribute.assign(this->stateAttribute()->constData(), sizeOfInput, 0, offset);
+				stateFrictionCoefficients.assign(this->stateFrictionCoefficients()->constData(), sizeOfInput, 0, offset);
 
 				auto topo = vehicle->stateTopology()->getDataPtr();
 
