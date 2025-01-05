@@ -19,6 +19,7 @@
 #include "STL/Pair.h"
 #include "VehicleInfo.h"
 #include "FilePath.h"
+#include "Topology/EdgeSet.h"
 
 namespace dyno
 {
@@ -52,6 +53,28 @@ namespace dyno
 		void resetStates() override;
 
 	};
+
+
+	template<typename TDataType>
+	class TrackedTank : virtual public ArticulatedBody<TDataType>
+	{
+		DECLARE_TCLASS(TrackedTank, TDataType)
+	public:
+		typedef typename TDataType::Real Real;
+		typedef typename TDataType::Coord Coord;
+
+		TrackedTank();
+		~TrackedTank() override;
+
+		DEF_INSTANCE_STATE(EdgeSet<TDataType>, caterpillarTrack, "");
+	protected:
+		void resetStates() override;
+
+	private:
+
+
+	};
+	
 
 	template<typename TDataType>
 	class UAV : virtual public ArticulatedBody<TDataType>

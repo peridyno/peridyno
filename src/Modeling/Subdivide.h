@@ -19,7 +19,7 @@
  */
 
 #pragma once
-#include "BasicShape.h"
+#include "Node/ParametricModel.h"
 
 #include "Topology/TriangleSet.h"
 #include "Topology/PolygonSet.h"
@@ -27,10 +27,14 @@
 
 namespace dyno
 {
+
+	void loopSubdivide(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles);
+
+
 	template<typename TDataType>
-	class SphereModel : public BasicShape<TDataType>
+	class Subdivide : public ParametricModel<TDataType>
 	{
-		DECLARE_TCLASS(SphereModel, TDataType);
+		DECLARE_TCLASS(Subdivide, TDataType);
 
 	public:
 		typedef typename TDataType::Real Real;
@@ -38,36 +42,18 @@ namespace dyno
 
 
 
-		SphereModel();
+		Subdivide();
 
-		std::string caption() override { return "Sphere"; }
-
-		BasicShapeType getShapeType() override { return BasicShapeType::SPHERE; }
-
-		NBoundingBox boundingBox() override;
+		std::string caption() override { return "Subdivide"; }
 
 	public:
-		DEF_VAR(Coord, Center, 0, "Sphere center");
 
-		DEF_VAR(Real, Radius, 0.5, "Sphere radius");
+		DEF_VAR(uint, Step, 1, "Step");
 
-		DECLARE_ENUM(SphereType,
-			Standard = 0,
-			Icosahedron = 1);
-
-		DEF_ENUM(SphereType, Type, SphereType::Standard, "Sphere type");
-
-		DEF_VAR(uint, Latitude, 32, "Latitude");
-
-		DEF_VAR(uint, Longitude, 32, "Longitude");
-
-        DEF_VAR(uint, IcosahedronStep, 1,"Step");
-
-		DEF_INSTANCE_STATE(PolygonSet<TDataType>, PolygonSet, "");
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, InTriangleSet, "");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
-		DEF_VAR_OUT(TSphere3D<Real>, Sphere, "");
 
 	protected:
 		void resetStates() override;
@@ -75,14 +61,10 @@ namespace dyno
 	private:
 		void varChanged();
 
-		void generateIcosahedron(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles);
 
-		void standardSphere();
-
-		void icosahedronSphere();
-        
 	};
 
 
-	IMPLEMENT_TCLASS(SphereModel, TDataType);
+	IMPLEMENT_TCLASS(Subdivide, TDataType);
+	
 }

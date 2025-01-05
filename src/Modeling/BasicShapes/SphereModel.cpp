@@ -7,6 +7,7 @@
 #include "GLPointVisualModule.h"
 
 #include "Mapping/Extract.h"
+#include "Subdivide.h"
 
 namespace dyno
 {
@@ -22,6 +23,7 @@ namespace dyno
 		
 		this->varLatitude()->setRange(2, 10000);
 		this->varLongitude()->setRange(3, 10000);
+		this->varIcosahedronStep()->setRange(0,6);
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&SphereModel<TDataType>::varChanged, this));
 
@@ -60,6 +62,7 @@ namespace dyno
 	template<typename TDataType>
 	NBoundingBox SphereModel<TDataType>::boundingBox()
 	{
+
 		auto center = this->varLocation()->getData();
 		auto rot = this->varRotation()->getData();
 		auto scale = this->varScale()->getData();
@@ -94,10 +97,10 @@ namespace dyno
 		return ret;
 	}
 
-
 	template<typename TDataType>
-	void SphereModel<TDataType>::varChanged()
+	void SphereModel<TDataType>::standardSphere()
 	{
+
 		auto center = this->varLocation()->getValue();
 		auto rot = this->varRotation()->getValue();
 		auto scale = this->varScale()->getValue();
@@ -119,8 +122,7 @@ namespace dyno
 
 		std::vector<Coord> vertices;
 
-		if (type == SphereType::Standard)
-		{
+
 			Real deltaTheta = M_PI / latitude;
 			Real deltaPhi = 2 * M_PI / longitude;
 
@@ -232,17 +234,237 @@ namespace dyno
 			polySet->update();
 
 			polygonIndices.clear();
-		}
-		else if(type == SphereType::Icosahedron)
-		{
-			//TODO: implementation
-		}
+
 
 		auto& ts = this->stateTriangleSet()->getData();
 		polySet->turnIntoTriangleSet(ts);
 
 		vertices.clear();
 	}
+	template<typename TDataType>
+	void SphereModel<TDataType>::icosahedronSphere()
+	{
+		std::vector<Vec3f> vts;
+		std::vector<TopologyModule::Triangle> trs;
+
+		generateIcosahedron(vts, trs);
+		float fixScale = this->varIcosahedronStep()->getValue() >= 2 ? 1.08 : 1;
+
+		Quat<Real> q = computeQuaternion();
+		auto center = this->varLocation()->getData();
+		auto scale = this->varScale()->getData();
+
+		auto RV = [&](const Coord& v)->Coord {
+			return center + q.rotate(v - center);
+		};
+
+		for (int i = 0; i < vts.size(); i++) {
+			vts[i] = RV(vts[i] * scale * fixScale + RV(center));
+		}
+		
+		if (this->varIcosahedronStep()->getValue() >= 2) 
+		{
+			for (int i = 0; i < (int)this->varIcosahedronStep()->getValue() - 1; i++)
+			{
+				loopSubdivide(vts, trs);
+			}
+		}
+
+
+		this->stateTriangleSet()->getDataPtr()->setPoints(vts);
+		this->stateTriangleSet()->getDataPtr()->setTriangles(trs);
+		this->stateTriangleSet()->getDataPtr()->update();
+
+		this->statePolygonSet()->getDataPtr()->triangleSetToPolygonSet(this->stateTriangleSet()->getData());
+		
+
+
+		return;
+	}
+
+
+
+	template<typename TDataType>
+	void SphereModel<TDataType>::varChanged()
+	{
+		if (this->varType()->getDataPtr()->currentKey() == SphereType::Icosahedron)
+		{
+			icosahedronSphere();
+		}
+		else 
+		{
+			standardSphere();
+		}
+
+	}
+
+
+	template<typename TDataType>
+	void SphereModel<TDataType>::generateIcosahedron(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles) 
+	{
+		auto radius = this->varRadius()->getValue() * 2;
+
+		if (this->varIcosahedronStep()->getValue() == 0)
+		{
+			float phi = (1.0 + std::sqrt(5.0)) / 2.0;
+
+			vertices = {
+				Vec3f(-1,  phi, 0), Vec3f(1,  phi, 0), Vec3f(-1, -phi, 0), Vec3f(1, -phi, 0),
+				Vec3f(0, -1,  phi), Vec3f(0,  1,  phi), Vec3f(0, -1, -phi), Vec3f(0,  1, -phi),
+				Vec3f(phi, 0, -1), Vec3f(phi, 0,  1), Vec3f(-phi, 0, -1), Vec3f(-phi, 0,  1)
+			};
+
+			triangles = {
+				TopologyModule::Triangle(0, 11, 5), TopologyModule::Triangle(0, 5, 1), TopologyModule::Triangle(0, 1, 7), TopologyModule::Triangle(0, 7, 10), TopologyModule::Triangle(0, 10, 11),
+				TopologyModule::Triangle(1, 5, 9), TopologyModule::Triangle(5, 11, 4), TopologyModule::Triangle(11, 10, 2), TopologyModule::Triangle(10, 7, 6), TopologyModule::Triangle(7, 1, 8),
+				TopologyModule::Triangle(3, 9, 4), TopologyModule::Triangle(3, 4, 2), TopologyModule::Triangle(3, 2, 6), TopologyModule::Triangle(3, 6, 8), TopologyModule::Triangle(3, 8, 9),
+				TopologyModule::Triangle(4, 9, 5), TopologyModule::Triangle(2, 4, 11), TopologyModule::Triangle(6, 2, 10), TopologyModule::Triangle(8, 6, 7), TopologyModule::Triangle(9, 8, 1)
+			};
+
+			for (auto& v : vertices) {
+				v = v / M_PI * radius;
+			}
+		}
+		else
+		{
+			vertices =
+			{
+				Vec3f(0,0, -0.5) * radius,
+				Vec3f(0, 0.262865603, -0.425325394) * radius,
+				Vec3f(0.249999985, 0.0812300518, -0.425325394) * radius,
+				Vec3f(0, 0.44721368, -0.223606572) * radius,
+				Vec3f(0.249999985, 0.344095677, -0.262865305) * radius,
+				Vec3f(0.425325423, 0.138196841, -0.223606601) * radius,
+				Vec3f(0.154508501, -0.212662712, -0.425325423) * radius,
+				Vec3f(0.404508621, -0.131432697, -0.262865394) * radius,
+				Vec3f(0.262865603, -0.361803472, -0.223606631) * radius,
+				Vec3f(-0.154508501, -0.212662712, -0.425325423) * radius,
+				Vec3f(0, -0.425325513, -0.262865365) * radius,
+				Vec3f(-0.262865603, -0.361803472, -0.223606631) * radius,
+				Vec3f(-0.249999985, 0.0812300518, -0.425325394) * radius,
+				Vec3f(-0.404508621, -0.131432697, -0.262865394) * radius,
+				Vec3f(-0.425325423, 0.138196841, -0.223606601) * radius,
+				Vec3f(-0.249999985, 0.344095677, -0.262865305) * radius,
+				Vec3f(-0.154508486, 0.4755283, 0) * radius,
+				Vec3f(-0.404508412, 0.293892711, 0) * radius,
+				Vec3f(-0.262865603, 0.361803472, 0.223606631) * radius,
+				Vec3f(-0.5, 0, 0) * radius,
+				Vec3f(-0.404508412, -0.293892711, 0) * radius,
+				Vec3f(-0.425325423, -0.138196841, 0.223606601) * radius,
+				Vec3f(-0.154508486, -0.4755283, 0) * radius,
+				Vec3f(0.154508486, -0.4755283, 0) * radius,
+				Vec3f(0, -0.44721368, 0.223606572) * radius,
+				Vec3f(0.404508412, -0.293892711, 0) * radius,
+				Vec3f(0.5, 0 ,0) * radius,
+				Vec3f(0.425325423, -0.138196841, 0.223606601) * radius,
+				Vec3f(0.404508412, 0.293892711, 0) * radius,
+				Vec3f(0.154508486, 0.4755283, 0) * radius,
+				Vec3f(0.262865603, 0.361803472 ,0.223606631) * radius,
+				Vec3f(0, 0.425325513, 0.262865365) * radius,
+				Vec3f(-0.404508621, 0.131432697, 0.262865394) * radius,
+				Vec3f(-0.249999985, -0.344095677, 0.262865305) * radius,
+				Vec3f(0.249999985, -0.344095677, 0.262865305) * radius,
+				Vec3f(0.404508621, 0.131432697, 0.262865394) * radius,
+				Vec3f(0, 0, 0.5) * radius,
+				Vec3f(0.154508501, 0.212662712 ,0.425325423) * radius,
+				Vec3f(-0.154508501, 0.212662712, 0.425325423) * radius,
+				Vec3f(0.249999985, -0.0812300518, 0.425325394) * radius,
+				Vec3f(0, -0.262865603, 0.425325394) * radius,
+				Vec3f(-0.249999985, -0.0812300518, 0.425325394) * radius
+			};
+
+			triangles =
+			{
+				TopologyModule::Triangle(3, 1, 2),
+				TopologyModule::Triangle(5,2 ,4),
+				TopologyModule::Triangle(6, 3, 5),
+				TopologyModule::Triangle(3, 2, 5),
+				TopologyModule::Triangle(7, 1, 3),
+				TopologyModule::Triangle(8, 3, 6),
+				TopologyModule::Triangle(9, 7, 8),
+				TopologyModule::Triangle(7, 3, 8),
+				TopologyModule::Triangle(10, 1, 7),
+				TopologyModule::Triangle(11, 7, 9),
+				TopologyModule::Triangle(12, 10, 11),
+				TopologyModule::Triangle(10, 7, 11),
+				TopologyModule::Triangle(13, 1, 10),
+				TopologyModule::Triangle(14, 10, 12),
+				TopologyModule::Triangle(15, 13, 14),
+				TopologyModule::Triangle(13, 10, 14),
+				TopologyModule::Triangle(2 ,1, 13),
+				TopologyModule::Triangle(16, 13, 15),
+				TopologyModule::Triangle(4 ,2, 16),
+				TopologyModule::Triangle(2 ,13, 16),
+				TopologyModule::Triangle(17, 4, 16),
+				TopologyModule::Triangle(18, 16, 15),
+				TopologyModule::Triangle(19, 17, 18),
+				TopologyModule::Triangle(17, 16, 18),
+				TopologyModule::Triangle(20, 15, 14),
+				TopologyModule::Triangle(21, 14, 12),
+				TopologyModule::Triangle(22, 20, 21),
+				TopologyModule::Triangle(20, 14, 21),
+				TopologyModule::Triangle(23, 12, 11),
+				TopologyModule::Triangle(24, 11, 9),
+				TopologyModule::Triangle(25, 23, 24),
+				TopologyModule::Triangle(23, 11, 24),
+				TopologyModule::Triangle(26, 9, 8),
+				TopologyModule::Triangle(27, 8, 6),
+				TopologyModule::Triangle(28, 26, 27),
+				TopologyModule::Triangle(26, 8, 27),
+				TopologyModule::Triangle(29, 6, 5),
+				TopologyModule::Triangle(30, 5, 4),
+				TopologyModule::Triangle(31, 29, 30),
+				TopologyModule::Triangle(29, 5, 30),
+				TopologyModule::Triangle(30, 4, 17),
+				TopologyModule::Triangle(32, 17, 19),
+				TopologyModule::Triangle(31, 30, 32),
+				TopologyModule::Triangle(30, 17, 32),
+				TopologyModule::Triangle(18, 15, 20),
+				TopologyModule::Triangle(33, 20, 22),
+				TopologyModule::Triangle(19, 18, 33),
+				TopologyModule::Triangle(18, 20, 33),
+				TopologyModule::Triangle(21, 12, 23),
+				TopologyModule::Triangle(34, 23, 25),
+				TopologyModule::Triangle(22, 21, 34),
+				TopologyModule::Triangle(21, 23, 34),
+				TopologyModule::Triangle(24, 9, 26),
+				TopologyModule::Triangle(35, 26, 28),
+				TopologyModule::Triangle(25, 24, 35),
+				TopologyModule::Triangle(24, 26, 35),
+				TopologyModule::Triangle(27, 6, 29),
+				TopologyModule::Triangle(36, 29, 31),
+				TopologyModule::Triangle(28, 27, 36),
+				TopologyModule::Triangle(27, 29, 36),
+				TopologyModule::Triangle(39, 37, 38),
+				TopologyModule::Triangle(32, 38, 31),
+				TopologyModule::Triangle(19, 39, 32),
+				TopologyModule::Triangle(39, 38, 32),
+				TopologyModule::Triangle(38, 37, 40),
+				TopologyModule::Triangle(36, 40, 28),
+				TopologyModule::Triangle(31, 38, 36),
+				TopologyModule::Triangle(38, 40, 36),
+				TopologyModule::Triangle(40, 37, 41),
+				TopologyModule::Triangle(35, 41, 25),
+				TopologyModule::Triangle(28, 40, 35),
+				TopologyModule::Triangle(40, 41, 35),
+				TopologyModule::Triangle(41, 37, 42),
+				TopologyModule::Triangle(34, 42, 22),
+				TopologyModule::Triangle(25, 41, 34),
+				TopologyModule::Triangle(41, 42, 34),
+				TopologyModule::Triangle(42, 37, 39),
+				TopologyModule::Triangle(33, 39, 19),
+				TopologyModule::Triangle(22, 42, 33),
+				TopologyModule::Triangle(42, 39, 33)
+			};
+			for (size_t i = 0; i < triangles.size(); i++)
+			{
+				triangles[i] = TopologyModule::Triangle(triangles[i][0] - 1, triangles[i][1] - 1, triangles[i][2] - 1);
+			}
+
+		}
+	}
+
+
 
 
 	DEFINE_CLASS(SphereModel);

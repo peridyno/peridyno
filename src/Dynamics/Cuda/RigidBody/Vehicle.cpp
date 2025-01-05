@@ -4,6 +4,7 @@
 
 #include "Mapping/DiscreteElementsToTriangleSet.h"
 #include "GLSurfaceVisualModule.h"
+#include "GLWireframeVisualModule.h"
 
 //Modeling
 #include "GltfFunc.h"
@@ -247,6 +248,280 @@ namespace dyno
 	}
 
 	DEFINE_CLASS(Tank);
+
+	//TrackedTank
+	IMPLEMENT_TCLASS(TrackedTank, TDataType)
+
+	template<typename TDataType>
+	TrackedTank<TDataType>::TrackedTank() :
+		ArticulatedBody<TDataType>()
+	{
+		auto driver = std::make_shared<CarDriver<DataType3f>>();
+		this->stateTopology()->connect(driver->inTopology());
+		this->animationPipeline()->pushModule(driver);
+
+		this->statecaterpillarTrack()->setDataPtr(std::make_shared<EdgeSet<DataType3f>>());
+		auto wireframe = std::make_shared<GLWireframeVisualModule>();
+		this->statecaterpillarTrack()->connect(wireframe->inEdgeSet());
+		this->graphicsPipeline()->pushModule(wireframe);
+
+	}
+
+	template<typename TDataType>
+	TrackedTank<TDataType>::~TrackedTank()
+	{
+
+	}
+
+
+	template<typename TDataType>
+	void TrackedTank<TDataType>::resetStates()
+	{
+		this->clearRigidBodySystem();
+		this->clearVechicle();
+
+		std::string filename = getAssetPath() + "gltf/Tank/TrackedTank.gltf";
+		if (this->varFilePath()->getValue() != filename)
+		{
+			this->varFilePath()->setValue(FilePath(filename));
+		}
+
+		auto instances = this->varVehiclesTransform()->getValue();
+		uint vehicleNum = instances.size();
+		for (size_t i = 0; i < vehicleNum; i++)
+		{
+			RigidBodyInfo rigidbody;
+			rigidbody.bodyId = i;
+
+			auto texMesh = this->stateTextureMesh()->constDataPtr();
+			std::map<int, std::shared_ptr<PdActor>> actors;
+
+#define FULLBODY
+
+#ifdef FULLBODY
+			//wheel
+			std::vector <int> Wheel_Id = { 1,2,3,4,6,7,8,10,11,12,13,15,16,17 };
+			//Capsule
+			for (auto it : Wheel_Id) 
+			{
+				auto up = texMesh->shapes()[it]->boundingBox.v1;
+				auto down = texMesh->shapes()[it]->boundingBox.v0;
+
+				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.motionType = BodyType::Static;
+				auto actor = this->createRigidBody(rigidbody);
+				actors[it] = actor;
+
+				CapsuleInfo capsule;
+				capsule.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
+				capsule.radius = (up[1] - down[1]) / 2;
+				capsule.halfLength = (up[2] - down[2]) / 2;
+
+				float r = (up[1] - down[1]) / 2;
+				this->bindCapsule(actor, capsule);		
+				this->bind(actor, Pair<uint, uint>(it, i));
+				
+			}
+			
+
+			//Gear
+			std::vector<int> gear = {0,5,9,14};
+			for (size_t c = 0; c < 4; c++)
+			{
+				int cid = gear[c];
+				auto up = texMesh->shapes()[cid]->boundingBox.v1;
+				auto down = texMesh->shapes()[cid]->boundingBox.v0;
+				//first gear
+				rigidbody.position = texMesh->shapes()[cid]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.motionType = BodyType::Static;
+				auto actor = this->createRigidBody(rigidbody);
+				actors[cid] = actor;
+
+				for (uint sec = 0; sec < 14; sec++)
+				{
+					CapsuleInfo capsule;
+					capsule.radius = 0.03;
+					capsule.halfLength = (up[1] - down[1]) / 2;
+					Vec3f offset = sec <=6 ? Vec3f(-0.1,0,0): Vec3f(0.1, 0, 0);
+					float theta = sec * M_PI / 7;
+
+					capsule.rot = Quat1f(sec * M_PI / 7, Vec3f(1, 0, 0));
+					capsule.center = offset;
+					this->bindCapsule(actor, capsule);
+
+					//row
+					float r = (up[1] - down[1]) / 3;
+					float theta2 = sec * M_PI / 7;
+					float y = r * sin(theta2);
+					float z = r * cos(theta2);
+
+					capsule.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
+					capsule.radius = 0.05f;
+					capsule.halfLength = (up[0] - down[0]) / 2;
+					capsule.center = Vec3f(0, y, z);
+					this->bindCapsule(actor, capsule);
+				}
+
+				this->bind(actor, Pair<uint, uint>(cid, i));
+
+
+			}
+			
+			//Gun
+			int head = 18;
+			{
+				auto up = texMesh->shapes()[head]->boundingBox.v1;
+				auto down = texMesh->shapes()[head]->boundingBox.v0;
+
+				rigidbody.position = texMesh->shapes()[head]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.motionType = BodyType::Static;
+				auto actor = this->createRigidBody(rigidbody);
+				actors[head] = actor;
+
+				BoxInfo box;
+				box.halfLength = Vec3f(0.8,0.4,1.2);
+				box.center = Vec3f(0,-0.2,-1);
+
+				this->bindBox(actor, box);
+
+				CapsuleInfo capsule;
+				capsule.rot = Quat1f(M_PI / 2, Vec3f(1, 0, 0));
+				capsule.radius = 0.1f;
+				capsule.halfLength = (up[2] - down[2]) / 3;
+				capsule.center = Vec3f(0.3,-0.2,0.5);
+				this->bindCapsule(actor, capsule);
+				capsule.center = Vec3f(-0.3, -0.2, 0.5);
+				this->bindCapsule(actor, capsule);
+
+				this->bind(actor, Pair<uint, uint>(head, i));
+			}
+			//Body
+			int body = 19;
+			{
+				auto up = texMesh->shapes()[body]->boundingBox.v1;
+				auto down = texMesh->shapes()[body]->boundingBox.v0;
+
+				rigidbody.position = texMesh->shapes()[body]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.motionType = BodyType::Static;
+				auto actor = this->createRigidBody(rigidbody);
+				actors[body] = actor;
+
+				BoxInfo box;
+				box.rot = Quat1f(0, Vec3f(0, 0, 1));
+				box.halfLength = (up - down) / Vec3f(3,2,3);
+
+				this->bindBox(actor, box);
+				this->bind(actor, Pair<uint, uint>(body, i));
+			}
+#endif // FULLBODY
+
+			std::vector<int> caterpillarTrack_L;
+			std::vector<int> caterpillarTrack_R;
+
+			for (int cid = 20; cid < 160; cid++)
+			{
+				auto up = texMesh->shapes()[cid]->boundingBox.v1;
+				auto down = texMesh->shapes()[cid]->boundingBox.v0;
+				
+				rigidbody.position = texMesh->shapes()[cid]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.motionType = BodyType::Static;
+				auto actor = this->createRigidBody(rigidbody);
+				actors[cid] = actor;
+				if(cid<90)
+					caterpillarTrack_L.push_back(cid);
+				else
+					caterpillarTrack_R.push_back(cid);
+
+
+				CapsuleInfo capsule;
+				capsule.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
+				capsule.radius = 0.05;
+				capsule.halfLength = (up[0] - down[0]) / 2;
+
+				this->bindCapsule(actor, capsule);
+
+				this->bind(actor, Pair<uint, uint>(cid, i));
+			}
+
+#ifdef FULLBODY
+			Real wheel_velocity = 10;
+
+			//weel to Body Joint
+			for (auto it : Wheel_Id)
+			{
+				auto& joint = this->createHingeJoint(actors[it], actors[body]);
+				joint.setAnchorPoint(actors[it]->center);
+				joint.setMoter(wheel_velocity);
+				joint.setAxis(Vec3f(1, 0, 0));
+			}
+
+			//Gear to Body Joint
+			for (auto it : gear)
+			{
+				auto& joint = this->createHingeJoint(actors[it], actors[body]);
+				joint.setAnchorPoint(actors[it]->center);
+				joint.setMoter(wheel_velocity);
+				joint.setAxis(Vec3f(1, 0, 0));
+			}
+
+			auto& jointGun_Body = this->createFixedJoint(actors[head], actors[body]);
+			jointGun_Body.setAnchorPoint(actors[body]->center);
+
+#endif // FULLBODY
+
+			//Caterpillar Track Joint
+			auto edgeset = this->statecaterpillarTrack()->getDataPtr();
+			std::vector<TopologyModule::Edge> edges;
+			std::vector<Vec3f> points;
+			for (int k = 0; k < caterpillarTrack_L.size(); k++)
+			{
+				auto start = caterpillarTrack_L[k];
+				auto end = k != caterpillarTrack_L.size() - 1 ? caterpillarTrack_L[k + 1] : caterpillarTrack_L[0];
+
+				auto& joint = this->createHingeJoint(actors[start], actors[end]);
+				joint.setAnchorPoint((actors[start]->center + actors[end]->center) / 2);
+				joint.setAxis(Vec3f(1, 0, 0));
+
+				points.push_back(actors[start]->center);
+
+				if (k != caterpillarTrack_L.size() - 1)
+					edges.push_back(TopologyModule::Edge(k, k + 1));
+				else
+					edges.push_back(TopologyModule::Edge(k, 0));
+				
+
+			}
+			auto edgeOffset = points.size();
+			for (int k = 0; k < caterpillarTrack_R.size(); k++)
+			{
+				auto start = caterpillarTrack_R[k];
+				auto end = k != caterpillarTrack_R.size() - 1 ? caterpillarTrack_R[k + 1] : caterpillarTrack_R[0];
+
+				auto& joint = this->createHingeJoint(actors[start], actors[end]);
+				joint.setAnchorPoint((actors[start]->center + actors[end]->center) / 2);
+				joint.setAxis(Vec3f(1, 0, 0));
+
+				points.push_back(actors[start]->center);
+
+				if (k != caterpillarTrack_R.size() - 1)
+					edges.push_back(TopologyModule::Edge(k + edgeOffset, k + 1 + edgeOffset));
+				else
+					edges.push_back(TopologyModule::Edge(k + edgeOffset, 0 + edgeOffset));
+
+			}
+			edgeset->setPoints(points);
+			edgeset->setEdges(edges);
+			edgeset->update();
+
+
+		}
+
+		//**************************************************//
+		ArticulatedBody<TDataType>::resetStates();
+
+	}
+
+	DEFINE_CLASS(TrackedTank);
 
 	//UAV
 	IMPLEMENT_TCLASS(UAV, TDataType)
