@@ -190,9 +190,10 @@ namespace dyno
 	);
 
 	void setUpFixedJointConstraints(
-		DArray<TConstraintPair<float>> constraints,
-		DArray<FixedJoint<float>> joints,
-		DArray<Mat3f> rotMat,
+		DArray<TConstraintPair<float>>& constraints,
+		DArray<FixedJoint<float>>& joints,
+		DArray<Mat3f>& rotMat,
+		DArray<Quat1f>& rotQuat,
 		int begin_index
 	);
 

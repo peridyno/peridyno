@@ -151,8 +151,9 @@ namespace dyno
 				mVelocityConstraints,
 				joints,
 				this->inRotationMatrix()->getData(),
+				this->inQuaternion()->getData(),
 				begin_index
-			);
+			);;
 		}
 
 		if (pointJoint_size != 0)
@@ -339,11 +340,12 @@ namespace dyno
 			int begin_index = contact_size + 3 * ballAndSocketJoint_size + 8 * sliderJoint_size + 8 * hingeJoint_size;
 
 			setUpFixedJointConstraints(
-				mPositionConstraints,
+				mVelocityConstraints,
 				joints,
 				this->inRotationMatrix()->getData(),
+				this->inQuaternion()->getData(),
 				begin_index
-			);
+			);;
 		}
 
 		if (pointJoint_size != 0)

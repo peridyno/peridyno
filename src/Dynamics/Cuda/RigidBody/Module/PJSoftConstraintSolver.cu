@@ -163,6 +163,7 @@ namespace dyno
 				mVelocityConstraints,
 				joints,
 				this->inRotationMatrix()->getData(),
+				this->inQuaternion()->getData(),
 				begin_index
 			);
 		}

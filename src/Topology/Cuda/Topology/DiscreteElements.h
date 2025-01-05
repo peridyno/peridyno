@@ -394,6 +394,11 @@ namespace dyno
 			{
 				Mat3f rotMat2 = this->actor2->rot.toMatrix3x3();
 				this->r2 = rotMat2.inverse() * (anchor_point - this->actor2->center);
+				this->q_init = this->actor2->rot.inverse() * this->actor1->rot;
+			}
+			else
+			{
+				this->q_init = this->actor1->rot;
 			}
 		}
 
@@ -405,6 +410,7 @@ namespace dyno
 		Vector<Real, 3> r2;
 		Vector<Real, 3> w;
 		Quat<Real> q;
+		Quat<Real> q_init;
 	};
 
 

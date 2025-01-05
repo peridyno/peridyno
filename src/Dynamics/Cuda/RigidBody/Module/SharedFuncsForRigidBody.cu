@@ -1865,110 +1865,54 @@ namespace dyno
 		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_1)
 		{
 			Quat q1 = rotation_q[idx1];
-			q1 = q1.normalize();
 			if (idx2 != INVALID)
 			{
 				Quat q2 = rotation_q[idx2];
-				q2 = q2.normalize();
+				Quat q_init = constraints[tId].rotQuat;
+				Quat q_error = q2 * q_init * q1.inverse();
 
-				Quat q_error = q2 * q1.inverse();
-				q_error = q_error.normalize();
-
-				Real theta = 2.0 * acos(q_error.w);
-				if (theta > 1e-6)
-				{
-					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q_error.x, q_error.y, q_error.z);
-					error = theta * v.x;
-				}
-				else
-				{
-					error = theta;
-				}
+				error = q_error.x * 2;
 			}
 			else
 			{
-				Real theta = 2.0 * acos(q1.w);
-				if (theta > 1e-6)
-				{
-					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q1.x, q1.y, q1.z);
-					error = theta * v.x;
-				}
-				else
-				{
-					error = theta;
-				}
+				Quat diff = rotation_q[idx1] * constraints[tId].rotQuat.inverse();
+				error = -diff.x * 2;
 			}
 		}
 
 		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_2)
 		{
 			Quat q1 = rotation_q[idx1];
-			q1 = q1.normalize();
 			if (idx2 != INVALID)
 			{
 				Quat q2 = rotation_q[idx2];
-				q2 = q2.normalize();
-				Quat q_error = q2 * q1.inverse();
-				q_error = q_error.normalize();
-				Real theta = 2.0 * acos(q_error.w);
-				if (theta > 1e-6)
-				{
-					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q_error.x, q_error.y, q_error.z);
-					error = theta * v.y;
-				}
-				else
-				{
-					error = theta;
-				}
+				Quat q_init = constraints[tId].rotQuat;
+				Quat q_error = q2 * q_init * q1.inverse();
+
+				error = q_error.y * 2;
 			}
 			else
 			{
-				Real theta = 2.0 * acos(q1.w);
-				if (theta > 1e-6)
-				{
-					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q1.x, q1.y, q1.z);
-					error = theta * v.y;
-				}
-				else
-				{
-					error = theta;
-				}
+				Quat diff = rotation_q[idx1] * constraints[tId].rotQuat.inverse();
+				error = -diff.y * 2;
 			}
 		}
 
 		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_3)
 		{
 			Quat q1 = rotation_q[idx1];
-			q1 = q1.normalize();
 			if (idx2 != INVALID)
 			{
 				Quat q2 = rotation_q[idx2];
-				q2 = q2.normalize();
-				Quat q_error = q2 * q1.inverse();
-				q_error = q_error.normalize();
-				Real theta = 2.0 * acos(q_error.w);
-				if (theta > 1e-6)
-				{
-					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q_error.x, q_error.y, q_error.z);
-					error = theta * v.z;
-				}
-				else
-				{
-					error = theta;
-				}
+				Quat q_init = constraints[tId].rotQuat;
+				Quat q_error = q2 * q_init * q1.inverse();
+
+				error = q_error.z * 2;
 			}
 			else
 			{
-				Real theta = 2.0 * acos(q1.w);
-				if (theta > 1e-6)
-				{
-					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q1.x, q1.y, q1.z);
-					error = theta * v.z;
-				}
-				else
-				{
-					error = theta;
-				}
+				Quat diff = rotation_q[idx1] * constraints[tId].rotQuat.inverse();
+				error = -diff.z * 2;
 			}
 		}
 
@@ -2940,11 +2884,12 @@ namespace dyno
 	* @param begin_index				begin index of fixed constraints in array
 	* This function set up the fixed joint constraints
 	*/
-	template<typename Joint, typename Constraint, typename Matrix>
+	template<typename Joint, typename Constraint, typename Matrix, typename Quat>
 	__global__ void SF_setUpFixedJointConstraints(
 		DArray<Constraint> constraints,
 		DArray<Joint> joints,
 		DArray<Matrix> rotMat,
+		DArray<Quat> rotQuat,
 		int begin_index
 	)
 	{
@@ -2970,6 +2915,7 @@ namespace dyno
 			constraints[baseIndex + i].normal1 = r1;
 			constraints[baseIndex + i].normal2 = r2;
 			constraints[baseIndex + i].pos1 = joints[tId].w;
+			constraints[baseIndex + i].rotQuat = joints[tId].q_init;
 			constraints[baseIndex + i].isValid = true;
 		}
 
@@ -2982,9 +2928,10 @@ namespace dyno
 	}
 
 	void setUpFixedJointConstraints(
-		DArray<TConstraintPair<float>> constraints,
-		DArray<FixedJoint<float>> joints,
-		DArray<Mat3f> rotMat,
+		DArray<TConstraintPair<float>> &constraints,
+		DArray<FixedJoint<float>> &joints,
+		DArray<Mat3f> &rotMat,
+		DArray<Quat1f> &rotQuat,
 		int begin_index
 	)
 	{
@@ -2993,6 +2940,7 @@ namespace dyno
 			constraints,
 			joints,
 			rotMat,
+			rotQuat,
 			begin_index);
 	}
 
