@@ -12,7 +12,7 @@ namespace dyno
 	BasicShapeToVolume<TDataType>::BasicShapeToVolume()
 		: Volume<TDataType>()
 	{
-
+		this->varGridSpacing()->setRange(0.001f, 1.0f);
 	}
 
 	template<typename TDataType>

@@ -7,6 +7,7 @@ namespace dyno
 		: ParametricModel<TDataType>()
 	{
 		this->setForceUpdate(true);
+		this->setAutoHidden(false);
 
 		this->varVelocityMagnitude()->setRange(Real(0), Real(10));
 		this->varSamplingDistance()->setRange(Real(0.001), Real(1.0));

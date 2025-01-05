@@ -1,5 +1,8 @@
 #include "QtNodeWidget.h"
 
+#include "nodes/QConnection"
+#include "nodes/QNode"
+
 #include "Node.h"
 #include "NodePort.h"
 
@@ -382,5 +385,4 @@ namespace Qt
 	{
 		mEditingEnabled = false;
 	}
-
 }
