@@ -129,6 +129,7 @@ namespace dyno
 				joints,
 				this->inCenter()->getData(),
 				this->inRotationMatrix()->getData(),
+				this->inQuaternion()->getData(),
 				begin_index
 			);
 		}
@@ -163,6 +164,7 @@ namespace dyno
 				mVelocityConstraints,
 				joints,
 				this->inRotationMatrix()->getData(),
+				this->inQuaternion()->getData(),
 				begin_index
 			);
 		}
@@ -274,6 +276,7 @@ namespace dyno
 
 
 		updateVelocity(
+			this->inAttribute()->getData(),
 			this->inVelocity()->getData(),
 			this->inAngularVelocity()->getData(),
 			mImpulseExt,
@@ -300,7 +303,7 @@ namespace dyno
 					mK_2,
 					mK_3,
 					this->inMass()->getData(),
-					this->varFrictionCoefficient()->getValue(),
+					this->inFrictionCoefficients()->getData(),
 					this->varGravityValue()->getValue(),
 					dt,
 					this->varDampingRatio()->getValue(),
@@ -310,6 +313,7 @@ namespace dyno
 		}
 
 		updateVelocity(
+			this->inAttribute()->getData(),
 			this->inVelocity()->getData(),
 			this->inAngularVelocity()->getData(),
 			mImpulseC,
@@ -319,6 +323,7 @@ namespace dyno
 		);
 
 		updateGesture(
+			this->inAttribute()->getData(),
 			this->inCenter()->getData(),
 			this->inQuaternion()->getData(),
 			this->inRotationMatrix()->getData(),

@@ -119,6 +119,7 @@ namespace dyno
 				joints,
 				this->inCenter()->getData(),
 				this->inRotationMatrix()->getData(),
+				this->inQuaternion()->getData(),
 				begin_index
 			);
 		}
@@ -153,6 +154,7 @@ namespace dyno
 				mVelocityConstraints,
 				joints,
 				this->inRotationMatrix()->getData(),
+				this->inQuaternion()->getData(),
 				begin_index
 			);
 		}
@@ -335,6 +337,7 @@ namespace dyno
 				joints,
 				this->inCenter()->getData(),
 				this->inRotationMatrix()->getData(),
+				this->inQuaternion()->getData(),
 				begin_index
 			);
 		}
@@ -369,8 +372,9 @@ namespace dyno
 				mVelocityConstraints,
 				joints,
 				this->inRotationMatrix()->getData(),
+				this->inQuaternion()->getData(),
 				begin_index
-			);
+			);;
 		}
 
 		if (pointJoint_size != 0)
@@ -438,6 +442,7 @@ namespace dyno
 			mErrors,
 			this->varSlop()->getValue(),
 			this->varBaumgarteRate()->getValue(),
+			1,
 			dt
 		);
 		
@@ -486,6 +491,7 @@ namespace dyno
 
 
 		updateVelocity(
+			this->inAttribute()->getData(),
 			this->inVelocity()->getData(),
 			this->inAngularVelocity()->getData(),
 			mImpulseExt,
@@ -517,6 +523,7 @@ namespace dyno
 					mK_2,
 					mK_3,
 					this->inMass()->getData(),
+					this->inFrictionCoefficients()->getData(),
 					this->varFrictionCoefficient()->getData(),
 					this->varGravityValue()->getData(),
 					dt
@@ -534,6 +541,7 @@ namespace dyno
 			errors.push_back(norm);
 
 			updateVelocity(
+				this->inAttribute()->getData(),
 				this->inVelocity()->getData(),
 				this->inAngularVelocity()->getData(),
 				mImpulseC,
@@ -543,6 +551,7 @@ namespace dyno
 			);
 
 			updateGesture(
+				this->inAttribute()->getData(),
 				this->inCenter()->getData(),
 				this->inQuaternion()->getData(),
 				this->inRotationMatrix()->getData(),
@@ -578,6 +587,7 @@ namespace dyno
 				}
 
 				updateVelocity(
+					this->inAttribute()->getData(),
 					this->inVelocity()->getData(),
 					this->inAngularVelocity()->getData(),
 					mImpulseC,
@@ -593,6 +603,7 @@ namespace dyno
 		else
 		{
 			updateGesture(
+				this->inAttribute()->getData(),
 				this->inCenter()->getData(),
 				this->inQuaternion()->getData(),
 				this->inRotationMatrix()->getData(),

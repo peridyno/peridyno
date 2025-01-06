@@ -279,5 +279,7 @@ namespace dyno
 
 		bool isValid;
 
+		Quat1f rotQuat;
+
 	};
 }

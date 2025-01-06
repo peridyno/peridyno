@@ -11,6 +11,9 @@
 
 #include "Algorithm/Reduction.h"
 
+#include "Collision/Attribute.h"
+
+
 namespace dyno 
 {
 	void ApplyTransform(
@@ -22,6 +25,7 @@ namespace dyno
 		const DArray<int>& bindingtag);
 
 	void updateVelocity(
+		DArray<Attribute> attribute,
 		DArray<Vec3f> velocity,
 		DArray<Vec3f> angular_velocity,
 		DArray<Vec3f> impulse,
@@ -31,6 +35,7 @@ namespace dyno
 	);
 
 	void updateGesture(
+		DArray<Attribute> attribute,
 		DArray<Vec3f> pos,
 		DArray<Quat1f> rotQuat,
 		DArray<Mat3f> rotMat,
@@ -92,10 +97,11 @@ namespace dyno
 		DArray<Vec3f> angular_velocity,
 		DArray<Vec3f> pos,
 		DArray<Quat1f> rotation_q,
-		DArray <TConstraintPair<float>> constraints,
+		DArray<TConstraintPair<float>> constraints,
 		DArray<float> errors,
 		float slop,
 		float beta,
+		uint substepping,
 		float dt
 	);
 
@@ -172,6 +178,7 @@ namespace dyno
 		DArray<SliderJoint<float>> joints,
 		DArray<Vec3f> pos,
 		DArray<Mat3f> rotMat,
+		DArray<Quat1f> rotQuat,
 		int begin_index
 	);
 
@@ -185,9 +192,10 @@ namespace dyno
 	);
 
 	void setUpFixedJointConstraints(
-		DArray<TConstraintPair<float>> constraints,
-		DArray<FixedJoint<float>> joints,
-		DArray<Mat3f> rotMat,
+		DArray<TConstraintPair<float>>& constraints,
+		DArray<FixedJoint<float>>& joints,
+		DArray<Mat3f>& rotMat,
+		DArray<Quat1f>& rotQuat,
 		int begin_index
 	);
 
@@ -236,6 +244,7 @@ namespace dyno
 		DArray<Mat2f> K_2,
 		DArray<Mat3f> K_3,
 		DArray<float> mass,
+		DArray<float> fricCoeffs,
 		float mu,
 		float g,
 		float dt
@@ -286,7 +295,7 @@ namespace dyno
 		DArray<Mat2f> K_2,
 		DArray<Mat3f> K_3,
 		DArray<float> mass,
-		float mu,
+		DArray<float> mu,
 		float g,
 		float dt,
 		float zeta,

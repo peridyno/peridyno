@@ -37,6 +37,14 @@ std::shared_ptr<SceneGraph> creatBricks()
 			auto boxAt = rigid->addBox(box, rigidBody);
 		}
 
+	for (int i = 8; i > 1; i--)
+		for (int j = 0; j < i + 1; j++)
+		{
+			rigidBody.position = 0.5f * Vec3f(2.5f, 1.1 - 0.13 * i, 0.12f + 0.2 * j + 0.1 * (8 - i));
+			rigidBody.friction = 0.1;
+			auto boxAt = rigid->addBox(box, rigidBody);
+		}
+
 
 
 	SphereInfo sphere;

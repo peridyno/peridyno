@@ -15,7 +15,6 @@
 
 #include "Collision/NeighborElementQuery.h"
 
-
 using namespace std;
 using namespace dyno;
 
@@ -24,46 +23,33 @@ std::shared_ptr<SceneGraph> creatBricks()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
+	uint dim = 5;
+	float h = 0.1f;
 
+	RigidBodyInfo rigidBody;
 	BoxInfo box;
-	box.center = Vec3f(0.0f);
-	box.halfLength = Vec3f(0.02, 0.02, 0.02);
+	box.halfLength = Vec3f(h, h, h);
 
-	RigidBodyInfo rbA;
-	RigidBodyInfo rbB;
-	rbA.position = Vec3f(0.0f, 0.1f, 0.0f);
-	rbA.linearVelocity = Vec3f(1.0, 0.0, 1.0);
+	std::vector<BodyType> test{ BodyType::Dynamic, BodyType::Kinematic, BodyType::Static };
 
-	auto oldBoxActor = rigid->addBox(box, rbA);
-
-	rbA.linearVelocity = Vec3f(0, 0, 0);
-
-	for (int i = 1; i < 300; i++)
+	int cnt = 1;
+	for (auto& te : test)
 	{
-		rbB.position = rbA.position + Vec3f(0, 0.05f, 0.0);
-		rbB.angle = Quat1f(M_PI / 3 * i, Vec3f(0, 1, 0));
-		auto newBoxActor = rigid->addBox(box, rbB);
-
-		auto& fixedJoint = rigid->createFixedJoint(oldBoxActor, newBoxActor);
-		fixedJoint.setAnchorPoint((rbA.position + rbB.position) / 2);
-
-		/*auto& fixedJoint = rigid->createUnilateralFixedJoint(newBoxActor);
-		fixedJoint.setAnchorPoint(newBox.center);*/
-
-		rbA = rbB;
-		oldBoxActor = newBoxActor;
+		rigidBody.angularVelocity = Vec3f(0.0, 0.0, 0.5);
+		rigidBody.motionType = te;
+		rigidBody.position = Vec3f(cnt * 0.5, 0.5, 0);
+		cnt++;
+		auto boxAt = rigid->addBox(box, rigidBody);
 	}
 
 	
-
-
 
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
 	rigid->stateTopology()->connect(mapper->inDiscreteElements());
 	rigid->graphicsPipeline()->pushModule(mapper);
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Color(1, 1, 0));
+	sRender->setColor(Color::SteelBlue2());
 	sRender->setAlpha(1.0f);
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
@@ -81,12 +67,12 @@ std::shared_ptr<SceneGraph> creatBricks()
 	rigid->graphicsPipeline()->pushModule(contactMapper);
 
 	auto wireRender = std::make_shared<GLWireframeVisualModule>();
-	wireRender->setColor(Color(0, 0, 1));
-	contactMapper->outEdgeSet()->connect(wireRender->inEdgeSet());
+	wireRender->setColor(Color(0, 0, 0));
+	mapper->outTriangleSet()->connect(wireRender->inEdgeSet());
 	rigid->graphicsPipeline()->pushModule(wireRender);
 
 	//Visualize contact points
-	auto contactPointMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
+	/*auto contactPointMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
 	elementQuery->outContacts()->connect(contactPointMapper->inContacts());
 	rigid->graphicsPipeline()->pushModule(contactPointMapper);
 
@@ -94,7 +80,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 	pointRender->setColor(Color(1, 0, 0));
 	pointRender->varPointSize()->setValue(0.003f);
 	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
-	rigid->graphicsPipeline()->pushModule(pointRender);
+	rigid->graphicsPipeline()->pushModule(pointRender);*/
 
 	return scn;
 }

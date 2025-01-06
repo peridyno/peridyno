@@ -45,7 +45,7 @@ namespace dyno
 		RigidBodyInfo info;
 		info.position = Vec3f(0.445f, 1.204f, -0.151);
 		info.angularVelocity = Vec3f(1, 0, 0);
-		info.motionType = BodyType::Static;
+		info.motionType = BodyType::Kinematic;
 		info.bodyId = 0;
 		auto actor = this->createRigidBody(info);
 
