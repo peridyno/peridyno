@@ -231,9 +231,17 @@ namespace dyno
 		void setAnchorPoint(Vector<Real, 3>anchor_point)
 		{
 			Mat3f rotMat1 = this->actor1->rot.toMatrix3x3();
-			Mat3f rotMat2 = this->actor2->rot.toMatrix3x3();
 			this->r1 = rotMat1.inverse() * (anchor_point - this->actor1->center);
-			this->r2 = rotMat2.inverse() * (anchor_point - this->actor2->center);
+			if (this->bodyId2 != INVALID)
+			{
+				Mat3f rotMat2 = this->actor2->rot.toMatrix3x3();
+				this->r2 = rotMat2.inverse() * (anchor_point - this->actor2->center);
+				this->q_init = this->actor2->rot.inverse() * this->actor1->rot;
+			}
+			else
+			{
+				this->q_init = this->actor1->rot;
+			}
 		}
 
 		void setAxis(Vector<Real, 3> axis)
@@ -268,6 +276,8 @@ namespace dyno
 		Vector<Real, 3> r2;
 		// slider axis in body1 local space
 		Vector<Real, 3> sliderAxis;
+
+		Quat1f q_init;
 	};
 
 

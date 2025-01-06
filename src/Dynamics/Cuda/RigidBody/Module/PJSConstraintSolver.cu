@@ -119,6 +119,7 @@ namespace dyno
 				joints,
 				this->inCenter()->getData(),
 				this->inRotationMatrix()->getData(),
+				this->inQuaternion()->getData(),
 				begin_index
 			);
 		}
@@ -336,6 +337,7 @@ namespace dyno
 				joints,
 				this->inCenter()->getData(),
 				this->inRotationMatrix()->getData(),
+				this->inQuaternion()->getData(),
 				begin_index
 			);
 		}
@@ -440,6 +442,7 @@ namespace dyno
 			mErrors,
 			this->varSlop()->getValue(),
 			this->varBaumgarteRate()->getValue(),
+			1,
 			dt
 		);
 		
@@ -520,6 +523,7 @@ namespace dyno
 					mK_2,
 					mK_3,
 					this->inMass()->getData(),
+					this->inFrictionCoefficients()->getData(),
 					this->varFrictionCoefficient()->getData(),
 					this->varGravityValue()->getData(),
 					dt

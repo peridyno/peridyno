@@ -94,6 +94,8 @@ namespace dyno
 
 		DEF_ARRAY_IN(Attribute, Attribute, DeviceType::GPU, "Rigid body attributes");
 
+		DEF_ARRAY_IN(Real, FrictionCoefficients, DeviceType::GPU, "FrictionCoefficients of rigid bodies");
+
 	protected:
 		void constrain() override;
 

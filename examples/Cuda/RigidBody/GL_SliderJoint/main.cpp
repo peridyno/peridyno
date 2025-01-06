@@ -28,48 +28,29 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 	RigidBodyInfo rigidBody;
 	rigidBody.friction = 0.01;
-	BoxInfo box1, box2, box3, box4, box5;
-	rigidBody.linearVelocity = Vec3f(0, 0, 0);
-	
-	rigidBody.position = Vec3f(0, 0.3, 0);
-	box1.halfLength = Vec3f(0.1, 0.2, 0.1);
-	auto boxActor1 = rigid->addBox(box1, rigidBody);
+	BoxInfo box1, box2;
 
-	rigidBody.linearVelocity = Vec3f(0, 0, 0);
+	box1.halfLength = Vec3f(0.09, 0.1, 0.1);
 
+	rigidBody.position = Vec3f(0, 0.5, 0);
 
-	rigidBody.position = Vec3f(0, 0.05, 0);
-	box2.halfLength = Vec3f(1, 0.05, 0.3);
+	auto boxActor1 = rigid->addBox(box1, rigidBody, 1000);
+
+	box2.halfLength = Vec3f(0.1, 0.4, 0.2);
+
+	rigidBody.position = Vec3f(0.2, 0.5, 0);
+	rigidBody.angularVelocity = Vec3f(1, 0, 0);
+	rigidBody.motionType = BodyType::Kinematic;
+
 	auto boxActor2 = rigid->addBox(box2, rigidBody);
 
-	rigidBody.linearVelocity = Vec3f(-10, 0, 0);
-
-	rigidBody.position = Vec3f(0.5, 0.2, 0);
-	box3.halfLength = Vec3f(0.1, 0.1, 0.1);
-
-	auto boxActor3 = rigid->addBox(box3, rigidBody);
-
-
 	auto& sliderJoint = rigid->createSliderJoint(boxActor1, boxActor2);
-	sliderJoint.setAnchorPoint(Vec3f(0, 0.1, 0));
-	sliderJoint.setAxis(Vec3f(1, 0, 0));
-	sliderJoint.setRange(-0.9, 0.9);
 
-	rigidBody.linearVelocity = Vec3f(0, 0, 0);
+	sliderJoint.setAnchorPoint((boxActor1->center + boxActor2->center) / 2);
 
-	rigidBody.position = Vec3f(0, 0.15, -0.2);
-	box4.halfLength = Vec3f(1, 0.05, 0.1);
-	auto boxActor4 = rigid->addBox(box4, rigidBody);
-	
-	rigidBody.position = Vec3f(0, 0.15, 0.2);
-	box5.halfLength = Vec3f(1, 0.05, 0.1);
-	auto boxActor5 = rigid->addBox(box5, rigidBody);
+	sliderJoint.setAxis(Vec3f(0, 1, 0));
 
-
-	auto& fixedJoint1 = rigid->createFixedJoint(boxActor2, boxActor4);
-	fixedJoint1.setAnchorPoint(Vec3f(0, 0.1, -0.2));
-	auto& fixedJoint2 = rigid->createFixedJoint(boxActor2, boxActor5);
-	fixedJoint2.setAnchorPoint(Vec3f(0, 0.1, 0.2));
+	sliderJoint.setRange(-0.2, 0.2);
 
 
 

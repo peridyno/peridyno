@@ -38,10 +38,10 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 	rbA.linearVelocity = Vec3f(0, 0, 0);
 
-	for (int i = 1; i < 30; i++)
+	for (int i = 1; i < 300; i++)
 	{
 		rbB.position = rbA.position + Vec3f(0, 0.05f, 0.0);
-		rbB.angle = Quat1f(M_PI / 30 * i, Vec3f(0, 1, 0));
+		rbB.angle = Quat1f(M_PI / 3 * i, Vec3f(0, 1, 0));
 		auto newBoxActor = rigid->addBox(box, rbB);
 
 		auto& fixedJoint = rigid->createFixedJoint(oldBoxActor, newBoxActor);

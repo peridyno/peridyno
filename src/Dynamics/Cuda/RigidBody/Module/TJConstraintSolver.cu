@@ -118,6 +118,7 @@ namespace dyno
 				joints,
 				this->inCenter()->getData(),
 				this->inRotationMatrix()->getData(),
+				this->inQuaternion()->getData(),
 				begin_index
 			);
 		}
@@ -230,7 +231,8 @@ namespace dyno
 			mVelocityConstraints,
 			mErrors,
 			this->varSlop()->getValue(),
-			this->varBaumgarteBias()->getValue() / this->varSubStepping()->getValue(),
+			this->varBaumgarteBias()->getValue(),
+			this->varSubStepping()->getValue(),
 			dt
 		);
 
@@ -310,6 +312,7 @@ namespace dyno
 						mK_2,
 						mK_3,
 						this->inMass()->getData(),
+						this->inFrictionCoefficients()->getData(),
 						this->varFrictionCoefficient()->getData(),
 						this->varGravityValue()->getData(),
 						dh

@@ -97,10 +97,11 @@ namespace dyno
 		DArray<Vec3f> angular_velocity,
 		DArray<Vec3f> pos,
 		DArray<Quat1f> rotation_q,
-		DArray <TConstraintPair<float>> constraints,
+		DArray<TConstraintPair<float>> constraints,
 		DArray<float> errors,
 		float slop,
 		float beta,
+		uint substepping,
 		float dt
 	);
 
@@ -177,6 +178,7 @@ namespace dyno
 		DArray<SliderJoint<float>> joints,
 		DArray<Vec3f> pos,
 		DArray<Mat3f> rotMat,
+		DArray<Quat1f> rotQuat,
 		int begin_index
 	);
 
@@ -242,6 +244,7 @@ namespace dyno
 		DArray<Mat2f> K_2,
 		DArray<Mat3f> K_3,
 		DArray<float> mass,
+		DArray<float> fricCoeffs,
 		float mu,
 		float g,
 		float dt

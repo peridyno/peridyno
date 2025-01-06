@@ -118,6 +118,7 @@ namespace dyno
 				joints,
 				this->inCenter()->getData(),
 				this->inRotationMatrix()->getData(),
+				this->inQuaternion()->getData(),
 				begin_index
 			);
 		}

@@ -117,6 +117,7 @@ namespace dyno
 				joints,
 				this->inCenter()->getData(),
 				this->inRotationMatrix()->getData(),
+				this->inQuaternion()->getData(),
 				begin_index
 			);
 		}
@@ -311,10 +312,11 @@ namespace dyno
 
 			begin_index += 3 * ballAndSocketJoint_size;
 			setUpSliderJointConstraints(
-				mPositionConstraints,
+				mVelocityConstraints,
 				joints,
 				this->inCenter()->getData(),
 				this->inRotationMatrix()->getData(),
+				this->inQuaternion()->getData(),
 				begin_index
 			);
 		}
@@ -476,6 +478,7 @@ namespace dyno
 					mK_2,
 					mK_3,
 					this->inMass()->getData(),
+					this->inFrictionCoefficients()->getData(),
 					this->varFrictionCoefficient()->getData(),
 					this->varGravityValue()->getData(),
 					dt
