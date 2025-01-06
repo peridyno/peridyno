@@ -291,9 +291,9 @@ namespace dyno
 		min_box = Coord(min_i * dx, min_j * dx, min_k * dx);
 		max_box = Coord(max_i * dx, max_j * dx, max_k * dx);
 
-		out.setSpace(min_box, max_box, ni - 1, nj - 1, nk - 1);
+		out.setSpace(min_box, max_box, dx);
 
-		auto& phi = out.getMDistance();
+		auto& phi = out.distances();
 
 		if (ni != mGridType.nx() || nj != mGridType.ny() || nk != mGridType.nz()) {
 			mGridType.resize(ni, nj, nk);
@@ -309,7 +309,7 @@ namespace dyno
 			inA,
 			inB,
 			out.lowerBound(),
-			out.getH()[0],
+			out.getGridSpacing(),
 			this->varBoolType()->currentKey());
 
 		for (uint t = 0; t < this->varMarchingNumber()->getValue(); t++)

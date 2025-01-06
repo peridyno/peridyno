@@ -15,7 +15,7 @@ namespace dyno
 		Coord lo(0.0f);
 		Coord hi(1.0f);
 		m_cSDF = std::make_shared<DistanceField3D<DataType3f>>();
-		m_cSDF->setSpace(lo - 0.025f, hi + 0.025f, 105, 105, 105);
+		m_cSDF->setSpace(lo - 0.025f, hi + 0.025f, Real(0.005));
 		m_cSDF->loadBox(lo, hi, true);
 	}
 
@@ -123,7 +123,7 @@ namespace dyno
 
 		uint padding = 5;
 
-		m_cSDF->setSpace(lo - padding *distance, hi + padding * distance, nx + 2 * padding, ny + 2 * padding, nz + 2 * padding);
+		m_cSDF->setSpace(lo - padding *distance, hi + padding * distance, distance);
 		m_cSDF->loadBox(lo, hi, inverted);
 	}
 
@@ -135,7 +135,7 @@ namespace dyno
 
 		uint padding = 5;
 
-		m_cSDF->setSpace(center - r - padding * distance, center + r + padding * distance, nx + 2 * padding, nx + 2 * padding, nx + 2 * padding);
+		m_cSDF->setSpace(center - r - padding * distance, center + r + padding * distance, distance);
 		m_cSDF->loadSphere(center, r, inverted);
 	}
 
@@ -147,7 +147,7 @@ namespace dyno
 
 		uint padding = 5;
 
-		m_cSDF->setSpace(center - height - r - padding * distance, center + height  + r + padding * distance, nx + 2 * padding, ny + 2 * padding, nx + 2 * padding);
+		m_cSDF->setSpace(center - height - r - padding * distance, center + height  + r + padding * distance, distance);
 		m_cSDF->loadCylinder(center, r, height, axis, inverted);
 	}
 

@@ -365,8 +365,8 @@ namespace dyno
 		origin = min_box;
 		maxPoint = max_box;
 
-		sdf.setSpace(min_box, max_box, ni - 1, nj - 1, nk - 1);
-		auto& phi = sdf.getMDistance();
+		sdf.setSpace(min_box, max_box, dx);
+		auto& phi = sdf.distances();
 
 		//initialize distances near the mesh
 		DArray3D<uint> counter3d(ni, nj, nk);

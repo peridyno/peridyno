@@ -190,13 +190,16 @@ namespace dyno{
 	}
 
 	template<typename TDataType>
-	void DistanceField3D<TDataType>::setSpace(const Coord p0, const Coord p1, int nbx, int nby, int nbz)
+	void DistanceField3D<TDataType>::setSpace(const Coord p0, const Coord p1, Real h)
 	{
-		m_left = p0;
+		mOrigin = p0;
+		mH = h;
 
-		m_h = (p1 - p0)*Coord(1.0 / Real(nbx+1), 1.0 / Real(nby+1), 1.0 / Real(nbz+1));
+		uint nbx = std::ceil((p1.x - p0.x) / h);
+		uint nby = std::ceil((p1.y - p0.y) / h);
+		uint nbz = std::ceil((p1.z - p0.z) / h);
 
-		m_distance.resize(nbx+1, nby+1, nbz+1);
+		mDistances.resize(nbx+1, nby+1, nbz+1);
 	}
 
 	template<typename TDataType>
@@ -206,7 +209,7 @@ namespace dyno{
 
 	template<typename TDataType>
 	void DistanceField3D<TDataType>::translate(const Coord &t) {
-		m_left += t;
+		mOrigin += t;
 	}
 
 	template <typename Real>
@@ -225,17 +228,15 @@ namespace dyno{
 
 	template<typename TDataType>
 	void DistanceField3D<TDataType>::scale(const Real s) {
-		m_left[0] *= s;
-		m_left[1] *= s;
-		m_left[2] *= s;
-		m_h[0] *= s;
-		m_h[1] *= s;
-		m_h[2] *= s;
+		mOrigin[0] *= s;
+		mOrigin[1] *= s;
+		mOrigin[2] *= s;
+		mH *= s;
 
 		dim3 blockSize = make_uint3(8, 8, 8);
-		dim3 gridDims = cudaGridSize3D(make_uint3(m_distance.nx(), m_distance.ny(), m_distance.nz()), blockSize);
+		dim3 gridDims = cudaGridSize3D(make_uint3(mDistances.nx(), mDistances.ny(), mDistances.nz()), blockSize);
 
-		K_Scale << <gridDims, blockSize >> >(m_distance, s);
+		K_Scale << <gridDims, blockSize >> >(mDistances, s);
 	}
 
 	template<typename Real>
@@ -256,13 +257,13 @@ namespace dyno{
 	void DistanceField3D<TDataType>::invertSDF()
 	{
 		dim3 blockSize = make_uint3(8, 8, 8);
-		dim3 gridDims = cudaGridSize3D(make_uint3(m_distance.nx(), m_distance.ny(), m_distance.nz()), blockSize);
+		dim3 gridDims = cudaGridSize3D(make_uint3(mDistances.nx(), mDistances.ny(), mDistances.nz()), blockSize);
 
-		K_Invert << <gridDims, blockSize >> >(m_distance);
+		K_Invert << <gridDims, blockSize >> >(mDistances);
 	}
 
 	template <typename Real, typename Coord>
-	__global__ void K_DistanceFieldToBox(DArray3D<Real> distance, Coord start, Coord h, Coord lo, Coord hi, bool inverted)
+	__global__ void K_DistanceFieldToBox(DArray3D<Real> distance, Coord start, Real h, Coord lo, Coord hi, bool inverted)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
 		int j = threadIdx.y + (blockIdx.y * blockDim.y);
@@ -273,7 +274,7 @@ namespace dyno{
 		if (k >= distance.nz()) return;
 
 		int sign = inverted ? 1.0f : -1.0f;
-		Coord p = start + Coord(i, j, k)*h;
+		Coord p = start + Coord(i, j, k) * h;
 
 		distance(i, j, k) = sign*DistanceToBox(p, lo, hi);
 	}
@@ -281,16 +282,16 @@ namespace dyno{
 	template<typename TDataType>
 	void DistanceField3D<TDataType>::loadBox(Coord& lo, Coord& hi, bool inverted)
 	{
-		m_bInverted = inverted;
+		mInverted = inverted;
 
 		dim3 blockSize = make_uint3(4, 4, 4);
-		dim3 gridDims = cudaGridSize3D(make_uint3(m_distance.nx(), m_distance.ny(), m_distance.nz()), blockSize);
+		dim3 gridDims = cudaGridSize3D(make_uint3(mDistances.nx(), mDistances.ny(), mDistances.nz()), blockSize);
 
-		K_DistanceFieldToBox << <gridDims, blockSize >> >(m_distance, m_left, m_h, lo, hi, inverted);
+		K_DistanceFieldToBox << <gridDims, blockSize >> >(mDistances, mOrigin, mH, lo, hi, inverted);
 	}
 
 	template <typename Real, typename Coord>
-	__global__ void K_DistanceFieldToCylinder(DArray3D<Real> distance, Coord start, Coord h, Coord center, Real radius, Real height, int axis, bool inverted)
+	__global__ void K_DistanceFieldToCylinder(DArray3D<Real> distance, Coord start, Real h, Coord center, Real radius, Real height, int axis, bool inverted)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
 		int j = threadIdx.y + (blockIdx.y * blockDim.y);
@@ -310,16 +311,16 @@ namespace dyno{
 	template<typename TDataType>
 	void DistanceField3D<TDataType>::loadCylinder(Coord& center, Real radius, Real height, int axis, bool inverted)
 	{
-		m_bInverted = inverted;
+		mInverted = inverted;
 
 		dim3 blockSize = make_uint3(8, 8, 8);
-		dim3 gridDims = cudaGridSize3D(make_uint3(m_distance.nx(), m_distance.ny(), m_distance.nz()), blockSize);
+		dim3 gridDims = cudaGridSize3D(make_uint3(mDistances.nx(), mDistances.ny(), mDistances.nz()), blockSize);
 
-		K_DistanceFieldToCylinder << <gridDims, blockSize >> >(m_distance, m_left, m_h, center, radius, height, axis, inverted);
+		K_DistanceFieldToCylinder << <gridDims, blockSize >> >(mDistances, mOrigin, mH, center, radius, height, axis, inverted);
 	}
 
 	template <typename Real, typename Coord>
-	__global__ void K_DistanceFieldToSphere(DArray3D<Real> distance, Coord start, Coord h, Coord center, Real radius, bool inverted)
+	__global__ void K_DistanceFieldToSphere(DArray3D<Real> distance, Coord start, Real h, Coord center, Real radius, bool inverted)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
 		int j = threadIdx.y + (blockIdx.y * blockDim.y);
@@ -331,7 +332,7 @@ namespace dyno{
 
 		int sign = inverted ? -1.0f : 1.0f;
 
-		Coord p = start + Coord(i, j, k)*h;
+		Coord p = start + Coord(i, j, k) * h;
 
 		Coord dir = p - center;
 
@@ -341,12 +342,12 @@ namespace dyno{
 	template<typename TDataType>
 	void DistanceField3D<TDataType>::loadSphere(Coord& center, Real radius, bool inverted)
 	{
-		m_bInverted = inverted;
+		mInverted = inverted;
 
 		dim3 blockSize = make_uint3(8, 8, 8);
-		dim3 gridDims = cudaGridSize3D(make_uint3(m_distance.nx(), m_distance.ny(), m_distance.nz()), blockSize);
+		dim3 gridDims = cudaGridSize3D(make_uint3(mDistances.nx(), mDistances.ny(), mDistances.nz()), blockSize);
 
-		K_DistanceFieldToSphere << <gridDims, blockSize >> >(m_distance, m_left, m_h, center, radius, inverted);
+		K_DistanceFieldToSphere << <gridDims, blockSize >> >(mDistances, mOrigin, mH, center, radius, inverted);
 	}
 
 	template<typename TDataType>
@@ -366,23 +367,21 @@ namespace dyno{
 		input >> yy;
 		input >> zz;
 
-		input >> m_left[0];
-		input >> m_left[1];
-		input >> m_left[2];
+		input >> mOrigin[0];
+		input >> mOrigin[1];
+		input >> mOrigin[2];
 
 		Real t_h;
 		input >> t_h;
 
 		std::cout << "SDF: " << xx << ", " << yy << ", " << zz << std::endl;
-		std::cout << "SDF: " << m_left[0] << ", " << m_left[1] << ", " << m_left[2] << std::endl;
-		std::cout << "SDF: " << m_left[0] + t_h*xx << ", " << m_left[1] + t_h*yy << ", " << m_left[2] + t_h*zz << std::endl;
+		std::cout << "SDF: " << mOrigin[0] << ", " << mOrigin[1] << ", " << mOrigin[2] << std::endl;
+		std::cout << "SDF: " << mOrigin[0] + t_h*xx << ", " << mOrigin[1] + t_h*yy << ", " << mOrigin[2] + t_h*zz << std::endl;
 
 		nbx = xx;
 		nby = yy;
 		nbz = zz;
-		m_h[0] = t_h;
-		m_h[1] = t_h;
-		m_h[2] = t_h;
+		mH = t_h;
 
 		CArray3D<Real> distances(nbx, nby, nbz);
 		for (int k = 0; k < zz; k++) {
@@ -396,10 +395,10 @@ namespace dyno{
 		}
 		input.close();
 
-		m_distance.resize(nbx, nby, nbz);
-		m_distance.assign(distances);
+		mDistances.resize(nbx, nby, nbz);
+		mDistances.assign(distances);
 
-		m_bInverted = inverted;
+		mInverted = inverted;
 		if (inverted)
 		{
 			invertSDF();
@@ -411,7 +410,7 @@ namespace dyno{
 	template<typename TDataType>
 	void DistanceField3D<TDataType>::release()
 	{
-		m_distance.clear();
+		mDistances.clear();
 	}
 
 	template class DistanceField3D<DataType3f>;

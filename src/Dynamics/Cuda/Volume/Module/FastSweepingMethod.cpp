@@ -31,7 +31,7 @@ namespace dyno
 		Coord p0(origin.x, origin.y, origin.z);
 		Coord p1(maxPoint.x, maxPoint.y, maxPoint.z);
 
-		sdf.setSpace(p0, p1, ni - 1, nj - 1, nk - 1);
+		sdf.setSpace(p0, p1, this->varSpacing()->getValue());
 		sdf.setDistance(phi);
 	}
 

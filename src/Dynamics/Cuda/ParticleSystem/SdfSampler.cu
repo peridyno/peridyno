@@ -198,9 +198,9 @@ namespace dyno
 		int nz = (hi[2] - lo[2]) / h;
 
 		auto levelset = std::make_shared<DistanceField3D<TDataType>>();
-		levelset->setSpace(lo, hi, nx, ny, nz);
+		levelset->setSpace(lo, hi, h);
 
-		auto& distances = levelset->getMDistance();
+		auto& distances = levelset->distances();
 
 		DArray<Coord> nodes(distances.size());
 

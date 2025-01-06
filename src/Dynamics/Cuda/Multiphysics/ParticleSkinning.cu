@@ -38,7 +38,7 @@ namespace dyno
 		int nx,
 		int ny,
 		int nz,
-		Coord h
+		Real h
 	)
 	{
 		int gId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -48,9 +48,9 @@ namespace dyno
 		uint nj = (gId % (nx * ny)) / ny;
 		uint ni = (gId % ny);
 
-		GridPositions[gId][0] = (float)(ni) * h[0];
-		GridPositions[gId][1] = (float)(nj)*h[1];
-		GridPositions[gId][2] = (float)(nk)*h[2];
+		GridPositions[gId][0] = (float)(ni)*h;
+		GridPositions[gId][1] = (float)(nj)*h;
+		GridPositions[gId][2] = (float)(nk)*h;
 
 		//if ((nk == 1) && (nj == 1))
 		//{
@@ -64,7 +64,7 @@ namespace dyno
 	void ParticleSkinning<TDataType> ::constrGridPositionArray() {
 	
 		auto& sdf = this->stateLevelSet()->getDataPtr()->getSDF();
-		auto& leveset = this->stateLevelSet()->getDataPtr()->getSDF().getMDistance();
+		auto& leveset = this->stateLevelSet()->getDataPtr()->getSDF().distances();
 	
 		int num = leveset.size();
 		std::cout <<"Grid number " << num << std::endl;
@@ -80,7 +80,7 @@ namespace dyno
 			this->stateLevelSet()->getDataPtr()->getSDF().nx(),
 			this->stateLevelSet()->getDataPtr()->getSDF().ny(),
 			this->stateLevelSet()->getDataPtr()->getSDF().nz(),
-			this->stateLevelSet()->getDataPtr()->getSDF().getH()
+			this->stateLevelSet()->getDataPtr()->getSDF().getGridSpacing()
 		)
 
 
@@ -127,7 +127,7 @@ namespace dyno
 		uint ny = (hiBound - loBound)[1] / h;
 		uint nz = (hiBound - loBound)[2] / h;
 
-		sdf.setSpace(loBound, hiBound, nx, ny, nz);
+		sdf.setSpace(loBound, hiBound, h);
 
 		constrGridPositionArray();
 

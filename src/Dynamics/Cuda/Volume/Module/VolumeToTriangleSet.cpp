@@ -29,7 +29,7 @@ namespace dyno
 		Coord lowerBound = sdf.lowerBound();
 		Coord upperBound = sdf.upperBound();
 
-		Real h = sdf.getH()[0];
+		Real h = sdf.getGridSpacing();
 
 		if (h < EPSILON)
 			return false;

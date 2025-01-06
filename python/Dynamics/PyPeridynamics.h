@@ -409,8 +409,7 @@ void declare_hyperelastic_body(py::module& m, std::string typestr) {
 		.def("state_volume", &Class::stateVolume, py::return_value_policy::reference)
 		.def("var_neighbor_searching_adjacent", &Class::varNeighborSearchingAdjacent, py::return_value_policy::reference)
 		.def("var_file_name", &Class::varFileName, py::return_value_policy::reference)
-		.def("state_tets", &Class::stateTets, py::return_value_policy::reference)
-		.def("state_disrance_sdf", &Class::stateDisranceSDF, py::return_value_policy::reference);
+		.def("state_tets", &Class::stateTets, py::return_value_policy::reference);
 }
 
 //#include "Peridynamics/initializePeridynamics.h"

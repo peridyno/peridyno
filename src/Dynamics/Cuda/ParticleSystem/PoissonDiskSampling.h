@@ -103,7 +103,7 @@ namespace dyno
 
 		//SDF in host.
 		CArray3D<Real> host_dist;
-		Coord m_h;
+		Real m_h;
 		Coord m_left;
 
 	};
