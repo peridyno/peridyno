@@ -31,6 +31,12 @@ namespace dyno
 		this->stateTopology()->setDataPtr(triSet);
 		this->outTriangleSet()->setDataPtr(triSet);
 
+		auto callback = std::make_shared<FCallBackFunc>(std::bind(&ObjLoader<TDataType>::animationUpdate, this));
+
+		this->varVelocity()->attach(callback);
+		this->varSequence()->attach(callback);
+		this->varAngularVelocity()->attach(callback);
+
 		auto surfacerender = std::make_shared<GLSurfaceVisualModule>();
 		surfacerender->setVisible(true);
 		surfacerender->setColor(Color(0.8, 0.52, 0.25));
@@ -38,6 +44,15 @@ namespace dyno
 		this->stateTopology()->connect(surfacerender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(surfacerender);
 
+	}
+
+	template<typename TDataType>
+	void ObjLoader<TDataType>::animationUpdate()
+	{
+		if (this->varSequence()->getValue() == true || this->varVelocity()->getValue() != Vec3f(0) || this->varAngularVelocity()->getValue() != Vec3f(0))
+			this->setForceUpdate(true);
+		else
+			this->setForceUpdate(false);
 	}
 
 	template<typename TDataType>
