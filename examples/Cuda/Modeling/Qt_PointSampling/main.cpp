@@ -58,6 +58,9 @@ std::shared_ptr<SceneGraph> createScene()
 	obj2->varType()->setCurrentKey(1);
 	obj2->varIcosahedronStep()->setValue(2);
 	obj2->varLocation()->setValue(Vec3f(0.418-1,0.5,0));
+	obj2->varType()->setCurrentKey(1);
+	obj2->varIcosahedronStep()->setValue(2);
+	obj2->setVisible(false);
 	auto SurfaceModule2 = obj2->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
 	SurfaceModule2->setColor(Color(0.2));
 	SurfaceModule2->setMetallic(1);
@@ -94,7 +97,9 @@ std::shared_ptr<SceneGraph> createScene()
 	meshes_1->varLatitude()->setValue(16);
 	meshes_1->varLongitude()->setValue(12);
 	meshes_1->varScale()->setValue(Vec3f(0.6, 0.6, 0.6));
-
+	meshes_1->varType()->setCurrentKey(1);
+	meshes_1->varIcosahedronStep()->setValue(2);
+	meshes_1->setVisible(false);
 	auto pointset_1 = scn->addNode(std::make_shared<PointsBehindMesh<DataType3f>>());
 	pointset_1->varGeneratingDirection()->setValue(false);
 	pointset_1->varSamplingDistance()->setValue(0.005);

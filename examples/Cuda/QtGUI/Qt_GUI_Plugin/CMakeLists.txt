@@ -8,6 +8,6 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
         DualParticleSystem
         SemiAnalyticalScheme
         Multiphysics
-        QtGUI)
+        UbiGUI)
     add_example(Qt_GUI_Plugin Qt LIB_DEPENDENCY)
 endif()

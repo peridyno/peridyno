@@ -25,6 +25,7 @@
 #include "ParticleSystem/MakeParticleSystem.h"
 
 #include "StaticTriangularMesh.h"
+#include "BasicShapes/CylinderModel.h"
 
 using namespace std;
 using namespace dyno;
@@ -375,22 +376,20 @@ std::shared_ptr<SceneGraph> createScene()
 	emitter->varLocation()->setValue(Vec3f(0.0f, 0.5f, 0.5f));
 
 	//**********Boundary 2
-	auto pipe = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
-	pipe->varFileName()->setValue(getAssetPath() + "bar/pipe.obj");
-	pipe->varLocation()->setValue(Vec3f(Vec3f(0.0, 0.0, 0.0)));
-	pipe->varScale()->setValue(Vec3f(1 / 5.0));
+	auto cylinder = scn->addNode(std::make_shared<CylinderModel<DataType3f>>());
+	cylinder->varRotation()->setValue(Vec3f(0, 0, 90));
+	cylinder->varScale()->setValue(Vec3f(0.2));
+	cylinder->varHeight()->setValue(8.2);
+	cylinder->varRadius()->setValue(0.415);
+	cylinder->varColumns()->setValue(80);
+	cylinder->varRow()->setValue(190);
 
-	auto meshRenderer = std::make_shared<GLSurfaceVisualModule>();
-	meshRenderer->setColor(Color(0.26f, 0.25f, 0.25f));
-	meshRenderer->setVisible(true);
-	pipe->stateTriangleSet()->connect(meshRenderer->inTriangleSet());
-	pipe->graphicsPipeline()->pushModule(meshRenderer);
 
 	//**********Solid Fluid Interaction Node
 	auto sfi = scn->addNode(std::make_shared<SemiAnalyticalSFINode<DataType3f>>());
 
 	loader->connect(sfi->importInitialStates());
-	pipe->stateTriangleSet()->connect(sfi->inTriangleSet());
+	cylinder->stateTriangleSet()->connect(sfi->inTriangleSet());
 
 	//Visualize fluid particles in SemiAnalyticalSFINode
 	{

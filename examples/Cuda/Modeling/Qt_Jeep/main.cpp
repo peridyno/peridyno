@@ -27,6 +27,7 @@
 #include "Auxiliary/DataSource.h"
 
 #include <ObjIO/ObjLoader.h>
+#include "GLPointVisualModule.h"
 
 using namespace dyno;
 
@@ -156,10 +157,12 @@ std::shared_ptr<SceneGraph> creatScene()
 	particleSystem->connect(fluid->importInitialStates());
 
 	auto visualizer = scn->addNode(std::make_shared<GLPointVisualNode<DataType3f>>());
+	auto ptrender = visualizer->graphicsPipeline()->findFirstModule<GLPointVisualModule>();
+	ptrender->varPointSize()->setValue(0.001);
 
 	fluid->statePointSet()->promoteOuput()->connect(visualizer->inPoints());
 	fluid->stateVelocity()->promoteOuput()->connect(visualizer->inVector());
-
+	
 	//SemiAnalyticalSFINode
 	auto meshBoundary = scn->addNode(std::make_shared<TriangularMeshBoundary<DataType3f>>());
 	//sfi->varFast()->setValue(true);
