@@ -120,7 +120,8 @@ namespace dyno
 		const auto jointInfo = config.mVehicleJointInfo;
 
 		// **************************** Create RigidBody  **************************** //
-		int vehicleNum = this->varVehiclesTransform()->getValue().size();
+		auto instances = this->varVehiclesTransform()->getValue();
+		uint vehicleNum = instances.size();
 		int maxGroup = 0;
 		for (size_t i = 0; i < rigidInfo.size(); i++)
 		{
@@ -130,7 +131,7 @@ namespace dyno
 
 		for (size_t j = 0; j < vehicleNum; j++)
 		{
-			RigidBodyInfo rigidbody;
+			
 
 			std::vector<std::shared_ptr<PdActor>> Actors;
 
@@ -139,6 +140,7 @@ namespace dyno
 
 			for (size_t i = 0; i < rigidInfo.size(); i++)
 			{
+				RigidBodyInfo rigidbody;
 				rigidbody.bodyId = j * (maxGroup + 1) + rigidInfo[i].rigidGroup;
 
 				rigidbody.offset = rigidInfo[i].Offset;
@@ -172,7 +174,6 @@ namespace dyno
 				SphereInfo currentSphere;
 				TetInfo currentTet;
 
-
 				if (shapeId != -1)
 				{
 					switch (type)
@@ -181,8 +182,9 @@ namespace dyno
 						currentBox.center = Vec3f(0.0f);
 						currentBox.halfLength = (up - down) / 2 * rigidInfo[i].mHalfLength;
 						currentBox.rot = Quat1f(transform.rotation());
-
-						rigidbody.position = T + rigidInfo[i].transform.translation();
+						
+						rigidbody.position = Quat1f(instances[j].rotation()).rotate(T + rigidInfo[i].transform.translation()) + instances[j].translation();
+						rigidbody.angle = Quat1f(instances[j].rotation());
 						Actors[i] = this->addBox(currentBox, rigidbody, density);
 						break;
 
@@ -196,16 +198,18 @@ namespace dyno
 						currentCapsule.halfLength = (up.y - down.y) / 2 * rigidInfo[i].capsuleLength;
 						currentCapsule.radius = std::abs(up.y - down.y) / 2 * rigidInfo[i].radius;
 
-						rigidbody.position = T + rigidInfo[i].transform.translation();
+						rigidbody.position = Quat1f(instances[j].rotation()).rotate(T + rigidInfo[i].transform.translation()) + instances[j].translation();
+						rigidbody.angle = Quat1f(instances[j].rotation());
 						Actors[i] = this->addCapsule(currentCapsule, rigidbody, density);
 						break;
 
 					case dyno::Sphere:
 						currentSphere.center = Vec3f(0.0f);
-						currentSphere.rot = Quat1f(transform.rotation());
+						currentSphere.rot =  Quat1f(transform.rotation());
 						currentSphere.radius = std::abs(up.y - down.y) / 2 * rigidInfo[i].radius;
 
-						rigidbody.position = T + rigidInfo[i].transform.translation();
+						rigidbody.position = Quat1f(instances[j].rotation()).rotate(T + rigidInfo[i].transform.translation()) + instances[j].translation();
+						rigidbody.angle = Quat1f(instances[j].rotation());
 						Actors[i] = this->addSphere(currentSphere, rigidbody, density);
 						break;
 
@@ -232,7 +236,8 @@ namespace dyno
 						currentBox.halfLength = rigidInfo[i].mHalfLength;
 						currentBox.rot = Quat<Real>(rigidInfo[i].transform.rotation());
 
-						rigidbody.position = rigidInfo[i].transform.translation();
+						rigidbody.position = Quat1f(instances[j].rotation()).rotate(rigidInfo[i].transform.translation()) + instances[j].translation();
+						rigidbody.angle = Quat1f(instances[j].rotation());
 						Actors[i] = this->addBox(currentBox, rigidbody, density);
 						break;
 
@@ -251,7 +256,8 @@ namespace dyno
 						currentCapsule.halfLength = rigidInfo[i].capsuleLength;
 						currentCapsule.radius = rigidInfo[i].radius;
 
-						rigidbody.position = rigidInfo[i].transform.translation();
+						rigidbody.position = Quat1f(instances[j].rotation()).rotate(rigidInfo[i].transform.translation()) + instances[j].translation();
+						rigidbody.angle = Quat1f(instances[j].rotation());
 						Actors[i] = this->addCapsule(currentCapsule, rigidbody, density);
 						break;
 
@@ -260,7 +266,8 @@ namespace dyno
 						currentSphere.rot = Quat<Real>(rigidInfo[i].transform.rotation());
 						currentSphere.radius = rigidInfo[i].radius;
 
-						rigidbody.position = rigidInfo[i].transform.translation();
+						rigidbody.position = Quat1f(instances[j].rotation()).rotate(rigidInfo[i].transform.translation()) + instances[j].translation();
+						rigidbody.angle = Quat1f(instances[j].rotation());
 						Actors[i] = this->addSphere(currentSphere, rigidbody, density);
 						break;
 
@@ -292,7 +299,7 @@ namespace dyno
 				int first = jointInfo[i].mRigidBodyName_1.rigidBodyId;
 				int second = jointInfo[i].mRigidBodyName_2.rigidBodyId;
 				Real speed = jointInfo[i].mMoter;
-				auto axis = jointInfo[i].mAxis;
+				auto axis = Quat1f(instances[j].rotation()).rotate(jointInfo[i].mAxis);
 				auto anchorOffset = jointInfo[i].mAnchorPoint;
 
 				if (first == -1 || second == -1)

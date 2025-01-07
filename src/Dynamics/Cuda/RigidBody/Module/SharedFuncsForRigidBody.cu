@@ -6,7 +6,6 @@ namespace dyno
 		DArrayList<Transform3f> instanceTransform,
 		const DArray<Vec3f> translate,
 		const DArray<Mat3f> rotation,
-		const DArray<Mat3f> rotationInit,
 		const DArray<Pair<uint, uint>> binding,
 		const DArray<int> bindingtag)
 	{
@@ -18,7 +17,7 @@ namespace dyno
 
 		Pair<uint, uint> pair = binding[tId];
 
-		Mat3f rot = rotation[tId] * rotationInit[tId].transpose();
+		Mat3f rot = rotation[tId];
 
 		Transform3f ti = Transform3f(translate[tId], rot);
 
@@ -29,7 +28,6 @@ namespace dyno
 		DArrayList<Transform3f>& instanceTransform, 
 		const DArray<Vec3f>& translate,
 		const DArray<Mat3f>& rotation,
-		const DArray<Mat3f>& rotationInit,
 		const DArray<Pair<uint, uint>>& binding,
 		const DArray<int>& bindingtag)
 	{
@@ -38,7 +36,6 @@ namespace dyno
 			instanceTransform,
 			translate,
 			rotation,
-			rotationInit,
 			binding,
 			bindingtag);
 

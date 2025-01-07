@@ -34,7 +34,6 @@ namespace dyno
 
 		auto transformer = std::make_shared<InstanceTransform<DataType3f>>();
 		this->stateCenter()->connect(transformer->inCenter());
-		this->stateInitialRotation()->connect(transformer->inInitialRotation());
 		this->stateRotationMatrix()->connect(transformer->inRotationMatrix());
 		this->stateBindingPair()->connect(transformer->inBindingPair());
 		this->stateBindingTag()->connect(transformer->inBindingTag());
@@ -112,7 +111,6 @@ namespace dyno
 
 		this->stateBindingPair()->assign(bindingPair);
 		this->stateBindingTag()->assign(tags);
-		this->stateInitialRotation()->assign(this->stateRotationMatrix()->constData());
 
 		this->updateInstanceTransform();
 
@@ -150,8 +148,6 @@ namespace dyno
 	void ArticulatedBody<TDataType>::transform()
 	{
 		////************************** initial mInitialRot *************************//
-
-		mInitialRot.assign(this->stateRotationMatrix()->constData());
 
 		CArray<Coord> hostCenter;
 		hostCenter.assign(this->stateCenter()->constData());
@@ -209,7 +205,6 @@ namespace dyno
 			this->stateInstanceTransform()->getData(),
 			this->stateCenter()->getData(),
 			this->stateRotationMatrix()->getData(),
-			this->stateInitialRotation()->constData(),
 			this->stateBindingPair()->constData(),
 			this->stateBindingTag()->constData());
 	}

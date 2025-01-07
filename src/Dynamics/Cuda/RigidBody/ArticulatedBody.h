@@ -56,8 +56,6 @@ namespace dyno
 
 		DEF_ARRAY_STATE(int, BindingTag, DeviceType::GPU, "");
 
-		DEF_ARRAY_STATE(Matrix, InitialRotation, DeviceType::GPU, "");
-
 	protected:
 		void resetStates() override;
 
@@ -73,7 +71,21 @@ namespace dyno
 
 	protected:
 
-		DArray<Matrix> mInitialRot;
+		std::vector<Quat<Real>> getInstanceRotation() 
+		{
+			std::vector<Quat<Real>> instanceQ;
+
+			auto instances = this->varVehiclesTransform()->getValue();
+
+			for (auto it : instances)
+			{
+				auto rot = it.rotation();
+				instanceQ.push_back(Quat<Real>(rot));
+			}
+
+			return instanceQ;
+		}
+
 
 	private:
 		std::vector<Pair<uint, uint>> mBindingPair;

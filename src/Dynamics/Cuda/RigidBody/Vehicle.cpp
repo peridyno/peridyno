@@ -72,7 +72,9 @@ namespace dyno
 				wheels[it].halfLength = 0.1;
 				wheels[it].radius = std::abs(up.y - down.y) / 2;
 
-				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
+				rigidbody.angle = Quat1f(instances[i].rotation());
+
 				actors[it] = this->addCapsule(wheels[it], rigidbody, 100);
 			}
 
@@ -94,7 +96,7 @@ namespace dyno
 				boxs[it].halfLength = (up - down) / 2;
 
 				rigidbody.offset = Vec3f(0.0f, 0.0f, 0.0f);
-				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
 				rigidbody.angle = Quat1f(instances[i].rotation());
 				actors[it] = this->addBox(boxs[it], rigidbody, 100);
 			}
@@ -120,7 +122,7 @@ namespace dyno
 				auto& joint = this->createHingeJoint(actors[it], actors[body]);
 				joint.setAnchorPoint(actors[it]->center);
 				joint.setMoter(wheel_velocity);
-				joint.setAxis(Vec3f(1, 0, 0));
+				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(1, 0, 0)));
 			}
 
 			auto& jointBackWheel_Body = this->createFixedJoint(actors[backWheel], actors[body]);
@@ -187,7 +189,7 @@ namespace dyno
 				wheels[it].halfLength = 0.1;
 				wheels[it].radius = std::abs(up.y - down.y) / 2;
 
-				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
 				rigidbody.angle = Quat1f(instances[i].rotation());
 				actors[it] = this->addCapsule(wheels[it], rigidbody, 100);
 			}
@@ -210,7 +212,7 @@ namespace dyno
 				boxs[it].halfLength = (up - down) / 2 * 0.5;
 
 				rigidbody.offset = Vec3f(0.0f, 0.0f, 0.0f);
-				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
 				rigidbody.angle = Quat1f(instances[i].rotation());
 				actors[it] = this->addBox(boxs[it], rigidbody, 100);
 			}
@@ -236,7 +238,7 @@ namespace dyno
 				auto& joint = this->createHingeJoint(actors[it], actors[body]);
 				joint.setAnchorPoint(actors[it]->center);
 				joint.setMoter(wheel_velocity);
-				joint.setAxis(Vec3f(1, 0, 0));
+				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(1, 0, 0)));
 			}
 
 			auto& jointGun_Body = this->createFixedJoint(actors[gun], actors[body]);
@@ -307,7 +309,8 @@ namespace dyno
 				auto up = texMesh->shapes()[it]->boundingBox.v1;
 				auto down = texMesh->shapes()[it]->boundingBox.v0;
 
-				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
+				rigidbody.angle = Quat1f(instances[i].rotation());
 				rigidbody.motionType = BodyType::Static;
 				auto actor = this->createRigidBody(rigidbody);
 				actors[it] = actor;
@@ -332,7 +335,9 @@ namespace dyno
 				auto up = texMesh->shapes()[cid]->boundingBox.v1;
 				auto down = texMesh->shapes()[cid]->boundingBox.v0;
 				//first gear
-				rigidbody.position = texMesh->shapes()[cid]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[cid]->boundingTransform.translation()) + instances[i].translation();
+				rigidbody.angle = Quat1f(instances[i].rotation());
+
 				rigidbody.motionType = BodyType::Static;
 				auto actor = this->createRigidBody(rigidbody);
 				actors[cid] = actor;
@@ -373,7 +378,9 @@ namespace dyno
 				auto up = texMesh->shapes()[head]->boundingBox.v1;
 				auto down = texMesh->shapes()[head]->boundingBox.v0;
 
-				rigidbody.position = texMesh->shapes()[head]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[head]->boundingTransform.translation()) + instances[i].translation();
+				rigidbody.angle = Quat1f(instances[i].rotation());
+
 				rigidbody.motionType = BodyType::Static;
 				auto actor = this->createRigidBody(rigidbody);
 				actors[head] = actor;
@@ -401,7 +408,9 @@ namespace dyno
 				auto up = texMesh->shapes()[body]->boundingBox.v1;
 				auto down = texMesh->shapes()[body]->boundingBox.v0;
 
-				rigidbody.position = texMesh->shapes()[body]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[body]->boundingTransform.translation()) + instances[i].translation();
+				rigidbody.angle = Quat1f(instances[i].rotation());
+
 				rigidbody.motionType = BodyType::Static;
 				auto actor = this->createRigidBody(rigidbody);
 				actors[body] = actor;
@@ -423,7 +432,9 @@ namespace dyno
 				auto up = texMesh->shapes()[cid]->boundingBox.v1;
 				auto down = texMesh->shapes()[cid]->boundingBox.v0;
 				
-				rigidbody.position = texMesh->shapes()[cid]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[cid]->boundingTransform.translation()) + instances[i].translation();
+				rigidbody.angle = Quat1f(instances[i].rotation());
+
 				rigidbody.motionType = BodyType::Static;
 				auto actor = this->createRigidBody(rigidbody);
 				actors[cid] = actor;
@@ -452,7 +463,7 @@ namespace dyno
 				auto& joint = this->createHingeJoint(actors[it], actors[body]);
 				joint.setAnchorPoint(actors[it]->center);
 				joint.setMoter(wheel_velocity);
-				joint.setAxis(Vec3f(1, 0, 0));
+				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(1, 0, 0)));
 			}
 
 			//Gear to Body Joint
@@ -461,7 +472,7 @@ namespace dyno
 				auto& joint = this->createHingeJoint(actors[it], actors[body]);
 				joint.setAnchorPoint(actors[it]->center);
 				joint.setMoter(wheel_velocity);
-				joint.setAxis(Vec3f(1, 0, 0));
+				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(1, 0, 0)));
 			}
 
 			auto& jointGun_Body = this->createFixedJoint(actors[head], actors[body]);
@@ -480,7 +491,7 @@ namespace dyno
 
 				auto& joint = this->createHingeJoint(actors[start], actors[end]);
 				joint.setAnchorPoint((actors[start]->center + actors[end]->center) / 2);
-				joint.setAxis(Vec3f(1, 0, 0));
+				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(1, 0, 0)));
 
 				points.push_back(actors[start]->center);
 
@@ -499,7 +510,7 @@ namespace dyno
 
 				auto& joint = this->createHingeJoint(actors[start], actors[end]);
 				joint.setAnchorPoint((actors[start]->center + actors[end]->center) / 2);
-				joint.setAxis(Vec3f(1, 0, 0));
+				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(1, 0, 0)));
 
 				points.push_back(actors[start]->center);
 
@@ -587,8 +598,9 @@ namespace dyno
 				wheels[it].halfLength = std::abs(up.x - down.x) / 1.5;
 				wheels[it].radius = std::abs(up.y - down.y) / 2;
 
-				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
 				rigidbody.angle = Quat1f(instances[i].rotation());
+
 				actors[it] = this->addCapsule(wheels[it], rigidbody, 100);
 			}
 
@@ -609,8 +621,9 @@ namespace dyno
 				boxs[it].halfLength = (up - down) / 2 ;
 
 				rigidbody.offset = Vec3f(0.0f, 0.0f, 0.0f);
-				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
 				rigidbody.angle = Quat1f(instances[i].rotation());
+
 				actors[it] = this->addBox(boxs[it], rigidbody, 100);
 			}
 
@@ -637,7 +650,7 @@ namespace dyno
 				auto& joint = this->createHingeJoint(actors[it], actors[body]);
 				joint.setAnchorPoint(actors[it]->center);
 				joint.setMoter(wheel_velocity);
-				joint.setAxis(Vec3f(0, 1, 0));
+				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(0, 1, 0)));
 			}
 
 		}
@@ -713,8 +726,9 @@ namespace dyno
 				wheels[it].halfLength = 0.13;
 				wheels[it].radius = 0.03;
 
-				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
 				rigidbody.angle = Quat1f(instances[i].rotation());
+
 				actors[it] = this->addCapsule(wheels[it], rigidbody, 100);
 			}
 
@@ -735,8 +749,9 @@ namespace dyno
 				boxs[it].halfLength = (up - down) / 2;
 
 				rigidbody.offset = Vec3f(0.0f, 0.0f, 0.0f);
-				rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation() + instances[i].translation();
+				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
 				rigidbody.angle = Quat1f(instances[i].rotation());
+
 				actors[it] = this->addBox(boxs[it], rigidbody, 100);
 			}
 
@@ -764,7 +779,7 @@ namespace dyno
 				joint.setAnchorPoint(actors[it]->center);
 				joint.setMoter(wheel_velocity);
 				Vec3f axis = it == 1 || it == 2 ? Vec3f(0, 1, 0) : Vec3f(0, 0, 1);
-				joint.setAxis(axis);
+				joint.setAxis(Quat1f(instances[i].rotation()).rotate(axis));
 			}
 
 		}

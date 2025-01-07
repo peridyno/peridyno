@@ -28,7 +28,6 @@ namespace dyno
 			this->outInstanceTransform()->getData(),
 			this->inCenter()->getData(),
 			this->inRotationMatrix()->getData(),
-			this->inInitialRotation()->constData(),
 			this->inBindingPair()->constData(),
 			this->inBindingTag()->constData());
 	}
