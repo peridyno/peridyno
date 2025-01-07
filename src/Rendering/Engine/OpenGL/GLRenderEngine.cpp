@@ -160,7 +160,7 @@ namespace dyno
 
 	void GLRenderEngine::setDefaultEnvmap()
 	{
-		setEnvmap(getAssetPath() + "textures/hdr/venice_sunset_1k.hdr");
+		setEnvmap(getAssetPath() + "textures/hdr/venice_dawn_1_4k.hdr");
 	}
 
 	void GLRenderEngine::setEnvmap(const std::string& file)
@@ -172,6 +172,7 @@ namespace dyno
 		else
 		{
 			//bDrawEnvmap = true;
+			mEnvmapFilePath = file;
 			mEnvmap->load(file.c_str());
 		}
 	}

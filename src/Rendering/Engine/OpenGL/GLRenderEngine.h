@@ -72,6 +72,8 @@ namespace dyno
 
 		void setEnvStyle(EEnvStyle style) override;
 
+		inline std::string getEnvmapFilePath() { return mEnvmapFilePath; }
+
 	private:
 		void createFramebuffer();
 		void resizeFramebuffer(int w, int h, int samples);
@@ -123,6 +125,7 @@ namespace dyno
 		FXAA*					mFXAAFilter;
 
 		// Envmap
+		std::string				mEnvmapFilePath = getAssetPath() + "textures/hdr/venice_dawn_1_4k.hdr";
 		Envmap*					mEnvmap = 0;
 		
 		Mesh* mScreenQuad = 0;

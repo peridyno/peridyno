@@ -13,6 +13,8 @@
 #include <QFormLayout>
 #include <QComboBox>
 #include <QCheckBox>
+#include <QFileDialog>
+#include <QMessageBox>
 #include <QSlider>
 
 #include "PDockWidget.h"
@@ -222,6 +224,49 @@ namespace dyno
 		layout->addRow(tr("MSAA Samples"), msaaSamples);
 		layout->addRow(tr("ShadowMap Size"), shadowMapSize);
 		layout->addRow(tr("ShadowMap Blur"), shadowBlurIters);
+
+
+		QHBoxLayout* hLayout = new QHBoxLayout;
+		hLayout->setContentsMargins(0, 0, 0, 0);
+		hLayout->setSpacing(0);
+
+		mLineEdit = new QLineEdit;
+		mLineEdit->setText(QString::fromStdString(""));
+
+		QPushButton* open = new QPushButton("Open");
+		// 		open->setStyleSheet("QPushButton{color: black;   border-radius: 10px;  border: 1px groove black;background-color:white; }"
+		// 							"QPushButton:hover{background-color:white; color: black;}"  
+		// 							"QPushButton:pressed{background-color:rgb(85, 170, 255); border-style: inset; }" );
+		open->setFixedSize(60, 24);
+
+		hLayout->addWidget(mLineEdit, 0);
+		hLayout->addWidget(open, 1);
+		hLayout->setSpacing(3);
+
+		layout->addRow("Env Map", hLayout);
+
+		connect(open, &QPushButton::clicked, this, [=]() {
+			QString path = QFileDialog::getOpenFileName(this, tr("Open File"), QString::fromStdString(getAssetPath()), tr("Text Files(*.hdr)"));
+			if (!path.isEmpty()) {
+				//Windows: "\\"; Linux: "/"
+				path = QDir::toNativeSeparators(path);
+				QFile file(path);
+				if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+					QMessageBox::warning(this, tr("Read File"),
+						tr("Cannot open file:\n%1").arg(path));
+					return;
+				}
+				mLineEdit->setText(path);
+				if (mRenderEngine != nullptr)
+				{
+					mRenderEngine->setEnvmap(path.toStdString());
+				}
+				file.close();
+			}
+			else {
+				QMessageBox::warning(this, tr("Path"), tr("You do not select any file."));
+			}
+			});
 	}
 
 	PRenderSetting::~PRenderSetting()
@@ -238,12 +283,12 @@ namespace dyno
 			msaaSamples->setCurrentText(QString::number(mRenderEngine->getMSAA()));
 			shadowMapSize->setCurrentText(QString::number(mRenderEngine->getShadowMapSize()));
 			shadowBlurIters->setValue(mRenderEngine->getShadowBlurIters());
+			mLineEdit->setText(QString::fromStdString(mRenderEngine->getEnvmapFilePath()));
 
 			// connection
 			connect(fxaaEnabled, &QCheckBox::toggled, [=]() {
 				mRenderEngine->setFXAA(fxaaEnabled->isChecked());
 				});
-
 
 			connect(msaaSamples, SIGNAL(currentIndexChanged(int)), this, SLOT(setMSAA(int)));
 

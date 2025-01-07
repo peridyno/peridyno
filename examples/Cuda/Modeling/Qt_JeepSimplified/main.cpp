@@ -133,8 +133,6 @@ std::shared_ptr<SceneGraph> creatScene()
 
 	auto transformer = std::make_shared<InstanceTransform<DataType3f>>();
 	jeep->stateCenter()->connect(transformer->inCenter());
-	jeep->stateInitialRotation()->connect(transformer->inInitialRotation());
-	jeep->stateRotationMatrix()->connect(transformer->inRotationMatrix());
 	jeep->stateBindingPair()->connect(transformer->inBindingPair());
 	jeep->stateBindingTag()->connect(transformer->inBindingTag());
 	jeep->stateInstanceTransform()->connect(transformer->inInstanceTransform());

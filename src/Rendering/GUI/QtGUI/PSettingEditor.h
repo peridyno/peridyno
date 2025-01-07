@@ -9,6 +9,7 @@
 #include <QGridLayout>
 #include <QComboBox>
 #include <QSpinBox>
+#include <QLineEdit>
 
 #include "NodeEditor/QtNodeWidget.h"
 #include "NodeEditor/QtModuleFlowScene.h"
@@ -126,13 +127,13 @@ namespace dyno
 
 
 	private:
-		std::shared_ptr<GLRenderEngine> mRenderEngine;
+		std::shared_ptr<GLRenderEngine> mRenderEngine = nullptr;
 
 		QCheckBox* fxaaEnabled;
 		QComboBox* msaaSamples;
 		QComboBox* shadowMapSize;
 		QSpinBox*  shadowBlurIters;
-
+		QLineEdit* mLineEdit = nullptr;
 	};
 
 	class POtherSetting :
