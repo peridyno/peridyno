@@ -4,6 +4,8 @@
 
 #include "Mapping/HeightFieldToTriangleSet.h"
 
+#include "Algorithm/CudaRand.h"
+
 #include "GLSurfaceVisualModule.h"
 
 #include <math_constants.h>
@@ -33,15 +35,17 @@ namespace dyno
             input >> param.global;
             mParams.push_back(param);
         }
-        mSpectrumWidth = this->varResolution()->getData() + 1;
-        mSpectrumHeight = this->varResolution()->getData() + 4;
-
-        this->varWindDirection()->setRange(0, 360);
+        mSpectrumWidth = this->varResolution()->getValue() + 1;
+        mSpectrumHeight = this->varResolution()->getValue() + 4;
 
         auto callback = std::make_shared<FCallBackFunc>(std::bind(&OceanPatch<TDataType>::resetWindType, this));
 
         this->varWindType()->attach(callback);
+        this->varWindType()->setRange(0, 12);
+        this->varWindType()->setValue(5);
 
+        this->varWindDirection()->setRange(0, 360);
+        
 		auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
 		this->stateHeightField()->connect(mapper->inHeightField());
 		this->graphicsPipeline()->pushModule(mapper);
@@ -94,8 +98,8 @@ namespace dyno
 
 		if ((x < out_width) && (y < out_height))
 		{
-			Complex h0_k = h0[in_index];
-			Complex h0_mk = h0[in_mindex];
+			Complex h0_k = h0(x, y);
+			Complex h0_mk = h0(out_width - x, out_height - y);
 
 			// output frequency-space complex values
 			ht[out_index] = h0_k * complex_exp(w * t) + h0_mk.conjugate() * complex_exp(-w * t);
@@ -113,7 +117,6 @@ namespace dyno
 	{
 		unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
 		unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
-		unsigned int id = y * width + x;
 
 		// calculate wave vector
 		Real kx = (-(int)width / 2.0f + x) * (2.0f * CUDART_PI_F / patchSize);
@@ -143,6 +146,84 @@ namespace dyno
         this->varGlobalShift()->setValue(mParams[windType].global);
     }
 
+	template <typename Real, typename Complex>
+	__global__ void OP_GenerateH0(
+		DArray2D<Complex> h0,
+        Real winDir,
+        Real winSpeed,
+        Real winDirDependence,
+        Real amplitude,
+        Real patchSize,
+        Real G,
+        uint res)
+	{
+		unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
+		unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
+        if (x >= h0.nx() || y >= h0.ny()) return;
+
+		Real scaledWinDir = winDir * (M_PI / Real(180));
+
+        RandNumber rd(x * y);
+
+		auto phillips = [=](Real Kx, Real Ky, Real Vdir, Real V, Real A, Real dir_depend) -> Real
+			{
+				Real k_squared = Kx * Kx + Ky * Ky;
+
+				if (k_squared == 0.0f)
+				{
+					return 0.0f;
+				}
+
+				// largest possible wave from constant wind of velocity v
+				Real L = V * V / G;
+
+				Real k_x = Kx / std::sqrt(k_squared);
+				Real k_y = Ky / std::sqrt(k_squared);
+				Real w_dot_k = k_x * std::cos(Vdir) + k_y * std::sin(Vdir);
+
+				Real phillips = A * std::exp(-1.0f / (k_squared * L * L)) / (k_squared * k_squared) * w_dot_k * w_dot_k;
+
+				// filter out waves moving opposite to wind
+				if (w_dot_k < 0.0f)
+				{
+					phillips *= dir_depend;
+				}
+
+				return phillips;
+			};
+
+		auto gauss = [&]() -> Real
+			{
+				Real u1 = rd.Generate();
+				Real u2 = rd.Generate();
+
+				if (u1 < EPSILON)
+				{
+					u1 = EPSILON;
+				}
+
+				return glm::sqrt(-2 * glm::log(u1)) * glm::cos(2 * CUDART_PI_F * u2);
+			};
+
+		Real kx = (-(int)res / 2.0f + x) * (2.0f * CUDART_PI_F / patchSize);
+		Real ky = (-(int)res / 2.0f + y) * (2.0f * CUDART_PI_F / patchSize);
+
+        Real P = glm::sqrt(phillips(kx, ky, scaledWinDir, winSpeed, amplitude, winDirDependence));
+
+		if (glm::abs(kx) < EPSILON && glm::abs(ky) == EPSILON)
+		{
+			P = 0.0f;
+		}
+
+		Real Er = gauss();
+		Real Ei = gauss();
+
+		Real h0_re = Er * P * CUDART_SQRT_HALF_F;
+		Real h0_im = Ei * P * CUDART_SQRT_HALF_F;
+
+		h0(x, y) = Complex(h0_re, h0_im);
+	}
+
     template<typename TDataType>
     void OceanPatch<TDataType>::resetStates()
     {
@@ -153,10 +234,21 @@ namespace dyno
         int spectrumSize = mSpectrumWidth * mSpectrumHeight * sizeof(Complex);
         mH0.resize(mSpectrumWidth, mSpectrumHeight);
 
-        Complex* host_h0 = (Complex*)malloc(spectrumSize);
-        generateH0(host_h0);
+// 		Complex* host_h0 = (Complex*)malloc(spectrumSize);
+// 		generateH0(host_h0);
+// 
+// 		cuSafeCall(cudaMemcpy(mH0.begin(), host_h0, spectrumSize, cudaMemcpyHostToDevice));
 
-        cuSafeCall(cudaMemcpy(mH0.begin(), host_h0, spectrumSize, cudaMemcpyHostToDevice));
+        cuExecute2D(make_uint2(mSpectrumWidth, mSpectrumHeight),
+            OP_GenerateH0,
+            mH0,
+            this->varWindDirection()->getValue(),
+            this->varWindSpeed()->getValue(),
+            mDirDepend,
+            this->varAmplitude()->getValue(),
+            this->varPatchSize()->getValue(),
+            g,
+            res);
 
         mHt.resize(res, res);
         mDxt.resize(res, res);
@@ -271,80 +363,6 @@ namespace dyno
             v[2] = choppiness * Dij[2];
 
             displacement(i, j) = v;
-        }
-    }
-
-    template<typename TDataType>
-    void OceanPatch<TDataType>::generateH0(Complex* h0)
-    {
-        Real windDir = M_PI * this->varWindDirection()->getValue() / Real(180);
-        Real windSpeed = this->varWindSpeed()->getValue();
-        Real amplitude = this->varAmplitude()->getValue();
-
-        auto phillips = [=](Real Kx, Real Ky, Real Vdir, Real V, Real A, Real dir_depend) -> Real
-        {
-            Real k_squared = Kx * Kx + Ky * Ky;
-
-            if (k_squared == 0.0f)
-            {
-                return 0.0f;
-            }
-
-            // largest possible wave from constant wind of velocity v
-            Real L = V * V / g;
-
-            Real k_x = Kx / std::sqrt(k_squared);
-            Real k_y = Ky / std::sqrt(k_squared);
-            Real w_dot_k = k_x * std::cos(Vdir) + k_y * std::sin(Vdir);
-
-            Real phillips = A * std::exp(-1.0f / (k_squared * L * L)) / (k_squared * k_squared) * w_dot_k * w_dot_k;
-
-            // filter out waves moving opposite to wind
-            if (w_dot_k < 0.0f)
-            {
-                phillips *= dir_depend;
-            }
-
-            return phillips;
-        };
-
-        auto gauss = []() -> Real
-        {
-            Real u1 = rand() / (Real)RAND_MAX;
-            Real u2 = rand() / (Real)RAND_MAX;
-
-            if (u1 < EPSILON)
-            {
-                u1 = EPSILON;
-            }
-
-            return std::sqrt(-2 * std::log(u1)) * std::cos(2 * CUDART_PI_F * u2);
-        };
-
-        uint res = this->varResolution()->getData();
-        for (unsigned int y = 0; y <= res; y++)
-        {
-            for (unsigned int x = 0; x <= res; x++)
-            {
-                Real kx = (-(int)res / 2.0f + x) * (2.0f * CUDART_PI_F / this->varPatchSize()->getData());
-                Real ky = (-(int)res / 2.0f + y) * (2.0f * CUDART_PI_F / this->varPatchSize()->getData());
-
-                Real P = std::sqrt(phillips(kx, ky, windDir, windSpeed, amplitude, mDirDepend));
-
-                if (std::abs(kx) < EPSILON && std::abs(ky) == EPSILON)
-                {
-                    P = 0.0f;
-                }
-
-                Real Er = gauss();
-                Real Ei = gauss();
-
-                Real h0_re = Er * P * CUDART_SQRT_HALF_F;
-                Real h0_im = Ei * P * CUDART_SQRT_HALF_F;
-
-                int i = y * mSpectrumWidth + x;
-                h0[i] = Complex(h0_re, h0_im);
-            }
         }
     }
 

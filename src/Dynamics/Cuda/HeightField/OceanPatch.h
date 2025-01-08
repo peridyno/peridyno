@@ -45,7 +45,7 @@ namespace dyno {
 
         std::string getNodeType() override { return "Height Fields"; }
     public:
-        DEF_VAR(uint, WindType, 2, "wind Types");//风速等级
+        DEF_VAR(uint, WindType, 2, "wind Types");
 
         DEF_VAR(Real, Amplitude, 0, "");
 
@@ -76,25 +76,24 @@ namespace dyno {
         void postUpdateStates() override;
 
     private:
-        void generateH0(Complex* h0);
         void resetWindType();
 
         std::vector<WindParam> mParams;  //A set of pre-defined configurations
 
-        DArray2D<Complex> mH0;  //初始频谱
-        DArray2D<Complex> mHt;  //当前时刻频谱
+        DArray2D<Complex> mH0;  //Initial spectrum
+        DArray2D<Complex> mHt;  //Current spectrum
 
-        DArray2D<Complex> mDxt;  //x方向偏移
-        DArray2D<Complex> mDzt;  //z方向偏移
+        DArray2D<Complex> mDxt;  //x-axis offset
+        DArray2D<Complex> mDzt;  //z-axis offset
 
-        const Real g = 9.81f;          //重力
+        const Real g = 9.81f;          //Gravity
 
-        Real mDirDepend = 0.07f;  //风长方向相关性
+        Real mDirDepend = 0.07f;
 
         cufftHandle fftPlan;
 
-        int mSpectrumWidth;  //频谱宽度
-        int mSpectrumHeight;  //频谱长度
+        int mSpectrumWidth;  //with of spectrum
+        int mSpectrumHeight;  //height of spectrum
     };
 
     IMPLEMENT_TCLASS(OceanPatch, TDataType)
