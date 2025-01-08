@@ -2,26 +2,22 @@
 #include <SceneGraph.h>
 
 #include <BasicShapes/CubeModel.h>
-
 #include <Volume/BasicShapeToVolume.h>
-
 #include <Multiphysics/VolumeBoundary.h>
+#include "Samplers/ShapeSampler.h"
+#include "Volume/MarchingCubes.h"
 
 #include <ParticleSystem/ParticleFluid.h>
 #include <ParticleSystem/Emitters/SquareEmitter.h>
-#include <Module/CalculateNorm.h>
+#include <ParticleSystem/MakeParticleSystem.h>
+
+#include "Multiphysics/ParticleSkinning.h"
+
 
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
 #include <GLSurfaceVisualModule.h>
-
-#include "Volume/MarchingCubes.h"
-#include "BasicShapes/CubeModel.h"
-#include "Samplers/CubeSampler.h"
-
-#include "ParticleSystem/MakeParticleSystem.h"
-
-#include "Multiphysics/ParticleSkinning.h"
+#include <Module/CalculateNorm.h>
 
 
 using namespace std;
@@ -40,11 +36,11 @@ std::shared_ptr<SceneGraph> createScene()
 	cube->setVisible(false);
 
 	//Create a sampler
-	auto sampler = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
+	auto sampler = scn->addNode(std::make_shared<ShapeSampler<DataType3f>>());
 	sampler->varSamplingDistance()->setValue(0.005);
 	sampler->setVisible(false);
 
-	cube->outCube()->connect(sampler->inCube());
+	cube->connect(sampler->importShape());
 
 	auto initialParticles = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
 	sampler->statePointSet()->promoteOuput()->connect(initialParticles->inPoints());
@@ -80,16 +76,9 @@ std::shared_ptr<SceneGraph> createScene()
 	marchingCubes->varIsoValue()->setValue(-300000.0);
 	marchingCubes->varGridSpacing()->setValue(0.005f);
 
-	auto ptRender = std::make_shared<GLPointVisualModule>();
-	ptRender->setColor(Color(0.9, 0.9, 0.9));
-	ptRender->varPointSize()->setValue(0.0015);
-	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-	fluid->statePointSet()->connect(ptRender->inPointSet());
-	fluid->graphicsPipeline()->pushModule(ptRender);
-
 	auto surfaceRenderer = std::make_shared<GLSurfaceVisualModule>();
 	surfaceRenderer->setColor(Color(0.1f, 0.1f, 0.9f));
-	marchingCubes->outTriangleSet()->connect(surfaceRenderer->inTriangleSet());
+	marchingCubes->stateTriangleSet()->connect(surfaceRenderer->inTriangleSet());
 	surfaceRenderer->varAlpha()->setValue(0.3f);
 	surfaceRenderer->varMetallic()->setValue(0.5f);
 	marchingCubes->graphicsPipeline()->pushModule(surfaceRenderer);

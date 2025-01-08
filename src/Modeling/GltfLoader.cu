@@ -3,16 +3,16 @@
 
 #define NULL_TIME (-9599.99)
 #define NULL_POSITION (-959959.9956)
-
 #define TINYGLTF_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
+
 #include "tinygltf/tiny_gltf.h"
 
 #include "GltfFunc.h"
+#include "ImageLoader.h"
 
 namespace dyno
 {
+
 	IMPLEMENT_CLASS(BoundingBoxOfTextureMesh);
 
 	BoundingBoxOfTextureMesh::BoundingBoxOfTextureMesh()
@@ -191,8 +191,7 @@ namespace dyno
 		using namespace tinygltf;
 
 		auto newModel = new Model;
-		Model model = *newModel;
-		delete newModel;
+
 
 		TinyGLTF loader;
 		std::string err;
@@ -200,8 +199,7 @@ namespace dyno
 		std::string filename = this->varFileName()->getValue().string();
 
 
-		bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, filename);
-		//bool ret = loader.LoadBinaryFromFile(&model, &err, &warn, argv[1]); // for binary glTF(.glb)
+		bool ret = loader.LoadASCIIFromFile(newModel, &err, &warn, filename);
 
 		if (!warn.empty()) {
 			printf("Warn: %s\n", warn.c_str());
@@ -217,30 +215,40 @@ namespace dyno
 		}
 
 		////import Animation
-		importAnimation(model, joint_output, joint_input, joint_T_f_anim, joint_T_Time, joint_S_f_anim, joint_S_Time, joint_R_f_anim, joint_R_Time);
+		importAnimation(*newModel, joint_output, joint_input, joint_T_f_anim, joint_T_Time, joint_S_f_anim, joint_S_Time, joint_R_f_anim, joint_R_Time);
 
-		for (int i = 0; i<model.nodes.size();i++)
+		for (int i = 0; i< newModel->nodes.size();i++)
 		{
-			node_Name[i] = model.nodes[i].name;
+			node_Name[i] = newModel->nodes[i].name;
 		}
 
 		// import Scenes:
+
 		std::map<scene, std::vector<int>> Scene_Nodes;
-		for (size_t i = 0; i < model.scenes.size(); i++)
+		for (size_t i = 0; i < newModel->scenes.size(); i++)
 		{
 			std::vector<int> vecS_Roots;
-			vecS_Roots = model.scenes[i].nodes;
+			vecS_Roots = newModel->scenes[i].nodes;
 			Scene_Nodes[i] = vecS_Roots;
 		}
+		std::vector<int> all_Nodes;
+		std::map<joint, std::vector<int>> nodeId_Dir;
+		int jointNum = -1;
+		int meshNum = -1;
+		std::vector<int> all_Meshs;
+		std::map<int, std::vector<int>> meshId_Dir;
 
-		getNodesAndHierarchy(model, Scene_Nodes, all_Nodes, nodeId_Dir);	//jointId_joint_Dir	//update private: std::map<joint, std::vector<int>> jointId_joint_Dir;
+		getNodesAndHierarchy(*newModel, Scene_Nodes, all_Nodes, nodeId_Dir);	//jointId_joint_Dir	//update private: std::map<joint, std::vector<int>> jointId_joint_Dir;
 
-		updateJoint_Mesh_Camera_Dir(model, jointNum, meshNum, jointId_joint_Dir, all_Joints, all_Nodes, nodeId_Dir, meshId_Dir, all_Meshs, d_joints, maxJointId);
+		updateJoint_Mesh_Camera_Dir(*newModel, jointNum, meshNum, jointId_joint_Dir, all_Joints, all_Nodes, nodeId_Dir, meshId_Dir, all_Meshs, maxJointId);
 
 		std::vector<std::vector<int>> joint_child;	//build edgeset;
 
 		//get Local Transform T S R M 
-		getJointsTransformData(all_Nodes, joint_Name, joint_child, joint_rotation, joint_scale, joint_translation, joint_matrix, model);
+		getJointsTransformData(all_Nodes, joint_child, joint_rotation, joint_scale, joint_translation, joint_matrix, *newModel);
+
+
+		d_joints.assign(all_Joints);
 
 		//get InverseBindMatrix (Global)
 		this->buildInverseBindMatrices(all_Joints);
@@ -287,325 +295,13 @@ namespace dyno
 			jointVertices.clear();
 		}
 
-
-
-
-		std::vector<Coord> vertices;
-		std::vector<Coord> normals;
-		std::vector<Coord> texCoord0;
-		std::vector<Coord> texCoord1;
-
-		std::vector<TopologyModule::Triangle> trianglesVector;
-		int shapeNum = 0;
-
-		for (auto meshId : model.meshes)
-		{
-			shapeNum += meshId.primitives.size();
-		}
-
-		//materials
-		loadMaterial(model, this->stateTextureMesh()->getDataPtr(), this->varFileName()->getValue());
-
-
-		//shapes
 		auto texMesh = this->stateTextureMesh()->getDataPtr();
-
-		auto& reShapes = texMesh->shapes();
-		reShapes.clear();
-		reShapes.resize(shapeNum);
-
-		auto& reMats = texMesh->materials();
-
-
-
-		std::vector<Coord> shapeCenter;
-
-		int primitive_PointOffest;
-		int currentShape = 0;
-
-
-		std::map<int, int> shape_meshId;
-
-
-		//skin_VerticeRange;
-		{
-			int tempShapeId = 0;
-			int tempSize = 0;
-			for (int mId = 0; mId < model.meshes.size(); mId++)
-			{
-				// import Mesh
-				std::vector<dyno::TopologyModule::Triangle> vertexIndex;
-				std::vector<dyno::TopologyModule::Triangle> normalIndex;
-				std::vector<dyno::TopologyModule::Triangle> texCoordIndex;
-
-				int primNum = model.meshes[mId].primitives.size();
-
-				for (size_t pId = 0; pId < primNum; pId++)	//shape
-				{
-
-					primitive_PointOffest = (vertices.size());
-
-					//current primitive
-					const tinygltf::Primitive& primitive = model.meshes[mId].primitives[pId];
-
-					std::map<std::string, int> attributesName = primitive.attributes;
-
-					
-					//Set Vertices
-					getVec3fByAttributeName(model, primitive, std::string("POSITION"), vertices);
-					skin_VerticeRange[tempShapeId].push_back(Vec2u(tempSize, vertices.size() - 1));
-					tempShapeId++;
-					tempSize = vertices.size();
-
-					//Set Normal
-					getVec3fByAttributeName(model, primitive, std::string("NORMAL"), normals);
-
-					//Set TexCoord
-
-					getVec3fByAttributeName(model, primitive, std::string("TEXCOORD_0"), texCoord0);
-
-					getVec3fByAttributeName(model, primitive, std::string("TEXCOORD_1"), texCoord1);
-
-
-
-					//Set Triangles
-
-					if (primitive.mode == TINYGLTF_MODE_TRIANGLES)
-					{
-
-						std::vector<TopologyModule::Triangle> tempTriangles;
-
-						getTriangles(model, primitive, tempTriangles, primitive_PointOffest);
-
-						vertexIndex = (tempTriangles);
-						normalIndex = (tempTriangles);
-						texCoordIndex = (tempTriangles);
-
-						reShapes[currentShape] = std::make_shared<Shape>();
-						shape_meshId[currentShape] = mId;		// set shapeId - meshId;
-						reShapes[currentShape]->vertexIndex.assign(vertexIndex);
-						reShapes[currentShape]->normalIndex.assign(normalIndex);
-						reShapes[currentShape]->texCoordIndex.assign(texCoordIndex);
-
-						getBoundingBoxByName(model, primitive, std::string("POSITION"), reShapes[currentShape]->boundingBox, reShapes[currentShape]->boundingTransform);//,Transform3f& transform
-
-						shapeCenter.push_back(reShapes[currentShape]->boundingTransform.translation());
-
-						int matId = primitive.material;
-						if (matId != -1 && matId < reMats.size())//
-						{
-							reShapes[currentShape]->material = reMats[matId];
-							//printf("shape_materialID : %d - %d\n",currentShape,matId);
-
-							//printf("texture size %d - %d:\n", reMats[matId]->texColor.nx(), reMats[matId]->texColor.ny());
-						}
-						else
-						{
-							reShapes[currentShape]->material = NULL;
-						}
-
-						//else //
-						//{
-						//	auto newMat = std::make_shared<Material>();
-
-						//	newMat->ambient = { 0,0,0 };
-						//	newMat->diffuse = Vec3f(0.5, 0.5, 0.5);
-						//	newMat->alpha = 1;
-						//	newMat->specular = Vec3f(1, 1, 1);
-						//	newMat->roughness = 0.5;
-
-						//	reMats.push_back(newMat);
-
-						//	reShapes[currentShape]->material = reMats[reMats.size() - 1];
-						//	printf("shape_materialID : %d - %d\n", currentShape, currentShape);
-						//}
-
-
-
-						trianglesVector.insert(trianglesVector.end(), tempTriangles.begin(), tempTriangles.end());
-
-					}
-					currentShape++;
-
-				}
-				this->stateShapeCenter()->getDataPtr()->setPoints(shapeCenter);
-			}
-		}
+		//materials
+		loadGLTFMaterial(*newModel, texMesh, filename);
 
 		
-
-
-
-		std::map<uint, uint> vertexId_shapeId;
-
+		loadGLTFShape(*newModel, texMesh, filename, &initialPosition,&initialNormal, &d_mesh_Matrix,&d_shape_meshId, this->stateSkin()->getDataPtr());
 		
-		texMesh->shapeIds().resize(vertices.size());
-		
-		//Import Skin;
-		{
-			//Update ;
-			std::map<int,std::vector<joint>> shape_skinJoint;
-
-			for (size_t i = 0; i < model.skins.size(); i++)
-			{
-				auto joints = model.skins[i].joints;
-				shape_skinJoint[i] = joints;
-			}
-
-
-			std::map<int, std::vector<joint>> skinNode_MeshId;
-			std::map<mesh, std::vector<shape>> meshNode_Primitive;
-
-			for (size_t i = 0; i < model.nodes.size(); i++)
-			{
-				if (model.nodes[i].skin != -1)
-				{
-					skinNode_MeshId[i].push_back(model.nodes[i].mesh);
-				}
-			}
-		
-			{
-				int tempShapeId = 0;
-
-				for (int mId = 0; mId < model.meshes.size(); mId++)
-				{
-					int primNum = model.meshes[mId].primitives.size();
-
-					for (size_t pId = 0; pId < primNum; pId++)
-					{
-						meshNode_Primitive[mId].push_back(tempShapeId);
-						tempShapeId++;
-					}
-				}
-			}
-
-
-			
-			auto SkinData = this->stateSkin()->getDataPtr();
-			SkinData->clearSkinInfo();
-			{
-				int tempShapeId = 0;
-				for (int mId = 0; mId < model.meshes.size(); mId++)
-				{
-					int primNum = model.meshes[mId].primitives.size();
-
-					for (size_t pId = 0; pId < primNum; pId++)
-					{
-						std::vector<joint> skinJoints;
-
-						if (shape_skinJoint.find(0) != shape_skinJoint.end())
-							skinJoints = shape_skinJoint[tempShapeId];
-
-						if (skinJoints.size())
-						{
-
-							std::vector<Vec4f> weight0;
-							std::vector<Vec4f> weight1;
-
-							std::vector<Vec4f> joint0;
-							std::vector<Vec4f> joint1;
-
-							getVec4ByAttributeName(model, model.meshes[mId].primitives[pId], std::string("WEIGHTS_0"), weight0);//
-
-							getVec4ByAttributeName(model, model.meshes[mId].primitives[pId], std::string("WEIGHTS_1"), weight1);//
-
-							getVertexBindJoint(model, model.meshes[mId].primitives[pId], std::string("JOINTS_0"), joint0, skinJoints);
-
-							getVertexBindJoint(model, model.meshes[mId].primitives[pId], std::string("JOINTS_1"), joint1, skinJoints);
-
-							SkinData->pushBack_Data(weight0, weight1, joint0, joint1);
-
-
-						}
-						tempShapeId++;
-					}
-				}
-			}
-			
-			for (auto it : skin_VerticeRange) 
-			{
-				SkinData->skin_VerticeRange[it.first] = it.second;
-			}
-			
-		}
-
-
-		for (int i = 0; i < texMesh->shapes().size(); i++)
-		{
-			auto it = texMesh->shapes()[i];
-
-			cuExecute(texMesh->shapes()[i]->vertexIndex.size(),
-				updateVertexId_Shape,
-				texMesh->shapes()[i]->vertexIndex,
-				texMesh->shapeIds(),		//vertex_shapeId, 
-				i
-			);
-		}
-
-		CArray<int> c_shape_meshId;
-
-		c_shape_meshId.resize(shape_meshId.size());
-
-		//getMeshMatrix
-
-		std::vector<int> MeshNodeIDs;
-
-		for (size_t nId = 0; nId < model.nodes.size(); nId++)
-		{
-			int j = 0;
-
-			if (model.nodes[nId].mesh >= 0)
-			{
-				j++;
-				MeshNodeIDs.push_back(nId);
-			}
-
-		}
-
-		getMeshMatrix(model, MeshNodeIDs, maxMeshId, mesh_Matrix);
-
-		for (auto it : shape_meshId)
-		{
-			c_shape_meshId[it.first] = MeshNodeIDs[it.second];
-		}
-		d_shape_meshId.assign(c_shape_meshId);
-
-
-		initialPosition.assign(vertices);
-		initialNormal.assign(normals);
-
-		texMesh->vertices().assign(vertices);
-		texMesh->normals().assign(normals);
-
-		
-		d_mesh_Matrix.assign(mesh_Matrix);
-
-
-		texMesh->shapeIds().resize(texMesh->vertices().size());
-
-
-
-		// flip UV
-		{
-			std::vector<Vec2f> tempTexCoord;
-			for (auto uv0 : texCoord0)
-			{
-				tempTexCoord.push_back(Vec2f(uv0[0], 1 - uv0[1]));	// uv.v need flip
-			}
-			this->stateTexCoord_0()->assign(tempTexCoord);
-			texMesh->texCoords().assign(tempTexCoord);
-
-
-			tempTexCoord.clear();
-			for (auto uv1 : texCoord1)
-			{
-				tempTexCoord.push_back(Vec2f(uv1[0], 1 - uv1[1]));
-			}
-			this->stateTexCoord_1()->assign(tempTexCoord);
-			texCoord1.clear();
-			tempTexCoord.clear();
-		}
-
 
 		this->updateTransform();
 		
@@ -639,24 +335,135 @@ namespace dyno
 			joint_R_Time,
 			this->stateJointsData()->getDataPtr()
 			);
-		printf("%d,%d,%d,%d,%d,%d,%d,%d\n", 
-			all_Joints.size(),
-			jointId_joint_Dir.size(),
-			joint_T_f_anim.size(),
-			joint_T_Time.size(),
-			joint_S_f_anim.size(),
-			joint_S_Time.size(),
-			joint_R_f_anim.size(),
-			joint_R_Time.size()
-			);
+
+		delete newModel;
 	}
-
-
 
 	// ***************************** function *************************** //
 
+	template<typename TDataType>
+	void GltfLoader<TDataType>::updateTransform()
+	{
+		//updateModelTransformMatrix
+		this->updateTransformState();
+
+		if (all_Joints.size())	//Animation
+		{
+			if (varImportAnimation()->getValue() && (!this->joint_R_f_anim.empty() && !this->joint_T_f_anim.empty() && !this->joint_S_f_anim.empty()))
+				updateAnimation(this->stateFrameNumber()->getValue());
+
+		}
+
+		if (this->stateTextureMesh()->getDataPtr()->vertices().size())
+		{
+			//Move by Dir
+			if (true)
+			{
+				cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
+					ShapeTransform,
+					initialPosition,
+					this->stateTextureMesh()->getDataPtr()->vertices(),
+					initialNormal,
+					this->stateTextureMesh()->getDataPtr()->normals(),
+					d_mesh_Matrix,
+					this->stateTextureMesh()->getDataPtr()->shapeIds(),
+					d_shape_meshId
+				);
+			}
+
+			//Move by VarTransform
+		}
 
 
+
+		//update BoundingBox 
+
+		auto shapeNum = this->stateTextureMesh()->getDataPtr()->shapes().size();
+
+		CArray<Coord> c_shapeCenter;
+		c_shapeCenter.resize(shapeNum);
+		//counter
+		for (uint i = 0; i < shapeNum; i++)
+		{
+			DArray<int> counter;
+			counter.resize(this->stateTextureMesh()->getDataPtr()->vertices().size());
+
+
+			cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
+				C_Shape_PointCounter,
+				counter,
+				this->stateTextureMesh()->getDataPtr()->shapeIds(),
+				i
+			);
+
+			Reduction<int> reduce;
+			int num = reduce.accumulate(counter.begin(), counter.size());
+
+			DArray<Coord> targetPoints;
+			targetPoints.resize(num);
+
+			Scan<int> scan;
+			scan.exclusive(counter.begin(), counter.size());
+
+			cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
+				C_SetupPoints,
+				targetPoints,
+				this->stateTextureMesh()->getDataPtr()->vertices(),
+				counter
+			);
+
+
+			Reduction<Coord> reduceBounding;
+
+			auto& bounding = this->stateTextureMesh()->getDataPtr()->shapes()[i]->boundingBox;
+			Coord lo = reduceBounding.minimum(targetPoints.begin(), targetPoints.size());
+			Coord hi = reduceBounding.maximum(targetPoints.begin(), targetPoints.size());
+
+			bounding.v0 = lo;
+			bounding.v1 = hi;
+			this->stateTextureMesh()->getDataPtr()->shapes()[i]->boundingTransform.translation() = (lo + hi) / 2;
+
+			c_shapeCenter[i] = (lo + hi) / 2;
+
+			targetPoints.clear();
+
+			counter.clear();
+		}
+
+		d_ShapeCenter.assign(c_shapeCenter);	// Used to "ToCenter"
+		unCenterPosition.assign(this->stateTextureMesh()->getDataPtr()->vertices());
+
+		//ToCenter
+		if (varUseInstanceTransform()->getValue())
+		{
+			cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
+				ShapeToCenter,
+				unCenterPosition,
+				this->stateTextureMesh()->getDataPtr()->vertices(),
+				this->stateTextureMesh()->getDataPtr()->shapeIds(),
+				d_ShapeCenter
+			);
+
+			auto& reShapes = this->stateTextureMesh()->getDataPtr()->shapes();
+
+			for (size_t i = 0; i < shapeNum; i++)
+			{
+				reShapes[i]->boundingTransform.translation() = reShapes[i]->boundingTransform.translation() + this->varLocation()->getValue();
+			}
+		}
+		else
+		{
+			auto& reShapes = this->stateTextureMesh()->getDataPtr()->shapes();
+
+			for (size_t i = 0; i < shapeNum; i++)
+			{
+				reShapes[i]->boundingTransform.translation() = Vec3f(0);
+			}
+		}
+
+		this->stateShapeCenter()->getDataPtr()->setPoints(d_ShapeCenter);
+
+	}
 
 	template<typename TDataType>
 	void GltfLoader<TDataType>::updateStates()
@@ -1008,129 +815,7 @@ namespace dyno
 		this->stateTransform()->setValue(transform);
 	}
 
-	template<typename TDataType>
-	void GltfLoader<TDataType>::updateTransform()
-	{
-		//updateModelTransformMatrix
-		this->updateTransformState();
-
-		if (all_Joints.size())	//Animation
-		{
-			if(varImportAnimation()->getValue()&&(!this->joint_R_f_anim.empty() && !this->joint_T_f_anim.empty() && !this->joint_S_f_anim.empty()))
-				updateAnimation(this->stateFrameNumber()->getValue());
-			
-		}
-
-		if (this->stateTextureMesh()->getDataPtr()->vertices().size())
-		{
-			//Move by Dir
-			if (true)
-			{
-				cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
-					ShapeTransform,
-					initialPosition,
-					this->stateTextureMesh()->getDataPtr()->vertices(),
-					initialNormal,
-					this->stateTextureMesh()->getDataPtr()->normals(),
-					d_mesh_Matrix,
-					this->stateTextureMesh()->getDataPtr()->shapeIds(),
-					d_shape_meshId
-				);
-			}
-
-			//Move by VarTransform
-		}
-
-		
-
-		//update BoundingBox 
-		
-		auto shapeNum = this->stateTextureMesh()->getDataPtr()->shapes().size();
-
-		CArray<Coord> c_shapeCenter;
-		c_shapeCenter.resize(shapeNum);
-		//counter
-		for (uint i = 0; i < shapeNum; i++)
-		{
-			DArray<int> counter;
-			counter.resize(this->stateTextureMesh()->getDataPtr()->vertices().size());
-
-
-			cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
-				C_Shape_PointCounter,
-				counter,
-				this->stateTextureMesh()->getDataPtr()->shapeIds(),
-				i
-			);
-
-			Reduction<int> reduce;
-			int num = reduce.accumulate(counter.begin(), counter.size());
-
-			DArray<Coord> targetPoints;
-			targetPoints.resize(num);
-
-			Scan<int> scan;
-			scan.exclusive(counter.begin(), counter.size());
-
-			cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
-				C_SetupPoints,
-				targetPoints,
-				this->stateTextureMesh()->getDataPtr()->vertices(),
-				counter
-			);
-
-
-			Reduction<Coord> reduceBounding;
-
-			auto& bounding = this->stateTextureMesh()->getDataPtr()->shapes()[i]->boundingBox;
-			Coord lo = reduceBounding.minimum(targetPoints.begin(), targetPoints.size());
-			Coord hi = reduceBounding.maximum(targetPoints.begin(), targetPoints.size());
-
-			bounding.v0 = lo;
-			bounding.v1 = hi;
-			this->stateTextureMesh()->getDataPtr()->shapes()[i]->boundingTransform.translation() = (lo + hi) / 2;
-
-			c_shapeCenter[i] = (lo + hi) / 2;
-
-			targetPoints.clear();
-			
-			counter.clear();
-		}
-
-		d_ShapeCenter.assign(c_shapeCenter);	// Used to "ToCenter"
-		unCenterPosition.assign(this->stateTextureMesh()->getDataPtr()->vertices());
-
-		//ToCenter
-		if (varUseInstanceTransform()->getValue())
-		{
-			cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
-				ShapeToCenter,
-				unCenterPosition,
-				this->stateTextureMesh()->getDataPtr()->vertices(),
-				this->stateTextureMesh()->getDataPtr()->shapeIds(),
-				d_ShapeCenter
-			);
-
-			auto& reShapes = this->stateTextureMesh()->getDataPtr()->shapes();
-
-			for (size_t i = 0; i < shapeNum; i++)
-			{
-				reShapes[i]->boundingTransform.translation() = reShapes[i]->boundingTransform.translation() + this->varLocation()->getValue();
-			}
-		}
-		else 
-		{
-			auto& reShapes = this->stateTextureMesh()->getDataPtr()->shapes();
-
-			for (size_t i = 0; i < shapeNum; i++)
-			{
-				reShapes[i]->boundingTransform.translation() = Vec3f(0);
-			}		
-		}
-
-		this->stateShapeCenter()->getDataPtr()->setPoints(d_ShapeCenter);
-
-	}
+	
 
 
 	template< typename Coord, typename Mat4f>
@@ -1187,21 +872,7 @@ namespace dyno
 	}
 
 
-	template<typename Triangle>
-	__global__ void updateVertexId_Shape(
-		DArray<Triangle> triangle,
-		DArray<uint> ID_shapeId,
-		int shapeId
-	)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= triangle.size()) return;
-
-		ID_shapeId[triangle[pId][0]] = shapeId;
-		ID_shapeId[triangle[pId][1]] = shapeId;
-		ID_shapeId[triangle[pId][2]] = shapeId;
-
-	}
+	
 
 
 
@@ -1331,9 +1002,6 @@ namespace dyno
 		d_joints.clear();
 		initialNormal.clear();
 
-		all_Nodes.clear();
-		all_Meshs.clear();
-		nodeId_Dir.clear();
 
 		meshId_Dir.clear();
 		node_matrix.clear();
@@ -1346,8 +1014,6 @@ namespace dyno
 
 
 		maxJointId = -1;
-		jointNum = -1;
-		meshNum = -1;
 
 
 
@@ -1381,112 +1047,6 @@ namespace dyno
 		jointPointRender->varPointSize()->setValue(this->varJointRadius()->getValue());
 	}
 
-
-	bool loadImage(const char* path, dyno::CArray2D<dyno::Vec4f>& img)
-	{
-		int x, y, comp;
-		stbi_set_flip_vertically_on_load(true);
-
-		float* data = stbi_loadf(path, &x, &y, &comp, STBI_default);
-
-		if (data) {
-			img.resize(x, y);
-			for (int x0 = 0; x0 < x; x0++)
-			{
-				for (int y0 = 0; y0 < y; y0++)
-				{
-					int idx = (y0 * x + x0) * comp;
-					for (int c0 = 0; c0 < comp; c0++) {
-						img(x0, y0)[c0] = data[idx + c0];
-					}
-				}
-			}
-			STBI_FREE(data);
-		}
-
-		return data != 0;
-	}
-
-
-
-	void loadMaterial(tinygltf::Model& model, std::shared_ptr<TextureMesh> texMesh, FilePath filename)
-	{
-		const std::vector<tinygltf::Material>& sourceMaterials = model.materials;
-
-		auto& reMats = texMesh->materials();
-		reMats.clear();
-		if (sourceMaterials.size()) //use materials.size()
-		{
-			reMats.resize(sourceMaterials.size());
-		}
-
-
-		std::vector<tinygltf::Texture>& textures = model.textures;
-		std::vector<tinygltf::Image>& images = model.images;
-		dyno::CArray2D<dyno::Vec4f> texture(1, 1);
-		texture[0, 0] = dyno::Vec4f(1);
-
-
-		for (int matId = 0; matId < sourceMaterials.size(); matId++)
-		{
-			auto material = sourceMaterials[matId];
-			auto color = material.pbrMetallicRoughness.baseColorFactor;
-			auto roughness = material.pbrMetallicRoughness.roughnessFactor;
-
-			auto metallic = material.pbrMetallicRoughness.metallicFactor;
-
-			auto colorTexId = material.pbrMetallicRoughness.baseColorTexture.index;
-			auto texCoord = material.pbrMetallicRoughness.baseColorTexture.texCoord;
-
-			reMats[matId] = std::make_shared<Material>();
-			reMats[matId]->baseColor = Vec3f(color[0], color[1], color[2]);
-			reMats[matId]->alpha = color[3];
-			reMats[matId]->metallic = metallic;
-			reMats[matId]->roughness = roughness;
-
-			std::string colorUri = getTexUri(textures, images, colorTexId);
-
-			if (!colorUri.empty())
-			{
-				auto root = filename.path().parent_path();
-				colorUri = (root / colorUri).string();
-
-				if (loadImage(colorUri.c_str(), texture))
-				{
-					reMats[matId]->texColor.assign(texture);
-				}
-			}
-			else
-			{
-				if (reMats[matId]->texColor.size())
-					reMats[matId]->texColor.clear();
-			}
-
-			auto bumpTexId = material.normalTexture.index;
-			auto scale = material.normalTexture.scale;
-			std::string bumpUri = getTexUri(textures, images, bumpTexId);
-
-			if (!bumpUri.empty())
-			{
-				auto root = filename.path().parent_path();
-				bumpUri = (root / bumpUri).string();
-
-				if (loadImage(bumpUri.c_str(), texture))
-				{
-					reMats[matId]->texBump.assign(texture);
-					reMats[matId]->bumpScale = scale;
-				}
-			}
-			else
-			{
-				if (reMats[matId]->texBump.size())
-					reMats[matId]->texBump.clear();
-			}
-
-		}
-
-
-	}
 
 
 	template< typename Coord, typename uint>

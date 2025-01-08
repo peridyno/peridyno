@@ -1,5 +1,9 @@
 #include "Ocean.h"
 
+#include "Mapping/HeightFieldToTriangleSet.h"
+
+#include "GLSurfaceVisualModule.h"
+
 namespace dyno
 {
 	template<typename TDataType>
@@ -8,6 +12,16 @@ namespace dyno
 	{
 		auto heights = std::make_shared<HeightField<TDataType>>();
 		this->stateHeightField()->setDataPtr(heights);
+
+		auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
+		this->stateHeightField()->connect(mapper->inHeightField());
+		this->graphicsPipeline()->pushModule(mapper);
+
+		auto sRender = std::make_shared<GLSurfaceVisualModule>();
+		sRender->setColor(Color(0, 0.2, 1.0));
+		sRender->varUseVertexNormal()->setValue(true);
+		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+		this->graphicsPipeline()->pushModule(sRender);
 	}
 
 	template<typename TDataType>

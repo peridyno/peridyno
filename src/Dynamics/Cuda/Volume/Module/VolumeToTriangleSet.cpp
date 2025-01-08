@@ -22,59 +22,67 @@ namespace dyno
 	{
 		Real iso = this->varIsoValue()->getValue();
 
-		auto vol = this->ioVolume()->constDataPtr();
+		auto levelset = this->ioVolume()->constDataPtr();
 
-		DArray<Coord> ceilVertices;
+		auto& sdf = levelset->getSDF();
 
-		vol->getCellVertices0(ceilVertices);
+		Coord lowerBound = sdf.lowerBound();
+		Coord upperBound = sdf.upperBound();
 
-		DArray<Real> sdfs;
-		DArray<Coord> normals;
+		Real h = sdf.getGridSpacing();
 
-		vol->getSignDistanceMLS(ceilVertices, sdfs, normals, false);
-		//sv->getSignDistanceKernel(ceilVertices, sdfs);
+		if (h < EPSILON)
+			return false;
 
-		//DArray3D<Real> distances(nx + 1, ny + 1, nz + 1);
-		DArray<uint> voxelVertNum(ceilVertices.size() / 8);
+		int nx = (upperBound[0] - lowerBound[0]) / h;
+		int ny = (upperBound[1] - lowerBound[1]) / h;
+		int nz = (upperBound[2] - lowerBound[2]) / h;
 
-		MarchingCubesHelper<TDataType>::countVerticeNumberForOctree(
+		DArray3D<Real> distances(nx + 1, ny + 1, nz + 1);
+		DArray<int> voxelVertNum(nx * ny * nz);
+
+		MarchingCubesHelper<TDataType>::reconstructSDF(
+			distances,
+			lowerBound,
+			h,
+			sdf);
+
+		MarchingCubesHelper<TDataType>::countVerticeNumber(
 			voxelVertNum,
-			ceilVertices,
-			sdfs,
+			distances,
 			iso);
 
-		Reduction<uint> reduce;
-		uint totalVNum = reduce.accumulate(voxelVertNum.begin(), voxelVertNum.size());
+		Reduction<int> reduce;
+		int totalVNum = reduce.accumulate(voxelVertNum.begin(), voxelVertNum.size());
 
-		Scan<uint> scan;
+		Scan<int> scan;
 		scan.exclusive(voxelVertNum.begin(), voxelVertNum.size());
 
-		DArray<Coord> triangleVertices(totalVNum);
+		DArray<Coord> vertices(totalVNum);
 
 		DArray<TopologyModule::Triangle> triangles(totalVNum / 3);
 
-		MarchingCubesHelper<TDataType>::constructTrianglesForOctree(
-			triangleVertices,
+		MarchingCubesHelper<TDataType>::constructTriangles(
+			vertices,
 			triangles,
 			voxelVertNum,
-			ceilVertices,
-			sdfs,
-			iso);
+			distances,
+			lowerBound,
+			iso,
+			h);
 
 		if (this->outTriangleSet()->isEmpty()) {
 			this->outTriangleSet()->allocate();
 		}
 
 		auto triSet = this->outTriangleSet()->getDataPtr();
-		triSet->setPoints(triangleVertices);
+		triSet->setPoints(vertices);
 		triSet->setTriangles(triangles);
 		triSet->update();
 
-		sdfs.clear();
-		normals.clear();
+		distances.clear();
 		voxelVertNum.clear();
-		ceilVertices.clear();
-		triangleVertices.clear();
+		vertices.clear();
 		triangles.clear();
 
 		return true;

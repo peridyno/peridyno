@@ -18,7 +18,7 @@ namespace dyno
 			ins = gInstance.load(std::memory_order_relaxed);
 			if (!ins) {
 				ins = new IOInitializer();
-				ins->setName("Peridynamics");
+				ins->setName("IO");
 				ins->setVersion("1.0");
 				ins->setDescription("A io library");
 

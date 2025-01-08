@@ -39,11 +39,6 @@ void Smesh::loadFile(string filename)
     }
 
     filein >> part_str;
-//     if (part_str != "*ELEMENTS")
-//     {
-//         cout << "after vertices, the first non-empty line must be '*ELEMENTS'." << endl;
-//         return;
-//     }
 
     while (!filein.eof())
     {

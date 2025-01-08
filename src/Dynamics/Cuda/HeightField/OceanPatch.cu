@@ -2,6 +2,10 @@
 
 #include "Topology/HeightField.h"
 
+#include "Mapping/HeightFieldToTriangleSet.h"
+
+#include "GLSurfaceVisualModule.h"
+
 #include <math_constants.h>
 
 #include <fstream>
@@ -12,6 +16,8 @@ namespace dyno
     OceanPatch<TDataType>::OceanPatch()
         : Node()
     {
+        this->setAutoHidden(true);
+
         auto heights = std::make_shared<HeightField<TDataType>>();
         this->stateHeightField()->setDataPtr(heights);
 
@@ -35,6 +41,16 @@ namespace dyno
         auto callback = std::make_shared<FCallBackFunc>(std::bind(&OceanPatch<TDataType>::resetWindType, this));
 
         this->varWindType()->attach(callback);
+
+		auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
+		this->stateHeightField()->connect(mapper->inHeightField());
+		this->graphicsPipeline()->pushModule(mapper);
+
+		auto sRender = std::make_shared<GLSurfaceVisualModule>();
+		sRender->setColor(Color::Blue1());
+		sRender->varUseVertexNormal()->setValue(true);
+		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+		this->graphicsPipeline()->pushModule(sRender);
     }
 
     template<typename TDataType>

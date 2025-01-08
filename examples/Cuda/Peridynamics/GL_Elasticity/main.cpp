@@ -20,7 +20,7 @@
 #include <ParticleSystem/ParticleFluid.h>
 #include "ParticleSystem/MakeParticleSystem.h"
 
-#include <Samplers/CubeSampler.h>
+#include <Samplers/ShapeSampler.h>
 
 using namespace dyno;
 
@@ -35,11 +35,11 @@ std::shared_ptr<SceneGraph> createScene()
 	cube->graphicsPipeline()->disable();
 
 	//Create a sampler
-	auto sampler = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
+	auto sampler = scn->addNode(std::make_shared<ShapeSampler<DataType3f>>());
 	sampler->varSamplingDistance()->setValue(0.005);
 	sampler->graphicsPipeline()->disable();
 
-	cube->outCube()->connect(sampler->inCube());
+	cube->connect(sampler->importShape());
 
 	auto initialParticles = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
 
@@ -64,14 +64,6 @@ std::shared_ptr<SceneGraph> createScene()
 	cube2vol->connect(container->importVolumes());
 
 	bunny->connect(container->importParticleSystems());
-
-	auto pointRenderer = std::make_shared<GLPointVisualModule>();
-	pointRenderer->varPointSize()->setValue(0.005);
-	pointRenderer->setColor(Color(1, 0.2, 1));
-	pointRenderer->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
-	bunny->statePointSet()->connect(pointRenderer->inPointSet());
-	bunny->stateVelocity()->connect(pointRenderer->inColor());
-	bunny->graphicsPipeline()->pushModule(pointRenderer);
 
 	return scn;
 }

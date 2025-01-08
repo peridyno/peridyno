@@ -6,7 +6,7 @@
 #include "ParticleSystem/GhostParticles.h"
 #include "ParticleSystem/MakeGhostParticles.h"
 #include <ParticleSystem/GhostFluid.h>
-#include <Samplers/CubeSampler.h>
+#include <Samplers/ShapeSampler.h>
 #include "ParticleSystem/MakeParticleSystem.h"
 
 #include <Module/CalculateNorm.h>
@@ -36,7 +36,7 @@ std::shared_ptr<SceneGraph> createScene()
 	scn->setUpperBound(Vec3f(10.5, 5, 10.5));
 	scn->setLowerBound(Vec3f(-10.5, -5, -10.5));
 
-	auto obj1 = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
+	auto obj1 = scn->addNode(std::make_shared<ObjLoader<DataType3f>>());
 	obj1->varScale()->setValue(Vec3f(0.3));
 	obj1->varFileName()->setValue(getAssetPath() + "plane/plane_lowRes.obj");
 	//obj1->varFileName()->setValue(getAssetPath() + "board/ball.obj");
@@ -79,11 +79,11 @@ std::shared_ptr<SceneGraph> createScene()
 	cube->graphicsPipeline()->disable();
 
 	
-	auto sampler = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
+	auto sampler = scn->addNode(std::make_shared<ShapeSampler<DataType3f>>());
 	sampler->varSamplingDistance()->setValue(0.005);
 	sampler->setVisible(false);
 
-	cube->outCube()->connect(sampler->inCube());
+	cube->connect(sampler->importShape());
 
 	auto fluidParticles = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
 
@@ -92,28 +92,6 @@ std::shared_ptr<SceneGraph> createScene()
 	auto incompressibleFluid = scn->addNode(std::make_shared<GhostFluid<DataType3f>>());
 	fluidParticles->connect(incompressibleFluid->importInitialStates());
 	ghost2->connect(incompressibleFluid->importBoundaryParticles());
-
-	{
-		auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
-		auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
-		colorMapper->varMax()->setValue(5.0f);
-
-		incompressibleFluid->stateVelocity()->connect(calculateNorm->inVec());
-		calculateNorm->outNorm()->connect(colorMapper->inScalar());
-
-		incompressibleFluid->graphicsPipeline()->pushModule(calculateNorm);
-		incompressibleFluid->graphicsPipeline()->pushModule(colorMapper);
-
-		auto ptRender = std::make_shared<GLPointVisualModule>();
-		ptRender->setColor(Color(1, 0, 0));
-		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-
-		incompressibleFluid->statePointSet()->connect(ptRender->inPointSet());
-		colorMapper->outColor()->connect(ptRender->inColor());
-
-		incompressibleFluid->graphicsPipeline()->pushModule(ptRender);
-	}
-
 
 	{
 		auto ptRender = std::make_shared<GLPointVisualModule>();

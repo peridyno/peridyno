@@ -99,7 +99,6 @@ void declare_rigid_body_system(py::module& m, std::string typestr) {
 		.def("state_topology", &Class::stateTopology, py::return_value_policy::reference)
 		.def("state_mass", &Class::stateMass, py::return_value_policy::reference)
 		.def("state_center", &Class::stateCenter, py::return_value_policy::reference)
-		.def("state_offset", &Class::stateOffset, py::return_value_policy::reference)
 		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference)
 		.def("state_angular_velocity", &Class::stateAngularVelocity, py::return_value_policy::reference)
 		.def("state_rotation_matrix", &Class::stateRotationMatrix, py::return_value_policy::reference)
@@ -131,17 +130,17 @@ void declare_rigid_mesh(py::module& m, std::string typestr) {
 		.def("state_mesh", &Class::stateMesh, py::return_value_policy::reference);
 }
 
-#include "RigidBody/Vechicle.h"
+#include "RigidBody/ArticulatedBody.h"
 template <typename TDataType>
 void declare_vechicle(py::module& m, std::string typestr) {
-	using Class = dyno::Vechicle<TDataType>;
+	using Class = dyno::ArticulatedBody<TDataType>;
 	using Parent = dyno::RigidBodySystem<TDataType>;
-	std::string pyclass_name = std::string("Vechicle") + typestr;
+	std::string pyclass_name = std::string("ArticulatedBody") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("bind", &Class::bind)
-		.def("in_texture_mesh", &Class::inTextureMesh, py::return_value_policy::reference)
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("state_texture_mesh", &Class::stateTextureMesh, py::return_value_policy::reference)
+		.def("var_file_path", &Class::varFilePath, py::return_value_policy::reference)
 		/*		.def("state_binding", &Class::stateBinding, py::return_value_policy::reference)
 				.def("state_binding_tag", &Class::stateBindingTag, py::return_value_policy::reference)*/
 		.def("state_instance_transform", &Class::stateInstanceTransform, py::return_value_policy::reference);

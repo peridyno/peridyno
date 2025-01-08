@@ -1,5 +1,11 @@
 #include "Volume.h"
+
 #include "Topology/LevelSet.h"
+
+#include "Module/VolumeToTriangleSet.h"
+
+//Rendering
+#include "GLSurfaceVisualModule.h"
 
 namespace dyno
 {
@@ -7,7 +13,15 @@ namespace dyno
 	Volume<TDataType>::Volume()
 		: Node()
 	{
- 		this->stateLevelSet()->setDataPtr(std::make_shared<LevelSet<TDataType>>());
+		this->setAutoHidden(true);
+
+		auto mapper = std::make_shared<VolumeToTriangleSet<TDataType>>();
+		this->stateLevelSet()->connect(mapper->ioVolume());
+		this->graphicsPipeline()->pushModule(mapper);
+
+		auto renderer = std::make_shared<GLSurfaceVisualModule>();
+		mapper->outTriangleSet()->connect(renderer->inTriangleSet());
+		this->graphicsPipeline()->pushModule(renderer);
 	}
 
 	template<typename TDataType>

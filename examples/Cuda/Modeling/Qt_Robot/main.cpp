@@ -15,7 +15,9 @@
 #include "RigidBody/Module/AnimationDriver.h"
 #include "RigidBody/Module/CarDriver.h"
 #include "BasicShapes/PlaneModel.h"
-#include "RigidBody/Vechicle.h"
+#include "RigidBody/MultibodySystem.h"
+
+#include "RigidBody/ConfigurableBody.h"
 
 
 /**
@@ -32,7 +34,7 @@ int main()
 	fbx->varFileName()->setValue(getAssetPath() + "fbx/HumanoidRobot.fbx");
 	fbx->reset();
 
-	auto robot = scn->addNode(std::make_shared<ConfigurableVehicle<DataType3f>>());
+	auto robot = scn->addNode(std::make_shared<ConfigurableBody<DataType3f>>());
 	fbx->stateTextureMesh()->connect(robot->inTextureMesh());
 	fbx->setVisible(false);
 
@@ -138,15 +140,15 @@ int main()
 	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Hand_R, 17), Name_Shape(Wrist_R, 16), Fixed, Vec3f(1, 0, 0), handOffset, true, 0, true, -90, 90));
 	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Hand_L, 22), Name_Shape(Wrist_L, 21), Fixed, Vec3f(1, 0, 0), -handOffset, true, 0, true, -90, 90));
 
-	//
-
-	//
-
-
-
 	robot->varVehicleConfiguration()->setValue(configData);
+
+	robot->varGravityValue()->setValue(0);
+	
+	auto multibody = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
+	robot->connect(multibody->importVehicles());
+
 	auto animDriver = std::make_shared<AnimationDriver<DataType3f>>();
-	robot->animationPipeline()->pushModule(animDriver);
+	multibody->animationPipeline()->pushModule(animDriver);
 
 	std::vector<std::string> driveName(8, "NULL");
 
@@ -164,19 +166,13 @@ int main()
 
 	animDriver->varDriverName()->setValue(driveName);
 	animDriver->varSpeed()->setValue(1);
-	robot->stateTimeStep()->connect(animDriver->inDeltaTime());
+	multibody->stateTimeStep()->connect(animDriver->inDeltaTime());
 	fbx->stateHierarchicalScene()->connect(animDriver->inHierarchicalScene());
-	robot->stateTopology()->connect(animDriver->inTopology());
-	//robot->varGravityValue()->setValue(0);
-
-	robot->varGravityValue()->setValue(0);
-
-	auto carDriver = robot->animationPipeline()->findFirstModule<CarDriver<DataType3f>>();
-	robot->animationPipeline()->popModule(carDriver);
+	multibody->stateTopology()->connect(animDriver->inTopology());
 
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
 	plane->varScale()->setValue(Vec3f(20));
-
+	plane->stateTriangleSet()->connect(multibody->inTriangleSet());
 
 
 	Modeling::initStaticPlugin();

@@ -942,7 +942,7 @@ namespace dyno
 		DArray<int> num,
 		DArray3D<Real> distances,
 		Coord origin,
-		Coord h,
+		Real h,
 		TPlane3D<Real> plane)
 	{
 		uint i = threadIdx.x + blockDim.x * blockIdx.x;
@@ -962,35 +962,35 @@ namespace dyno
 
 		uint cubeindex;
 
-		p = origin + Coord(i * h[0], j * h[1], k * h[2]);
+		p = origin + Coord(i * h, j * h, k * h);
 		d = p.distance(plane);
 		cubeindex = uint(d < isoValue);
 
-		p = origin + Coord((i + 1) * h[0], j * h[1], k * h[2]);
+		p = origin + Coord((i + 1) * h, j * h, k * h);
 		d = p.distance(plane);
 		cubeindex += uint(d < isoValue) * 2;
 
-		p = origin + Coord((i + 1) * h[0], (j + 1) * h[1], k * h[2]);
+		p = origin + Coord((i + 1) * h, (j + 1) * h, k * h);
 		d = p.distance(plane);
 		cubeindex += uint(d < isoValue) * 4;
 
-		p = origin + Coord(i * h[0], (j + 1) * h[1], k * h[2]);
+		p = origin + Coord(i * h, (j + 1) * h, k * h);
 		d = p.distance(plane);
 		cubeindex += uint(d < isoValue) * 8;
 
-		p = origin + Coord(i * h[0], j * h[1], (k + 1) * h[2]);
+		p = origin + Coord(i * h, j * h, (k + 1) * h);
 		d = p.distance(plane);
 		cubeindex += uint(d < isoValue) * 16;
 
-		p = origin + Coord((i + 1) * h[0], j * h[1], (k + 1) * h[2]);
+		p = origin + Coord((i + 1) * h, j * h, (k + 1) * h);
 		d = p.distance(plane);
 		cubeindex += uint(d < isoValue) * 32;
 
-		p = origin + Coord((i + 1) * h[0], (j + 1) * h[1], (k + 1) * h[2]);
+		p = origin + Coord((i + 1) * h, (j + 1) * h, (k + 1) * h);
 		d = p.distance(plane);
 		cubeindex += uint(d < isoValue) * 64;
 
-		p = origin + Coord(i * h[0], (j + 1) * h[1], (k + 1) * h[2]);
+		p = origin + Coord(i * h, (j + 1) * h, (k + 1) * h);
 		d = p.distance(plane);
 		cubeindex += uint(d < isoValue) * 128;
 
@@ -1001,14 +1001,14 @@ namespace dyno
 	template<typename TDataType>
 	void MarchingCubesHelper<TDataType>::countVerticeNumberForClipper(DArray<int>& num, DistanceField3D<TDataType>& sdf, TPlane3D<Real> plane)
 	{
-		auto& distances = sdf.getMDistance();
+		auto& distances = sdf.distances();
 
 		cuExecute3D(make_uint3(distances.nx() - 1, distances.ny() - 1, distances.nz() - 1),
 			MCH_CountVertexNumberForClipper,
 			num,
 			distances,
 			sdf.lowerBound(),
-			sdf.getH(),
+			sdf.getGridSpacing(),
 			plane);
 	}
 
@@ -1020,7 +1020,7 @@ namespace dyno
 		DArray<int> vertRadix,
 		DArray3D<Real> distances,
 		Coord origin,
-		Coord h,
+		Real h,
 		TPlane3D<Real> plane) 
 	{
 		uint i = threadIdx.x + blockDim.x * blockIdx.x;
@@ -1034,15 +1034,15 @@ namespace dyno
 		if (i >= nx - 1 || j >= ny - 1 || k >= nz - 1) return;
 
 		Coord v[8];
-		Coord p = origin + Coord(i * h[0], j * h[1], k * h[2]);
+		Coord p = origin + Coord(i * h, j * h, k * h);
 		v[0] = p;
-		v[1] = p + Coord(h[0], 0, 0);
-		v[2] = p + Coord(h[0], h[1], 0);
-		v[3] = p + Coord(0, h[1], 0);
-		v[4] = p + Coord(0, 0, h[2]);
-		v[5] = p + Coord(h[0], 0, h[2]);
-		v[6] = p + Coord(h[0], h[1], h[2]);
-		v[7] = p + Coord(0, h[1], h[2]);
+		v[1] = p + Coord(h, 0, 0);
+		v[2] = p + Coord(h, h, 0);
+		v[3] = p + Coord(0, h, 0);
+		v[4] = p + Coord(0, 0, h);
+		v[5] = p + Coord(h, 0, h);
+		v[6] = p + Coord(h, h, h);
+		v[7] = p + Coord(0, h, h);
 
 		Real field[8];
 		field[0] = distances(i, j, k);
@@ -1147,7 +1147,7 @@ namespace dyno
 		DistanceField3D<TDataType>& sdf, 
 		TPlane3D<Real> plane)
 	{
-		auto& distances = sdf.getMDistance();
+		auto& distances = sdf.distances();
 
 		cuExecute3D(make_uint3(distances.nx() - 1, distances.ny() - 1, distances.nz() - 1),
 			MCH_ConstructTrianglesForClipper,
@@ -1157,7 +1157,7 @@ namespace dyno
 			vertNum,
 			distances,
 			sdf.lowerBound(),
-			sdf.getH(),
+			sdf.getGridSpacing(),
 			plane);
 	}
 

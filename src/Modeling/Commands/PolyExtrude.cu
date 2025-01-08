@@ -21,7 +21,6 @@ namespace dyno
 
 		auto glModule2 = std::make_shared<GLPointVisualModule>();
 		glModule2->setColor(Color(1, 0.1, 0.1));
-		//glModule2->setVisible(false);
 		glModule2->varPointSize()->setValue(0.001);
 		this->stateTriangleSet()->connect(glModule2->inPointSet());
 		this->graphicsPipeline()->pushModule(glModule2);
@@ -58,7 +57,6 @@ namespace dyno
 	void PolyExtrude<TDataType>::varChanged()
 	{
 		auto triangleSet = this->stateTriangleSet()->getDataPtr();
-		//std::string primString = this->varPrimtiveId()->getData(); 
 		
 		std::vector<Coord> vertices;
 		std::vector<TopologyModule::Triangle> triangles;
@@ -74,20 +72,13 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void PolyExtrude<TDataType>::extrude(std::vector<Coord>& vertices, std::vector<TopologyModule::Triangle>& triangles)
+	void PolyExtrude<TDataType>::extrude(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles)
 	{
 		auto triangleSet = this->stateTriangleSet()->getDataPtr();
 		auto distance = this->varDistance()->getData();		
 		auto divisions = this->varDivisions()->getData();
-
-		
-		//*******************
+	
 		std::string primString = this->varPrimitiveId()->getData();
-		
-
-		//*******************
-
-
 
 		if (divisions == 0) { divisions = 1; }
 		TriangleSet<TDataType>trilist;
@@ -125,12 +116,10 @@ namespace dyno
 		int n_triangle = this->inTriangleSet()->getDataPtr()->getTriangles().size();
 		int n_edges = this->inTriangleSet()->getDataPtr()->getEdges().size();
 
-		//选择的面
-		DArray<int> d_selected_primid;
-		CArray<int> c_selected_primid;
+		CArray<uint> c_selected_primid;
 		if (this->inPrimitiveId()->isEmpty()== false)
 		{
-			d_selected_primid = this->inPrimitiveId()->getData();
+			auto d_selected_primid = this->inPrimitiveId()->getData();
 			c_selected_primid.assign(d_selected_primid);
 		}
 
@@ -157,9 +146,6 @@ namespace dyno
 			}
 		}
 
-			
-		//按照面选择包含的点序号
-
 		std::vector<int> selectedPtNum;
 
 		for (int i = 0; i < tempPrimArray.size(); i++)
@@ -179,13 +165,11 @@ namespace dyno
 			}
 		}
 
-		//构造vertices
 		for (int i = 0; i < n_point; i++)
 		{
 			vertices.push_back(c_point[i]);
 		}
 
-		//构造triangles
 		for (int i = 0; i < n_triangle; i++)
 		{
 			triangles.push_back(c_triangle[i]);
@@ -194,12 +178,6 @@ namespace dyno
 		std::vector<int> tempid;
 		std::map<int, int> ptid_count;
 		std::map<int, int> ptid_allTri;
-
-
-		//遍历面上的每个点
-		// 将这些点存放在tempid中
-		//将点的id 和其出现次数 m_count 记录在IDcount中，以便后续删除这些点
-
 
 		for (int i = 0; i < tempPrimArray.size(); i++)
 		{
@@ -210,7 +188,7 @@ namespace dyno
 
 			for (int i = 0; i < idArray.size(); i++)
 			{
-				Tid = idArray[i]; //面的顶点
+				Tid = idArray[i]; 
 				if (ptid_count.count(Tid))
 				{
 					ptid_count[Tid] = ptid_count.at(Tid) + 1;
@@ -230,7 +208,7 @@ namespace dyno
 
 			for (int k = 0; k < idArray.size(); k++)
 			{
-				Tid = idArray[k]; //every point
+				Tid = idArray[k]; 
 				if (ptid_count.count(Tid))
 				{
 					if (ptid_allTri.count(Tid))
@@ -257,7 +235,6 @@ namespace dyno
 
 			if (it.second == ptid_allTri.at(it.first))
 			{
-				//容器
 				replace_id.push_back(it.first);
 			}
 			else
@@ -267,7 +244,6 @@ namespace dyno
 
 		}
 
-		////TriangleSet的法线getVertexNormals();
 		 
 		auto d_normal = this->inTriangleSet()->getDataPtr()->getVertexNormals();
 
@@ -296,50 +272,6 @@ namespace dyno
 		}
 
 
-		/*std::map<int, Coord> map_vertexID_tNormal;
-		std::map<int, Coord> map_primID_Normal;
-
-		for (int i = 0; i < tempPrimArray.size(); i++)
-		{
-			int primNum = tempPrimArray[i];
-
-			Vec3f v0 = c_point[c_triangle[primNum][1]] - c_point[c_triangle[primNum][0]];
-			Vec3f v1 = c_point[c_triangle[primNum][2]] - c_point[c_triangle[primNum][1]];
-			v0.normalize();
-			v1.normalize();
-
-			Vec3f N = v0.cross(v1).normalize();
-
-			map_primID_Normal[primNum] = N;
-		}
-
-		for (size_t i = 0; i < select_ptid.size(); i++)
-		{
-			int currentPointID = select_ptid[i];
-			std::vector<Vec3f> tempPrimNormal;
-			for (int j = 0; j < tempPrimArray.size(); j++)
-			{
-				int PrimID = tempPrimArray[j];
-				if (c_triangle[PrimID][0] == currentPointID | c_triangle[PrimID][1] == currentPointID | c_triangle[PrimID][2] == currentPointID)
-				{
-					auto temp = map_primID_Normal.at(PrimID);
-					tempPrimNormal.push_back(Vec3f(temp[0], temp[1], temp[2]));
-				}
-			}
-			if (tempPrimNormal.size())
-			{
-				Vec3f N = { 0,0,0 };
-				for (size_t k = 0; k < tempPrimNormal.size(); k++)
-				{
-					N += tempPrimNormal[k];
-				}
-				N.normalize();
-				map_vertexID_tNormal[select_ptid[i]] = N;
-
-			}
-
-		}*/
-
 		std::map<point_layer, int> oriP_newP;
 
 		for (size_t i = 0; i < border_id.size(); i++)
@@ -348,7 +280,6 @@ namespace dyno
 		}
 
 
-		//分段
 		for (size_t k = 1; k < divisions; k++)
 		{
 			float tempdistance = float(k) /divisions * distance;
@@ -370,7 +301,6 @@ namespace dyno
 
 		}
 
-		//封口顶点
 		for (int i = 0; i < select_ptid.size(); i++)
 		{
 			int temp = -1;
@@ -403,7 +333,6 @@ namespace dyno
 
 
 
-		//查询边界edge
 		std::map<int, int> borderP_countInLine;
 		std::vector<TopologyModule::Edge> borderLine;
 
@@ -445,7 +374,6 @@ namespace dyno
 			}
 		}
 
-		//封面
 		for (int i = 0; i < tempPrimArray.size(); i++)
 		{
 			triangles[tempPrimArray[i]][0] = oriP_newP.at(point_layer(triangles[tempPrimArray[i]][0],divisions));
@@ -453,7 +381,6 @@ namespace dyno
 			triangles[tempPrimArray[i]][2] = oriP_newP.at(point_layer(triangles[tempPrimArray[i]][2],divisions));
 		}
 
-		//封侧面
 		for (size_t k = 0; k < divisions; k++)
 		{
 			for (size_t i = 0; i < borderLine.size(); i++)

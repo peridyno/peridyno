@@ -14,10 +14,10 @@
 
 namespace dyno
 {
-	IMPLEMENT_TCLASS(ObjMesh, TDataType)
+	IMPLEMENT_TCLASS(ObjLoader, TDataType)
 
 		template<typename TDataType>
-	ObjMesh<TDataType>::ObjMesh()
+	ObjLoader<TDataType>::ObjLoader()
 		: Node()
 	{
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
@@ -31,6 +31,12 @@ namespace dyno
 		this->stateTopology()->setDataPtr(triSet);
 		this->outTriangleSet()->setDataPtr(triSet);
 
+		auto callback = std::make_shared<FCallBackFunc>(std::bind(&ObjLoader<TDataType>::animationUpdate, this));
+
+		this->varVelocity()->attach(callback);
+		this->varSequence()->attach(callback);
+		this->varAngularVelocity()->attach(callback);
+
 		auto surfacerender = std::make_shared<GLSurfaceVisualModule>();
 		surfacerender->setVisible(true);
 		surfacerender->setColor(Color(0.8, 0.52, 0.25));
@@ -41,7 +47,16 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void ObjMesh<TDataType>::resetStates()
+	void ObjLoader<TDataType>::animationUpdate()
+	{
+		if (this->varSequence()->getValue() == true || this->varVelocity()->getValue() != Vec3f(0) || this->varAngularVelocity()->getValue() != Vec3f(0))
+			this->setForceUpdate(true);
+		else
+			this->setForceUpdate(false);
+	}
+
+	template<typename TDataType>
+	void ObjLoader<TDataType>::resetStates()
 	{
 		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTopology()->getDataPtr());
 
@@ -83,7 +98,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void ObjMesh<TDataType>::updateStates()
+	void ObjLoader<TDataType>::updateStates()
 	{
 
 		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTopology()->getDataPtr());
@@ -138,7 +153,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void ObjMesh<TDataType>::loadObj(TriangleSet<TDataType>& Triangleset, std::string filename)
+	void ObjLoader<TDataType>::loadObj(TriangleSet<TDataType>& Triangleset, std::string filename)
 	{
 		std::vector<Coord> vertList;
 		std::vector<TopologyModule::Triangle> faceList;
@@ -188,5 +203,5 @@ namespace dyno
 	}
 
 
-	DEFINE_CLASS(ObjMesh);
+	DEFINE_CLASS(ObjLoader);
 }

@@ -24,7 +24,7 @@ namespace dyno
 			m_preVelocity.resize(num);
 			m_prePosition.assign(this->inPosition()->getData());
 			m_preVelocity.assign(this->inVelocity()->getData());
-			this->inForceDensity()->getDataPtr()->reset();
+
 		}
 	}
 
@@ -37,13 +37,11 @@ namespace dyno
 	template<typename Real, typename Coord>
 	__global__ void KRS_UpdateVelocity(
 		DArray<Coord> vel,
-		DArray<Coord> forceDensity,
 		Coord gravity,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= forceDensity.size()) return;
-		vel[pId] += dt * (forceDensity[pId]);
+		if (pId >= vel.size()) return;
 		vel[pId][1] = 0.0f;
 	}
 
@@ -53,14 +51,13 @@ namespace dyno
 	template<typename Real, typename Coord>
 	__global__ void KRS_InitVelocity(
 		DArray<Coord> vel,
-		DArray<Coord> forceDensity,
 		DArray<Coord> pos,
 		Coord Origin,
 		Real T,
 		Real dt)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= forceDensity.size()) return;
+		if (pId >= vel.size()) return;
 			
 			Origin[1] = pos[pId][1];
 
@@ -106,7 +103,6 @@ namespace dyno
 			cuExecute(total_num,
 				KRS_InitVelocity,
 				this->inVelocity()->getData(),
-				this->inForceDensity()->getData(),
 				this->inPosition()->getData(),
 				origin,
 				T,
@@ -117,7 +113,6 @@ namespace dyno
 		cuExecute(total_num,
 			KRS_UpdateVelocity,
 			this->inVelocity()->getData(),
-			this->inForceDensity()->getData(),
 			gravity,
 			dt);
 

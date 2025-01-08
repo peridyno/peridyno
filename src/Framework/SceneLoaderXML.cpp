@@ -119,7 +119,7 @@ namespace dyno
 			nodeXml->InsertEndChild(nodeConnectionsXml);
 
 			auto ports = node->getImportNodes();
-			//--------------------7.7:增加对ports类型的处理------------------------：
+
 			for (int i = 0; i < ports.size(); i++)
 			{
 				auto NodesSrc = ports[i]->getNodes();
@@ -148,8 +148,6 @@ namespace dyno
 				}
 				
 			}
-
-			//------------------------------------------------------------
 
 			auto fieldInp = node->getInputFields();
 
@@ -508,7 +506,6 @@ namespace dyno
 			int id0 = atoi(animationConnectionXml->Attribute("From"));
 			int id1 = atoi(animationConnectionXml->Attribute("To"));
 
-			//关于-1接口编号的处理：因为中间节点内部的States模块里的部分输入变量类型是Input而不是State。所以在前面的states数组里加上了Input类型的Fields
 			FBase* fout = src == -1 ? states[id0] : animationModules[src]->getOutputFields()[id0];
 			FBase* fin = animationModules[dst]->getInputFields()[id1];
 

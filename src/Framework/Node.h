@@ -80,6 +80,8 @@ namespace dyno
 		virtual std::string getNodeType();
 
 		bool isAutoSync();
+		
+		bool isAutoHidden();
 
 		/**
 		 * @brief Whether the node can be automatically synchronized when its ancestor is updated
@@ -87,6 +89,8 @@ namespace dyno
 		 * @param if true, the node can be synchronized automatically, otherwise not
 		 */
 		void setAutoSync(bool con);
+
+		void setAutoHidden(bool con);
 
 		/// Check the state of dynamics
 		virtual bool isActive();
@@ -314,6 +318,8 @@ namespace dyno
 		bool mExported = true;
 
 		bool mForceUpdate = true;
+
+		bool mAutoHidden = false;
 
 		/**
 		 * @brief Time step size

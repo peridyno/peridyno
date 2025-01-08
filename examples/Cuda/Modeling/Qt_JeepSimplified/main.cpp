@@ -24,7 +24,7 @@
 #include <Commands/Merge.h>
 
 #include <BasicShapes/CubeModel.h>
-#include <Samplers/CubeSampler.h>
+#include <Samplers/ShapeSampler.h>
 
 #include <Node/GLPointVisualNode.h>
 
@@ -37,7 +37,9 @@
 
 #include "Auxiliary/DataSource.h"
 
-#include <RigidBody/Vechicle.h>
+#include <RigidBody/Vehicle.h>
+#include <RigidBody/MultibodySystem.h>
+#include <RigidBody/Module/InstanceTransform.h>
 
 #include <Mapping/TextureMeshToTriangleSet.h>
 #include <Mapping/MergeTriangleSet.h>
@@ -107,19 +109,17 @@ std::shared_ptr<SceneGraph> creatScene()
 	Vec3f anglurVel = Vec3f(100,0,0); 
 	Vec3f scale = Vec3f(0.4,0.4,0.4);
 
-	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
-	gltf->setVisible(false);
-	gltf->varFileName()->setValue(getAssetPath() + "Jeep/JeepGltf/jeep.gltf");
+// 	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
+// 	gltf->setVisible(false);
+// 	gltf->varFileName()->setValue(getAssetPath() + "Jeep/JeepGltf/jeep.gltf");
 
 
 	auto jeep = scn->addNode(std::make_shared<Jeep<DataType3f>>());
-	gltf->stateTextureMesh()->connect(jeep->inTextureMesh());
 
-	auto prRender = std::make_shared<GLPhotorealisticInstanceRender>();
-	jeep->inTextureMesh()->connect(prRender->inTextureMesh());
-	jeep->stateInstanceTransform()->connect(prRender->inTransform());
-	jeep->graphicsPipeline()->pushModule(prRender);
+	auto multibody = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
+	jeep->connect(multibody->importVehicles());
 
+	//gltf->stateTextureMesh()->connect(jeep->inTextureMesh());
 
 	auto gltfRoad = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
 	gltfRoad->varFileName()->setValue(getAssetPath() + "gltf/Road_Gltf/Road_Tex.gltf");
@@ -131,9 +131,16 @@ std::shared_ptr<SceneGraph> creatScene()
 
 	auto tsJeep = gltfRoad->animationPipeline()->promoteOutputToNode(roadMeshConverter->outTriangleSet());
 
+	auto transformer = std::make_shared<InstanceTransform<DataType3f>>();
+	jeep->stateCenter()->connect(transformer->inCenter());
+	jeep->stateBindingPair()->connect(transformer->inBindingPair());
+	jeep->stateBindingTag()->connect(transformer->inBindingTag());
+	jeep->stateInstanceTransform()->connect(transformer->inInstanceTransform());
+	jeep->animationPipeline()->pushModule(transformer);
+
 	auto texMeshConverter = std::make_shared<TextureMeshToTriangleSet<DataType3f>>();
-	jeep->inTextureMesh()->connect(texMeshConverter->inTextureMesh());
-	jeep->stateInstanceTransform()->connect(texMeshConverter->inTransform());
+	jeep->stateTextureMesh()->connect(texMeshConverter->inTextureMesh());
+	transformer->outInstanceTransform()->connect(texMeshConverter->inTransform());
 	jeep->animationPipeline()->pushModule(texMeshConverter);
 	jeep->varLocation()->setValue(Vec3f(0,0,-2.9));
 
@@ -142,7 +149,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	jeep->animationPipeline()->promoteOutputToNode(texMeshConverter->outTriangleSet())->connect(tsMerger->inFirst());
 	tsJeep->connect(tsMerger->inSecond());
 
-	tsJeep->connect(jeep->inTriangleSet());
+	tsJeep->connect(multibody->inTriangleSet());
 
 	//*************************************** Cube Sample ***************************************//
 	// Cube 
@@ -152,9 +159,9 @@ std::shared_ptr<SceneGraph> creatScene()
 	cube->varScale()->setValue(Vec3f(2, 1, 0.932));
 	cube->graphicsPipeline()->disable();
 
-	auto cubeSmapler = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
+	auto cubeSmapler = scn->addNode(std::make_shared<ShapeSampler<DataType3f>>());
 	cubeSmapler->varSamplingDistance()->setValue(0.004f * total_scale);
-	cube->outCube()->connect(cubeSmapler->inCube());
+	cube->connect(cubeSmapler->importShape());
 	cubeSmapler->graphicsPipeline()->disable();
 
 	//MakeParticleSystem
@@ -164,6 +171,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	//*************************************** Fluid ***************************************//
 	//Particle fluid node
 	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
+	fluid->setDt(0.004f);
 
 	{
 		fluid->animationPipeline()->clear();
@@ -206,28 +214,10 @@ std::shared_ptr<SceneGraph> creatScene()
 		fluid->stateVelocity()->connect(viscosity->inVelocity());
 		nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());
 		fluid->animationPipeline()->pushModule(viscosity);
-	}
 
-	//Setup the point render
-	{
-		auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
-		fluid->stateVelocity()->connect(calculateNorm->inVec());
-		fluid->graphicsPipeline()->pushModule(calculateNorm);
-
-		auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
-		colorMapper->varMax()->setValue(5.0f);
-		calculateNorm->outNorm()->connect(colorMapper->inScalar());
-		fluid->graphicsPipeline()->pushModule(colorMapper);
-
-		auto ptRender = std::make_shared<GLPointVisualModule>();
-		ptRender->setColor(Color(1, 0, 0));
-		ptRender->varPointSize()->setValue(0.01);
-		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-
-		fluid->statePointSet()->connect(ptRender->inPointSet());
-		colorMapper->outColor()->connect(ptRender->inColor());
-
-		fluid->graphicsPipeline()->pushModule(ptRender);
+		auto pointRender = fluid->graphicsPipeline()->findFirstModule<GLPointVisualModule>();
+		if (pointRender != nullptr)
+			pointRender->varPointSize()->setValue(0.015f);
 	}
 
 	particleSystem->connect(fluid->importInitialStates());

@@ -16,6 +16,10 @@
 #include "SharedFunc.h"
 #include "TriangularSystem.h"
 
+#include "GLPointVisualModule.h"
+#include "GLWireframeVisualModule.h"
+#include "GLSurfaceVisualModule.h"
+
 namespace dyno
 {
 	IMPLEMENT_TCLASS(Cloth, TDataType)
@@ -24,9 +28,14 @@ namespace dyno
 	Cloth<TDataType>::Cloth()
 		: TriangularSystem<TDataType>()
 	{
-		auto horizon = std::make_shared<FloatingNumber<TDataType>>();
-		horizon->varValue()->setValue(Real(0.01));
-		this->animationPipeline()->pushModule(horizon);
+		this->varHorizon()->attach(
+			std::make_shared<FCallBackFunc>(
+				[=]() {
+					this->stateHorizon()->setValue(this->varHorizon()->getValue());
+				})
+		);
+
+		this->varHorizon()->setValue(0.0085);
 
 		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
 		this->stateTimeStep()->connect(integrator->inTimeStep());
@@ -36,13 +45,34 @@ namespace dyno
 		this->animationPipeline()->pushModule(integrator);
 
 		auto elasticity = std::make_shared<LinearElasticitySolver<TDataType>>();
-		horizon->outFloating()->connect(elasticity->inHorizon());
+		this->stateHorizon()->connect(elasticity->inHorizon());
 		this->stateTimeStep()->connect(elasticity->inTimeStep());
 		this->stateRestPosition()->connect(elasticity->inX());
 		this->statePosition()->connect(elasticity->inY());
 		this->stateVelocity()->connect(elasticity->inVelocity());
 		this->stateBonds()->connect(elasticity->inBonds());
 		this->animationPipeline()->pushModule(elasticity);
+
+		auto pointRenderer = std::make_shared<GLPointVisualModule>();
+		pointRenderer->setColor(Color(1, 0.2, 1));
+		pointRenderer->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
+		pointRenderer->varPointSize()->setValue(0.002f);
+		this->stateTriangleSet()->connect(pointRenderer->inPointSet());
+		this->stateVelocity()->connect(pointRenderer->inColor());
+
+		this->graphicsPipeline()->pushModule(pointRenderer);
+		this->setVisible(true);
+
+		auto wireRenderer = std::make_shared<GLWireframeVisualModule>();
+		wireRenderer->varBaseColor()->setValue(Color(1.0, 0.8, 0.8));
+		wireRenderer->varRadius()->setValue(0.001f);
+		wireRenderer->varRenderMode()->setCurrentKey(GLWireframeVisualModule::CYLINDER);
+		this->stateTriangleSet()->connect(wireRenderer->inEdgeSet());
+		this->graphicsPipeline()->pushModule(wireRenderer);
+
+		auto surfaceRenderer = std::make_shared<GLSurfaceVisualModule>();
+		this->stateTriangleSet()->connect(surfaceRenderer->inTriangleSet());
+		this->graphicsPipeline()->pushModule(surfaceRenderer);
 	}
 
 	template<typename TDataType>

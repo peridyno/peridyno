@@ -2,11 +2,9 @@
 
 #include "NodeFactory.h"
 
-#include "VolumeOctreeGenerator.h"
-
-#include "VolumeOctreeBoolean.h"
-
-#include "SparseMarchingCubes.h"
+#include "VolumeGenerator.h"
+#include "VolumeBoolean.h"
+#include "MarchingCubes.h"
 
 namespace dyno
 {
@@ -48,28 +46,28 @@ namespace dyno
 		auto group = page->addGroup("Volume");
 
 		group->addAction(
-			"VolumeOctreeGenerator",
+			"Volume",
 			"ToolBarIco/Volume/volume_v3.png",
 			[=]()->std::shared_ptr<Node> {
-				auto node = std::make_shared<VolumeOctreeGenerator<DataType3f>>();
+				auto node = std::make_shared<VolumeGenerator<DataType3f>>();
 
 				return node;
 			});
 
 		group->addAction(
-			"VolumeOctreeBoolean",
+			"VolumeBoolean",
 			"ToolBarIco/Volume/Intersect_v5.png",
 			[=]()->std::shared_ptr<Node> {
-				auto node = std::make_shared<VolumeOctreeBoolean<DataType3f>>();
+				auto node = std::make_shared<VolumeBoolean<DataType3f>>();
 
 				return node;
 			});
 
 		group->addAction(
-			"MarchingCube",
+			"MarchingCubes",
 			"ToolBarIco/Volume/GenerateUniformVolume.png",
 			[=]()->std::shared_ptr<Node> {
-				auto node = std::make_shared<SparseMarchingCubes<DataType3f>>();
+				auto node = std::make_shared<MarchingCubes<DataType3f>>();
 
 				return node; }
 		);

@@ -24,17 +24,17 @@ namespace dyno
 
 
 	template < typename Coord>
-	__device__ Coord CSur_getCellPosition(int3 index,  Coord origin, Coord h)
+	__device__ Coord CSur_getCellPosition(int3 index,  Coord origin, Real h)
 	{
 		return Coord(
-			index.x * h[0] + origin[0],
-			index.y * h[1] + origin[1],
-			index.z * h[2] + origin[2]
+			index.x * h + origin[0],
+			index.y * h + origin[1],
+			index.z * h + origin[2]
 		);
 	}
 
 	template < typename Coord>
-	__device__ int3 CSur_getCellIndex(Coord pos, Coord origin, Coord h)
+	__device__ int3 CSur_getCellIndex(Coord pos, Coord origin, Real h)
 	{
 		int3 index;
 		/*
@@ -45,9 +45,9 @@ namespace dyno
 		//index.x = (int)((pos - origin + 0.5 * h[0])[0] / h[0]);
 		//index.y = (int)((pos - origin + 0.5 * h[0])[1] / h[1]);
 		//index.z = (int)((pos - origin + 0.5 * h[0])[2] / h[2]);
-		index.x = (int)((pos - origin )[0] / h[0]);
-		index.y = (int)((pos - origin )[1] / h[1]);
-		index.z = (int)((pos - origin )[2] / h[2]);
+		index.x = (int)((pos - origin )[0] / h);
+		index.y = (int)((pos - origin )[1] / h);
+		index.z = (int)((pos - origin )[2] / h);
 		return index;
 	}
 
@@ -64,7 +64,7 @@ namespace dyno
 	__global__ void ComputeSurface_PointToLevelset(
 		DArray3D<Real> distance,
 		DArray<Coord> point,
-		Coord cell_dx,
+		Real cell_dx,
 		Coord origin,
 		SpikyKernel<Real> kern,
 		int3 neiborGridNum,
@@ -184,23 +184,18 @@ namespace dyno
 		int num = this->inPoints()->size();
 		auto& sdf = this->inLevelSet()->getDataPtr()->getSDF();
 
-		auto& distances = this->inLevelSet()->getDataPtr()->getSDF().getMDistance();
-		Coord cell_dx = this->inLevelSet()->getDataPtr()->getSDF().getH();
+		auto& distances = this->inLevelSet()->getDataPtr()->getSDF().distances();
+		Real cell_dx = this->inLevelSet()->getDataPtr()->getSDF().getGridSpacing();
 		Coord origin = this->inLevelSet()->getDataPtr()->getSDF().lowerBound();
-
-		//cuExecute(distances.nx() * distances.ny() * distances.nz(),
-		//	ComputeSurface_LevelsetInitial,
-		//	distances,
-		//	0.0f);
 
 		distances.reset();
 
-		Real smoothingLength = (Real)(2.5f * cell_dx.norm());
+		Real smoothingLength = (Real)(2.5f * cell_dx);
 
 		int3 neiborGridNumber = make_int3(
-			(int)(smoothingLength / cell_dx[0]),
-			(int)(smoothingLength / cell_dx[1]),
-			(int)(smoothingLength / cell_dx[2])
+			(int)(smoothingLength / cell_dx),
+			(int)(smoothingLength / cell_dx),
+			(int)(smoothingLength / cell_dx)
 		);
 		std::cout << neiborGridNumber.x << ", " << neiborGridNumber.y << ", " << neiborGridNumber.z << ", "  << std::endl;
 
@@ -213,23 +208,6 @@ namespace dyno
 			neiborGridNumber,
 			smoothingLength,
 			1.0f);
-
-		//cuExecute3D(make_uint3(distances.nx(), distances.ny(), distances.nz()),
-		//	ComputeSurface_Smoothing,
-		//	distances,
-		//	this->inPoints()->getData(),
-		//	h,
-		//	origin,
-		//	(Real)(1.5f * h.norm()),
-		//	m_kernel
-		//)
-
-
-		//cuExecute(distances.nx() * distances.ny() * distances.nz(),
-		//	ComputeSurface_LevelsetTest,
-		//	distances,
-		//	0.0f);
-		
 	}
 
 	DEFINE_CLASS(ComputeSurfaceLevelset);

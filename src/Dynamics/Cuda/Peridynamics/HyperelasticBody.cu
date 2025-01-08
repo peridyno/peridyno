@@ -63,19 +63,19 @@ namespace dyno
 
 
 
-		auto CalcSDF = std::make_shared<CalculateNormalSDF<TDataType>>();
-		this->statePosition()->connect(CalcSDF->inPosition());
-		this->stateTets()->connect(CalcSDF->inTets());
-		this->stateDisranceSDF()->connect(CalcSDF->inDisranceSDF());
-		this->stateNormalSDF()->connect(CalcSDF->inNormalSDF());
-		this->animationPipeline()->pushModule(CalcSDF);
+// 		auto CalcSDF = std::make_shared<CalculateNormalSDF<TDataType>>();
+// 		this->statePosition()->connect(CalcSDF->inPosition());
+// 		this->stateTets()->connect(CalcSDF->inTets());
+// 		this->stateDisranceSDF()->connect(CalcSDF->inDisranceSDF());
+// 		this->stateNormalSDF()->connect(CalcSDF->inNormalSDF());
+// 		this->animationPipeline()->pushModule(CalcSDF);
 
 
-		Coord lo(0.0f);
-		Coord hi(1.0f);
-		m_cSDF = std::make_shared<DistanceField3D<DataType3f>>();
-		m_cSDF->setSpace(lo - 0.025f, hi + 0.025f, 105, 105, 105);
-		m_cSDF->loadBox(lo, hi, true);
+// 		Coord lo(0.0f);
+// 		Coord hi(1.0f);
+// 		m_cSDF = std::make_shared<DistanceField3D<DataType3f>>();
+// 		m_cSDF->setSpace(lo - 0.025f, hi + 0.025f, 105, 105, 105);
+// 		m_cSDF->loadBox(lo, hi, true);
 
 		this->setDt(Real(0.001));
 	}
@@ -83,7 +83,7 @@ namespace dyno
 	template<typename TDataType>
 	HyperelasticBody<TDataType>::~HyperelasticBody()
 	{
-		m_cSDF->release();
+		//m_cSDF->release();
 	}
 
 	template<typename TDataType>
@@ -502,30 +502,30 @@ namespace dyno
 	template<typename TDataType>
 	void HyperelasticBody<TDataType>::loadSDF(std::string filename, bool inverted)
 	{
-		m_cSDF->loadSDF(filename, inverted);
-
-		auto tetSet = TypeInfo::cast<TetrahedronSet<TDataType>>(this->stateTetrahedronSet()->getDataPtr());
-		if (tetSet == nullptr) return;
-
-		//auto& ver2Tet = tetSet->getVer2Tet();
-
-		auto& restPos = tetSet->getPoints();
-
-		initDistance.resize(restPos.size());
-
-		cuExecute(restPos.size(),
-			K_InitTetVertexSDF,
-			restPos,
-			*m_cSDF,
-			initDistance);
-
-		printf("tet size = %d\n", tetSet->getTetrahedrons().size());
-
-		this->stateDisranceSDF()->resize(restPos.size());
-		this->stateDisranceSDF()->getData().assign(initDistance);
-		this->stateNormalSDF()->resize(tetSet->getTetrahedrons().size());
-		this->stateNormalSDF()->getData().reset();
-		this->varSDF()->setValue(true);
+// 		m_cSDF->loadSDF(filename, inverted);
+// 
+// 		auto tetSet = TypeInfo::cast<TetrahedronSet<TDataType>>(this->stateTetrahedronSet()->getDataPtr());
+// 		if (tetSet == nullptr) return;
+// 
+// 		//auto& ver2Tet = tetSet->getVer2Tet();
+// 
+// 		auto& restPos = tetSet->getPoints();
+// 
+// 		initDistance.resize(restPos.size());
+// 
+// 		cuExecute(restPos.size(),
+// 			K_InitTetVertexSDF,
+// 			restPos,
+// 			*m_cSDF,
+// 			initDistance);
+// 
+// 		printf("tet size = %d\n", tetSet->getTetrahedrons().size());
+// 
+// 		this->stateDisranceSDF()->resize(restPos.size());
+// 		this->stateDisranceSDF()->getData().assign(initDistance);
+// 		this->stateNormalSDF()->resize(tetSet->getTetrahedrons().size());
+// 		this->stateNormalSDF()->getData().reset();
+// 		this->varSDF()->setValue(true);
 
 		//printf("max vol: %f; min vol: %f \n", max_vol, min_vol);
 	}

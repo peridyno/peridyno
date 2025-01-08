@@ -1,6 +1,7 @@
 #include "initializePeridynamics.h"
 
 #include "Cloth.h"
+#include "ElasticBody.h"
 
 #include "GLPointVisualModule.h"
 #include "GLWireframeVisualModule.h"
@@ -83,7 +84,8 @@ namespace dyno
 			"Soft Body",
 			"ToolBarIco/SoftBody/SoftBody5.png",
 			[=]()->std::shared_ptr<Node> {
-				return nullptr;
+				auto elasticBody = std::make_shared<ElasticBody<DataType3f>>();
+				return elasticBody;
 			});
 	}
 }

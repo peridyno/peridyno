@@ -16,6 +16,8 @@
 
 namespace dyno {
 
+#define FARWAY_DISTANCE 10^6
+
 	template<typename TDataType>
 	class DistanceField3D {
 	public:
@@ -60,11 +62,11 @@ namespace dyno {
 		 */
 		GPU_FUNC void getDistance(const Coord &p, Real &d, Coord &normal);
 
-		DYN_FUNC uint nx() { return m_distance.nx(); }
+		DYN_FUNC uint nx() { return mDistances.nx(); }
 
-		DYN_FUNC uint ny() { return m_distance.ny(); }
+		DYN_FUNC uint ny() { return mDistances.ny(); }
 
-		DYN_FUNC uint nz() { return m_distance.nz(); }
+		DYN_FUNC uint nz() { return mDistances.nz(); }
 
 	public:
 		/**
@@ -75,33 +77,38 @@ namespace dyno {
 		 */
 		void loadSDF(std::string filename, bool inverted = false);
 
+		/**
+		 * @brief load signed distance field from a Box (lo, hi)
+		 * 
+		 * @param inverted indicated whether the signed distance field should be positive in outside. default: +[---]+
+		 */
 		void loadBox(Coord& lo, Coord& hi, bool inverted = false);
 
 		void loadCylinder(Coord& center, Real radius, Real height, int axis, bool inverted = false);
 
 		void loadSphere(Coord& center, Real radius, bool inverted = false);
 
-		void setSpace(const Coord p0, const Coord p1, int nbx, int nby, int nbz);
+		void setSpace(const Coord p0, const Coord p1, Real h);
 
-		inline Coord lowerBound() { return m_left; }
+		inline Coord lowerBound() { return mOrigin; }
 
-		inline Coord upperBound() { return Coord(m_left[0] + (m_distance.nx() - 1) * m_h[0], m_left[1] + (m_distance.ny() - 1) * m_h[1], m_left[2] + (m_distance.nz() - 1) * m_h[2]); }
+		inline Coord upperBound() { return Coord(mOrigin[0] + (mDistances.nx() - 1) * mH, mOrigin[1] + (mDistances.ny() - 1) * mH, mOrigin[2] + (mDistances.nz() - 1) * mH); }
 
 
 		void assign(DistanceField3D<TDataType>& sdf) {
-			m_left = sdf.m_left;
-			m_h = sdf.m_h;
-			m_bInverted = sdf.m_bInverted;
-			m_distance.assign(sdf.m_distance);
+			mOrigin = sdf.mOrigin;
+			mH = sdf.mH;
+			mInverted = sdf.mInverted;
+			mDistances.assign(sdf.mDistances);
 		}
 
-		DArray3D<Real>& getMDistance() { return m_distance; }
+		DArray3D<Real>& distances() { return mDistances; }
 
 		void setDistance(CArray3D<Real> distance) {
-			m_distance.assign(distance);
+			mDistances.assign(distance);
 		}
 
-		Coord getH() { return m_h; }
+		Real getGridSpacing() { return mH; }
 
 		/**
 		 * @brief Invert the signed distance field
@@ -118,34 +125,34 @@ namespace dyno {
 		 * @brief Lower left corner
 		 * 
 		 */
-		Coord m_left;
+		Coord mOrigin;
 
 		/**
 		 * @brief grid spacing
 		 * 
 		 */
-		Coord m_h;
+		Real mH;
 
-		bool m_bInverted = false;
+		bool mInverted = false;
 
 		/**
 		 * @brief Storing the signed distance field as a 3D array.
 		 * 
 		 */
-		DArray3D<Real> m_distance;
+		DArray3D<Real> mDistances;
 	};
 
 	template<typename TDataType>
 	GPU_FUNC void DistanceField3D<TDataType>::getDistance(const Coord &p, Real &d, Coord &normal)
 	{
 		// get cell and lerp values
-		Coord fp = (p - m_left)*Coord(1.0 / m_h[0], 1.0 / m_h[1], 1.0 / m_h[2]);
+		Coord fp = (p - mOrigin) / mH;
 		const int i = (int)floor(fp[0]);
 		const int j = (int)floor(fp[1]);
 		const int k = (int)floor(fp[2]);
-		if (i < 0 || i >= m_distance.nx() - 1 || j < 0 || j >= m_distance.ny() - 1 || k < 0 || k >= m_distance.nz() - 1) {
-			if (m_bInverted) d = -100000.0f;
-			else d = 100000.0f;
+		if (i < 0 || i >= mDistances.nx() - 1 || j < 0 || j >= mDistances.ny() - 1 || k < 0 || k >= mDistances.nz() - 1) {
+			if (mInverted) d = -FARWAY_DISTANCE;
+			else d = FARWAY_DISTANCE;
 			normal = Coord(0);
 			return;
 		}
@@ -156,14 +163,14 @@ namespace dyno {
 		Real beta = alphav[1];
 		Real gamma = alphav[2];
 
-		Real d000 = m_distance(i, j, k);
-		Real d100 = m_distance(i + 1, j, k);
-		Real d010 = m_distance(i, j + 1, k);
-		Real d110 = m_distance(i + 1, j + 1, k);
-		Real d001 = m_distance(i, j, k + 1);
-		Real d101 = m_distance(i + 1, j, k + 1);
-		Real d011 = m_distance(i, j + 1, k + 1);
-		Real d111 = m_distance(i + 1, j + 1, k + 1);
+		Real d000 = mDistances(i, j, k);
+		Real d100 = mDistances(i + 1, j, k);
+		Real d010 = mDistances(i, j + 1, k);
+		Real d110 = mDistances(i + 1, j + 1, k);
+		Real d001 = mDistances(i, j, k + 1);
+		Real d101 = mDistances(i + 1, j, k + 1);
+		Real d011 = mDistances(i, j + 1, k + 1);
+		Real d111 = mDistances(i + 1, j + 1, k + 1);
 
 		Real dx00 = lerp(d000, d100, alpha);
 		Real dx10 = lerp(d010, d110, alpha);

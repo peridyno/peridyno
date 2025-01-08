@@ -16,9 +16,9 @@ namespace dyno
 	*
 	*/
 	template<typename TDataType>
-	class ObjMesh : public ParametricModel<TDataType>
+	class ObjLoader : virtual public ParametricModel<TDataType>
 	{
-		DECLARE_TCLASS(ObjMesh, TDataType)
+		DECLARE_TCLASS(ObjLoader, TDataType)
 	public:
 
 		typedef typename TDataType::Real Real;
@@ -27,7 +27,7 @@ namespace dyno
 
 		typedef typename ::dyno::Quat<Real> TQuat;
 
-		ObjMesh();
+		ObjLoader();
 
 		std::string getNodeType() override { return "IO"; }
 
@@ -53,8 +53,9 @@ namespace dyno
 		void resetStates() override;
 		void updateStates() override;
 		void loadObj(TriangleSet<TDataType>& Triangleset,std::string filename);
-
+		
 	private:
+		void animationUpdate();
 
 		Quat<Real> rotQuat = Quat<Real>();
 		Matrix rotMat;

@@ -117,6 +117,7 @@ namespace dyno
 				joints,
 				this->inCenter()->getData(),
 				this->inRotationMatrix()->getData(),
+				this->inQuaternion()->getData(),
 				begin_index
 			);
 		}
@@ -151,8 +152,9 @@ namespace dyno
 				mVelocityConstraints,
 				joints,
 				this->inRotationMatrix()->getData(),
+				this->inQuaternion()->getData(),
 				begin_index
-			);
+			);;
 		}
 
 		if (pointJoint_size != 0)
@@ -310,10 +312,11 @@ namespace dyno
 
 			begin_index += 3 * ballAndSocketJoint_size;
 			setUpSliderJointConstraints(
-				mPositionConstraints,
+				mVelocityConstraints,
 				joints,
 				this->inCenter()->getData(),
 				this->inRotationMatrix()->getData(),
+				this->inQuaternion()->getData(),
 				begin_index
 			);
 		}
@@ -339,11 +342,12 @@ namespace dyno
 			int begin_index = contact_size + 3 * ballAndSocketJoint_size + 8 * sliderJoint_size + 8 * hingeJoint_size;
 
 			setUpFixedJointConstraints(
-				mPositionConstraints,
+				mVelocityConstraints,
 				joints,
 				this->inRotationMatrix()->getData(),
+				this->inQuaternion()->getData(),
 				begin_index
-			);
+			);;
 		}
 
 		if (pointJoint_size != 0)
@@ -433,6 +437,7 @@ namespace dyno
 		}
 
 		updateVelocity(
+			this->inAttribute()->getData(),
 			this->inVelocity()->getData(),
 			this->inAngularVelocity()->getData(),
 			mImpulseExt,
@@ -473,6 +478,7 @@ namespace dyno
 					mK_2,
 					mK_3,
 					this->inMass()->getData(),
+					this->inFrictionCoefficients()->getData(),
 					this->varFrictionCoefficient()->getData(),
 					this->varGravityValue()->getData(),
 					dt
@@ -481,6 +487,7 @@ namespace dyno
 		}
 
 		updateVelocity(
+			this->inAttribute()->getData(),
 			this->inVelocity()->getData(),
 			this->inAngularVelocity()->getData(),
 			mImpulseC,
@@ -490,6 +497,7 @@ namespace dyno
 		);
 
 		updateGesture(
+			this->inAttribute()->getData(),
 			this->inCenter()->getData(),
 			this->inQuaternion()->getData(),
 			this->inRotationMatrix()->getData(),

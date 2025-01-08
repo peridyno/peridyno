@@ -12,7 +12,7 @@ namespace dyno
 	BasicShapeToVolume<TDataType>::BasicShapeToVolume()
 		: Volume<TDataType>()
 	{
-
+		this->varGridSpacing()->setRange(0.001f, 1.0f);
 	}
 
 	template<typename TDataType>
@@ -24,6 +24,9 @@ namespace dyno
 	template<typename TDataType>
 	void BasicShapeToVolume<TDataType>::resetStates()
 	{
+		if (this->stateLevelSet()->isEmpty()){
+			this->stateLevelSet()->allocate();
+		}
 		convert();
 	}
 
@@ -67,7 +70,7 @@ namespace dyno
 
 				uint padding = 5;
 
-				sdf.setSpace(lo - padding * h, hi + padding * h, nx + 2 * padding, ny + 2 * padding, nz + 2 * padding);
+				sdf.setSpace(lo - padding * h, hi + padding * h, h);
 				sdf.loadBox(aabb.v0, aabb.v1, inverted);
 			}
 		}
@@ -92,7 +95,7 @@ namespace dyno
 
 				uint padding = 5;
 
-				sdf.setSpace(lo - padding * h, hi + padding * h, nx + 2 * padding, ny + 2 * padding, nz + 2 * padding);
+				sdf.setSpace(lo - padding * h, hi + padding * h, h);
 				sdf.loadSphere(sphere.center, sphere.radius, inverted);
 			}
 		}

@@ -53,6 +53,7 @@ namespace dyno
 		propertyDockWidget->setMinimumWidth(480);
 
 		connect(moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::nodeSelected, propertyWidget, &PPropertyWidget::showProperty);
+		connect(moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::nodeDeselected, propertyWidget, &PPropertyWidget::clearProperty);
 
 		connect(mToolBar, &PModuleEditorToolBar::showResetPipeline, moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::showResetPipeline);
 		connect(mToolBar, &PModuleEditorToolBar::showAnimationPipeline, moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::showAnimationPipeline);

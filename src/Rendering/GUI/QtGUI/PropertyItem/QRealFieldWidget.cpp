@@ -27,24 +27,25 @@ namespace dyno
 		slider->setRange(field->getMin(), field->getMax());
 		slider->setMinimumWidth(60);
 
+		spinner = new QPiecewiseDoubleSpinBox();
+		spinner->setRange(field->getMin(), field->getMax());
+		spinner->setFixedWidth(100);
+
 		std::string template_name = field->getTemplateName();
 		if (template_name == std::string(typeid(float).name()))
 		{
 			FVar<float>* f = TypeInfo::cast<FVar<float>>(field);
 
-			spinner = new QPiecewiseDoubleSpinBox(f->getValue());
+			spinner->setValue((double)f->getValue());
 			slider->setValue((double)f->getValue());
 		}
 		else if (template_name == std::string(typeid(double).name()))
 		{
 			FVar<double>* f = TypeInfo::cast<FVar<double>>(field);
 
-			spinner = new QPiecewiseDoubleSpinBox(f->getValue());
+			spinner->setValue((double)f->getValue());
 			slider->setValue(f->getValue());
 		}
-
-		spinner->setRange(field->getMin(), field->getMax());
-		spinner->setFixedWidth(100);
 
 		layout->addWidget(name, 0);
 		layout->addWidget(slider, 1);

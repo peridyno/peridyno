@@ -4,10 +4,8 @@ namespace dyno
 {
 	  __global__ void SF_ApplyTransform(
 		DArrayList<Transform3f> instanceTransform,
-		const DArray<Vec3f> offset,
 		const DArray<Vec3f> translate,
 		const DArray<Mat3f> rotation,
-		const DArray<Mat3f> rotationInit,
 		const DArray<Pair<uint, uint>> binding,
 		const DArray<int> bindingtag)
 	{
@@ -19,29 +17,25 @@ namespace dyno
 
 		Pair<uint, uint> pair = binding[tId];
 
-		Mat3f rot = rotation[tId] * rotationInit[tId].transpose();
+		Mat3f rot = rotation[tId];
 
-		Transform3f ti = Transform3f(translate[tId] + rot * offset[tId], rot);
+		Transform3f ti = Transform3f(translate[tId], rot);
 
 		instanceTransform[pair.first][pair.second] = ti;
 	}
 
 	void ApplyTransform(
 		DArrayList<Transform3f>& instanceTransform, 
-		const DArray<Vec3f>& offset,
 		const DArray<Vec3f>& translate,
 		const DArray<Mat3f>& rotation,
-		const DArray<Mat3f>& rotationInit,
 		const DArray<Pair<uint, uint>>& binding,
 		const DArray<int>& bindingtag)
 	{
 		cuExecute(rotation.size(),
 			SF_ApplyTransform,
 			instanceTransform,
-			offset,
 			translate,
 			rotation,
-			rotationInit,
 			binding,
 			bindingtag);
 
@@ -59,6 +53,7 @@ namespace dyno
 	* This function update the velocity of rigids based on impulse
 	*/
 	__global__ void SF_updateVelocity(
+		DArray<Attribute> attribute,
 		DArray<Vec3f> velocity,
 		DArray<Vec3f> angular_velocity,
 		DArray<Vec3f> impulse,
@@ -71,15 +66,18 @@ namespace dyno
 		if (tId >= velocity.size())
 			return;
 
-		velocity[tId] += impulse[2 * tId];
-		angular_velocity[tId] += impulse[2 * tId + 1];
-
-		//Damping
-		velocity[tId] *= 1.0f / (1.0f + dt * linearDamping);
-		angular_velocity[tId] *= 1.0f / (1.0f + dt * angularDamping);
+		if (attribute[tId].isDynamic())
+		{
+			velocity[tId] += impulse[2 * tId];
+			angular_velocity[tId] += impulse[2 * tId + 1];
+			//Damping
+			/*velocity[tId] *= 1.0f / (1.0f + dt * linearDamping);
+			angular_velocity[tId] *= 1.0f / (1.0f + dt * angularDamping);*/
+		}
 	}
 
 	void updateVelocity(
+		DArray<Attribute> attribute,
 		DArray<Vec3f> velocity,
 		DArray<Vec3f> angular_velocity,
 		DArray<Vec3f> impulse,
@@ -90,6 +88,7 @@ namespace dyno
 	{
 		cuExecute(velocity.size(),
 			SF_updateVelocity,
+			attribute,
 			velocity,
 			angular_velocity,
 			impulse,
@@ -113,6 +112,7 @@ namespace dyno
 	* This function update the gesture of rigids based on velocity and timeStep
 	*/
 	__global__ void SF_updateGesture(
+		DArray<Attribute> attribute,
 		DArray<Vec3f> pos,
 		DArray<Quat1f> rotQuat,
 		DArray<Mat3f> rotMat,
@@ -127,22 +127,26 @@ namespace dyno
 		if (tId >= pos.size())
 			return;
 
-		pos[tId] += velocity[tId] * dt;
+		if (!attribute[tId].isFixed())
+		{
+			pos[tId] += velocity[tId] * dt;
 
-		rotQuat[tId] = rotQuat[tId].normalize();
+			rotQuat[tId] = rotQuat[tId].normalize();
 
-		rotQuat[tId] += dt * 0.5f *
-			Quat1f(angular_velocity[tId][0], angular_velocity[tId][1], angular_velocity[tId][2], 0.0)
-			* (rotQuat[tId]);
+			rotQuat[tId] += dt * 0.5f *
+				Quat1f(angular_velocity[tId][0], angular_velocity[tId][1], angular_velocity[tId][2], 0.0)
+				* (rotQuat[tId]);
 
-		rotQuat[tId] = rotQuat[tId].normalize();
+			rotQuat[tId] = rotQuat[tId].normalize();
 
-		rotMat[tId] = rotQuat[tId].toMatrix3x3();
+			rotMat[tId] = rotQuat[tId].toMatrix3x3();
 
-		inertia[tId] = rotMat[tId] * inertia_init[tId] * rotMat[tId].inverse();
+			inertia[tId] = rotMat[tId] * inertia_init[tId] * rotMat[tId].inverse();
+		}
 	}
 
 	void updateGesture(
+		DArray<Attribute> attribute,
 		DArray<Vec3f> pos,
 		DArray<Quat1f> rotQuat,
 		DArray<Mat3f> rotMat,
@@ -155,6 +159,7 @@ namespace dyno
 	{
 		cuExecute(pos.size(),
 			SF_updateGesture,
+			attribute,
 			pos,
 			rotQuat,
 			rotMat,
@@ -1129,6 +1134,7 @@ namespace dyno
 		DArray<Real> errors,
 		Real slop,
 		Real beta,
+		uint substepping,
 		Real dt
 	)
 	{
@@ -1163,7 +1169,7 @@ namespace dyno
 
 		if (constraints[tId].type == ConstraintType::CN_NONPENETRATION)
 		{
-			error = minimum(constraints[tId].interpenetration + slop, 0.0f);
+			error = minimum(constraints[tId].interpenetration + slop, 0.0f) / substepping;
 		}
 
 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_1)
@@ -1226,110 +1232,54 @@ namespace dyno
 		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_1)
 		{
 			Quat q1 = rotation_q[idx1];
-			q1 = q1.normalize();
 			if (idx2 != INVALID)
 			{
 				Quat q2 = rotation_q[idx2];
-				q2 = q2.normalize();
+				Quat q_init = constraints[tId].rotQuat;
+				Quat q_error = q2 * q_init * q1.inverse();
 
-				Quat q_error = q2 * q1.inverse();
-				q_error = q_error.normalize();
-
-				Real theta = 2.0 * acos(q_error.w);
-				if (theta > 1e-6)
-				{
-					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q_error.x, q_error.y, q_error.z);
-					error = theta * v.x;
-				}
-				else
-				{
-					error = theta;
-				}
+				error = q_error.x * 2;
 			}
 			else
 			{
-				Real theta = 2.0 * acos(q1.w);
-				if (theta > 1e-6)
-				{
-					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q1.x, q1.y, q1.z);
-					error = theta * v.x;
-				}
-				else
-				{
-					error = theta;
-				}
+				Quat diff = rotation_q[idx1] * constraints[tId].rotQuat.inverse();
+				error = -diff.x * 2;
 			}
 		}
 
 		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_2)
 		{
 			Quat q1 = rotation_q[idx1];
-			q1 = q1.normalize();
 			if (idx2 != INVALID)
 			{
 				Quat q2 = rotation_q[idx2];
-				q2 = q2.normalize();
-				Quat q_error = q2 * q1.inverse();
-				q_error = q_error.normalize();
-				Real theta = 2.0 * acos(q_error.w);
-				if (theta > 1e-6)
-				{
-					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q_error.x, q_error.y, q_error.z);
-					error = theta * v.y;
-				}
-				else
-				{
-					error = theta;
-				}
+				Quat q_init = constraints[tId].rotQuat;
+				Quat q_error = q2 * q_init * q1.inverse();
+
+				error = q_error.y * 2;
 			}
 			else
 			{
-				Real theta = 2.0 * acos(q1.w);
-				if (theta > 1e-6)
-				{
-					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q1.x, q1.y, q1.z);
-					error = theta * v.y;
-				}
-				else
-				{
-					error = theta;
-				}
+				Quat diff = rotation_q[idx1] * constraints[tId].rotQuat.inverse();
+				error = -diff.y * 2;
 			}
 		}
 
 		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_3)
 		{
 			Quat q1 = rotation_q[idx1];
-			q1 = q1.normalize();
 			if (idx2 != INVALID)
 			{
 				Quat q2 = rotation_q[idx2];
-				q2 = q2.normalize();
-				Quat q_error = q2 * q1.inverse();
-				q_error = q_error.normalize();
-				Real theta = 2.0 * acos(q_error.w);
-				if (theta > 1e-6)
-				{
-					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q_error.x, q_error.y, q_error.z);
-					error = theta * v.z;
-				}
-				else
-				{
-					error = theta;
-				}
+				Quat q_init = constraints[tId].rotQuat;
+				Quat q_error = q2 * q_init * q1.inverse();
+
+				error = q_error.z * 2;
 			}
 			else
 			{
-				Real theta = 2.0 * acos(q1.w);
-				if (theta > 1e-6)
-				{
-					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q1.x, q1.y, q1.z);
-					error = theta * v.z;
-				}
-				else
-				{
-					error = theta;
-				}
+				Quat diff = rotation_q[idx1] * constraints[tId].rotQuat.inverse();
+				error = -diff.z * 2;
 			}
 		}
 
@@ -1653,6 +1603,7 @@ namespace dyno
 		DArray<float> errors,
 		float slop,
 		float beta,
+		uint substepping,
 		float dt
 	)
 	{
@@ -1668,6 +1619,7 @@ namespace dyno
 			errors,
 			slop,
 			beta,
+			substepping,
 			dt);
 	}
 
@@ -1794,7 +1746,7 @@ namespace dyno
 
 		if (constraints[tId].type == ConstraintType::CN_NONPENETRATION)
 		{
-			error = minimum(constraints[tId].interpenetration + slop, 0.0f);
+			error = minimum(constraints[tId].interpenetration + slop, 0.0f) / substepping;
 		}
 
 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_1)
@@ -1857,110 +1809,54 @@ namespace dyno
 		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_1)
 		{
 			Quat q1 = rotation_q[idx1];
-			q1 = q1.normalize();
 			if (idx2 != INVALID)
 			{
 				Quat q2 = rotation_q[idx2];
-				q2 = q2.normalize();
+				Quat q_init = constraints[tId].rotQuat;
+				Quat q_error = q2 * q_init * q1.inverse();
 
-				Quat q_error = q2 * q1.inverse();
-				q_error = q_error.normalize();
-
-				Real theta = 2.0 * acos(q_error.w);
-				if (theta > 1e-6)
-				{
-					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q_error.x, q_error.y, q_error.z);
-					error = theta * v.x;
-				}
-				else
-				{
-					error = theta;
-				}
+				error = q_error.x * 2;
 			}
 			else
 			{
-				Real theta = 2.0 * acos(q1.w);
-				if (theta > 1e-6)
-				{
-					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q1.x, q1.y, q1.z);
-					error = theta * v.x;
-				}
-				else
-				{
-					error = theta;
-				}
+				Quat diff = rotation_q[idx1] * constraints[tId].rotQuat.inverse();
+				error = -diff.x * 2;
 			}
 		}
 
 		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_2)
 		{
 			Quat q1 = rotation_q[idx1];
-			q1 = q1.normalize();
 			if (idx2 != INVALID)
 			{
 				Quat q2 = rotation_q[idx2];
-				q2 = q2.normalize();
-				Quat q_error = q2 * q1.inverse();
-				q_error = q_error.normalize();
-				Real theta = 2.0 * acos(q_error.w);
-				if (theta > 1e-6)
-				{
-					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q_error.x, q_error.y, q_error.z);
-					error = theta * v.y;
-				}
-				else
-				{
-					error = theta;
-				}
+				Quat q_init = constraints[tId].rotQuat;
+				Quat q_error = q2 * q_init * q1.inverse();
+
+				error = q_error.y * 2;
 			}
 			else
 			{
-				Real theta = 2.0 * acos(q1.w);
-				if (theta > 1e-6)
-				{
-					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q1.x, q1.y, q1.z);
-					error = theta * v.y;
-				}
-				else
-				{
-					error = theta;
-				}
+				Quat diff = rotation_q[idx1] * constraints[tId].rotQuat.inverse();
+				error = -diff.y * 2;
 			}
 		}
 
 		if (constraints[tId].type == ConstraintType::CN_BAN_ROT_3)
 		{
 			Quat q1 = rotation_q[idx1];
-			q1 = q1.normalize();
 			if (idx2 != INVALID)
 			{
 				Quat q2 = rotation_q[idx2];
-				q2 = q2.normalize();
-				Quat q_error = q2 * q1.inverse();
-				q_error = q_error.normalize();
-				Real theta = 2.0 * acos(q_error.w);
-				if (theta > 1e-6)
-				{
-					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q_error.x, q_error.y, q_error.z);
-					error = theta * v.z;
-				}
-				else
-				{
-					error = theta;
-				}
+				Quat q_init = constraints[tId].rotQuat;
+				Quat q_error = q2 * q_init * q1.inverse();
+
+				error = q_error.z * 2;
 			}
 			else
 			{
-				Real theta = 2.0 * acos(q1.w);
-				if (theta > 1e-6)
-				{
-					Vec3f v = (1 / sin(theta / 2.0)) * Vec3f(q1.x, q1.y, q1.z);
-					error = theta * v.z;
-				}
-				else
-				{
-					error = theta;
-				}
+				Quat diff = rotation_q[idx1] * constraints[tId].rotQuat.inverse();
+				error = -diff.z * 2;
 			}
 		}
 
@@ -2009,7 +1905,7 @@ namespace dyno
 		Real omega = 2.0 * M_PI * hertz;
 		Real a1 = 2.0 * zeta + omega * dt;
 		Real biasRate = omega / a1;
-		eta[tId] -= biasRate * error / substepping;
+		eta[tId] -= biasRate * error;
 	}
 
 	void calculateEtaVectorForPJSoft(
@@ -2645,12 +2541,13 @@ namespace dyno
 	* @param begin_index				begin index of slider constraints in array
 	* This function set up the slider joint constraints
 	*/
-	template<typename Joint, typename Constraint, typename Coord, typename Matrix>
+	template<typename Joint, typename Constraint, typename Coord, typename Matrix, typename Quat>
 	__global__ void SF_setUpSliderJointConstraints(
 		DArray<Constraint> constraints,
 		DArray<Joint> joints,
 		DArray<Coord> pos,
 		DArray<Matrix> rotMat,
+		DArray<Quat> rotQuat,
 		int begin_index
 	)
 	{
@@ -2739,6 +2636,7 @@ namespace dyno
 			constraint.interpenetration = v_moter;
 			constraint.d_min = C_min;
 			constraint.d_max = C_max;
+			constraint.rotQuat = joints[tId].q_init;
 		}
 
 		constraints[baseIndex].type = ConstraintType::CN_ANCHOR_TRANS_1;
@@ -2756,6 +2654,7 @@ namespace dyno
 		DArray<SliderJoint<float>> joints,
 		DArray<Vec3f> pos,
 		DArray<Mat3f> rotMat,
+		DArray<Quat1f> rotQuat,
 		int begin_index
 	)
 	{
@@ -2765,6 +2664,7 @@ namespace dyno
 			joints,
 			pos,
 			rotMat,
+			rotQuat,
 			begin_index);
 	}
 
@@ -2932,11 +2832,12 @@ namespace dyno
 	* @param begin_index				begin index of fixed constraints in array
 	* This function set up the fixed joint constraints
 	*/
-	template<typename Joint, typename Constraint, typename Matrix>
+	template<typename Joint, typename Constraint, typename Matrix, typename Quat>
 	__global__ void SF_setUpFixedJointConstraints(
 		DArray<Constraint> constraints,
 		DArray<Joint> joints,
 		DArray<Matrix> rotMat,
+		DArray<Quat> rotQuat,
 		int begin_index
 	)
 	{
@@ -2962,6 +2863,7 @@ namespace dyno
 			constraints[baseIndex + i].normal1 = r1;
 			constraints[baseIndex + i].normal2 = r2;
 			constraints[baseIndex + i].pos1 = joints[tId].w;
+			constraints[baseIndex + i].rotQuat = joints[tId].q_init;
 			constraints[baseIndex + i].isValid = true;
 		}
 
@@ -2974,9 +2876,10 @@ namespace dyno
 	}
 
 	void setUpFixedJointConstraints(
-		DArray<TConstraintPair<float>> constraints,
-		DArray<FixedJoint<float>> joints,
-		DArray<Mat3f> rotMat,
+		DArray<TConstraintPair<float>> &constraints,
+		DArray<FixedJoint<float>> &joints,
+		DArray<Mat3f> &rotMat,
+		DArray<Quat1f> &rotQuat,
 		int begin_index
 	)
 	{
@@ -2985,6 +2888,7 @@ namespace dyno
 			constraints,
 			joints,
 			rotMat,
+			rotQuat,
 			begin_index);
 	}
 
@@ -3342,6 +3246,7 @@ namespace dyno
 		DArray<Matrix2> K_2,
 		DArray<Matrix3> K_3,
 		DArray<Real> mass,
+		DArray<Real> fricCoeffs,
 		Real mu,
 		Real g,
 		Real dt
@@ -3393,7 +3298,13 @@ namespace dyno
 			if (constraints[tId].type == ConstraintType::CN_FRICTION)
 			{
 				Real mass_avl = mass[idx1];
-				Real lambda_new = minimum(maximum(lambda[tId] + (tmp * K_1[tId] * omega), -mu * mass_avl * g * dt), mu * mass_avl * g * dt);
+				Real mu_i = fricCoeffs[idx1];
+				if (idx2 != INVALID)
+				{
+					mass_avl = (mass_avl + mass[idx2]) / 2;
+					mu_i = (mu_i + fricCoeffs[idx2]) / 2;
+				}
+				Real lambda_new = minimum(maximum(lambda[tId] + (tmp * K_1[tId] * omega), -mu_i * mass_avl * g * dt), mu_i * mass_avl * g * dt);
 				delta_lambda = lambda_new - lambda[tId];
 			}
 
@@ -3989,7 +3900,7 @@ namespace dyno
 		DArray<Matrix2> K_2,
 		DArray<Matrix3> K_3,
 		DArray<Real> mass,
-		Real mu,
+		DArray<Real> mu,
 		Real g,
 		Real dt,
 		Real zeta,
@@ -4049,8 +3960,14 @@ namespace dyno
 			if (constraints[tId].type == ConstraintType::CN_FRICTION)
 			{
 				Real mass_avl = mass[idx1];
-				/*Real lambda_new = minimum(maximum(lambda[tId] + omega * (massCoeff * tmp * K_1[tId] - impulseCoeff * lambda[tId]), -mu * mass_avl * g * dt), mu * mass_avl * g * dt);*/
-				delta_lambda = omega * (massCoeff * tmp * K_1[tId] - impulseCoeff * lambda[tId]);
+				Real mu_i = mu[idx1];
+				if (idx2 != INVALID)
+				{
+					mass_avl = (mass_avl + mass[idx2]) / 2;
+					mu_i = (mu_i + mu[idx2]) / 2;
+				}
+				Real lambda_new = minimum(maximum(lambda[tId] + omega * (massCoeff * tmp * K_1[tId] - impulseCoeff * lambda[tId]), -mu_i * mass_avl * g * dt), mu_i * mass_avl * g * dt);
+				delta_lambda = lambda_new - lambda[tId];
 
 			}
 
@@ -4308,6 +4225,7 @@ namespace dyno
 		DArray<Mat2f> K_2,
 		DArray<Mat3f> K_3,
 		DArray<float> mass,
+		DArray<float> fricCoeffs,
 		float mu,
 		float g,
 		float dt
@@ -4326,6 +4244,7 @@ namespace dyno
 			K_2,
 			K_3,
 			mass,
+			fricCoeffs,
 			mu,
 			g,
 			dt);
@@ -4412,7 +4331,7 @@ namespace dyno
 		DArray<Mat2f> K_2,
 		DArray<Mat3f> K_3,
 		DArray<float> mass,
-		float mu,
+		DArray<float> mu,
 		float g,
 		float dt,
 		float zeta,

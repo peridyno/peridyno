@@ -8,6 +8,7 @@
 #include "Topology/TextureMesh.h"
 #include "tinygltf/tiny_gltf.h"
 #include "FilePath.h"
+#include "SkinInfo.h"
 
 #define NULL_TIME (-9599.99)
 
@@ -17,9 +18,6 @@ namespace dyno
 	typedef unsigned char byte;
 	typedef int joint;
 	typedef int scene;
-
-	//bool loadImage(const char* path, dyno::CArray2D<dyno::Vec4f>& img);
-
 
 
 	void getBoundingBoxByName(tinygltf::Model& model,const tinygltf::Primitive& primitive,const std::string& attributeName,TAlignedBox3D<Real>& bound,Transform3f& transform);
@@ -47,7 +45,6 @@ namespace dyno
 
 	void getJointsTransformData(		
 		const std::vector<int>& all_Joints,
-		std::map<int, std::string>& joint_name,
 		std::vector<std::vector<int>>& joint_child,
 		std::map<int, Quat<float>>& joint_rotation,
 		std::map<int, Vec3f>& joint_scale,
@@ -55,9 +52,6 @@ namespace dyno
 		std::map<int, Mat4f>& joint_matrix,
 		tinygltf::Model model
 	);
-
-
-
 
 	void importAnimation(
 		tinygltf::Model model,
@@ -71,8 +65,6 @@ namespace dyno
 		std::map<joint, std::vector<Real>>& joint_R_Time
 	);
 
-
-
 	void buildInverseBindMatrices(
 		const std::vector<joint>& all_Joints,
 		std::map<joint, Mat4f>& joint_matrix, int& maxJointId,
@@ -84,7 +76,6 @@ namespace dyno
 		std::map<joint, std::vector<int>> jointId_joint_Dir
 	);
 
-
 	void updateJoint_Mesh_Camera_Dir(
 		tinygltf::Model& model,
 		int& jointNum,
@@ -95,13 +86,10 @@ namespace dyno
 		std::map<joint, std::vector<int>> nodeId_Dir,
 		std::map<int, std::vector<int>>& meshId_Dir,
 		std::vector<int>& all_Meshs,
-		DArray<int>& d_joints,
 		int& maxJointId
 	);
 
 	std::vector<int> getJointDirByJointIndex(int Index, std::map<joint, std::vector<int>> jointId_joint_Dir);
-
-
 
 	void getMeshMatrix(
 		tinygltf::Model& model,
@@ -109,7 +97,6 @@ namespace dyno
 		int& maxMeshId,
 		CArray<Mat4f>& mesh_Matrix
 	);
-
 
 	template< typename Vec3f, typename Vec4f, typename Mat4f, typename Vec2u>
 	void skinAnimation(
@@ -129,6 +116,64 @@ namespace dyno
 		Vec2u range
 	);
 
+	void loadGLTFTextureMesh(std::shared_ptr<TextureMesh> texMesh, const std::string& filepath);
 
+	void loadGLTFMaterial(tinygltf::Model& model, std::shared_ptr<TextureMesh> texMesh, FilePath filename);
+
+	void loadGLTFShape(
+		tinygltf::Model& model, 
+		std::shared_ptr<TextureMesh> texMesh, 
+		const std::string& filepath,  
+		DArray<Vec3f>* initialPosition = nullptr,
+		DArray<Vec3f>* initialNormal = nullptr, 
+		DArray<Mat4f>* d_mesh_Matrix =nullptr,
+		DArray<int>* d_shape_meshId = nullptr,
+		std::shared_ptr<SkinInfo> skinData = nullptr
+	);
+
+
+
+	template< typename Triangle>
+	void updateVertexIdShape(
+		DArray<Triangle>& triangle,
+		DArray<uint>& ID_shapeId,
+		int& shapeId,
+		int size
+	);
+
+	template<typename Mat4f, typename Vec3f >
+	void shapeTransform(
+		DArray<Vec3f>& intialPosition,
+		DArray<Vec3f>& worldPosition,
+		DArray<Vec3f>& intialNormal,
+		DArray<Vec3f>& Normal,
+		DArray<Mat4f>& WorldMatrix,
+		DArray<uint>& vertexId_shape,
+		DArray<int>& shapeId_MeshId
+	);
+
+
+
+	template<typename Vec3f>
+	void  setupPoints(
+		DArray<Vec3f>& newPos,
+		DArray<Vec3f>& pos,
+		DArray<int>& radix
+	);
+
+	template<typename uint>
+	void  Shape_PointCounter(
+		DArray<int>& counter,
+		DArray<uint>& point_ShapeIds,
+		uint& target
+	);
+
+	template< typename Vec3f, typename uint>
+	void shapeToCenter(
+		DArray<Vec3f>& iniPos,
+		DArray<Vec3f>& finalPos,
+		DArray<uint>& shapeId,
+		DArray<Vec3f>& t
+	);
 
 }

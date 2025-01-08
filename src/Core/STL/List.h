@@ -34,11 +34,11 @@ namespace dyno
 			return this->m_startLoc + m_size;
 		}
 
-		GPU_FUNC inline T& operator [] (uint id) {
+		DYN_FUNC inline T& operator [] (uint id) {
 			return this->m_startLoc[id];
 		}
 
-		GPU_FUNC inline T& operator [] (uint id) const {
+		DYN_FUNC inline T& operator [] (uint id) const {
 			return this->m_startLoc[id];
 		}
 

@@ -5,21 +5,20 @@
 #include <GLSurfaceVisualModule.h>
 #include "GLPhotorealisticInstanceRender.h"
 
+#include "GltfFunc.h"
+
 namespace dyno
 {
 	template<typename TDataType>
 	Vessel<TDataType>::Vessel()
 		: RigidBody<TDataType>()
 	{
-		this->stateEnvelope()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
-
 		this->varDensity()->setRange(1.0f, 10000.0f);
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&Vessel<TDataType>::transform, this));
 		this->varLocation()->attach(callback);
 		this->varScale()->attach(callback);
 		this->varRotation()->attach(callback);
-
 
 		auto EnvelopeRender = std::make_shared<GLSurfaceVisualModule>();
 		EnvelopeRender->setColor(Color(0.8f, 0.8f, 0.8f));
@@ -29,7 +28,7 @@ namespace dyno
 
 
 		auto texMeshRender = std::make_shared<GLPhotorealisticInstanceRender>();
-		this->inTextureMesh()->connect(texMeshRender->inTextureMesh());
+		this->stateTextureMesh()->connect(texMeshRender->inTextureMesh());
 		this->stateInstanceTransform()->connect(texMeshRender->inTransform());
 		this->graphicsPipeline()->pushModule(texMeshRender);
 
@@ -55,8 +54,17 @@ namespace dyno
 		);
 		evenlopeLoader->update();
 
-
 		this->varEnvelopeName()->attach(evenlopeLoader);
+
+		auto textureMeshLoader = std::make_shared<FCallBackFunc>(
+			[=]() {
+				std::string filepath = this->varTextureMeshName()->getValue().string();
+				std::shared_ptr<TextureMesh> texMesh = this->stateTextureMesh()->getDataPtr();
+				loadGLTFTextureMesh(texMesh, filepath);
+			}
+		);
+
+		this->varTextureMeshName()->attach(textureMeshLoader);
 	}
 
 	template<typename TDataType>
@@ -78,10 +86,22 @@ namespace dyno
 	template<typename TDataType>
 	void Vessel<TDataType>::resetStates()
 	{
+		if (this->stateEnvelope()->isEmpty()) this->stateEnvelope()->allocate();
+		if (this->stateTextureMesh()->isEmpty()) this->stateTextureMesh()->allocate();
+
+		std::string envFileName = getAssetPath() + "obj/boat_boundary.obj";
+		if (this->varEnvelopeName()->getValue() != envFileName) {
+			this->varEnvelopeName()->setValue(FilePath(envFileName));
+		}
+
+		std::string texMeshName = getAssetPath() + "gltf/SailBoat/SailBoat.gltf";
+		if (this->varTextureMeshName()->getValue() != texMeshName) {
+			this->varTextureMeshName()->setValue(FilePath(texMeshName));
+		}
 
 		this->transform();
 
-		auto texMesh = this->inTextureMesh()->constDataPtr();
+		auto texMesh = this->stateTextureMesh()->constDataPtr();
 
 		//Initialize states for the rigid body
 		{
@@ -128,9 +148,6 @@ namespace dyno
 			this->stateInitialInertia()->setValue(inertia);
 		}
 
-
-
-
 		RigidBody<TDataType>::resetStates();
 	}
 
@@ -153,7 +170,7 @@ namespace dyno
 		buoy->scale(scale);
 		buoy->translate(center - mShapeCenter);
 
-		auto texMesh = this->inTextureMesh()->getDataPtr();
+		auto texMesh = this->stateTextureMesh()->getDataPtr();
 		{
 
 			uint N = texMesh->shapes().size();
@@ -197,10 +214,10 @@ namespace dyno
 		envelope->rotate(quat);
 		envelope->translate(location);
 
-		if (this->inTextureMesh()->isEmpty())
+		if (this->stateTextureMesh()->isEmpty())
 			return;
 
-		auto texMesh = this->inTextureMesh()->constDataPtr();
+		auto texMesh = this->stateTextureMesh()->constDataPtr();
 		{
 			uint N = texMesh->shapes().size();
 
@@ -212,8 +229,6 @@ namespace dyno
 				Transform3f t = texMesh->shapes()[i]->boundingTransform;
 
 				tms[i].insert(Transform3f(t.translation() * scale + location, quat.toMatrix3x3(), t.scale() * scale));
-
-
 			}
 
 			if (this->stateInstanceTransform()->isEmpty())
@@ -225,7 +240,6 @@ namespace dyno
 			instantanceTransform->assign(tms);
 
 			tms.clear();
-
 		}
 	}
 

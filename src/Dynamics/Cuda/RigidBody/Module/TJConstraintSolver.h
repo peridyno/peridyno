@@ -21,6 +21,9 @@
 
 #include "Topology/DiscreteElements.h"
 
+#include "Collision/Attribute.h"
+#include "Collision/CollisionData.h"
+
 namespace dyno
 {
 	template<typename TDataType>
@@ -56,15 +59,15 @@ namespace dyno
 
 		DEF_VAR(Real, Slop, 0, "");
 
-		DEF_VAR(Real, BaumgarteBias, 0.3, "");
+		DEF_VAR(Real, BaumgarteBias, 0.6, "");
 
 		DEF_VAR(uint, SubStepping, 10, "");
 
 		DEF_VAR(uint, IterationNumberForVelocitySolver, 30, "");
 
-		DEF_VAR(Real, LinearDamping, 0.1, "");
+		DEF_VAR(Real, LinearDamping, 0.2, "");
 
-		DEF_VAR(Real, AngularDamping, 0.1, "");
+		DEF_VAR(Real, AngularDamping, 0.2, "");
 
 	public:
 		DEF_VAR_IN(Real, TimeStep, "Time step size");
@@ -88,6 +91,10 @@ namespace dyno
 		DEF_ARRAY_IN(ContactPair, Contacts, DeviceType::GPU, "");
 
 		DEF_INSTANCE_IN(DiscreteElements<TDataType>, DiscreteElements, "");
+
+		DEF_ARRAY_IN(Attribute, Attribute, DeviceType::GPU, "Rigid body attributes");
+
+		DEF_ARRAY_IN(Real, FrictionCoefficients, DeviceType::GPU, "FrictionCoefficients of rigid bodies");
 
 	protected:
 		void constrain() override;

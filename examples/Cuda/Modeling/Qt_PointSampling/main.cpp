@@ -39,10 +39,11 @@ std::shared_ptr<SceneGraph> createScene()
 	/*
 	*@brief Regular sampling in .sdf
 	*/
-	auto obj1 = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
+	auto obj1 = scn->addNode(std::make_shared<SphereModel<DataType3f>>());
 	obj1->varScale()->setValue(Vec3f(0.7));
-	obj1->varFileName()->setValue(getAssetPath() + "board/ball.obj");
-	obj1->varLocation()->setValue(Vec3f(0.0, 0.5, 0.0));
+	obj1->varType()->setCurrentKey(1);
+	obj1->varIcosahedronStep()->setValue(2);
+	obj1->varLocation()->setValue(Vec3f(-1, 0.5, 0.0));
 	auto SurfaceModule1 = obj1->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
 	SurfaceModule1->setColor(Color(0.2));
 	SurfaceModule1->setMetallic(1);
@@ -50,12 +51,16 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto volume1 = scn->addNode(std::make_shared<VolumeOctreeGenerator<DataType3f>>()); /*Creat a SDF convert module*/
 	volume1->varSpacing()->setValue(0.005);	 /*The grid spacing of the SDF*/
-	obj1->outTriangleSet()->promoteOuput()->connect(volume1->inTriangleSet()); /*Connect the .obj to the SDF convert module*/
+	obj1->stateTriangleSet()->promoteOuput()->connect(volume1->inTriangleSet()); /*Connect the .obj to the SDF convert module*/
 
-	auto obj2 = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
+	auto obj2 = scn->addNode(std::make_shared<SphereModel<DataType3f>>());
 	obj2->varScale()->setValue(Vec3f(0.45));
-	obj2->varFileName()->setValue(getAssetPath() + "board/ball.obj");
-	obj2->varLocation()->setValue(Vec3f(0.0, 0.5, 0.0));
+	obj2->varType()->setCurrentKey(1);
+	obj2->varIcosahedronStep()->setValue(2);
+	obj2->varLocation()->setValue(Vec3f(0.418-1,0.5,0));
+	obj2->varType()->setCurrentKey(1);
+	obj2->varIcosahedronStep()->setValue(2);
+	obj2->setVisible(false);
 	auto SurfaceModule2 = obj2->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
 	SurfaceModule2->setColor(Color(0.2));
 	SurfaceModule2->setMetallic(1);
@@ -63,7 +68,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto volume2 = scn->addNode(std::make_shared<VolumeOctreeGenerator<DataType3f>>()); /*Creat a SDF convert module*/
 	volume2->varSpacing()->setValue(0.005);	 /*The grid spacing of the SDF*/
-	obj2->outTriangleSet()->promoteOuput()->connect(volume2->inTriangleSet());/*Connect the .obj to the SDF convert module*/
+	obj2->stateTriangleSet()->promoteOuput()->connect(volume2->inTriangleSet());/*Connect the .obj to the SDF convert module*/
 
 	/*Boolean operation: Two SDF. The shape(.obj1) sbtract the hole(.obj2)*/
 	auto volume_Sphere_Uniform = scn->addNode(std::make_shared<VolumeOctreeBoolean<DataType3f>>());
@@ -92,7 +97,9 @@ std::shared_ptr<SceneGraph> createScene()
 	meshes_1->varLatitude()->setValue(16);
 	meshes_1->varLongitude()->setValue(12);
 	meshes_1->varScale()->setValue(Vec3f(0.6, 0.6, 0.6));
-
+	meshes_1->varType()->setCurrentKey(1);
+	meshes_1->varIcosahedronStep()->setValue(2);
+	meshes_1->setVisible(false);
 	auto pointset_1 = scn->addNode(std::make_shared<PointsBehindMesh<DataType3f>>());
 	pointset_1->varGeneratingDirection()->setValue(false);
 	pointset_1->varSamplingDistance()->setValue(0.005);
@@ -122,10 +129,11 @@ std::shared_ptr<SceneGraph> createScene()
 	/*
 	*@brief Poisson disk sampling in .sdf
 	*/
-	auto obj3 = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
+	auto obj3 = scn->addNode(std::make_shared<SphereModel<DataType3f>>());
 	obj3->varScale()->setValue(Vec3f(0.7));
-	obj3->varFileName()->setValue(getAssetPath() + "board/ball.obj");
-	obj3->varLocation()->setValue(Vec3f(1.0, 0.5, 0.0));
+	obj3->varType()->setCurrentKey(1);
+	obj3->varIcosahedronStep()->setValue(2);
+	obj3->varLocation()->setValue(Vec3f(0, 0.5, 0.0));
 	auto SurfaceModule4 = obj3->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
 	SurfaceModule4->setColor(Color(0.2));
 	SurfaceModule4->setMetallic(1);
@@ -133,12 +141,13 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto volume3 = scn->addNode(std::make_shared<VolumeOctreeGenerator<DataType3f>>()); /*Creat a SDF convert module*/
 	volume3->varSpacing()->setValue(0.005);	 /*The grid spacing of the SDF*/
-	obj3->outTriangleSet()->promoteOuput()->connect(volume3->inTriangleSet()); /*Connect the .obj to the SDF convert module*/
+	obj3->stateTriangleSet()->promoteOuput()->connect(volume3->inTriangleSet()); /*Connect the .obj to the SDF convert module*/
 
-	auto obj4 = scn->addNode(std::make_shared<ObjMesh<DataType3f>>());
+	auto obj4 = scn->addNode(std::make_shared<SphereModel<DataType3f>>());
 	obj4->varScale()->setValue(Vec3f(0.45));
-	obj4->varFileName()->setValue(getAssetPath() + "board/ball.obj");
-	obj4->varLocation()->setValue(Vec3f(1.0, 0.5, 0.0));
+	obj4->varLocation()->setValue(Vec3f(0.35, 0.5, 0));
+	obj4->varType()->setCurrentKey(1);
+	obj4->varIcosahedronStep()->setValue(2);
 	auto SurfaceModule5 = obj4->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
 	SurfaceModule5->setColor(Color(0.2));
 	SurfaceModule5->setMetallic(1);
@@ -146,7 +155,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto volume4 = scn->addNode(std::make_shared<VolumeOctreeGenerator<DataType3f>>()); /*Creat a SDF convert module*/
 	volume4->varSpacing()->setValue(0.005);	 /*The grid spacing of the SDF*/
-	obj4->outTriangleSet()->promoteOuput()->connect(volume4->inTriangleSet());/*Connect the .obj to the SDF convert module*/
+	obj4->stateTriangleSet()->promoteOuput()->connect(volume4->inTriangleSet());/*Connect the .obj to the SDF convert module*/
 
 	auto volume_bool2 = scn->addNode(std::make_shared<VolumeOctreeBoolean<DataType3f>>());
 	volume_bool2->varBooleanType()->getDataPtr()->setCurrentKey(VolumeOctreeBoolean<DataType3f>::UNION_SET);

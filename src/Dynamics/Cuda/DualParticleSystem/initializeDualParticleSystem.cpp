@@ -1,9 +1,9 @@
 #include "initializeDualParticleSystem.h"
-#include "DualParticleFluidSystem.h"
-#include "DualParticleIsphModule.h"
-#include "VirtualColocationStrategy.h"
-#include "VirtualParticleShiftingStrategy.h"
-#include "VirtualSpatiallyAdaptiveStrategy.h"
+#include "DualParticleFluid.h"
+#include "Module/DualParticleIsphModule.h"
+#include "Module/VirtualColocationStrategy.h"
+#include "Module/VirtualParticleShiftingStrategy.h"
+#include "Module/VirtualSpatiallyAdaptiveStrategy.h"
 #include "ParticleSystem/Emitters/CircularEmitter.h"
 #include "ParticleSystem/Emitters/SquareEmitter.h"
 #include "ParticleSystem/ParticleFluid.h"
@@ -50,7 +50,7 @@ namespace dyno
 			"Particle System",
 			"ToolBarIco/DualParticleSystem/DualParticleSystem_v4.png");
 
-		auto group = page->addGroup("Dual Particle System");
+		auto group = page->addGroup("Particle Fluid Solvers");
 
 
 		group->addAction(
@@ -58,24 +58,7 @@ namespace dyno
 			"ToolBarIco/DualParticleSystem/DualParticleFluid_v4.png",
 			[=]()->std::shared_ptr<Node> { 
 				
-				auto fluid = std::make_shared<DualParticleFluidSystem<DataType3f>>();
-
-				auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
-				fluid->stateVelocity()->connect(calculateNorm->inVec());
-				fluid->graphicsPipeline()->pushModule(calculateNorm);
-
-				auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
-				colorMapper->varMax()->setValue(5.0f);
-				calculateNorm->outNorm()->connect(colorMapper->inScalar());
-				fluid->graphicsPipeline()->pushModule(colorMapper);
-
-				auto ptRender = std::make_shared<GLPointVisualModule>();
-				ptRender->setColor(Color(1, 0, 0));
-				ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-
-				fluid->statePointSet()->connect(ptRender->inPointSet());
-				colorMapper->outColor()->connect(ptRender->inColor());
-				fluid->graphicsPipeline()->pushModule(ptRender);
+				auto fluid = std::make_shared<DualParticleFluid<DataType3f>>();
 
 				auto vpRender = std::make_shared<GLPointVisualModule>();
 				vpRender->setColor(Color(1, 1, 0));

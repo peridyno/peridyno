@@ -307,15 +307,18 @@ namespace dyno
 		}
 	}
 
+	void PPropertyWidget::clearProperty()
+	{
+		this->removeAllWidgets();
+	}
+
 	void PPropertyWidget::contentUpdated()
 	{
-
 		auto node = std::dynamic_pointer_cast<Node>(mSeleted);
 
 		if (node != nullptr) 
 		{
 			emit nodeUpdated(node);
-
 		}
 
 		auto module = std::dynamic_pointer_cast<Module>(mSeleted);

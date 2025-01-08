@@ -431,7 +431,7 @@ void declare_marching_cubes(py::module& m, std::string typestr) {
 		.def("var_iso_value", &Class::varIsoValue, py::return_value_policy::reference)
 		.def("var_grid_spacing", &Class::varGridSpacing, py::return_value_policy::reference)
 		.def("in_level_set", &Class::inLevelSet, py::return_value_policy::reference)
-		.def("out_triangle_set", &Class::outTriangleSet, py::return_value_policy::reference);
+		.def("out_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference);
 }
 
 #include "Volume/Module/MarchingCubesHelper.h"
@@ -644,9 +644,9 @@ void declare_distance_field3D(py::module& m, std::string typestr) {
 		.def("lower_bound", &Class::lowerBound)
 		.def("upper_bound", &Class::upperBound)
 		.def("assign", &Class::assign)
-		.def("get_m_distance", &Class::getMDistance, py::return_value_policy::reference)
+		.def("get_m_distance", &Class::distances, py::return_value_policy::reference)
 		.def("set_distance", &Class::setDistance)
-		.def("get_h", &Class::getH)
+		.def("get_h", &Class::getGridSpacing)
 		.def("invert_sdf", &Class::invertSDF);
 }
 

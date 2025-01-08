@@ -17,8 +17,6 @@
 
 namespace dyno
 {
-	IMPLEMENT_TCLASS(RigidBodySystem, TDataType)
-
 	typedef typename dyno::TOrientedBox3D<Real> Box3D;
 
 	template<typename TDataType>
@@ -45,7 +43,7 @@ namespace dyno
 
 		this->animationPipeline()->pushModule(merge);
 
-		auto iterSolver = std::make_shared<PJSoftConstraintSolver<TDataType>>();
+		auto iterSolver = std::make_shared<TJSoftConstraintSolver<TDataType>>();
 		this->stateTimeStep()->connect(iterSolver->inTimeStep());
 		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
 		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
@@ -54,6 +52,8 @@ namespace dyno
 		this->varSlop()->connect(iterSolver->varSlop());
 		this->stateMass()->connect(iterSolver->inMass());
 		
+		this->stateFrictionCoefficients()->connect(iterSolver->inFrictionCoefficients());
+		this->stateAttribute()->connect(iterSolver->inAttribute());
 		this->stateCenter()->connect(iterSolver->inCenter());
 		this->stateVelocity()->connect(iterSolver->inVelocity());
 		this->stateAngularVelocity()->connect(iterSolver->inAngularVelocity());
@@ -425,7 +425,6 @@ namespace dyno
 	__global__ void RB_SetupInitialStates(
 		DArray<Real> mass,
 		DArray<Coord> pos,
-		DArray<Coord> barycenterOffset,
 		DArray<Matrix> rotation,
 		DArray<Coord> velocity,
 		DArray<Coord> angularVelocity,
@@ -434,6 +433,7 @@ namespace dyno
 		DArray<CollisionMask> mask,
 		DArray<Attribute> atts,
 		DArray<RigidBodyInfo> states,
+		DArray<Real> fricCoeffs,
 		ElementOffset offset)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -446,12 +446,24 @@ namespace dyno
 		angularVelocity[tId] = rotation[tId] * states[tId].angularVelocity;
 		rotation_q[tId] = states[tId].angle;
 		pos[tId] = states[tId].position;
-		barycenterOffset[tId] = states[tId].offset;
 		inertia[tId] = states[tId].inertia;
 		mask[tId] = states[tId].collisionMask;
+		fricCoeffs[tId] = states[tId].friction;
 
 		Attribute att_i;
 		att_i.setObjectId(states[tId].bodyId);
+		if (states[tId].motionType == BodyType::Static)
+		{
+			att_i.setFixed();
+		}
+		else if (states[tId].motionType == BodyType::Kinematic)
+		{
+			att_i.setPassive();
+		}
+		else if (states[tId].motionType == BodyType::Dynamic)
+		{
+			att_i.setDynamic();
+		}
 		atts[tId] = att_i;
 	}
 
@@ -572,26 +584,25 @@ namespace dyno
 
 		mDeviceRigidBodyStates.assign(mHostRigidBodyStates);
 
-		int sizeOfRigids = topo->totalSize();
+		int sizeOfRigidBodies = mDeviceRigidBodyStates.size();// topo->totalSize();
 
 		ElementOffset eleOffset = topo->calculateElementOffset();
 
-		this->stateRotationMatrix()->resize(sizeOfRigids);
-		this->stateAngularVelocity()->resize(sizeOfRigids);
-		this->stateCenter()->resize(sizeOfRigids);
-		this->stateOffset()->resize(sizeOfRigids);
-		this->stateVelocity()->resize(sizeOfRigids);
-		this->stateMass()->resize(sizeOfRigids);
-		this->stateInertia()->resize(sizeOfRigids);
-		this->stateQuaternion()->resize(sizeOfRigids);
-		this->stateCollisionMask()->resize(sizeOfRigids);
-		this->stateAttribute()->resize(sizeOfRigids);
+		this->stateRotationMatrix()->resize(sizeOfRigidBodies);
+		this->stateAngularVelocity()->resize(sizeOfRigidBodies);
+		this->stateCenter()->resize(sizeOfRigidBodies);
+		this->stateVelocity()->resize(sizeOfRigidBodies);
+		this->stateMass()->resize(sizeOfRigidBodies);
+		this->stateInertia()->resize(sizeOfRigidBodies);
+		this->stateQuaternion()->resize(sizeOfRigidBodies);
+		this->stateCollisionMask()->resize(sizeOfRigidBodies);
+		this->stateAttribute()->resize(sizeOfRigidBodies);
+		this->stateFrictionCoefficients()->resize(sizeOfRigidBodies);
 
-		cuExecute(sizeOfRigids,
+		cuExecute(sizeOfRigidBodies,
 			RB_SetupInitialStates,
 			this->stateMass()->getData(),
 			this->stateCenter()->getData(),
-			this->stateOffset()->getData(),
 			this->stateRotationMatrix()->getData(),
 			this->stateVelocity()->getData(),
 			this->stateAngularVelocity()->getData(),
@@ -600,9 +611,10 @@ namespace dyno
 			this->stateCollisionMask()->getData(),
 			this->stateAttribute()->getData(),
 			mDeviceRigidBodyStates,
+			this->stateFrictionCoefficients()->getData(),
 			eleOffset);
 
-		this->stateInitialInertia()->resize(sizeOfRigids);
+		this->stateInitialInertia()->resize(sizeOfRigidBodies);
 		this->stateInitialInertia()->getDataPtr()->assign(this->stateInertia()->getData());
 
 		topo->ballAndSocketJoints().assign(mHostJointsBallAndSocket);

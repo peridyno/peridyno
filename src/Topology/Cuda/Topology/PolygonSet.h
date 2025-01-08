@@ -79,6 +79,11 @@ namespace dyno
 		 */
 		void turnIntoTriangleSet(TriangleSet<TDataType>& ts);
 
+		/**
+		 * @brief turn all polygons into triangles and store into one TriangleSet
+		 */
+		void triangleSetToPolygonSet(TriangleSet<TDataType>& ts);
+
 	protected:
 		void updateTopology() override;
 

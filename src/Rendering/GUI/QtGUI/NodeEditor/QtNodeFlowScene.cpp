@@ -98,9 +98,7 @@ namespace Qt
 
 				QPointF posView(m->bx(), m->by());
 
-				node.nodeGraphicsObject().setPos(posView);
-				node.nodeGraphicsObject().setHotKey0Checked(m->isVisible());
-				node.nodeGraphicsObject().setHotKey1Checked(m->isActive());
+			node.nodeGraphicsObject().setPos(posView);
 
 				//this->nodePlaced(node);
 			};
@@ -349,6 +347,8 @@ namespace Qt
 		if (mEditingEnabled && nodeData != nullptr) {
 			auto scn = dyno::SceneGraphFactory::instance()->active();
 			scn->deleteNode(nodeData->getNode());
+
+			emit this->nodeDeselected();
 		}
 	}
 
@@ -687,7 +687,7 @@ namespace Qt
 
 
 				auto fieldInp = nd->getInputFields();
-				for (int i = 0; i < fieldInp.size(); i++)//±éÀúÃ¿¸öNodeµÄInputfield
+				for (int i = 0; i < fieldInp.size(); i++)//ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½Nodeï¿½ï¿½Inputfield
 				{
 					auto fieldSrc = fieldInp[i]->getSource();
 					if (fieldSrc != nullptr) {
@@ -785,7 +785,7 @@ namespace Qt
 
 		}
 
-		//ÀëÉ¢½ÚµãµÄÅÅÐò
+		//ï¿½ï¿½É¢ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		auto otherVertices = layout.getOtherVertices();
 		float width = 0;
 		float heigth = 0;

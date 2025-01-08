@@ -186,7 +186,7 @@ namespace dyno
 	private:
 		void varChanged();
 
-		void extrude(std::vector<Coord>& vertices,std::vector<TopologyModule::Triangle>& triangles);
+		void extrude(std::vector<Vec3f>& vertices,std::vector<TopologyModule::Triangle>& triangles);
 
 		std::shared_ptr<GLWireframeVisualModule> glModule3;
 

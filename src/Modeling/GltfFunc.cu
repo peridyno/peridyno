@@ -1,10 +1,543 @@
 
 #include "GltfFunc.h"
+#include "ImageLoader.h"
 
-
+#define NULL_POSITION (-959959.9956)
+#define TINYGLTF_IMPLEMENTATION
 
 namespace dyno
 {
+	void loadGLTFTextureMesh(std::shared_ptr<TextureMesh> texMesh,const std::string& filepath)
+	{
+		using namespace tinygltf;
+
+		auto model = new Model;
+
+		TinyGLTF loader;
+		std::string err;
+		std::string warn;
+
+		bool ret = loader.LoadASCIIFromFile(model, &err, &warn, filepath);
+		if (!warn.empty()) 
+			printf("Warn: %s\n", warn.c_str());
+		
+		if (!err.empty()) 
+			printf("Err: %s\n", err.c_str());
+		
+		if (!ret) 
+		{
+			printf("Failed to parse glTF\n");
+			return;
+
+		}
+		// import Scenes:
+		
+		loadGLTFMaterial(*model, texMesh,filepath);
+
+		DArray<Vec3f> initialPosition;
+		DArray<Vec3f> initialNormal;
+		DArray<Mat4f> d_mesh_Matrix;
+		DArray<int> d_shape_meshId;
+
+		loadGLTFShape(
+			*model,
+			texMesh,
+			filepath,
+			&initialPosition,
+			&initialNormal,
+			&d_mesh_Matrix,
+			&d_shape_meshId
+		);
+
+		//ToCenter
+
+		shapeTransform(initialPosition,
+			texMesh->vertices(),
+			initialNormal,
+			texMesh->normals(),
+			d_mesh_Matrix,
+			texMesh->shapeIds(),
+			d_shape_meshId
+		);
+
+
+		auto shapeNum = texMesh->shapes().size();
+
+		CArray<Vec3f> c_shapeCenter;
+		c_shapeCenter.resize(shapeNum);
+		//counter
+		for (uint i = 0; i < shapeNum; i++)
+		{
+			DArray<int> counter;
+			counter.resize(texMesh->vertices().size());
+
+			Shape_PointCounter(counter,
+				texMesh->shapeIds(),
+				i);
+
+
+			Reduction<int> reduce;
+			int num = reduce.accumulate(counter.begin(), counter.size());
+
+			DArray<Vec3f> targetPoints;
+			targetPoints.resize(num);
+
+			Scan<int> scan;
+			scan.exclusive(counter.begin(), counter.size());
+
+			setupPoints(
+				targetPoints,
+				texMesh->vertices(),
+				counter
+			);
+
+
+
+			Reduction<Vec3f> reduceBounding;
+
+			auto& bounding = texMesh->shapes()[i]->boundingBox;
+			Vec3f lo = reduceBounding.minimum(targetPoints.begin(), targetPoints.size());
+			Vec3f hi = reduceBounding.maximum(targetPoints.begin(), targetPoints.size());
+
+			bounding.v0 = lo;
+			bounding.v1 = hi;
+			texMesh->shapes()[i]->boundingTransform.translation() = (lo + hi) / 2;
+
+			c_shapeCenter[i] = (lo + hi) / 2;
+
+			targetPoints.clear();
+
+			counter.clear();
+		}
+
+		DArray<Vec3f> d_ShapeCenter;
+		DArray<Vec3f> unCenterPosition;
+
+		d_ShapeCenter.assign(c_shapeCenter);	// Used to "ToCenter"
+		unCenterPosition.assign(texMesh->vertices());
+
+		//ToCenter
+		if (true)//varUseInstanceTransform()->getValue()
+		{
+			shapeToCenter(unCenterPosition,
+				texMesh->vertices(),
+				texMesh->shapeIds(),
+				d_ShapeCenter);
+
+
+			auto& reShapes = texMesh->shapes();
+
+			for (size_t i = 0; i < shapeNum; i++)
+			{
+				reShapes[i]->boundingTransform.translation() = reShapes[i]->boundingTransform.translation() ;//+ this->varLocation()->getValue()
+			}
+		}
+		else
+		{
+			auto& reShapes = texMesh->shapes();
+
+			for (size_t i = 0; i < shapeNum; i++)
+			{
+				reShapes[i]->boundingTransform.translation() = Vec3f(0);
+			}
+		}
+
+	}
+	void loadGLTFShape(tinygltf::Model& model, std::shared_ptr<TextureMesh> texMesh, const std::string& filepath, DArray<Vec3f>* initialPosition, DArray<Vec3f>* initialNormal, DArray<Mat4f>* d_mesh_Matrix,DArray<int>* d_shape_meshId, std::shared_ptr<SkinInfo> skinData )
+	{
+		typedef int joint;
+		typedef int shape;
+		typedef int mesh;
+		typedef int primitive;
+		typedef int scene;
+
+		//
+		std::vector<Vec3f> vertices;
+		std::vector<Vec3f> normals;
+		std::vector<Vec3f> texCoord0;
+		std::vector<Vec3f> texCoord1;
+
+		std::vector<TopologyModule::Triangle> trianglesVector;
+		int shapeNum = 0;
+
+		for (auto meshId : model.meshes)
+		{
+			shapeNum += meshId.primitives.size();
+		}
+
+		//materials
+		loadGLTFMaterial(model, texMesh, filepath);
+
+		//shapes
+
+		auto& reShapes = texMesh->shapes();
+		reShapes.clear();
+		reShapes.resize(shapeNum);
+
+		auto& reMats = texMesh->materials();
+
+		std::vector<Vec3f> shapeCenter;
+
+		int primitive_PointOffest;
+		int currentShape = 0;
+		std::map<int, std::vector<Vec2u>> shape2VerticeRange;
+
+		std::map<int, int> shape_meshId;
+		//skin_VerticeRange;
+		{
+			int tempShapeId = 0;
+			int tempSize = 0;
+			for (int mId = 0; mId < model.meshes.size(); mId++)
+			{
+				// import Mesh
+				std::vector<dyno::TopologyModule::Triangle> vertexIndex;
+				std::vector<dyno::TopologyModule::Triangle> normalIndex;
+				std::vector<dyno::TopologyModule::Triangle> texCoordIndex;
+
+				int primNum = model.meshes[mId].primitives.size();
+
+				for (size_t pId = 0; pId < primNum; pId++)	//shape
+				{
+
+					primitive_PointOffest = (vertices.size());
+
+					//current primitive
+					const tinygltf::Primitive& primitive = model.meshes[mId].primitives[pId];
+
+					std::map<std::string, int> attributesName = primitive.attributes;
+
+
+					//Set Vertices
+					getVec3fByAttributeName(model, primitive, std::string("POSITION"), vertices);
+					shape2VerticeRange[tempShapeId].push_back(Vec2u(tempSize, vertices.size() - 1));
+					tempShapeId++;
+					tempSize = vertices.size();
+
+					//Set Normal
+					getVec3fByAttributeName(model, primitive, std::string("NORMAL"), normals);
+
+					//Set TexCoord
+
+					getVec3fByAttributeName(model, primitive, std::string("TEXCOORD_0"), texCoord0);
+
+					getVec3fByAttributeName(model, primitive, std::string("TEXCOORD_1"), texCoord1);
+
+
+
+					//Set Triangles
+
+					if (primitive.mode == TINYGLTF_MODE_TRIANGLES)
+					{
+
+						std::vector<TopologyModule::Triangle> tempTriangles;
+
+						getTriangles(model, primitive, tempTriangles, primitive_PointOffest);
+
+						vertexIndex = (tempTriangles);
+						normalIndex = (tempTriangles);
+						texCoordIndex = (tempTriangles);
+
+						reShapes[currentShape] = std::make_shared<Shape>();
+						shape_meshId[currentShape] = mId;		// set shapeId - meshId;
+						reShapes[currentShape]->vertexIndex.assign(vertexIndex);
+						reShapes[currentShape]->normalIndex.assign(normalIndex);
+						reShapes[currentShape]->texCoordIndex.assign(texCoordIndex);
+
+						getBoundingBoxByName(model, primitive, std::string("POSITION"), reShapes[currentShape]->boundingBox, reShapes[currentShape]->boundingTransform);//,Transform3f& transform
+
+						shapeCenter.push_back(reShapes[currentShape]->boundingTransform.translation());
+
+						int matId = primitive.material;
+						if (matId != -1 && matId < reMats.size())//
+						{
+							reShapes[currentShape]->material = reMats[matId];
+							//printf("shape_materialID : %d - %d\n",currentShape,matId);
+
+							//printf("texture size %d - %d:\n", reMats[matId]->texColor.nx(), reMats[matId]->texColor.ny());
+						}
+						else
+						{
+							reShapes[currentShape]->material = NULL;
+						}
+
+						//else //
+						//{
+						//	auto newMat = std::make_shared<Material>();
+
+						//	newMat->ambient = { 0,0,0 };
+						//	newMat->diffuse = Vec3f(0.5, 0.5, 0.5);
+						//	newMat->alpha = 1;
+						//	newMat->specular = Vec3f(1, 1, 1);
+						//	newMat->roughness = 0.5;
+
+						//	reMats.push_back(newMat);
+
+						//	reShapes[currentShape]->material = reMats[reMats.size() - 1];
+						//	printf("shape_materialID : %d - %d\n", currentShape, currentShape);
+						//}
+
+						trianglesVector.insert(trianglesVector.end(), tempTriangles.begin(), tempTriangles.end());
+
+					}
+					currentShape++;
+				}
+			}
+		}
+
+		std::map<uint, uint> vertexId_shapeId;
+
+		texMesh->shapeIds().resize(vertices.size());
+
+		//Import Skin;
+		{
+			//Update ;
+			std::map<int, std::vector<joint>> shape_skinJoint;
+
+			for (size_t i = 0; i < model.skins.size(); i++)
+			{
+				auto joints = model.skins[i].joints;
+				shape_skinJoint[i] = joints;
+			}
+
+
+			std::map<int, std::vector<joint>> skinNode_MeshId;
+			std::map<mesh, std::vector<shape>> meshNode_Primitive;
+
+			for (size_t i = 0; i < model.nodes.size(); i++)
+			{
+				if (model.nodes[i].skin != -1)
+				{
+					skinNode_MeshId[i].push_back(model.nodes[i].mesh);
+				}
+			}
+
+			{
+				int tempShapeId = 0;
+
+				for (int mId = 0; mId < model.meshes.size(); mId++)
+				{
+					int primNum = model.meshes[mId].primitives.size();
+
+					for (size_t pId = 0; pId < primNum; pId++)
+					{
+						meshNode_Primitive[mId].push_back(tempShapeId);
+						tempShapeId++;
+					}
+				}
+			}
+
+
+
+			if (skinData != nullptr) 
+			{
+				skinData->clearSkinInfo();
+				{
+					int tempShapeId = 0;
+					for (int mId = 0; mId < model.meshes.size(); mId++)
+					{
+						int primNum = model.meshes[mId].primitives.size();
+
+						for (size_t pId = 0; pId < primNum; pId++)
+						{
+							std::vector<joint> skinJoints;
+
+							if (shape_skinJoint.find(0) != shape_skinJoint.end())
+								skinJoints = shape_skinJoint[tempShapeId];
+
+							if (skinJoints.size())
+							{
+
+								std::vector<Vec4f> weight0;
+								std::vector<Vec4f> weight1;
+
+								std::vector<Vec4f> joint0;
+								std::vector<Vec4f> joint1;
+
+								getVec4ByAttributeName(model, model.meshes[mId].primitives[pId], std::string("WEIGHTS_0"), weight0);//
+
+								getVec4ByAttributeName(model, model.meshes[mId].primitives[pId], std::string("WEIGHTS_1"), weight1);//
+
+								getVertexBindJoint(model, model.meshes[mId].primitives[pId], std::string("JOINTS_0"), joint0, skinJoints);
+
+								getVertexBindJoint(model, model.meshes[mId].primitives[pId], std::string("JOINTS_1"), joint1, skinJoints);
+
+								skinData->pushBack_Data(weight0, weight1, joint0, joint1);
+
+
+							}
+							tempShapeId++;
+						}
+					}
+				}
+
+				for (auto it : shape2VerticeRange)
+				{
+					skinData->skin_VerticeRange[it.first] = it.second;
+				}
+			}
+			
+
+		}
+
+
+		for (int i = 0; i < texMesh->shapes().size(); i++)
+		{
+			auto it = texMesh->shapes()[i];
+
+			updateVertexIdShape(texMesh->shapes()[i]->vertexIndex, texMesh->shapeIds(),i, texMesh->shapes()[i]->vertexIndex.size());
+
+		}
+
+		CArray<int> c_shape_meshId;
+
+		c_shape_meshId.resize(shape_meshId.size());
+
+		//getMeshMatrix
+
+		std::vector<int> MeshNodeIDs;
+
+		for (size_t nId = 0; nId < model.nodes.size(); nId++)
+		{
+			int j = 0;
+
+			if (model.nodes[nId].mesh >= 0)
+			{
+				j++;
+				MeshNodeIDs.push_back(nId);
+			}
+
+		}
+		int maxMeshId;
+		CArray<Mat4f> mesh_Matrix;
+
+		getMeshMatrix(model, MeshNodeIDs, maxMeshId, mesh_Matrix);
+
+		for (auto it : shape_meshId)
+		{
+			c_shape_meshId[it.first] = MeshNodeIDs[it.second];
+		}
+
+		if (d_shape_meshId != nullptr) 
+			d_shape_meshId->assign(c_shape_meshId);
+
+		if (initialPosition != nullptr)
+			initialPosition->assign(vertices);
+
+		if (initialNormal != nullptr)
+			initialNormal->assign(normals);
+
+		texMesh->vertices().assign(vertices);
+		texMesh->normals().assign(normals);
+
+		if (d_mesh_Matrix != nullptr)
+			d_mesh_Matrix->assign(mesh_Matrix);
+
+
+		texMesh->shapeIds().resize(texMesh->vertices().size());
+
+
+
+		// flip UV
+		{
+			std::vector<Vec2f> tempTexCoord;
+			for (auto uv0 : texCoord0)
+			{
+				tempTexCoord.push_back(Vec2f(uv0[0], 1 - uv0[1]));	// uv.v need flip
+			}
+			texMesh->texCoords().assign(tempTexCoord);
+
+
+			tempTexCoord.clear();
+			for (auto uv1 : texCoord1)
+			{
+				tempTexCoord.push_back(Vec2f(uv1[0], 1 - uv1[1]));
+			}
+			texCoord1.clear();
+			tempTexCoord.clear();
+		}
+
+	}
+
+	void loadGLTFMaterial(tinygltf::Model& model, std::shared_ptr<TextureMesh> texMesh, FilePath filename)
+	{
+		const std::vector<tinygltf::Material>& sourceMaterials = model.materials;
+
+		auto& reMats = texMesh->materials();
+		reMats.clear();
+		if (sourceMaterials.size()) //use materials.size()
+		{
+			reMats.resize(sourceMaterials.size());
+		}
+
+
+		std::vector<tinygltf::Texture>& textures = model.textures;
+		std::vector<tinygltf::Image>& images = model.images;
+		dyno::CArray2D<dyno::Vec4f> texture(1, 1);
+		texture[0, 0] = dyno::Vec4f(1);
+
+
+		for (int matId = 0; matId < sourceMaterials.size(); matId++)
+		{
+			auto material = sourceMaterials[matId];
+			auto color = material.pbrMetallicRoughness.baseColorFactor;
+			auto roughness = material.pbrMetallicRoughness.roughnessFactor;
+
+			auto metallic = material.pbrMetallicRoughness.metallicFactor;
+
+			auto colorTexId = material.pbrMetallicRoughness.baseColorTexture.index;
+			auto texCoord = material.pbrMetallicRoughness.baseColorTexture.texCoord;
+
+			reMats[matId] = std::make_shared<Material>();
+			reMats[matId]->baseColor = Vec3f(color[0], color[1], color[2]);
+			reMats[matId]->alpha = color[3];
+			reMats[matId]->metallic = metallic;
+			reMats[matId]->roughness = roughness;
+
+			std::string colorUri = getTexUri(textures, images, colorTexId);
+			std::shared_ptr<ImageLoader> loader = std::make_shared<ImageLoader>();
+
+			if (!colorUri.empty())
+			{
+
+				auto root = filename.path().parent_path();
+				colorUri = (root / colorUri).string();
+
+				if (loader->loadImage(colorUri.c_str(), texture))
+				{
+					reMats[matId]->texColor.assign(texture);
+				}
+			}
+			else
+			{
+				if (reMats[matId]->texColor.size())
+					reMats[matId]->texColor.clear();
+			}
+
+			auto bumpTexId = material.normalTexture.index;
+			auto scale = material.normalTexture.scale;
+			std::string bumpUri = getTexUri(textures, images, bumpTexId);
+
+			if (!bumpUri.empty())
+			{
+				auto root = filename.path().parent_path();
+				bumpUri = (root / bumpUri).string();
+
+				if (loader->loadImage(bumpUri.c_str(), texture))
+				{
+					reMats[matId]->texBump.assign(texture);
+					reMats[matId]->bumpScale = scale;
+				}
+			}
+			else
+			{
+				if (reMats[matId]->texBump.size())
+					reMats[matId]->texBump.clear();
+			}
+
+		}
+
+	}
+
 
 	void getBoundingBoxByName(
 		tinygltf::Model& model,
@@ -371,7 +904,6 @@ namespace dyno
 
 	void getJointsTransformData(
 		const std::vector<int>& all_Joints,
-		std::map<int, std::string>& joint_name,
 		std::vector<std::vector<int>>& joint_child,
 		std::map<int, Quat<float>>& joint_rotation,
 		std::map<int, Vec3f>& joint_scale,
@@ -391,7 +923,6 @@ namespace dyno
 			std::vector<double>& translation = model.nodes[jId].translation;		//length must be 0 or 3
 			std::vector<double>& matrix = model.nodes[jId].matrix;				//length must be 0 or 16
 
-			joint_name[jId] = model.nodes[jId].name;
 			joint_child.push_back(children);
 
 			Mat4f tempT = Mat4f::identityMatrix();
@@ -557,7 +1088,6 @@ namespace dyno
 		std::map<joint, std::vector<int>> nodeId_Dir,
 		std::map<int, std::vector<int>>& meshId_Dir,
 		std::vector<int>& all_Meshs,
-		DArray<int>& d_joints,
 		int& maxJointId
 	)
 	{
@@ -578,7 +1108,6 @@ namespace dyno
 		jointNum = all_Joints.size();
 		meshNum = all_Meshs.size();
 
-		d_joints.assign(all_Joints);
 
 		if (all_Joints.size())
 			maxJointId = *std::max_element(all_Joints.begin(), all_Joints.end());
@@ -643,8 +1172,6 @@ namespace dyno
 		}
 
 	}
-
-
 
 
 	void importAnimation(
@@ -722,35 +1249,34 @@ namespace dyno
 					std::vector<Real> frame_R_Time;
 					std::vector<Real> frame_S_Time;
 
-					//获取关节的变换 output 数据
 					if (target_path == "translation")
 					{
 						getVec3fByIndex(model, output, frame_T_anim);
 						joint_T_f_anim[joint_nodeId] = frame_T_anim;
 
 						getRealByIndex(model, input, frame_T_Time);
-						joint_T_Time[joint_nodeId] = frame_T_Time;	//获取关节的位移时间戳 input data
+						joint_T_Time[joint_nodeId] = frame_T_Time;	
 					}
 					else if (target_path == "scale")
 					{
 						getVec3fByIndex(model, output, frame_S_anim);
 						joint_S_f_anim[joint_nodeId] = frame_S_anim;
 						getRealByIndex(model, input, frame_S_Time);
-						joint_S_Time[joint_nodeId] = frame_S_Time;	//获取关节的位移时间戳 input data
+						joint_S_Time[joint_nodeId] = frame_S_Time;	
 					}
 					else if (target_path == "rotation")
 					{
 						getQuatByIndex(model, output, frame_R_anim);
 						joint_R_f_anim[joint_nodeId] = frame_R_anim;
 						getRealByIndex(model, input, frame_R_Time);
-						joint_R_Time[joint_nodeId] = frame_R_Time;	//获取关节的旋转时间戳 input data
+						joint_R_Time[joint_nodeId] = frame_R_Time;	
 					}
 				}
 			}
 		}
 	}
 
-
+		
 
 	template< typename Coord, typename Vec4f, typename Mat4f, typename Vec2u>
 	__global__ void PointsAnimation(
@@ -862,8 +1388,7 @@ namespace dyno
 		);
 
 	}
-
-	template void skinAnimation<Vec3f, Vec4f , Mat4f, Vec2u>(DArray<Vec3f>& intialPosition,
+	template void skinAnimation<Vec3f, Vec4f, Mat4f, Vec2u>(DArray<Vec3f>& intialPosition,
 		DArray<Vec3f>& worldPosition,
 		DArray<Mat4f>& joint_inverseBindMatrix,
 		DArray<Mat4f>& WorldMatrix,
@@ -878,5 +1403,228 @@ namespace dyno
 
 		Vec2u range
 		);
+
+	template<typename Triangle>
+	__global__ void updateVertexId_Shape(
+		DArray<Triangle> triangle,
+		DArray<uint> ID_shapeId,
+		int shapeId
+	)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= triangle.size()) return;
+
+		ID_shapeId[triangle[pId][0]] = shapeId;
+		ID_shapeId[triangle[pId][1]] = shapeId;
+		ID_shapeId[triangle[pId][2]] = shapeId;
+
+	}
+	template< typename Triangle>
+	void updateVertexIdShape(
+		DArray<Triangle>& triangle,
+		DArray<uint>& ID_shapeId,
+		int& shapeId,
+		int size
+	) 
+	{
+		cuExecute(size,
+			updateVertexId_Shape,
+			triangle,
+			ID_shapeId,
+			shapeId
+		);
+	}
+
+	template void updateVertexIdShape<TopologyModule::Triangle>(DArray<TopologyModule::Triangle>& triangle,
+		DArray<uint>& ID_shapeId,
+		int& shapeId,
+		int size
+		);
+
+
+	template<typename Mat4f, typename Vec3f >
+	__global__ void ShapeTransform(
+		DArray<Vec3f> intialPosition,
+		DArray<Vec3f> worldPosition,
+		DArray<Vec3f> intialNormal,
+		DArray<Vec3f> Normal,
+		DArray<Mat4f> WorldMatrix,
+		DArray<uint> vertexId_shape,
+		DArray<int> shapeId_MeshId
+	)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= intialPosition.size()) return;
+
+		int shape = vertexId_shape[pId];
+
+		int MeshId = shapeId_MeshId[shape];
+
+		Vec4f tempV = Vec4f(intialPosition[pId][0], intialPosition[pId][1], intialPosition[pId][2], 1);
+		Vec4f tempN = Vec4f(intialNormal[pId][0], intialNormal[pId][1], intialNormal[pId][2], 0);
+		if (pId == 1)
+		{
+			auto iP = intialPosition[pId];
+		}
+
+		tempV = WorldMatrix[MeshId] * tempV;
+		tempN = WorldMatrix[MeshId] * tempN;
+
+		worldPosition[pId] = Vec3f(tempV[0], tempV[1], tempV[2]);
+		Normal[pId] = Vec3f(tempN[0], tempN[1], tempN[2]);
+		if (pId == 1)
+		{
+			auto iP = worldPosition[pId];
+		}
+	}
+
+
+	template<typename Mat4f, typename Vec3f >
+	void shapeTransform(
+		DArray<Vec3f>& intialPosition,
+		DArray<Vec3f>& worldPosition,
+		DArray<Vec3f>& intialNormal,
+		DArray<Vec3f>& Normal,
+		DArray<Mat4f>& WorldMatrix,
+		DArray<uint>& vertexId_shape,
+		DArray<int>& shapeId_MeshId
+	) 
+	{
+		cuExecute(intialPosition.size(),
+			ShapeTransform,
+			intialPosition,
+			worldPosition,
+			intialNormal,
+			Normal,
+			WorldMatrix,
+			vertexId_shape,
+			shapeId_MeshId
+		);
+	}
+
+	template void shapeTransform<Mat4f, Vec3f>(DArray<Vec3f>& intialPosition,
+		DArray<Vec3f>& worldPosition,
+		DArray<Vec3f>& intialNormal,
+		DArray<Vec3f>& Normal,
+		DArray<Mat4f>& WorldMatrix,
+		DArray<uint>& vertexId_shape,
+		DArray<int>& shapeId_MeshId
+		);
+
+	template<typename Vec3f>
+	__global__ void  C_SetupPoints(
+		DArray<Vec3f> newPos,
+		DArray<Vec3f> pos,
+		DArray<int> radix
+	)
+	{
+		uint tId = threadIdx.x + blockDim.x * blockIdx.x;
+		if (tId >= pos.size()) return;
+
+		if (tId < pos.size() - 1 && radix[tId] != radix[tId + 1])
+		{
+			newPos[radix[tId]] = pos[tId];
+		}
+		else if (tId == pos.size() - 1 && pos.size() > 2)
+		{
+			if (radix[tId] != radix[tId - 1])
+				newPos[radix[tId]] = pos[tId];
+		}
+
+	}
+
+	template<typename Vec3f>
+	void setupPoints(
+		DArray<Vec3f>& newPos,
+		DArray<Vec3f>& pos,
+		DArray<int>& radix
+	) 
+	{
+		cuExecute(pos.size(),
+			C_SetupPoints,
+			newPos,
+			pos,
+			radix
+		);
+	}
+
+	template void setupPoints<Vec3f>(DArray<Vec3f>& newPos,
+		DArray<Vec3f>& pos,
+		DArray<int>& radix
+		);
+
+	template<typename uint>
+	__global__ void  C_Shape_PointCounter(
+		DArray<int> counter,
+		DArray<uint> point_ShapeIds,
+		uint target
+	)
+	{
+		uint tId = threadIdx.x + blockDim.x * blockIdx.x;
+		if (tId >= point_ShapeIds.size()) return;
+
+		counter[tId] = (point_ShapeIds[tId] == target) ? 1 : 0;
+	}
+
+	template<typename uint>
+	void  Shape_PointCounter(
+		DArray<int>& counter,
+		DArray<uint>& point_ShapeIds,
+		uint& target) 
+	{
+		cuExecute(point_ShapeIds.size(),
+			C_Shape_PointCounter,
+			counter,
+			point_ShapeIds,
+			target
+		);
+	}
+
+	template void Shape_PointCounter <uint>(DArray<int>& counter,
+		DArray<uint>& point_ShapeIds,
+		uint& target
+		);
+
+	template< typename Vec3f, typename uint>
+	__global__ void ShapeToCenter(
+		DArray<Vec3f> iniPos,
+		DArray<Vec3f> finalPos,
+		DArray<uint> shapeId,
+		DArray<Vec3f> t
+	)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= iniPos.size()) return;
+
+		finalPos[pId] = iniPos[pId] - t[shapeId[pId]];
+		Vec4f P = Vec4f(finalPos[pId][0], finalPos[pId][1], finalPos[pId][2], 1);
+
+		finalPos[pId] = Vec3f(P[0], P[1], P[2]);
+
+	}
+
+	template< typename Vec3f, typename uint>
+	void shapeToCenter(
+		DArray<Vec3f>& iniPos,
+		DArray<Vec3f>& finalPos,
+		DArray<uint>& shapeId,
+		DArray<Vec3f>& t
+	) 
+	{
+		cuExecute(finalPos.size(),
+			ShapeToCenter,
+			iniPos,
+			finalPos,
+			shapeId,
+			t
+		);
+	}
+
+	template void shapeToCenter <Vec3f,uint>(DArray<Vec3f>& iniPos,
+		DArray<Vec3f>& finalPos,
+		DArray<uint>& shapeId,
+		DArray<Vec3f>& t
+		);
+
 
 }

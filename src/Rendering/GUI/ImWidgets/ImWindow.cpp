@@ -316,7 +316,7 @@ void ImWindow::draw(RenderWindow* app)
 		
 		// Right Sidebar
 		{
-			ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 50, 30));
+			ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 50, 28));
 
 			ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(36 / 255.0, 36 / 255.0, 36 / 255.0, 255 / 255.0));
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);

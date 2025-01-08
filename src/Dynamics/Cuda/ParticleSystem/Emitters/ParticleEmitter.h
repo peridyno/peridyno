@@ -30,7 +30,7 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 
 		ParticleEmitter();
-		virtual ~ParticleEmitter();
+		~ParticleEmitter() override;
 
 		uint sizeOfParticles() { return mPosition.size(); }
 
@@ -42,9 +42,14 @@ namespace dyno
 	public:
 		DEF_VAR(Real, VelocityMagnitude, 1, "Emitter Velocity");
 		DEF_VAR(Real, SamplingDistance, 0.005, "Emitter Sampling Distance");
+
+		DEF_VAR(Real, Spacing, Real(1), "A variable to control the particle generation frequency");
+
 		//DEF_VAR(Coord, InitialVelocity, Coord(0, -1, 0), "Initial velocity");
 
 	protected:
+		void resetStates() override;
+
 		void updateStates() final;
 		
 		virtual void generateParticles();
@@ -69,5 +74,7 @@ namespace dyno
 	protected:
 		DArray<Coord> mPosition;
 		DArray<Coord> mVelocity;
+
+		Real mTimeInterval = 0;
 	};
 }

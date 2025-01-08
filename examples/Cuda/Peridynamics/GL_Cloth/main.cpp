@@ -47,28 +47,6 @@ std::shared_ptr<SceneGraph> createScene()
 
 	cloth->connect(boundary->importTriangularSystems());
 
-	auto pointRenderer = std::make_shared<GLPointVisualModule>();
-	pointRenderer->setColor(Color(1, 0.2, 1));
-	pointRenderer->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
-	pointRenderer->varPointSize()->setValue(0.002f);
-	cloth->stateTriangleSet()->connect(pointRenderer->inPointSet());
-	cloth->stateVelocity()->connect(pointRenderer->inColor());
-
-	cloth->graphicsPipeline()->pushModule(pointRenderer);
-	cloth->setVisible(true);
-
-	auto wireRenderer = std::make_shared<GLWireframeVisualModule>();
-	wireRenderer->varBaseColor()->setValue(Color(1.0, 0.8, 0.8));
-	wireRenderer->varRadius()->setValue(0.001f);
-	wireRenderer->varRenderMode()->setCurrentKey(GLWireframeVisualModule::CYLINDER);
-	cloth->stateTriangleSet()->connect(wireRenderer->inEdgeSet());
-	cloth->graphicsPipeline()->pushModule(wireRenderer);
-
-	auto surfaceRenderer = std::make_shared<GLSurfaceVisualModule>();
-	cloth->stateTriangleSet()->connect(surfaceRenderer->inTriangleSet());
-	cloth->graphicsPipeline()->pushModule(surfaceRenderer);
-	//cloth->getSurface()->graphicsPipeline()->pushPersistentModule(surfaceRenderer);
-
 	return scn;
 }
 

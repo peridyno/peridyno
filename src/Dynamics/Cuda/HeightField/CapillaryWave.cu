@@ -2,7 +2,8 @@
 
 #include "SceneGraph.h"
 
-#include <Mapping/HeightFieldToTriangleSet.h>
+#include "Mapping/HeightFieldToTriangleSet.h"
+#include "GLSurfaceVisualModule.h"
 
 namespace dyno
 {
@@ -12,6 +13,18 @@ namespace dyno
 	{
 		auto heights = std::make_shared<HeightField<TDataType>>();
 		this->stateHeightField()->setDataPtr(heights);
+
+		auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
+		this->stateHeightField()->connect(mapper->inHeightField());
+		this->graphicsPipeline()->pushModule(mapper);
+
+		// 	mapper->varScale()->setValue(0.1);
+		// 	mapper->varTranslation()->setValue(Vec3f(-2, 0.2, -2));
+
+		auto sRender = std::make_shared<GLSurfaceVisualModule>();
+		sRender->setColor(Color(0, 0.2, 1.0));
+		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+		this->graphicsPipeline()->pushModule(sRender);
 	}
 
 	template<typename TDataType>

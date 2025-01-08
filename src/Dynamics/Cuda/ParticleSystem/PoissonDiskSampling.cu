@@ -162,7 +162,7 @@ namespace dyno
 			this->varBox_a()->setValue(area_a);
 			this->varBox_b()->setValue(area_b);
 
-			m_h = sdf->getH();
+			m_h = sdf->getGridSpacing();
 			m_left = sdf->lowerBound();
 
 			std::cout << "SDF is loaded: " << area_a << ", " << area_b << std::endl;
@@ -212,7 +212,7 @@ namespace dyno
 
 		Real d = 0.0f;
 
-		Coord fp = (p - m_left) * Coord(1.0 / m_h[0], 1.0 / m_h[1], 1.0 / m_h[2]);
+		Coord fp = (p - m_left) * Coord(1.0 / m_h, 1.0 / m_h, 1.0 / m_h);
 		const int i = (int)floor(fp[0]);
 		const int j = (int)floor(fp[1]);
 		const int k = (int)floor(fp[2]);
@@ -308,11 +308,11 @@ namespace dyno
 		area_b = maxPoint + Coord(r * 3);
 		this->varBox_a()->setValue(area_a);
 		this->varBox_b()->setValue(area_b);
-		m_h = inputSDF->getH();
+		m_h = inputSDF->getGridSpacing();
 		m_left = inputSDF->lowerBound();
 
 		host_dist.resize(inputSDF->nx(), inputSDF->ny(), inputSDF->nz());
-		host_dist.assign(inputSDF->getMDistance());
+		host_dist.assign(inputSDF->distances());
 
 		SDF_flag = true;
 

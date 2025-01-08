@@ -7,9 +7,11 @@ namespace dyno
 		: ParametricModel<TDataType>()
 	{
 		this->setForceUpdate(true);
+		this->setAutoHidden(false);
 
 		this->varVelocityMagnitude()->setRange(Real(0), Real(10));
 		this->varSamplingDistance()->setRange(Real(0.001), Real(1.0));
+		this->varSpacing()->setRange(Real(0), Real(2));
 	}
 
 	template<typename TDataType>
@@ -26,9 +28,27 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	void ParticleEmitter<TDataType>::resetStates()
+	{
+		ParametricModel<TDataType>::resetStates();
+
+		mTimeInterval = 0;
+	}
+
+	template<typename TDataType>
 	void ParticleEmitter<TDataType>::updateStates()
 	{
-		this->generateParticles();
+		mPosition.clear();
+		mVelocity.clear();
+
+		Real d = (this->stateElapsedTime()->getValue() - mTimeInterval) * this->varVelocityMagnitude()->getValue();
+
+		if (d > this->varSamplingDistance()->getValue() * this->varSpacing()->getValue())
+		{
+			this->generateParticles();
+
+			mTimeInterval = this->stateElapsedTime()->getValue();
+		}
 	}
 
 	template<typename TDataType>

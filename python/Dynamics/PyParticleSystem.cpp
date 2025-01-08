@@ -37,6 +37,5 @@ void pybind_particle_system(py::module& m)
 	declare_particle_system_helper<dyno::DataType3f>(m, "3f");
 	declare_poisson_disk_sampling<dyno::DataType3f>(m, "3f");
 	declare_poisson_emitter<dyno::DataType3f>(m, "3f");
-	declare_sphere_sampler<dyno::DataType3f>(m, "3f");
 	declare_square_emitter<dyno::DataType3f>(m, "3f");
 }

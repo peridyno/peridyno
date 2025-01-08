@@ -1,4 +1,6 @@
 #include "CircularEmitter.h"
+
+#include "GLWireframeVisualModule.h"
 #include <time.h>
 
 #include <stdlib.h>
@@ -22,6 +24,11 @@ namespace dyno
 		this->varRotation()->attach(callback);
 
 		this->varRadius()->attach(callback);
+
+		auto wireRender = std::make_shared<GLWireframeVisualModule>();
+		wireRender->setColor(Color(0, 1, 0));
+		this->stateOutline()->connect(wireRender->inEdgeSet());
+		this->graphicsPipeline()->pushModule(wireRender);
 	}
 
 	template<typename TDataType>
@@ -62,7 +69,7 @@ namespace dyno
 		{
 			for (Real z = -b; z <= b; z += sampling_distance)
 			{
-				if ((x * x * invA2 + z * z * invB2) < 1 && rand() % 5 == 0)
+				if ((x * x * invA2 + z * z * invB2) < 1)// && rand() % 5 == 0)
 				{
 					Coord p = Coord(x / scale.x, 0, z / scale.z);
 
@@ -123,6 +130,8 @@ namespace dyno
 	template<typename TDataType>
 	void CircularEmitter<TDataType>::resetStates()
 	{
+		ParticleEmitter<TDataType>::resetStates();
+
 		tranformChanged();
 	}
 

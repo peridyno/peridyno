@@ -1,21 +1,28 @@
-//#include <GlfwApp.h>
 #include <QtApp.h>
-#include "SceneGraph.h"
-#include <Log.h>
+#include <SceneGraph.h>
+
+#include <SemiAnalyticalScheme/TriangularMeshBoundary.h>
+#include <StaticTriangularMesh.h>
+#include <PointsLoader.h>
+#include <BasicShapes/SphereModel.h>
+
+#include <DualParticleSystem/DualParticleFluid.h>
+#include <ParticleSystem/MakeParticleSystem.h>
+#include <ParticleSystem/Emitters/PoissonEmitter.h>
+#include "Auxiliary/DataSource.h"
 
 #include <Module/CalculateNorm.h>
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
 #include <ColorMapping.h>
 #include <ImColorbar.h>
-#include "DualParticleSystem/DualParticleFluidSystem.h"
+#include "DualParticleSystem/DualParticleFluid.h"
 #include "ParticleSystem/MakeParticleSystem.h"
 #include <BasicShapes/SphereModel.h>
 #include <SemiAnalyticalScheme/TriangularMeshBoundary.h>
 #include <StaticTriangularMesh.h>
 #include <GLSurfaceVisualModule.h>
-#include "Auxiliary/DataSource.h"
-#include "PointsLoader.h"
+
 using namespace std;
 using namespace dyno;
 
@@ -34,7 +41,7 @@ std::shared_ptr<SceneGraph> createScene()
 	auto initialParticles = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f >>());
 	ptsLoader->outPointSet()->promoteOuput()->connect(initialParticles->inPoints());
 
-	auto fluid = scn->addNode(std::make_shared<DualParticleFluidSystem<DataType3f>>());
+	auto fluid = scn->addNode(std::make_shared<DualParticleFluid<DataType3f>>());
 	fluid->varReshuffleParticles()->setValue(true);
 	initialParticles->connect(fluid->importInitialStates());
 
@@ -51,8 +58,7 @@ std::shared_ptr<SceneGraph> createScene()
 	auto pm_collide = scn->addNode(std::make_shared <TriangularMeshBoundary<DataType3f >>());
 	ball->stateTriangleSet()->connect(pm_collide->inTriangleSet());
 	fluid->connect(pm_collide->importParticleSystems());
-	//fluid->stateVelocity()->connect(pm_collide->inVelocity());
-
+	
 	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
 	fluid->stateVelocity()->connect(calculateNorm->inVec());
 	fluid->graphicsPipeline()->pushModule(calculateNorm);
@@ -77,7 +83,6 @@ std::shared_ptr<SceneGraph> createScene()
 	calculateNorm->outNorm()->connect(colorBar->inScalar());
 	// add the widget to app
 	fluid->graphicsPipeline()->pushModule(colorBar);
-
 
 	auto vpRender = std::make_shared<GLPointVisualModule>();
 	vpRender->setColor(Color(1, 1, 0));

@@ -78,7 +78,7 @@ namespace dyno
 
 		DEF_ARRAY_STATE(Tetrahedron, Tets, DeviceType::GPU, "");
 
-		DEF_ARRAY_STATE(Real, DisranceSDF, DeviceType::GPU, "");
+		//DEF_ARRAY_STATE(Real, DisranceSDF, DeviceType::GPU, "");
 
 		//DEF_ARRAY_STATE(Coord, NormalSDF, DeviceType::GPU, "");
 
@@ -88,7 +88,7 @@ namespace dyno
 
 		virtual void updateRestShape();
 		virtual void updateVolume();
-		std::shared_ptr<DistanceField3D<TDataType>> m_cSDF;
-		DArray<Real> initDistance;
+		//std::shared_ptr<DistanceField3D<TDataType>> m_cSDF;
+		//DArray<Real> initDistance;
 	};
 }

@@ -33,7 +33,7 @@
 #include <ParticleSystem/ParticleFluid.h>
 #include "ParticleSystem/MakeParticleSystem.h"
 
-#include <Samplers/CubeSampler.h>
+#include <Samplers/ShapeSampler.h>
 
 using namespace std;
 using namespace dyno;
@@ -50,11 +50,11 @@ std::shared_ptr<SceneGraph> createScene()
 	cube->varSegments()->setValue(Vec3i(10, 10, 10));
 
 	//Create a sampler
-	auto sampler = scn->addNode(std::make_shared<CubeSampler<DataType3f>>());
+	auto sampler = scn->addNode(std::make_shared<ShapeSampler<DataType3f>>());
 	sampler->varSamplingDistance()->setValue(0.005);
 	sampler->graphicsPipeline()->disable();
 
-	cube->outCube()->connect(sampler->inCube());
+	cube->connect(sampler->importShape());
 
 	auto initialParticles = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
 
@@ -63,14 +63,6 @@ std::shared_ptr<SceneGraph> createScene()
 	//Create a elastoplastic object
 	auto elastoplasticBody = scn->addNode(std::make_shared<ElastoplasticBody<DataType3f>>());	
 	initialParticles->connect(elastoplasticBody->importSolidParticles());
-
-	auto elastoplasticBodyRenderer = std::make_shared<GLPointVisualModule>();
-	elastoplasticBodyRenderer->varPointSize()->setValue(0.005);
-	elastoplasticBodyRenderer->setColor(Color(1, 0.2, 1));
-	elastoplasticBodyRenderer->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
-	elastoplasticBody->statePointSet()->connect(elastoplasticBodyRenderer->inPointSet());
-	elastoplasticBody->stateVelocity()->connect(elastoplasticBodyRenderer->inColor());
-	elastoplasticBody->graphicsPipeline()->pushModule(elastoplasticBodyRenderer);
 
 // 	//Create a surface mesh loader
 // 	auto surfaceMeshLoader = scn->addNode(std::make_shared<SurfaceMeshLoader<DataType3f>>());

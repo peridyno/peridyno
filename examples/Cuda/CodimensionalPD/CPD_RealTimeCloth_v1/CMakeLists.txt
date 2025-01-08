@@ -22,6 +22,7 @@ if(PERIDYNO_LIBRARY_PERIDYNAMICS)
 	    GlfwGUI
         GLRenderEngine
         Interaction
+        UbiGUI
 		)
 
     file(RELATIVE_PATH PROJECT_PATH_REL "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")

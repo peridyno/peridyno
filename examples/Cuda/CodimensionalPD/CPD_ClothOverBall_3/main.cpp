@@ -1,4 +1,4 @@
-#include <GlfwApp.h>
+#include <UbiApp.h>
 #include "Peridynamics/Cloth.h"
 #include <SceneGraph.h>
 #include <Volume/VolumeLoader.h>
@@ -82,7 +82,7 @@ int main()
 {
 	Log::setUserReceiver(&RecieveLogMessage);
 
-	GlfwApp window;
+	UbiApp window(GUIType::GUI_QT);
 	window.setSceneGraph(createScene());
 
 	window.initialize(1024, 768);

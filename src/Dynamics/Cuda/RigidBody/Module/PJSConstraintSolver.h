@@ -20,6 +20,8 @@
 #include "RigidBody/RigidBodyShared.h"
 
 #include "Topology/DiscreteElements.h"
+#include "Collision/Attribute.h"
+#include "Collision/CollisionData.h"
 
 namespace dyno
 {
@@ -86,6 +88,10 @@ namespace dyno
 		DEF_ARRAY_IN(ContactPair, Contacts, DeviceType::GPU, "");
 
 		DEF_INSTANCE_IN(DiscreteElements<TDataType>, DiscreteElements, "");
+
+		DEF_ARRAY_IN(Attribute, Attribute, DeviceType::GPU, "Rigid body attributes");
+
+		DEF_ARRAY_IN(Real, FrictionCoefficients, DeviceType::GPU, "FrictionCoefficients of rigid bodies");
 
 	protected:
 		void constrain() override;

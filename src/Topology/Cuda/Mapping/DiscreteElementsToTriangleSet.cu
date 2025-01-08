@@ -172,15 +172,15 @@ namespace dyno
 		Vec3f orignZ = Vec3f(0, 1, 0);
 		Vec3f newZ = Vec3f(0, h, 0);
 
-		if (v.y >= 1) // 上半球
+		if (v.y >= 1)
 		{
 			vertices[pointOffset + tId] = rot * ((v - orignZ) * r + newZ) + center;
 		}
-		else if (v.y <= -1) // 下半球
+		else if (v.y <= -1) 
 		{
 			vertices[pointOffset + tId] = rot * ((v + orignZ) * r - newZ) + center;
 		}
-		else // 圆柱
+		else
 		{
 			vertices[pointOffset + tId] = rot * (v * Vec3f(r, h, r)) + center;
 		}	

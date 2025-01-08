@@ -18,6 +18,7 @@
 #include "RigidBodyShared.h"
 
 #include "Collision/Attribute.h"
+#include "Collision/CollisionData.h"
 
 #include <vector>
 #include <iostream>
@@ -31,7 +32,6 @@ namespace dyno
 	template<typename TDataType>
 	class RigidBodySystem : virtual public Node
 	{
-		DECLARE_TCLASS(RigidBodySystem, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -177,33 +177,30 @@ namespace dyno
 
 		DEF_INSTANCE_STATE(DiscreteElements<TDataType>, Topology, "Topology");
 
+		DEF_ARRAY_STATE(Real, FrictionCoefficients, DeviceType::GPU, "FrictionCoefficients of rigid bodies");
+
 		/**
-		 * @brief Particle position
+		 * @brief Rigid Mass
 		 */
 		DEF_ARRAY_STATE(Real, Mass, DeviceType::GPU, "Mass of rigid bodies");
 
 		/**
-		 * @brief Particle position
+		 * @brief Rigid Position
 		 */
 		DEF_ARRAY_STATE(Coord, Center, DeviceType::GPU, "Center of rigid bodies");
 
 		/**
-		 * @brief The initial offset of barycenters
-		 */
-		DEF_ARRAY_STATE(Coord, Offset, DeviceType::GPU, "Offset of barycenters");
-
-		/**
-		 * @brief Particle position
+		 * @brief Rigid Velocity
 		 */
 		DEF_ARRAY_STATE(Coord, Velocity, DeviceType::GPU, "Velocity of rigid bodies");
 
 		/**
-		 * @brief Particle position
+		 * @brief Rigid Angular Velocity
 		 */
 		DEF_ARRAY_STATE(Coord, AngularVelocity, DeviceType::GPU, "Angular velocity of rigid bodies");
 
 		/**
-		 * @brief Particle position
+		 * @brief Rigid Rotation
 		 */
 		DEF_ARRAY_STATE(Matrix, RotationMatrix, DeviceType::GPU, "Rotation matrix of rigid bodies");
 

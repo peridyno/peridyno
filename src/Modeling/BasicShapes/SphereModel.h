@@ -23,6 +23,7 @@
 
 #include "Topology/TriangleSet.h"
 #include "Topology/PolygonSet.h"
+#include "STL/Map.h"
 
 namespace dyno
 {
@@ -34,6 +35,8 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
+
+
 
 		SphereModel();
 
@@ -58,6 +61,8 @@ namespace dyno
 
 		DEF_VAR(uint, Longitude, 32, "Longitude");
 
+        DEF_VAR(uint, IcosahedronStep, 1,"Step");
+
 		DEF_INSTANCE_STATE(PolygonSet<TDataType>, PolygonSet, "");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
@@ -69,8 +74,14 @@ namespace dyno
 
 	private:
 		void varChanged();
-	};
 
+		void generateIcosahedron(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles);
+
+		void standardSphere();
+
+		void icosahedronSphere();
+        
+	};
 
 
 	IMPLEMENT_TCLASS(SphereModel, TDataType);

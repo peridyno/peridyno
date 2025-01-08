@@ -2,7 +2,7 @@
 
 #include <SceneGraph.h>
 
-#include <RigidBody/Vechicle.h>
+#include <RigidBody/ConfigurableBody.h>
 
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
@@ -26,6 +26,7 @@
 
 #include "GltfLoader.h"
 #include "BasicShapes/PlaneModel.h"
+#include "RigidBody/MultibodySystem.h"
 
 
 using namespace std;
@@ -36,7 +37,7 @@ std::shared_ptr<SceneGraph> creatCar()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
-	auto configCar = scn->addNode(std::make_shared<ConfigurableVehicle<DataType3f>>());
+	auto configCar = scn->addNode(std::make_shared<ConfigurableBody<DataType3f>>());
 
 	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
 	gltf->varFileName()->setValue(getAssetPath() + "Jeep/JeepGltf/jeep.gltf");
@@ -66,39 +67,44 @@ std::shared_ptr<SceneGraph> creatCar()
 	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("LB", 1), Name_Shape("Body", 5), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
 	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("RF", 2), Name_Shape("Body", 5), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
 	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("RB", 3), Name_Shape("Body", 5), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("BackWheel", 4), Name_Shape("Body", 5), Fixed, Vec3f(1, 0, 0), Vec3f(0), true, 0));
 
 
 	configCar->varVehicleConfiguration()->setValue(configData);
 
 	configCar->varRotation()->setValue(Vec3f(0, 45, 0));
 
-	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
-	plane->varLengthX()->setValue(50);
-	plane->varLengthZ()->setValue(50);
 
-	plane->stateTriangleSet()->connect(configCar->inTriangleSet());
 
 	std::vector<Transform3f> vehicleTransforms;
 
-	vehicleTransforms.push_back(Transform3f(Vec3f(0), Quat1f(0, Vec3f(0, 1, 0)).toMatrix3x3()));
-	vehicleTransforms.push_back(Transform3f(Vec3f(3, 0.5, -1), Quat1f(M_PI, Vec3f(0, 1, 0)).toMatrix3x3()));
-// 	vehicleTransforms.push_back(Transform3f(Vec3f(-3, 0.5, -1), Quat1f(M_PI, Vec3f(0, 1, 0)).toMatrix3x3()));
-// 	vehicleTransforms.push_back(Transform3f(Vec3f(6, 1, -2), Quat1f(0, Vec3f(0, 1, 0)).toMatrix3x3()));
-// 	vehicleTransforms.push_back(Transform3f(Vec3f(-6, 1, -2), Quat1f(0, Vec3f(0, 1, 0)).toMatrix3x3()));
+	vehicleTransforms.push_back(Transform3f(Vec3f(-1,0,0), Quat1f(0, Vec3f(0, 1, 0)).toMatrix3x3()));
+	vehicleTransforms.push_back(Transform3f(Vec3f(5, 0.5, -1), Quat1f(M_PI, Vec3f(0, 1, 0)).toMatrix3x3()));
 
 	configCar->varVehiclesTransform()->setValue(vehicleTransforms);
 
-	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
-	configCar->stateTopology()->connect(mapper->inDiscreteElements());
-	configCar->graphicsPipeline()->pushModule(mapper);
+	auto multibody = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
+	configCar->connect(multibody->importVehicles());
+	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
+	plane->varLengthX()->setValue(50);
+	plane->varLengthZ()->setValue(50);
+	plane->varSegmentX()->setValue(5);
+	plane->varSegmentZ()->setValue(5);
 
-	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Color(0.3f, 0.5f, 0.9f));
-	sRender->setAlpha(0.8f);
-	sRender->setRoughness(0.7f);
-	sRender->setMetallic(3.0f);
-	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
-	configCar->graphicsPipeline()->pushModule(sRender);
+	plane->stateTriangleSet()->connect(configCar->inTriangleSet());
+	plane->stateTriangleSet()->connect(multibody->inTriangleSet());
+
+ 	//auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
+ 	//configCar->stateTopology()->connect(mapper->inDiscreteElements());
+ 	//configCar->graphicsPipeline()->pushModule(mapper);
+ 
+ 	//auto sRender = std::make_shared<GLSurfaceVisualModule>();
+ 	//sRender->setColor(Color(0.3f, 0.5f, 0.9f));
+ 	//sRender->setAlpha(0.8f);
+ 	//sRender->setRoughness(0.7f);
+ 	//sRender->setMetallic(3.0f);
+ 	//mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+ 	//configCar->graphicsPipeline()->pushModule(sRender);
 
 	return scn;
 }

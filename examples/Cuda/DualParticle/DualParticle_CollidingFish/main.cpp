@@ -1,16 +1,17 @@
+
 #include <GlfwApp.h>
-#include "SceneGraph.h"
+#include <SceneGraph.h>
+
+#include <PointsLoader.h>
+
+#include <DualParticleSystem/DualParticleFluid.h>
+#include <ParticleSystem/MakeParticleSystem.h>
+
 #include <Module/CalculateNorm.h>
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
 #include <ColorMapping.h>
 #include <ImColorbar.h>
-#include "DualParticleSystem/DualParticleFluidSystem.h"
-#include "ParticleSystem/MakeParticleSystem.h"
-#include <BasicShapes/CubeModel.h>
-#include <Samplers/CubeSampler.h>
-#include <ParticleSystem/Emitters/SquareEmitter.h>
-#include "PointsLoader.h"
 
 using namespace std;
 using namespace dyno;
@@ -40,7 +41,7 @@ std::shared_ptr<SceneGraph> createScene()
 	initialParticles2->varInitialVelocity()->setValue(Vec3f(0.0f, 0.0f, 1.5f));
 	ptsLoader2->outPointSet()->promoteOuput()->connect(initialParticles2->inPoints());
 
-	auto fluid = scn->addNode(std::make_shared<DualParticleFluidSystem<DataType3f>>());
+	auto fluid = scn->addNode(std::make_shared<DualParticleFluid<DataType3f>>());
 	fluid->varReshuffleParticles()->setValue(true);
 	initialParticles->connect(fluid->importInitialStates());
 	initialParticles2->connect(fluid->importInitialStates());

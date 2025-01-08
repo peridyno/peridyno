@@ -1,6 +1,6 @@
 #include "VolumeOctree.h"
 
-#include "Module/VolumeToTriangleSet.h"
+#include "Module/AdaptiveVolumeToTriangleSet.h"
 
 #include "GLSurfaceVisualModule.h"
 
@@ -10,7 +10,7 @@ namespace dyno
 	VolumeOctree<TDataType>::VolumeOctree()
 		: Node()
 	{
-		auto mapper = std::make_shared<VolumeToTriangleSet<TDataType>>();
+		auto mapper = std::make_shared<AdaptiveVolumeToTriangleSet<TDataType>>();
 		this->stateSDFTopology()->connect(mapper->ioVolume());
 		this->graphicsPipeline()->pushModule(mapper);
 
@@ -27,7 +27,7 @@ namespace dyno
 	template<typename TDataType>
 	std::string VolumeOctree<TDataType>::getNodeType()
 	{
-		return "Volume";
+		return "Adaptive Volume";
 	}
 
 	DEFINE_CLASS(VolumeOctree);

@@ -59,10 +59,6 @@ namespace dyno
 				QAction* art = new QAction(QPixmap(mediaDir + m_tbl.ico[j]), m_tbl.label[j]);
 				m_page->AddAction(QToolButton::DelayedPopup, art);
 
-				if (i == 2 || i == 5 || i == 3) {//add connect event 
-					//connect(art, &QAction::triggered, this, [=]() {addNodeByName(m_tbl.label[j].toStdString() + "<DataType3f>"); });
-				}
-
 				//reoder¹¦ÄÜ
 				if (i == v_IcoAndLabel.size() - 1 && j == 0) {
 					connect(art, &QAction::triggered, this, [=]() {mNodeFlow->flowScene()->reorderAllNodes(); });
@@ -85,7 +81,12 @@ namespace dyno
 				auto qGroup = page->AddGroup("");
 				for (size_t i = 0; i < actions.size(); i++)
 				{
-					QAction* act = new QAction(QPixmap(mediaDir + QString::fromStdString(actions[i]->icon())), QString::fromStdString(actions[i]->caption()));
+					QFontMetrics fontMetrics(this->font());
+					QString caption = QString::fromStdString(actions[i]->caption());
+					QString elide = fontMetrics.elidedText(caption, Qt::ElideRight, 90);
+
+					QAction* act = new QAction(QPixmap(mediaDir + QString::fromStdString(actions[i]->icon())), elide);
+					act->setToolTip(caption);
 					qGroup->AddAction(QToolButton::DelayedPopup, act);
 
 					auto func = actions[i]->action();

@@ -20,18 +20,6 @@
 #include "Topology/TriangleSet.h"
 
 namespace dyno {
-	typedef Vector<unsigned int, 3> Vec3ui;
-	typedef Vector<int, 3> Vec3i;
-
-	typedef CArray3D<unsigned int> CArray3ui;
-	typedef CArray3D<float> CArray3f;
-	typedef CArray3D<int> CArray3i;
-
-	/**
-	 * @brief This is a CPU-based implementation of grid-based signed distance field 
-	 *			(level set) generator for triangle meshes.
-	 * 		  For more details, please refer to Robert Bridson's website (www.cs.ubc.ca/~rbridson).
-	 */
 	template<typename TDataType>
 	class VolumeGenerator : public Volume<TDataType>
 	{
@@ -44,33 +32,16 @@ namespace dyno {
 		VolumeGenerator();
 		~VolumeGenerator() override;
 
-		void loadClosedSurface();
+		DEF_VAR(Real, Spacing, 0.05f, "");
 
-		void load(std::string filename);
-//		void updateVolume() override;
-
-	protected:
-		void resetStates() override;
+		DEF_VAR(uint, Padding, 10, "");
 
 	public:
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
 
-		DEF_INSTANCE_OUT(LevelSet<TDataType>, GenSDF, "");
+		DEF_INSTANCE_OUT(LevelSet<TDataType>, LevelSet, "");
 
-		DEF_VAR_IN(Real, Spacing, "");
-
-		DEF_VAR_IN(uint, Padding, "");
-	public:
-		void makeLevelSet();
-
-		CArray<Vec3ui> faceList;
-		CArray<Coord> vertList;
-		
-		int ni;
-		int nj;
-		int nk;
-		Vec3f origin;
-		Vec3f maxPoint;
-		CArray3f phi; 
+	protected:
+		void resetStates() override;
 	};
 }
