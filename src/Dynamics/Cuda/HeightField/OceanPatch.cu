@@ -8,6 +8,8 @@
 
 #include "GLSurfaceVisualModule.h"
 
+#include "Math/Lerp.h"
+
 #include <math_constants.h>
 
 #include <fstream>
@@ -51,7 +53,7 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(mapper);
 
 		auto sRender = std::make_shared<GLSurfaceVisualModule>();
-		sRender->setColor(Color::Blue1());
+		sRender->varBaseColor()->setValue(Color::Blue1());
 		sRender->varUseVertexNormal()->setValue(true);
 		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(sRender);
@@ -253,7 +255,7 @@ namespace dyno
         mHt.resize(res, res);
         mDxt.resize(res, res);
         mDzt.resize(res, res);
-        this->stateDisplacement()->resize(res, res);
+        mDisp.resize(res, res);
 
         auto topo = this->stateHeightField()->getDataPtr();
         Real h = this->varPatchSize()->getValue() / res;
@@ -296,7 +298,7 @@ namespace dyno
 
         cuExecute2D(make_uint2(res, res),
             O_UpdateDisplacement,
-            this->stateDisplacement()->getData(),
+            mDisp,
             mHt,
             mDxt,
             mDzt,
@@ -310,6 +312,9 @@ namespace dyno
 
         auto topo = this->stateHeightField()->getDataPtr();
 
+        auto h = topo->getGridSpacing();
+        auto origin = topo->getOrigin();
+
         auto& shifts = topo->getDisplacement();
 
         uint2 extent;
@@ -318,7 +323,9 @@ namespace dyno
         cuExecute2D(extent,
             CW_UpdateHeightDisp,
             shifts,
-            this->stateDisplacement()->getData(),
+            mDisp,
+            origin,
+            h,
             choppiness);
 
        // topo->rasterize();
@@ -345,24 +352,29 @@ namespace dyno
         }
     }
 
-    template <typename Coord>
+    template <typename Real, typename Coord>
     __global__ void CW_UpdateHeightDisp(
-        DArray2D<Coord> displacement,
+        DArray2D<Coord> heights,
         DArray2D<Coord> dis,
-        float choppiness)
+        Coord origin,
+        Real h,
+        Real choppiness)
     {
         unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
         unsigned int j = blockIdx.y * blockDim.y + threadIdx.y;
-        if (i < displacement.nx() && j < displacement.ny())
+        if (i < heights.nx() && j < heights.ny())
         {
-            Coord Dij = dis(i, j);
+            Real x = (i * h - origin.x) / h;
+            Real y = (j * h - origin.y) / h;
+
+            Coord Dij = bilinear(dis, x, y, LerpMode::REPEAT);
 
             Coord v;
             v[0] = choppiness * Dij[0];
             v[1] = Dij[1];
             v[2] = choppiness * Dij[2];
 
-            displacement(i, j) = v;
+            heights(i, j) = v;
         }
     }
 

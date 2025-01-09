@@ -446,8 +446,9 @@ namespace dyno
 		if (s.items.empty())
 			return;
 
-		emit this->nodeSelected(s.items[0].node);
-
+		//Disable node selection as simulation is started.
+		if(PSimulationThread::instance()->isPaused())
+			emit this->nodeSelected(s.items[0].node);
 	}
 
 	void POpenGLWidget::updateGrpahicsContext()

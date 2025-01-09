@@ -268,7 +268,10 @@ namespace dyno
 		{
 		public:
 			void process(Node* node) override {
-				node->graphicsPipeline()->update();
+				if (node->isVisible())
+				{
+					node->graphicsPipeline()->update();
+				}
 			}
 		};
 

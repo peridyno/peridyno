@@ -65,6 +65,9 @@ namespace dyno
 		);
 
 		this->varTextureMeshName()->attach(textureMeshLoader);
+
+		this->varDensity()->setValue(150.0f);
+		this->varBarycenterOffset()->setValue(Vec3f(0.0f, 0.0f, -0.5f));
 	}
 
 	template<typename TDataType>

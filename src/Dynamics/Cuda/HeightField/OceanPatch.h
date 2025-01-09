@@ -65,9 +65,7 @@ namespace dyno {
         DEF_VAR(Real, TimeScale, Real(1), "");
 
     public:
-        DEF_ARRAY2D_STATE(Coord, Displacement, DeviceType::GPU, "");
-
-        DEF_INSTANCE_STATE(HeightField<TDataType>, HeightField, "Topology");
+        DEF_INSTANCE_STATE(HeightField<TDataType>, HeightField, "Height field");
 
     protected:
         void resetStates() override;
@@ -85,6 +83,8 @@ namespace dyno {
 
         DArray2D<Complex> mDxt;  //x-axis offset
         DArray2D<Complex> mDzt;  //z-axis offset
+
+        DArray2D<Coord> mDisp;   //xyz-axis offset
 
         const Real g = 9.81f;          //Gravity
 

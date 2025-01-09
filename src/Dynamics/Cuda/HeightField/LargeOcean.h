@@ -16,7 +16,10 @@
 #pragma once
 #include "OceanBase.h"
 
+#include "FilePath.h"
+
 #include "Topology/TriangleSet.h"
+#include "Topology/HeightField.h"
 
 namespace dyno
 {
@@ -26,23 +29,32 @@ namespace dyno
 		DECLARE_TCLASS(LargeOcean, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
-		typedef typename TDataType::Coord Coord;
+		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename Vector<Real, 3> Coord3D;
+		typedef typename Vector<Real, 4> Coord4D;
 
 		LargeOcean();
 		~LargeOcean() override;
 
 	public:
+		DEF_VAR(FilePath, FileName, "", "File name for the ocean mesh");
+
+	public:
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "Topology");
 
-		DEF_ARRAY_STATE(Vec2f, TexCoord, DeviceType::GPU, "");
+		DEF_ARRAY_STATE(Coord2D, TexCoord, DeviceType::GPU, "");
 
-		DEF_ARRAY_STATE(TopologyModule::Triangle, TexCoordIndex, DeviceType::GPU, "");
+		DEF_ARRAY2D_STATE(Coord4D, BumpMap, DeviceType::GPU, "");
 
-		DEF_ARRAY2D_STATE(Vec4f, BumpMap, DeviceType::GPU, "");
+		DEF_INSTANCE_STATE(HeightField<TDataType>, HeightField, "");
 
 	protected:
 		void resetStates() override;
+
 		void updateStates() override;
+
+	private:
+		std::string mFileName;
 	};
 
 	IMPLEMENT_TCLASS(LargeOcean, TDataType)

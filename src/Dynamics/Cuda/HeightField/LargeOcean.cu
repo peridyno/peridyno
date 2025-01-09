@@ -1,5 +1,9 @@
 #include "LargeOcean.h"
 
+#include "Module/ApplyBumpMap2TriangleSet.h"
+
+#include "GLSurfaceVisualModule.h"
+
 namespace dyno
 {
 	template<typename TDataType>
@@ -7,10 +11,21 @@ namespace dyno
 		: OceanBase<TDataType>()
 	{
 		auto ts = std::make_shared<TriangleSet<TDataType>>();
-
-		ts->loadObjFile(getAssetPath() + "ocean/OceanPlane.obj");
-
 		this->stateTriangleSet()->setDataPtr(ts);
+
+		//Set default mesh
+		this->varFileName()->setValue(getAssetPath() + "ocean/OceanPlane.obj");
+
+		auto mapper = std::make_shared<ApplyBumpMap2TriangleSet<DataType3f>>();
+		this->stateTriangleSet()->connect(mapper->inTriangleSet());
+		this->stateHeightField()->connect(mapper->inHeightField());
+		this->graphicsPipeline()->pushModule(mapper);
+
+		auto sRender = std::make_shared<GLSurfaceVisualModule>();
+		sRender->setColor(Color(0, 0.2, 1.0));
+		sRender->varUseVertexNormal()->setValue(true);
+		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
+		this->graphicsPipeline()->pushModule(sRender);
 	}
 
 	template<typename TDataType>
@@ -66,13 +81,19 @@ namespace dyno
 	{
 		auto patch = this->getOceanPatch();
 
-		auto& disp = patch->stateDisplacement()->constData();
+		auto& topo = patch->stateHeightField()->constDataPtr();
+		auto& disp = topo->getDisplacement();
 
 		auto ts = this->stateTriangleSet()->constDataPtr();
 
-		this->stateTexCoord()->resize(ts->getPointSize());
-		this->stateTexCoordIndex()->assign(ts->getTriangles());
+		auto name = this->varFileName()->getValue().string();
+		if (name != mFileName)
+		{
+			ts->loadObjFile(name);
+			mFileName = name;
+		}
 
+		this->stateTexCoord()->resize(ts->getPointSize());
 		this->stateBumpMap()->resize(disp.nx(), disp.ny());
 
 		cuExecute(ts->getPointSize(),
@@ -84,19 +105,14 @@ namespace dyno
 			LO_UpdateBumpMap,
 			this->stateBumpMap()->getData(),
 			disp);
+
+		this->stateHeightField()->setDataPtr(topo);
 	}
 
 	template<typename TDataType>
 	void LargeOcean<TDataType>::updateStates()
 	{
-		auto patch = this->getOceanPatch();
-
-		auto& disp = patch->stateDisplacement()->constData();
-
-		cuExecute2D(make_uint2(disp.nx(), disp.ny()),
-			LO_UpdateBumpMap,
-			this->stateBumpMap()->getData(),
-			disp);
+		this->stateHeightField()->tick();
 	}
 
 	DEFINE_CLASS(LargeOcean);

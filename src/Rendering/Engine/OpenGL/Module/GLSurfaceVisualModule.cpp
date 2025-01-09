@@ -164,7 +164,7 @@ namespace dyno
 #ifdef CUDA_BACKEND
 			//TODO: optimize the performance
 			if (this->inNormal()->isEmpty()) {
-				triSet->update();
+				//triSet->update();
 				auto normals = triSet->getVertexNormals();
 				mNormal.load(normals);
 			}
