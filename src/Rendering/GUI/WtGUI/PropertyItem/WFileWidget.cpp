@@ -104,7 +104,8 @@ void WFileWidget::updateField()
 		return;
 	}
 	auto path = f->getValue();
-	std::string filePath = getAssetPath() + mfilename->text().toUTF8();
+	std::string filePath = getAssetPath() + "WebUploadFiles/" + mfilename->text().toUTF8();
+	std::cout << filePath << std::endl;
 	if (hasFile(filePath))
 	{
 		path.set_path(filePath);

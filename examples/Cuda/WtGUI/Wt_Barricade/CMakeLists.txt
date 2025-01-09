@@ -7,6 +7,7 @@ set(LIB_DEPENDENCY
     DualParticleSystem
     SemiAnalyticalScheme
     Multiphysics
+    ObjIO
     WtGUI
 )
 add_example(Wt_Barricade WtGUI LIB_DEPENDENCY)

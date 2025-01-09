@@ -156,7 +156,7 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 
 		});
 
-	auto hide = menu->addItem(">>", 0);
+	auto hide = menu->addItem("<<", 0);
 	hide->select();
 	hide->clicked().connect([=]() {
 		menu->contentsStack()->setCurrentWidget(0);

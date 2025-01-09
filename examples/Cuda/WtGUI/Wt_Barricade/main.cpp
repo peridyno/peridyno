@@ -38,6 +38,10 @@
 #include "initializeModeling.h"
 #include "initializeIO.h"
 
+#include "ObjIO/initializeObjIO.h"
+#include "ObjIO/ObjLoader.h"
+
+
 using namespace dyno;
 
 std::shared_ptr<SceneGraph> createScene()
@@ -63,6 +67,7 @@ int main(int argc, char** argv)
 	Volume::initStaticPlugin();
 	Multiphysics::initStaticPlugin();
 	dynoIO::initStaticPlugin();
+	ObjIO::initStaticPlugin();
 
 	WtApp app;
 
