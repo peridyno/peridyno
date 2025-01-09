@@ -39,7 +39,7 @@ namespace dyno
 
 		if (field->parent()->findOutputField(field))
 		{
-			checkbox->setChecked(true);;
+			checkbox->setChecked(true);
 		}
 		else
 		{
@@ -48,6 +48,9 @@ namespace dyno
 
 		//TODO: use another way
 		connect(checkbox, SIGNAL(stateChanged(int)), this, SLOT(tagAsOuput(int)));
+
+		//Disable the callback function for state fields
+		this->clearCallBackFunc();
 	}
 
 	void QStateFieldWidget::tagAsOuput(int status)
