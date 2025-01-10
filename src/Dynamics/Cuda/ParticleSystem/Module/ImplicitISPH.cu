@@ -272,7 +272,24 @@ namespace dyno
 
 				//sum += mass * g_ij.dot(SumDijPj[pId] - Dii[j] * pressures[j] - (SumDijPj[j] - d_ji * pressures[pId] ));
 
-				sum += mass * g_ij.dot(SumDijPj[pId] - Dii[j] * pressures[j] - (SumDijPj[j]));
+				//Coord sumDjkPk = SumDijPj[j];
+				Coord sumDjkPk(0);
+
+				List<int>& list_j = neighbors[j];
+				for (int nj = 0; nj < list_j.size(); nj++)
+				{
+					int k = list_i[nj];
+					Real r_jk = (posArr[j] - posArr[k]).norm();
+					if (r_jk > EPSILON && k != pId)
+					{
+						Coord g_jk = gradient(r_jk, smoothingLength, scale) * (posArr[j] - posArr[k]) * (1.0f / r_jk);
+						d_jk = (-dt * dt * mass / (rhoArr[k] * rhoArr[k])) * g_jk;
+
+						sumDjkPk += d_jk * pressures[k];
+					}
+				}
+
+				sum += mass * g_ij.dot(SumDijPj[pId] - Dii[j] * pressures[j] - sumDjkPk);
 			}
 
 		}
@@ -371,13 +388,16 @@ namespace dyno
 
 		int itNum = this->varIterationNumber()->getValue();
 
-		Real error_max = takeOneIteration();
-		Real error = error_max;
+		mOldPressrue.reset();
+		mPressrue.reset();
 
-		while ((error / error_max * 100.0f >= 1.0f) && (it++ < itNum))
+// 		Real error_max = takeOneIteration();
+// 		Real error = error_max;
+
+		while ( (it++ < itNum))
 		{
-			error = takeOneIteration();
-			std::cout << "Residual: " << error / error_max * 100.0f << "%" << std::endl;
+			takeOneIteration();
+			//std::cout << "Residual: " << error / error_max * 100.0f << "%" << std::endl;
 		}
 
 		updateVelocity();
@@ -442,18 +462,18 @@ namespace dyno
 
 		mOldPressrue.assign(mPressrue);
 	
-		cuFirstOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
-			IISPH_Sum_DijDotPjInPPE,
-			mSumDijPj,
-			mPressrue,
-			this->inPosition()->getData(),
-			mSummation->outDensity()->getData(),
-			this->inNeighborIds()->getData(),
-			this->inTimeStep()->getValue(),
-			rho_0,
-			mSummation->getParticleMass(),
-			this->inSmoothingLength()->getValue()
-		);
+// 		cuFirstOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
+// 			IISPH_Sum_DijDotPjInPPE,
+// 			mSumDijPj,
+// 			mPressrue,
+// 			this->inPosition()->getData(),
+// 			mSummation->outDensity()->getData(),
+// 			this->inNeighborIds()->getData(),
+// 			this->inTimeStep()->getValue(),
+// 			rho_0,
+// 			mSummation->getParticleMass(),
+// 			this->inSmoothingLength()->getValue()
+// 		);
 
 		cuFirstOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
 			IISPH_AnDotPnInPPE,
@@ -481,9 +501,9 @@ namespace dyno
 			this->varRelaxedOmega()->getValue()
 		);
 
-		auto m_reduce = Reduction<Real>::Create(num);
-		Real error = m_reduce->average(m_Residual.begin(), num) / num;
-		return error;
+// 		auto m_reduce = Reduction<Real>::Create(num);
+// 		Real error = m_reduce->average(m_Residual.begin(), num) / num;
+		return 0;
 
 	}
 

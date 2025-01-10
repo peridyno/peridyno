@@ -123,7 +123,7 @@ namespace dyno
 		}
 		Real rho_i = rhoArr[pId] > rest_density ? rhoArr[pId] : rest_density;
 
-		if (nbSize < 10) div_i = 0;
+		//if (nbSize < 10) div_i = 0;
 
 		p_rhoArr[pId] = rho_i + dt * div_i;
 
@@ -240,12 +240,11 @@ namespace dyno
 				Coord g = gradient(r, smoothingLength, scale) * (pos_i - posArr[j]) * (1.0f / r);
 				{
 					//d_velo += mass * (KappaArr[pId] / rhoArr[pId] + KappaArr[j] / rhoArr[j]) * g;
-					d_velo += mass * (KappaArr[pId] / (rhoArr[pId] * rhoArr[pId]) + KappaArr[j] / (rhoArr[j] * rhoArr[j]) ) * g;
+					d_velo += mass * (KappaArr[pId] / (rhoArr[pId]) + KappaArr[j] / (rhoArr[j]) ) * g;
 				}
 			}
 		}
-		veloArr[pId] -= dt * d_velo * rhoArr[pId];
-
+		veloArr[pId] -= dt * d_velo;
 	}
 
 	template<typename TDataType>
@@ -285,9 +284,8 @@ namespace dyno
 			Real v_err = 10000.0f;
 			while ((v_err > this->varDivergenceErrorThreshold()->getValue()) && (it < MaxItNum))
 			{
-				it++;
 				v_err = abs(this->takeOneDivergenIteration()) / this->varRestDensity()->getValue();
-				std::cout << "Divergence Error: " << v_err << std::endl;
+				it++;
 			}
 		}
 
@@ -295,11 +293,10 @@ namespace dyno
 		if (this->varDensitySolverDisabled()->getValue() == false)
 		{
 			Real d_err = 10000.0f;
-			while ((d_err > this->varDensityErrorThreshold()->getValue()) && (it < MaxItNum))
+			while ((it < MaxItNum))
 			{
-				it++;
 				d_err = abs(this->takeOneDensityIteration());
-				std::cout << "Density Error: " << d_err << std::endl;
+				it++;
 			}
 		}
 	}
@@ -329,6 +326,8 @@ namespace dyno
 		Real dt = this->inTimeStep()->getData();
 		int num = this->inPosition()->size();
 		Real rho_0 = this->varRestDensity()->getValue();
+
+		mSummation->update();
 
 		cuFirstOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
 			DFSPH_DensityPredict,
@@ -367,11 +366,11 @@ namespace dyno
 			this->inSmoothingLength()->getValue()
 		);
 
-	   auto m_reduce = Reduction<Real>::Create(num);
-	   Real avr_pdensity = m_reduce->average(mPredictDensity.begin(), num);
-	   Real err = (avr_pdensity - rho_0) / rho_0;
-	   delete m_reduce;
-	   return err;
+// 	   auto m_reduce = Reduction<Real>::Create(num);
+// 	   Real avr_pdensity = m_reduce->average(mPredictDensity.begin(), num);
+// 	   Real err = (avr_pdensity - rho_0) / rho_0;
+// 	   delete m_reduce;
+	   return 0;
 	}
 
 	template<typename TDataType>
