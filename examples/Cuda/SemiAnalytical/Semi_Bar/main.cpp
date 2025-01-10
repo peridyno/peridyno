@@ -412,6 +412,7 @@ std::shared_ptr<SceneGraph> createScene()
 		//instanceRender->inTriangleSet()->allocate();
 		std::shared_ptr<TriangleSet<DataType3f>> triSet = std::make_shared<TriangleSet<DataType3f>>();
 		triSet->loadObjFile(getAssetPath() + "standard/standard_icosahedron.obj");
+		triSet->scale(1.5);
 		instanceRender->inTriangleSet()->setDataPtr(triSet);
 
 		sfi->graphicsPipeline()->pushModule(instanceRender);

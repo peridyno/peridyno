@@ -3,6 +3,7 @@ if(PERIDYNO_QT_GUI AND PERIDYNO_LIBRARY_RIGIDBODY)
         RigidBody
         Modeling
         QtGUI
+        HeightField
         SkeletonLoader
         ObjIO)
     add_example(Qt_ConfigurationQuadruped RigidBody LIB_DEPENDENCY)
