@@ -85,7 +85,7 @@ public:
 std::shared_ptr<SceneGraph> creatScene();
 void importOtherModel(std::shared_ptr<SceneGraph> scn);
 
-float total_scale = 6;
+float total_scale = 8;
 
 std::shared_ptr<SceneGraph> creatScene()
 {
@@ -109,17 +109,11 @@ std::shared_ptr<SceneGraph> creatScene()
 	Vec3f anglurVel = Vec3f(100,0,0); 
 	Vec3f scale = Vec3f(0.4,0.4,0.4);
 
-// 	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
-// 	gltf->setVisible(false);
-// 	gltf->varFileName()->setValue(getAssetPath() + "Jeep/JeepGltf/jeep.gltf");
-
 
 	auto jeep = scn->addNode(std::make_shared<Jeep<DataType3f>>());
 
 	auto multibody = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
 	jeep->connect(multibody->importVehicles());
-
-	//gltf->stateTextureMesh()->connect(jeep->inTextureMesh());
 
 	auto gltfRoad = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
 	gltfRoad->varFileName()->setValue(getAssetPath() + "gltf/Road_Gltf/Road_Tex.gltf");
@@ -135,6 +129,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	jeep->stateCenter()->connect(transformer->inCenter());
 	jeep->stateBindingPair()->connect(transformer->inBindingPair());
 	jeep->stateBindingTag()->connect(transformer->inBindingTag());
+	jeep->stateRotationMatrix()->connect(transformer->inRotationMatrix());
 	jeep->stateInstanceTransform()->connect(transformer->inInstanceTransform());
 	jeep->animationPipeline()->pushModule(transformer);
 
@@ -142,7 +137,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	jeep->stateTextureMesh()->connect(texMeshConverter->inTextureMesh());
 	transformer->outInstanceTransform()->connect(texMeshConverter->inTransform());
 	jeep->animationPipeline()->pushModule(texMeshConverter);
-	jeep->varLocation()->setValue(Vec3f(0,0,-2.9));
+	jeep->varLocation()->setValue(Vec3f(0,0.329f,-2.9f));
 
 	auto tsMerger = scn->addNode(std::make_shared<MergeTriangleSet<DataType3f>>());
 	//texMeshConverter->outTriangleSet()->connect(tsMerger->inFirst());
@@ -231,8 +226,9 @@ std::shared_ptr<SceneGraph> creatScene()
 
 	//Create a boundary
 	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
-	cubeBoundary->varLocation()->setValue(Vec3f(0.0f, 1.0f, 2.4f));
-	cubeBoundary->varLength()->setValue(Vec3f(9.2f, 2.0f, 19.2f));
+	cubeBoundary->varLocation()->setValue(Vec3f(0.0f, 3.006f, 3.476f));
+	cubeBoundary->varScale()->setValue(Vec3f(1.0f, 1.0f, 0.875f));
+	cubeBoundary->varLength()->setValue(Vec3f(9.2f, 6.0f, 19.200f));
 	cubeBoundary->setVisible(false);
 
 	auto cube2vol = scn->addNode(std::make_shared<BasicShapeToVolume<DataType3f>>());
