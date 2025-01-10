@@ -471,6 +471,48 @@ void declare_vector_visual_node(py::module& m, std::string typestr) {
 		.value("Arrow", Class::LineMode::Arrow);
 }
 
+#include "Samplers/PoissonPlane.h"
+template <typename TDataType>
+void declare_poisson_plane(py::module& m, std::string typestr) {
+	using Class = dyno::PoissonPlane<TDataType>;
+	using Parent = dyno::ComputeModule;
+	std::string pyclass_name = std::string("PoissonPlane") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("construct_grid", &Class::ConstructGrid)
+		.def("collision_judge", &Class::collisionJudge)
+		.def("var_sampling_distance", &Class::varSamplingDistance, py::return_value_policy::reference)
+		.def("var_upper", &Class::varUpper, py::return_value_policy::reference)
+		.def("var_lower", &Class::varLower, py::return_value_policy::reference)
+		.def("compute", &Class::compute)
+		.def("get_points", &Class::getPoints);
+}
+
+#include "Samplers/Sampler.h"
+template <typename TDataType>
+void declare_sampler(py::module& m, std::string typestr) {
+	using Class = dyno::Sampler<TDataType>;
+	using Parent = dyno::Node;
+	std::string pyclass_name = std::string("Sampler") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		//DEF_INSTANCE_STATE
+		.def("state_point_set", &Class::statePointSet, py::return_value_policy::reference);
+}
+
+#include "Samplers/ShapeSampler.h"
+template <typename TDataType>
+void declare_cube_sampler(py::module& m, std::string typestr) {
+	using Class = dyno::ShapeSampler<TDataType>;
+	using Parent = dyno::Sampler<TDataType>;
+	std::string pyclass_name = std::string("CubeSampler") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		//DEF_VAR
+		.def("var_sampling_distance", &Class::varSamplingDistance, py::return_value_policy::reference)
+		//DEF_VAR_IN
+		.def("import_shape", &Class::importShape, py::return_value_policy::reference);
+}
 void declare_modeling_initializer(py::module& m);
 
 void pybind_modeling(py::module& m);

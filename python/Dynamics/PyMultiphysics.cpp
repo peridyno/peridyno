@@ -9,11 +9,11 @@ void declare_multiphysics_initializer(py::module& m) {
 		.def("instance", &Class::instance);
 }
 
-
-
 void pybind_multiphysics(py::module& m)
 {
-	declare_volume_boundary<dyno::DataType3f>(m, "3f");
 	declare_adaptive_boundary<dyno::DataType3f>(m, "3f");
+	declare_compute_surface_level_set<dyno::DataType3f>(m, "3f");
+	declare_particle_skinning<dyno::DataType3f>(m, "3f");
+	declare_volume_boundary<dyno::DataType3f>(m, "3f");
 	declare_multiphysics_initializer(m);
 }

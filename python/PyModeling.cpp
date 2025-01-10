@@ -34,6 +34,9 @@ void pybind_modeling(py::module& m) {
 	declare_transform_model<dyno::DataType3f>(m, "3f");
 	declare_turning_model<dyno::DataType3f>(m, "3f");
 	declare_vector_visual_node<dyno::DataType3f>(m, "3f");
+	declare_poisson_plane<dyno::DataType3f>(m, "3f");
+	declare_sampler<dyno::DataType3f>(m, "3f");
+	declare_cube_sampler<dyno::DataType3f>(m, "3f");
 
 	declare_modeling_initializer(m);
 

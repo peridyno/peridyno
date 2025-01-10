@@ -30,6 +30,7 @@ void declare_dual_particle_isph_module(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("DualParticleIsphModule") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
+		.def("constrain", &Class::constrain)
 		.def("var_rest_density", &Class::varRestDensity, py::return_value_policy::reference)
 		.def("var_sampling_distance", &Class::varSamplingDistance, py::return_value_policy::reference)
 		.def("var_smoothing_length", &Class::varSmoothingLength, py::return_value_policy::reference)
@@ -49,6 +50,44 @@ void declare_dual_particle_isph_module(py::module& m, std::string typestr) {
 		.def("var_residual_threshold", &Class::varResidualThreshold, py::return_value_policy::reference);
 }
 
+#include "DualParticleSystem/Module/EnergyAnalysis.h"
+template <typename TDataType>
+void declare_energy_analyish(py::module& m, std::string typestr)
+{
+	using Class = dyno::EnergyAnalysis<TDataType>;
+	using Parent = dyno::ConstraintModule;
+	std::string pyclass_name = std::string("EnergyAnalysis") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("constrain", &Class::constrain)
+		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
+		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("in_neighbor_ids", &Class::inNeighborIds, py::return_value_policy::reference)
+		.def("initialize_impl", &Class::initializeImpl)
+		.def("set_name_prefix", &Class::setNamePrefix)
+		.def("set_output_path", &Class::setOutputPath);
+}
+
+#include "DualParticleSystem/Module/PaticleUniformAnalysis.h"
+template <typename TDataType>
+void declare_paticle_uniform_analysis(py::module& m, std::string typestr)
+{
+	using Class = dyno::PaticleUniformAnalysis<TDataType>;
+	using Parent = dyno::ConstraintModule;
+	std::string pyclass_name = std::string("PaticleUniformAnalysis") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
+		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("in_neighbor_ids", &Class::inNeighborIds, py::return_value_policy::reference)
+		.def("constrain", &Class::constrain)
+		.def("initialize_impl", &Class::initializeImpl)
+		.def("set_name_prefix", &Class::setNamePrefix)
+		.def("set_output_path", &Class::setOutputPath)
+		.def("in_smoothing_length", &Class::inSmoothingLength, py::return_value_policy::reference)
+		.def("in_sampling_distance", &Class::inSamplingDistance, py::return_value_policy::reference);
+}
+
 #include "DualParticleSystem/Module/VirtualParticleGenerator.h"
 template <typename TDataType>
 void declare_virtual_particle_generator(py::module& m, std::string typestr) {
@@ -57,6 +96,18 @@ void declare_virtual_particle_generator(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("VirtualParticleGenerator") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def("out_virtual_particles", &Class::outVirtualParticles, py::return_value_policy::reference);
+}
+
+#include "DualParticleSystem/Module/VirtualColocationStrategy.h"
+template <typename TDataType>
+void declare_virtual_colocation_strategy(py::module& m, std::string typestr) {
+	using Class = dyno::VirtualColocationStrategy<TDataType>;
+	using Parent = dyno::VirtualParticleGenerator<TDataType>;
+	std::string pyclass_name = std::string("VirtualColocationStrategy") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("constrain", &Class::constrain)
+		.def("in_r_position", &Class::inRPosition, py::return_value_policy::reference);
 }
 
 #include "DualParticleSystem/Module/VirtualParticleShiftingStrategy.h"
@@ -99,10 +150,10 @@ void declare_virtual_spatially_adaptive_strategy(py::module& m, std::string type
 	VSAS.def(py::init<>())
 		.def("constrain", &Class::constrain)
 		.def("set_hash_grid_size", &Class::setHashGridSize)
+		.def("var_candidate_point_count", &Class::varCandidatePointCount, py::return_value_policy::reference)
 		.def("var_rest_density", &Class::varRestDensity, py::return_value_policy::reference)
 		.def("var_sampling_distance", &Class::varSamplingDistance, py::return_value_policy::reference)
 		.def("in_r_position", &Class::inRPosition, py::return_value_policy::reference);
-	//.def("var_candidate_point_count", &Class::varCandidatePointCount py::return_value_policy::reference);
 }
 
 void declare_dual_particle_system_initializer(py::module& m);
