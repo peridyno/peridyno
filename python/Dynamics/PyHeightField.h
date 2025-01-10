@@ -18,7 +18,6 @@ void declare_ocean_patch(py::module& m, std::string typestr) {
 		.def("var_resolution", &Class::varResolution, py::return_value_policy::reference)
 		.def("var_patch_size", &Class::varPatchSize, py::return_value_policy::reference)
 		.def("var_time_scale", &Class::varTimeScale, py::return_value_policy::reference)
-		.def("state_displacement", &Class::stateDisplacement, py::return_value_policy::reference)
 		.def("state_height_field", &Class::stateHeightField, py::return_value_policy::reference);
 }
 
