@@ -144,6 +144,7 @@ namespace dyno
 				rigidbody.bodyId = j * (maxGroup + 1) + rigidInfo[i].rigidGroup;
 
 				rigidbody.offset = rigidInfo[i].Offset;
+				rigidbody.friction = this->varFrictionCoefficient()->getValue();
 
 				auto type = rigidInfo[i].shapeType;
 				auto shapeId = rigidInfo[i].meshShapeId;
