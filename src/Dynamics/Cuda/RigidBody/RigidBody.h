@@ -7,7 +7,7 @@ namespace dyno
 {
 	/*!
 	*	\class	RigidBody
-	* 
+	*
 	*	This class implements a simple rigid body.
 	*
 	*/

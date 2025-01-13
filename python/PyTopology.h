@@ -330,7 +330,6 @@ void declare_point_joint(py::module& m, std::string typestr) {
 		.def("set_anchor_point", &Class::setAnchorPoint);
 }
 
-
 #include "Mapping/PointSetToTriangleSet.h"
 template <typename TDataType>
 void declare_point_set_to_triangle_set(py::module& m, std::string typestr) {
@@ -420,29 +419,6 @@ void declare_frame_to_point_set(py::module& m, std::string typestr) {
 		.def("apply", &Class::apply);
 }
 
-#include "Volume/MarchingCubes.h"
-template <typename TDataType>
-void declare_marching_cubes(py::module& m, std::string typestr) {
-	using Class = dyno::MarchingCubes<TDataType>;
-	using Parent = dyno::Node;
-	std::string pyclass_name = std::string("MarchingCubes") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("var_iso_value", &Class::varIsoValue, py::return_value_policy::reference)
-		.def("var_grid_spacing", &Class::varGridSpacing, py::return_value_policy::reference)
-		.def("in_level_set", &Class::inLevelSet, py::return_value_policy::reference)
-		.def("out_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference);
-}
-
-#include "Volume/Module/MarchingCubesHelper.h"
-template <typename TDataType>
-void declare_marching_cubes_helper(py::module& m, std::string typestr) {
-	using Class = dyno::MarchingCubesHelper<TDataType>;
-	std::string pyclass_name = std::string("MarchingCubesHelper") + typestr;
-	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>());
-}
-
 #include "Mapping/MergeSimplexSet.h"
 template <typename TDataType>
 void declare_merge_simplex_set(py::module& m, std::string typestr) {
@@ -523,22 +499,6 @@ void declare_texture_mesh_to_triangle_set(py::module& m, std::string typestr) {
 		.def("in_texture_mesh", &Class::inTextureMesh, py::return_value_policy::reference)
 		.def("in_transform", &Class::inTransform, py::return_value_policy::reference)
 		.def("out_triangle_set", &Class::outTriangleSet, py::return_value_policy::reference);
-}
-
-#include "Volume/VolumeClipper.h"
-template <typename TDataType>
-void declare_volume_clipper(py::module& m, std::string typestr) {
-	using Class = dyno::VolumeClipper<TDataType>;
-	using Parent = dyno::Node;
-	std::string pyclass_name = std::string("VolumeClipper") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("var_translation", &Class::varTranslation, py::return_value_policy::reference)
-		.def("var_rotation", &Class::varRotation, py::return_value_policy::reference)
-		.def("state_field", &Class::stateField, py::return_value_policy::reference)
-		.def("state_plane", &Class::statePlane, py::return_value_policy::reference)
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("in_level_set", &Class::inLevelSet, py::return_value_policy::reference);
 }
 
 #include "Module/CalculateMaximum.h"

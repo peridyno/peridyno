@@ -60,10 +60,8 @@ void declare_attribute(py::module& m) {
 		.value("OBJECTID_INVALID", Class::ObjectID::OBJECTID_INVALID);
 }
 
-
 void pybind_topology(py::module& m)
 {
-
 	declare_point_set<dyno::DataType3f>(m, "3f");
 	declare_edge_set<dyno::DataType3f>(m, "3f");
 	declare_triangle_set<dyno::DataType3f>(m, "3f");
@@ -196,7 +194,6 @@ void pybind_topology(py::module& m)
 	py::class_<dyno::TKey, std::shared_ptr<dyno::TKey>>(m, "TKey")
 		.def(py::init<>());
 
-
 	declare_texture_mesh(m);
 	declare_attribute(m);
 	declare_quad_set<dyno::DataType3f>(m, "3f");
@@ -207,15 +204,12 @@ void pybind_topology(py::module& m)
 	declare_extract_triangle_set_from_polygon_set<dyno::DataType3f>(m, "3f");
 	declare_extract_qaud_set_from_polygon_set<dyno::DataType3f>(m, "3f");
 	declare_frame_to_point_set<dyno::DataType3f>(m, "3f");
-	declare_marching_cubes<dyno::DataType3f>(m, "3f");
-	declare_marching_cubes_helper<dyno::DataType3f>(m, "3f");
 	declare_merge_simplex_set<dyno::DataType3f>(m, "3f");
 	declare_point_set_to_point_set<dyno::DataType3f>(m, "3f");
 	declare_quad_set_to_triangle_set<dyno::DataType3f>(m, "3f");
 	declare_split_simplex_set<dyno::DataType3f>(m, "3f");
 	declare_tetrahedron_set_to_point_set<dyno::DataType3f>(m, "3f");
 	declare_texture_mesh_to_triangle_set<dyno::DataType3f>(m, "3f");
-	declare_volume_clipper<dyno::DataType3f>(m, "3f");
 	declare_calculate_maximum<dyno::DataType3f>(m, "3f");
 	declare_calculate_minimum<dyno::DataType3f>(m, "3f");
 	declare_animation_curve<dyno::DataType3f>(m, "3f");
@@ -229,7 +223,6 @@ void pybind_topology(py::module& m)
 	declare_joint_tree<dyno::DataType3f>(m, "3f");
 	declare_linear_bvh<dyno::DataType3f>(m, "3f");
 	declare_polygon_set<dyno::DataType3f>(m, "3f");
-
 
 	declare_signed_distance_fieldt<dyno::DataType3f>(m, "3f");
 	declare_simplex_set<dyno::DataType3f>(m, "3f");

@@ -36,6 +36,7 @@ void pybind_modeling(py::module& m) {
 	declare_vector_visual_node<dyno::DataType3f>(m, "3f");
 	declare_poisson_plane<dyno::DataType3f>(m, "3f");
 	declare_sampler<dyno::DataType3f>(m, "3f");
+	declare_points_behind_mesh<dyno::DataType3f>(m, "3f");
 	declare_cube_sampler<dyno::DataType3f>(m, "3f");
 
 	declare_modeling_initializer(m);

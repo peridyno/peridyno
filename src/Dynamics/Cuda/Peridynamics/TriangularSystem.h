@@ -35,7 +35,7 @@ namespace dyno
 		DEF_ARRAY_STATE(Coord, Velocity, DeviceType::GPU, "Vertex velocity");
 
 	public:
-		
+
 		void loadSurface(std::string filename);
 
 		//std::shared_ptr<Node> getSurface();

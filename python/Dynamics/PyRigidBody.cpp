@@ -1,17 +1,9 @@
 #include "PyRigidBody.h"
 
-#include "RigidBody/initializeRigidBody.h"
-void declare_rigid_body_initializer(py::module& m) {
-	using Class = dyno::RigidBodyInitializer;
-	using Parent = dyno::PluginEntry;
-	std::string pyclass_name = std::string("RigidBodyInitializer");
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def("instance", &Class::instance);
-}
+#include "RigidBody/Module/SharedFuncsForRigidBody.h"
 
 void declare_rigid_body_info(py::module& m, std::string typestr) {
 	using Class = dyno::RigidBodyInfo;
-
 	std::string pyclass_name = std::string("RigidBodyInfo") + typestr;
 	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
@@ -63,7 +55,6 @@ void declare_tet_info(py::module& m, std::string typestr) {
 
 void declare_capsule_info(py::module& m, std::string typestr) {
 	using Class = dyno::CapsuleInfo;
-
 	std::string pyclass_name = std::string("CapsuleInfo") + typestr;
 	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
@@ -84,21 +75,34 @@ void declare_simple_vechicle_driver(py::module& m) {
 }
 
 void pybind_rigid_body(py::module& m) {
+	// Module
+	declare_animation_driver<dyno::DataType3f>(m, "3f");
+	declare_car_driver<dyno::DataType3f>(m, "3f");
 	declare_contacts_union<dyno::DataType3f>(m, "3f");
-	declare_rigid_body_initializer(m);
-	declare_iterative_constraint_solver<dyno::DataType3f>(m, "3f");
-	declare_rigid_body<dyno::DataType3f>(m, "3f");
-	declare_rigid_body_system<dyno::DataType3f>(m, "3f");
-	declare_rigid_mesh<dyno::DataType3f>(m, "3f");
-	declare_vechicle<dyno::DataType3f>(m, "3f");
-
+	declare_instance_transform<dyno::DataType3f>(m, "3f");
+	declare_pcg_constraint_solver<dyno::DataType3f>(m, "3f");
+	declare_pjs_constraint_solver<dyno::DataType3f>(m, "3f");
+	declare_pjsnj_constraint_solver<dyno::DataType3f>(m, "3f");
+	declare_pj_soft_constraint_solver<dyno::DataType3f>(m, "3f");
 	declare_simple_vechicle_driver(m);
+	declare_tj_constraint_solver<dyno::DataType3f>(m, "3f");
+	declare_tj_soft_constraint_solver<dyno::DataType3f>(m, "3f");
+	declare_rigid_body_system<dyno::DataType3f>(m, "3f");
+	declare_articulated_body<dyno::DataType3f>(m, "3f");
+	declare_configurable_body<dyno::DataType3f>(m, "3f");
+	declare_gear<dyno::DataType3f>(m, "3f");
+	declare_multibody_system<dyno::DataType3f>(m, "3f");
+	declare_rigid_body<dyno::DataType3f>(m, "3f");
+	declare_rigid_mesh<dyno::DataType3f>(m, "3f");
+	declare_jeep<dyno::DataType3f>(m, "3f");
+	declare_tank<dyno::DataType3f>(m, "3f");
+	declare_tracked_tank<dyno::DataType3f>(m, "3f");
+	declare_uav<dyno::DataType3f>(m, "3f");
+	declare_uuv<dyno::DataType3f>(m, "3f");
 
 	declare_rigid_body_info(m, "");
 	declare_box_info(m, "");
 	declare_sphere_info(m, "");
 	declare_tet_info(m, "");
 	declare_capsule_info(m, "");
-
-
 }

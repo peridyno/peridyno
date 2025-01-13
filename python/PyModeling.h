@@ -500,6 +500,26 @@ void declare_sampler(py::module& m, std::string typestr) {
 		.def("state_point_set", &Class::statePointSet, py::return_value_policy::reference);
 }
 
+#include "Samplers/PointsBehindMesh.h"
+template <typename TDataType>
+void declare_points_behind_mesh(py::module& m, std::string typestr) {
+	using Class = dyno::PointsBehindMesh<TDataType>;
+	using Parent = dyno::Sampler<TDataType>;
+	std::string pyclass_name = std::string("PointsBehindMesh") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("var_thickness", &Class::varThickness, py::return_value_policy::reference)
+		.def("var_sampling_distance", &Class::varSamplingDistance, py::return_value_policy::reference)
+		.def("var_generating_direction", &Class::varGeneratingDirection, py::return_value_policy::reference)
+		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("state_position", &Class::statePosition, py::return_value_policy::reference)
+		.def("state_plane", &Class::statePlane, py::return_value_policy::reference)
+		.def("state_point_normal", &Class::statePointNormal, py::return_value_policy::reference)
+		.def("out_point_growth_direction", &Class::outPointGrowthDirection, py::return_value_policy::reference)
+		.def("state_point_belong_triangle_index", &Class::statePointBelongTriangleIndex, py::return_value_policy::reference)
+		.def("out_sampling_distance", &Class::outSamplingDistance, py::return_value_policy::reference);
+}
+
 #include "Samplers/ShapeSampler.h"
 template <typename TDataType>
 void declare_cube_sampler(py::module& m, std::string typestr) {
