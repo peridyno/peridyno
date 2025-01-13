@@ -4,7 +4,7 @@
 #include "Module/CalculateNorm.h"
 #include "Module/ParticleIntegrator.h"
 #include "Module/ImplicitViscosity.h"
-#include "Module/IterativeDensitySolver.h"
+#include "Module/SemiImplicitDensitySolver.h"
 
 #include "ParticleSystemHelper.h"
 
@@ -46,7 +46,7 @@ namespace dyno
 		this->statePosition()->connect(nbrQuery->inPosition());
 		this->animationPipeline()->pushModule(nbrQuery);
 
-		auto density = std::make_shared<IterativeDensitySolver<TDataType>>();
+		auto density = std::make_shared<SemiImplicitDensitySolver<TDataType>>();
 		smoothingLength->outFloating()->connect(density->inSmoothingLength());
 		samplingDistance->outFloating()->connect(density->inSamplingDistance());
 		this->stateTimeStep()->connect(density->inTimeStep());

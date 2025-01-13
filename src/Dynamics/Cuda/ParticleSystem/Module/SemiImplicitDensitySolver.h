@@ -25,6 +25,7 @@ namespace dyno {
 	/*!
 	*	\class	SemiImplicitDensitySolver
 	*	\brief	This class implements a semi-implicit successive substitution method to solve incompressibility.
+	*			For more details, refer to He et al. "A Semi-Implicit SPH Method for Compressible and Incompressible Flows with Improved Convergence", Eurographics 2025
 	*/
 	template<typename TDataType>
 	class SemiImplicitDensitySolver : public ParticleApproximation<TDataType>
