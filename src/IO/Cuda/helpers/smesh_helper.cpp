@@ -1,4 +1,4 @@
-#include "smesh.h"
+#include "smesh_helper.h"
 #include <string.h>
 #include <fstream>
 #include <iostream>

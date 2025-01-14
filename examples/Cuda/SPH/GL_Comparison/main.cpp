@@ -29,7 +29,7 @@
 #include <BasicShapes/SphereModel.h>
 #include <BasicShapes/CubeModel.h>
 
-#include <StaticTriangularMesh.h>
+#include <StaticMeshLoader.h>
 
 #include <Samplers/ShapeSampler.h>
 

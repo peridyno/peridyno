@@ -12,7 +12,7 @@
 #include <BasicShapes/CubeModel.h>
 #include <Samplers/ShapeSampler.h>
 #include <ParticleSystem/Emitters/SquareEmitter.h>
-#include <StaticTriangularMesh.h>
+#include <StaticMeshLoader.h>
 #include <GLSurfaceVisualModule.h>
 #include "Collision/Attribute.h"
 #include "DualParticleSystem/Module/VirtualSpatiallyAdaptiveStrategy.h"

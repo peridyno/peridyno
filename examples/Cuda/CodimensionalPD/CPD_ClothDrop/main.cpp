@@ -5,7 +5,7 @@
 #include <GLSurfaceVisualModule.h>
 
 #include "Peridynamics/CodimensionalPD.h"
-#include "StaticTriangularMesh.h"
+#include "StaticMeshLoader.h"
 
 #include "ManualControl.h"
 

@@ -57,7 +57,7 @@
 #include "GeometryLoader.h"
 #include "ParticleSystem/MakeParticleSystem.h"
 #include "ParticleSystem/ParticleFluid.h"
-#include "StaticTriangularMesh.h"
+#include "StaticMeshLoader.h"
 #include "Multiphysics/VolumeBoundary.h"
 
 #include "Action/ActNodeInfo.h"

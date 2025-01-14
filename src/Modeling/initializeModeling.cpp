@@ -15,7 +15,8 @@
 
 #include "Samplers/ShapeSampler.h"
 
-#include "StaticTriangularMesh.h"
+#include "StaticMeshLoader.h"
+
 #include "GLWireframeVisualModule.h"
 #include "GLSurfaceVisualModule.h"
 
