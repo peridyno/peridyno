@@ -1,12 +1,12 @@
 #include <UbiApp.h>
 #include <SceneGraph.h>
 
+#include <BasicShapes/SphereModel.h>
+
 #include "Volume/VolumeGenerator.h"
 #include <Volume/VolumeBoolean.h>
 #include <Volume/VolumeClipper.h>
 #include <Volume/MarchingCubes.h>
-
-#include <StaticTriangularMesh.h>
 
 using namespace std;
 using namespace dyno;
@@ -18,9 +18,10 @@ std::shared_ptr<SceneGraph> createScene1()
 	scn->setUpperBound(Vec3f(2, 2, 2));
 	scn->setLowerBound(Vec3f(-2, -2, -2));
 
-	auto mesh1 = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
-	mesh1->setVisible(false);
-	mesh1->varFileName()->setValue(getAssetPath() + "volume/boolean/sphere31.obj");
+	auto mesh1 = scn->addNode(std::make_shared<SphereModel<DataType3f>>());
+	mesh1->varLocation()->setValue(Vec3f(-0.2f, 0.0f, 0.0f));
+	mesh1->varType()->setCurrentKey(SphereModel<DataType3f>::Icosahedron);
+	mesh1->varIcosahedronStep()->setValue(3);
 
 	auto sdfUniformA = scn->addNode(std::make_shared<VolumeGenerator<DataType3f>>());
 	sdfUniformA->varSpacing()->setValue(0.069f);
@@ -28,9 +29,10 @@ std::shared_ptr<SceneGraph> createScene1()
 	mesh1->stateTriangleSet()->connect(sdfUniformA->inTriangleSet());
 
 
-	auto mesh2 = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
-	mesh2->setVisible(false);
-	mesh2->varFileName()->setValue(getAssetPath() + "volume/boolean/sphere32.obj");
+	auto mesh2 = scn->addNode(std::make_shared<SphereModel<DataType3f>>());
+	mesh2->varLocation()->setValue(Vec3f(0.2f, 0.0f, 0.0f));
+	mesh2->varType()->setCurrentKey(SphereModel<DataType3f>::Icosahedron);
+	mesh2->varIcosahedronStep()->setValue(3);
 
 	auto sdfUniformB = scn->addNode(std::make_shared<VolumeGenerator<DataType3f>>());
 	sdfUniformB->varSpacing()->setValue(0.05f);

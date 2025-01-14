@@ -358,15 +358,15 @@ namespace dyno
 		min_box -= padding * dx * unit;
 		max_box += padding * dx * unit;
 
-		ni = std::floor((max_box[0] - min_box[0]) / dx);
-		nj = std::floor((max_box[1] - min_box[1]) / dx);
-		nk = std::floor((max_box[2] - min_box[2]) / dx);
-
 		origin = min_box;
 		maxPoint = max_box;
 
 		sdf.setSpace(min_box, max_box, dx);
 		auto& phi = sdf.distances();
+
+		ni = phi.nx();
+		nj = phi.ny();
+		nk = phi.nz();
 
 		//initialize distances near the mesh
 		DArray3D<uint> counter3d(ni, nj, nk);
