@@ -40,7 +40,8 @@ void declare_particle_writer(py::module& m, std::string typestr) {
 
 	py::enum_<typename Class::OpenType>(PW, "OpenType")
 		.value("ASCII", Class::OpenType::ASCII)
-		.value("binary", Class::OpenType::binary);
+		.value("binary", Class::OpenType::binary)
+		.export_values();
 }
 
 #include "PointsLoader.h"
@@ -73,11 +74,11 @@ void declare_tetra_mesh_writer(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TetraMeshWriter") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("set_name_prefix", &Class::setNamePrefix)
-		.def("set_output_path", &Class::setOutputPath)
+		//.def("set_name_prefix", &Class::setNamePrefix)
+		//.def("set_output_path", &Class::setOutputPath)
 		.def("set_tetrahedron_set_ptr", &Class::setTetrahedronSetPtr)
 		.def("update_ptr", &Class::updatePtr)
-		.def("output_surface_mesh", &Class::outputSurfaceMesh)
+		//.def("output_surface_mesh", &Class::outputSurfaceMesh)
 		.def("output", &Class::output);
 }
 
@@ -92,7 +93,8 @@ void declare_tetra_mesh_writer_fracture(py::module& m, std::string typestr) {
 		.def("load_uvs", &Class::loadUVs)
 		.def("set_tetrahedron_set_ptr", &Class::setTetrahedronSetPtr)
 		.def("update_ptr", &Class::updatePtr)
-		.def("output_surface_mesh", &Class::outputSurfaceMesh);
+		.def("output_surface_mesh", &Class::outputSurfaceMesh)
+		.def_readwrite("OringalID", &Class::OringalID);
 }
 
 #include "TriangleMeshWriter.h"
@@ -111,13 +113,14 @@ void declare_triangle_mesh_writer(py::module& m, std::string typestr) {
 
 	py::enum_<typename Class::OutputType>(TMW, "OutputType")
 		.value("TriangleMesh", Class::OutputType::TriangleMesh)
-		.value("PointCloud", Class::OutputType::PointCloud);
+		.value("PointCloud", Class::OutputType::PointCloud)
+		.export_values();
 }
 
 void declare_gmsh(py::module& m);
 
 void declare_smesh(py::module& m);
 
-void declare_io_initializer(py::module& m);
+void declare_image_loader(py::module& m);
 
 void pybind_io(py::module& m);

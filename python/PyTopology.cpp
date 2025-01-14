@@ -1,5 +1,7 @@
 #include "PyTopology.h"
 
+#include <Collision/CollisionDetectionAlgorithm.h>
+
 #include "Topology/TextureMesh.h"
 void declare_texture_mesh(py::module& m) {
 	using Class = dyno::TextureMesh;
@@ -11,7 +13,6 @@ void declare_texture_mesh(py::module& m) {
 
 void declare_attribute(py::module& m) {
 	using Class = dyno::Attribute;
-
 	std::string pyclass_name = std::string("Attribute");
 	py::class_<Class, std::shared_ptr<Class>>Attribute(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	Attribute.def(py::init<>())
@@ -46,42 +47,64 @@ void declare_attribute(py::module& m) {
 		.value("KINEMATIC_MASK", Class::KinematicType::KINEMATIC_MASK)
 		.value("KINEMATIC_FIXED", Class::KinematicType::KINEMATIC_FIXED)
 		.value("KINEMATIC_PASSIVE", Class::KinematicType::KINEMATIC_PASSIVE)
-		.value("KINEMATIC_POSITIVE", Class::KinematicType::KINEMATIC_POSITIVE);
+		.value("KINEMATIC_POSITIVE", Class::KinematicType::KINEMATIC_POSITIVE)
+		.export_values();
 
 	py::enum_<typename Class::MaterialType>(Attribute, "MaterialType")
 		.value("MATERIAL_MASK", Class::MaterialType::MATERIAL_MASK)
 		.value("MATERIAL_FLUID", Class::MaterialType::MATERIAL_FLUID)
 		.value("MATERIAL_RIGID", Class::MaterialType::MATERIAL_RIGID)
 		.value("MATERIAL_ELASTIC", Class::MaterialType::MATERIAL_ELASTIC)
-		.value("MATERIAL_PLASTIC", Class::MaterialType::MATERIAL_PLASTIC);
+		.value("MATERIAL_PLASTIC", Class::MaterialType::MATERIAL_PLASTIC)
+		.export_values();
 
 	py::enum_<typename Class::ObjectID>(Attribute, "ObjectID")
 		.value("OBJECTID_MASK", Class::ObjectID::OBJECTID_MASK)
-		.value("OBJECTID_INVALID", Class::ObjectID::OBJECTID_INVALID);
+		.value("OBJECTID_INVALID", Class::ObjectID::OBJECTID_INVALID)
+		.export_values();
 }
 
 void pybind_topology(py::module& m)
 {
-	declare_point_set<dyno::DataType3f>(m, "3f");
-	declare_edge_set<dyno::DataType3f>(m, "3f");
-	declare_triangle_set<dyno::DataType3f>(m, "3f");
-	declare_calculate_norm<dyno::DataType3f>(m, "3f");
-	declare_height_field_to_triangle_set<dyno::DataType3f>(m, "3f");
-	declare_discrete_elements_to_triangle_set<dyno::DataType3f>(m, "3f");
-	declare_merge_triangle_set<dyno::DataType3f>(m, "3f");
-
-	declare_neighbor_element_query<dyno::DataType3f>(m, "3f");
-	declare_contacts_to_edge_set<dyno::DataType3f>(m, "3f");
-	declare_contacts_to_point_set<dyno::DataType3f>(m, "3f");
-	declare_neighbor_point_query<dyno::DataType3f>(m, "3f");
-	declare_neighbor_triangle_query<dyno::DataType3f>(m, "3f");
-
+	// Collision
+	declare_attribute(m);
 	declare_calculate_bounding_box<dyno::DataType3f>(m, "3f");
 	declare_collision_detection_broad_phase<dyno::DataType3f>(m, "3f");
 	declare_collistion_detection_bounding_box<dyno::DataType3f>(m, "3f");
 	declare_collistion_detection_triangle_set<dyno::DataType3f>(m, "3f");
+	declare_neighbor_element_query<dyno::DataType3f>(m, "3f");
+	declare_neighbor_point_query<dyno::DataType3f>(m, "3f");
+	declare_neighbor_triangle_query<dyno::DataType3f>(m, "3f");
 
-	py::class_<dyno::PdActor, std::shared_ptr<dyno::PdActor>>(m, "PdActor");
+	// Mapping
+	declare_anchor_point_to_point_set<dyno::DataType3f>(m, "3f");
+	declare_bounding_box_to_edge_set<dyno::DataType3f>(m, "3f");
+	declare_contacts_to_edge_set<dyno::DataType3f>(m, "3f");
+	declare_contacts_to_point_set<dyno::DataType3f>(m, "3f");
+	declare_discrete_elements_to_triangle_set<dyno::DataType3f>(m, "3f");
+	declare_extract_edge_set_from_polygon_set<dyno::DataType3f>(m, "3f");
+	declare_extract_triangle_set_from_polygon_set<dyno::DataType3f>(m, "3f");
+	declare_extract_qaud_set_from_polygon_set<dyno::DataType3f>(m, "3f");
+	declare_frame_to_point_set<dyno::DataType3f>(m, "3f");
+	declare_height_field_to_triangle_set<dyno::DataType3f>(m, "3f");
+	declare_merge_simplex_set<dyno::DataType3f>(m, "3f");
+	declare_merge_triangle_set<dyno::DataType3f>(m, "3f");
+	declare_point_set_to_point_set<dyno::DataType3f>(m, "3f");
+	declare_point_set_to_triangle_set<dyno::DataType3f>(m, "3f");
+	declare_quad_set_to_triangle_set<dyno::DataType3f>(m, "3f");
+	declare_split_simplex_set<dyno::DataType3f>(m, "3f");
+	declare_tetrahedron_set_to_point_set<dyno::DataType3f>(m, "3f");
+	declare_texture_mesh_to_triangle_set<dyno::DataType3f>(m, "3f");
+	declare_texture_mesh_to_triangle_set_node<dyno::DataType3f>(m, "3f");
+
+	// Module
+	declare_calculate_maximum<dyno::DataType3f>(m, "3f");
+	declare_calculate_minimum<dyno::DataType3f>(m, "3f");
+	declare_calculate_norm<dyno::DataType3f>(m, "3f");
+
+	py::class_<dyno::PdActor, std::shared_ptr<dyno::PdActor>>PdActor(m, "PdActor");
+	// Topology
+	declare_animation_curve<dyno::DataType3f>(m, "3f");
 
 	declare_joint<float>(m, "f");
 	declare_ball_and_socket_joint<float>(m, "f");
@@ -89,6 +112,52 @@ void pybind_topology(py::module& m)
 	declare_hinge_joint<float>(m, "f");
 	declare_fixed_joint<float>(m, "f");
 	declare_point_joint<float>(m, "f");
+	declare_distance_joint<float>(m, "f");
+	declare_discrete_elements<dyno::DataType3f>(m, "3f");
+
+	declare_point_set<dyno::DataType3f>(m, "3f");
+	declare_edge_set<dyno::DataType3f>(m, "3f");
+	declare_triangle_set<dyno::DataType3f>(m, "3f");
+
+	declare_texture_mesh(m);
+
+	declare_quad_set<dyno::DataType3f>(m, "3f");
+
+	declare_distance_field3D<dyno::DataType3f>(m, "3f");
+	declare_frame<dyno::DataType3f>(m, "3f");
+	declare_grid_hash<dyno::DataType3f>(m, "3f");
+	declare_grid_set<dyno::DataType3f>(m, "3f");
+	declare_height_field<dyno::DataType3f>(m, "3f");
+	declare_hexahedron_set<dyno::DataType3f>(m, "3f");
+	declare_joint_tree<dyno::DataType3f>(m, "3f");
+	declare_linear_bvh<dyno::DataType3f>(m, "3f");
+	declare_polygon_set<dyno::DataType3f>(m, "3f");
+
+	declare_signed_distance_fieldt<dyno::DataType3f>(m, "3f");
+	declare_simplex_set<dyno::DataType3f>(m, "3f");
+	declare_sparse_grid_hash<dyno::DataType3f>(m, "3f");
+	declare_sparse_octree<dyno::DataType3f>(m, "3f");
+	declare_structured_point_set<dyno::DataType3f>(m, "3f");
+	declare_tetrahedron_set<dyno::DataType3f>(m, "3f");
+	declare_uniform_grid3D<dyno::DataType3f>(m, "3f");
+	declare_unstructured_point_set<dyno::DataType3f>(m, "3f");
+
+	py::enum_<typename dyno::CModeMask>(m, "CModeMask")
+		.value("CM_Disabled", dyno::CModeMask::CM_Disabled)
+		.value("CM_OriginDCD_Tet", dyno::CModeMask::CM_OriginDCD_Tet)
+		.value("CM_InputSDF_Tet", dyno::CModeMask::CM_InputSDF_Tet)
+		.value("CM_RigidSurface_Tet", dyno::CModeMask::CM_RigidSurface_Tet)
+		.value("CM_TetMesh_Tet", dyno::CModeMask::CM_TetMesh_Tet)
+		.value("CM_SurfaceMesh_Tet", dyno::CModeMask::CM_SurfaceMesh_Tet)
+		.value("CM_OriginDCD_Sphere", dyno::CModeMask::CM_OriginDCD_Sphere)
+		.value("CM_InputSDF_Sphere", dyno::CModeMask::CM_InputSDF_Sphere);
+
+	py::enum_<typename dyno::BodyType>(m, "BodyType")
+		.value("Static", dyno::BodyType::Static)
+		.value("Kinematic", dyno::BodyType::Kinematic)
+		.value("Dynamic", dyno::BodyType::Dynamic)
+		.value("NonRotatable", dyno::BodyType::NonRotatable)
+		.value("NonGravitative", dyno::BodyType::NonGravitative);
 
 	py::enum_<typename dyno::CollisionMask>(m, "CollisionMask")
 		.value("CT_AllObjects", dyno::CollisionMask::CT_AllObjects)
@@ -137,13 +206,22 @@ void pybind_topology(py::module& m)
 		.value("CN_JOINT_NO_MOVE_3", dyno::ConstraintType::CN_JOINT_NO_MOVE_3)
 		.value("CN_UNKNOWN", dyno::ConstraintType::CN_UNKNOWN);
 
+	py::enum_<typename dyno::SeparationType>(m, "SeparationType")
+		.value("CT_POINT", dyno::SeparationType::CT_POINT)
+		.value("CT_EDGE", dyno::SeparationType::CT_EDGE)
+		.value("CT_TRIA", dyno::SeparationType::CT_TRIA)
+		.value("CT_TRIB", dyno::SeparationType::CT_TRIB)
+		.value("CT_RECTA", dyno::SeparationType::CT_RECTA)
+		.value("CT_RECTB", dyno::SeparationType::CT_RECTB);
+
 	py::enum_<typename dyno::ElementType>(m, "ElementType")
 		.value("ET_BOX", dyno::ElementType::ET_BOX)
 		.value("ET_TET", dyno::ElementType::ET_TET)
 		.value("ET_CAPSULE", dyno::ElementType::ET_CAPSULE)
 		.value("ET_SPHERE", dyno::ElementType::ET_SPHERE)
 		.value("ET_TRI", dyno::ElementType::ET_TRI)
-		.value("ET_Other", dyno::ElementType::ET_Other);
+		.value("ET_Other", dyno::ElementType::ET_Other)
+		.export_values();
 
 	py::class_<dyno::EKey, std::shared_ptr<dyno::EKey>>(m, "EKey")
 		.def(py::init<>())
@@ -193,43 +271,4 @@ void pybind_topology(py::module& m)
 
 	py::class_<dyno::TKey, std::shared_ptr<dyno::TKey>>(m, "TKey")
 		.def(py::init<>());
-
-	declare_texture_mesh(m);
-	declare_attribute(m);
-	declare_quad_set<dyno::DataType3f>(m, "3f");
-	declare_point_set_to_triangle_set<dyno::DataType3f>(m, "3f");
-	declare_anchor_point_to_point_set<dyno::DataType3f>(m, "3f");
-	declare_bounding_box_to_edge_set<dyno::DataType3f>(m, "3f");
-	declare_extract_edge_set_from_polygon_set<dyno::DataType3f>(m, "3f");
-	declare_extract_triangle_set_from_polygon_set<dyno::DataType3f>(m, "3f");
-	declare_extract_qaud_set_from_polygon_set<dyno::DataType3f>(m, "3f");
-	declare_frame_to_point_set<dyno::DataType3f>(m, "3f");
-	declare_merge_simplex_set<dyno::DataType3f>(m, "3f");
-	declare_point_set_to_point_set<dyno::DataType3f>(m, "3f");
-	declare_quad_set_to_triangle_set<dyno::DataType3f>(m, "3f");
-	declare_split_simplex_set<dyno::DataType3f>(m, "3f");
-	declare_tetrahedron_set_to_point_set<dyno::DataType3f>(m, "3f");
-	declare_texture_mesh_to_triangle_set<dyno::DataType3f>(m, "3f");
-	declare_calculate_maximum<dyno::DataType3f>(m, "3f");
-	declare_calculate_minimum<dyno::DataType3f>(m, "3f");
-	declare_animation_curve<dyno::DataType3f>(m, "3f");
-	declare_discrete_elements<dyno::DataType3f>(m, "3f");
-	declare_distance_field3D<dyno::DataType3f>(m, "3f");
-	declare_frame<dyno::DataType3f>(m, "3f");
-	declare_grid_hash<dyno::DataType3f>(m, "3f");
-	declare_grid_set<dyno::DataType3f>(m, "3f");
-	declare_height_field<dyno::DataType3f>(m, "3f");
-	declare_hexahedron_set<dyno::DataType3f>(m, "3f");
-	declare_joint_tree<dyno::DataType3f>(m, "3f");
-	declare_linear_bvh<dyno::DataType3f>(m, "3f");
-	declare_polygon_set<dyno::DataType3f>(m, "3f");
-
-	declare_signed_distance_fieldt<dyno::DataType3f>(m, "3f");
-	declare_simplex_set<dyno::DataType3f>(m, "3f");
-	declare_sparse_grid_hash<dyno::DataType3f>(m, "3f");
-	declare_sparse_octree<dyno::DataType3f>(m, "3f");
-	declare_structured_point_set<dyno::DataType3f>(m, "3f");
-	declare_tetrahedron_set<dyno::DataType3f>(m, "3f");
-	declare_uniform_grid3D<dyno::DataType3f>(m, "3f");
-	declare_unstructured_point_set<dyno::DataType3f>(m, "3f");
 }
