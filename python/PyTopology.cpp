@@ -1,6 +1,7 @@
 #include "PyTopology.h"
 
 #include <Collision/CollisionDetectionAlgorithm.h>
+#include <Topology/HierarchicalModel.h>
 
 #include "Topology/TextureMesh.h"
 void declare_texture_mesh(py::module& m) {
@@ -8,7 +9,16 @@ void declare_texture_mesh(py::module& m) {
 	using Parent = dyno::TopologyModule;
 	std::string pyclass_name = std::string("TextureMesh");
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>());
+		.def(py::init<>())
+		.def("vertices", &Class::vertices)
+		.def("normals", &Class::normals)
+		.def("tex_coords", &Class::texCoords)
+		.def("shape_ids", &Class::shapeIds)
+
+		.def("shapes", &Class::shapes)
+		.def("materials", &Class::materials)
+		.def("merge", &Class::merge)
+		.def("clear", &Class::clear);
 }
 
 void declare_attribute(py::module& m) {
@@ -103,6 +113,7 @@ void pybind_topology(py::module& m)
 	declare_calculate_norm<dyno::DataType3f>(m, "3f");
 
 	py::class_<dyno::PdActor, std::shared_ptr<dyno::PdActor>>PdActor(m, "PdActor");
+
 	// Topology
 	declare_animation_curve<dyno::DataType3f>(m, "3f");
 
@@ -114,30 +125,25 @@ void pybind_topology(py::module& m)
 	declare_point_joint<float>(m, "f");
 	declare_distance_joint<float>(m, "f");
 	declare_discrete_elements<dyno::DataType3f>(m, "3f");
-
+	declare_distance_field3D<dyno::DataType3f>(m, "3f");
+	declare_texture_mesh(m);
 	declare_point_set<dyno::DataType3f>(m, "3f");
 	declare_edge_set<dyno::DataType3f>(m, "3f");
-	declare_triangle_set<dyno::DataType3f>(m, "3f");
-
-	declare_texture_mesh(m);
-
-	declare_quad_set<dyno::DataType3f>(m, "3f");
-
-	declare_distance_field3D<dyno::DataType3f>(m, "3f");
 	declare_frame<dyno::DataType3f>(m, "3f");
 	declare_grid_hash<dyno::DataType3f>(m, "3f");
 	declare_grid_set<dyno::DataType3f>(m, "3f");
 	declare_height_field<dyno::DataType3f>(m, "3f");
+	declare_quad_set<dyno::DataType3f>(m, "3f");
 	declare_hexahedron_set<dyno::DataType3f>(m, "3f");
 	declare_joint_tree<dyno::DataType3f>(m, "3f");
+	declare_level_set<dyno::DataType3f>(m, "3f");
 	declare_linear_bvh<dyno::DataType3f>(m, "3f");
 	declare_polygon_set<dyno::DataType3f>(m, "3f");
-
-	declare_signed_distance_fieldt<dyno::DataType3f>(m, "3f");
 	declare_simplex_set<dyno::DataType3f>(m, "3f");
 	declare_sparse_grid_hash<dyno::DataType3f>(m, "3f");
 	declare_sparse_octree<dyno::DataType3f>(m, "3f");
 	declare_structured_point_set<dyno::DataType3f>(m, "3f");
+	declare_triangle_set<dyno::DataType3f>(m, "3f");
 	declare_tetrahedron_set<dyno::DataType3f>(m, "3f");
 	declare_uniform_grid3D<dyno::DataType3f>(m, "3f");
 	declare_unstructured_point_set<dyno::DataType3f>(m, "3f");
@@ -236,8 +242,13 @@ void pybind_topology(py::module& m)
 
 	py::class_<dyno::OctreeNode, std::shared_ptr<dyno::OctreeNode>>(m, "OctreeNode")
 		.def(py::init<>())
+		.def(py::init<dyno::OcKey>())
+		.def(py::init<dyno::Level, dyno::OcIndex, dyno::OcIndex, dyno::OcIndex>())
 		//.def("is_contained_in", &dyno::OctreeNode::isContainedIn)
 		.def("is_contained_strictly_in", &dyno::OctreeNode::isContainedStrictlyIn)
+
+		.def("get_coord", &dyno::OctreeNode::getCoord)
+
 		.def("least_common_ancestor", &dyno::OctreeNode::leastCommonAncestor)
 		.def("key", &dyno::OctreeNode::key)
 		.def("level", &dyno::OctreeNode::level)
@@ -248,7 +259,16 @@ void pybind_topology(py::module& m)
 		.def("set_data_size", &dyno::OctreeNode::setDataSize)
 		.def("get_data_size", &dyno::OctreeNode::getDataSize)
 		.def("is_valid", &dyno::OctreeNode::isValid)
-		.def("is_empty", &dyno::OctreeNode::isEmpty);
+		.def("is_empty", &dyno::OctreeNode::isEmpty)
+
+		.def_readwrite("m_key", &dyno::OctreeNode::m_key)
+		.def_readwrite("m_level", &dyno::OctreeNode::m_level)
+		.def_readwrite("m_data_loc", &dyno::OctreeNode::m_data_loc)
+		.def_readwrite("m_start_loc", &dyno::OctreeNode::m_start_loc)
+		.def_readwrite("m_data_size", &dyno::OctreeNode::m_data_size)
+		.def_readwrite("m_current_loc", &dyno::OctreeNode::m_current_loc)
+		.def_readwrite("m_first_child_loc", &dyno::OctreeNode::m_first_child_loc)
+		.def_readwrite("m_bCopy", &dyno::OctreeNode::m_bCopy);
 
 	py::class_<dyno::Material, dyno::Object, std::shared_ptr<dyno::Material>>(m, "Material")
 		.def(py::init<>())
@@ -270,5 +290,72 @@ void pybind_topology(py::module& m)
 		.def_readwrite("material", &dyno::Shape::material);
 
 	py::class_<dyno::TKey, std::shared_ptr<dyno::TKey>>(m, "TKey")
+		.def(py::init<>())
+		.def(py::init<dyno::PointType, dyno::PointType, dyno::PointType>());
+
+	py::class_<dyno::ModelObject, dyno::Object, std::shared_ptr<dyno::ModelObject>>(m, "ModelObject")
+		.def(py::init<>())
+		.def_readwrite("name", &dyno::ModelObject::name)
+		.def_readwrite("localTransform", &dyno::ModelObject::localTransform)
+		.def_readwrite("localTranslation", &dyno::ModelObject::localTranslation)
+		.def_readwrite("localRotation", &dyno::ModelObject::localRotation)
+		.def_readwrite("localScale", &dyno::ModelObject::localScale)
+		.def_readwrite("preRotation", &dyno::ModelObject::preRotation)
+		.def_readwrite("pivot", &dyno::ModelObject::pivot)
+
+		.def_readwrite("child", &dyno::ModelObject::child)
+		.def_readwrite("parent", &dyno::ModelObject::parent)
+
+		.def_readwrite("id", &dyno::ModelObject::id);
+
+	py::class_<dyno::Bone, dyno::ModelObject, std::shared_ptr<dyno::Bone>>(m, "Bone")
 		.def(py::init<>());
+
+	py::class_<dyno::MeshInfo, dyno::ModelObject, std::shared_ptr<dyno::MeshInfo>>(m, "MeshInfo")
+		.def(py::init<>())
+		.def_readwrite("vertices", &dyno::MeshInfo::vertices)
+		.def_readwrite("verticeId_pointId", &dyno::MeshInfo::verticeId_pointId)
+		.def_readwrite("pointId_verticeId", &dyno::MeshInfo::pointId_verticeId)
+		.def_readwrite("normals", &dyno::MeshInfo::normals)
+		.def_readwrite("texcoords", &dyno::MeshInfo::texcoords)
+		.def_readwrite("verticesColor", &dyno::MeshInfo::verticesColor)
+		.def_readwrite("facegroup_triangles", &dyno::MeshInfo::facegroup_triangles)
+		//.def_readwrite("facegroup_polygons", &dyno::MeshInfo::facegroup_polygons)
+
+		.def_readwrite("materials", &dyno::MeshInfo::materials)
+
+		.def_readwrite("boundingBox", &dyno::MeshInfo::boundingBox)
+		.def_readwrite("boundingTransform", &dyno::MeshInfo::boundingTransform)
+
+		.def_readwrite("boneIndices0", &dyno::MeshInfo::boneIndices0)
+		.def_readwrite("boneWeights0", &dyno::MeshInfo::boneWeights0)
+		.def_readwrite("boneIndices1", &dyno::MeshInfo::boneIndices1)
+		.def_readwrite("boneWeights1", &dyno::MeshInfo::boneWeights1)
+		.def_readwrite("boneIndices2", &dyno::MeshInfo::boneIndices2)
+		.def_readwrite("boneWeights2", &dyno::MeshInfo::boneWeights2);
+
+	py::class_<dyno::HierarchicalScene, dyno::Object, std::shared_ptr<dyno::HierarchicalScene>>(m, "HierarchicalScene")
+		.def(py::init<>())
+		.def("clear", &dyno::HierarchicalScene::clear)
+		.def("find_mesh_index_by_name", &dyno::HierarchicalScene::findMeshIndexByName)
+		.def("get_object_by_name", &dyno::HierarchicalScene::getObjectByName)
+		.def("get_obj_index_by_name", &dyno::HierarchicalScene::getObjIndexByName)
+		.def("get_bone_index_by_name", &dyno::HierarchicalScene::getBoneIndexByName)
+		.def("update_inverse_bind_matrix", &dyno::HierarchicalScene::updateInverseBindMatrix)
+		.def("update_frame_world_transform", &dyno::HierarchicalScene::updateFrameWorldTransform)
+		.def("get_vector_data_by_time", &dyno::HierarchicalScene::getVectorDataByTime)
+		.def("find_max_smaller_index", &dyno::HierarchicalScene::findMaxSmallerIndex)
+
+		.def_readwrite("mModelObjects", &dyno::HierarchicalScene::mModelObjects)
+		.def_readwrite("mMeshs", &dyno::HierarchicalScene::mMeshs)
+		.def_readwrite("mBones", &dyno::HierarchicalScene::mBones)
+		.def_readwrite("mBoneRotations", &dyno::HierarchicalScene::mBoneRotations)
+		.def_readwrite("mBoneTranslations", &dyno::HierarchicalScene::mBoneTranslations)
+		.def_readwrite("mBoneScales", &dyno::HierarchicalScene::mBoneScales)
+		.def_readwrite("mBoneWorldMatrix", &dyno::HierarchicalScene::mBoneWorldMatrix)
+		.def_readwrite("mBoneInverseBindMatrix", &dyno::HierarchicalScene::mBoneInverseBindMatrix)
+
+		.def_readwrite("mTimeStart", &dyno::HierarchicalScene::mTimeStart)
+		.def_readwrite("mTimeEnd", &dyno::HierarchicalScene::mTimeEnd);
+
 }

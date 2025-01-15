@@ -202,7 +202,7 @@ template <typename TDataType>
 void declare_multi_node_port(py::module& m, std::string typestr) {
 	using Class = dyno::MultipleNodePort<TDataType>;
 	using Parent = dyno::NodePort;
-	std::string pyclass_name = std::string("MultipleNodePort_") + typestr;
+	std::string pyclass_name = std::string("MultipleNodePort") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def("clear", &Class::clear)
 		.def("add_derive_node", &Class::addDerivedNode)

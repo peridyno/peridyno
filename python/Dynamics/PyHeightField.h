@@ -96,10 +96,11 @@ void declare_large_ocean(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("LargeOcean") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
+		.def("var_file_name", &Class::varFileName)
 		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
 		.def("state_tex_coord", &Class::stateTexCoord, py::return_value_policy::reference)
-		.def("state_tex_coord_index", &Class::stateTexCoordIndex, py::return_value_policy::reference)
-		.def("state_bump_map", &Class::stateBumpMap, py::return_value_policy::reference);
+		.def("state_bump_map", &Class::stateBumpMap, py::return_value_policy::reference)
+		.def("state_height_field", &Class::stateHeightField, py::return_value_policy::reference);
 }
 
 #include "HeightField/Ocean.h"
@@ -136,11 +137,12 @@ void declare_ocean_patch(py::module& m, std::string typestr) {
 		.def("var_wind_speed", &Class::varWindSpeed, py::return_value_policy::reference)
 		.def("var_choppiness", &Class::varChoppiness, py::return_value_policy::reference)
 		.def("var_global_shift", &Class::varGlobalShift, py::return_value_policy::reference)
+
 		.def("var_wind_direction", &Class::varWindDirection, py::return_value_policy::reference)
 		.def("var_resolution", &Class::varResolution, py::return_value_policy::reference)
 		.def("var_patch_size", &Class::varPatchSize, py::return_value_policy::reference)
 		.def("var_time_scale", &Class::varTimeScale, py::return_value_policy::reference)
-		.def("state_displacement", &Class::stateDisplacement, py::return_value_policy::reference)
+
 		.def("state_height_field", &Class::stateHeightField, py::return_value_policy::reference);
 }
 

@@ -55,6 +55,21 @@ void declare_points_loader(py::module& m, std::string typestr) {
 		.def("out_point_set", &Class::outPointSet, py::return_value_policy::reference);
 }
 
+#include "StaticMeshLoader.h"
+template <typename TDataType>
+void declare_static_mesh_loader(py::module& m, std::string typestr) {
+	using Class = dyno::StaticMeshLoader<TDataType>;
+	using Parent = dyno::ParametricModel<TDataType>;
+	std::string pyclass_name = std::string("StaticMeshLoader") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("get_node_type", &Class::getNodeType)
+		.def("var_file_name", &Class::varFileName, py::return_value_policy::reference)
+		.def("state_initial_triangle_set", &Class::stateInitialTriangleSet, py::return_value_policy::reference)
+		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference);
+}
+
+
 #include "TetraMeshWriter.h"
 template <typename TDataType>
 void declare_tetra_mesh_writer(py::module& m, std::string typestr) {

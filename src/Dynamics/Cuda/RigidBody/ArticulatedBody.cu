@@ -15,6 +15,8 @@
 
 #include "GltfFunc.h"
 #include "TextureMeshLoader.h"
+#include "helpers/tinyobj_helper.h"
+
 
 namespace dyno
 {
@@ -68,7 +70,7 @@ namespace dyno
 
 		uint N = 0;
 		if (texMesh != NULL);
-			N = texMesh->shapes().size();
+		N = texMesh->shapes().size();
 
 		CArrayList<Transform3f> tms;
 		CArray<uint> instanceNum(N);

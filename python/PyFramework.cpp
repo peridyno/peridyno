@@ -820,6 +820,7 @@ void pybind_framework(py::module& m)
 	declare_multi_node_port<dyno::ParticleSystem<dyno::DataType3f>>(m, "ParticleSystem3f");
 	declare_multi_node_port<dyno::TriangularSystem<dyno::DataType3f>>(m, "TriangularSystem3f");
 	declare_multi_node_port<dyno::CapillaryWave<dyno::DataType3f>>(m, "CapillaryWave3f");
+	declare_multi_node_port<dyno::Volume<dyno::DataType3f>>(m, "Volume3f");
 
 	declare_single_node_port<dyno::Ocean<dyno::DataType3f>>(m, "Ocean3f");
 	declare_single_node_port<dyno::OceanPatch<dyno::DataType3f>>(m, "OceanPatch3f");

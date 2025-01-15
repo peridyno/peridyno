@@ -4,17 +4,22 @@ scn = dyno.SceneGraph()
 scn.set_lower_bound(dyno.Vector3f([-1.5, 0, -1.5]))
 scn.set_upper_bound(dyno.Vector3f([1.5, 3, 1.5]))
 
-mesh = dyno.StaticTriangularMesh3f()
-
+object = dyno.StaticMeshLoader3f()
+scn.add_node(object)
 FilePath = dyno.FilePath(dyno.get_asset_path() + "cloth_shell/table/table.obj")
-mesh.var_file_name().set_value(FilePath)
+object.var_file_name().set_value(FilePath)
+
+volLoader = dyno.VolumeLoader3f()
+scn.add_node(volLoader)
+FilePath = dyno.FilePath(dyno.get_asset_path() + "cloth_shell/table/table.sdf")
+volLoader.var_file_name().set_value(FilePath)
 
 boundary = dyno.VolumeBoundary3f()
-boundary.load_cube(dyno.Vector3f([-1.5, 0, -1.5]), dyno.Vector3f([1.5, 3, 1.5]), 0.005, True)
+scn.add_node(boundary)
+volLoader.connect(boundary.import_volumes())
 
-boundary.load_sdf(dyno.get_asset_path() + "cloth_shell/table/table.sdf", False)
-
-cloth = dyno.CodimensionalPD3f(0.3, 8000, 0.003, float('7e-4'), "default")
+cloth = dyno.CodimensionalPD3f()
+scn.add_node(cloth)
 cloth.load_surface(dyno.get_asset_path() + "cloth_shell/mesh40k_1_h90.obj")
 cloth.connect(boundary.import_triangular_systems())
 
@@ -26,19 +31,15 @@ surfaceRenderer.set_color(dyno.Color(0.8, 0.8, 0.8))
 surfaceRenderer.var_use_vertex_normal().set_value(True)
 
 cloth.state_triangle_set().connect(surfaceRendererCloth.in_triangle_set())
-mesh.state_triangle_set().connect(surfaceRenderer.in_triangle_set())
+object.state_triangle_set().connect(surfaceRenderer.in_triangle_set())
 cloth.graphics_pipeline().push_module(surfaceRendererCloth)
-mesh.graphics_pipeline().push_module(surfaceRenderer)
+object.graphics_pipeline().push_module(surfaceRenderer)
 
 cloth.set_visible(True)
-mesh.set_visible(True)
+object.set_visible(True)
 
 scn.print_node_info(True)
 scn.print_simulation_info(True)
-
-scn.add_node(mesh)
-scn.add_node(boundary)
-scn.add_node(cloth)
 
 app = dyno.GlfwApp()
 app.set_scenegraph(scn)

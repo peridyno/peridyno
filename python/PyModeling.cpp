@@ -50,7 +50,6 @@ void pybind_modeling(py::module& m)
 	declare_joint_animation_info(m);
 	declare_normal_visualization<dyno::DataType3f>(m, "3f");
 	declare_spline_constraint<dyno::DataType3f>(m, "3f");
-	declare_static_triangular_mesh<dyno::DataType3f>(m, "3f");
 	declare_subdivide<dyno::DataType3f>(m, "3f");
 	declare_vector_visual_node<dyno::DataType3f>(m, "3f");
 

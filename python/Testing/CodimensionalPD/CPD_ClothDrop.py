@@ -5,7 +5,7 @@ scn.set_lower_bound(dyno.Vector3f([-1.5, -1, -1.5]))
 scn.set_upper_bound(dyno.Vector3f([1.5, 3, 1.5]))
 scn.set_gravity(dyno.Vector3f([0, -200, 0]))
 
-cloth = dyno.CodimensionalPD3f(0.15, 120, 0.001, 0.0001, "default")
+cloth = dyno.CodimensionalPD3f()
 
 cloth.load_surface(dyno.get_asset_path() + "cloth_shell/mesh_drop.obj")
 

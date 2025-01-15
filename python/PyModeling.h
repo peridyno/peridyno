@@ -738,22 +738,6 @@ void declare_spline_constraint(py::module& m, std::string typestr) {
 		.def("state_topology", &Class::stateTopology, py::return_value_policy::reference);
 }
 
-#include "StaticMeshLoader.h"
-template <typename TDataType>
-void declare_static_triangular_mesh(py::module& m, std::string typestr) {
-	using Class = dyno::StaticMeshLoader<TDataType>;
-	using Parent = dyno::ParametricModel<TDataType>;
-	std::string pyclass_name = std::string("StaticMeshLoader") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("get_node_type", &Class::getNodeType)
-
-		.def("var_file_name", &Class::varFileName, py::return_value_policy::reference)
-
-		.def("state_initial_triangle_set", &Class::stateInitialTriangleSet, py::return_value_policy::reference)
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference);
-}
-
 #include "Subdivide.h"
 template <typename TDataType>
 void declare_subdivide(py::module& m, std::string typestr) {
