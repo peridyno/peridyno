@@ -100,6 +100,8 @@ namespace dyno
 			heights->width(),
 			heights->height());
 
+		triSet->update();
+
 		return true;
 	}
 

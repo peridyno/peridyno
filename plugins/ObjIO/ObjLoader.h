@@ -31,13 +31,7 @@ namespace dyno
 
 		std::string getNodeType() override { return "IO"; }
 
-		//void update() override;
-
 	public:
-		//DEF_VAR(Vec3f, Location, 0, "Node location");
-		//DEF_VAR(Vec3f, Rotation, 0, "Node rotation");
-		//DEF_VAR(Vec3f, Scale, Vec3f(1.0f), "Node scale");
-
 		DEF_VAR(FilePath, FileName, "", "");
 
 		DEF_INSTANCE_OUT(TriangleSet<TDataType>, TriangleSet, "");

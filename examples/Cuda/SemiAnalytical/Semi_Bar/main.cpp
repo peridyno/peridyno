@@ -24,7 +24,7 @@
 
 #include "ParticleSystem/MakeParticleSystem.h"
 
-#include "StaticTriangularMesh.h"
+#include "StaticMeshLoader.h"
 #include "BasicShapes/CylinderModel.h"
 
 using namespace std;
@@ -371,9 +371,9 @@ std::shared_ptr<SceneGraph> createScene()
 		Vec3f(-0.04, 0.24, 0.065), 0.016,
 		0.005);
 
-	//Create a particle emitter
-	auto emitter = scn->addNode(std::make_shared<SquareEmitter<DataType3f>>());
-	emitter->varLocation()->setValue(Vec3f(0.0f, 0.5f, 0.5f));
+// 	//Create a particle emitter
+// 	auto emitter = scn->addNode(std::make_shared<SquareEmitter<DataType3f>>());
+// 	emitter->varLocation()->setValue(Vec3f(0.0f, 0.5f, 0.5f));
 
 	//**********Boundary 2
 	auto cylinder = scn->addNode(std::make_shared<CylinderModel<DataType3f>>());
@@ -393,6 +393,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	//Visualize fluid particles in SemiAnalyticalSFINode
 	{
+		sfi->graphicsPipeline()->clear();
 		////neighbor query
 		auto nbrQuery = std::make_shared<NeighborPointQuery<DataType3f>>();
 		nbrQuery->inRadius()->setValue(0.01);
@@ -412,6 +413,7 @@ std::shared_ptr<SceneGraph> createScene()
 		//instanceRender->inTriangleSet()->allocate();
 		std::shared_ptr<TriangleSet<DataType3f>> triSet = std::make_shared<TriangleSet<DataType3f>>();
 		triSet->loadObjFile(getAssetPath() + "standard/standard_icosahedron.obj");
+		triSet->scale(1.5);
 		instanceRender->inTriangleSet()->setDataPtr(triSet);
 
 		sfi->graphicsPipeline()->pushModule(instanceRender);

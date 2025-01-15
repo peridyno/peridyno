@@ -1,6 +1,6 @@
 #include "PyIO.h"
 
-#include "Gmsh_IO/gmsh.h"
+#include "helpers/gmsh_helper.h"
 void declare_gmsh(py::module& m) {
 	using Class = dyno::Gmsh;
 	std::string pyclass_name = std::string("Gmsh");
@@ -11,7 +11,7 @@ void declare_gmsh(py::module& m) {
 		.def_readwrite("m_tets", &Class::m_tets);
 }
 
-#include "Smesh_IO/smesh.h"
+#include "helpers/smesh_helper.h"
 void declare_smesh(py::module& m) {
 	using Class = dyno::Smesh;
 	std::string pyclass_name = std::string("Smesh");

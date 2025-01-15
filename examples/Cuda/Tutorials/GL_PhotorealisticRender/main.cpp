@@ -1,7 +1,7 @@
 #include <GlfwApp.h>
 #include <SceneGraph.h>
 
-#include <ObjIO/TexturedMesh.h>
+#include <TextureMeshLoader.h>
 
 #include <Windows.h>
 
@@ -13,14 +13,14 @@ std::shared_ptr<SceneGraph> createScene()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	if(true) {
-		auto mesh = scn->addNode(std::make_shared<TexturedMesh>());
+		auto mesh = scn->addNode(std::make_shared<TextureMeshLoader>());
 		mesh->varFileName()->setValue(getAssetPath() + "obj/standard/cube.obj");
 		mesh->varScale()->setValue(Vec3f(0.3f));
 		mesh->varLocation()->setValue(Vec3f(-1.5f, 0.3f, 0.0f));
 	}
 
 	if(true) {
-		auto mesh = scn->addNode(std::make_shared<TexturedMesh>());
+		auto mesh = scn->addNode(std::make_shared<TextureMeshLoader>());
 		mesh->varFileName()->setValue(getAssetPath() + "obj/moon/Moon_Normal.obj");
 		//mesh->varFileName()->setValue("C:/Users/M/Desktop/land/Landscape.obj");
 

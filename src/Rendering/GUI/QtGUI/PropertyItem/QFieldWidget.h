@@ -73,6 +73,9 @@ namespace dyno
 
 		inline FBase* field() { return mField; }
 
+	public:
+		void clearCallBackFunc();
+
 	signals:
 		void fieldChanged();
 

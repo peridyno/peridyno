@@ -54,6 +54,7 @@ namespace dyno
 		{
 			RigidBodyInfo rigidbody;
 			rigidbody.bodyId = i;
+			rigidbody.friction = this->varFrictionCoefficient()->getValue();
 
 			auto texMesh = this->stateTextureMesh()->constDataPtr();
 
@@ -171,6 +172,7 @@ namespace dyno
 		{
 			RigidBodyInfo rigidbody;
 			rigidbody.bodyId = i;
+			rigidbody.friction = this->varFrictionCoefficient()->getValue();
 
 			auto texMesh = this->stateTextureMesh()->constDataPtr();
 
@@ -294,6 +296,7 @@ namespace dyno
 		{
 			RigidBodyInfo rigidbody;
 			rigidbody.bodyId = i;
+			rigidbody.friction = this->varFrictionCoefficient()->getValue();
 
 			auto texMesh = this->stateTextureMesh()->constDataPtr();
 			std::map<int, std::shared_ptr<PdActor>> actors;
@@ -570,6 +573,7 @@ namespace dyno
 		{
 			RigidBodyInfo rigidbody;
 			rigidbody.bodyId = i;
+			rigidbody.friction = this->varFrictionCoefficient()->getValue();
 
 			auto texMesh = this->stateTextureMesh()->constDataPtr();
 
@@ -698,6 +702,7 @@ namespace dyno
 		{
 			RigidBodyInfo rigidbody;
 			rigidbody.bodyId = i;
+			rigidbody.friction = this->varFrictionCoefficient()->getValue();
 
 			auto texMesh = this->stateTextureMesh()->constDataPtr();
 

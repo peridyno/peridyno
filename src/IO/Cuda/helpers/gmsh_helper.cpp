@@ -1,4 +1,5 @@
-#include "gmsh.h"
+#include "gmsh_helper.h"
+
 #include <string.h>
 #include <fstream>
 #include <iostream>

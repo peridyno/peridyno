@@ -14,7 +14,7 @@
 #include "Peridynamics/Module/DragSurfaceInteraction.h"
 #include "Peridynamics/Module/DragVertexInteraction.h"
 
-#include "StaticTriangularMesh.h"
+#include "StaticMeshLoader.h"
 using namespace std;
 using namespace dyno;
 
@@ -24,7 +24,7 @@ std::shared_ptr<SceneGraph> createScene()
 	scn->setLowerBound(Vec3f(-1.5, 0, -1.5));
 	scn->setUpperBound(Vec3f(1.5, 3, 1.5));
 	scn->setGravity(Vec3f(0, -0.98, 0));
-	auto object = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
+	auto object = scn->addNode(std::make_shared<StaticMeshLoader<DataType3f>>());
 	object->varFileName()->setValue(getAssetPath() + "cloth_shell/v1/woman_model.obj");
 	
 	auto volLoader = scn->addNode(std::make_shared<VolumeLoader<DataType3f>>());

@@ -8,21 +8,21 @@ namespace dyno
 {
 	template <typename TDataType> class TriangleSet;
 	/*!
-	*	\class	StaticTriangularMesh
+	*	\class	StaticMeshLoader
 	*	\brief	A node containing a TriangleSet object
 	*
 	*	This class is typically used as a representation for a static boundary mesh or base class to other classes
 	*
 	*/
 	template<typename TDataType>
-	class StaticTriangularMesh : public ParametricModel<TDataType>
+	class StaticMeshLoader : public ParametricModel<TDataType>
 	{
-		DECLARE_TCLASS(StaticTriangularMesh, TDataType)
+		DECLARE_TCLASS(StaticMeshLoader, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		StaticTriangularMesh();
+		StaticMeshLoader();
 		std::string getNodeType() override { return "IO"; }
 	public:
 		DEF_VAR(FilePath, FileName, "", "");

@@ -8,7 +8,7 @@
 #include <GLSurfaceVisualModule.h>
 #include "TriangleMeshWriter.h"
 #include "Peridynamics/CodimensionalPD.h"
-#include "StaticTriangularMesh.h"
+#include "StaticMeshLoader.h"
 #include "ManualControl.h"
 
 using namespace std;

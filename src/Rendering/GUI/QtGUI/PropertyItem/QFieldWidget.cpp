@@ -25,6 +25,11 @@ namespace dyno
 
 	QFieldWidget::~QFieldWidget()
 	{
+		this->clearCallBackFunc();
+	}
+
+	void QFieldWidget::clearCallBackFunc()
+	{
 		if (mField != nullptr) {
 			mField->detach(callback);
 		}

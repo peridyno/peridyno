@@ -112,135 +112,129 @@ namespace dyno
 
 		auto type = this->varType()->getValue();
 
-		//Setup a sphere primitive
-		TSphere3D<Real> ball;
-		ball.center = center;
-		ball.radius = radius;
-		this->outSphere()->setValue(ball);
-
 		auto polySet = this->statePolygonSet()->getDataPtr();
 
 		std::vector<Coord> vertices;
 
 
-			Real deltaTheta = M_PI / latitude;
-			Real deltaPhi = 2 * M_PI / longitude;
+		Real deltaTheta = M_PI / latitude;
+		Real deltaPhi = 2 * M_PI / longitude;
 
-			//Setup vertices
-			vertices.push_back(Coord(0, radius, 0));
+		//Setup vertices
+		vertices.push_back(Coord(0, radius, 0));
 
-			Real theta = 0;
-			for (uint i = 0; i < latitude - 1; i++)
-			{
-				theta += deltaTheta;
+		Real theta = 0;
+		for (uint i = 0; i < latitude - 1; i++)
+		{
+			theta += deltaTheta;
 
-				Real phi = 0;
-				for (uint j = 0; j < longitude; j++)
-				{
-					phi += deltaPhi;
-
-					Real y = radius * std::cos(theta);
-					Real x = (std::sin(theta) * radius) * std::sin(phi);
-					Real z = (std::sin(theta) * radius) * std::cos(phi);
-
-					vertices.push_back(Coord(x, y, z));
-				}
-			}
-
-			vertices.push_back(Coord(0, -radius, 0));
-
-			//Setup polygon indices
-			uint numOfPolygon = latitude * longitude;
-
-			CArray<uint> counter(numOfPolygon);
-
-			uint incre = 0;
+			Real phi = 0;
 			for (uint j = 0; j < longitude; j++)
 			{
-				counter[incre] = 3;
-				incre++;
-			}
+				phi += deltaPhi;
 
-			for (uint i = 0; i < latitude - 2; i++)
-			{
-				for (uint j = 0; j < longitude; j++)
-				{
-					counter[incre] = 4;
-					incre++;
-				}
-			}
+				Real y = radius * std::cos(theta);
+				Real x = (std::sin(theta) * radius) * std::sin(phi);
+				Real z = (std::sin(theta) * radius) * std::cos(phi);
 
+				vertices.push_back(Coord(x, y, z));
+			}
+		}
+
+		vertices.push_back(Coord(0, -radius, 0));
+
+		//Setup polygon indices
+		uint numOfPolygon = latitude * longitude;
+
+		CArray<uint> counter(numOfPolygon);
+
+		uint incre = 0;
+		for (uint j = 0; j < longitude; j++)
+		{
+			counter[incre] = 3;
+			incre++;
+		}
+
+		for (uint i = 0; i < latitude - 2; i++)
+		{
 			for (uint j = 0; j < longitude; j++)
 			{
-				counter[incre] = 3;
+				counter[incre] = 4;
 				incre++;
 			}
+		}
 
-			CArrayList<uint> polygonIndices;
-			polygonIndices.resize(counter);
+		for (uint j = 0; j < longitude; j++)
+		{
+			counter[incre] = 3;
+			incre++;
+		}
 
-			incre = 0;
-			uint offset = 1;
-			for (uint j = 0; j < longitude; j++)
-			{
-				auto& index = polygonIndices[incre];
-				index.insert(0);
-				index.insert(offset + j);
-				index.insert(offset + (j + 1) % longitude);
+		CArrayList<uint> polygonIndices;
+		polygonIndices.resize(counter);
 
-				incre++;
-			}
+		incre = 0;
+		uint offset = 1;
+		for (uint j = 0; j < longitude; j++)
+		{
+			auto& index = polygonIndices[incre];
+			index.insert(0);
+			index.insert(offset + j);
+			index.insert(offset + (j + 1) % longitude);
 
-			for (uint i = 0; i < latitude - 2; i++)
-			{
-				for (uint j = 0; j < longitude; j++)
-				{
-					auto& index = polygonIndices[incre];
-					index.insert(offset + j);
-					index.insert(offset + j + longitude);
-					index.insert(offset + (j + 1) % longitude + longitude);
-					index.insert(offset + (j + 1) % longitude);
+			incre++;
+		}
 
-					incre++;
-				}
-				offset += longitude;
-			}
-
+		for (uint i = 0; i < latitude - 2; i++)
+		{
 			for (uint j = 0; j < longitude; j++)
 			{
 				auto& index = polygonIndices[incre];
 				index.insert(offset + j);
-				index.insert(vertices.size() - 1);
+				index.insert(offset + j + longitude);
+				index.insert(offset + (j + 1) % longitude + longitude);
 				index.insert(offset + (j + 1) % longitude);
 
 				incre++;
 			}
+			offset += longitude;
+		}
 
-			//Apply transformation
-			Quat<Real> q = computeQuaternion();
+		for (uint j = 0; j < longitude; j++)
+		{
+			auto& index = polygonIndices[incre];
+			index.insert(offset + j);
+			index.insert(vertices.size() - 1);
+			index.insert(offset + (j + 1) % longitude);
 
-			auto RV = [&](const Coord& v)->Coord {
-				return center + q.rotate(v - center);
-			};
+			incre++;
+		}
 
-			int numpt = vertices.size();
+		//Apply transformation
+		Quat<Real> q = computeQuaternion();
 
-			for (int i = 0; i < numpt; i++) {
-				vertices[i] = RV(vertices[i] * scale + RV(center));
-			}
+		auto RV = [&](const Coord& v)->Coord {
+			return center + q.rotate(v - center);
+		};
 
-			polySet->setPoints(vertices);
-			polySet->setPolygons(polygonIndices);
-			polySet->update();
+		int numpt = vertices.size();
 
-			polygonIndices.clear();
+		for (int i = 0; i < numpt; i++) {
+			vertices[i] = RV(vertices[i] * scale + RV(center));
+		}
 
+		polySet->setPoints(vertices);
+		polySet->setPolygons(polygonIndices);
+		polySet->update();
+
+		polygonIndices.clear();
 
 		auto& ts = this->stateTriangleSet()->getData();
 		polySet->turnIntoTriangleSet(ts);
 
 		vertices.clear();
 	}
+
 	template<typename TDataType>
 	void SphereModel<TDataType>::icosahedronSphere()
 	{
@@ -277,8 +271,6 @@ namespace dyno
 
 		this->statePolygonSet()->getDataPtr()->triangleSetToPolygonSet(this->stateTriangleSet()->getData());
 		
-
-
 		return;
 	}
 
@@ -287,12 +279,23 @@ namespace dyno
 	template<typename TDataType>
 	void SphereModel<TDataType>::varChanged()
 	{
+		auto center = this->varLocation()->getValue();
+		auto rot = this->varRotation()->getValue();
+		auto scale = this->varScale()->getValue();
+
+		auto radius = this->varRadius()->getValue();
+
+		//Setup a sphere primitive
+		TSphere3D<Real> ball;
+		ball.center = center;
+		ball.radius = radius;
+		this->outSphere()->setValue(ball);
+
 		if (this->varType()->getDataPtr()->currentKey() == SphereType::Icosahedron)
 		{
 			icosahedronSphere();
 		}
-		else 
-		{
+		else {
 			standardSphere();
 		}
 

@@ -2,6 +2,7 @@
 
 #include "Ocean.h"
 #include "CapillaryWave.h"
+#include "LargeOcean.h"
 #include "OceanPatch.h"
 
 #include "Vessel.h"
@@ -70,6 +71,15 @@ namespace dyno
 			});
 
 		group->addAction(
+			"LargeOcean",
+			"ToolBarIco/HeightField/Wave.png",
+			[=]()->std::shared_ptr<Node> {
+				auto ocean = std::make_shared<LargeOcean<DataType3f>>();
+
+				return ocean;
+			});
+
+		group->addAction(
 			"CapillaryWave",
 			"ToolBarIco/HeightField/CapillaryWave.png",
 			[=]()->std::shared_ptr<Node> { return std::make_shared<CapillaryWave<DataType3f>>(); });
@@ -85,7 +95,6 @@ namespace dyno
 			"ToolBarIco/RigidBody/Boat_45.png",
 			[=]()->std::shared_ptr<Node> {
 				auto vessel = std::make_shared<Vessel<DataType3f>>();
-
 				return vessel;
 			});
 	}

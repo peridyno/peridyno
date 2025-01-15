@@ -102,6 +102,7 @@ namespace dyno
 
 		connect(PSimulationThread::instance(), SIGNAL(simulationFinished()), this, SLOT(simulationFinished()));
 		connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished(int)), this, SLOT(updateSlider(int)));
+		connect(PSimulationThread::instance(), SIGNAL(finished()), PSimulationThread::instance(), SLOT(deleteLater()));
 
 		connect(mTotalFrameSpinbox, SIGNAL(valueChanged(int)), mFrameSlider, SLOT(maximumChanged(int)));
 		connect(mTotalFrameSpinbox, SIGNAL(valueChanged(int)), this, SLOT(totalFrameChanged(int)));
@@ -116,8 +117,8 @@ namespace dyno
 	PAnimationWidget::~PAnimationWidget()
 	{
 		PSimulationThread::instance()->stop();
-		PSimulationThread::instance()->deleteLater();
-		PSimulationThread::instance()->wait();
+// 		PSimulationThread::instance()->deleteLater();
+// 		PSimulationThread::instance()->wait();
 	}
 	
 	void PAnimationWidget::toggleSimulation()

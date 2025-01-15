@@ -34,6 +34,7 @@
 #include <cstdio>
 #include <cassert>
 #include <cstdarg>
+#include <atomic>
 
 namespace dyno
 {

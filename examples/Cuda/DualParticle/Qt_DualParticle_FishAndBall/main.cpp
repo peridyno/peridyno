@@ -2,7 +2,7 @@
 #include <SceneGraph.h>
 
 #include <SemiAnalyticalScheme/TriangularMeshBoundary.h>
-#include <StaticTriangularMesh.h>
+#include <StaticMeshLoader.h>
 #include <PointsLoader.h>
 #include <BasicShapes/SphereModel.h>
 
@@ -20,7 +20,7 @@
 #include "ParticleSystem/MakeParticleSystem.h"
 #include <BasicShapes/SphereModel.h>
 #include <SemiAnalyticalScheme/TriangularMeshBoundary.h>
-#include <StaticTriangularMesh.h>
+#include <StaticMeshLoader.h>
 #include <GLSurfaceVisualModule.h>
 
 using namespace std;

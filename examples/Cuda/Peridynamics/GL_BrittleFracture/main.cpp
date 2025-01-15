@@ -18,8 +18,6 @@
 
 #include <Mapping/PointSetToTriangleSet.h>
 
-#include <SurfaceMeshLoader.h>
-
 // Modeling
 #include <BasicShapes/CubeModel.h>
 

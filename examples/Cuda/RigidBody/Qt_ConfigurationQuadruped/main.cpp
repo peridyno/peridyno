@@ -1,7 +1,7 @@
 #include <QtApp.h>
 
 #include <SceneGraph.h>
-
+#include <HeightField/GranularMedia.h>
 #include <BasicShapes/PlaneModel.h>
 #include <BasicShapes/PlaneModel.h>
 
@@ -12,7 +12,8 @@
 #include "SkeletonLoader/SkeletonLoader.h"
 #include "RigidBody/Module/AnimationDriver.h"
 #include "RigidBody/MultibodySystem.h"
-
+#include <HeightField/SurfaceParticleTracking.h>
+#include <HeightField/RigidSandCoupling.h>
 
 using namespace std;
 using namespace dyno;
@@ -29,6 +30,7 @@ std::shared_ptr<SceneGraph> creatCar()
 
 	auto robot = scn->addNode(std::make_shared<ConfigurableBody<DataType3f>>());
 	fbx->stateTextureMesh()->connect(robot->inTextureMesh());
+	robot->varLocation()->setValue(Vec3f(0,0.3,0));
 
 	VehicleBind configData;
 
@@ -94,14 +96,14 @@ std::shared_ptr<SceneGraph> creatCar()
 	hinge_DriveObjName[6] = std::string("Model::RBU_11");
 	hinge_DriveObjName[7] = std::string("Model::RBD_12");
 
-	hinge_DriveObjName[8] = std::string("Model::LFU_2");
-	hinge_DriveObjName[9] = std::string("Model::LFD_3");
-	hinge_DriveObjName[10] = std::string("Model::LBU_5");
-	hinge_DriveObjName[11] = std::string("Model::LBD_6");
-	hinge_DriveObjName[12] = std::string("Model::RFU_8");
-	hinge_DriveObjName[13] = std::string("Model::RFD_9");
-	hinge_DriveObjName[14] = std::string("Model::RBU_11");
-	hinge_DriveObjName[15] = std::string("Model::RBD_12");
+	//hinge_DriveObjName[8] = std::string("Model::LFU_2");
+	//hinge_DriveObjName[9] = std::string("Model::LFD_3");
+	//hinge_DriveObjName[10] = std::string("Model::LBU_5");
+	//hinge_DriveObjName[11] = std::string("Model::LBD_6");
+	//hinge_DriveObjName[12] = std::string("Model::RFU_8");
+	//hinge_DriveObjName[13] = std::string("Model::RFD_9");
+	//hinge_DriveObjName[14] = std::string("Model::RBU_11");
+	//hinge_DriveObjName[15] = std::string("Model::RBD_12");
 
 
 	auto multibody = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
@@ -109,12 +111,12 @@ std::shared_ptr<SceneGraph> creatCar()
 
 	auto animDriver = std::make_shared<AnimationDriver<DataType3f>>();
 	animDriver->varDriverName()->setValue(hinge_DriveObjName);
+	animDriver->varSpeed()->setValue(0.5);
 
 	multibody->animationPipeline()->pushModule(animDriver);
 	multibody->stateTimeStep()->connect(animDriver->inDeltaTime());
 	fbx->stateHierarchicalScene()->connect(animDriver->inHierarchicalScene());
 	multibody->stateTopology()->connect(animDriver->inTopology());
-	animDriver->varSpeed()->setValue(1);
 
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
 	plane->varScale()->setValue(Vec3f(20));
@@ -122,6 +124,20 @@ std::shared_ptr<SceneGraph> creatCar()
 	plane->varSegmentZ()->setValue(5);
 	plane->stateTriangleSet()->connect(multibody->inTriangleSet());
 
+	float spacing = 0.1f;
+	uint res = 256;
+	auto sand = scn->addNode(std::make_shared<GranularMedia<DataType3f>>());
+	sand->varOrigin()->setValue(-0.5f * Vec3f(res * spacing, 0.0f, res * spacing));
+	sand->varSpacing()->setValue(spacing);
+	sand->varWidth()->setValue(res);
+	sand->varHeight()->setValue(res);
+	sand->varDepth()->setValue(0.15);
+	sand->varDepthOfDiluteLayer()->setValue(0.1);
+
+
+	auto coupling = scn->addNode(std::make_shared<RigidSandCoupling<DataType3f>>());
+	multibody->connect(coupling->importRigidBodySystem());
+	sand->connect(coupling->importGranularMedia());
 
 	return scn;
 }

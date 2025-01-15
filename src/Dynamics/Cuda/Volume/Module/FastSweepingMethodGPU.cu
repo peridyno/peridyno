@@ -99,8 +99,13 @@ namespace dyno
 		int k0 = glm::clamp(int(TRI_MIN(fkp, fkq, fkr)) - exact_band, 0, nk - 1);
 		int k1 = glm::clamp(int(TRI_MAX(fkp, fkq, fkr)) + exact_band + 1, 0, nk - 1);
 
+		TTriangle3D<Real> tri(vp, vq, vr);
 		for (int k = k0; k <= k1; ++k) for (int j = j0; j <= j1; ++j) for (int i = i0; i <= i1; ++i) {
-			atomicAdd(&counter(i, j, k), 1);
+			TPoint3D<Real> point(origin + Coord(i * dx, j * dx, k * dx));
+			if (glm::abs(point.distance(tri)) < dx * 1.74)	//1.74 is chosen to be slightly larger than sqrt(3)
+			{
+				atomicAdd(&counter(i, j, k), 1);
+			}
 		}
 	}
 
@@ -148,8 +153,13 @@ namespace dyno
 		int k0 = glm::clamp(int(TRI_MIN(fkp, fkq, fkr)) - exact_band, 0, nk - 1);
 		int k1 = glm::clamp(int(TRI_MAX(fkp, fkq, fkr)) + exact_band + 1, 0, nk - 1);
 
+		TTriangle3D<Real> tri(vp, vq, vr);
 		for (int k = k0; k <= k1; ++k) for (int j = j0; j <= j1; ++j) for (int i = i0; i <= i1; ++i) {
-			triIds[counter.index(i, j, k)].atomicInsert(tId);
+			TPoint3D<Real> point(origin + Coord(i * dx, j * dx, k * dx));
+			if (glm::abs(point.distance(tri)) < dx * 1.74)	//1.74 is chosen to be slightly larger than sqrt(3)
+			{
+				triIds[counter.index(i, j, k)].atomicInsert(tId);
+			}
 		}
 	}
 
@@ -172,7 +182,7 @@ namespace dyno
 		arr1d[index1d] = arr3d(i, j, k);
 	}
 
-	template<typename Real, typename Coord>
+	template<typename Real, typename Coord, typename Tri2Edg>
 	__global__ void FSM_InitializeSDFNearMesh(
 		DArray3D<Real> phi,
 		DArray3D<int> closestId,
@@ -180,6 +190,10 @@ namespace dyno
 		DArrayList<uint> triIds,
 		DArray<Coord> vertices,
 		DArray<TopologyModule::Triangle> indices,
+		DArray<TopologyModule::Edge> edges,
+		DArray<Tri2Edg> t2e,
+		DArray<Coord> edgeN,
+		DArray<Coord> vertexN,
 		Coord origin,
 		Real dx)
 	{
@@ -201,7 +215,7 @@ namespace dyno
 		{
 			ProjectedPoint3D<Real> p3d;
 
-			bool valid = calculateSignedDistance2TriangleSet(p3d, gx, vertices, indices, list);
+			bool valid = calculateSignedDistance2TriangleSetFromNormal(p3d, gx, vertices, edges, indices, t2e, edgeN, vertexN, list);
 			if (valid) {
 				phi(i, j, k) = p3d.signed_distance;
 				closestId(i, j, k) = p3d.id;
@@ -344,12 +358,20 @@ namespace dyno
 
 		auto ts = this->inTriangleSet()->constDataPtr();
 
-		auto& mPoints = ts->getPoints();
-		auto& mTriangles = ts->getTriangles();
+		DArray<Coord> edgeNormal, vertexNormal;
+		ts->updateEdgeNormal(edgeNormal);
+		ts->updateAngleWeightedVertexNormal(vertexNormal);
+
+		ts->updateTriangle2Edge();
+		auto& tri2edg = ts->getTriangle2Edge();
+
+		auto& vertices = ts->getPoints();
+		auto& edges = ts->getEdges();
+		auto& triangles = ts->getTriangles();
 
 		Reduction<Coord> reduce;
-		Coord min_box = reduce.minimum(mPoints.begin(), mPoints.size());
-		Coord max_box = reduce.maximum(mPoints.begin(), mPoints.size());
+		Coord min_box = reduce.minimum(vertices.begin(), vertices.size());
+		Coord max_box = reduce.maximum(vertices.begin(), vertices.size());
 
 		Real dx = this->varSpacing()->getValue();
 		uint padding = this->varPadding()->getValue();
@@ -358,15 +380,15 @@ namespace dyno
 		min_box -= padding * dx * unit;
 		max_box += padding * dx * unit;
 
-		ni = std::floor((max_box[0] - min_box[0]) / dx);
-		nj = std::floor((max_box[1] - min_box[1]) / dx);
-		nk = std::floor((max_box[2] - min_box[2]) / dx);
-
 		origin = min_box;
 		maxPoint = max_box;
 
 		sdf.setSpace(min_box, max_box, dx);
 		auto& phi = sdf.distances();
+
+		ni = phi.nx();
+		nj = phi.ny();
+		nk = phi.nz();
 
 		//initialize distances near the mesh
 		DArray3D<uint> counter3d(ni, nj, nk);
@@ -382,11 +404,11 @@ namespace dyno
 			closestTriId,
 			gridType);
 
-		cuExecute(mTriangles.size(),
+		cuExecute(triangles.size(),
 			FSM_FindNeighboringGrids,
 			counter3d,
-			mPoints,
-			mTriangles,
+			vertices,
+			triangles,
 			origin,
 			dx);
 
@@ -398,12 +420,12 @@ namespace dyno
 		DArrayList<uint> neighbors;
 		neighbors.resize(counter1d);
 
-		cuExecute(mTriangles.size(),
+		cuExecute(triangles.size(),
 			FSM_StoreTriangleIds,
 			neighbors,
 			counter3d,
-			mPoints,
-			mTriangles,
+			vertices,
+			triangles,
 			origin,
 			dx);
 
@@ -413,8 +435,12 @@ namespace dyno
 			closestTriId,
 			gridType,
 			neighbors,
-			mPoints,
-			mTriangles,
+			vertices,
+			triangles,
+			edges,
+			tri2edg,
+			edgeNormal,
+			vertexNormal,
 			origin,
 			dx);
 
@@ -428,8 +454,8 @@ namespace dyno
 				phi,
 				closestTriId,
 				gridType,
-				mPoints,
-				mTriangles,
+				vertices,
+				triangles,
 				origin,
 				dx,
 				1);
@@ -440,8 +466,8 @@ namespace dyno
 				phi,
 				closestTriId,
 				gridType,
-				mPoints,
-				mTriangles,
+				vertices,
+				triangles,
 				origin,
 				dx,
 				-1);
@@ -452,8 +478,8 @@ namespace dyno
 				phi,
 				closestTriId,
 				gridType,
-				mPoints,
-				mTriangles,
+				vertices,
+				triangles,
 				origin,
 				dx,
 				1);
@@ -464,8 +490,8 @@ namespace dyno
 				phi,
 				closestTriId,
 				gridType,
-				mPoints,
-				mTriangles,
+				vertices,
+				triangles,
 				origin,
 				dx,
 				-1);
@@ -476,8 +502,8 @@ namespace dyno
 				phi,
 				closestTriId,
 				gridType,
-				mPoints,
-				mTriangles,
+				vertices,
+				triangles,
 				origin,
 				dx,
 				1);
@@ -488,8 +514,8 @@ namespace dyno
 				phi,
 				closestTriId,
 				gridType,
-				mPoints,
-				mTriangles,
+				vertices,
+				triangles,
 				origin,
 				dx,
 				-1);
@@ -499,6 +525,8 @@ namespace dyno
 		counter1d.clear();
 		gridType.clear();
 		neighbors.clear();
+		edgeNormal.clear();
+		vertexNormal.clear();
 	}
 
 	DEFINE_CLASS(FastSweepingMethodGPU);

@@ -55,17 +55,6 @@ void declare_points_loader(py::module& m, std::string typestr) {
 		.def("out_point_set", &Class::outPointSet, py::return_value_policy::reference);
 }
 
-#include "SurfaceMeshLoader.h"
-template <typename TDataType>
-void declare_surface_mesh_loader(py::module& m, std::string typestr) {
-	using Class = dyno::SurfaceMeshLoader<TDataType>;
-	using Parent = dyno::GeometryLoader<TDataType>;
-	std::string pyclass_name = std::string("SurfaceMeshLoader") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("out_triangle_set", &Class::outTriangleSet, py::return_value_policy::reference);
-}
-
 #include "TetraMeshWriter.h"
 template <typename TDataType>
 void declare_tetra_mesh_writer(py::module& m, std::string typestr) {

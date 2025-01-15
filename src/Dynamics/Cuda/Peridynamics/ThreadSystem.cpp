@@ -4,8 +4,8 @@
 #include "Topology/TetrahedronSet.h"
 
 
-#include "Smesh_IO/smesh.h"
-#include "Gmsh_IO/gmsh.h"
+#include "helpers/smesh_helper.h"
+#include "helpers/gmsh_helper.h"
 
 namespace dyno
 {
