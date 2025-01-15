@@ -2,6 +2,9 @@
 
 void pybind_peridynamics(py::module& m)
 {
+	// Basic
+	declare_tetrahedral_system<dyno::DataType3f>(m, "3f");
+
 	//Module
 	declare_calculate_normal_sdf<dyno::DataType3f>(m, "3f");
 	declare_contact_rule<dyno::DataType3f>(m, "3f");
@@ -25,7 +28,6 @@ void pybind_peridynamics(py::module& m)
 	declare_elastic_body<dyno::DataType3f>(m, "3f");
 	declare_elastoplastic_body<dyno::DataType3f>(m, "3f");
 	declare_hyperelastic_body<dyno::DataType3f>(m, "3f");
-	declare_tetrahedral_system<dyno::DataType3f>(m, "3f");
 	declare_thread_system<dyno::DataType3f>(m, "3f");
 	declare_thread<dyno::DataType3f>(m, "3f");
 }

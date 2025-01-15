@@ -200,9 +200,6 @@ void pybind_framework(py::module& m)
 		.def("process", &dyno::Action::process)
 		.def("end", &dyno::Action::end);
 
-	py::class_<dyno::Canvas, std::shared_ptr<dyno::Canvas>>(m, "Canvas")
-		.def(py::init<>());
-
 	py::class_<dyno::TimeStamp, std::shared_ptr<dyno::TimeStamp>>(m, "TimeStamp")
 		.def(py::init<>())
 		.def("mark", &dyno::TimeStamp::mark);

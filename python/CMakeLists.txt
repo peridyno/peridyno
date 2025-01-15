@@ -26,9 +26,6 @@ link_libraries(Core Interaction Framework IO Modeling Topology)
 link_libraries(GlfwGUI RenderCore GLRenderEngine ImWidgets QtGUI)
 link_libraries(DualParticleSystem HeightField Multiphysics ParticleSystem Peridynamics RigidBody SemiAnalyticalScheme Volume)
 
-file(COPY "Testing/" DESTINATION ${CMAKE_BINARY_DIR}/bin/Debug)
-file(COPY "Testing/" DESTINATION ${CMAKE_BINARY_DIR}/bin/Release)
-
 pybind11_add_module(${PyBind_Name} ${PY_ALL_SOURCE_FILES})
 
 set_target_properties(${PyBind_Name} PROPERTIES

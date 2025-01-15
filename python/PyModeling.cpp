@@ -2,6 +2,12 @@
 
 void pybind_modeling(py::module& m)
 {
+	// Basic
+	declare_model_editing<dyno::DataType3f>(m, "3f");
+	declare_polygon_set_to_triangle_set_module<dyno::DataType3f>(m, "3f");
+	declare_polygon_set_to_triangle_set_node<dyno::DataType3f>(m, "3f");
+	declare_group<dyno::DataType3f>(m, "3f");
+
 	// BasicShapes
 	declare_basic_shape<dyno::DataType3f>(m, "3f");
 	declare_capsule_model<dyno::DataType3f>(m, "3f");
@@ -22,8 +28,7 @@ void pybind_modeling(py::module& m)
 	declare_merge<dyno::DataType3f>(m, "3f");
 	declare_point_clip<dyno::DataType3f>(m, "3f");
 	declare_poly_extrude<dyno::DataType3f>(m, "3f");
-	declare_polygon_set_to_triangle_set_module<dyno::DataType3f>(m, "3f");
-	declare_polygon_set_to_triangle_set_node<dyno::DataType3f>(m, "3f");
+
 	declare_sweep_model<dyno::DataType3f>(m, "3f");
 	declare_texture_mesh_merge<dyno::DataType3f>(m, "3f");
 	declare_transform_model<dyno::DataType3f>(m, "3f");
@@ -40,37 +45,16 @@ void pybind_modeling(py::module& m)
 	declare_collision_detector<dyno::DataType3f>(m, "3f");
 	declare_bounding_box_of_texture_mesh(m);
 	declare_gltf_loader<dyno::DataType3f>(m, "3f");
-	declare_group<dyno::DataType3f>(m, "3f");
 	declare_joint_deform<dyno::DataType3f>(m, "3f");
 	declare_joint_info(m);
 	declare_joint_animation_info(m);
-	declare_model_editing<dyno::DataType3f>(m, "3f");
 	declare_normal_visualization<dyno::DataType3f>(m, "3f");
 	declare_spline_constraint<dyno::DataType3f>(m, "3f");
 	declare_static_triangular_mesh<dyno::DataType3f>(m, "3f");
 	declare_subdivide<dyno::DataType3f>(m, "3f");
 	declare_vector_visual_node<dyno::DataType3f>(m, "3f");
 
-	py::class_<dyno::Ramp, dyno::Canvas, std::shared_ptr<dyno::Ramp>>(m, "Ramp")
-		.def(py::init<>())
-		.def("get_curve_value_by_x", &dyno::Ramp::getCurveValueByX)
-		.def("update_bezier_curve", &dyno::Ramp::updateBezierCurve)
-		.def("calculate_length_for_point_set", &dyno::Ramp::calculateLengthForPointSet)
-		.def("update_resample_bezier_curve", &dyno::Ramp::updateResampleBezierCurve)
-		.def("border_close_resort", &dyno::Ramp::borderCloseResort)
-		.def("update_field_final_coord", &dyno::Ramp::UpdateFieldFinalCoord)
-		.def_readwrite("Dirmode", &dyno::Ramp::Dirmode)
-		//.def_readwrite("DirectionStrings", &dyno::Ramp::DirectionStrings)
-		.def_readwrite("myBezierPoint_H", &dyno::Ramp::myBezierPoint_H)
-		.def_readwrite("FE_MyCoord", &dyno::Ramp::FE_MyCoord)
-		.def_readwrite("FE_HandleCoord", &dyno::Ramp::FE_HandleCoord);
-
-	py::class_<dyno::Curve, dyno::Canvas, std::shared_ptr<dyno::Curve>>(m, "Curve")
-		.def(py::init<>())
-		.def("update_resample_bezier_curve", &dyno::Curve::updateResampleBezierCurve)
-		.def("update_field_final_coord", &dyno::Curve::UpdateFieldFinalCoord);
-
-	py::class_<dyno::Canvas, std::shared_ptr<dyno::Canvas>>CANVAS(m, "Curves");
+	py::class_<dyno::Canvas, std::shared_ptr<dyno::Canvas>>CANVAS(m, "Canvas");
 	CANVAS.def(py::init<>())
 		.def("add_point", &dyno::Canvas::addPoint)
 		.def("add_point_and_handle_point", &dyno::Canvas::addPointAndHandlePoint)
@@ -145,6 +129,25 @@ void pybind_modeling(py::module& m)
 		.def_readwrite("Spacing", &dyno::Canvas::Spacing)
 		.def_readwrite("segment", &dyno::Canvas::segment)
 		.def_readwrite("resampleResolution", &dyno::Canvas::resampleResolution);
+
+	py::class_<dyno::Ramp, dyno::Canvas, std::shared_ptr<dyno::Ramp>>(m, "Ramp")
+		.def(py::init<>())
+		.def("get_curve_value_by_x", &dyno::Ramp::getCurveValueByX)
+		.def("update_bezier_curve", &dyno::Ramp::updateBezierCurve)
+		.def("calculate_length_for_point_set", &dyno::Ramp::calculateLengthForPointSet)
+		.def("update_resample_bezier_curve", &dyno::Ramp::updateResampleBezierCurve)
+		.def("border_close_resort", &dyno::Ramp::borderCloseResort)
+		.def("update_field_final_coord", &dyno::Ramp::UpdateFieldFinalCoord)
+		.def_readwrite("Dirmode", &dyno::Ramp::Dirmode)
+		//.def_readwrite("DirectionStrings", &dyno::Ramp::DirectionStrings)
+		.def_readwrite("myBezierPoint_H", &dyno::Ramp::myBezierPoint_H)
+		.def_readwrite("FE_MyCoord", &dyno::Ramp::FE_MyCoord)
+		.def_readwrite("FE_HandleCoord", &dyno::Ramp::FE_HandleCoord);
+
+	py::class_<dyno::Curve, dyno::Canvas, std::shared_ptr<dyno::Curve>>(m, "Curve")
+		.def(py::init<>())
+		.def("update_resample_bezier_curve", &dyno::Curve::updateResampleBezierCurve)
+		.def("update_field_final_coord", &dyno::Curve::UpdateFieldFinalCoord);
 
 	//.def_readwrite("length_EndPoint_Map", &dyno::Canvas::length_EndPoint_Map);
 

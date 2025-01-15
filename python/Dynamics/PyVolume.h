@@ -5,7 +5,7 @@ template <typename TDataType>
 void declare_adaptive_volume_to_triangle_set(py::module& m, std::string typestr) {
 	using Class = dyno::AdaptiveVolumeToTriangleSet<TDataType>;
 	using Parent = dyno::TopologyMapping;
-	std::string pyclass_name = std::string("VolumeToTriangleSet") + typestr;
+	std::string pyclass_name = std::string("AdaptiveVolumeToTriangleSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("var_iso_value", &Class::varIsoValue, py::return_value_policy::reference)
@@ -49,7 +49,7 @@ template <typename TDataType>
 void declare_fast_sweeping_method_GPU(py::module& m, std::string typestr) {
 	using Class = dyno::FastSweepingMethodGPU<TDataType>;
 	using Parent = dyno::ComputeModule;
-	std::string pyclass_name = std::string("FastSweepingMethod") + typestr;
+	std::string pyclass_name = std::string("FastSweepingMethodGPU") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("var_spacing", &Class::varSpacing, py::return_value_policy::reference)
@@ -94,7 +94,7 @@ void declare_volume_to_grid_cell(py::module& m, std::string typestr) {
 #include "Volume/Module/VolumeToTriangleSet.h"
 template <typename TDataType>
 void declare_volume_to_triangle_set(py::module& m, std::string typestr) {
-	using Class = dyno::AdaptiveVolumeToTriangleSet<TDataType>;
+	using Class = dyno::VolumeToTriangleSet<TDataType>;
 	using Parent = dyno::TopologyMapping;
 	std::string pyclass_name = std::string("VolumeToTriangleSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())

@@ -233,7 +233,7 @@ template <typename TDataType>
 void declare_editable_mesh(py::module& m, std::string typestr) {
 	using Class = dyno::EditableMesh<TDataType>;
 	using Parent = dyno::PolygonSetToTriangleSetNode<TDataType>;
-	std::string pyclass_name = std::string("EarClipper") + typestr;
+	std::string pyclass_name = std::string("EditableMesh") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
@@ -249,7 +249,7 @@ template <typename TDataType>
 void declare_extract_shape(py::module& m, std::string typestr) {
 	using Class = dyno::ExtractShape<TDataType>;
 	using Parent = dyno::ModelEditing<TDataType>;
-	std::string pyclass_name = std::string("EarClipper") + typestr;
+	std::string pyclass_name = std::string("ExtractShape") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("var_shape_id", &Class::varShapeId, py::return_value_policy::reference)
@@ -759,7 +759,7 @@ template <typename TDataType>
 void declare_subdivide(py::module& m, std::string typestr) {
 	using Class = dyno::Subdivide<TDataType>;
 	using Parent = dyno::ParametricModel<TDataType>;
-	std::string pyclass_name = std::string("StaticTriangularMesh") + typestr;
+	std::string pyclass_name = std::string("Subdivide") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
