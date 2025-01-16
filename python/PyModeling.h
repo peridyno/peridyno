@@ -504,7 +504,7 @@ template <typename TDataType>
 void declare_shape_sampler(py::module& m, std::string typestr) {
 	using Class = dyno::ShapeSampler<TDataType>;
 	using Parent = dyno::Sampler<TDataType>;
-	std::string pyclass_name = std::string("CubeSampler") + typestr;
+	std::string pyclass_name = std::string("ShapeSampler") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		//DEF_VAR

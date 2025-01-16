@@ -1,5 +1,8 @@
 #include "PyFramework.h"
 
+#include "RigidBody/RigidBodySystem.h"
+#include "HeightField/Vessel.h"
+
 #include "Camera.h"
 void declare_camera(py::module& m)
 {
@@ -8,23 +11,33 @@ void declare_camera(py::module& m)
 	py::class_<Class, std::shared_ptr<Class>>camera(m, pyclass_name.c_str());
 	camera.def("get_view_mat", &Class::getViewMat) // 绑定 getViewMat 方法
 		.def("get_proj_mat", &Class::getProjMat) // 绑定 getProjMat 方法
+
 		.def("rotate_to_point", &Class::rotateToPoint) // 绑定 rotateToPoint 方法
 		.def("translate_to_point", &Class::translateToPoint) // 绑定 translateToPoint 方法
 		.def("zoom", &Class::zoom) // 绑定 zoom 方法
+
 		.def("register_point", &Class::registerPoint) // 绑定 registerPoint 方法
+
 		.def("set_width", &Class::setWidth) // 绑定 setWidth 方法
 		.def("set_height", &Class::setHeight) // 绑定 setHeight 方法
+
 		.def("set_clip_near", &Class::setClipNear) // 绑定 setClipNear 方法
 		.def("set_clip_far", &Class::setClipFar) // 绑定 setClipFar 方法
+
 		.def("viewport_width", &Class::viewportWidth) // 绑定 viewportWidth 方法
 		.def("viewport_height", &Class::viewportHeight) // 绑定 viewportHeight 方法
+
 		.def("clip_near", &Class::clipNear) // 绑定 clipNear 方法
 		.def("clip_far", &Class::clipFar) // 绑定 clipFar 方法
+
 		.def("set_eye_pos", &Class::setEyePos) // 绑定 setEyePos 方法
 		.def("set_target_pos", &Class::setTargetPos) // 绑定 setTargetPos 方法
+
 		.def("get_eye_pos", &Class::getEyePos) // 绑定 getEyePos 方法
 		.def("get_target_pos", &Class::getTargetPos) // 绑定 getTargetPos 方法
+
 		.def("cast_ray_in_world_space", &Class::castRayInWorldSpace) // 绑定 castRayInWorldSpace 方法
+
 		.def("set_unit_scale", &Class::setUnitScale) // 绑定 setUnitScale 方法
 		.def("unit_scale", &Class::unitScale) // 绑定 unitScale 方法
 		.def("set_projection_type", &Class::setProjectionType) // 绑定 setProjectionType 方法
@@ -781,7 +794,9 @@ void pybind_framework(py::module& m)
 	declare_var<dyno::FilePath>(m, "FilePath");
 	declare_var<dyno::Color>(m, "Color");
 	declare_var<dyno::RigidBody<dyno::DataType3f>>(m, "RigidBody3f");
-	declare_var < dyno::Quat<float>>(m, "QuatFloat");
+	declare_var<dyno::Quat<float>>(m, "QuatFloat");
+	declare_var<dyno::Curve>(m, "Curve");
+
 	py::class_<dyno::FVar<dyno::PEnum>, FBase, std::shared_ptr<dyno::FVar<dyno::PEnum>>>(m, "FVarPEnum")
 		.def(py::init<>())
 		.def("size", &dyno::FVar<dyno::PEnum>::size)
@@ -821,10 +836,16 @@ void pybind_framework(py::module& m)
 	declare_multi_node_port<dyno::TriangularSystem<dyno::DataType3f>>(m, "TriangularSystem3f");
 	declare_multi_node_port<dyno::CapillaryWave<dyno::DataType3f>>(m, "CapillaryWave3f");
 	declare_multi_node_port<dyno::Volume<dyno::DataType3f>>(m, "Volume3f");
+	declare_multi_node_port<dyno::RigidBodySystem<dyno::DataType3f>>(m, "RigidBodySystem3f");
+	declare_multi_node_port<dyno::Vessel<dyno::DataType3f>>(m, "Vessel3f");
 
+	declare_single_node_port<dyno::OceanBase<dyno::DataType3f>>(m, "OceanBase3f");
 	declare_single_node_port<dyno::Ocean<dyno::DataType3f>>(m, "Ocean3f");
 	declare_single_node_port<dyno::OceanPatch<dyno::DataType3f>>(m, "OceanPatch3f");
 	declare_single_node_port<dyno::GranularMedia<dyno::DataType3f>>(m, "GranularMedia3f");
+	declare_single_node_port<dyno::BasicShape<dyno::DataType3f>>(m, "BasicShape3f");
+	declare_single_node_port<dyno::RigidBodySystem<dyno::DataType3f>>(m, "RigidBodySystem3f");
+	declare_single_node_port<dyno::Vessel<dyno::DataType3f>>(m, "Vessel3f");
 	//declare_semi_analytical_sfi_node<dyno::DataType3f>(m, "3f");
 
 	declare_floating_number<dyno::DataType3f>(m, "3f");

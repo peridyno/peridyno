@@ -313,9 +313,10 @@ void declare_rigid_body_system(py::module& m, std::string typestr) {
 template <typename TDataType>
 void declare_articulated_body(py::module& m, std::string typestr) {
 	using Class = dyno::ArticulatedBody<TDataType>;
-	using Parent = dyno::RigidBodySystem<TDataType>;
+	using Parent1 = dyno::ParametricModel<TDataType>;
+	using Parent2 = dyno::RigidBodySystem<TDataType>;
 	std::string pyclass_name = std::string("ArticulatedBody") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent1, Parent2, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("bind", &Class::bind)
 		.def("var_file_path", &Class::varFilePath, py::return_value_policy::reference)

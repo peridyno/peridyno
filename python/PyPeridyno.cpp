@@ -10,7 +10,7 @@ PYBIND11_MODULE(PyPeridyno, m) {
 	pybind_io(m);
 	pybind_modeling(m);
 	pybind_topology(m);
-	pybind_expand(m);
+	pybind_objIO(m);
 
 	pybind_particle_system(m);
 	pybind_rigid_body(m);
@@ -22,10 +22,11 @@ PYBIND11_MODULE(PyPeridyno, m) {
 	pybind_volume(m);
 
 	pybind_render_core(m);
+	pybind_rendering(m);
 	pybind_im_widgets(m);
 	pybind_glfw_gui(m);
 	pybind_qt_gui(m);
-	pybind_rendering(m);
+
 
 
 	m.def("get_asset_path", &getAssetPath, "Get the asset path");

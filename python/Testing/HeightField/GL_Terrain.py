@@ -12,5 +12,5 @@ scn.add_node(land)
 app = dyno.GlfwApp()
 app.set_scenegraph(scn)
 app.initialize(1920, 1080, True)
-app.render_window().get_camera().set_unit_scale(512)
+
 app.main_loop()

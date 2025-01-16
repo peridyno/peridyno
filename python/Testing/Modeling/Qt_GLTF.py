@@ -1,10 +1,12 @@
 import PyPeridyno as dyno
 
 scn = dyno.SceneGraph()
+
 gltf = dyno.GltfLoader3f()
+scn.add_node(gltf)
+
 gltf.var_file_name().set_value(dyno.FilePath(dyno.get_asset_path() + "Jeep/JeepGltf/jeep.gltf"))
 
-scn.add_node(gltf)
 
 app = dyno.GlfwApp()
 app.set_scenegraph(scn)

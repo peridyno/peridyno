@@ -74,6 +74,8 @@
 #include "SceneLoaderFactory.h"
 #include "SceneLoaderXML.h"
 
+#include "Curve.h"
+
 using FBase = dyno::FBase;
 using OBase = dyno::OBase;
 using InstanceBase = dyno::InstanceBase;

@@ -46,7 +46,7 @@ void declare_granular_media(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("GranularMedia") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		//DEV_VAR
+		.def("var_origin", &Class::varOrigin, py::return_value_policy::reference)
 		.def("var_width", &Class::varWidth, py::return_value_policy::reference)
 		.def("var_height", &Class::varHeight, py::return_value_policy::reference)
 		.def("var_depth", &Class::varDepth, py::return_value_policy::reference)
@@ -115,7 +115,7 @@ void declare_ocean(py::module& m, std::string typestr) {
 		.def("var_extentZ", &Class::varExtentZ, py::return_value_policy::reference)
 		.def("var_water_level", &Class::varWaterLevel, py::return_value_policy::reference)
 		//DEF_NODE_PORTS
-		.def("import_capillary_waves", &Class::importCapillaryWaves)
+		.def("import_capillary_waves", &Class::importCapillaryWaves, py::return_value_policy::reference)
 		.def("get_capillary_waves", &Class::getCapillaryWaves)
 		.def("add_capillary_wave", &Class::addCapillaryWave)
 		.def("remove_capillary_wave", &Class::removeCapillaryWave)

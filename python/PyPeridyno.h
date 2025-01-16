@@ -5,7 +5,7 @@
 #include "PyModeling.h"
 #include "PyTopology.h"
 #include "PyIO.h"
-#include "PyExpand.h"
+#include "PyObjIO.h"
 
 #include "Rendering/PyRenderCore.h"
 #include "Rendering/PyGlfwGUI.h"
