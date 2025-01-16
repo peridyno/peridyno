@@ -43,8 +43,13 @@ void main(void)
 
 		vec3 color = vec3(0, 0, 0);
 		float factor = 1.f;
+		float depth = 1.f;
 		for (uint i = 0; i < numberFragments; i++)
 		{
+			if (nodes[fragmentIndices[i]].depth == depth )
+				continue;
+			
+			depth = nodes[fragmentIndices[i]].depth;
 			color = mix(color, nodes[fragmentIndices[i]].color.rgb, nodes[fragmentIndices[i]].color.a);
 			factor = factor * (1 - nodes[fragmentIndices[i]].color.a);
 		}
