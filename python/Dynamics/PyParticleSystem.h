@@ -400,7 +400,6 @@ void declare_particle_system(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("get_node_type", &Class::getNodeType)
-		//DEF_ARRAY_STATE
 		.def("state_position", &Class::statePosition, py::return_value_policy::reference)
 		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference)
 		.def("state_point_set", &Class::statePointSet, py::return_value_policy::reference);
@@ -473,9 +472,7 @@ void declare_make_particle_system(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("MakeParticleSystem") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		//DEF_VAR
 		.def("var_initial_velocity", &Class::varInitialVelocity, py::return_value_policy::reference)
-		//DEF_INSTANCE_IN
 		.def("in_points", &Class::inPoints, py::return_value_policy::reference);
 }
 

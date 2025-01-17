@@ -172,15 +172,15 @@ void pybind_modeling(py::module& m)
 		.value("count", dyno::Canvas::Direction::count)
 		.export_values();
 
-	py::enum_<typename dyno::Canvas::CurveMode>(CANVAS, "CurveMode")
-		.value("Open", dyno::Canvas::CurveMode::Open)
-		.value("Close", dyno::Canvas::CurveMode::Close)
-		.export_values();
-
 	py::enum_<typename dyno::Canvas::Interpolation>(CANVAS, "Interpolation")
 		.value("Linear", dyno::Canvas::Interpolation::Linear)
 		.value("Bezier", dyno::Canvas::Interpolation::Bezier)
 		.value("InterpolationCount", dyno::Canvas::Interpolation::InterpolationCount)
+		.export_values();
+
+	py::enum_<typename dyno::Canvas::CurveMode>(CANVAS, "CurveMode")
+		.value("Open", dyno::Canvas::CurveMode::Open)
+		.value("Close", dyno::Canvas::CurveMode::Close)
 		.export_values();
 
 	py::enum_<typename dyno::BasicShapeType>(m, "BasicShapeType")
@@ -191,4 +191,20 @@ void pybind_modeling(py::module& m)
 		.value("CAPSULE", dyno::BasicShapeType::CAPSULE)
 		.value("CYLINDER", dyno::BasicShapeType::CYLINDER)
 		.value("UNKNOWN", dyno::BasicShapeType::UNKNOWN);
+
+	// Canvas Struct
+	py::class_<dyno::Curve::Coord2D>(CANVAS, "Coord2D")
+		.def(py::init<>())
+		.def(py::init<double, double>())
+		.def(py::init<dyno::Vec2f>())
+		.def(py::init<double, double, int>())
+		.def("set", &dyno::Curve::Coord2D::set);
+
+	py::class_<dyno::Curve::EndPoint>(CANVAS, "EndPoint")
+		.def(py::init<>())
+		.def(py::init<int, int>());
+
+	py::class_<dyno::Curve::OriginalCoord>(CANVAS, "OriginalCoord")
+		.def(py::init<>())
+		.def("set", &dyno::Curve::OriginalCoord::set);
 }

@@ -1,9 +1,23 @@
 #include "PyRendering.h"
 
+#include "Cuda/Node/GLPointVisualNode.h"
+template <typename TDataType>
+void declare_gl_point_visual_node(py::module& m, std::string typestr) {
+	using Class = dyno::GLPointVisualNode<TDataType>;
+	using Parent = dyno::Node;
+	std::string pyclass_name = std::string("GLPointVisualNode") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("get_node_type", &Class::getNodeType)
+		.def("in_points", &Class::inPoints, py::return_value_policy::reference)
+		.def("in_vector", &Class::inVector, py::return_value_policy::reference)
+		.def("var_color", &Class::varColor, py::return_value_policy::reference)
+		.def_readwrite("pointSize", &Class::pointSize);
+}
+
 void declare_point_visual_module(py::module& m, std::string typestr) {
 	using Class = dyno::GLPointVisualModule;
 	using Parent = dyno::GLVisualModule;
-
 	std::string pyclass_name = std::string("GLPointVisualModule") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>> GLPV(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	GLPV.def(py::init<>())
@@ -24,7 +38,6 @@ void declare_point_visual_module(py::module& m, std::string typestr) {
 void declare_surface_visual_module(py::module& m, std::string typestr) {
 	using Class = dyno::GLSurfaceVisualModule;
 	using Parent = dyno::GLVisualModule;
-
 	std::string pyclass_name = std::string("GLSurfaceVisualModule") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>GLSVM(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	GLSVM.def(py::init<>())
@@ -164,6 +177,8 @@ void pybind_rendering(py::module& m)
 		.def("var_alpha", &GLVisualModule::varAlpha, py::return_value_policy::reference);
 
 	declare_color_mapping<dyno::DataType3f>(m, "3f");
+
+	declare_gl_point_visual_node<dyno::DataType3f>(m, "3f");
 
 	declare_point_visual_module(m, "");
 

@@ -12,17 +12,17 @@ void pybind_core(py::module& m)
 	declare_vector<float, 3>(m, "3f");
 	declare_vector<float, 4>(m, "4f");
 
-	// 	declare_vector<double, 2>(m, "2d");
-	// 	declare_vector<double, 3>(m, "3d");
-	// 	declare_vector<double, 4>(m, "4d");
+	declare_vector<double, 2>(m, "2d");
+	declare_vector<double, 3>(m, "3d");
+	declare_vector<double, 4>(m, "4d");
 
 	declare_matrix<float, 2>(m, "2f");
 	declare_matrix<float, 3>(m, "3f");
 	declare_matrix<float, 4>(m, "4f");
-	//
-	// 	declare_matrix<double, 2>(m, "2d");
-	// 	declare_matrix<double, 3>(m, "3d");
-	// 	declare_matrix<double, 4>(m, "4d");
+
+	declare_matrix<double, 2>(m, "2d");
+	declare_matrix<double, 3>(m, "3d");
+	declare_matrix<double, 4>(m, "4d");
 
 	declare_quat<float>(m, "1f");
 

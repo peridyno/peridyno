@@ -1,8 +1,5 @@
 #include "PyPeridyno.h"
 
-// void init_GlutGUI(py::module &);
-// void init_Core(py::module &);
-
 PYBIND11_MODULE(PyPeridyno, m) {
 	m.doc() = "Python binding of Peridyno";
 	pybind_core(m);
@@ -26,7 +23,6 @@ PYBIND11_MODULE(PyPeridyno, m) {
 	pybind_im_widgets(m);
 	pybind_glfw_gui(m);
 	pybind_qt_gui(m);
-
 
 
 	m.def("get_asset_path", &getAssetPath, "Get the asset path");

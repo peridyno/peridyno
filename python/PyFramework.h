@@ -75,6 +75,10 @@
 #include "SceneLoaderXML.h"
 
 #include "Curve.h"
+#include "Ramp.h"
+
+#include <GLSurfaceVisualModule.h>
+#include <ColorMapping.h>
 
 using FBase = dyno::FBase;
 using OBase = dyno::OBase;
@@ -181,6 +185,7 @@ void declare_instance(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("Instance") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
+		.def(py::init<std::string, std::string, dyno::FieldTypeEnum, dyno::OBase*>())
 		.def("get_template_name", &Class::getTemplateName)
 		.def("get_class_name", &Class::getClassName)
 		.def("get_data_ptr", &Class::getDataPtr)
@@ -190,12 +195,12 @@ void declare_instance(py::module& m, std::string typestr) {
 		.def("is_empty", &Class::isEmpty)
 		.def("connect", &Class::connect)
 		.def("get_data", &Class::getData, py::return_value_policy::reference)
-		.def("size", &Class::size);
-	//.def("object_pointer", &Class::objectPointer)
-	//.def("standard_object_pointer", &Class::standardObjectPointer)
-	//.def("set_object_pointer", &Class::setObjectPointer)
-	//.def("can_be_connected_by", &Class::canBeConnectedBy)
-	//.def("get_template_name", &Class::getTemplateName);
+		.def("size", &Class::size)
+		.def("object_pointer", &Class::objectPointer)
+		.def("standard_object_pointer", &Class::standardObjectPointer)
+		.def("set_object_pointer", &Class::setObjectPointer)
+		.def("can_be_connected_by", &Class::canBeConnectedBy);
+
 }
 
 //------------------------- New ------------------------------

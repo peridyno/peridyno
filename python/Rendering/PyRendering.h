@@ -53,6 +53,7 @@ void declare_gl_surface_visual_node(py::module& m, std::string typestr) {
 		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
 		.def("var_color", &Class::varColor, py::return_value_policy::reference);
 }
+void declare_gl_point_visual_node(py::module& m, std::string typestr);
 
 void declare_point_visual_module(py::module& m, std::string typestr);
 
