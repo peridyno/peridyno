@@ -100,6 +100,7 @@ cube.var_scale().set_value(dyno.Vector3f([2, 1, 1]))
 cube.graphics_pipeline().disable()
 
 cubeSampler = dyno.ShapeSampler3f()
+scn.add_node(cubeSampler)
 cubeSampler.var_sampling_distance().set_value(0.005)
 cube.connect(cubeSampler.import_shape())
 cubeSampler.graphics_pipeline().disable()
@@ -108,7 +109,7 @@ cubeSampler.graphics_pipeline().disable()
 particleSystem = dyno.MakeParticleSystem3f()
 scn.add_node(particleSystem)
 
-#cubeSampler.state_point_set().promote_output().connect(particleSystem.in_points())
+cubeSampler.state_point_set().promote_output().connect(particleSystem.in_points())
 
 # *************************************** Fluid ***************************************//
 # Particle fluid node
