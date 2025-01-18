@@ -14,7 +14,7 @@
 #include "Module/GLPhotorealisticInstanceRender.h"
 
 #include "GltfFunc.h"
-#include "TextureMeshLoader.h"
+#include "helpers/tinyobj_helper.h"
 
 namespace dyno
 {
