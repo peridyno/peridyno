@@ -16,6 +16,10 @@ void pybind_core(py::module& m)
 	declare_vector<double, 3>(m, "3d");
 	declare_vector<double, 4>(m, "4d");
 
+	//declare_vector<int, 2>(m, "2i");
+	declare_vector<int, 3>(m, "3i");
+	//declare_vector<int, 4>(m, "4i");
+
 	declare_matrix<float, 2>(m, "2f");
 	declare_matrix<float, 3>(m, "3f");
 	declare_matrix<float, 4>(m, "4f");

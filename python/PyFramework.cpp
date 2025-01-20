@@ -94,11 +94,8 @@ void declare_reset_act(py::module& m)
 		.def(py::init<>());
 }
 
-
-
 void pybind_log(py::module& m)
 {
-
 	//py::class_<Log>LOG(m, "Log");
 	//LOG.def(py::init<>())
 	//	.def("instance", &Log::instance, py::return_value_policy::reference)
@@ -114,7 +111,6 @@ void pybind_log(py::module& m)
 	//	.value("Warning", Log::Warning)
 	//	.value("Error", Log::Error)
 	//	.value("User", Log::User);
-
 }
 
 void pybind_framework(py::module& m)
@@ -126,8 +122,6 @@ void pybind_framework(py::module& m)
 		.def("is_dynamic", &dyno::ClassInfo::isDynamic)
 		.def("get_class_name", &dyno::ClassInfo::getClassName)
 		.def("get_constructor", &dyno::ClassInfo::getConstructor);
-
-
 
 	//basic
 	py::class_<Object, std::shared_ptr<Object>>(m, "Object")
@@ -616,7 +610,6 @@ void pybind_framework(py::module& m)
 		.value("PKEY_RIGHT_ALT", dyno::PKeyboardType::PKEY_RIGHT_ALT)
 		.value("PKEY_RIGHT_SUPER", dyno::PKeyboardType::PKEY_RIGHT_SUPER);
 
-
 	py::enum_<typename dyno::PModifierBits>(m, "PModifierBits")
 		.value("MB_NO_MODIFIER", dyno::PModifierBits::MB_NO_MODIFIER)
 		.value("MB_SHIFT", dyno::PModifierBits::MB_SHIFT)
@@ -683,9 +676,11 @@ void pybind_framework(py::module& m)
 		.def("get_module_type", &DataSource::getModuleType);
 
 	//pipeline
-	py::class_<GraphicsPipeline, Pipeline, std::shared_ptr<GraphicsPipeline>>(m, "GraphicsPipeline", py::buffer_protocol(), py::dynamic_attr());
+	py::class_<GraphicsPipeline, Pipeline, std::shared_ptr<GraphicsPipeline>>(m, "GraphicsPipeline", py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<Node*>());
 
-	py::class_<AnimationPipeline, Pipeline, std::shared_ptr<AnimationPipeline>>(m, "AnimationPipeline", py::buffer_protocol(), py::dynamic_attr());
+	py::class_<AnimationPipeline, Pipeline, std::shared_ptr<AnimationPipeline>>(m, "AnimationPipeline", py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<Node*>());
 
 	py::class_<TopologyModule, OBase, std::shared_ptr<TopologyModule>>(m, "TopologyModule")
 		.def(py::init<>())
@@ -755,11 +750,9 @@ void pybind_framework(py::module& m)
 		.def("add_node", static_cast<std::shared_ptr<dyno::ParametricModel<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::ParametricModel<dyno::DataType3f>>)>(&SceneGraph::addNode))
 		.def("add_node", static_cast<std::shared_ptr<dyno::GeometryLoader<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::GeometryLoader<dyno::DataType3f>>)>(&SceneGraph::addNode));
 
-
 	py::enum_<typename SceneGraph::EWorkMode>(m, "EWorkMode")
 		.value("EDIT_MODE", SceneGraph::EWorkMode::EDIT_MODE)
 		.value("RUNNING_MODE", SceneGraph::EWorkMode::RUNNING_MODE);
-
 
 	//py::class_<dyno::SceneGraphFactory>(m, "SceneGraphFactory");
 	//.def("instance", &dyno::SceneGraphFactory::instance, py::return_value_policy::reference)
@@ -772,7 +765,6 @@ void pybind_framework(py::module& m)
 		.def("load", &dyno::SceneLoader::load)
 		.def("save", &dyno::SceneLoader::save)
 		.def("can_load_file_by_extension", &dyno::SceneLoader::canLoadFileByExtension);
-
 
 	py::class_<dyno::SceneLoaderFactory>(m, "SceneLoaderFactory")
 		.def("get_instance", &dyno::SceneLoaderFactory::getInstance, py::return_value_policy::reference)
@@ -792,8 +784,14 @@ void pybind_framework(py::module& m)
 	declare_var<float>(m, "f");
 	declare_var<bool>(m, "b");
 	declare_var<uint>(m, "uint");
+	declare_var<int>(m, "int");
 	declare_var<std::string>(m, "s");
 	declare_var<dyno::Vec3f>(m, "3f");
+	declare_var<dyno::Vec3d>(m, "3d");
+	declare_var<dyno::Vec3i>(m, "3i");
+	declare_var<dyno::Vec3u>(m, "3u");
+	declare_var<dyno::Vec3c>(m, "3c");
+	declare_var<dyno::Vec3uc>(m, "3uc");
 	declare_var<dyno::TOrientedBox3D<Real>>(m, "TOrientedBox3D");
 	declare_var<dyno::FilePath>(m, "FilePath");
 	declare_var<dyno::Color>(m, "Color");
@@ -824,6 +822,7 @@ void pybind_framework(py::module& m)
 	declare_array_list<int, DeviceType::GPU>(m, "1D");
 	declare_array_list<float, DeviceType::GPU>(m, "1fD");
 	declare_array_list<Vec3f, DeviceType::GPU>(m, "3fD");
+	declare_array_list<dyno::TBond, DeviceType::GPU>(m, "TBondD");
 
 	declare_instance<TopologyModule>(m, "");
 	declare_instance<dyno::PointSet<dyno::DataType3f>>(m, "PointSet3f");
@@ -851,6 +850,7 @@ void pybind_framework(py::module& m)
 	declare_single_node_port<dyno::BasicShape<dyno::DataType3f>>(m, "BasicShape3f");
 	declare_single_node_port<dyno::RigidBodySystem<dyno::DataType3f>>(m, "RigidBodySystem3f");
 	declare_single_node_port<dyno::Vessel<dyno::DataType3f>>(m, "Vessel3f");
+	declare_single_node_port<dyno::VolumeOctree<dyno::DataType3f>>(m, "VolumeOctree3f");
 	//declare_semi_analytical_sfi_node<dyno::DataType3f>(m, "3f");
 
 	declare_floating_number<dyno::DataType3f>(m, "3f");

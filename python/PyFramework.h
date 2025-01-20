@@ -79,6 +79,8 @@
 
 #include <GLSurfaceVisualModule.h>
 #include <ColorMapping.h>
+#include <Peridynamics/Bond.h>
+#include <Volume/VolumeOctree.h>
 
 using FBase = dyno::FBase;
 using OBase = dyno::OBase;
@@ -116,7 +118,6 @@ using PrintUnsigned = dyno::PrintUnsigned;
 using Divide = dyno::Divide;
 using Multiply = dyno::Multiply;
 using Subtract = dyno::Subtract;
-
 
 using uint = unsigned int;
 using uchar = unsigned char;
@@ -200,7 +201,6 @@ void declare_instance(py::module& m, std::string typestr) {
 		.def("standard_object_pointer", &Class::standardObjectPointer)
 		.def("set_object_pointer", &Class::setObjectPointer)
 		.def("can_be_connected_by", &Class::canBeConnectedBy);
-
 }
 
 //------------------------- New ------------------------------
@@ -279,7 +279,6 @@ void declare_vector_3_source(py::module& m, std::string typestr) {
 		.def("var_value", &Class::varValue, py::return_value_policy::reference)
 		.def("out_coord", &Class::outCoord, py::return_value_policy::reference);
 }
-
 
 template <typename TDataType>
 void declare_add_real_and_real(py::module& m, std::string typestr) {

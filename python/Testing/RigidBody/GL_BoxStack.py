@@ -3,26 +3,27 @@ import PyPeridyno as dyno
 scn = dyno.SceneGraph()
 
 rigid = dyno.RigidBodySystem3f()
+scn.add_node(rigid)
 
-dim = 10
+dim = 5
 h = 0.1
 
 rigidBody = dyno.RigidBodyInfo()
-rigidBody.linear_velocity = dyno.Vector3f([0, 0, 0])
+rigidBody.linear_velocity = dyno.Vector3f([0.0, 0, 0])
 box = dyno.BoxInfo()
+box.half_length = dyno.Vector3f([h, h, h])
 for i in range(dim):
     for j in range(dim):
         for k in range(dim):
-            box.center = dyno.Vector3f([2 * i * h - h * dim, h + 2.05 * j * h, 2 * k * h - h * dim])
-            box.half_length = dyno.Vector3f([h, h, h])
-            rigid.add_box(box, rigidBody)
+            rigidBody.position = dyno.Vector3f([2 * i * h - h * dim, h + 2.01 * j * h, 2 * k * h - h * dim])
+            boxAt = rigid.add_box(box, rigidBody)
 
 mapper = dyno.DiscreteElementsToTriangleSet3f()
 rigid.state_topology().connect(mapper.in_discrete_elements())
 rigid.graphics_pipeline().push_module(mapper)
 
 sRender = dyno.GLSurfaceVisualModule()
-sRender.set_color(dyno.Color(1, 1, 0))
+sRender.set_color(dyno.Color(0.36078, 0.67451, 0.93333))
 sRender.set_alpha(1)
 mapper.out_triangle_set().connect(sRender.in_triangle_set())
 rigid.graphics_pipeline().push_module(sRender)
@@ -38,21 +39,11 @@ contactMapper.var_scale().set_value(0.02)
 rigid.graphics_pipeline().push_module(contactMapper)
 
 wireRender = dyno.GLWireframeVisualModule()
-wireRender.set_color(dyno.Color(0, 0, 1))
-contactMapper.out_edge_set().connect(wireRender.in_edge_set())
+wireRender.set_color(dyno.Color(0, 0, 0))
+mapper.out_triangle_set().connect(wireRender.in_edge_set())
 rigid.graphics_pipeline().push_module(wireRender)
 
-contactPointMapper = dyno.ContactsToPointSet3f()
-elementQuery.out_contacts().connect(contactPointMapper.in_contacts())
-rigid.graphics_pipeline().push_module(contactPointMapper)
 
-pointRender = dyno.GLPointVisualModule()
-pointRender.set_color(dyno.Color(1, 0, 0))
-pointRender.var_point_size().set_value(0.003)
-contactPointMapper.out_point_set().connect(pointRender.in_point_set())
-rigid.graphics_pipeline().push_module(pointRender)
-
-scn.add_node(rigid)
 
 app = dyno.GlfwApp()
 app.set_scenegraph(scn)

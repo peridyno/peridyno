@@ -43,8 +43,8 @@ void pybind_particle_system(py::module& m)
 	declare_make_ghost_particles<dyno::DataType3f>(m, "3f");
 	declare_make_particle_system<dyno::DataType3f>(m, "3f");
 	declare_particle_system_helper<dyno::DataType3f>(m, "3f");
-	declare_poisson_disk_sampling<dyno::DataType3f>(m, "3f");
 	declare_sdf_sampler<dyno::DataType3f>(m, "3f");
+	declare_poisson_disk_sampling<dyno::DataType3f>(m, "3f");
 
 	declare_particle_system_initializer(m);
 }

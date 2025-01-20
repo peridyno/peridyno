@@ -491,7 +491,7 @@ void declare_particle_system_helper(py::module& m, std::string typestr) {
 template <typename TDataType>
 void declare_poisson_disk_sampling(py::module& m, std::string typestr) {
 	using Class = dyno::PoissonDiskSampling<TDataType>;
-	using Parent = dyno::Sampler<TDataType>;
+	using Parent = dyno::SdfSampler<TDataType>;
 	std::string pyclass_name = std::string("PoissonDiskSampling") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
