@@ -1,58 +1,31 @@
 import PyPeridyno as dyno
 
+M_PI = 3.14159265358979323846
+
 scn = dyno.SceneGraph()
 
 rigid = dyno.RigidBodySystem3f()
 scn.add_node(rigid)
 rigidBody = dyno.RigidBodyInfo()
-rigidBody.linear_velocity = dyno.Vector3f([1, 0, 0])
-
+rigidBody.linear_velocity = dyno.Vector3f([0,0,0])
 box = dyno.BoxInfo()
-box.half_length = dyno.Vector3f([0.5 * 0.065, 0.5 * 0.065, 0.5 * 0.1])
-for i in range(8, 1, -1):
-    for j in range(i + 1):
-        rigidBody.position = dyno.Vector3f([0.5, 0.5, 0.5]) * dyno.Vector3f(
-            [0.5, 1.1 - 0.13 * i, 0.12 + 0.2 * j + 0.1 * (8 - i)])
-        boxAt = rigid.add_box(box, rigidBody)
-
-for i in range(8, 1, -1):
+box.half_length = dyno.Vector3f([5,5,5]) * dyno.Vector3f([0.065,0.065,0.1])
+N = 8
+for i in range(N, 0, -1):
     for j in range(i+1):
-        rigidBody.position = dyno.Vector3f([0.5, 0.5, 0.5]) * dyno.Vector3f(
-            [2.5, 1.1 - 0.13 * i, 0.12 + 0.2 * j + 0.1 * (8 - i)])
-        rigidBody.friction = 0.1
-        boxAt = rigid.add_box(box, rigidBody)
-
-sphere = dyno.SphereInfo()
-sphere.radius = 0.025
-
-rigidSphere = dyno.RigidBodyInfo()
-rigidSphere.position = dyno.Vector3f([0.5, 0.75, 0.5])
-sphereAt1 = rigid.add_sphere(sphere, rigidSphere)
-
-rigidSphere.position = dyno.Vector3f([0.5, 0.95, 0.5])
-sphereAt2 = rigid.add_sphere(sphere, rigidSphere)
-
-rigidSphere.position = dyno.Vector3f([0.5, 0.65, 0.5])
-sphere.radius = 0.05
-sphereAt3 = rigid.add_sphere(sphere, rigidSphere)
-
-rigidSphere.position = dyno.Vector3f([0, 0, 0])
-tet = dyno.TetInfo()
-tet.v = [
-    dyno.Vector3f([0.5, 1.1, 0.5]),
-    dyno.Vector3f([0.5, 1.2, 0.5]),
-    dyno.Vector3f([0.6, 1.1, 0.5]),
-    dyno.Vector3f([0.5, 1.1, 0.6]),
-]
-TetAt = rigid.add_tet(tet, rigidSphere)
+        rigidBody.position = dyno.Vector3f([5,5,5]) * dyno.Vector3f([0.5,0.065+0.15*(N-i), 0.12+0.2*j+0.1*(N-j)])
+        if i==0:
+            boxAt = rigid.add_box(box, rigidBody, 10000)
+        else:
+            boxAt = rigid.add_box(box, rigidBody)
 
 mapper = dyno.DiscreteElementsToTriangleSet3f()
 rigid.state_topology().connect(mapper.in_discrete_elements())
 rigid.graphics_pipeline().push_module(mapper)
 
 sRender = dyno.GLSurfaceVisualModule()
-sRender.set_color(dyno.Color(1, 1, 0))
-sRender.set_alpha(0.5)
+sRender.set_color(dyno.Color(1,1,0))
+sRender.set_alpha(1.0)
 mapper.out_triangle_set().connect(sRender.in_triangle_set())
 rigid.graphics_pipeline().push_module(sRender)
 

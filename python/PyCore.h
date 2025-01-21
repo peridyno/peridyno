@@ -103,6 +103,7 @@ void declare_quat(py::module& m, std::string typestr) {
 	using Quat = dyno::Quat<Real>;
 	std::string pyclass_name = std::string("Quat") + typestr;
 	py::class_<Quat>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
 		.def(py::init<Real, Real, Real, Real>())
 		.def(py::init<Real, const dyno::Vector<Real, 3>&>());
 }

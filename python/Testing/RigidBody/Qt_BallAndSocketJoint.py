@@ -4,55 +4,37 @@ scn = dyno.SceneGraph()
 
 rigid = dyno.RigidBodySystem3f()
 scn.add_node(rigid)
-rigidBody = dyno.RigidBodyInfo()
-rigidBody.linear_velocity = dyno.Vector3f([1, 0, 0])
 
-box = dyno.BoxInfo()
-box.half_length = dyno.Vector3f([0.5 * 0.065, 0.5 * 0.065, 0.5 * 0.1])
-for i in range(8, 1, -1):
-    for j in range(i + 1):
-        rigidBody.position = dyno.Vector3f([0.5, 0.5, 0.5]) * dyno.Vector3f(
-            [0.5, 1.1 - 0.13 * i, 0.12 + 0.2 * j + 0.1 * (8 - i)])
-        boxAt = rigid.add_box(box, rigidBody)
+box =  dyno.BoxInfo()
+rA = dyno.RigidBodyInfo()
+rA.bodyId = 1
+rA.linear_velocity = dyno.Vector3f([1,0,0])
+box.center = dyno.Vector3f([0,0,0])
+box.half_length = dyno.Vector3f([0.05,0.05,0.05])
+oldBoxActor = rigid.add_box(box, rA)
 
-for i in range(8, 1, -1):
-    for j in range(i+1):
-        rigidBody.position = dyno.Vector3f([0.5, 0.5, 0.5]) * dyno.Vector3f(
-            [2.5, 1.1 - 0.13 * i, 0.12 + 0.2 * j + 0.1 * (8 - i)])
-        rigidBody.friction = 0.1
-        boxAt = rigid.add_box(box, rigidBody)
+for i in range(100):
+    rB = dyno.RigidBodyInfo()
+    rB.position = rA.position + dyno.Vector3f([0, 0.12, 0])
+    rB.linear_velocity = dyno.Vector3f([0,0,0])
 
-sphere = dyno.SphereInfo()
-sphere.radius = 0.025
+    newBoxActor = rigid.add_box(box, rB)
 
-rigidSphere = dyno.RigidBodyInfo()
-rigidSphere.position = dyno.Vector3f([0.5, 0.75, 0.5])
-sphereAt1 = rigid.add_sphere(sphere, rigidSphere)
+    ballAndSockerJoint = rigid.create_ball_and_socket_joint(oldBoxActor, newBoxActor)
+    ballAndSockerJoint.set_anchor_point((rA.position + rB.position) / 2)
 
-rigidSphere.position = dyno.Vector3f([0.5, 0.95, 0.5])
-sphereAt2 = rigid.add_sphere(sphere, rigidSphere)
-
-rigidSphere.position = dyno.Vector3f([0.5, 0.65, 0.5])
-sphere.radius = 0.05
-sphereAt3 = rigid.add_sphere(sphere, rigidSphere)
-
-rigidSphere.position = dyno.Vector3f([0, 0, 0])
-tet = dyno.TetInfo()
-tet.v = [
-    dyno.Vector3f([0.5, 1.1, 0.5]),
-    dyno.Vector3f([0.5, 1.2, 0.5]),
-    dyno.Vector3f([0.6, 1.1, 0.5]),
-    dyno.Vector3f([0.5, 1.1, 0.6]),
-]
-TetAt = rigid.add_tet(tet, rigidSphere)
+    rA = rB
+    oldBoxActor = newBoxActor
 
 mapper = dyno.DiscreteElementsToTriangleSet3f()
 rigid.state_topology().connect(mapper.in_discrete_elements())
 rigid.graphics_pipeline().push_module(mapper)
 
 sRender = dyno.GLSurfaceVisualModule()
-sRender.set_color(dyno.Color(1, 1, 0))
-sRender.set_alpha(0.5)
+sRender.set_color(dyno.Color(0.3,0.5,0.9))
+sRender.set_alpha(0.8)
+sRender.set_roughness(0.7)
+sRender.set_metallic(3)
 mapper.out_triangle_set().connect(sRender.in_triangle_set())
 rigid.graphics_pipeline().push_module(sRender)
 

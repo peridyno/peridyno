@@ -3,14 +3,17 @@ import PyPeridyno as dyno
 
 def createTwoBoxes(rigid):
     rigidBody = dyno.RigidBodyInfo()
+    rigidBody.position = dyno.Vector3f([-0.3, 0.1, 0.5])
     rigidBody.linear_velocity = dyno.Vector3f([0, 0, 0])
+
     box = dyno.BoxInfo()
-    box.center = dyno.Vector3f([-0.3, 0.1, 0.5])
     box.half_length = dyno.Vector3f([0.1, 0.1, 0.1])
     rigid.add_box(box, rigidBody)
 
+    rigidBody.position = dyno.Vector3f([-0.3, 0.3, 0.5])
+    rigidBody.motion_type = dyno.BodyType.Dynamic
     rigidBody.linear_velocity = dyno.Vector3f([0, 0, 0])
-    box.center = dyno.Vector3f([-0.3, 0.3, 0.5])
+
     box.half_length = dyno.Vector3f([0.1, 0.1, 0.1])
     rigid.add_box(box, rigidBody)
 
@@ -18,6 +21,7 @@ def createTwoBoxes(rigid):
 def createTwoTets(rigid):
     rigidBody = dyno.RigidBodyInfo()
     rigidBody.linear_velocity = dyno.Vector3f([0, 0, 0])
+
     tet0 = dyno.TetInfo()
     tet0.v = [
         dyno.Vector3f([0.45, 0.3, 0.45]),
@@ -39,9 +43,9 @@ def createTwoTets(rigid):
 
 def createTetBox(rigid):
     rigidBody = dyno.RigidBodyInfo()
+    rigidBody.position = dyno.Vector3f([1.3, 0.1, 0.5])
     rigidBody.linear_velocity = dyno.Vector3f([0, 0, 0])
     box = dyno.BoxInfo()
-    box.center = dyno.Vector3f([1.3, 0.1, 0.5])
     box.half_length = dyno.Vector3f([0.1, 0.1, 0.1])
     rigid.add_box(box, rigidBody)
 
@@ -57,17 +61,18 @@ def createTetBox(rigid):
 
 def createTwoCapsules(rigid):
     rigidBody = dyno.RigidBodyInfo()
+    rigidBody.position = dyno.Vector3f([-1.25, 0.1, -0.5])
     rigidBody.linear_velocity = dyno.Vector3f([0, 0, 0])
+
     capsule = dyno.CapsuleInfo()
-    capsule.center = dyno.Vector3f([-1.25, 0.1, -0.5])
     capsule.rot = dyno.Quat1f(3.14159265358979323846 / 2, dyno.Vector3f([1, 0, 0]))
     capsule.half_length = 0.1
     capsule.radius = 0.1
     rigid.add_capsule(capsule, rigidBody)
 
-    capsule.center = dyno.Vector3f([-1.3, 0.33, -0.5])
-    capsule.rot = dyno.Quat1f(3.14159265358979323846 / 2, dyno.Vector3f([1, 0, 0]))
+    rigidBody.position = dyno.Vector3f([-1.3, 0.3, -0.5])
     capsule.half_length = 0.1
+    capsule.rot = dyno.Quat1f(3.14159265358979323846 / 2, dyno.Vector3f([1, 0, 0]))
     capsule.radius = 0.1
     rigid.add_capsule(capsule, rigidBody)
 
@@ -76,21 +81,43 @@ def createCapsuleBox(rigid):
     rigidBody = dyno.RigidBodyInfo()
     rigidBody.linear_velocity = dyno.Vector3f([0, 0, 0])
     box = dyno.BoxInfo()
-    box.center = dyno.Vector3f([-1.3, 0.1, 0.5])
     box.half_length = dyno.Vector3f([0.1, 0.1, 0.1])
+
+    rigidBody.position = dyno.Vector3f([-1.3, 0.1, 0.5])
+
     rigid.add_box(box, rigidBody)
 
     capsule = dyno.CapsuleInfo()
-    capsule.center = dyno.Vector3f([-1.3, 0.3, 0.35])
     capsule.rot = dyno.Quat1f(3.14159265358979323846 / 2, dyno.Vector3f([1, 0, 0]))
     capsule.half_length = 0.1
     capsule.radius = 0.1
+
+    rigidBody.position = dyno.Vector3f([-1.3, 0.3, 0.5])
+
     rigid.add_capsule(capsule, rigidBody)
 
+def createBoxCapsule(rigid):
+    capsule = dyno.CapsuleInfo()
+    capsule.rot = dyno.Quat1f(3.14159265358979323846 / 2, dyno.Vector3f([1, 0, 0]))
+    capsule.half_length = 0.1
+    capsule.radius = 0.1
+
+    rigidBody = dyno.RigidBodyInfo()
+    rigidBody.position = dyno.Vector3f([-0.3, 0.1, -0.35])
+    rigidBody.linear_velocity = dyno.Vector3f([0, 0, 0])
+
+    rigid.add_capsule(capsule, rigidBody)
+
+    box = dyno.BoxInfo()
+    box.half_length = dyno.Vector3f([0.1, 0.1, 0.1])
+
+    rigidBody.position = dyno.Vector3f([-0.3, 0.3, -0.5])
+
+    rigid.add_box(box, rigidBody)
 
 def createCapsuleTet(rigid):
     rigidBody = dyno.RigidBodyInfo()
-    rigidBody.linear_velocity = dyno.Vector3f([0, 0, 0])
+
     tet0 = dyno.TetInfo()
     tet0.v = [
         dyno.Vector3f([0.45, 0, -0.45]),
@@ -101,24 +128,51 @@ def createCapsuleTet(rigid):
     rigid.add_tet(tet0, rigidBody)
 
     capsule = dyno.CapsuleInfo()
-    capsule.center = dyno.Vector3f([0.45, 0.4, -0.35])
+
     capsule.rot = dyno.Quat1f(3.14159265358979323846 / 2, dyno.Vector3f([1, 0, 0]))
     capsule.half_length = 0.1
     capsule.radius = 0.1
+
+    rigidBody.position = dyno.Vector3f([0.45, 0.4, -0.35])
+
     rigid.add_capsule(capsule, rigidBody)
 
+def createTetCapsule(rigid):
+    rigidBody = dyno.RigidBodyInfo()
+    rigidBody.linear_velocity = dyno.Vector3f([0, 0, 0])
+
+    tet0 = dyno.TetInfo()
+    tet0.v = [
+        dyno.Vector3f([1.25, 0.3, -0.45]),
+        dyno.Vector3f([1.25, 0.55, -0.45]),
+        dyno.Vector3f([1.5, 0.3, -0.45]),
+        dyno.Vector3f([1.25, 0.3, -0.2]),
+    ]
+    rigid.add_tet(tet0, rigidBody)
+
+    capsule = dyno.CapsuleInfo()
+    capsule.rot = dyno.Quat1f(3.14159265358979323846 / 2, dyno.Vector3f([1, 0, 0]))
+    capsule.half_length = 0.1
+    capsule.radius = 0.1
+
+    rigidBody.position = dyno.Vector3f([1.25, 0.1, -0.35])
+
+    rigid.add_capsule(capsule, rigidBody)
 
 def createTwoSpheres(rigid):
     rigidBody = dyno.RigidBodyInfo()
     rigidBody.linear_velocity = dyno.Vector3f([0, 0, 0])
     sphere = dyno.SphereInfo()
-    sphere.center = dyno.Vector3f([-1.3, 0.1, 1.5])
     sphere.radius = 0.1
+
+    rigidBody.position = dyno.Vector3f([-1.3, 0.1, 1.5])
     rigid.add_sphere(sphere, rigidBody)
 
     rigidBody.linear_velocity = dyno.Vector3f([0, 0, 0])
-    sphere.center = dyno.Vector3f([-1.3, 0.3, 1.59])
     sphere.radius = 0.1
+
+    rigidBody.position = dyno.Vector3f([-1.3, 0.3, 1.59])
+
     rigid.add_sphere(sphere, rigidBody)
 
 
@@ -126,14 +180,18 @@ def createSphereBox(rigid):
     rigidBody = dyno.RigidBodyInfo()
     rigidBody.linear_velocity = dyno.Vector3f([0, 0, 0])
     box = dyno.BoxInfo()
-    box.center = dyno.Vector3f([-0.3, 0.3, 1.5])
     box.half_length = dyno.Vector3f([0.1, 0.1, 0.1])
+
+    rigidBody.position = dyno.Vector3f([-0.3, 0.3, 1.5])
+
     rigid.add_box(box, rigidBody)
 
     sphere = dyno.SphereInfo()
     rigidBody.linear_velocity = dyno.Vector3f([0, 0, 0])
-    sphere.center = dyno.Vector3f([-0.3, 0.1, 1.59])
     sphere.radius = 0.1
+
+    rigidBody.position = dyno.Vector3f([-0.3, 0.1, 1.59])
+
     rigid.add_sphere(sphere, rigidBody)
 
 
@@ -151,8 +209,10 @@ def createSphereTet(rigid):
 
     sphere = dyno.SphereInfo()
     rigidBody.linear_velocity = dyno.Vector3f([0, 0, 0])
-    sphere.center = dyno.Vector3f([0.7, 0.1, 1.59])
     sphere.radius = 0.1
+
+    rigidBody.position = dyno.Vector3f([0.7, 0.1, 1.59])
+
     rigid.add_sphere(sphere, rigidBody)
 
 
@@ -160,29 +220,33 @@ def createSphereCapsule(rigid):
     rigidBody = dyno.RigidBodyInfo()
     rigidBody.linear_velocity = dyno.Vector3f([0, 0, 0])
     capsule = dyno.CapsuleInfo()
-    capsule.center = dyno.Vector3f([1.3, 0.3, 1.6])
     capsule.rot = dyno.Quat1f(3.14159265358979323846 / 2, dyno.Vector3f([1, 0, 0]))
     capsule.half_length = 0.1
     capsule.radius = 0.1
+
+    rigidBody.position = dyno.Vector3f([1.3, 0.3, 1.6])
+
     rigid.add_capsule(capsule, rigidBody)
 
     sphere = dyno.SphereInfo()
     rigidBody.linear_velocity = dyno.Vector3f([0, 0, 0])
-    sphere.center = dyno.Vector3f([1.3, 0.1, 1.59])
     sphere.radius = 0.1
+
+    rigidBody.position = dyno.Vector3f([1.3, 0.1, 1.59])
+
     rigid.add_sphere(sphere, rigidBody)
 
 
 scn = dyno.SceneGraph()
 
 rigid = dyno.RigidBodySystem3f()
-
+scn.add_node(rigid)
+rigid.set_dt(0.005)
 mapper = dyno.DiscreteElementsToTriangleSet3f()
 rigid.state_topology().connect(mapper.in_discrete_elements())
 rigid.graphics_pipeline().push_module(mapper)
 
 sRender = dyno.GLSurfaceVisualModule()
-sRender.set_color(dyno.Color(1, 1, 0))
 sRender.set_alpha(0.8)
 mapper.out_triangle_set().connect(sRender.in_triangle_set())
 rigid.graphics_pipeline().push_module(sRender)
@@ -232,13 +296,14 @@ createTetBox(rigid)
 createCapsuleBox(rigid)
 createTwoCapsules(rigid)
 createCapsuleTet(rigid)
+createBoxCapsule(rigid)
+createTetCapsule(rigid)
 
 createTwoSpheres(rigid)
 createSphereBox(rigid)
 createSphereTet(rigid)
 createSphereCapsule(rigid)
 
-scn.add_node(rigid)
 
 app = dyno.GlfwApp()
 app.set_scenegraph(scn)

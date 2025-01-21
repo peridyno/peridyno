@@ -112,7 +112,12 @@ void pybind_topology(py::module& m)
 	declare_calculate_minimum<dyno::DataType3f>(m, "3f");
 	declare_calculate_norm<dyno::DataType3f>(m, "3f");
 
-	py::class_<dyno::PdActor, std::shared_ptr<dyno::PdActor>>PdActor(m, "PdActor");
+	py::class_<dyno::PdActor, std::shared_ptr<dyno::PdActor>>(m, "PdActor")
+		.def(py::init<>())
+		.def_readwrite("idx", &dyno::PdActor::idx)
+		.def_readwrite("shapeType", &dyno::PdActor::shapeType)
+		.def_readwrite("center", &dyno::PdActor::center)
+		.def_readwrite("rot", &dyno::PdActor::rot);
 
 	// Topology
 	declare_animation_curve<dyno::DataType3f>(m, "3f");
@@ -357,5 +362,4 @@ void pybind_topology(py::module& m)
 
 		.def_readwrite("mTimeStart", &dyno::HierarchicalScene::mTimeStart)
 		.def_readwrite("mTimeEnd", &dyno::HierarchicalScene::mTimeEnd);
-
 }

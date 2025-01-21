@@ -1,40 +1,35 @@
 import PyPeridyno as dyno
 
+M_PI = 3.14159265358979323846
+
 scn = dyno.SceneGraph()
 
 rigid = dyno.RigidBodySystem3f()
 scn.add_node(rigid)
+dim = 5
+h = 0.1
 
-box =  dyno.BoxInfo()
-box.center = dyno.Vector3f([0,0,0])
-box.half_length = dyno.Vector3f([0.02, 0.02,0.02])
+rigidBody = dyno.RigidBodyInfo()
+box = dyno.BoxInfo()
+box.half_length = dyno.Vector3f([h,h,h])
 
-rbA = dyno.RigidBodyInfo()
-rbB = dyno.RigidBodyInfo()
-rbA.position = dyno.Vector3f([0,0.1,0])
-rbA.linear_velocity = dyno.Vector3f([1, 0, 1])
+test = [dyno.BodyType.Dynamic, dyno.BodyType.Kinematic, dyno.BodyType.Static]
 
-oldBoxActor = rigid.add_box(box, rbA)
+cnt =1
 
-rbA.linear_velocity = dyno.Vector3f([0,0,0])
-
-for i in range(1, 300):
-    rbB.position = rbA.position + dyno.Vector3f([0, 0.05, 0])
-    rbB.angle = dyno.Quat1f(3.14159265358979323846 / 3 * i, dyno.Vector3f([0,1,0]))
-    newBoxActor = rigid.add_box(box, rbB)
-
-    fixedJoint = rigid.create_fixed_joint(oldBoxActor, newBoxActor)
-    fixedJoint.set_anchor_point((rbA.position + rbB.position) / 2)
-
-    rbA = rbB
-    oldBoxActor = newBoxActor
+for te in test:
+    rigidBody.angular_velocity = dyno.Vector3f([0,0,0.5])
+    rigidBody.motion_type = te
+    rigidBody.position = dyno.Vector3f([cnt*0.5,0.5,0])
+    cnt = cnt + 1
+    boxAt = rigid.add_box(box, rigidBody)
 
 mapper = dyno.DiscreteElementsToTriangleSet3f()
 rigid.state_topology().connect(mapper.in_discrete_elements())
 rigid.graphics_pipeline().push_module(mapper)
 
 sRender = dyno.GLSurfaceVisualModule()
-sRender.set_color(dyno.Color(1, 1, 0))
+sRender.set_color(dyno.Color(0.36078, 0.67451, 0.93333))
 sRender.set_alpha(1.0)
 mapper.out_triangle_set().connect(sRender.in_triangle_set())
 rigid.graphics_pipeline().push_module(sRender)
@@ -54,15 +49,15 @@ wireRender.set_color(dyno.Color(0, 0, 1))
 contactMapper.out_edge_set().connect(wireRender.in_edge_set())
 rigid.graphics_pipeline().push_module(wireRender)
 
-contactPointMapper = dyno.ContactsToPointSet3f()
-elementQuery.out_contacts().connect(contactPointMapper.in_contacts())
-rigid.graphics_pipeline().push_module(contactPointMapper)
-
-pointRender = dyno.GLPointVisualModule()
-pointRender.set_color(dyno.Color(1, 0, 0))
-pointRender.var_point_size().set_value(0.003)
-contactPointMapper.out_point_set().connect(pointRender.in_point_set())
-rigid.graphics_pipeline().push_module(pointRender)
+# contactPointMapper = dyno.ContactsToPointSet3f()
+# elementQuery.out_contacts().connect(contactPointMapper.in_contacts())
+# rigid.graphics_pipeline().push_module(contactPointMapper)
+#
+# pointRender = dyno.GLPointVisualModule()
+# pointRender.set_color(dyno.Color(1, 0, 0))
+# pointRender.var_point_size().set_value(0.003)
+# contactPointMapper.out_point_set().connect(pointRender.in_point_set())
+# rigid.graphics_pipeline().push_module(pointRender)
 
 app = dyno.GlfwApp()
 app.set_scenegraph(scn)

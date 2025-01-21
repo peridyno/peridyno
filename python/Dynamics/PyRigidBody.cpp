@@ -7,6 +7,7 @@ void declare_rigid_body_info(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("RigidBodyInfo") + typestr;
 	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
+		.def(py::init < dyno::Vector<float, 3>, dyno::Quat<Real>>())
 		.def_readwrite("linear_velocity", &Class::linearVelocity)
 		.def_readwrite("angular_velocity", &Class::angularVelocity)
 		.def_readwrite("position", &Class::position)

@@ -81,6 +81,7 @@
 #include <ColorMapping.h>
 #include <Peridynamics/Bond.h>
 #include <Volume/VolumeOctree.h>
+#include "ParticleSystem/GhostFluid.h"
 
 using FBase = dyno::FBase;
 using OBase = dyno::OBase;
@@ -153,10 +154,19 @@ template<typename T, DeviceType deviceType>
 void declare_array(py::module& m, std::string typestr) {
 	using Class = dyno::FArray<T, deviceType>;
 	using Parent = FBase;
+	typedef T							VarType;
 	std::string pyclass_name = std::string("FArray") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("resize", &Class::resize);
+		.def("size", &Class::size)
+		.def("resize", &Class::resize)
+		.def("reset", &Class::reset)
+		.def("clear", &Class::clear)
+		//.def("assign", py::overload_cast<const T&>(&Class::assign))
+		//.def("assign", py::overload_cast<const std::vector<T>&>(&Class::assign))
+		//.def("assign", py::overload_cast<const dyno::Array<T, DeviceType::GPU>&>(&Class::assign))
+		//.def("assign", py::overload_cast<const dyno::Array<T, DeviceType::CPU>&>(&Class::assign))
+		.def("is_empty", &Class::isEmpty);
 }
 
 template<typename T, DeviceType deviceType>

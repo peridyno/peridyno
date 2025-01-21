@@ -822,7 +822,7 @@ void pybind_framework(py::module& m)
 	declare_array_list<int, DeviceType::GPU>(m, "1D");
 	declare_array_list<float, DeviceType::GPU>(m, "1fD");
 	declare_array_list<Vec3f, DeviceType::GPU>(m, "3fD");
-	declare_array_list<dyno::TBond, DeviceType::GPU>(m, "TBondD");
+	declare_array_list<dyno::TBond<dyno::DataType3f>, DeviceType::GPU>(m, "TBondD3f");
 
 	declare_instance<TopologyModule>(m, "");
 	declare_instance<dyno::PointSet<dyno::DataType3f>>(m, "PointSet3f");
@@ -851,6 +851,7 @@ void pybind_framework(py::module& m)
 	declare_single_node_port<dyno::RigidBodySystem<dyno::DataType3f>>(m, "RigidBodySystem3f");
 	declare_single_node_port<dyno::Vessel<dyno::DataType3f>>(m, "Vessel3f");
 	declare_single_node_port<dyno::VolumeOctree<dyno::DataType3f>>(m, "VolumeOctree3f");
+	declare_single_node_port<dyno::GhostParticles<dyno::DataType3f>>(m, "GhostParticles3f");
 	//declare_semi_analytical_sfi_node<dyno::DataType3f>(m, "3f");
 
 	declare_floating_number<dyno::DataType3f>(m, "3f");

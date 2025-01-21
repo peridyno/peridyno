@@ -1,58 +1,44 @@
 import PyPeridyno as dyno
 
+M_PI = 3.14159265358979323846
+
 scn = dyno.SceneGraph()
 
 rigid = dyno.RigidBodySystem3f()
 scn.add_node(rigid)
+
 rigidBody = dyno.RigidBodyInfo()
-rigidBody.linear_velocity = dyno.Vector3f([1, 0, 0])
+rigidBody.friction = 0.01
+box1 = box2 = dyno.BoxInfo()
 
-box = dyno.BoxInfo()
-box.half_length = dyno.Vector3f([0.5 * 0.065, 0.5 * 0.065, 0.5 * 0.1])
-for i in range(8, 1, -1):
-    for j in range(i + 1):
-        rigidBody.position = dyno.Vector3f([0.5, 0.5, 0.5]) * dyno.Vector3f(
-            [0.5, 1.1 - 0.13 * i, 0.12 + 0.2 * j + 0.1 * (8 - i)])
-        boxAt = rigid.add_box(box, rigidBody)
+box1.half_length = dyno.Vector3f([0.09, 0.1, 0.1])
 
-for i in range(8, 1, -1):
-    for j in range(i+1):
-        rigidBody.position = dyno.Vector3f([0.5, 0.5, 0.5]) * dyno.Vector3f(
-            [2.5, 1.1 - 0.13 * i, 0.12 + 0.2 * j + 0.1 * (8 - i)])
-        rigidBody.friction = 0.1
-        boxAt = rigid.add_box(box, rigidBody)
+rigidBody.position = dyno.Vector3f([0, 0.5,0])
 
-sphere = dyno.SphereInfo()
-sphere.radius = 0.025
+boxActor1 = rigid.add_box(box1, rigidBody, 1000)
 
-rigidSphere = dyno.RigidBodyInfo()
-rigidSphere.position = dyno.Vector3f([0.5, 0.75, 0.5])
-sphereAt1 = rigid.add_sphere(sphere, rigidSphere)
+box2.half_length = dyno.Vector3f([0.1, 0.4,0.2])
 
-rigidSphere.position = dyno.Vector3f([0.5, 0.95, 0.5])
-sphereAt2 = rigid.add_sphere(sphere, rigidSphere)
+rigidBody.position = dyno.Vector3f([0.2, 0.5, 0])
+rigidBody.angular_velocity = dyno.Vector3f([1,0,0])
+rigidBody.motion_type = dyno.BodyType.Kinematic
 
-rigidSphere.position = dyno.Vector3f([0.5, 0.65, 0.5])
-sphere.radius = 0.05
-sphereAt3 = rigid.add_sphere(sphere, rigidSphere)
+boxActor2 = rigid.add_box(box2, rigidBody)
 
-rigidSphere.position = dyno.Vector3f([0, 0, 0])
-tet = dyno.TetInfo()
-tet.v = [
-    dyno.Vector3f([0.5, 1.1, 0.5]),
-    dyno.Vector3f([0.5, 1.2, 0.5]),
-    dyno.Vector3f([0.6, 1.1, 0.5]),
-    dyno.Vector3f([0.5, 1.1, 0.6]),
-]
-TetAt = rigid.add_tet(tet, rigidSphere)
+sliderJoint = rigid.create_slider_joint(boxActor1, boxActor2)
+
+sliderJoint.set_anchor_point((boxActor1.center + boxActor2.center) / 2)
+
+sliderJoint.set_axis(dyno.Vector3f([0,1,0]))
+sliderJoint.set_range(-0.2, 0.2)
 
 mapper = dyno.DiscreteElementsToTriangleSet3f()
 rigid.state_topology().connect(mapper.in_discrete_elements())
 rigid.graphics_pipeline().push_module(mapper)
 
 sRender = dyno.GLSurfaceVisualModule()
-sRender.set_color(dyno.Color(1, 1, 0))
-sRender.set_alpha(0.5)
+sRender.set_color(dyno.Color(1,1,0))
+sRender.set_alpha(1.0)
 mapper.out_triangle_set().connect(sRender.in_triangle_set())
 rigid.graphics_pipeline().push_module(sRender)
 

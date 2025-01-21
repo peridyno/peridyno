@@ -3,38 +3,30 @@ import PyPeridyno as dyno
 scn = dyno.SceneGraph()
 
 emitter = dyno.SquareEmitter3f()
+scn.add_node(emitter)
 emitter.var_location().set_value(dyno.Vector3f([0.5, 0.5, 0.5]))
 
 fluid = dyno.ParticleFluid3f()
-fluid.load_particles(dyno.Vector3f([0, 0, 0]), dyno.Vector3f([0.2, 0.2, 0.2]), 0.05)
-
+scn.add_node(fluid)
 emitter.connect(fluid.import_particle_emitters())
 
-calculateNorm = dyno.CalculateNorm3f()
-colorMapper = dyno.ColorMapping3f()
-colorMapper.var_max().set_value(0.5)
+cubeBoundary = dyno.CubeModel3f()
+scn.add_node(cubeBoundary)
+cubeBoundary.var_location().set_value(dyno.Vector3f([0.5,0.5,0.5]))
+cubeBoundary.var_length().set_value(dyno.Vector3f([1,1,1]))
+cubeBoundary.set_visible(False)
 
-ptRender = dyno.GLPointVisualModule()
-ptRender.set_color(dyno.Color(1, 0, 0))
-ptRender.set_color_map_mode(ptRender.ColorMapMode.PER_VERTEX_SHADER)
+cube2vol = dyno.BasicShapeToVolume3f()
+scn.add_node(cube2vol)
+cube2vol.var_grid_spacing().set_value(0.02)
+cube2vol.var_inerted().set_value(True)
+cubeBoundary.connect(cube2vol.import_shape())
 
-fluid.state_velocity().connect(calculateNorm.in_vec())
-fluid.state_point_set().connect(ptRender.in_point_set())
-calculateNorm.out_norm().connect(colorMapper.in_scalar())
-colorMapper.out_color().connect(ptRender.in_color())
-
-fluid.graphics_pipeline().push_module(calculateNorm)
-fluid.graphics_pipeline().push_module(colorMapper)
-fluid.graphics_pipeline().push_module(ptRender)
-
-container = dyno.StaticBoundary3f()
-container.load_cube(dyno.Vector3f([0, 0, 0]), dyno.Vector3f([1.0, 1.0, 1.0]), 0.02, True)
+container = dyno.VolumeBoundary3f()
+scn.add_node(container)
+cube2vol.connect(container.import_volumes())
 
 fluid.connect(container.import_particle_systems())
-
-scn.add_node(emitter)
-scn.add_node(fluid)
-scn.add_node(container)
 
 app = dyno.GlfwApp()
 app.set_scenegraph(scn)

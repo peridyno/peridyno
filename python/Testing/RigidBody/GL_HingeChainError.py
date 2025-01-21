@@ -4,55 +4,41 @@ scn = dyno.SceneGraph()
 
 rigid = dyno.RigidBodySystem3f()
 scn.add_node(rigid)
+
 rigidBody = dyno.RigidBodyInfo()
-rigidBody.linear_velocity = dyno.Vector3f([1, 0, 0])
-
-box = dyno.BoxInfo()
-box.half_length = dyno.Vector3f([0.5 * 0.065, 0.5 * 0.065, 0.5 * 0.1])
-for i in range(8, 1, -1):
-    for j in range(i + 1):
-        rigidBody.position = dyno.Vector3f([0.5, 0.5, 0.5]) * dyno.Vector3f(
-            [0.5, 1.1 - 0.13 * i, 0.12 + 0.2 * j + 0.1 * (8 - i)])
-        boxAt = rigid.add_box(box, rigidBody)
-
-for i in range(8, 1, -1):
-    for j in range(i+1):
-        rigidBody.position = dyno.Vector3f([0.5, 0.5, 0.5]) * dyno.Vector3f(
-            [2.5, 1.1 - 0.13 * i, 0.12 + 0.2 * j + 0.1 * (8 - i)])
-        rigidBody.friction = 0.1
-        boxAt = rigid.add_box(box, rigidBody)
-
+scale = 2.5
 sphere = dyno.SphereInfo()
-sphere.radius = 0.025
+sphere.center = dyno.Vector3f([scale, scale, scale]) * dyno.Vector3f([-4.6,20,0.5])
+sphere.radius = scale * 2.5
 
-rigidSphere = dyno.RigidBodyInfo()
-rigidSphere.position = dyno.Vector3f([0.5, 0.75, 0.5])
-sphereAt1 = rigid.add_sphere(sphere, rigidSphere)
+newbox = oldbox = dyno.BoxInfo()
+oldbox.center = dyno.Vector3f([scale, scale, scale]) * dyno.Vector3f([-2.0,20,0.5])
+oldbox.half_length = dyno.Vector3f([scale, scale, scale]) * dyno.Vector3f([0.05,0.09,0.02])
+oldbox.rot = dyno.Quat1f(3.14159265358979323846 / 2, dyno.Vector3f([0,0,0]))
+oldBoxActor = rigid.add_box(oldbox, rigidBody)
+rigidBody.linear_velocity = dyno.Vector3f([0,0,0])
 
-rigidSphere.position = dyno.Vector3f([0.5, 0.95, 0.5])
-sphereAt2 = rigid.add_sphere(sphere, rigidSphere)
-
-rigidSphere.position = dyno.Vector3f([0.5, 0.65, 0.5])
-sphere.radius = 0.05
-sphereAt3 = rigid.add_sphere(sphere, rigidSphere)
-
-rigidSphere.position = dyno.Vector3f([0, 0, 0])
-tet = dyno.TetInfo()
-tet.v = [
-    dyno.Vector3f([0.5, 1.1, 0.5]),
-    dyno.Vector3f([0.5, 1.2, 0.5]),
-    dyno.Vector3f([0.6, 1.1, 0.5]),
-    dyno.Vector3f([0.5, 1.1, 0.6]),
-]
-TetAt = rigid.add_tet(tet, rigidSphere)
+for i in range(20):
+    newbox.center = oldbox.center + dyno.Vector3f([scale, scale, scale]) * dyno.Vector3f([0.2,0,0])
+    newbox.half_length = oldbox.half_length
+    newbox.rot = dyno.Quat1f(3.14159265358979323846 / 2, dyno.Vector3f([0,0,1]))
+    newBoxActor = rigid.add_box(newbox, rigidBody)
+    hingeJoint = rigid.create_hinge_joint(oldBoxActor, newBoxActor)
+    hingeJoint.set_anchor_point((oldbox.center + newbox.center) / 2)
+    hingeJoint.set_axis(dyno.Vector3f([0,0,1]))
+    hingeJoint.set_range(-3.14159265358979323846, 3.14159265358979323846)
+    oldbox = newbox
+    if i == 19:
+        pointJoint = rigid.create_point_joint(newBoxActor)
+        pointJoint.set_anchor_point(newbox.center)
 
 mapper = dyno.DiscreteElementsToTriangleSet3f()
 rigid.state_topology().connect(mapper.in_discrete_elements())
 rigid.graphics_pipeline().push_module(mapper)
 
 sRender = dyno.GLSurfaceVisualModule()
-sRender.set_color(dyno.Color(1, 1, 0))
-sRender.set_alpha(0.5)
+sRender.set_color(dyno.Color(0.204, 0.424, 0.612))
+sRender.set_alpha(1.0)
 mapper.out_triangle_set().connect(sRender.in_triangle_set())
 rigid.graphics_pipeline().push_module(sRender)
 
@@ -67,7 +53,7 @@ contactMapper.var_scale().set_value(0.02)
 rigid.graphics_pipeline().push_module(contactMapper)
 
 wireRender = dyno.GLWireframeVisualModule()
-wireRender.set_color(dyno.Color(0, 0, 1))
+wireRender.set_color(dyno.Color(0, 0, 0))
 contactMapper.out_edge_set().connect(wireRender.in_edge_set())
 rigid.graphics_pipeline().push_module(wireRender)
 
