@@ -112,7 +112,8 @@ void declare_volume(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("Volume") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("get_node_type", &Class::getNodeType);
+		.def("get_node_type", &Class::getNodeType)
+		.def("state_level_set", &Class::stateLevelSet, py::return_value_policy::reference);
 }
 
 #include "Volume/BasicShapeToVolume.h"
@@ -219,8 +220,8 @@ void declare_volume_generator(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("VolumeGenerator") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_spacing", &Class::varSpacing, py::return_value_policy::reference)
-		.def("in_padding", &Class::varPadding, py::return_value_policy::reference)
+		.def("var_spacing", &Class::varSpacing, py::return_value_policy::reference)
+		.def("var_padding", &Class::varPadding, py::return_value_policy::reference)
 
 		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
 		.def("out_level_set", &Class::outLevelSet, py::return_value_policy::reference);

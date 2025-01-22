@@ -831,6 +831,7 @@ void pybind_framework(py::module& m)
 	declare_instance<dyno::DiscreteElements<dyno::DataType3f>>(m, "DiscreteElements3f");
 	declare_instance<dyno::HeightField<dyno::DataType3f>>(m, "HeightField3f");
 	declare_instance<dyno::TextureMesh>(m, "TextureMesh");
+	declare_instance<dyno::LevelSet<dyno::DataType3f>>(m, "LevelSet3f");
 
 	// New
 	declare_parametric_model<dyno::DataType3f>(m, "3f");
@@ -852,6 +853,7 @@ void pybind_framework(py::module& m)
 	declare_single_node_port<dyno::Vessel<dyno::DataType3f>>(m, "Vessel3f");
 	declare_single_node_port<dyno::VolumeOctree<dyno::DataType3f>>(m, "VolumeOctree3f");
 	declare_single_node_port<dyno::GhostParticles<dyno::DataType3f>>(m, "GhostParticles3f");
+	declare_single_node_port<dyno::ParticleSystem<dyno::DataType3f>>(m, "ParticleSystem3f");
 	//declare_semi_analytical_sfi_node<dyno::DataType3f>(m, "3f");
 
 	declare_floating_number<dyno::DataType3f>(m, "3f");

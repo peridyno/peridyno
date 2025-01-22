@@ -69,7 +69,6 @@ void declare_static_mesh_loader(py::module& m, std::string typestr) {
 		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference);
 }
 
-
 #include "TetraMeshWriter.h"
 template <typename TDataType>
 void declare_tetra_mesh_writer(py::module& m, std::string typestr) {
@@ -99,6 +98,19 @@ void declare_tetra_mesh_writer_fracture(py::module& m, std::string typestr) {
 		.def("update_ptr", &Class::updatePtr)
 		.def("output_surface_mesh", &Class::outputSurfaceMesh)
 		.def_readwrite("OringalID", &Class::OringalID);
+}
+
+#include "TextureMeshLoader.h"
+template <typename TDataType>
+void declare_texture_mesh_loader(py::module& m, std::string typestr) {
+	using Class = dyno::TextureMeshLoader;
+	using Parent = dyno::ParametricModel<TDataType>;
+	std::string pyclass_name = std::string("TextureMeshLoader") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("get_node_type", &Class::getNodeType)
+		.def("var_file_name", &Class::varFileName, py::return_value_policy::reference)
+		.def("state_texture_mesh", &Class::stateTextureMesh, py::return_value_policy::reference);
 }
 
 #include "TriangleMeshWriter.h"
