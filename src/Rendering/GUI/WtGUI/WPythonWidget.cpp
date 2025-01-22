@@ -92,7 +92,6 @@ scene.add_node(container)
 	setText(source);
 }
 
-
 WPythonWidget::~WPythonWidget()
 {
 	Wt::log("warning") << "WPythonWidget destory";
@@ -116,9 +115,9 @@ void WPythonWidget::execute(const std::string& src)
 		auto locals = py::dict();
 		py::exec(src, py::globals(), locals);
 
-		if (locals.contains("scene"))
+		if (locals.contains("scn"))
 		{
-			auto scene = locals["scene"].cast<std::shared_ptr<dyno::SceneGraph>>();
+			auto scene = locals["scn"].cast<std::shared_ptr<dyno::SceneGraph>>();
 			if (scene) mSignal.emit(scene);
 		}
 		else
@@ -130,5 +129,4 @@ void WPythonWidget::execute(const std::string& src)
 		Wt::WMessageBox::show("Error", e.what(), Wt::StandardButton::Ok);
 		flag = false;
 	}
-
 }
