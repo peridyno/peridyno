@@ -1,4 +1,4 @@
-#include "StaticTriangularMesh.h"
+#include "StaticMeshLoader.h"
 
 #include "GLSurfaceVisualModule.h"
 
@@ -6,10 +6,10 @@
 
 namespace dyno
 {
-	IMPLEMENT_TCLASS(StaticTriangularMesh, TDataType)
+	IMPLEMENT_TCLASS(StaticMeshLoader, TDataType)
 
 	template<typename TDataType>
-	StaticTriangularMesh<TDataType>::StaticTriangularMesh()
+	StaticMeshLoader<TDataType>::StaticMeshLoader()
 		: ParametricModel<TDataType>()
 	{
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
@@ -38,6 +38,8 @@ namespace dyno
 					curTopo->scale(this->varScale()->getValue());
 					curTopo->rotate(this->varRotation()->getValue() * M_PI / 180);
 					curTopo->translate(this->varLocation()->getValue());
+
+					curTopo->update();
 				}
 			}
 		);
@@ -57,7 +59,9 @@ namespace dyno
 		this->varLocation()->attach(transform);
 		this->varScale()->attach(transform);
 		this->varRotation()->attach(transform);
+
+		this->stateTriangleSet()->promoteOuput();
 	}
 
-	DEFINE_CLASS(StaticTriangularMesh);
+	DEFINE_CLASS(StaticMeshLoader);
 }

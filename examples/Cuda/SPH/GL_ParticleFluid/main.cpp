@@ -20,7 +20,7 @@
 
 #include <BasicShapes/CubeModel.h>
 
-#include <StaticTriangularMesh.h>
+#include <StaticMeshLoader.h>
 
 #include <Samplers/ShapeSampler.h>
 
@@ -75,7 +75,7 @@ std::shared_ptr<SceneGraph> createScene()
 	cubeBoundary->connect(cube2vol->importShape());
 	cube2vol->connect(volBoundary->importVolumes());
 
-	auto staticMesh = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
+	auto staticMesh = scn->addNode(std::make_shared<StaticMeshLoader<DataType3f>>());
 	staticMesh->varFileName()->setValue(getAssetPath() + "bowl/bowl.obj");
 
 	fluid->graphicsPipeline()->clear();

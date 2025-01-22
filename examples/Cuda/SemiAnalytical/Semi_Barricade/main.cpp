@@ -31,7 +31,7 @@
 #include "SemiAnalyticalScheme/TriangularMeshBoundary.h"
 #include "SemiAnalyticalScheme/SemiAnalyticalPositionBasedFluidModel.h"
 
-#include "StaticTriangularMesh.h"
+#include "StaticMeshLoader.h"
 
 using namespace std;
 using namespace dyno;
@@ -71,7 +71,7 @@ std::shared_ptr<SceneGraph> createScene()
 	fluid->graphicsPipeline()->pushModule(ptRender);
 
 	//Barricade
-	auto barricade = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
+	auto barricade = scn->addNode(std::make_shared<StaticMeshLoader<DataType3f>>());
 	barricade->varFileName()->setValue(getAssetPath() + "bowl/barricade.obj");
 	barricade->varLocation()->setValue(Vec3f(0.1, 0.022, 0.5));
 
@@ -83,7 +83,7 @@ std::shared_ptr<SceneGraph> createScene()
 	barricade->graphicsPipeline()->pushModule(sRenderf);
 
 	//Scene boundary
-	auto boundary = scn->addNode(std::make_shared<StaticTriangularMesh<DataType3f>>());
+	auto boundary = scn->addNode(std::make_shared<StaticMeshLoader<DataType3f>>());
 	boundary->varFileName()->setValue(getAssetPath() + "standard/standard_cube2.obj");
 	boundary->graphicsPipeline()->disable();
 

@@ -3,25 +3,8 @@ namespace dyno
 	template<typename Real, typename Coord, DeviceType deviceType, typename IndexType>
 	DYN_FUNC bool calculateSignedDistance2TriangleSet(ProjectedPoint3D<Real>& p3d, Coord point, Array<Coord, deviceType>& vertices, Array<TopologyModule::Triangle, deviceType>& indices, List<IndexType>& list, Real dHat)
 	{
-// 		auto PROJECT_INSIDE = [](const TPoint3D<Real> p, const TTriangle3D<Real> triangle) -> bool
-// 			{
-// 				TPlane3D<Real> plane(triangle.v[0], triangle.normal());
-// 
-// 				TPoint3D<Real> proj = p.project(plane);
-// 
-// 				typename TTriangle3D<Real>::Param tParam;
-// 				bool bValid = triangle.computeBarycentrics(proj.origin, tParam);
-// 				if (bValid)
-// 				{
-// 					return tParam.u > Real(0) && tParam.u < Real(1) && tParam.v > Real(0) && tParam.v < Real(1) && tParam.w > Real(0) && tParam.w < Real(1);
-// 				}
-// 				else
-// 				{
-// 					return false;
-// 				}
-// 			};
-
-		Real eps = EPSILON;
+		//This value is important, if the result is wrong, first check eps
+		Real eps = 16 * EPSILON;
 
 		p3d.signed_distance = REAL_MAX;
 

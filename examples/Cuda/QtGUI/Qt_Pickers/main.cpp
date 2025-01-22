@@ -7,8 +7,6 @@
 #include "EdgePickerNode.h"
 #include "PointPickerNode.h"
 
-#include "SurfaceMeshLoader.h"
-
 #include "BasicShapes/CylinderModel.h"
 #include "BasicShapes/CubeModel.h"
 
