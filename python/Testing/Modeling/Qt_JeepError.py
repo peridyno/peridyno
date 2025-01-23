@@ -1,4 +1,5 @@
 import PyPeridyno as dyno
+from PyPeridyno import ObjLoader3f
 
 scn = dyno.SceneGraph()
 scn.set_total_time(3.0)
@@ -108,7 +109,6 @@ cubeSampler.graphics_pipeline().disable()
 # MakeParticleSystem
 particleSystem = dyno.MakeParticleSystem3f()
 scn.add_node(particleSystem)
-
 cubeSampler.state_point_set().promote_output().connect(particleSystem.in_points())
 
 # *************************************** Fluid ***************************************//
@@ -154,6 +154,51 @@ fluid.connect(container.import_particle_systems())
 # first Module
 colormapping = visualizer.graphics_pipeline().find_first_module_color_mapping()
 colormapping.var_max().set_value(1.5)
+
+LocationRoad = dyno.Vector3f([0,0,0.5])
+ScaleRoad = dyno.Vector3f([0.04,0.04,0.04])
+
+ObjRoad_1 = ObjLoader3f()
+scn.add_node(ObjRoad_1)
+ObjRoad_1.var_file_name().set_value(dyno.FilePath(dyno.get_asset_path() + "Jeep/Road/obj_1.obj"))
+ObjRoad_1.var_scale().set_value(ScaleRoad)
+ObjRoad_1.var_location().set_value(LocationRoad)
+glRoad_1 = ObjRoad_1.graphics_pipeline().find_first_module_surface()
+glRoad_1.set_color(dyno.Color(1,1,1))
+
+ObjRoadWall = dyno.ObjLoader3f()
+scn.add_node(ObjRoadWall)
+ObjRoadWall.var_file_name().set_value(dyno.FilePath(dyno.get_asset_path() + "Jeep/Road/obj_wall.obj"))
+ObjRoadWall.var_scale().set_value(ScaleRoad)
+ObjRoadWall.var_location().set_value(LocationRoad)
+glRoadWall = ObjRoadWall.graphics_pipeline().find_first_module_surface()
+glRoadWall.set_color(dyno.Color(1,1,1))
+
+ObjRoadDoor = dyno.ObjLoader3f()
+scn.add_node(ObjRoadDoor)
+ObjRoadDoor.var_file_name().set_value(dyno.FilePath(dyno.get_asset_path() + "Jeep/Road/obj_door.obj"))
+ObjRoadDoor.var_scale().set_value(ScaleRoad)
+ObjRoadDoor.var_location().set_value(LocationRoad)
+glRoadDoor = ObjRoadDoor.graphics_pipeline().find_first_module_surface()
+glRoadDoor.set_color(dyno.Color(0.5,0.5,0.5))
+glRoadDoor.set_roughness(0.5)
+glRoadDoor.set_metallic(1)
+
+ObjRoadLogo = dyno.ObjLoader3f()
+scn.add_node(ObjRoadLogo)
+ObjRoadLogo.var_file_name().set_value(dyno.FilePath(dyno.get_asset_path() + "Jeep/Road/obj_logo.obj"))
+ObjRoadLogo.var_scale().set_value(ScaleRoad)
+ObjRoadLogo.var_location().set_value(LocationRoad)
+glRoadLogo = ObjRoadLogo.graphics_pipeline().find_first_module_surface()
+glRoadLogo.set_color(dyno.Color(0,0.2,1))
+
+ObjRoadText = dyno.ObjLoader3f()
+scn.add_node(ObjRoadText)
+ObjRoadText.var_file_name().set_value(dyno.FilePath(dyno.get_asset_path() + "Jeep/Road/obj_peridyno.obj"))
+ObjRoadText.var_scale().set_value(ScaleRoad)
+ObjRoadText.var_location().set_value(LocationRoad)
+glRoadText = ObjRoadText.graphics_pipeline().find_first_module_surface()
+glRoadText.set_color(dyno.Color(0.5,0.5,0.5))
 
 app = dyno.GlfwApp()
 app.set_scenegraph(scn)
