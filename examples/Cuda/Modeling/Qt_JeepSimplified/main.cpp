@@ -1,4 +1,4 @@
-#include <QtApp.h>
+#include <UbiApp.h>
 #include <SceneGraph.h>
 #include <GLRenderEngine.h>
 
@@ -90,7 +90,7 @@ float total_scale = 8;
 std::shared_ptr<SceneGraph> creatScene()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
-	scn->setAsynchronousSimulation(true);
+	scn->setAsynchronousSimulation(false);
 
 	//***************************************Scene Setting***************************************//
 	// Scene Setting
@@ -247,7 +247,7 @@ std::shared_ptr<SceneGraph> creatScene()
 
 int main()
 {
-	QtApp window;
+	UbiApp window;
 	window.setSceneGraph(creatScene());
 	window.initialize(1366, 768);
 
