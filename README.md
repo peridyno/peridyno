@@ -78,9 +78,7 @@ With a scene moded by PeriDyno, it can either be run as a GFLW application, Qt a
 
 - Web application
 
-[<img src="screenshots/wtapp.png" style="zoom:80%;" />]
-
-
+<img src="screenshots/wtapp.png" style="zoom:80%;" />
 
 # Other resources
 
