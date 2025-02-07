@@ -196,8 +196,6 @@ namespace dyno {
 		}
 
 		data->resize(num);
-
-		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -210,8 +208,6 @@ namespace dyno {
 		}
 
 		data->assign(val);
-
-		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -224,8 +220,6 @@ namespace dyno {
 		}
 
 		data->assign(vals);
-
-		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -238,8 +232,6 @@ namespace dyno {
 		}
 
 		data->assign(vals);
-
-		//this->tick();
 	}
 
 #ifndef NO_BACKEND
@@ -253,8 +245,6 @@ namespace dyno {
 		}
 
 		data->assign(vals);
-
-		//this->tick();
 	}
 #endif
 
@@ -268,8 +258,6 @@ namespace dyno {
 		}
 
 		data->reset();
-
-		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -282,8 +270,6 @@ namespace dyno {
 		}
 
 		data->clear();
-
-		//this->tick();
 	}
 
 	template<typename T>
@@ -345,8 +331,6 @@ namespace dyno {
 		}
 
 		data->assign(vals);
-
-		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -359,8 +343,6 @@ namespace dyno {
 		}
 
 		data->assign(vals);
-
-		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -373,8 +355,6 @@ namespace dyno {
 		}
 
 		data->reset();
-
-		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -398,9 +378,7 @@ namespace dyno {
 			data = std::make_shared<Array2D<T, deviceType>>();
 		}
 
-		data->resize(ny, ny);
-
-		//this->tick();
+		data->resize(nx, ny);
 	}
 
 	/**
@@ -455,8 +433,6 @@ namespace dyno {
 			data = std::make_shared<Array3D<T, deviceType>>();
 
 		data->assign(vals);
-
-		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -468,8 +444,6 @@ namespace dyno {
 			data = std::make_shared<Array3D<T, deviceType>>();
 
 		data->assign(vals);
-
-		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -481,8 +455,6 @@ namespace dyno {
 			data = std::make_shared<Array3D<T, deviceType>>();
 
 		data->reset();
-
-		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -506,8 +478,6 @@ namespace dyno {
 			data = std::make_shared<Array3D<T, deviceType>>();
 
 		data->resize(nx, ny, nz);
-
-		//this->tick();
 	}
 
 #ifdef CUDA_BACKEND
@@ -563,8 +533,6 @@ namespace dyno {
 			data = std::make_shared<ArrayList<T, deviceType>>();
 
 		data->assign(src);
-
-		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -576,8 +544,6 @@ namespace dyno {
 			data = std::make_shared<ArrayList<T, deviceType>>();
 
 		data->assign(src);
-
-		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -589,8 +555,6 @@ namespace dyno {
 			data = std::make_shared<ArrayList<T, deviceType>>();
 
 		data->resize(num);
-
-		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -602,8 +566,6 @@ namespace dyno {
 			data = std::make_shared<ArrayList<T, deviceType>>();
 
 		data->resize(arr);
-
-		//this->tick();
 	}
 
 	template<typename T, DeviceType deviceType>
@@ -667,8 +629,6 @@ namespace dyno {
 // 		}
 // 
 // 		data->resize(num);
-// 
-// 		this->tick();
 // 	}
 // 
 // 	template<typename T, DeviceType deviceType>
@@ -681,8 +641,6 @@ namespace dyno {
 // 		}
 // 
 // 		data->reset();
-// 
-// 		this->tick();
 // 	}
 // 
 // 	template<typename T, DeviceType deviceType>
@@ -694,8 +652,6 @@ namespace dyno {
 // 		}
 // 
 // 		data->clear();
-// 
-// 		this->tick();
 // 	}
 
 
@@ -738,8 +694,6 @@ namespace dyno {
 // 			data = std::make_shared<ArrayList<T, deviceType>>();
 // 
 // 		data->assign(src);
-// 
-// 		this->tick();
 // 	}
 // 
 // 	template<typename T, DeviceType deviceType>
@@ -751,8 +705,6 @@ namespace dyno {
 // 			data = std::make_shared<ArrayList<T, deviceType>>();
 // 
 // 		data->assign(src);
-// 
-// 		this->tick();
 // 	}
 // 
 // 	template<typename T, DeviceType deviceType>
@@ -777,8 +729,6 @@ namespace dyno {
 // 			data = std::make_shared<ArrayList<T, deviceType>>();
 // 
 // 		data->resize(arr);
-// 
-// 		this->tick();
 // 	}
 
 #endif

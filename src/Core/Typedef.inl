@@ -36,9 +36,13 @@ namespace dyno {
 #define M_E 2.71828182845904523536
 
 	constexpr Real EPSILON = std::numeric_limits<Real>::epsilon();
+	constexpr Real REAL_EPSILON = (std::numeric_limits<Real>::epsilon)();
+	constexpr Real REAL_EPSILON_SQUARED = REAL_EPSILON * REAL_EPSILON;	
 	constexpr Real REAL_MAX = (std::numeric_limits<Real>::max)();
 	constexpr Real REAL_MIN = (std::numeric_limits<Real>::min)();
+	constexpr Real REAL_INF = (std::numeric_limits<Real>::infinity)();
 	constexpr uint BLOCK_SIZE = 64;
+
 
 #ifdef CUDA_BACKEND
 	static uint iDivUp(uint a, uint b)
@@ -159,6 +163,12 @@ namespace dyno {
 		__VA_ARGS__);										\
 		cuSynchronize();									\
 	}
+
+#define cuExecuteNoSync(size, Func, ...){						\
+	uint pDims = cudaGridSize((uint)size, BLOCK_SIZE);	\
+	Func << <pDims, BLOCK_SIZE >> > (				\
+	__VA_ARGS__);									\
+}
 
 #endif
 

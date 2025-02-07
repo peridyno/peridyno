@@ -9,7 +9,6 @@ namespace dyno {
 #else
 #	define DYN_ALIGN_16 alignas(16)
 #endif
-
 	template<typename T>
 	class VectorBase
 	{

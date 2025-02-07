@@ -344,4 +344,12 @@ namespace dyno
 			0.0, 0.0, 1.0);
 	}
 
+	template <typename T>
+	DYN_FUNC const SquareMatrix<T, 3> SquareMatrix<T, 3>::diagonalMatrix(const Vector<T, 3> vec)
+	{
+		return SquareMatrix<T, 3>(vec[0], 0.0, 0.0,
+			0.0, vec[1], 0.0,
+			0.0, 0.0, vec[2]);
+	}	
+
 }
