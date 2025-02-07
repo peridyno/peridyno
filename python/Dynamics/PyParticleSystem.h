@@ -405,7 +405,7 @@ void declare_particle_system_helper(py::module& m, std::string typestr) {
 		.def("reorder_particles", &Class::reorderParticles);
 }
 
-#include "ParticleSystem/PoissonDiskSampling.h"
+#include "Multiphysics/PoissonDiskSampling.h"
 template <typename TDataType>
 void declare_poisson_disk_sampling(py::module& m, std::string typestr) {
 	using Class = dyno::PoissonDiskSampling<TDataType>;

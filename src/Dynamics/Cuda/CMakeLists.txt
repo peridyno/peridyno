@@ -76,8 +76,13 @@ macro(build_library LIB_NAME LIB_DEPENDENCY)
     file(GLOB FILE_DYNAMICS_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NAME}/*.h")
     install(FILES ${FILE_DYNAMICS_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Dynamics/${LIB_NAME})
 
-    file(GLOB FILE_DYNAMICS_MODULE "${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NAME}/Module/*.h")
-    install(FILES ${FILE_DYNAMICS_MODULE}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Dynamics/${LIB_NAME}/Module)
+    file(GLOB ITEMS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NAME}/*)
+    foreach(ITEM in ${ITEMS})
+        if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NAME}/${ITEM})
+            file(GLOB FILE_DYNAMICS_MODULE "${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NAME}/${ITEM}/*.h")
+            install(FILES ${FILE_DYNAMICS_MODULE}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Dynamics/${LIB_NAME}/${ITEM})
+        endif()
+    endforeach()
 endmacro()
        
 option(PERIDYNO_LIBRARY_PARTICLESYSTEM "Enable binding the particle system library" ON)
@@ -91,7 +96,7 @@ option(PERIDYNO_LIBRARY_DUALPARTICLESYSTEM "Enable binding the dual-particle sch
 option(PERIDYNO_LIBRARY_MULTIPHYSICS "Enable building the multiphysics library" ON)
 
 if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
-    set(LIB_DEPENDENCY Core IO Framework Topology Modeling GLRenderEngine  Volume)
+    set(LIB_DEPENDENCY Core IO Framework Topology Modeling GLRenderEngine)
     build_library(ParticleSystem LIB_DEPENDENCY)
 endif()
 
@@ -117,7 +122,7 @@ if(PERIDYNO_LIBRARY_HEIGHTFIELD)
 endif()
 
 if(PERIDYNO_LIBRARY_SEMIANALYTICALSCHEME)
-    set(LIB_DEPENDENCY ParticleSystem Modeling)
+    set(LIB_DEPENDENCY ParticleSystem)
     build_library(SemiAnalyticalScheme LIB_DEPENDENCY)
 endif()
 
@@ -127,6 +132,6 @@ if(PERIDYNO_LIBRARY_MULTIPHYSICS)
 endif()
 
 if(PERIDYNO_LIBRARY_DUALPARTICLESYSTEM)
-    set(LIB_DEPENDENCY ParticleSystem Modeling SemiAnalyticalScheme)
+    set(LIB_DEPENDENCY SemiAnalyticalScheme)
     build_library(DualParticleSystem LIB_DEPENDENCY)
 endif()

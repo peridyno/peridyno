@@ -21,8 +21,6 @@
 
 #include "ParticleFluid.h"
 
-#include "PoissonDiskSampling.h"
-
 #include "NodeFactory.h"
 
 namespace dyno 
@@ -87,13 +85,6 @@ namespace dyno
 			[=]()->std::shared_ptr<Node> {
 				auto emitter = std::make_shared<PoissonEmitter<DataType3f>>();
 				return emitter;
-			});
-
-		emitters->addAction(
-			"Poisson Disk Sampler",
-			"ToolBarIco/Modeling/PoissonDiskSampler_v2.png",
-			[=]()->std::shared_ptr<Node> {
-				return std::make_shared<PoissonDiskSampling<DataType3f>>();
 			});
 
 		auto solvers = page->addGroup("Particle Fluid Solvers");

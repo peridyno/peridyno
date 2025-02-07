@@ -5,8 +5,9 @@
 
 #include "SemiAnalyticalScheme/ParticleRelaxtionOnMesh.h"
 #include <SemiAnalyticalScheme/TriangularMeshBoundary.h>
-#include "ParticleSystem/SdfSampler.h"
-#include "ParticleSystem/PoissonDiskSampling.h"
+
+#include "Multiphysics/SdfSampler.h"
+#include "Multiphysics/PoissonDiskSampling.h"
 
 #include "BasicShapes/CubeModel.h"
 #include "BasicShapes/SphereModel.h"
