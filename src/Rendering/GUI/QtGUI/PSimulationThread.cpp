@@ -29,10 +29,22 @@ namespace dyno
 	{
 	}
 
+	std::atomic<PSimulationThread*> PSimulationThread::pInstance;
+	std::mutex PSimulationThread::mInstanceMutex;
+
 	PSimulationThread* PSimulationThread::instance()
 	{
-		static PSimulationThread m_instance;
-		return &m_instance;
+		PSimulationThread* ins = pInstance.load(std::memory_order_acquire);
+		if (!ins) {
+			std::lock_guard<std::mutex> tLock(mInstanceMutex);
+			ins = pInstance.load(std::memory_order_relaxed);
+			if (!ins) {
+				ins = new PSimulationThread();
+				pInstance.store(ins, std::memory_order_release);
+			}
+		}
+
+		return ins;
 	}
 
 	void PSimulationThread::pause()
