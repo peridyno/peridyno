@@ -49,12 +49,12 @@ endif()
 target_include_directories(${LIB_NAME} PUBLIC
 	$<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/GUI/>
     $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/GUI/GlfwGUI>
-    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
-    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/GUI>)
+    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/GUI>
+    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/GUI>/GlfwGUI)
 
 #TODO: include a general IO library
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
-    target_link_libraries(${LIB_NAME} Core Framework IO RenderCore GLRenderEngine ImWidgets glfw imgui)
+    target_link_libraries(${LIB_NAME} Core Framework RenderCore GLRenderEngine ImWidgets glfw imgui)
 else()
     target_link_libraries(${LIB_NAME} Core Framework RenderCore GLRenderEngine ImWidgets glfw imgui)
 endif()

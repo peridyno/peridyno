@@ -19,7 +19,8 @@
 
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
-#include "Curve.h"
+
+#include "Field/Curve.h"
 
 namespace dyno
 {

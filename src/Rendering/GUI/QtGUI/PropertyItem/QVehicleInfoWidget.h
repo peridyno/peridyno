@@ -22,7 +22,7 @@
 #include "Field.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
-#include "VehicleInfo.h"
+#include "Field/VehicleInfo.h"
 #include <QComboBox>
 #include <QLineEdit>
 #include "qcheckbox.h"

@@ -121,7 +121,6 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>)
     target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-lineinfo>)
 
-	
 	install(TARGETS ${LIB_NAME}
 	    EXPORT ${LIB_NAME}Targets
 	    RUNTIME  DESTINATION  ${PERIDYNO_RUNTIME_INSTALL_DIR}
