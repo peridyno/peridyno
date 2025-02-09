@@ -271,12 +271,6 @@ namespace dyno
 		bool mValidationInfo = false;
 
 		EWorkMode mWorkMode = EDIT_MODE;
-
-		/**
-		 * A  lock to guarantee consistency across threads
-		 */
-		std::mutex mSync;
-
 	};
 
 }

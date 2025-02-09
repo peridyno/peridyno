@@ -194,8 +194,6 @@ namespace dyno
 
 	void SceneGraph::takeOneFrame()
 	{
-		mSync.lock();
-
 		std::cout << "****************    Frame " << mFrameNumber << " Started    ****************" << std::endl;
 		
 		CTimer timer;
@@ -258,8 +256,6 @@ namespace dyno
 		mFrameNumber++;
 
 		mWorkMode = RUNNING_MODE;
-
-		mSync.unlock();
 	}
 
 	void SceneGraph::updateGraphicsContext()
@@ -275,10 +271,7 @@ namespace dyno
 			}
 		};
 
-		if (mSync.try_lock()) {
-			this->traverseForward<UpdateGrpahicsContextAct>();
-			mSync.unlock();
-		}
+		this->traverseForward<UpdateGrpahicsContextAct>();
 	}
 
 
@@ -300,8 +293,6 @@ namespace dyno
 
 	void SceneGraph::reset()
 	{
-		mSync.lock();
-
 		class ResetNodeAct : public Action
 		{
 		public:
@@ -321,17 +312,11 @@ namespace dyno
 		mFrameNumber = 0;
 
 		mWorkMode = EDIT_MODE;
-
-		mSync.unlock();
 	}
 
 	void SceneGraph::reset(std::shared_ptr<Node> node)
 	{
-		mSync.lock();
-
 		this->traverseForward<ResetAct>(node);
-
-		mSync.unlock();
 	}
 
 	void SceneGraph::printNodeInfo(bool enabled)

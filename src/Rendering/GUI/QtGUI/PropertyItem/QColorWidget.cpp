@@ -151,7 +151,7 @@ namespace dyno
 		if (template_name == std::string(typeid(Color).name()))
 		{
 			FVar<Color>* f = TypeInfo::cast<FVar<Color>>(field);
-			auto v = f->getData();
+			auto v = f->getValue();
 
 			int r = int(v.r * 255) % 255;
 			int g = int(v.g * 255) % 255;

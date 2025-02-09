@@ -57,7 +57,7 @@ namespace dyno
 		if (template_name == std::string(typeid(Vec3i).name()))
 		{
 			FVar<Vec3i>* f = TypeInfo::cast<FVar<Vec3i>>(field);
-			auto v = f->getData();
+			auto v = f->getValue();
 			v1 = v[0];
 			v2 = v[1];
 			v3 = v[2];
@@ -65,7 +65,7 @@ namespace dyno
 		else if (template_name == std::string(typeid(Vec3u).name()))
 		{
 			FVar<Vec3u>* f = TypeInfo::cast<FVar<Vec3u>>(field);
-			auto v = f->getData();
+			auto v = f->getValue();
 			v1 = v[0];
 			v2 = v[1];
 			v3 = v[2];
@@ -117,7 +117,7 @@ namespace dyno
 		if (template_name == std::string(typeid(Vec3i).name()))
 		{
 			FVar<Vec3i>* f = TypeInfo::cast<FVar<Vec3i>>(field());
-			auto v = f->getData();
+			auto v = f->getValue();
 			v1 = v[0];
 			v2 = v[1];
 			v3 = v[2];
@@ -125,7 +125,7 @@ namespace dyno
 		else if (template_name == std::string(typeid(Vec3u).name()))
 		{
 			FVar<Vec3u>* f = TypeInfo::cast<FVar<Vec3u>>(field());
-			auto v = f->getData();
+			auto v = f->getValue();
 			v1 = v[0];
 			v2 = v[1];
 			v3 = v[2];
