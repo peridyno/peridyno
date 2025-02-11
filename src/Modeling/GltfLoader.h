@@ -185,7 +185,6 @@ namespace dyno
 		DArray<Mat4f> d_mesh_Matrix;
 		DArray<int> d_shape_meshId;
 
-		std::map<int, std::vector<Vec2u>> skin_VerticeRange;
 
 	private:
 
@@ -193,6 +192,8 @@ namespace dyno
 		void varChanged();
 
 		void varRenderChanged();
+
+		void varAnimation();
 
 		void updateTransform();
 

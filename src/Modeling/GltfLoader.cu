@@ -103,11 +103,13 @@ namespace dyno
 	GltfLoader<TDataType>::GltfLoader()
 	{
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&GltfLoader<TDataType>::varChanged, this));
+		auto animationCallback = std::make_shared<FCallBackFunc>(std::bind(&GltfLoader<TDataType>::varAnimation, this));
 
 		this->stateJointSet()->setDataPtr(std::make_shared<EdgeSet<DataType3f>>());
 		this->stateShapeCenter()->setDataPtr(std::make_shared<PointSet<DataType3f>>());
 
 		this->varImportAnimation()->attach(callback);
+		this->varImportAnimation()->attach(animationCallback);
 		this->varFileName()->attach(callback);
 
 		
@@ -171,8 +173,18 @@ namespace dyno
 
 	}
 
+	template<typename TDataType>
+	void GltfLoader<TDataType>::varAnimation()
+	{
+		auto importAnimation = this->varImportAnimation()->getValue();
+		if(importAnimation)
+			this->setForceUpdate(true);
+		else 
+			this->setForceUpdate(false);
 
 
+
+	}
 
 
 	template<typename TDataType>
@@ -525,7 +537,7 @@ namespace dyno
 			auto& bindWeight0 = skinInfo.V_jointWeight_0[i];
 			auto& bindWeight1 = skinInfo.V_jointWeight_1[i];
 
-			for (size_t j = 0; j < skin_VerticeRange[i].size(); j++)
+			for (size_t j = 0; j < skinInfo.skin_VerticeRange[i].size(); j++)
 			{
 				//
 				Vec2u& range = skinInfo.skin_VerticeRange[i][j];
@@ -1009,7 +1021,6 @@ namespace dyno
 		d_mesh_Matrix.clear();
 		d_shape_meshId.clear();
 		unCenterPosition.clear();
-		skin_VerticeRange.clear();
 		node_Name.clear();
 
 
