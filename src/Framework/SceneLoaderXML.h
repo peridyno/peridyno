@@ -3,6 +3,9 @@
 #include "SceneLoaderFactory.h"
 #include "tinyxml/tinyxml2.h"
 
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
 namespace dyno {
 
 	class SceneLoaderXML : public SceneLoader

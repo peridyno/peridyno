@@ -15,7 +15,7 @@ namespace dyno
 			return nullptr;
 		}
 
-		for (size_t i = 0; i < mConnectionInfo.size(); i++){
+		for (size_t i = 0; i < mConnectionInfo.size(); i++) {
 			mConnectionInfo[i].clear();
 		}
 		mConnectionInfo.clear();
@@ -69,8 +69,9 @@ namespace dyno
 	{
 		tinyxml2::XMLDocument doc;
 
-// 		const char* declaration = "<?xml version=\"0.6.0\" encoding=\"UTF-8\">";
-// 		doc.Parse(declaration);
+		// 		const char* declaration = "<?xml version=\"0.6.0\" encoding=\"UTF-8\">";
+		// 		doc.Parse(declaration);
+
 
 		tinyxml2::XMLElement* root = doc.NewElement("SceneGraph");
 
@@ -78,6 +79,12 @@ namespace dyno
 		root->SetAttribute("UpperBound", encodeVec3f(scn->getUpperBound()).c_str());
 
 		doc.InsertEndChild(root);
+
+		// version
+		tinyxml2::XMLElement* version = doc.NewElement("Version");
+		version->SetText(TOSTRING(PERIDYNO_VERSION));
+		root->InsertEndChild(version);
+
 
 		SceneGraph::Iterator itor = scn->begin();
 
@@ -125,7 +132,7 @@ namespace dyno
 				auto NodesSrc = ports[i]->getNodes();
 				bool fieldFound = false;
 				Node* nSrcPar = nullptr;
-				for (auto nSrc : NodesSrc) 
+				for (auto nSrc : NodesSrc)
 				{
 					auto nSrcExports = nSrc->getExportNodes();
 					for (auto x : nSrcExports)
@@ -137,8 +144,8 @@ namespace dyno
 						}
 					}
 				}
-				if (fieldFound&&nSrcPar!=nullptr) {
-					
+				if (fieldFound && nSrcPar != nullptr) {
+
 					tinyxml2::XMLElement* connection = doc.NewElement("Connection");
 					connection->SetAttribute("SourceId", indices[nSrcPar->objectId()]);
 					connection->SetAttribute("From", 0);
@@ -146,7 +153,7 @@ namespace dyno
 					connection->SetAttribute("To", uint(i));
 					nodeConnectionsXml->InsertEndChild(connection);
 				}
-				
+
 			}
 
 			auto fieldInp = node->getInputFields();
@@ -163,8 +170,8 @@ namespace dyno
 						auto fieldsOut = nodeSrc->getOutputFields();
 						uint outFieldIndex = 0;
 						bool fieldFound = false;
-						
-						for(outFieldIndex=0; outFieldIndex< fieldsOut.size(); outFieldIndex++)
+
+						for (outFieldIndex = 0; outFieldIndex < fieldsOut.size(); outFieldIndex++)
 						{
 							if (fieldsOut[outFieldIndex] == fieldSrc)
 							{
@@ -176,7 +183,7 @@ namespace dyno
 						if (fieldFound) {
 							tinyxml2::XMLElement* connection = doc.NewElement("Connection");
 							connection->SetAttribute("SourceId", indices[parSrc->objectId()]);
-							connection->SetAttribute("From", 1 +outFieldIndex);
+							connection->SetAttribute("From", 1 + outFieldIndex);
 							connection->SetAttribute("TargetId", indices[node->objectId()]);
 							connection->SetAttribute("To", uint(i + ports.size()));
 							nodeConnectionsXml->InsertEndChild(connection);
@@ -184,7 +191,7 @@ namespace dyno
 					}
 				}
 			}
-			
+
 
 			auto& fields = node->getAllFields();
 			std::vector<FBase*> fieldsOut;
@@ -198,7 +205,7 @@ namespace dyno
 				{
 					auto fieldSrc = field->getSource();
 					if (fieldSrc != nullptr) {
-	
+
 						auto parSrc = fieldSrc->parent();
 						if (parSrc != nullptr)
 						{
@@ -226,7 +233,7 @@ namespace dyno
 				uint radix = 0;
 
 				auto& activeModules = pipeline->activeModules();
-				for (auto m : activeModules){
+				for (auto m : activeModules) {
 					tinyxml2::XMLElement* moduleXml = doc.NewElement("Module");
 					moduleXml->SetAttribute("Class", m->getClassInfo()->getClassName().c_str());
 					moduleXml->SetAttribute("Coordinate", encodeVec2f(Vec2f(m->bx(), m->by())).c_str());
@@ -287,7 +294,7 @@ namespace dyno
 									if (fieldFound && moduleMap.find(outId) != moduleMap.end())
 									{
 										auto outBlock = moduleMap[outId];
-										
+
 										tinyxml2::XMLElement* moduleConnectionXml = doc.NewElement("Connection");
 										moduleConnectionXml->SetAttribute("SourceId", indices[outBlock->objectId()]);
 										moduleConnectionXml->SetAttribute("From", outFieldIndex);
@@ -303,7 +310,7 @@ namespace dyno
 									{
 										uint outFieldIndex = 0;
 										bool fieldFound = false;
-										auto n=src->getModuleList().size();
+										auto n = src->getModuleList().size();
 										for (auto f : fieldsOut)
 										{
 											if (f == fieldSrc)
@@ -311,7 +318,7 @@ namespace dyno
 												fieldFound = true;
 												break;
 											}
-												outFieldIndex++;
+											outFieldIndex++;
 										}
 
 										if (fieldFound)
@@ -331,22 +338,22 @@ namespace dyno
 				}
 
 				indices.clear();
-			};
+				};
 
 			savePipeline(node->animationPipeline(), "Simulation");
 
-// 			//Insert graphics pipeline
-// 			tinyxml2::XMLElement* graphicsPipelineXml = doc.NewElement("Rendering");
-// 			nodeXml->InsertEndChild(graphicsPipelineXml);
-// 
-// 			auto graphicsPipeline = node->graphicsPipeline();
-// 			for each (auto m in graphicsPipeline->activeModules())
-// 			{
-// 				tinyxml2::XMLElement* moduleXml = doc.NewElement("Module");
-// 				moduleXml->SetAttribute("Class", m->getClassInfo()->getClassName().c_str());
-// 				moduleXml->SetAttribute("Coordinate", encodeVec2f(Vec2f(m->bx(), m->by())).c_str());
-// 				graphicsPipelineXml->InsertEndChild(moduleXml);
-// 			}
+			// 			//Insert graphics pipeline
+			// 			tinyxml2::XMLElement* graphicsPipelineXml = doc.NewElement("Rendering");
+			// 			nodeXml->InsertEndChild(graphicsPipelineXml);
+			// 
+			// 			auto graphicsPipeline = node->graphicsPipeline();
+			// 			for each (auto m in graphicsPipeline->activeModules())
+			// 			{
+			// 				tinyxml2::XMLElement* moduleXml = doc.NewElement("Module");
+			// 				moduleXml->SetAttribute("Class", m->getClassInfo()->getClassName().c_str());
+			// 				moduleXml->SetAttribute("Coordinate", encodeVec2f(Vec2f(m->bx(), m->by())).c_str());
+			// 				graphicsPipelineXml->InsertEndChild(moduleXml);
+			// 			}
 
 			savePipeline(node->graphicsPipeline(), "Rendering");
 
@@ -407,20 +414,20 @@ namespace dyno
 		 */
 		tinyxml2::XMLElement* cnnXmls = nodeXML->FirstChildElement("Connections");
 		tinyxml2::XMLElement* connectionXml = cnnXmls->FirstChildElement("Connection");
-		
-		while (connectionXml) 
+
+		while (connectionXml)
 		{
 			ConnectionInfo info;
-			
+
 			info.src = atoi(connectionXml->Attribute("SourceId"));
 			info.dst = atoi(connectionXml->Attribute("TargetId"));
 
 			info.id0 = atoi(connectionXml->Attribute("From"));
 			info.id1 = atoi(connectionXml->Attribute("To"));
-			
+
 			infoVec.push_back(info);
 
-			
+
 			connectionXml = connectionXml->NextSiblingElement("Connection");
 		}
 
@@ -436,11 +443,11 @@ namespace dyno
 			{
 				states.push_back(field);
 			}
-			else if (field->getFieldType() == dyno::FieldTypeEnum::In )
+			else if (field->getFieldType() == dyno::FieldTypeEnum::In)
 			{
-				
+
 				states.push_back(field);
-							
+
 			}
 		}
 		/**
@@ -450,7 +457,7 @@ namespace dyno
 		node->animationPipeline()->clear();
 		tinyxml2::XMLElement* animationPipelineXml = nodeXML->FirstChildElement("Simulation");
 		tinyxml2::XMLElement* animationModuleXml = animationPipelineXml->FirstChildElement("Module");
-		
+
 		auto processModule = [&](tinyxml2::XMLElement* moduleXml, std::shared_ptr<Pipeline> pipeline, std::vector<Module*>& modules) {
 			const char* name = moduleXml->Attribute("Class");
 			if (name) {
@@ -480,19 +487,19 @@ namespace dyno
 					str2Field.clear();
 				}
 			}
-		};
+			};
 
 		while (animationModuleXml)
 		{
 			processModule(animationModuleXml, node->animationPipeline(), animationModules);
-// 			const char* name = animationModuleXml->Attribute("Class");
-// 			if (name) {
-// 				std::shared_ptr<Module> module(dynamic_cast<Module*>(Object::createObject(name)));
-// 				if (module != nullptr) {
-// 					node->animationPipeline()->pushModule(module);
-// 					animationModules.push_back(module.get());
-// 				}
-// 			}
+			// 			const char* name = animationModuleXml->Attribute("Class");
+			// 			if (name) {
+			// 				std::shared_ptr<Module> module(dynamic_cast<Module*>(Object::createObject(name)));
+			// 				if (module != nullptr) {
+			// 					node->animationPipeline()->pushModule(module);
+			// 					animationModules.push_back(module.get());
+			// 				}
+			// 			}
 
 			animationModuleXml = animationModuleXml->NextSiblingElement("Module");
 		}
@@ -525,14 +532,14 @@ namespace dyno
 		while (renderingModuleXml)
 		{
 			processModule(renderingModuleXml, node->graphicsPipeline(), renderingModules);
-// 			const char* name = renderingModuleXml->Attribute("Class");
-// 			if (name) {
-// 				std::shared_ptr<Module> module(dynamic_cast<Module*>(Object::createObject(name)));
-// 				if (module != nullptr) {
-// 					node->graphicsPipeline()->pushModule(module);
-// 					renderingModules.push_back(module.get());
-// 				}
-// 			}
+			// 			const char* name = renderingModuleXml->Attribute("Class");
+			// 			if (name) {
+			// 				std::shared_ptr<Module> module(dynamic_cast<Module*>(Object::createObject(name)));
+			// 				if (module != nullptr) {
+			// 					node->graphicsPipeline()->pushModule(module);
+			// 					renderingModules.push_back(module.get());
+			// 				}
+			// 			}
 
 			renderingModuleXml = renderingModuleXml->NextSiblingElement("Module");
 		}
@@ -554,7 +561,7 @@ namespace dyno
 
 				fout->connect(fin);
 			}
-			
+
 
 			renderingConnectionXml = renderingConnectionXml->NextSiblingElement("Connection");
 		}
@@ -573,7 +580,7 @@ namespace dyno
 		std::string templateClass = std::string(className);
 		if (dataType)
 		{
-			templateClass += std::string("<")+std::string(dataType)+ std::string(">");
+			templateClass += std::string("<") + std::string(dataType) + std::string(">");
 		}
 		std::shared_ptr<Module> module(dynamic_cast<Module*>(Object::createObject(templateClass)));
 

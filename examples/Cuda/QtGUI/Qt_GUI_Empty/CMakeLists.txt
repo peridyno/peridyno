@@ -1,7 +1,7 @@
 set(LIB_DEPENDENCY 
     QtGUI
-    ParticleSystem
-	Modeling
-    SemiAnalyticalScheme 
+    DualParticleSystem 
+    Multiphysics
+    GlfwGUI
 )
 add_example(Qt_GUI_Empty Qt LIB_DEPENDENCY)
