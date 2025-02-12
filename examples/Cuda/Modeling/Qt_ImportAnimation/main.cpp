@@ -48,6 +48,7 @@ int main()
 	auto renderer = std::dynamic_pointer_cast<dyno::GLRenderEngine>(app.renderWindow()->getRenderEngine());
 	if (renderer) {
 		renderer->setEnvStyle(EEnvStyle::Studio);
+		renderer->showGround = false;
 	}
 
 	app.mainLoop();
