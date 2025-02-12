@@ -1,5 +1,4 @@
-#include <GlfwApp.h>
-#include <QtGUI/QtApp.h>
+#include <UbiApp.h>
 #include <SceneGraph.h>
 #include <Log.h>
 
@@ -163,7 +162,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
-	QtApp app;
+	UbiApp app(GUIType::GUI_QT);
 	app.setSceneGraph(createScene());
 	app.initialize(1024, 768);
 	app.mainLoop();

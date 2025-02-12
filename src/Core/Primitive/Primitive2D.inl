@@ -668,8 +668,8 @@ namespace dyno
 	template<typename Real>
 	DYN_FUNC TSegment2D<Real>::TSegment2D()
 	{
-		v0 = Coord3D(0, 0);
-		v1 = Coord3D(1, 0);
+		v0 = Coord2D(0, 0);
+		v1 = Coord2D(1, 0);
 	}
 
 	template<typename Real>

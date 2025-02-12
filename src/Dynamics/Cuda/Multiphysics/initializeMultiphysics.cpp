@@ -5,6 +5,8 @@
 #include "VolumeBoundary.h"
 #include "AdaptiveBoundary.h"
 
+#include "PoissonDiskSampling.h"
+
 namespace dyno
 {
 	std::atomic<MultiphysicsInitializer*> MultiphysicsInitializer::gInstance;
@@ -50,6 +52,19 @@ namespace dyno
 			[=]()->std::shared_ptr<Node> {
 				auto node = std::make_shared<AdaptiveBoundary<DataType3f>>();
 				return node;
+			});
+
+		auto psPage = factory->addPage(
+			"Particle System",
+			"ToolBarIco/ParticleSystem/ParticleSystem.png");
+
+		auto emitters = psPage->addGroup("Emitters");
+
+		emitters->addAction(
+			"Poisson Disk Sampler",
+			"ToolBarIco/Modeling/PoissonDiskSampler_v2.png",
+			[=]()->std::shared_ptr<Node> {
+				return std::make_shared<PoissonDiskSampling<DataType3f>>();
 			});
 	}
 }

@@ -71,6 +71,7 @@ namespace dyno {
 		DYN_FUNC T infNorm() const;
 
 		DYN_FUNC static const SquareMatrix<T, 3> identityMatrix();
+		DYN_FUNC static const SquareMatrix<T, 3> diagonalMatrix(const Vector<T, 3> vec);
 
 		DYN_FUNC T* getDataPtr() { return &data_[0].x; }
 

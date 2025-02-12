@@ -18,8 +18,10 @@
 #include "Node/ParametricModel.h"
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
-#include "Curve.h"
+
 #include "Topology/PolygonSet.h"
+
+#include "Field/Curve.h"
 
 namespace dyno
 {

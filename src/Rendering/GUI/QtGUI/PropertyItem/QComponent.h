@@ -23,7 +23,7 @@
 #include <QKeyEvent>
 #include <QEvent>
 
-#include "Ramp.h"
+#include "Field/Ramp.h"
 #include "PCustomWidgets.h"
 #include "QBoolFieldWidget.h"
 #include "qcheckbox.h"

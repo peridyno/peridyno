@@ -113,7 +113,7 @@ endif()
 
 # target_link_libraries(${LIB_NAME} Core Framework ParticleSystem RenderEngine glu32)
 target_link_libraries(${LIB_NAME} PUBLIC
-	Core Framework RenderCore GLRenderEngine ImWidgets imgui Modeling
+	Core Framework RenderCore GLRenderEngine ImWidgets imgui
 	Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Core 
     Qt${QT_VERSION_MAJOR}::Gui 
@@ -131,8 +131,8 @@ target_link_libraries(${LIB_NAME} PRIVATE $<BUILD_INTERFACE:nodes>)
 target_include_directories(${LIB_NAME} PUBLIC
     $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/GUI>
     $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/GUI/QtGUI>	
-    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
-    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/GUI>)
+    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/GUI>
+    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/GUI/QtGUI>)
 
 if(WIN32)
     # fix error for linking

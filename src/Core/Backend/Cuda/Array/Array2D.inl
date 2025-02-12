@@ -121,7 +121,7 @@ namespace dyno {
 	template<typename T>
 	void Array2D<T, DeviceType::GPU>::assign(const Array2D<T, DeviceType::GPU>& src)
 	{
-		if (m_nx != src.size() || m_ny != src.size()){
+		if (m_nx != src.nx() || m_ny != src.ny()){
 			this->resize(src.nx(), src.ny());
 		}
 
@@ -131,7 +131,7 @@ namespace dyno {
 	template<typename T>
 	void Array2D<T, DeviceType::GPU>::assign(const Array2D<T, DeviceType::CPU>& src)
 	{
-		if (m_nx != src.size() || m_ny != src.size()) {
+		if (m_nx != src.nx() || m_ny != src.ny()) {
 			this->resize(src.nx(), src.ny());
 		}
 

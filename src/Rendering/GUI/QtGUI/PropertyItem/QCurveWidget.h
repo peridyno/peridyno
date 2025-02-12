@@ -29,7 +29,7 @@
 #include "qlayout.h"
 #include "Field.h"
 
-#include "Curve.h"
+#include "Field/Curve.h"
 #include "QComponent.h"
 
 namespace dyno

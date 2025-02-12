@@ -44,7 +44,7 @@ public:
 	DEF_ARRAY_STATE(Transform3f, Transforms, DeviceType::GPU, "Instance transform");
 	DEF_ARRAY_STATE(Vec3f, Colors, DeviceType::GPU, "Instance color");
 
-	DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+	DEF_INSTANCE_STATE(TriangleSet<DataType3f>, Topology, "Topology");
 };
 
 int main(int, char**)
