@@ -84,7 +84,7 @@ namespace dyno
 		
 		if (columns_i >= 3)
 		{
-		//�����ǲ����Ĺ���
+		//以下是侧面点的构建
 
 			Real HeightValue = this->varHeight()->getData();
 			Real RowValue = this->varRow()->getData();
@@ -134,12 +134,12 @@ namespace dyno
 
 
 
-			//�����ǵײ����ϲ���Ĺ���
+			//以下是底部及上部点的构建
 			std::vector<TopologyModule::Triangle> triangle;
 
 			int pt_side_len = vertices.size();
 
-			//�����ǲ���Ĺ���
+			//以下是侧面的构建
 			for (int rowl = 0; rowl <= RowValue - 1; rowl++)
 			{
 

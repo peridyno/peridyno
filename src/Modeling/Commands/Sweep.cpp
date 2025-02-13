@@ -99,14 +99,14 @@ namespace dyno
 		std::vector<Coord> vertices;
 		std::vector<TopologyModule::Triangle> triangle;
 
-		//Spline·������ ���ߵ�
+		//Spline路径曲线 曲线点
 		CArray<Coord> c_point1;
 
 		c_point1.assign(SplineIn);
 
 		int lengthV = SplineIn.size();
 		totalIndex = lengthV;
-		//Curve2�������� ���ߵ�
+		//Curve2环形曲线 曲线点
 
 		CArray<Coord> c_point2;
 		c_point2.assign(VertexIn2);
@@ -124,7 +124,7 @@ namespace dyno
 		Coord LocationTemp2 = {0,1,0};
 
 
-		//������Ԫ���Խ��еݹ�任
+		//建立四元数以进行递归变换
 
 
 		for (size_t i = 0; i < lengthV; i++) 
