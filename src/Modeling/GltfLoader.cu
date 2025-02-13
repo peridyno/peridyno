@@ -111,7 +111,7 @@ namespace dyno
 		this->varImportAnimation()->attach(callback);
 		this->varImportAnimation()->attach(animationCallback);
 		this->varFileName()->attach(callback);
-
+		this->varAnimationSpeed()->setRange(0.02,10);
 		
 		auto callbackTransform = std::make_shared<FCallBackFunc>(std::bind(&GltfLoader<TDataType>::updateTransform, this));
 
@@ -227,6 +227,13 @@ namespace dyno
 		}
 
 		////import Animation
+		std::map<joint, std::vector<Real>> joint_T_Time;
+		std::map<joint, std::vector<Real>> joint_S_Time;
+		std::map<joint, std::vector<Real>> joint_R_Time;
+		std::map<joint, std::vector<Vec3f>> joint_T_f_anim;
+		std::map<joint, std::vector<Quat<float>>> joint_R_f_anim;
+		std::map<joint, std::vector<Vec3f>> joint_S_f_anim;
+
 		importAnimation(*newModel, joint_output, joint_input, joint_T_f_anim, joint_T_Time, joint_S_f_anim, joint_S_Time, joint_R_f_anim, joint_R_Time);
 
 		for (int i = 0; i< newModel->nodes.size();i++)
@@ -323,7 +330,7 @@ namespace dyno
 
 		this->stateSkin()->getDataPtr()->initialNormal = initialNormal;
 
-		this->updateAnimation(0);
+		
 
 		this->stateJointsData()->getDataPtr()->UpdateJointInfo(
 			this->stateJointInverseBindMatrix()->getData(),
@@ -348,6 +355,10 @@ namespace dyno
 			this->stateJointsData()->getDataPtr()
 			);
 
+		this->stateAnimation()->getDataPtr()->setLoop(false);
+
+		this->updateAnimation(0);
+
 		delete newModel;
 	}
 
@@ -358,10 +369,10 @@ namespace dyno
 	{
 		//updateModelTransformMatrix
 		this->updateTransformState();
-
+		auto animation = this->stateAnimation()->getDataPtr();
 		if (all_Joints.size())	//Animation
 		{
-			if (varImportAnimation()->getValue() && (!this->joint_R_f_anim.empty() && !this->joint_T_f_anim.empty() && !this->joint_S_f_anim.empty()))
+			if (varImportAnimation()->getValue() && (!animation->mJoint_Index_Translation.empty() && !animation->mJoint_Index_Rotation.empty() && !animation->mJoint_Index_Scale.empty()))
 				updateAnimation(this->stateFrameNumber()->getValue());
 
 		}
@@ -481,8 +492,9 @@ namespace dyno
 	void GltfLoader<TDataType>::updateStates()
 	{
 		ParametricModel<TDataType>::updateStates();
+		auto animation = this->stateAnimation()->getDataPtr();
 
-		if (joint_output.empty() || !this->varImportAnimation()->getValue() || (this->joint_R_f_anim.empty()&&this->joint_T_f_anim.empty()&&this->joint_S_f_anim.empty()))
+		if (joint_output.empty() || !this->varImportAnimation()->getValue() || (animation->mJoint_Index_Rotation.empty()&& animation->mJoint_Index_Translation.empty()&&animation->mJoint_Index_Scale.empty()))
 			return;
 
 		updateAnimation(this->stateFrameNumber()->getValue());
@@ -509,16 +521,15 @@ namespace dyno
 
 		auto mesh = this->stateTextureMesh()->getDataPtr();
 
-		this->updateAnimationMatrix(all_Joints, frameNumber);
-		this->updateJointWorldMatrix(all_Joints, joint_AnimaMatrix);
 
+		this->stateAnimation()->getDataPtr()->updateAnimationPose(this->stateElapsedTime()->getValue()* this->varAnimationSpeed()->getValue());
 
 
 		//update Joints
 		cuExecute(all_Joints.size(),
 			jointAnimation,
 			this->stateJointSet()->getDataPtr()->getPoints(),
-			this->stateJointWorldMatrix()->getData(),
+			this->stateJointsData()->getDataPtr()->mJointWorldMatrix,
 			d_joints,
 			this->stateTransform()->getValue()
 		);
@@ -545,7 +556,7 @@ namespace dyno
 				skinAnimation(initialPosition,
 					mesh->vertices(),
 					this->stateJointInverseBindMatrix()->getData(),
-					this->stateJointWorldMatrix()->getData(),
+					this->stateJointsData()->getDataPtr()->mJointWorldMatrix,
 
 					bindJoint0,
 					bindJoint1,
@@ -562,7 +573,7 @@ namespace dyno
 					initialNormal,
 					mesh->normals(),
 					this->stateJointInverseBindMatrix()->getData(),
-					this->stateJointWorldMatrix()->getData(),
+					this->stateJointsData()->getDataPtr()->mJointWorldMatrix,
 
 					bindJoint0,
 					bindJoint1,
@@ -580,101 +591,6 @@ namespace dyno
 	};
 
 
-	template<typename TDataType>
-	void GltfLoader<TDataType>::updateAnimationMatrix(const std::vector<joint>& all_Joints, int currentframe)
-	{
-		joint_AnimaMatrix = joint_matrix;
-
-		for (auto jId : all_Joints)
-		{
-			const std::vector<int>& jD = getJointDirByJointIndex(jId,jointId_joint_Dir);
-
-			Mat4f tempMatrix = Mat4f::identityMatrix();
-
-			//
-			for (int k = jD.size() - 1; k >= 0; k--)
-			{
-
-				joint select = jD[k];
-
-				Vec3f tempVT = Vec3f(0, 0, 0);
-				Vec3f tempVS = Vec3f(1, 1, 1);
-				Quat<float> tempQR = Quat<float>(Mat3f::identityMatrix());
-
-				//replace 
-
-				if (joint_input.find(select) != joint_input.end())		//ֻ
-				{
-					auto iterR = joint_R_f_anim.find(select);
-					//auto iterR_inPut = joint_input.find(select);		//
-
-					int tempFrame = 0;
-
-					if (iterR != joint_R_f_anim.end())
-					{
-
-						if (currentframe > iterR->second.size() - 1)
-							tempFrame = iterR->second.size() - 1;
-						else if (currentframe < 0)
-							tempFrame = 0;
-						else
-							tempFrame = currentframe;
-
-						tempQR = iterR->second[tempFrame];
-					}
-					else
-					{
-						tempQR = joint_rotation[select];
-					}
-
-					std::map<joint, std::vector<Vec3f>>::const_iterator iterT;
-					iterT = joint_T_f_anim.find(select);
-					if (iterT != joint_T_f_anim.end())
-					{
-						//
-						if (currentframe > iterT->second.size() - 1)
-							tempFrame = iterT->second.size() - 1;
-						else if (currentframe < 0)
-							tempFrame = 0;
-						else
-							tempFrame = currentframe;
-
-						tempVT = iterT->second[tempFrame];
-					}
-					else
-					{
-						tempVT = joint_translation[select];
-					}
-
-					std::map<joint, std::vector<Vec3f>>::const_iterator iterS;
-					iterS = joint_S_f_anim.find(select);
-					if (iterS != joint_S_f_anim.end())
-					{
-						//
-						if (currentframe > iterS->second.size() - 1)
-							tempFrame = iterS->second.size() - 1;
-						else if (currentframe < 0)
-							tempFrame = 0;
-						else
-							tempFrame = currentframe;
-
-						tempVS = iterS->second[tempFrame];
-					}
-					else
-					{
-						tempVS = joint_scale[select];
-					}
-
-					Mat4f mT = Mat4f(1, 0, 0, tempVT[0], 0, 1, 0, tempVT[1], 0, 0, 1, tempVT[2], 0, 0, 0, 1);
-					Mat4f mS = Mat4f(tempVS[0], 0, 0, 0, 0, tempVS[1], 0, 0, 0, 0, tempVS[2], 0, 0, 0, 0, 1);
-					Mat4f mR = tempQR.toMatrix4x4();
-
-					joint_AnimaMatrix[select] = mT * mS * mR;	//
-				}
-				//
-			}
-		}
-	}
 
 	template<typename TDataType>
 	Vec3f GltfLoader<TDataType>::getVertexLocationWithJointTransform(joint jointId, Vec3f inPoint, std::map<joint, Mat4f> jMatrix)
@@ -700,39 +616,6 @@ namespace dyno
 		return result;
 	};
 
-	template<typename TDataType>
-	void GltfLoader<TDataType>::updateJointWorldMatrix(const std::vector<joint>& allJoints, std::map<joint, Mat4f> jMatrix)
-	{
-		std::vector<Mat4f> c_joint_Mat4f;
-
-		this->stateJointWorldMatrix()->resize(allJoints.size());
-		c_joint_Mat4f.resize(maxJointId + 1);
-
-
-		for (size_t i = 0; i < allJoints.size(); i++)
-		{
-			joint jointId = allJoints[i];
-			const std::vector<int>& jD = getJointDirByJointIndex(jointId, jointId_joint_Dir);
-
-
-
-			Mat4f tempMatrix = Mat4f::identityMatrix();
-
-			//
-			for (int k = jD.size() - 1; k >= 0; k--)
-			{
-				joint select = jD[k];
-				tempMatrix *= jMatrix[select];		//
-			}
-			c_joint_Mat4f[jointId] = tempMatrix;
-
-		}
-
-
-
-		this->stateJointWorldMatrix()->assign(c_joint_Mat4f);
-
-	};
 
 	template<typename TDataType>
 	void GltfLoader<TDataType>::buildInverseBindMatrices(const std::vector<joint>& all_Joints)
@@ -996,12 +879,7 @@ namespace dyno
 		joint_translation.clear();
 		joint_matrix.clear();
 		jointId_joint_Dir.clear();
-		joint_T_f_anim.clear();
-		joint_R_f_anim.clear();
-		joint_S_f_anim.clear();
-		joint_T_Time.clear();
-		joint_S_Time.clear();
-		joint_R_Time.clear();
+
 		Scene_Name.clear();
 		joint_output.clear();
 		joint_input.clear();
