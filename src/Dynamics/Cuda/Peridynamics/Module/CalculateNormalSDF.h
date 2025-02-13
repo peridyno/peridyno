@@ -15,7 +15,7 @@ namespace dyno
 	public:
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Real Real;
-		typedef typename TContactPair<Real> ContactPair;
+		typedef typename ::dyno::TContactPair<Real> ContactPair;
 		typedef typename TopologyModule::Tetrahedron Tetrahedron;
 
 		CalculateNormalSDF() {};

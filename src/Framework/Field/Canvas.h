@@ -164,31 +164,18 @@ namespace dyno {
 		template <typename T>
 		void convertVarToStr(std::string VarName, T value, std::string& Str)
 		{
-			int temp = int(value);
 			Str.append(VarName + " ");
-			Str.append(std::to_string(temp));
+			if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>)
+			{
+				Str.append(std::to_string(value));
+			}
+			else
+			{
+				Str.append(std::to_string(static_cast<int>(value)));
+			}
 			Str.append(" ");
 			std::cout << std::endl << Str;
 		}
-
-		template<>
-		void convertVarToStr(std::string VarName, float value, std::string& Str)
-		{
-			Str.append(VarName + " ");
-			Str.append(std::to_string(value));
-			Str.append(" ");
-			std::cout << std::endl << Str;
-		}
-
-		template<>
-		void convertVarToStr(std::string VarName, double value, std::string& Str)
-		{
-			Str.append(VarName + " ");
-			Str.append(std::to_string(value));
-			Str.append(" ");
-			std::cout << std::endl << Str;
-		}
-
 
 		void setVarByStr(std::string Str, double& value)
 		{
@@ -289,8 +276,6 @@ namespace dyno {
 
 
 	};
-
-	
 
 }
 

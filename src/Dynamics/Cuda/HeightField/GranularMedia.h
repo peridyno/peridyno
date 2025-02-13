@@ -32,8 +32,8 @@ namespace dyno
 		DECLARE_TCLASS(GranularMedia, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
-		typedef typename Vector<Real, 3> Coord3D;
-		typedef typename Vector<Real, 4> Coord4D;
+		typedef typename ::dyno::Vector<Real, 3> Coord3D;
+		typedef typename ::dyno::Vector<Real, 4> Coord4D;
 
 		GranularMedia();
 		~GranularMedia();

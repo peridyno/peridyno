@@ -56,7 +56,7 @@ namespace dyno
 
 		Real lerp(Real a, Real b, Real alpha);
 
-		Real getDistanceFromSDF(Coord& p, Coord& normal);
+		Real getDistanceFromSDF(const Coord& p, Coord& normal);
 
 		std::shared_ptr<DistanceField3D<TDataType>>  getSDF() {
 			return inputSDF;

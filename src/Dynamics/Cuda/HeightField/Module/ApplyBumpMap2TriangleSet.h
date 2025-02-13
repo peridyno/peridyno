@@ -13,7 +13,7 @@ namespace dyno
 		DECLARE_TCLASS(ApplyBumpMap2TriangleSet, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
-		typedef typename Vector<Real, 3> Coord3D;
+		typedef typename ::dyno::Vector<Real, 3> Coord3D;
 
 		ApplyBumpMap2TriangleSet();
 

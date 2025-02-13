@@ -82,7 +82,7 @@ namespace dyno
 	template<typename TDataType>
 	void PolygonSet<TDataType>::updateTopology()
 	{
-		uint vNum = mCoords.size();
+		uint vNum = PointSet<TDataType>::mCoords.size();
 
 		//Update the vertex to polygon mapping
 		DArray<uint> counter(vNum);
@@ -220,12 +220,12 @@ namespace dyno
 		int uniqueNum = thrust::reduce(thrust::device, uniqueEdgeCounter.begin(), uniqueEdgeCounter.begin() + uniqueEdgeCounter.size());
 		thrust::exclusive_scan(thrust::device, uniqueEdgeCounter.begin(), uniqueEdgeCounter.begin() + uniqueEdgeCounter.size(), uniqueEdgeCounter.begin());
 
-		mEdges.resize(uniqueNum);
+		EdgeSet<TDataType>::mEdges.resize(uniqueNum);
 		mEdg2Poly.resize(uniqueNum);
 
 		cuExecute(edgeKeys.size(),
 			PolygonSet_SetupEdgeIndices,
-			mEdges,
+			EdgeSet<TDataType>::mEdges,
 			mPoly2Edg,
 			mEdg2Poly,
 			edgeKeys,
@@ -241,8 +241,8 @@ namespace dyno
 	template<typename TDataType>
 	void PolygonSet<TDataType>::extractEdgeSet(EdgeSet<TDataType>& es)
 	{
-		es.setPoints(mCoords);
-		es.setEdges(mEdges);
+		es.setPoints(PointSet<TDataType>::mCoords);
+		es.setEdges(EdgeSet<TDataType>::mEdges);
 
 		es.update();
 	}
@@ -305,7 +305,7 @@ namespace dyno
 			mPolygonIndex,
 			radix);
 
-		ts.setPoints(mCoords);
+		ts.setPoints(PointSet<TDataType>::mCoords);
 		ts.setTriangles(triangleIndices);
 		ts.update();
 
@@ -372,7 +372,7 @@ namespace dyno
 			mPolygonIndex,
 			radix);
 
-		qs.setPoints(mCoords);
+		qs.setPoints(PointSet<TDataType>::mCoords);
 		qs.setQuads(quadIndices);
 		qs.update();
 
@@ -438,7 +438,7 @@ namespace dyno
 			mPolygonIndex,
 			radix);
 
-		ts.setPoints(mCoords);
+		ts.setPoints(PointSet<TDataType>::mCoords);
 		ts.setTriangles(triangleIndex);
 		ts.update();
 

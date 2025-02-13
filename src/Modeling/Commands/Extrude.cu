@@ -84,7 +84,7 @@ namespace dyno
 		
 		if (columns_i >= 3)
 		{
-		//ртобйг╡ЮцФ╣Ц╣д╧╧╫╗
+		//О©╫О©╫О©╫О©╫О©╫г╡О©╫О©╫О©╫О©╫д╧О©╫О©╫О©╫
 
 			Real HeightValue = this->varHeight()->getData();
 			Real RowValue = this->varRow()->getData();
@@ -134,12 +134,12 @@ namespace dyno
 
 
 
-			//ртобйг╣в╡©╪╟ио╡©╣Ц╣д╧╧╫╗
+			//О©╫О©╫О©╫О©╫О©╫г╣в╡О©╫О©╫О©╫О©╫о╡О©╫О©╫О©╫д╧О©╫О©╫О©╫
 			std::vector<TopologyModule::Triangle> triangle;
 
 			int pt_side_len = vertices.size();
 
-			//ртобйг╡ЮцФ╣д╧╧╫╗
+			//О©╫О©╫О©╫О©╫О©╫г╡О©╫О©╫О©╫д╧О©╫О©╫О©╫
 			for (int rowl = 0; rowl <= RowValue - 1; rowl++)
 			{
 
@@ -168,7 +168,7 @@ namespace dyno
 			//transform
 
 
-			Quat<Real> q = computeQuaternion();
+			Quat<Real> q = this->computeQuaternion();
 
 			q.normalize();
 

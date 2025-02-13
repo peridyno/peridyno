@@ -36,9 +36,9 @@ namespace dyno
 		Real thickness,	//thickness of the boundary
 		Real dt)
 	{
-		typedef typename TPoint3D<Real> Point3D;
-		typedef typename TTriangle3D<Real> Triangle3D;
-		typedef typename TPointSweep3D<Real> PointSweep3D;
+		typedef typename ::dyno::TPoint3D<Real> Point3D;
+		typedef typename ::dyno::TTriangle3D<Real> Triangle3D;
+		typedef typename ::dyno::TPointSweep3D<Real> PointSweep3D;
 
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= particle_position.size()) return;

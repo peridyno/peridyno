@@ -29,9 +29,9 @@ namespace dyno
 		DECLARE_TCLASS(LargeOcean, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord3D;
-		typedef typename Vector<Real, 4> Coord4D;
+		typedef typename ::dyno::Vector<Real, 2> Coord2D;
+		typedef typename ::dyno::Vector<Real, 3> Coord3D;
+		typedef typename ::dyno::Vector<Real, 4> Coord4D;
 
 		LargeOcean();
 		~LargeOcean() override;
