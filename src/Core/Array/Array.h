@@ -18,6 +18,7 @@
 #include <cassert>
 #include <vector>
 #include <iostream>
+#include <cstring>
 #include <memory>
 #include <cmath>
 

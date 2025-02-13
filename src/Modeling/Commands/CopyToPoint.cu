@@ -63,7 +63,6 @@ namespace dyno
 		unsigned CopyNumber = c_target.size();
 
 		Coord Location;
-		////构建vertices及triangle
 		//for (int i = 0; i < lengthV; i++)
 		//{
 		//	Location = { c_point[i][0], c_point[i][1], c_point[i][2] };
@@ -75,14 +74,13 @@ namespace dyno
 		//}
 
 
-		//构建Copy多边形
-		//顶点
+		//Copy polygons
+		//vertices
 		if (!this->inTargetPointSet()->isEmpty()) 
 		{
 
 			for(int i = 0;i < CopyNumber; i++)
 			{
-				////建立四元数以进行递归变换
 				//Quat<Real> q = Quat<Real>(M_PI * rot[0] / 180 * (i + 1), Coord(1, 0, 0))
 				//	* Quat<Real>(M_PI * rot[1] / 180 * (i + 1), Coord(0, 1, 0))
 				//	* Quat<Real>(M_PI * rot[2] / 180 * (i + 1), Coord(0, 0, 1));
@@ -109,13 +107,13 @@ namespace dyno
 				{
 					Location = { c_point[j][0], c_point[j][1], c_point[j][2] };
 
-					//Location = RV(Location * RealScale) + center * (i+1);//添加变换RV(Location * RealScale + RV(center * (i + 1)))
+					//Location = RV(Location * RealScale) + center * (i+1);//娣诲姞鍙樻崲RV(Location * RealScale + RV(center * (i + 1)))
 					Location = Location + c_target[i];
 					vertices.push_back(Location);
 				}
 			}
 			
-			//面
+			//face
 			for (int i = 0; i < CopyNumber; i++) 
 			{
 				for (int j = 0; j < lengthT; j++)
@@ -129,13 +127,13 @@ namespace dyno
 
 		}
 
-		//整体变换
+		//transform
 		
 		auto centert = this->varLocation()->getData();
 		auto rott = this->varRotation()->getData();
 		auto scalet= this->varScale()->getData();
 
-		Quat<Real> qt = computeQuaternion();
+		Quat<Real> qt = this->computeQuaternion();
 
 		qt.normalize();
 

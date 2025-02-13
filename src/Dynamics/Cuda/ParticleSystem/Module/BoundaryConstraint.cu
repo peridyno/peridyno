@@ -140,7 +140,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void BoundaryConstraint<TDataType>::setCylinder(Coord center, Real r, Real height, Real distance, int axis, bool inverted = false)
+	void BoundaryConstraint<TDataType>::setCylinder(Coord center, Real r, Real height, Real distance, int axis, bool inverted)
 	{
 		int nx = floor(2 * r / distance);
 		int ny = floor(0.5 * height / distance);

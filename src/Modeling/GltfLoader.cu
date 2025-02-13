@@ -12,7 +12,12 @@
 
 namespace dyno
 {
-
+	template<typename uint>
+	__global__ void  C_Shape_PointCounter(
+		DArray<int> counter,
+		DArray<uint> point_ShapeIds,
+		uint target
+		);
 	IMPLEMENT_CLASS(BoundingBoxOfTextureMesh);
 
 	BoundingBoxOfTextureMesh::BoundingBoxOfTextureMesh()
@@ -821,7 +826,7 @@ namespace dyno
 		Vec3f scale = this->varScale()->getValue();
 		Mat4f mT = Mat4f(1, 0, 0, location[0], 0, 1, 0, location[1], 0, 0, 1, location[2], 0, 0, 0, 1);
 		Mat4f mS = Mat4f(scale[0], 0, 0, 0, 0, scale[1], 0, 0, 0, 0, scale[2], 0, 0, 0, 0, 1);
-		Mat4f mR = computeQuaternion().toMatrix4x4();
+		Mat4f mR = this->computeQuaternion().toMatrix4x4();
 		Mat4f transform = mT * mS * mR;
 
 		this->stateTransform()->setValue(transform);

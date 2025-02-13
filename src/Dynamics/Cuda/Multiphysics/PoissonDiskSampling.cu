@@ -196,14 +196,14 @@ namespace dyno
 
 
 	template <typename TDataType>
-	TDataType::Real PoissonDiskSampling<TDataType>::lerp(Real a, Real b, Real alpha)
+	typename TDataType::Real PoissonDiskSampling<TDataType>::lerp(Real a, Real b, Real alpha)
 	{
 		return (1.0f - alpha) * a + alpha * b;
 	};
 
 
 	template <typename TDataType>
-	TDataType::Real PoissonDiskSampling<TDataType>::getDistanceFromSDF(Coord& p,
+	typename TDataType::Real PoissonDiskSampling<TDataType>::getDistanceFromSDF(const Coord& p,
 		Coord& normal)
 	{
 		if (!SDF_flag) {
@@ -275,7 +275,7 @@ namespace dyno
 	};
 
 	template<typename TDataType>
-	TDataType::Coord PoissonDiskSampling<TDataType>::getOnePointInsideSDF()
+	typename TDataType::Coord PoissonDiskSampling<TDataType>::getOnePointInsideSDF()
 	{
 		Coord normal(0.0f);
 		for (Real ax = area_a[0]; ax < area_b[0]; ax += this->varSpacing()->getData())

@@ -52,8 +52,8 @@ namespace dyno {
 		void setValue(T val);
 		T getValue();
 
-		std::string serialize() override { return "Unknown"; }
-		bool deserialize(const std::string& str) override { return false; }
+		inline std::string serialize() override { return "Unknown"; }
+		inline bool deserialize(const std::string& str) override { return false; }
 
 		bool isEmpty() override {
 			return this->constDataPtr() == nullptr;

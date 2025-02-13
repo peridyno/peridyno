@@ -22,7 +22,7 @@ endif()
 
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	project(peridyno LANGUAGES ${SUPPORTED_LANGUAGES})  
-
+	include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
     #find_package(CUDA REQUIRED)
     # if(CUDA_FOUND)
     #     include_directories(${CUDA_INCLUDE_DIRS})
@@ -96,6 +96,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${CMAKE_BUILD_TYPE})
 IF(MSVC)
     SET( CMAKE_DEBUG_POSTFIX "d" )
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -utf-8")
 ENDIF(MSVC)
 
 # installation destinations

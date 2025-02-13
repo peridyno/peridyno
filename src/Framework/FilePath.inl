@@ -5,7 +5,7 @@
 
 namespace dyno {
 	template<>
-	std::string FVar<FilePath>::serialize()
+	inline std::string FVar<FilePath>::serialize()
 	{
 		if (isEmpty())
 			return "";
@@ -16,7 +16,7 @@ namespace dyno {
 	}
 
 	template<>
-	bool FVar<FilePath>::deserialize(const std::string& str)
+	inline bool FVar<FilePath>::deserialize(const std::string& str)
 	{
 		if (str.empty())
 			return false;

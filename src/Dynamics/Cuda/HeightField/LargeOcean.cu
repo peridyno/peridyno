@@ -81,7 +81,7 @@ namespace dyno
 	{
 		auto patch = this->getOceanPatch();
 
-		auto& topo = patch->stateHeightField()->constDataPtr();
+		auto  topo = patch->stateHeightField()->constDataPtr();
 		auto& disp = topo->getDisplacement();
 
 		auto ts = this->stateTriangleSet()->constDataPtr();

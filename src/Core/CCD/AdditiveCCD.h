@@ -108,28 +108,28 @@ namespace dyno
 	private: 
 
 
-		inline Vector<T, 3> DistanceEE(
+		inline DYN_FUNC Vector<T, 3> DistanceEE(
 			const Vector<T, 3>& x0, const Vector<T, 3>& x1,
 			const Vector<T, 3>& y0, const Vector<T, 3>& y1,
 			T* para);
 
-		inline T DistanceVF(
+		inline DYN_FUNC T DistanceVF(
 			const Vector<T, 3>& x,
 			const Vector<T, 3>& y0,
 			const Vector<T, 3>& y1,
 			const Vector<T, 3>& y2);
 
-		inline Vector<T, 3> DistanceVF_v(
+		inline DYN_FUNC Vector<T, 3> DistanceVF_v(
 			const Vector<T, 3>& x,
 			const Vector<T, 3>& y0,
 			const Vector<T, 3>& y1,
 			const Vector<T, 3>& y2,
 			T* para);
 
-		T SquareDistanceVF(const Vector<T, 3>& x0, const Vector<T, 3>& x1, const Vector<T, 3>& x2,
+		DYN_FUNC T SquareDistanceVF(const Vector<T, 3>& x0, const Vector<T, 3>& x1, const Vector<T, 3>& x2,
 			const Vector<T, 3>& x3);
 
-		T SquareDistanceEE(
+		DYN_FUNC T SquareDistanceEE(
 			const Vector<T, 3>& x0, const Vector<T, 3>& x1,
 			const Vector<T, 3>& x2, const Vector<T, 3>& x3);
 
@@ -139,4 +139,4 @@ namespace dyno
 	};
 }
 
-#include "additiveCCD.inl"
+#include "AdditiveCCD.inl"

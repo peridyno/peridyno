@@ -2,7 +2,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
-#include "ParticleSystem\Module\Kernel.h"
+#include "ParticleSystem/Module/Kernel.h"
 
 
 namespace dyno {

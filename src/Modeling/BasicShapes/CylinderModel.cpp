@@ -278,7 +278,7 @@ namespace dyno
 
 		//TransformModel
 
-		Quat<Real> q = computeQuaternion();
+		Quat<Real> q = this->computeQuaternion();
 
 		q.normalize();
 
@@ -334,7 +334,7 @@ namespace dyno
 		length[1] *= scale[1];
 		length[2] *= scale[2];
 
-		Quat<Real> q = computeQuaternion();
+		Quat<Real> q = this->computeQuaternion();
 
 		q.normalize();
 

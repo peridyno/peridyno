@@ -29,7 +29,7 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
-		typedef typename Pair<uint, uint> BindingPair;
+		typedef typename ::dyno::Pair<uint, uint> BindingPair;
 
 		MultibodySystem();
 		~MultibodySystem() override;
