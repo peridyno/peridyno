@@ -84,6 +84,16 @@ namespace dyno {
 
 		void setJointName(const std::map<int,std::string> name) { this->mJointName = name; }
 
+		void setPose(Pose pose) 
+		{
+			mCurrentTranslation.assign(pose.mTranslation);
+			mCurrentRotation.assign(pose.mRotation);
+			mCurrentScale.assign(pose.mScale);
+
+			updateWorldMatrixByTransform();
+
+		};
+
 	public:
 
 		std::map<int, std::string> mJointName;
@@ -159,6 +169,13 @@ namespace dyno {
 
 		Pose getPose(float inTime);
 
+		void updateAnimationPose(float inTime){
+
+			auto pose = this->getPose(inTime);
+			mSkeleton->setPose(pose);
+			
+		};
+
 		float getCurrentAnimationTime() { return currentTime; }
 
 		float& getBlendInTime() { return mBlendInTime; }
@@ -171,8 +188,6 @@ namespace dyno {
 		
 		std::shared_ptr<JointInfo> mSkeleton = NULL;
 
-	private:
-
 		//动画及时间戳
 		std::map<joint, std::vector<Vec3f>> mJoint_Index_Translation;
 		std::map<joint, std::vector<Real>> mJoint_Index_TimeCode_Translation;
@@ -183,6 +198,7 @@ namespace dyno {
 		std::map<joint, std::vector<Quat1f>> mJoint_Index_Rotation;
 		std::map<joint, std::vector<Real>> mJoint_Index_TimeCode_Rotation;
 
+	private:
 		//当前时间下的动画数据，在某些情况下仅记录三维软件中具有动画变化的骨骼
 		std::vector<Vec3f> mTranslation;
 		std::vector<Vec3f> mScale;
