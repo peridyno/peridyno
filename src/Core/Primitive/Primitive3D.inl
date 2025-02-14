@@ -3318,7 +3318,7 @@ namespace dyno
 		center = 0.5f * (v0 + v1);
 		Real len = (v1 - v0).norm();
 
-		rotation = Quat<Real>((0, 1, 0), v1 - v0);
+		rotation = Quat<Real>(Coord3D(0, 1, 0), v1 - v0);
 		radius = Real(r);
 		halfLength = Real(len * 0.5f);
 	}

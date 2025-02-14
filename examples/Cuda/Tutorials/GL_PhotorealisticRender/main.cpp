@@ -3,8 +3,6 @@
 
 #include <TextureMeshLoader.h>
 
-#include <Windows.h>
-
 using namespace std;
 using namespace dyno;
 

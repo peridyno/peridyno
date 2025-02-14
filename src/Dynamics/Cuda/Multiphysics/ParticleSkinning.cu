@@ -1,5 +1,5 @@
 #include "ParticleSkinning.h"
-#include "ComputeSurfaceLevelset.h"
+#include "ComputeSurfaceLevelSet.h"
 
 namespace dyno
 {

@@ -1,7 +1,7 @@
 #pragma once
 #include "Module/OutputModule.h"
 #include "Module/TopologyModule.h"
-#include "node.h"
+#include "Node.h"
 #include "Topology/TriangleSet.h"
 
 #include <string>
@@ -21,7 +21,7 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
 
-		typedef typename Quat<Real> TQuat;
+		typedef typename ::dyno::Quat<Real> TQuat;
 
 		PlyExporter();
 

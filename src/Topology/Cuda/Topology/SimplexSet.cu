@@ -136,12 +136,12 @@ namespace dyno
 
 		DArray<Coord> vertices(vNum);
 		DArray<Edge> edgeIndices(mEdgeIndex.size());
-		DArray<uint> vertexIdMapper(mCoords.size());
+		DArray<uint> vertexIdMapper(PointSet<TDataType>::mCoords.size());
 
 		cuExecute(radix.size(),
 			Simplex_SetupEdgeVertices,
 			vertices,
-			mCoords,
+			PointSet<TDataType>::mCoords,
 			vertexIdMapper,
 			vIds,
 			radix);
@@ -224,12 +224,12 @@ namespace dyno
 
 		DArray<Coord> vertices(vNum);
 		DArray<Triangle> triangleIndex(mTriangleIndex.size());
-		DArray<uint> vertexIdMapper(mCoords.size());
+		DArray<uint> vertexIdMapper(PointSet<TDataType>::mCoords.size());
 
 		cuExecute(radix.size(),
 			Simplex_SetupEdgeVertices,
 			vertices,
-			mCoords,
+			PointSet<TDataType>::mCoords,
 			vertexIdMapper,
 			vIds,
 			radix);
@@ -314,12 +314,12 @@ namespace dyno
 
 		DArray<Coord> vertices(vNum);
 		DArray<Tetrahedron> tetrahedronIndex(mTetrahedronIndex.size());
-		DArray<uint> vertexIdMapper(mCoords.size());
+		DArray<uint> vertexIdMapper(PointSet<TDataType>::mCoords.size());
 
 		cuExecute(radix.size(),
 			Simplex_SetupEdgeVertices,
 			vertices,
-			mCoords,
+			PointSet<TDataType>::mCoords,
 			vertexIdMapper,
 			vIds,
 			radix);
@@ -346,7 +346,7 @@ namespace dyno
 	{
 		ps.clear();
 
-		ps.setPoints(mCoords);
+		ps.setPoints(PointSet<TDataType>::mCoords);
 		ps.update();
 	}
 
@@ -499,7 +499,7 @@ namespace dyno
 			keys,
 			radix);
 
-		es.setPoints(mCoords);
+		es.setPoints(PointSet<TDataType>::mCoords);
 		es.setEdges(distinctEdges);
 		es.update();
 

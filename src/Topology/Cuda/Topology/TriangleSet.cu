@@ -385,7 +385,7 @@ namespace dyno
 		auto& vertices = ret->getPoints();
 		auto& indices = ret->getTriangles();
 
-		uint vNum0 = mCoords.size();
+		uint vNum0 = PointSet<TDataType>::mCoords.size();
 		uint vNum1 = ts.getPoints().size();
 
 		uint tNum0 = mTriangleIndex.size();
@@ -394,7 +394,7 @@ namespace dyno
 		vertices.resize(vNum0 + vNum1);
 		indices.resize(tNum0 + tNum1);
 
-		vertices.assign(mCoords, vNum0, 0, 0);
+		vertices.assign(PointSet<TDataType>::mCoords, vNum0, 0, 0);
 		vertices.assign(ts.getPoints(), vNum1, vNum0, 0);
 
 		indices.assign(mTriangleIndex, tNum0, 0, 0);

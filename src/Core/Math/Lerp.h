@@ -82,7 +82,7 @@ namespace dyno
 	};
 
 	template<typename T, DeviceType deviceType>
-	DYN_FUNC T trilinear(Array3D<T, deviceType>& array3d, float x, float y, LerpMode mode = LerpMode::REPEAT)
+	DYN_FUNC T trilinear(Array3D<T, deviceType>& array3d, float x, float y, float z, LerpMode mode = LerpMode::REPEAT)
 	{
 		const uint nx = array3d.nx();
 		const uint ny = array3d.ny();

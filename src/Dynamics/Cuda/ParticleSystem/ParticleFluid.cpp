@@ -29,10 +29,10 @@ namespace dyno
 	ParticleFluid<TDataType>::ParticleFluid()
 		: ParticleSystem<TDataType>()
 	{
-		auto smoothingLength = this->animationPipeline()->createModule<FloatingNumber<TDataType>>();
+		auto smoothingLength = this->animationPipeline()->template createModule<FloatingNumber<TDataType>>();
 		smoothingLength->varValue()->setValue(Real(0.006));
 
-		auto samplingDistance = this->animationPipeline()->createModule<FloatingNumber<TDataType>>();
+		auto samplingDistance = this->animationPipeline()->template createModule<FloatingNumber<TDataType>>();
 		samplingDistance->varValue()->setValue(Real(0.005));
 
 		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();

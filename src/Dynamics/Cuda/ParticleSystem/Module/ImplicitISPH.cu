@@ -454,7 +454,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	TDataType::Real ImplicitISPH<TDataType>::takeOneIteration()
+	typename TDataType::Real ImplicitISPH<TDataType>::takeOneIteration()
 	{
 		Real dt = this->inTimeStep()->getData();
 		int num = this->inPosition()->size();

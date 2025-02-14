@@ -32,8 +32,12 @@ namespace dyno {
 	using int64 = signed long long;
 
 #define INVALID -1
+#ifndef M_PI
 #define M_PI 3.14159265358979323846
+#endif
+#ifndef M_E
 #define M_E 2.71828182845904523536
+#endif
 
 	constexpr Real EPSILON = std::numeric_limits<Real>::epsilon();
 	constexpr Real REAL_EPSILON = (std::numeric_limits<Real>::epsilon)();

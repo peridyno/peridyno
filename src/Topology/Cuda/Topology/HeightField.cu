@@ -143,7 +143,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	DArray2D<TDataType::Real>& HeightField<TDataType>::calculateHeightField()
+	DArray2D<typename TDataType::Real>& HeightField<TDataType>::calculateHeightField()
 	{
 		uint nx = mDisplacement.nx();
 		uint ny = mDisplacement.ny();

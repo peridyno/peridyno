@@ -7,7 +7,7 @@ namespace dyno
 	ImplicitViscosity<TDataType>::ImplicitViscosity()
 		:ParticleApproximation<TDataType>()
 	{
-		this->varKernelType()->setCurrentKey(EKernelType::KT_Smooth);
+		this->varKernelType()->setCurrentKey(ParticleApproximation<TDataType>::EKernelType::KT_Smooth);
 		this->varViscosity()->setValue(Real(0.05));
 	}
 

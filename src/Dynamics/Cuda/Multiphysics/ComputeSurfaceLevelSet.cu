@@ -1,4 +1,4 @@
-#include "ComputeSurfaceLevelset.h"
+#include "ComputeSurfaceLevelSet.h"
 
 namespace dyno
 {

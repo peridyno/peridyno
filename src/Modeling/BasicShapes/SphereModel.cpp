@@ -74,7 +74,7 @@ namespace dyno
 		length[1] *= scale[1];
 		length[2] *= scale[2];
 
-		Quat<Real> q = computeQuaternion();
+		Quat<Real> q = this->computeQuaternion();
 
 		q.normalize();
 
@@ -211,7 +211,7 @@ namespace dyno
 		}
 
 		//Apply transformation
-		Quat<Real> q = computeQuaternion();
+		Quat<Real> q = this->computeQuaternion();
 
 		auto RV = [&](const Coord& v)->Coord {
 			return center + q.rotate(v - center);
@@ -244,7 +244,7 @@ namespace dyno
 		generateIcosahedron(vts, trs);
 		float fixScale = this->varIcosahedronStep()->getValue() >= 2 ? 1.08 : 1;
 
-		Quat<Real> q = computeQuaternion();
+		Quat<Real> q = this->computeQuaternion();
 		auto center = this->varLocation()->getData();
 		auto scale = this->varScale()->getData();
 

@@ -132,7 +132,7 @@ namespace dyno
 		auto rott = this->varRotation()->getData();
 		auto scalet= this->varScale()->getData();
 
-		Quat<Real> qt = computeQuaternion();
+		Quat<Real> qt = this->computeQuaternion();
 
 		qt.normalize();
 

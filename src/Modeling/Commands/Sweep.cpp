@@ -99,14 +99,14 @@ namespace dyno
 		std::vector<Coord> vertices;
 		std::vector<TopologyModule::Triangle> triangle;
 
-		//Spline路径曲线 曲线点
+		//Spline
 		CArray<Coord> c_point1;
 
 		c_point1.assign(SplineIn);
 
 		int lengthV = SplineIn.size();
 		totalIndex = lengthV;
-		//Curve2环形曲线 曲线点
+		//Curve2
 
 		CArray<Coord> c_point2;
 		c_point2.assign(VertexIn2);
@@ -124,7 +124,7 @@ namespace dyno
 		Coord LocationTemp2 = {0,1,0};
 
 
-		//建立四元数以进行递归变换
+		//Transform
 
 
 		for (size_t i = 0; i < lengthV; i++) 
@@ -232,7 +232,7 @@ namespace dyno
 
 		//Transform
 
-		Quat<Real> q2 = computeQuaternion();
+		Quat<Real> q2 = this->computeQuaternion();
 
 		q2.normalize();
 
@@ -278,13 +278,13 @@ namespace dyno
 	template<typename TDataType>
 	void SweepModel<TDataType>::displayChanged()
 	{
-		auto SurfaceModule = this->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
+		auto SurfaceModule = this->graphicsPipeline()->template findFirstModule<GLSurfaceVisualModule>();
 		SurfaceModule->setVisible(this->varDisplaySurface()->getValue());
 
-		auto wireModule = this->graphicsPipeline()->findFirstModule<GLWireframeVisualModule>();
+		auto wireModule = this->graphicsPipeline()->template findFirstModule<GLWireframeVisualModule>();
 		wireModule->setVisible(this->varDisplayWireframe()->getValue());
 	
-		auto pointModule = this->graphicsPipeline()->findFirstModule<GLPointVisualModule>();
+		auto pointModule = this->graphicsPipeline()->template findFirstModule<GLPointVisualModule>();
 		pointModule->setVisible(this->varDisplayPoints()->getValue());
 	}
 

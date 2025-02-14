@@ -56,8 +56,8 @@ namespace dyno
 
 		Coord v0 = this->varVelocityMagnitude()->getData() * quat.rotate(Vec3f(0, -1, 0));
 
-		auto w = 0.5 * this->varWidth()->getData();
-		auto h = 0.5 * this->varHeight()->getData();
+		auto w = 0.5 * this->varWidth()->getValue();
+		auto h = 0.5 * this->varHeight()->getValue();
 
 		for (Real x = -w; x <= w; x += sampling_distance)
 		{
@@ -128,6 +128,8 @@ namespace dyno
 	template<typename TDataType>
 	void Waterfall<TDataType>::resetStates()
 	{
+		ParticleEmitter<TDataType>::resetStates();
+
 		tranformChanged();
 	}
 

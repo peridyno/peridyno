@@ -40,7 +40,7 @@ namespace dyno {
 	};
 
 	template<>
-	std::string FVar<Curve>::serialize()
+	inline std::string FVar<Curve>::serialize()
 	{
 
 		std::string finalText;
@@ -86,7 +86,7 @@ namespace dyno {
 
 
 	template<>
-	bool FVar<Curve>::deserialize(const std::string& str)
+	inline bool FVar<Curve>::deserialize(const std::string& str)
 	{
 		if (str.empty())
 			return false;

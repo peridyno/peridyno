@@ -20,7 +20,7 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
-		typedef typename TBond<TDataType> Bond;
+		typedef typename ::dyno::TBond<TDataType> Bond;
 
 		CoSemiImplicitHyperelasticitySolver();
 		~CoSemiImplicitHyperelasticitySolver() override;
