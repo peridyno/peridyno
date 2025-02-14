@@ -500,16 +500,6 @@ namespace dyno
 		updateAnimation(this->stateFrameNumber()->getValue());
 		auto jointInfo = this->stateJointsData()->getDataPtr();
 		
-		this->stateJointsData()->getDataPtr()->UpdateJointInfo(
-			this->stateJointInverseBindMatrix()->getData(), 
-			this->stateJointLocalMatrix()->getData(), 
-			this->stateJointWorldMatrix()->getData(),
-			all_Joints,
-			jointId_joint_Dir,
-			joint_translation,
-			joint_scale,
-			joint_rotation
-		);
 	}; 
 
 
