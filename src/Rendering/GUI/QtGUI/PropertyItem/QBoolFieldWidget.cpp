@@ -36,9 +36,9 @@ namespace dyno
 		layout->addStretch(1);
 		layout->addWidget(checkbox, 0);
 
-		connect(checkbox, SIGNAL(stateChanged(int)), this, SLOT(updateField(int)));
+		checkbox->setChecked(f->getValue());
 
-		checkbox->setChecked(f->getData());
+		connect(checkbox, SIGNAL(stateChanged(int)), this, SLOT(updateField(int)));
 	}
 
 	void QBoolFieldWidget::updateField(int status)

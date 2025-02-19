@@ -13,10 +13,10 @@ add_library(${LIB_NAME} SHARED ${LIB_SRC})
 set_target_properties(${LIB_NAME} PROPERTIES FOLDER "Rendering/GUI")
 
 target_include_directories(${LIB_NAME} PUBLIC
-	$<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/GUI/>
+	$<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/GUI>
     $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/GUI/ImWidgets>
-    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
-    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/GUI>)
+    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/GUI>
+    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/GUI/ImWidgets>)
 	
 target_link_libraries(${LIB_NAME} Core Framework imgui RenderCore)
 

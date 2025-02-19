@@ -68,17 +68,6 @@ namespace px
 
 namespace dyno
 {
-	// #ifdef PRECISION_FLOAT
-	// 	#define REAL_EPSILON 1e-5
-	// 	#define  REAL_EPSILON_SQUARED 1e-10
-	// #else
-	// 	#define REAL_EPSILON 1e-10
-	// 	#define  REAL_EPSILON_SQUARED 1e-20
-	// #endif
-
-	constexpr Real REAL_EPSILON = (std::numeric_limits<Real>::epsilon)();
-	constexpr Real REAL_EPSILON_SQUARED = REAL_EPSILON * REAL_EPSILON;
-
 	/**
 	 * @brief 0D geometric primitive in three-dimensional space
 	 *
@@ -679,7 +668,9 @@ namespace dyno
 
 	/**
 	 * @brief vertices are ordered so that the normal vectors for the triangular faces point outwards
-	 *
+	 *			3
+	 *        /  | \
+	 *       0 - 2 - 1
 	 */
 	template<typename Real>
 	class TTet3D
@@ -696,6 +687,8 @@ namespace dyno
 
 		DYN_FUNC TTriangle3D<Real> face(const int index) const;
 		DYN_FUNC TSegment3D<Real> edge(const int index) const;
+
+		DYN_FUNC Real solidAngle(const int index) const;
 
 		DYN_FUNC Real volume() const;
 

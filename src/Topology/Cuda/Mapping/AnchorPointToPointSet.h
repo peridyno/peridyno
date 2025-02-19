@@ -16,10 +16,10 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
 
-		typedef typename BallAndSocketJoint<Real> BallAndSocketJoint;
-		typedef typename SliderJoint<Real> SliderJoint;
-		typedef typename HingeJoint<Real> HingeJoint;
-		typedef typename FixedJoint<Real> FixedJoint;
+		typedef typename ::dyno::BallAndSocketJoint<Real> BallAndSocketJoint;
+		typedef typename ::dyno::SliderJoint<Real> SliderJoint;
+		typedef typename ::dyno::HingeJoint<Real> HingeJoint;
+		typedef typename ::dyno::FixedJoint<Real> FixedJoint;
 
 		AnchorPointToPointSet();
 

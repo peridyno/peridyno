@@ -98,7 +98,7 @@ namespace dyno
 		length[1] *= scale[1];
 		length[2] *= scale[2];
 
-		Quat<Real> q = computeQuaternion();
+		Quat<Real> q = this->computeQuaternion();
 
 		q.normalize();
 
@@ -137,7 +137,7 @@ namespace dyno
 		Real halfHeight = this->varHeight()->getValue() / 2;
 		auto row = this->varHeightSegment()->getValue();
 
-		Quat<Real> q = computeQuaternion();
+		Quat<Real> q = this->computeQuaternion();
 
 		//Setup a capsule primitive
 		TCapsule3D<Real> capsulePrim = TCapsule3D<Real>(center, q, radius, halfHeight);
@@ -348,7 +348,7 @@ namespace dyno
 
 
 			//Apply transformation
-			Quat<Real> q = computeQuaternion();
+			Quat<Real> q = this->computeQuaternion();
 
 			auto RV = [&](const Coord& v)->Coord {
 				return center + q.rotate(v - center);

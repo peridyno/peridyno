@@ -4,10 +4,12 @@
 #include <memory>
 #include <string>
 #include "Vector.h"
-#include "Canvas.h"
+
 #include "OBase.h"
 #include "Module.h"
 #include "Topology/TextureMesh.h"
+
+#include "Field/Canvas.h"
 
 namespace dyno {
 

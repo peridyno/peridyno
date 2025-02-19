@@ -6,7 +6,7 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
         Peridynamics
         SemiAnalyticalScheme
         Multiphysics
-        QtGUI
+        UbiGUI
         ObjIO)
     add_example(Qt_JeepSimplified Modeling LIB_DEPENDENCY)
 endif()

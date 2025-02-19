@@ -173,7 +173,7 @@ namespace dyno
 		Real mass,
 		Real sampling_distance)
 	{
-		cuZerothOrder(rho.size(), this->varKernelType()->getDataPtr()->currentKey(), mScalingFactor,
+		cuZerothOrder(rho.size(), this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
 			SD_ComputeDensity,
 			rho,
 			pos,
@@ -184,7 +184,7 @@ namespace dyno
 
 		if (neighborsTri.size() > 0)
 		{
-			cuIntegral(rho.size(), this->varKernelType()->getDataPtr()->currentKey(), mScalingFactor,
+			cuIntegral(rho.size(), this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
 				SD_BoundaryIntegral,
 				rho,
 				pos,

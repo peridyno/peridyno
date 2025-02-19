@@ -386,15 +386,9 @@ namespace dyno
 
 	Transform3f JointAnimationInfo::updateTransform(joint select, float time) //时间插值
 	{
-		//基于循环添加time的裁切
-
-
 		auto iterR = mJoint_Index_Rotation.find(select);
-		if (iterR != mJoint_Index_Rotation.end())
-			mRotation[select] = iterR->second[(int)time];
-		else
+		if (iterR == mJoint_Index_Rotation.end())
 			mRotation[select] = mSkeleton->mBindPoseRotation[select];
-
 		{
 			//Rotation
 			if (iterR != mJoint_Index_Rotation.end())
@@ -410,27 +404,18 @@ namespace dyno
 				}
 				else
 				{
-					if (all_R[tId] != all_R[tId + 1])
-					{
-						float weight = (time - tTimeCode[tId]) / (tTimeCode[tId + 1] - tTimeCode[tId]);
-						mRotation[select] = slerp(all_R[tId], all_R[tId + 1], weight);
-					}
+					float weight = (time - tTimeCode[tId]) / (tTimeCode[tId + 1] - tTimeCode[tId]);
+					mRotation[select] = nlerp(all_R[tId], all_R[tId + 1], weight);
 				}
 			}
-			else
-			{
-				mRotation[select] = mSkeleton->mBindPoseRotation[select];
-			}
+
 		}
 
 
 		//Translation
 		auto iterT = mJoint_Index_Translation.find(select);
-		if (iterT != mJoint_Index_Translation.end())
-			mTranslation[select] = iterT->second[(int)time];
-		else
+		if (iterT == mJoint_Index_Translation.end()) 
 			mTranslation[select] = mSkeleton->mBindPoseTranslation[select];
-
 		{
 			//Translation
 			if (iterT != mJoint_Index_Translation.end())
@@ -441,36 +426,22 @@ namespace dyno
 				int tId = findMaxSmallerIndex(tTimeCode, time);
 
 
-				if (tId >= all_T.size() - 1)				//   [size-1]<=[tId]   大于最后一个
+				if (tId >= all_T.size() - 1)				//   [size-1]<=[tId] 
 				{
 					mTranslation[select] = all_T[all_T.size() - 1];
-					//printf("joint : %d  , %d 最左  T: %f, %f, %f\n", select, all_T.size() - 1, all_T[all_T.size() - 1]);
 				}
 				else
 				{
-					if (all_T[tId] != all_T[tId + 1])
-					{
-						float weight = (time - tTimeCode[tId]) / (tTimeCode[tId + 1] - tTimeCode[tId]);
-						mTranslation[select] = lerp(all_T[tId], all_T[tId + 1], weight);
-
-
-					}
-					//printf("joint : %d  , %d - %d  T: %f, %f, %f\n", select, tId, tId + 1, mTranslation[select]);
-
-
+					float weight = (time - tTimeCode[tId]) / (tTimeCode[tId + 1] - tTimeCode[tId]);
+					mTranslation[select] = lerp(all_T[tId], all_T[tId + 1], weight);	
 				}
 			}
-			else
-			{
-				mTranslation[select] = mSkeleton->mBindPoseTranslation[select];
-			}
+
 		}
 
 		//Scale
 		auto iterS = mJoint_Index_Scale.find(select);
-		if (iterS != mJoint_Index_Scale.end())
-			mScale[select] = iterS->second[(int)time];
-		else
+		if (iterS == mJoint_Index_Scale.end())
 			mScale[select] = mSkeleton->mBindPoseScale[select];
 
 		{
@@ -483,24 +454,15 @@ namespace dyno
 				int tId = findMaxSmallerIndex(tTimeCode, time);
 
 
-				if (tId >= all_S.size() - 1)				//   [size-1]<=[tId]   大于最后一个
+				if (tId >= all_S.size() - 1)				//   [size-1]<=[tId]  
 				{
 					mScale[select] = all_S[all_S.size() - 1];
-					//printf("joint : %d  , %d 最左  T: %f, %f, %f\n", select, all_T.size() - 1, all_T[all_T.size() - 1]);
 				}
 				else
 				{
-					if (all_S[tId] != all_S[tId + 1])
-					{
-						float weight = (time - tTimeCode[tId]) / (tTimeCode[tId + 1] - tTimeCode[tId]);
-						mScale[select] = lerp(all_S[tId], all_S[tId + 1], weight);
-					}
-					//printf("joint : %d  , %d - %d  T: %f, %f, %f\n", select, tId, tId + 1, mTranslation[select]);
+					float weight = (time - tTimeCode[tId]) / (tTimeCode[tId + 1] - tTimeCode[tId]);
+					mScale[select] = lerp(all_S[tId], all_S[tId + 1], weight);
 				}
-			}
-			else
-			{
-				mScale[select] = mSkeleton->mBindPoseScale[select];
 			}
 		}
 

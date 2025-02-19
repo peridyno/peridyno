@@ -35,11 +35,11 @@ namespace dyno
 	template<typename TDataType>
 	SemiImplicitHyperelasticitySolver<TDataType>::~SemiImplicitHyperelasticitySolver()
 	{
-		mWeights.clear();
-		mDisplacement.clear();
-		mInvK.clear();
-		mF.clear();
-		mPosBuf.clear();
+		this->mWeights.clear();
+		this->mDisplacement.clear();
+		this->mInvK.clear();
+		this->mF.clear();
+		this->mPosBuf.clear();
 	}
 
 	template <typename Real, typename Coord, typename Matrix>
@@ -86,7 +86,7 @@ namespace dyno
 	template<typename TDataType>
 	void SemiImplicitHyperelasticitySolver<TDataType>::solveElasticity()
 	{
-		cudaMemcpyToSymbol(ENERGY_FUNC, &this->inEnergyModels()->getData(), sizeof(EnergyModels<Real>));
+		cudaMemcpyToSymbol(ENERGY_FUNC, this->inEnergyModels()->constDataPtr().get(), sizeof(EnergyModels<Real>));
 
 		enforceHyperelasticity();
 	}
@@ -835,7 +835,7 @@ namespace dyno
 		m_source.resize(num);
 		m_A.resize(num);
 
-		mPosBuf.resize(num);
+		this->mPosBuf.resize(num);
 
 		m_fraction.resize(num);
 
@@ -868,7 +868,7 @@ namespace dyno
 		// initialize y_now, y_next_iter
 		y_current.assign(this->inY()->getData());
 		y_next.assign(this->inY()->getData());
-		mPosBuf.assign(this->inY()->getData());
+		this->mPosBuf.assign(this->inY()->getData());
 
 		// do Jacobi method Loop
 		bool convergeFlag = false; // converge or not
@@ -922,7 +922,7 @@ namespace dyno
 				HM_ComputeNextPosition,
 				y_next,
 				y_current,
-				mPosBuf,
+				this->mPosBuf,
 				m_source,
 				m_A,
 				this->inVolume()->getData(),
@@ -991,7 +991,7 @@ namespace dyno
 			this->inY()->getData(),
 			this->inVelocity()->getData(),
 			y_next,
-			mPosBuf,
+			this->mPosBuf,
 			this->inAttribute()->getData(),
 			this->inTimeStep()->getData());
 		printf("outside\n");

@@ -18,3 +18,6 @@ if(PERIDYNO_WT_GUI)
 endif()
 
 add_subdirectory(UbiGUI)
+
+file(GLOB FILE_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+install(FILES ${FILE_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/Rendering/GUI)

@@ -84,7 +84,7 @@ namespace dyno
 		
 		if (columns_i >= 3)
 		{
-		//以下是侧面点的构建
+		//Side vertices
 
 			Real HeightValue = this->varHeight()->getData();
 			Real RowValue = this->varRow()->getData();
@@ -134,12 +134,12 @@ namespace dyno
 
 
 
-			//以下是底部及上部点的构建
+			//top and bottom
 			std::vector<TopologyModule::Triangle> triangle;
 
 			int pt_side_len = vertices.size();
 
-			//以下是侧面的构建
+			//side
 			for (int rowl = 0; rowl <= RowValue - 1; rowl++)
 			{
 
@@ -168,7 +168,7 @@ namespace dyno
 			//transform
 
 
-			Quat<Real> q = computeQuaternion();
+			Quat<Real> q = this->computeQuaternion();
 
 			q.normalize();
 

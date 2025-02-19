@@ -35,6 +35,8 @@ namespace dyno {
 
 		bool resize(uint num);
 
+		void reset();
+
 		inline uint size() const { return m_maps.size(); }
 		inline uint elementSize() const { return m_elements.size(); }
 

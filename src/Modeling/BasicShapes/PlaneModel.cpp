@@ -86,7 +86,7 @@ namespace dyno
 		length[1] = 1;
 		length[2] *= scale[2];
 
-		Quat<Real> q = computeQuaternion();
+		Quat<Real> q = this->computeQuaternion();
 
 		q.normalize();
 
@@ -134,7 +134,7 @@ namespace dyno
 		lengthX *= scale[0];
 		lengthZ *= scale[2];
 
-		Quat<Real> q = computeQuaternion();
+		Quat<Real> q = this->computeQuaternion();
 
 		q.normalize();
 

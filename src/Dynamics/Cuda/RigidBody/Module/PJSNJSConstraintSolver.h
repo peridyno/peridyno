@@ -39,11 +39,11 @@ namespace dyno
 		typedef typename ::dyno::TContactPair<Real> ContactPair;
 		typedef typename ::dyno::TConstraintPair<Real> Constraint;
 
-		typedef typename BallAndSocketJoint<Real> BallAndSocketJoint;
-		typedef typename SliderJoint<Real> SliderJoint;
-		typedef typename HingeJoint<Real> HingeJoint;
-		typedef typename FixedJoint<Real> FixedJoint;
-		typedef typename PointJoint<Real> PointJoint;
+		typedef typename ::dyno::BallAndSocketJoint<Real> BallAndSocketJoint;
+		typedef typename ::dyno::SliderJoint<Real> SliderJoint;
+		typedef typename ::dyno::HingeJoint<Real> HingeJoint;
+		typedef typename ::dyno::FixedJoint<Real> FixedJoint;
+		typedef typename ::dyno::PointJoint<Real> PointJoint;
 
 		PJSNJSConstraintSolver();
 		~PJSNJSConstraintSolver();

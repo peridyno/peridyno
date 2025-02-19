@@ -28,7 +28,7 @@ namespace dyno
 
         Vector<Real, 3> separation_normal;
         Vector<Real, 3> separation_point[4];
-        Real separation_distance = -REAL_infinity;
+        Real separation_distance = -REAL_INF;
         SeparationType separation_type = CT_POINT;
         int separation_flag = 0;        // [0 A-B, 1 B-A]
 
@@ -48,13 +48,13 @@ namespace dyno
 
         DYN_FUNC void update(SeparationType type, Real BoundaryA, Real BoundaryB, Real Depth, Vec3f N, Vec3f a0, Vec3f a1, Vec3f a2 = Vec3f(0.), Vec3f a3 = Vec3f(0.))
         {
-			N = ((BoundaryA < BoundaryB) ^ (REAL_LESS(Depth, 0))) ? N : -N;  // [Question: why -N]
-            if (!REAL_LESS(Depth, 0.f))
+			N = ((BoundaryA < BoundaryB) ^ (isless(Depth, 0.f))) ? N : -N;  // [Question: why -N]
+            if (!isless(Depth, 0.f))
             {
                 separation_distance = Depth;
                 separation_normal = N;
             }
-            else if (REAL_GREAT(Depth, separation_distance))
+            else if (isgreat(Depth, separation_distance))
             {
                 separation_type = type;
                 separation_distance = Depth;

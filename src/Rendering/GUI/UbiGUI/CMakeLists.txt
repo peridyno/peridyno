@@ -47,10 +47,10 @@ elseif(UNIX)
 endif()
 
 target_include_directories(${LIB_NAME} PUBLIC
-	$<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/GUI/>
+	$<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/GUI>
     $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/Rendering/GUI/UbiGUI>
-    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
-    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/GUI>)
+    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/GUI>
+    $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/Rendering/GUI/UbiGUI>)
 
 #TODO: include a general IO library
 target_link_libraries(${LIB_NAME} GlfwGUI)

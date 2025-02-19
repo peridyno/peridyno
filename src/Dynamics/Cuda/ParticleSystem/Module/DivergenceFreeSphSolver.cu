@@ -321,7 +321,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	TDataType::Real DivergenceFreeSphSolver<TDataType>::takeOneDensityIteration()
+	typename TDataType::Real DivergenceFreeSphSolver<TDataType>::takeOneDensityIteration()
 	{
 		Real dt = this->inTimeStep()->getData();
 		int num = this->inPosition()->size();
@@ -374,7 +374,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	TDataType::Real DivergenceFreeSphSolver<TDataType>::takeOneDivergenIteration()
+	typename TDataType::Real DivergenceFreeSphSolver<TDataType>::takeOneDivergenIteration()
 	{
 		Real err = 0.0f;
 	

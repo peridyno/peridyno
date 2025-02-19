@@ -81,6 +81,9 @@ namespace dyno
 	private:
 		PSimulationThread();
 
+		static std::atomic<PSimulationThread*> pInstance;
+		static std::mutex mInstanceMutex;
+
 		void notify();
 
 		std::atomic<int> mTotalFrame;

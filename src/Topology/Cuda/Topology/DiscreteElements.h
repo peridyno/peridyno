@@ -515,12 +515,12 @@ namespace dyno
 		typedef typename ::dyno::TOrientedBox3D<Real> Box3D;
 		typedef typename ::dyno::TTet3D<Real> Tet3D;
 
-		typedef typename BallAndSocketJoint<Real> BallAndSocketJoint;
-		typedef typename SliderJoint<Real> SliderJoint;
-		typedef typename HingeJoint<Real> HingeJoint;
-		typedef typename FixedJoint<Real> FixedJoint;
-		typedef typename PointJoint<Real> PointJoint;
-		typedef typename DistanceJoint<Real> DistanceJoint;
+		typedef typename ::dyno::BallAndSocketJoint<Real> BallAndSocketJoint;
+		typedef typename ::dyno::SliderJoint<Real> SliderJoint;
+		typedef typename ::dyno::HingeJoint<Real> HingeJoint;
+		typedef typename ::dyno::FixedJoint<Real> FixedJoint;
+		typedef typename ::dyno::PointJoint<Real> PointJoint;
+		typedef typename ::dyno::DistanceJoint<Real> DistanceJoint;
 
 		DiscreteElements();
 		~DiscreteElements() override;

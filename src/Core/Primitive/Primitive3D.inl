@@ -5,11 +5,6 @@
 
 namespace dyno
 {
-	#define REAL_infinity 1.0e30
-	#define	REAL_EQUAL(a,b)  (((a < b + EPSILON) && (a > b - EPSILON)) ? true : false)
-	#define REAL_GREAT(a,b) ((a > EPSILON + b)? true: false) 
-	#define REAL_LESS(a,b) ((a + EPSILON < b)? true: false)
-
 	template<typename Real>
 	DYN_FUNC TPoint3D<Real>::TPoint3D()
 	{
@@ -3323,7 +3318,7 @@ namespace dyno
 		center = 0.5f * (v0 + v1);
 		Real len = (v1 - v0).norm();
 
-		rotation = Quat<Real>((0, 1, 0), v1 - v0);
+		rotation = Quat<Real>(Coord3D(0, 1, 0), v1 - v0);
 		radius = Real(r);
 		halfLength = Real(len * 0.5f);
 	}
@@ -3448,6 +3443,47 @@ namespace dyno
 
 		//return an ill triangle in case index is out of range
 		return TTriangle3D<Real>(Coord3D(0), Coord3D(0), Coord3D(0));
+	}
+
+	//https://en.wikipedia.org/wiki/Solid_angle
+	template<typename Real>
+	DYN_FUNC Real TTet3D<Real>::solidAngle(const int index) const
+	{
+		Coord3D v0, v1, v2, v3;
+		switch (index)
+		{
+		case 0:
+			v0 = v[0]; v1 = v[1]; v2 = v[3]; v3 = v[2];
+			break;
+		case 1:
+			v0 = v[1]; v1 = v[0]; v2 = v[2]; v3 = v[3];
+			break;
+		case 2:
+			v0 = v[2]; v1 = v[0]; v2 = v[3]; v3 = v[1];
+			break;
+		case 3:
+			v0 = v[3]; v1 = v[0]; v2 = v[1]; v3 = v[2];
+			break;
+		default:
+			break;
+		}
+
+		Coord3D A = v1 - v0;
+		Coord3D B = v2 - v0;
+		Coord3D C = v3 - v0;
+
+		Real a = A.norm();
+		Real b = B.norm();
+		Real c = C.norm();
+
+		Real dividend = A.dot(B.cross(C));
+		Real divisor = a * b * c + A.dot(B) * c + A.dot(C) * b + B.dot(C) * a;
+
+		Real angle = 2 * glm::atan(glm::abs(dividend) / divisor);
+
+		if (dividend > 0 && divisor < 0) angle += M_PI;
+
+		return angle;
 	}
 
 	template<typename Real>

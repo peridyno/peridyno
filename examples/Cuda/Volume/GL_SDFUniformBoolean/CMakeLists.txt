@@ -1,11 +1,6 @@
 if(PERIDYNO_LIBRARY_VOLUME)
-    set(LIB_DEPENDENCY 
-        Core 
-        Framework 
-        IO          
+    set(LIB_DEPENDENCY        
         Volume
-        ABCExporter
-		ObjIO
         UbiGUI
         GLRenderEngine)
     add_example(GL_SDFUniformBoolean Volume LIB_DEPENDENCY)

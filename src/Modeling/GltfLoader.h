@@ -89,6 +89,7 @@ namespace dyno
 
 		DEF_VAR(FilePath, FileName, "", "");
 		DEF_VAR(bool, ImportAnimation, false, "");
+		DEF_VAR(Real,AnimationSpeed,1,"AnimationSpeed");
 		DEF_VAR(Real, JointRadius, 0.01, "");
 
 		DEF_VAR(bool, UseInstanceTransform, true, "");
@@ -147,12 +148,8 @@ namespace dyno
 		std::map<joint, std::vector<int>> jointId_joint_Dir;
 
 
-		std::map<joint, std::vector<Vec3f>> joint_T_f_anim;
-		std::map<joint, std::vector<Quat<float>>> joint_R_f_anim;
-		std::map<joint, std::vector<Vec3f>> joint_S_f_anim;
-		std::map<joint, std::vector<Real>> joint_T_Time;
-		std::map<joint, std::vector<Real>> joint_S_Time;
-		std::map<joint, std::vector<Real>> joint_R_Time;
+
+
 
 		std::map<joint, Mat4f> joint_inverseBindMatrix;
 		std::map<joint, Mat4f> joint_AnimaMatrix;
@@ -185,7 +182,6 @@ namespace dyno
 		DArray<Mat4f> d_mesh_Matrix;
 		DArray<int> d_shape_meshId;
 
-		std::map<int, std::vector<Vec2u>> skin_VerticeRange;
 
 	private:
 
@@ -194,19 +190,15 @@ namespace dyno
 
 		void varRenderChanged();
 
+		void varAnimation();
+
 		void updateTransform();
 
 		void updateAnimation(int frameNumber);
 
 		void InitializationData();
 
-
-
-		void updateAnimationMatrix(const std::vector<joint>& all_Joints, int currentframe);
-
 		Vec3f getVertexLocationWithJointTransform(joint jointId, Vec3f inPoint, std::map<joint, Mat4f> jMatrix);
-
-		void updateJointWorldMatrix(const std::vector<joint>& allJoints, std::map<joint, Mat4f> jMatrix);
 
 		void buildInverseBindMatrices(const std::vector<joint>& all_Joints);
 		

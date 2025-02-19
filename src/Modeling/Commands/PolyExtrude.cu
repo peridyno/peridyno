@@ -130,7 +130,7 @@ namespace dyno
 		{
 			for (size_t i = 0; i < this->selectedPrimitiveID.size(); i++)
 			{
-				tempPrimArray.push_back(selectedPrimitiveID[i]);
+				tempPrimArray.push_back(this->selectedPrimitiveID[i]);
 			}
 		}
 		else 

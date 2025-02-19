@@ -17,7 +17,8 @@
 #include "ArticulatedBody.h"
 
 #include "STL/Pair.h"
-#include "VehicleInfo.h"
+
+#include "Field/VehicleInfo.h"
 
 namespace dyno
 {

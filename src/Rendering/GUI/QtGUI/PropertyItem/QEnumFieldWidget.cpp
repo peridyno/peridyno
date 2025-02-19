@@ -13,7 +13,7 @@ namespace dyno
 		: QFieldWidget(field)
 	{
 		auto f = TypeInfo::cast<FVar<PEnum>>(field);
-		if (f == nullptr || f->getDataPtr() == nullptr) {
+		if (f == nullptr || f->constDataPtr() == nullptr) {
 			return;
 		}
 
@@ -30,7 +30,7 @@ namespace dyno
 		QComboBox* combox = new QComboBox;
 		combox->setMaximumWidth(256);
 
-		auto& enums = f->getDataPtr()->enumMap();
+		auto& enums = f->constDataPtr()->enumMap();
 		int num = 0;
 		int curIndex = 0;
 		for (auto e : enums)
@@ -38,7 +38,7 @@ namespace dyno
 			mComboxIndexMap[num] = e.first;
 			combox->addItem(QString::fromStdString(e.second));
 
-			if (e.first == f->getDataPtr()->currentKey()) {
+			if (e.first == f->constDataPtr()->currentKey()) {
 				curIndex = num;
 			}
 
@@ -57,7 +57,7 @@ namespace dyno
 	void QEnumFieldWidget::updateField(int index)
 	{
 		auto f = TypeInfo::cast<FVar<PEnum>>(field());
-		if (f == nullptr || f->getDataPtr() == nullptr) {
+		if (f == nullptr || f->constDataPtr() == nullptr) {
 			return;
 		}
 

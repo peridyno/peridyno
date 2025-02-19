@@ -27,6 +27,8 @@ namespace dyno
 		bool resize(const DArray<uint> counts);
 		bool resize(const uint arraySize, const uint eleSize);
 
+		void reset();
+
 		template<typename ET2>
 		bool resize(const ArrayMap<ET2, DeviceType::GPU>& src);
 
@@ -113,6 +115,11 @@ namespace dyno
 		return true;
 	}
 
+	template<class ElementType>
+	void ArrayMap<ElementType, DeviceType::GPU>::reset()
+	{
+		m_elements.reset();
+	}
 
 	template<class ElementType>
 	bool ArrayMap<ElementType, DeviceType::GPU>::resize(const uint arraySize, const uint eleSize)
@@ -240,6 +247,12 @@ namespace dyno
 		m_index.resize(num);
 
 		return true;
+	}
+
+	template<class ElementType>
+	void ArrayMap<ElementType, DeviceType::CPU>::reset()
+	{
+		m_elements.reset();
 	}
 
 	template<class ElementType>

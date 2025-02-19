@@ -6,7 +6,7 @@ namespace dyno
 	SurfaceEnergyForce<TDataType>::SurfaceEnergyForce()
 		: ParticleApproximation<TDataType>()
 	{
-		this->varKernelType()->setCurrentKey(EKernelType::KT_Smooth);
+		this->varKernelType()->setCurrentKey(ParticleApproximation<TDataType>::EKernelType::KT_Smooth);
 	}
 
 	template<typename TDataType>
