@@ -2,6 +2,7 @@
 #include "Node.h"
 #include "SceneLoaderFactory.h"
 #include "tinyxml/tinyxml2.h"
+#include <variant>
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
@@ -19,7 +20,7 @@ namespace dyno {
 		};
 
 	public:
-		std::shared_ptr<SceneGraph> load(const std::string filename) override;
+		LoadResult load(const std::string filename) override;
 
 		bool save(std::shared_ptr<SceneGraph> scn, const std::string filename) override;
 
@@ -39,5 +40,7 @@ namespace dyno {
 		virtual bool canLoadFileByExtension(const std::string extension);
 
 		std::vector<std::vector<ConnectionInfo>> mConnectionInfo;
+
+
 	};
 }

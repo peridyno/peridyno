@@ -51,6 +51,9 @@
 #include "Auxiliary/DataSource.h"
 #include "Collision/CollisionData.h"
 
+#include "Field/Curve.h"
+#include "Field/Ramp.h"
+
 //ScemeGraph->add_node
 #include "PointsLoader.h"
 #include "GltfLoader.h"
@@ -73,9 +76,6 @@
 #include "SceneGraphFactory.h"
 #include "SceneLoaderFactory.h"
 #include "SceneLoaderXML.h"
-
-#include "Curve.h"
-#include "Ramp.h"
 
 #include <GLSurfaceVisualModule.h>
 #include <ColorMapping.h>

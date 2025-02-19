@@ -6,13 +6,15 @@
 
 namespace dyno
 {
-	std::shared_ptr<SceneGraph> SceneLoaderXML::load(const std::string filename)
+	using LoadResult = std::variant<std::shared_ptr<SceneGraph>, std::string>;
+
+	LoadResult SceneLoaderXML::load(const std::string filename)
 	{
 		tinyxml2::XMLDocument doc;
 		if (doc.LoadFile(filename.c_str()))
 		{
 			doc.PrintError();
-			return nullptr;
+			return "Error Load";
 		}
 
 		for (size_t i = 0; i < mConnectionInfo.size(); i++) {
@@ -23,6 +25,14 @@ namespace dyno
 		std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 		tinyxml2::XMLElement* root = doc.RootElement();
+
+		tinyxml2::XMLElement* versionXML = root->FirstChildElement("Version");
+		std::string version = TOSTRING(PERIDYNO_VERSION);
+		if (version.compare(versionXML->GetText()) != 0)
+		{
+			return "Error Version";
+		}
+
 
 		std::vector<std::shared_ptr<Node>> nodes;
 		tinyxml2::XMLElement* nodeXML = root->FirstChildElement("Node");

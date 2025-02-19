@@ -1,4 +1,5 @@
 #include "WSaveWidget.h"
+#include <variant>
 
 WSaveWidget::WSaveWidget(WMainWindow* parent)
 	: mParent(parent)
@@ -122,15 +123,30 @@ void WSaveWidget::createUploadPanel()
 		{
 			auto scnLoader = dyno::SceneLoaderFactory::getInstance().getEntryByFileExtension("xml");
 
-			auto scn = scnLoader->load(filePath);
+			auto result = scnLoader->load(filePath);
 
-			if (scn)
+			if (std::holds_alternative<std::string>(result))
 			{
-				mParent->setScene(scn);
+				std::string error = std::get<std::string>(result);
+				if (error.compare("Error Load") == 0)
+				{
+					Wt::WMessageBox::show("Error", "Error Load!", Wt::StandardButton::Ok);
+				}
+				else if (error.compare("Error Version") == 0)
+				{
+					Wt::WMessageBox::show("Error", "Version Error detected!", Wt::StandardButton::Ok);
+				}
+				else
+				{
+					Wt::WMessageBox::show("Error", "Unknown Error!", Wt::StandardButton::Ok);
+				}
+			}
+			else if (std::holds_alternative<std::shared_ptr<SceneGraph>>(result))
+			{
+				mParent->setScene(std::get<std::shared_ptr<SceneGraph>>(result));
 				mParent->createLeftPanel();
 				mUploadOut->setText("File upload is finished.");
 			}
-
 		}
 		else
 		{
@@ -216,7 +232,7 @@ std::string WSaveWidget::uploadFile(Wt::WFileUpload* upload)
 
 			if (dst)
 			{
-				Wt::WMessageBox::show("Success", "File save path." + savePath, Wt::StandardButton::Ok);
+				//Wt::WMessageBox::show("Success", "File save path." + savePath, Wt::StandardButton::Ok);
 				src.close();
 				dst.close();
 				return savePath;
