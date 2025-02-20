@@ -135,6 +135,7 @@ void pybind_framework(py::module& m)
 	//OBase
 	typedef std::map<dyno::FieldID, FBase*> FieldMap;
 	py::class_<OBase, Object, std::shared_ptr<OBase>>(m, "OBase")
+		.def(py::init<>())
 		.def("caption", &OBase::caption)
 		.def("caption_visible", &OBase::captionVisible)
 		.def("description", &OBase::description)
@@ -174,11 +175,14 @@ void pybind_framework(py::module& m)
 		.def("get_parameters", &OBase::getParameters, py::return_value_policy::reference);
 
 	py::class_<Node, OBase, std::shared_ptr<Node>>(m, "Node", py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
 		.def("set_name", &Node::setName)
 		.def("get_name", &Node::getName)
 		.def("get_node_type", &Node::getNodeType)
 		.def("is_auto_sync", &Node::isAutoSync)
+		.def("is_auto_hidden", &Node::isAutoHidden)
 		.def("set_auto_sync", &Node::setAutoSync)
+		.def("set_auto_hidden", &Node::setAutoHidden)
 		.def("is_active", &Node::isActive)
 		.def("set_active", &Node::setActive)
 		.def("is_visible", &Node::isVisible)

@@ -136,6 +136,8 @@ void declare_var(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("FVar") + typestr;
 	py::class_<Class, FBase, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
+		.def(py::init<std::string, std::string, dyno::FieldTypeEnum, OBase*>())
+		.def(py::init<T, std::string, std::string, dyno::FieldTypeEnum, OBase*>())
 		.def("get_template_name", &Class::getTemplateName)
 		.def("get_class_name", &Class::getClassName)
 		.def("size", &Class::size)
@@ -193,7 +195,7 @@ template<typename T>
 void declare_instance(py::module& m, std::string typestr) {
 	using Class = dyno::FInstance<T>;
 	using Parent = InstanceBase;
-	std::string pyclass_name = std::string("Instance") + typestr;
+	std::string pyclass_name = std::string("FInstance") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def(py::init<std::string, std::string, dyno::FieldTypeEnum, dyno::OBase*>())
@@ -255,18 +257,6 @@ void declare_parametric_model(py::module& m, std::string typestr) {
 		.def("var_rotation", &Class::varRotation, py::return_value_policy::reference)
 		.def("var_scale", &Class::varScale, py::return_value_policy::reference);
 }
-
-//#include "SemiAnalyticalScheme/SemiAnalyticalSFINode.h"
-//template <typename TDataType>
-//void declare_semi_analytical_sfi_node(py::module& m, std::string typestr) {
-//	using Class = dyno::SemiAnalyticalSFINode<TDataType>;
-//	using Parent = dyno::Node;
-//	std::string pyclass_name = std::string("SemiAnalyticalSFINode") + typestr;
-//	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-//		.def(py::init<>())
-//		.def("import_particle_systems", &Class::importParticleSystems, py::return_value_policy::reference)
-//		.def("in_triangleSet", &Class::inTriangleSet, py::return_value_policy::reference);
-//}
 
 template <typename TDataType>
 void declare_floating_number(py::module& m, std::string typestr) {
