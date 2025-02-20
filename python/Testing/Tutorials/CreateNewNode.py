@@ -7,7 +7,6 @@ class VolumeTest(dyno.Node):
         self.state_LevelSet = dyno.FInstanceLevelSet3f("LevelSet", "", dyno.FieldTypeEnum.State, self)
 
         self.set_auto_hidden(True)
-
         mapper = dyno.VolumeToTriangleSet3f()
         self.state_level_set().connect(mapper.io_volume())
         self.graphics_pipeline().push_module(mapper)
@@ -26,11 +25,8 @@ class VolumeTest(dyno.Node):
 scn = dyno.SceneGraph()
 scn.set_upper_bound(dyno.Vector3f([2,2,2]))
 scn.set_lower_bound(dyno.Vector3f([-2,-2,-2]))
-
-cube1 = dyno.CubeModel3f()
-scn.add_node(cube1)
-cube1.var_location().set_value(dyno.Vector3f([0.125, 0.125, 0.125]))
-cube1.var_length().set_value(dyno.Vector3f([0.15, 0.15, 0.15]))
+test = VolumeTest()
+scn.add_node(test)
 
 app = dyno.GlfwApp()
 app.set_scenegraph(scn)

@@ -52,41 +52,33 @@ WPythonWidget::WPythonWidget()
 	std::string source = R"====(# dyno sample
 import PyPeridyno as dyno
 
-scene = dyno.SceneGraph()
+class VolumeTest(dyno.Node):
+    
+    def __init__(self):
+        dyno = __import__('PyPeridyno')
+        super().__init__()
+        self.state_LevelSet = dyno.FInstanceLevelSet3f("LevelSet", "", dyno.FieldTypeEnum.State, self)
 
-emitter = dyno.SquareEmitter3f()
-emitter.var_location().set_value(dyno.Vector3f([0.5, 0.5, 0.5]))
+        self.set_auto_hidden(True)
+        mapper = dyno.VolumeToTriangleSet3f()
+        self.state_level_set().connect(mapper.io_volume())
+        self.graphics_pipeline().push_module(mapper)
 
-fluid = dyno.ParticleFluid3f()
-fluid.load_particles(dyno.Vector3f([0, 0, 0]), dyno.Vector3f([0.2, 0.2, 0.2]), 0.05)
+        renderer = dyno.GLSurfaceVisualModule()
+        mapper.out_triangle_set().connect(renderer.in_triangle_set())
+        self.graphics_pipeline().push_module(renderer)
+        
+    def get_node_type(self):
+        return "Volume"
 
-emitter.connect(fluid.import_particle_emitters())
+    def state_level_set(self):
+        return self.state_LevelSet
 
-calculateNorm = dyno.CalculateNorm3f()
-colorMapper = dyno.ColorMapping3f()
-colorMapper.var_max().set_value(0.5)
 
-ptRender = dyno.GLPointVisualModule()
-ptRender.set_color(dyno.Color(1, 0, 0))
-ptRender.set_color_map_mode(ptRender.ColorMapMode.PER_VERTEX_SHADER)
+scn = dyno.SceneGraph()
 
-fluid.state_velocity().connect(calculateNorm.in_vec())
-fluid.state_point_set().connect(ptRender.in_point_set())
-calculateNorm.out_norm().connect(colorMapper.in_scalar())
-colorMapper.out_color().connect(ptRender.in_color())
-
-fluid.graphics_pipeline().push_module(calculateNorm)
-fluid.graphics_pipeline().push_module(colorMapper)
-fluid.graphics_pipeline().push_module(ptRender)
-
-container = dyno.StaticBoundary3f()
-container.load_cube(dyno.Vector3f([0, 0, 0]), dyno.Vector3f([1.0, 1.0, 1.0]), 0.02, True)
-
-fluid.connect(container.import_particle_systems())
-
-scene.add_node(emitter)
-scene.add_node(fluid)
-scene.add_node(container)
+test = VolumeTest()
+scn.add_node(test)
 )====";
 
 	setText(source);
@@ -122,7 +114,7 @@ void WPythonWidget::execute(const std::string& src)
 		}
 		else
 		{
-			Wt::WMessageBox::show("Error", "Please define 'scene = dyno.SceneGraph()'", Wt::StandardButton::Ok);
+			Wt::WMessageBox::show("Error", "Please define 'scn = dyno.SceneGraph()'", Wt::StandardButton::Ok);
 		}
 	}
 	catch (const std::exception& e) {
