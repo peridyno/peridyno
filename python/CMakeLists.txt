@@ -23,8 +23,9 @@ elseif(UNIX)
 endif()
 
 link_libraries(Core Interaction Framework IO Modeling Topology)
-link_libraries(GlfwGUI RenderCore GLRenderEngine ImWidgets QtGUI ObjIO)
 link_libraries(DualParticleSystem HeightField Multiphysics ParticleSystem Peridynamics RigidBody SemiAnalyticalScheme Volume)
+link_libraries(GlfwGUI RenderCore GLRenderEngine ImWidgets ObjIO QtGUI)
+
 
 pybind11_add_module(${PyBind_Name} ${PY_ALL_SOURCE_FILES})
 

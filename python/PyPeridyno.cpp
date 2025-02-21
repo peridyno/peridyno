@@ -22,7 +22,6 @@ PYBIND11_MODULE(PyPeridyno, m) {
 	pybind_rendering(m);
 	pybind_im_widgets(m);
 	pybind_glfw_gui(m);
-	pybind_qt_gui(m);
 
 
 	m.def("get_asset_path", &getAssetPath, "Get the asset path");

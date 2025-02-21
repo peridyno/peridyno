@@ -487,8 +487,4 @@ void declare_particle_system_helper(py::module& m, std::string typestr) {
 		.def("reorder_particles", &Class::reorderParticles);
 }
 
-
-
-void declare_particle_system_initializer(py::module& m);
-
 void pybind_particle_system(py::module& m);

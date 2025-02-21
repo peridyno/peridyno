@@ -147,6 +147,4 @@ void declare_poisson_disk_sampling(py::module& m, std::string typestr) {
 		.def("get_one_point_inside_sdf", &Class::getOnePointInsideSDF);
 }
 
-void declare_multiphysics_initializer(py::module& m);
-
 void pybind_multiphysics(py::module& m);

@@ -156,6 +156,4 @@ void declare_virtual_spatially_adaptive_strategy(py::module& m, std::string type
 		.def("in_r_position", &Class::inRPosition, py::return_value_policy::reference);
 }
 
-void declare_dual_particle_system_initializer(py::module& m);
-
 void pybind_dual_particle_system(py::module& m);

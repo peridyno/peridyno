@@ -1,14 +1,5 @@
 #include "PyParticleSystem.h"
 
-#include "ParticleSystem/initializeParticleSystem.h"
-void declare_particle_system_initializer(py::module& m) {
-	using Class = dyno::ParticleSystemInitializer;
-	using Parent = dyno::PluginEntry;
-	std::string pyclass_name = std::string("ParticleSystemInitializer");
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def("instance", &Class::instance);
-}
-
 void pybind_particle_system(py::module& m)
 {
 	// Emitters

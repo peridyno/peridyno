@@ -11,7 +11,6 @@
 #include "Rendering/PyGlfwGUI.h"
 #include "Rendering/PyImWidgets.h"
 #include "Rendering/PyRendering.h"
-#include "Rendering/PyQtGUI.h"
 
 #include "Dynamics/PyDualParticleSystem.h"
 #include "Dynamics/PySemiAnalyticalScheme.h"
