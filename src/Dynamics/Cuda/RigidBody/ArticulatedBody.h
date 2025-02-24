@@ -21,7 +21,7 @@
 #include "Topology/TriangleSet.h"
 #include "Topology/TextureMesh.h"
 
-#include "FilePath.h"
+#include "Field/FilePath.h"
 
 namespace dyno 
 {

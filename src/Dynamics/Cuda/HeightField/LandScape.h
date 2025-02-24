@@ -17,7 +17,7 @@
 #include "Node/ParametricModel.h"
 
 #include "Topology/HeightField.h"
-#include "FilePath.h"
+#include "Field/FilePath.h"
 namespace dyno {
 
     template<typename TDataType>

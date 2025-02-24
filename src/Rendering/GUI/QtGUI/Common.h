@@ -1,7 +1,7 @@
 #pragma once
 #include <QString>
 
-#include "FilePath.h"
+#include "Field/FilePath.h"
 
 #if defined(PERIDYNO_QTGUI_EXPORTS)
 #define PERIDYNO_QTGUI_API Q_DECL_EXPORT

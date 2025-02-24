@@ -2,7 +2,7 @@
 #include "ModelEditing.h"
 #include "Topology/TriangleSet.h"
 #include "Field.h"
-#include "FilePath.h"
+#include "Field/FilePath.h"
 
 namespace dyno
 {

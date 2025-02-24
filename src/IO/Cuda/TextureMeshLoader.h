@@ -2,7 +2,7 @@
 
 #include "Node/ParametricModel.h"
 
-#include "FilePath.h"
+#include "Field/FilePath.h"
 
 #include "Topology/TriangleSet.h"
 #include "Topology/TextureMesh.h"

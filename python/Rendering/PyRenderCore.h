@@ -1,7 +1,7 @@
 #pragma once
 #include "../PyCommon.h"
 #include "SceneGraph.h"
-#include "Color.h"
+#include "Field/Color.h"
 
 void declare_orbit_camera(py::module& m);
 

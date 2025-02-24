@@ -18,9 +18,10 @@
 
 #include <chrono>
 #include <mutex>
+
+#include <Field/Color.h>
 #include <Module/VisualModule.h>
 
-#include <Color.h>
 #include <RenderParams.h>
 
 namespace dyno

@@ -2,7 +2,7 @@
 #include "RigidBody/RigidBody.h"
 #include "Topology/TriangleSet.h"
 
-#include "FilePath.h"
+#include "Field/FilePath.h"
 
 namespace dyno 
 {
