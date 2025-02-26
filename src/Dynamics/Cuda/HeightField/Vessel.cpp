@@ -40,6 +40,9 @@ namespace dyno
 
 				if (succeed)
 				{
+					if (this->stateEnvelope()->isEmpty())
+						this->stateEnvelope()->allocate();
+
 					auto envelope = this->stateEnvelope()->getDataPtr();
 
 					envelope->copyFrom(mInitialEnvelope);
@@ -59,6 +62,9 @@ namespace dyno
 		auto textureMeshLoader = std::make_shared<FCallBackFunc>(
 			[=]() {
 				std::string filepath = this->varTextureMeshName()->getValue().string();
+				if (this->stateTextureMesh()->isEmpty())
+					this->stateTextureMesh()->allocate();
+
 				std::shared_ptr<TextureMesh> texMesh = this->stateTextureMesh()->getDataPtr();
 				loadGLTFTextureMesh(texMesh, filepath);
 			}
@@ -91,16 +97,6 @@ namespace dyno
 	{
 		if (this->stateEnvelope()->isEmpty()) this->stateEnvelope()->allocate();
 		if (this->stateTextureMesh()->isEmpty()) this->stateTextureMesh()->allocate();
-
-		std::string envFileName = getAssetPath() + "obj/boat_boundary.obj";
-		if (this->varEnvelopeName()->getValue() != envFileName) {
-			this->varEnvelopeName()->setValue(FilePath(envFileName));
-		}
-
-		std::string texMeshName = getAssetPath() + "gltf/SailBoat/SailBoat.gltf";
-		if (this->varTextureMeshName()->getValue() != texMeshName) {
-			this->varTextureMeshName()->setValue(FilePath(texMeshName));
-		}
 
 		this->transform();
 

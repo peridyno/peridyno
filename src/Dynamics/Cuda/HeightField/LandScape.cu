@@ -23,8 +23,9 @@ namespace dyno
         this->graphicsPipeline()->pushModule(mapper);
 
         auto sRender = std::make_shared<GLSurfaceVisualModule>();
-        //sRender->setColor(Color(0.57f, 0.4f, 0.3f));
+        sRender->setColor(Color(0.5f));
         sRender->varUseVertexNormal()->setValue(true);
+        sRender->varRoughness()->setValue(1.0f);
         mapper->outTriangleSet()->connect(sRender->inTriangleSet());
         this->graphicsPipeline()->pushModule(sRender);
 
@@ -64,6 +65,7 @@ namespace dyno
         {
             Real y = heights(i, j);
 
+            // disp(i, j) = origin + Coord(i * scale.x, y * scale.y, j * scale.x);
             disp(i, j) = Coord(0, y * scale.y, 0);
         }
     }
@@ -71,6 +73,7 @@ namespace dyno
     template<typename TDataType>
     void LandScape<TDataType>::callbackTransform()
     {
+
         auto scale = this->varScale()->getValue();
         auto loc = this->varLocation()->getValue();
 
@@ -78,9 +81,10 @@ namespace dyno
 
         uint nx = mInitialHeights.nx();
         uint nz = mInitialHeights.ny();
+        // printf("nx: %d, nz: %d\n", nx, nz);
 
         topo->setExtents(mInitialHeights.nx(), mInitialHeights.ny());
-        topo->setGridSpacing(1);
+        topo->setGridSpacing(scale.x);
         topo->setOrigin(Coord(-0.5 * nx * scale.x + loc.x, loc.y, -0.5 * nz * scale.z + loc.z));
 
         auto& disp = topo->getDisplacement();

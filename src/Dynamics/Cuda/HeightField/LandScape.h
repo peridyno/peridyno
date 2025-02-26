@@ -31,6 +31,7 @@ namespace dyno {
         LandScape();
         ~LandScape();
 
+        DArray2D<Real>& getInitialHeights() { return mInitialHeights; }
     public:
  
         DEF_VAR(Real, PatchSize, Real(256), "Real patch size");

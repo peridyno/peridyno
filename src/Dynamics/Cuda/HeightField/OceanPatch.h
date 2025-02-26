@@ -49,6 +49,8 @@ namespace dyno {
 
         DEF_VAR(Real, Amplitude, 0, "");
 
+        DEF_VAR(Real, AmplitudeScale, 1, "");
+
         DEF_VAR(Real, WindSpeed, 0, "");
 
         DEF_VAR(Real, Choppiness, 0, "");

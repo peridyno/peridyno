@@ -44,6 +44,8 @@ namespace dyno
 
 		DEF_VAR(Real, Length, 512.0f, "The simulated region size in meters");
 
+		DEF_VAR(Real, Viscosity, 0.001, "Fluid viscosity");
+
 	public:
 		DEF_ARRAY2D_STATE(Coord4D, Height, DeviceType::GPU, "");
 
@@ -71,6 +73,7 @@ namespace dyno
 	protected:
 		DArray2D<Coord4D> mDeviceGrid;
 		DArray2D<Coord4D> mDeviceGridNext;
+		DArray2D<Coord4D> mDeviceGridOld;
 
 	private:
 		Real mRealGridSize;

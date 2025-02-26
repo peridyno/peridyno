@@ -1,5 +1,7 @@
 #include "GranularMedia.h"
 
+#include "Module/NumericalScheme.h"
+
 #include "Mapping/HeightFieldToTriangleSet.h"
 #include "GLSurfaceVisualModule.h"
 
@@ -32,95 +34,6 @@ namespace dyno
 	{
 	}
 
-	template<typename Real, typename Coord4D>
-	__device__ Coord4D d_flux_x(Coord4D gpl, Coord4D gpr, Real GRAVITY)
-	{
-		Real h = maximum(0.5f * (gpl.x + gpr.x), 0.0f);
-		Real b = 0.5f * (gpl.w + gpr.w);
-
-		Real hl = maximum(gpl.x, 0.0f);
-		Real hl4 = hl * hl * hl * hl;
-		Real ul = sqrtf(2.0f) * hl * gpl.y / (sqrtf(hl4 + maximum(hl4, Real(EPSILON))));
-
-		Real hr = max(gpr.x, 0.0f);
-		Real hr4 = hr * hr * hr * hr;
-		Real ur = sqrtf(2.0f) * hr * gpr.y / (sqrtf(hr4 + maximum(hr4, Real(EPSILON))));
-
-		if (hl < EPSILON && hr < EPSILON)
-		{
-
-			return Coord4D(0.0f);
-		}
-
-		Real a_plus;
-		Real a_minus;
-		a_plus = maximum(maximum(Real(ul + sqrtf(GRAVITY * (gpl.x/*+gpl.w*/))), Real(ur + sqrtf(GRAVITY * (gpr.x/*+gpr.w*/)))), Real(0));
-		a_minus = minimum(minimum(Real(ul - sqrtf(GRAVITY * (gpl.x/*+gpl.w*/))), Real(ur - sqrtf(GRAVITY * (gpr.x/*+gpr.w*/)))), Real(0));
-
-		Coord4D delta_U = gpr - gpl;
-		if (gpl.x > EPSILON && gpr.x > EPSILON)
-		{
-			delta_U.x += delta_U.w;
-		}
-
-		delta_U.w = 0.0f;
-
-		Coord4D Fl = Coord4D(gpl.y, gpl.y * ul, gpl.z * ul, 0.0f);
-		Coord4D Fr = Coord4D(gpr.y, gpr.y * ur, gpr.z * ur, 0.0f);
-
-		Coord4D re = (a_plus * Fl - a_minus * Fr) / (a_plus - a_minus) + a_plus * a_minus / (a_plus - a_minus) * delta_U;
-
-		if (ul == 0 && ur == 0)//abs(ul) <EPSILON && abs(ur) <EPSILON
-		{
-			re.x = 0;
-			re.y = 0;
-			re.z = 0;
-		}
-		return re;
-	}
-
-	template<typename Real, typename Coord4D>
-	__device__ Coord4D d_flux_y(Coord4D gpl, Coord4D gpr, Real GRAVITY)
-	{
-		Real hl = max(gpl.x, 0.0f);
-		Real hl4 = hl * hl * hl * hl;
-		Real vl = sqrtf(2.0f) * hl * gpl.z / (sqrtf(hl4 + max(hl4, EPSILON)));
-
-		Real hr = max(gpr.x, 0.0f);
-		Real hr4 = hr * hr * hr * hr;
-		Real vr = sqrtf(2.0f) * hr * gpr.z / (sqrtf(hr4 + max(hr4, EPSILON)));
-
-		if (hl < EPSILON && hr < EPSILON)
-		{
-			return Coord4D(0.0f);
-		}
-
-		Real a_plus = maximum(maximum(Real(vl + sqrtf(GRAVITY * (gpl.x/* + gpl.w*/))), Real(vr + sqrtf(GRAVITY * (gpr.x/* + gpr.w*/)))), Real(0));
-		Real a_minus = minimum(minimum(Real(vl - sqrtf(GRAVITY * (gpl.x/* + gpl.w*/))), Real(vr - sqrtf(GRAVITY * (gpr.x/* + gpr.w*/)))), Real(0));
-
-		Real b = 0.5f * (gpl.w + gpr.w);
-
-		Coord4D delta_U = gpr - gpl;
-		if (gpl.x > EPSILON && gpr.x > EPSILON)
-		{
-			delta_U.x += delta_U.w;
-		}
-		delta_U.w = 0.0f;
-
-		Coord4D Fl = Coord4D(gpl.z, gpl.y * vl, gpl.z * vl, 0.0f);
-		Coord4D Fr = Coord4D(gpr.z, gpr.y * vr, gpr.z * vr, 0.0f);
-
-		Coord4D re = (a_plus * Fl - a_minus * Fr) / (a_plus - a_minus) + a_plus * a_minus / (a_plus - a_minus) * delta_U;
-
-		if (vl == 0 && vr == 0)
-		{
-			re.x = 0;
-			re.y = 0;
-			re.z = 0;
-		}
-		return re;
-	}
-
 	//Section 4.1
 	template<typename Coord4D>
 	__global__ void GM_Advection(
@@ -146,10 +59,10 @@ namespace dyno
 			Coord4D south = grid(gridx, gridy + 1);
 			Coord4D east = grid(gridx + 1, gridy);
 
-			Coord4D eastflux = d_flux_x(center, east, GRAVITY);
-			Coord4D westflux = d_flux_x(west, center, GRAVITY);
-			Coord4D southflux = d_flux_y(center, south, GRAVITY);
-			Coord4D northflux = d_flux_y(north, center, GRAVITY);
+			Coord4D eastflux = CentralUpwindX(center, east, GRAVITY);
+			Coord4D westflux = CentralUpwindX(west, center, GRAVITY);
+			Coord4D southflux = CentralUpwindY(center, south, GRAVITY);
+			Coord4D northflux = CentralUpwindY(north, center, GRAVITY);
 			Coord4D flux = eastflux - westflux + southflux - northflux;
 			Coord4D u_center = center - timestep * flux;
 
@@ -355,7 +268,7 @@ namespace dyno
 
 			Coord4D gxy = grid(gx, gy);
 
-			heightfield(i, j) = Coord3D(0, gxy.x, 0);
+			heightfield(i, j) = Coord3D(0, gxy.x + gxy.w, 0);
 		}
 	}
 	template<typename Coord3D, typename Coord4D>
@@ -493,7 +406,7 @@ namespace dyno
 		cuExecute2D(dim,
 			UpdateHeightField,
 			disp,
-			grid_next);
+			grid);
 	}
 
 	DEFINE_CLASS(GranularMedia);

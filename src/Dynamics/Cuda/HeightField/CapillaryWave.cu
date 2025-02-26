@@ -2,15 +2,21 @@
 
 #include "SceneGraph.h"
 
+#include "Module/NumericalScheme.h"
+
 #include "Mapping/HeightFieldToTriangleSet.h"
 #include "GLSurfaceVisualModule.h"
 
 namespace dyno
 {
+#define Velocity_Limiter Real(60)
+
 	template<typename TDataType>
 	CapillaryWave<TDataType>::CapillaryWave()
 		: Node()
 	{
+		this->varViscosity()->setRange(0, 1);
+
 		auto heights = std::make_shared<HeightField<TDataType>>();
 		this->stateHeightField()->setDataPtr(heights);
 
@@ -32,19 +38,7 @@ namespace dyno
 	{
 		mDeviceGrid.clear();
 		mDeviceGridNext.clear();
-	}
-
-	template <typename Coord3D, typename Coord4D>
-	__global__ void CW_UpdateHeightDisp(
-		DArray2D<Coord3D> displacement,
-		DArray2D<Coord4D> dis)
-	{
-		unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
-		unsigned int j = blockIdx.y * blockDim.y + threadIdx.y;
-		if (i < displacement.nx() && j < displacement.ny())
-		{
-			displacement(i, j).y = dis(i, j).x;
-		}
+		mDeviceGridOld.clear();
 	}
 
 	template <typename Coord>
@@ -141,24 +135,13 @@ namespace dyno
 		int extNx = res + 2;
 		int extNy = res + 2;
 
-		mDeviceGrid.resize(extNx, extNy);
-		mDeviceGridNext.resize(extNx, extNy);
 		this->stateHeight()->resize(res, res);
+		this->stateHeight()->reset();
 
 		//init grid with initial values
-		cuExecute2D(make_uint2(extNx, extNy),
+		cuExecute2D(make_uint2(res, res),
 			InitDynamicRegion,
-			mDeviceGrid,
-			extNx,
-			extNy,
-			level);
-
-		//init grid_next with initial values
-		cuExecute2D(make_uint2(extNx, extNy),
-			InitDynamicRegion,
-			mDeviceGridNext,
-			extNx,
-			extNy,
+			this->stateHeight()->getData(),
 			level);
 
 		auto topo = this->stateHeightField()->getDataPtr();
@@ -174,10 +157,8 @@ namespace dyno
 
 		cuExecute2D(extent,
 			CW_InitHeightDisp,
-			this->stateHeight()->getData(),
 			disp,
-			mDeviceGrid,
-			level);
+			this->stateHeight()->getData());
 	}
 
 	template<typename TDataType>
@@ -187,7 +168,9 @@ namespace dyno
 
 		Real level = this->varWaterLevel()->getValue();
 
-		uint res = this->varResolution()->getValue();
+		auto grid = this->stateHeight()->getData();
+
+		uint res = grid.nx();
 
 		int extNx = res + 2;
 		int extNy = res + 2;
@@ -197,6 +180,21 @@ namespace dyno
 
 		auto scn = this->getSceneGraph();
 		auto GRAVITY = scn->getGravity().norm();
+
+		if (mDeviceGrid.nx() != extNx || mDeviceGrid.ny() != extNy)
+		{
+			mDeviceGrid.resize(extNx, extNy);
+			mDeviceGridNext.resize(extNx, extNy);
+			mDeviceGridOld.resize(extNy, extNy);
+		}
+
+		//init grid_next with initial values
+		cuExecute2D(make_uint2(extNx, extNy),
+			AssignComputeGrid,
+			mDeviceGrid,
+			this->stateHeight()->constData());
+
+		mDeviceGridNext.assign(mDeviceGrid);
 
 		for (int iter = 0; iter < nStep; iter++)
 		{
@@ -217,17 +215,32 @@ namespace dyno
 				timestep);
 		}
 
+		//A simple viscosity model that does not conserve the total momentum, develop a momentum conserving model in the future.
+		mDeviceGridOld.assign(mDeviceGrid);
+		for (int iter = 0; iter < 5; iter++)
+		{
+			cuExecute2D(make_uint2(extNx, extNy),
+				CW_ImposeBC,
+				mDeviceGridNext,
+				mDeviceGrid,
+				extNx,
+				extNy);
+
+			cuExecute2D(make_uint2(res, res),
+				CW_ApplyViscosity,
+				mDeviceGrid,
+				mDeviceGridNext,
+				mDeviceGridOld,
+				res,
+				res,
+				this->varViscosity()->getValue(),
+				timestep);
+		}
+
 		cuExecute2D(make_uint2(res, res),
 			CW_InitHeights,
 			this->stateHeight()->getData(),
-			mDeviceGrid,
-			res,
-			mRealGridSize);
-
-		cuExecute2D(make_uint2(res, res),
-			CW_InitHeightGrad,
-			this->stateHeight()->getData(),
-			res);
+			mDeviceGrid);
 
 		//Update topology
 		auto topo = this->stateHeightField()->getDataPtr();
@@ -239,17 +252,21 @@ namespace dyno
 		extent.y = disp.ny();
 
 		cuExecute2D(extent,
-			CW_UpdateHeightDisp,
+			CW_InitHeightDisp,
 			disp,
 			this->stateHeight()->getData());
+
+		Node::updateStates();
 	}
 
 	template <typename Coord4D>
-	__global__ void InitDynamicRegion(DArray2D<Coord4D> grid, int gridwidth, int gridheight, float level)
+	__global__ void InitDynamicRegion(
+		DArray2D<Coord4D> grid, 
+		Real level)
 	{
 		int x = threadIdx.x + blockIdx.x * blockDim.x;
 		int y = threadIdx.y + blockIdx.y * blockDim.y;
-		if (x < gridwidth && y < gridheight)
+		if (x < grid.nx() && y < grid.ny())
 		{
 			Coord4D gp;
 			gp.x = level;
@@ -258,7 +275,20 @@ namespace dyno
 			gp.w = 0.0f;
 
 			grid(x, y) = gp;
-//			if ((x - 256) * (x - 256) + (y - 256) * (y - 256) <= 2500)  grid(x, y).x = level;
+		}
+	}
+
+	template <typename Coord4D>
+	__global__ void AssignComputeGrid(
+		DArray2D<Coord4D> computeGrid, 
+		DArray2D<Coord4D> stateGrid)
+	{
+		int x = threadIdx.x + blockIdx.x * blockDim.x;
+		int y = threadIdx.y + blockIdx.y * blockDim.y;
+
+		if (x < stateGrid.nx() && y < stateGrid.ny())
+		{
+			computeGrid(x + 1, y + 1) = stateGrid(x, y);
 		}
 	}
 
@@ -302,27 +332,65 @@ namespace dyno
 	}
 
 	template <typename Coord>
-	__host__ __device__ void CW_FixShore(Coord& l, Coord& c, Coord& r)
+	__host__ __device__ void CW_FixHorizontalShore(Coord& l, Coord& c, Coord& r)
 	{
-
-		if (r.x < 0.0f || l.x < 0.0f || c.x < 0.0f)
+		if (r.x <= 0)
 		{
-			c.x = c.x + l.x + r.x;
-			c.x = max(0.0f, c.x);
-			l.x = 0.0f;
-			r.x = 0.0f;
+			r.x = 0;
+			r.y = 0;
+			r.z = 0;// r.w > c.x + c.w ? -c.z : 0;
+			r.w = r.w > c.x + c.w ? c.x + c.w : r.w;
 		}
-		float h = c.x;
-		float h4 = h * h * h * h;
-		float v = sqrtf(2.0f) * h * c.y / (sqrtf(h4 + max(h4, EPSILON)));
-		float u = sqrtf(2.0f) * h * c.z / (sqrtf(h4 + max(h4, EPSILON)));
 
-		c.y = u * h;
-		c.z = v * h;
+		if (l.x <= 0)
+		{
+			l.x = 0;
+			l.y = 0;
+			l.z = 0;//r.w > c.x + c.w ? -c.z : 0;
+			l.w = l.w > c.x + c.w ? c.x + c.w : l.w;
+		}
 	}
 
 	template <typename Coord>
-	__host__ __device__ Coord CW_VerticalPotential(Coord gp, float GRAVITY)
+	__host__ __device__ void CW_FixVerticalShore(Coord& l, Coord& c, Coord& r)
+	{
+		if (r.x <= 0)
+		{
+			r.x = 0;
+			r.y = 0;//r.w > c.x + c.w ? -c.y : 0;
+			r.z = 0;
+			r.w = r.w > c.x + c.w ? c.x + c.w : r.w;
+		}
+
+		if (l.x <= 0)
+		{
+			l.x = 0;
+			l.y = 0;//r.w > c.x + c.w ? -c.y : 0;
+			l.z = 0;
+			l.w = l.w > c.x + c.w ? c.x + c.w : l.w;
+		}
+	}
+
+	template <typename Coord>
+	__device__ Coord CW_HorizontalPotential(Coord gp, float H, float GRAVITY)
+	{
+		float h = max(gp.x, 0.0f);
+		float uh = gp.y;
+		float vh = gp.z;
+
+		float h4 = h * h * h * h;
+		float u = sqrtf(2.0f) * h * uh / (sqrtf(h4 + max(h4, EPSILON)));
+
+		Coord F;
+		F.x = u * h;
+		F.y = uh * u + GRAVITY * H * (gp.x + gp.w);
+		F.z = vh * u;
+		F.w = 0.0f;
+		return F;
+	}
+
+	template <typename Coord>
+	__host__ __device__ Coord CW_VerticalPotential(Coord gp, float H, float GRAVITY)
 	{
 		float h = max(gp.x, 0.0f);
 		float uh = gp.y;
@@ -334,40 +402,31 @@ namespace dyno
 		Coord G;
 		G.x = v * h;
 		G.y = uh * v;
-		G.z = vh * v + GRAVITY * h * h;
+		G.z = vh * v + GRAVITY * H * (gp.x + gp.w);
 		G.w = 0.0f;
 		return G;
 	}
 
 	template <typename Coord>
-	__device__ Coord CW_HorizontalPotential(Coord gp, float GRAVITY)
+	__device__ Coord CW_HorizontalSlope(Coord gp, float H, float GRAVITY)
 	{
-		float h = max(gp.x, 0.0f);
-		float uh = gp.y;
-		float vh = gp.z;
-
-		float h4 = h * h * h * h;
-		float u = sqrtf(2.0f) * h * uh / (sqrtf(h4 + max(h4, EPSILON)));
-
 		Coord F;
-		F.x = u * h;
-		F.y = uh * u + GRAVITY * h * h;
-		F.z = vh * u;
+		F.x = 0.0f;// u* h;
+		F.y = GRAVITY * H * (gp.x + gp.w);
+		F.z = 0.0f;
 		F.w = 0.0f;
 		return F;
 	}
 
 	template <typename Coord>
-	__device__ Coord CW_SlopeForce(Coord c, Coord n, Coord e, Coord s, Coord w, float GRAVITY)
+	__host__ __device__ Coord CW_VerticalSlope(Coord gp, float H, float GRAVITY)
 	{
-		float h = max(c.x, 0.0f);
-
-		Coord H;
-		H.x = 0.0f;
-		H.y = -GRAVITY * h * (e.w - w.w);
-		H.z = -GRAVITY * h * (s.w - n.w);
-		H.w = 0.0f;
-		return H;
+		Coord G;
+		G.x = 0.0f;
+		G.y = 0.0f;
+		G.z = GRAVITY * H * (gp.x + gp.w);
+		G.w = 0.0f;
+		return G;
 	}
 
 	template <typename Coord4D>
@@ -397,31 +456,129 @@ namespace dyno
 
 			Coord4D east = grid(gridx + 1, gridy);
 
-			CW_FixShore(west, center, east);
-			CW_FixShore(north, center, south);
+			Real H = max(center.x, 0.0f);
 
-			Coord4D u_south = 0.5f * (south + center) - timestep * (CW_VerticalPotential(south, GRAVITY) - CW_VerticalPotential(center, GRAVITY));
-			Coord4D u_north = 0.5f * (north + center) - timestep * (CW_VerticalPotential(center, GRAVITY) - CW_VerticalPotential(north, GRAVITY));
-			Coord4D u_west = 0.5f * (west + center) - timestep * (CW_HorizontalPotential(center, GRAVITY) - CW_HorizontalPotential(west, GRAVITY));
-			Coord4D u_east = 0.5f * (east + center) - timestep * (CW_HorizontalPotential(east, GRAVITY) - CW_HorizontalPotential(center, GRAVITY));
+// 			CW_FixHorizontalShore(west, center, east);
+// 			CW_FixVerticalShore(north, center, south);
 
-			Coord4D u_center = center + timestep * CW_SlopeForce(center, north, east, south, west, GRAVITY) - timestep * (CW_HorizontalPotential(u_east, GRAVITY) - CW_HorizontalPotential(u_west, GRAVITY)) - timestep * (CW_VerticalPotential(u_south, GRAVITY) - CW_VerticalPotential(u_north, GRAVITY));
-			u_center.x = max(0.0f, u_center.x);
+// 			Coord4D u_south = 0.5f * (south + center) - timestep * (CW_VerticalPotential(south, H, GRAVITY) - CW_VerticalPotential(center, H, GRAVITY));
+// 			Coord4D u_north = 0.5f * (north + center) - timestep * (CW_VerticalPotential(center, H, GRAVITY) - CW_VerticalPotential(north, H, GRAVITY));
+// 			Coord4D u_west = 0.5f * (west + center) - timestep * (CW_HorizontalPotential(center, H, GRAVITY) - CW_HorizontalPotential(west, H, GRAVITY));
+// 			Coord4D u_east = 0.5f * (east + center) - timestep * (CW_HorizontalPotential(east, H, GRAVITY) - CW_HorizontalPotential(center, H, GRAVITY));
+// 
+// 			Coord4D u_center = center - timestep * (CW_HorizontalPotential(u_east, H, GRAVITY) - CW_HorizontalPotential(u_west, H, GRAVITY)) - timestep * (CW_VerticalPotential(u_south, H, GRAVITY) - CW_VerticalPotential(u_north, H, GRAVITY));
 
-			grid_next(gridx, gridy) = u_center;
+// 			Coord4D eastflux = CentralUpwindX(center, east, GRAVITY);
+// 			Coord4D westflux = CentralUpwindX(west, center, GRAVITY);
+// 			Coord4D southflux = CentralUpwindY(center, south, GRAVITY);
+// 			Coord4D northflux = CentralUpwindY(north, center, GRAVITY);
+// 			Coord4D flux = eastflux - westflux + southflux - northflux;
+// 
+// 			Coord4D u_center = center - timestep * flux - timestep * (CW_HorizontalSlope(east, H, GRAVITY) - CW_HorizontalSlope(west, H, GRAVITY)) - timestep * (CW_VerticalSlope(south, H, GRAVITY) - CW_VerticalSlope(north, H, GRAVITY));
+
+			Coord4D eastflux = FirstOrderUpwindX(center, east, GRAVITY, timestep);
+			Coord4D westflux = FirstOrderUpwindX(west, center, GRAVITY, timestep);
+			Coord4D southflux = FirstOrderUpwindY(center, south, GRAVITY, timestep);	//Coord4D(0); //
+			Coord4D northflux = FirstOrderUpwindY(north, center, GRAVITY, timestep);//Coord4D(0); //
+			Coord4D flux = eastflux - westflux + southflux - northflux;
+
+			Coord4D u_center = center - timestep * flux;
+			u_center.y += 0.5 * (FirstOrderUpwindPotential(center, east, GRAVITY, timestep) + FirstOrderUpwindPotential(west, center, GRAVITY, timestep));
+			u_center.z += 0.5 * (FirstOrderUpwindPotential(center, south, GRAVITY, timestep) + FirstOrderUpwindPotential(north, center, GRAVITY, timestep));
+
+// 			//if (gridx == 796 && gridy == 793)
+// 			if (gridx == 100 && gridy == 100)
+// 			{
+// 				//printf("height: %d %d: south %f; north %f \n", gridx, gridy, south.x + south.w, north.x + north.w);
+// 
+// 				// 				printf("%d %d: %f %f %f %f \n", gridx, gridy, flux.x, flux.y, flux.z, flux.w);
+// 				// 				printf("east: %d %d: %f %f %f %f \n", gridx, gridy, eastflux.x, eastflux.y, eastflux.z, eastflux.w);
+// 				// 				printf("west: %d %d: %f %f %f %f \n", gridx, gridy, westflux.x, westflux.y, westflux.z, westflux.w);
+// 				// 				printf("south: %d %d: %f %f %f %f \n", gridx, gridy, southflux.x, southflux.y, southflux.z, southflux.w);
+// 
+// // 				printf("north: %d %d: %f %f %f %f; s: %f \n", gridx, gridy, north.x, north.y, north.z, north.w, north.x + north.w);
+// // 
+// // 				printf("center: %d %d: %f %f %f %f; s: %f \n", gridx, gridy, center.x, center.y, center.z, center.w, center.x + center.w);
+// 
+// 				printf("northflux: %d %d: %f %f %f %f \n", gridx, gridy, northflux.x, northflux.y, northflux.z, northflux.w);
+// 
+// 				printf("center: %d %d: %f %f %f %f \n", gridx, gridy, u_center.x, u_center.y, u_center.z, u_center.w);
+// 			}
+
+// 			if (glm::abs(u_center.x) > EPSILON && glm::abs(u_center.y / u_center.x) > 100)
+// 			{
+// 				printf("%f %f %f %f \n", u_center.x, u_center.y, u_center.z, center.w);
+// 			}
+
+			//Hack: Clamp small value to ensure stability
+			Real hc = maximum(u_center.x, 0.0f);
+			Real hc4 = hc * hc * hc * hc;
+			Real uc = sqrtf(2.0f) * hc * u_center.y / (sqrtf(hc4 + maximum(hc4, Real(0.00001))));
+			Real vc = sqrtf(2.0f) * hc * u_center.z / (sqrtf(hc4 + maximum(hc4, Real(0.00001))));
+
+			//Hack: clamp large velocites
+			uc = minimum(Velocity_Limiter, maximum(-Velocity_Limiter, uc));
+			vc = minimum(Velocity_Limiter, maximum(-Velocity_Limiter, vc));
+
+			grid_next(gridx, gridy) = Coord4D(hc, uc * hc, vc * hc, u_center.w);
+		}
+	}
+
+	template <typename Real, typename Coord4D>
+	__global__ void CW_ApplyViscosity(
+		DArray2D<Coord4D> grid_next,
+		DArray2D<Coord4D> grid,
+		DArray2D<Coord4D> grid_old,
+		int width,
+		int height,
+		Real viscosity,
+		Real timestep)
+	{
+		int x = threadIdx.x + blockIdx.x * blockDim.x;
+		int y = threadIdx.y + blockIdx.y * blockDim.y;
+
+		if (x < width && y < height)
+		{
+			int gridx = x + 1;
+			int gridy = y + 1;
+
+			Coord4D center = grid_old(gridx, gridy);
+
+			Coord4D north = grid(gridx, gridy - 1);
+
+			Coord4D west = grid(gridx - 1, gridy);
+
+			Coord4D south = grid(gridx, gridy + 1);
+
+			Coord4D east = grid(gridx + 1, gridy);
+
+			Real eta = viscosity * timestep;
+			Real alpha = 1 / (1 + 4 * eta);
+
+			Real u_center, u_north, u_west, u_south, u_east;
+			Real v_center, v_north, v_west, v_south, v_east;
+
+			ComputeVelocity(u_center, v_center, center);
+			ComputeVelocity(u_north, v_north, north);
+			ComputeVelocity(u_west, v_west, west);
+			ComputeVelocity(u_south, v_south, south);
+			ComputeVelocity(u_east, v_east, east);
+
+			Real u = alpha * u_center + eta * alpha * (u_north + u_west + u_south + u_east);
+			Real v = alpha * v_center + eta * alpha * (v_north + v_west + v_south + v_east);
+
+			grid_next(gridx, gridy) = Coord4D(center.x, u * center.x, v * center.x, center.w);
 		}
 	}
 
 	template <typename Coord>
 	__global__ void CW_InitHeights(
 		DArray2D<Coord> height,
-		DArray2D<Coord> grid,
-		int patchSize,
-		float realSize)
+		DArray2D<Coord> grid)
 	{
 		int i = threadIdx.x + blockIdx.x * blockDim.x;
 		int j = threadIdx.y + blockIdx.y * blockDim.y;
-		if (i < patchSize && j < patchSize)
+		if (i < height.nx() && j < height.ny())
 		{
 			int gridx = i + 1;
 			int gridy = j + 1;
@@ -453,27 +610,41 @@ namespace dyno
 		}
 	}
 
-	template <typename Real, typename Coord3D, typename Coord4D>
+	template <typename Coord3D, typename Coord4D>
 	__global__ void CW_InitHeightDisp(
-		DArray2D<Coord4D> heights,
 		DArray2D<Coord3D> displacement,
-		DArray2D<Coord4D> grid,
-		Real horizon)
+		DArray2D<Coord4D> grid)
 	{
 		unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
 		unsigned int j = blockIdx.y * blockDim.y + threadIdx.y;
 		if (i < displacement.nx() && j < displacement.ny())
 		{
-			int gridx = i + 1;
-			int gridy = j + 1;
+			int gridx = i;
+			int gridy = j;
 
 			Coord4D gij = grid(gridx, gridy);
 
 			displacement(i, j).x = 0;
 			displacement(i, j).y = gij.x + gij.w;
 			displacement(i, j).z = 0;
+		}
+	}
 
-			heights(i, j) = gij;
+	template <typename Real, typename Coord3D>
+	__global__ void CW_InitHeightDispLand(
+		DArray2D<Coord3D> displacement,
+		DArray2D<Coord3D> terrain,
+		Real horizon)
+	{
+		unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
+		unsigned int j = blockIdx.y * blockDim.y + threadIdx.y;
+		if (i < displacement.nx() && j < displacement.ny())
+		{
+			//Real water = max(0.0f, horizon - terrain(i, j).y);
+
+			displacement(i, j).x = 0;
+			displacement(i, j).y = horizon;
+			displacement(i, j).z = 0;
 		}
 	}
 

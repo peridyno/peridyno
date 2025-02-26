@@ -41,11 +41,12 @@ namespace dyno
 	public:
 		DEF_VAR(Coord, BarycenterOffset, Coord(0), "The center offset defined in vessel's local frame");
 
-		DEF_VAR(FilePath, EnvelopeName, "", "");
+		DEF_VAR(FilePath, EnvelopeName, getAssetPath() + "obj/boat_boundary.obj", "");
 
-		DEF_VAR(FilePath, TextureMeshName, "", "");
+		DEF_VAR(FilePath, TextureMeshName, getAssetPath() + "gltf/SailBoat/SailBoat.gltf", "");
 
 		DEF_VAR(Real, Density, Real(1000), "Density");
+		DEF_VAR(Real, InitialMass, Real(0.f), "Density");
 
 		DEF_VAR_STATE(Coord, Barycenter, Coord(0), "A vessel's barycenter, note it can be different from the Center");
 
