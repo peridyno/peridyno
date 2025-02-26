@@ -384,7 +384,7 @@ void pybind_framework(py::module& m)
 		.def("class_name", &InstanceBase::className);
 
 	//module
-	py::class_<Module, std::shared_ptr<Module>>(m, "Module")
+	py::class_<Module, OBase, std::shared_ptr<Module>>(m, "Module")
 		.def(py::init<>())
 		.def("initialize", &Module::initialize)
 		.def("update", &Module::update)
@@ -654,6 +654,7 @@ void pybind_framework(py::module& m)
 //.def(py::self != py::self);
 
 	py::class_<InputModule, Module, std::shared_ptr<InputModule>>(m, "InputModule")
+		.def(py::init<>())
 		.def("get_module_type", &InputModule::getModuleType);
 
 	py::class_<KeyboardInputModule, InputModule, std::shared_ptr<KeyboardInputModule>>(m, "KeyboardInputModule")
@@ -661,10 +662,12 @@ void pybind_framework(py::module& m)
 		.def("var_cache_event", &KeyboardInputModule::varCacheEvent);
 
 	py::class_<MouseInputModule, InputModule, std::shared_ptr<MouseInputModule>>(m, "MouseInputModule")
+		.def(py::init<>())
 		.def("enqueue_event", &MouseInputModule::enqueueEvent)
 		.def("var_cache_event", &MouseInputModule::varCacheEvent);
 
 	py::class_<OutputModule, Module, std::shared_ptr<OutputModule>>(m, "OutputModule")
+		.def(py::init<>())
 		.def("var_output_path", &OutputModule::varOutputPath, py::return_value_policy::reference)
 		.def("var_prefix", &OutputModule::varPrefix, py::return_value_policy::reference)
 		.def("var_start_frame", &OutputModule::varStartFrame, py::return_value_policy::reference)

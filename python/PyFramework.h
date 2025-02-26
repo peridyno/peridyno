@@ -160,6 +160,7 @@ void declare_array(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("FArray") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
+		.def(py::init<std::string, std::string, dyno::FieldTypeEnum, OBase*>())
 		.def("size", &Class::size)
 		.def("resize", &Class::resize)
 		.def("reset", &Class::reset)
