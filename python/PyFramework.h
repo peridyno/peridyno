@@ -153,7 +153,7 @@ void declare_var(py::module& m, std::string typestr) {
 }
 
 template<typename T, DeviceType deviceType>
-void declare_array(py::module& m, std::string typestr) {
+void declare_farray(py::module& m, std::string typestr) {
 	using Class = dyno::FArray<T, deviceType>;
 	using Parent = FBase;
 	typedef T							VarType;

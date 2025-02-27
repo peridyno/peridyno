@@ -18,6 +18,13 @@ class Hit(dyno.InputModule):
         velocities = self.in_velocity().get_data()
 
         offset = elements.calculate_element_offset()
+        boxInGlobal = dyno.DArrayTOrientedBox3D()
+
+        elements.requestBoxInGlobal(boxInGlobal)
+
+
+        boxInGlobal.clear()
+
 
 scn = dyno.SceneGraph()
 

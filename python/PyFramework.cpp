@@ -819,12 +819,12 @@ void pybind_framework(py::module& m)
 		.def("is_empty", &dyno::FVar<dyno::PEnum>::isEmpty)
 		.def("get_data_ptr", &dyno::FVar<dyno::PEnum>::getDataPtr);
 
-	declare_array<int, DeviceType::GPU>(m, "1D");
-	declare_array<float, DeviceType::GPU>(m, "1fD");
-	declare_array<Vec3f, DeviceType::GPU>(m, "3fD");
-	declare_array<CollisionMask, DeviceType::GPU>(m, "CollisionMask");
-	declare_array<dyno::TContactPair<float>, DeviceType::GPU>(m, "TContactPair");
-	declare_array<dyno::Attribute, DeviceType::GPU>(m, "Attribute");
+	declare_farray<int, DeviceType::GPU>(m, "1D");
+	declare_farray<float, DeviceType::GPU>(m, "1fD");
+	declare_farray<Vec3f, DeviceType::GPU>(m, "3fD");
+	declare_farray<CollisionMask, DeviceType::GPU>(m, "CollisionMask");
+	declare_farray<dyno::TContactPair<float>, DeviceType::GPU>(m, "TContactPair");
+	declare_farray<dyno::Attribute, DeviceType::GPU>(m, "Attribute");
 
 	declare_array_list<int, DeviceType::GPU>(m, "1D");
 	declare_array_list<float, DeviceType::GPU>(m, "1fD");
