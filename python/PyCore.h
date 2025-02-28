@@ -110,28 +110,22 @@ void declare_quat(py::module& m, std::string typestr) {
 
 #include "Array/Array.h"
 template<typename T, DeviceType deviceType>
-void declare_array(py::module& m, std::string typestr, std::string type) {
+void declare_array(py::module& m, std::string typestr, std::string type)
+{
 	using Class = dyno::Array<T, deviceType>;
-	std::string pyclass_name = typestr + std::string("Array") + type;
 	using uint = unsigned int;
+	std::string pyclass_name = typestr + std::string("Array") + type;
 	py::class_<Class>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def(py::init<uint>())
 		.def("resize", &Class::resize)
 		.def("reset", &Class::reset)
 		.def("clear", &Class::clear)
-		//.def("begin", &Class::begin)
 		.def("deviceType", &Class::deviceType)
 		.def("size", &Class::size)
 		.def("is_CPU", &Class::isCPU)
 		.def("is_GPU", &Class::isGPU)
 		.def("is_empty", &Class::isEmpty);
-	//.def("assign", &Class::assign);
-//.def("assign", py::overload_cast<const T&>(&Class::assign))
-//.def("assign", py::overload_cast<const std::vector<T>&>(&Class::assign))
-//.def("assign", py::overload_cast<const dyno::Array<T, DeviceType::GPU>&>(&Class::assign))
-//.def("assign", py::overload_cast<const dyno::Array<T, DeviceType::CPU>&>(&Class::assign))
-
 }
 
 #include "Primitive/Primitive3D.h"

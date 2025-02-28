@@ -35,6 +35,7 @@ void pybind_core(py::module& m)
 	typedef  dyno::SquareMatrix<Real, 3> Matrix3D;
 
 	py::class_<dyno::TOrientedBox3D<Real>>(m, "TOrientedBox3D")
+		.def(py::init<>())
 		.def(py::init<const Coord3D&, const Coord3D&, const Coord3D&, const Coord3D&, const Coord3D&>())
 		.def(py::init<const Coord3D&, const dyno::Quat<Real>&, const Coord3D&>())
 		.def(py::init<const dyno::TOrientedBox3D<Real>&>())

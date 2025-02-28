@@ -1,29 +1,32 @@
 import PyPeridyno as dyno
 
-class Hit(dyno.InputModule):
+class Hit(dyno.MouseInputModule):
     def __init__(self):
-        super().__init__()
+       super().__init__()
 
-        self.in_Topology = dyno.FInstanceDiscreteElements3f("Topology", "", dyno.FieldTypeEnum.In, self)
-        self.in_Velocity = dyno.FArray3fD("Velocity", "Rigid body velocities", dyno.FieldTypeEnum.In, self)
+    #     self.in_Topology = dyno.FInstanceDiscreteElements3f("Topology", "", dyno.FieldTypeEnum.In, self)
+    #     self.in_Velocity = dyno.FArray3fD("Velocity", "Rigid body velocities", dyno.FieldTypeEnum.In, self)
+    #
+    # def in_topology(self):
+    #     return self.in_Topology
+    #
+    # def in_velocity(self):
+    #     return self.in_Velocity
 
-    def in_topology(self):
-        return self.in_Topology
-
-    def in_velocity(self):
-        return self.in_Velocity
-
-    def on_event(self):
-        elements = self.in_topology().get_data_ptr()
-        velocities = self.in_velocity().get_data()
-
-        offset = elements.calculate_element_offset()
-        boxInGlobal = dyno.DArrayTOrientedBox3D()
-
-        elements.requestBoxInGlobal(boxInGlobal)
+    def on_event(self, event):
+        print("test")
 
 
-        boxInGlobal.clear()
+        # elements = self.in_topology().get_data_ptr()
+        # velocities = self.in_velocity().get_data()
+        #
+        # offset = elements.calculate_element_offset()
+        # boxInGlobal = dyno.DArrayTOrientedBox3D()
+        #
+        # elements.requestBoxInGlobal(boxInGlobal)
+        #
+        #
+        # boxInGlobal.clear()
 
 
 scn = dyno.SceneGraph()
@@ -75,9 +78,9 @@ mapper.out_triangle_set().connect(sRender.in_triangle_set())
 rigid.graphics_pipeline().push_module(sRender)
 
 hit = Hit()
-rigid.state_topology().connect(hit.in_topology())
-rigid.state_velocity().connect(hit.in_velocity())
-rigid.animation_pipeline().push_module(hit)
+# rigid.state_topology().connect(hit.in_topology())
+# rigid.state_velocity().connect(hit.in_velocity())
+# rigid.animation_pipeline().push_module(hit)
 
 app = dyno.GlfwApp()
 app.set_scenegraph(scn)
