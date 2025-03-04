@@ -1,5 +1,5 @@
 
-#include <GlfwApp.h>
+#include <UbiApp.h>
 #include <SceneGraph.h>
 
 #include <PointsLoader.h>
@@ -84,7 +84,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
-	GlfwApp window;
+	UbiApp window;
 	window.setSceneGraph(createScene());
 	window.initialize(1024, 768);
 	window.mainLoop();

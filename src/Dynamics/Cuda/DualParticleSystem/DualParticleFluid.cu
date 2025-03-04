@@ -127,6 +127,7 @@ namespace dyno
 		auto m_visModule = std::make_shared<ImplicitViscosity<TDataType>>();
 		m_visModule->varViscosity()->setValue(Real(0.3));
 		this->stateTimeStep()->connect(m_visModule->inTimeStep());
+		samplingDistance->outFloating()->connect(m_visModule->inSamplingDistance());
 		smoothingLength->outFloating()->connect(m_visModule->inSmoothingLength());
 		this->stateTimeStep()->connect(m_visModule->inTimeStep());
 		this->statePosition()->connect(m_visModule->inPosition());
