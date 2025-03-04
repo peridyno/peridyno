@@ -48,7 +48,7 @@ namespace dyno
 		smoothingLength->varValue()->setValue(Real(0.012));
 
 		auto samplingDistance = std::make_shared<FloatingNumber<TDataType>>();
-		this->animationPipeline()->pushModule(smoothingLength);
+		this->animationPipeline()->pushModule(samplingDistance);
 		samplingDistance->varValue()->setValue(Real(0.005));
 
 		if (key == EVirtualParticleSamplingStrategy::SpatiallyAdaptiveStrategy)
