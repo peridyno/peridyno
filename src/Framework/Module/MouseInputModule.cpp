@@ -1,11 +1,11 @@
 #include "MouseInputModule.h"
+#define PYTHON
 
 namespace dyno
 {
 	MouseInputModule::MouseInputModule()
 		: InputModule()
 	{
-
 	}
 
 	MouseInputModule::~MouseInputModule()
@@ -25,7 +25,7 @@ namespace dyno
 				}
 				else
 					break;
-			}	
+			}
 		}
 		else
 		{
@@ -39,6 +39,10 @@ namespace dyno
 
 	void MouseInputModule::updateImpl()
 	{
+#ifdef PYTHON
+		std::cout << "MouseInputModule::updateImpl" << std::endl;
+#endif // PYTHON
+
 		mMutex.lock();
 		if (!mEventQueue.empty())
 		{
@@ -55,5 +59,4 @@ namespace dyno
 
 		return required || Module::requireUpdate();
 	}
-
 }

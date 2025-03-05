@@ -32,10 +32,10 @@ namespace dyno
 		DEF_VAR(bool, CacheEvent, false, "If set false, all previous queued events will be dropped");
 
 	public:
+		//protected:
 		virtual void onEvent(PMouseEvent event) {};
 
-	protected:
-		void updateImpl() final;
+		void updateImpl();
 
 		bool requireUpdate() override;
 

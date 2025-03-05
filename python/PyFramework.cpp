@@ -661,7 +661,6 @@ void pybind_framework(py::module& m)
 		.def("enqueue_event", &KeyboardInputModule::enqueueEvent)
 		.def("var_cache_event", &KeyboardInputModule::varCacheEvent);
 
-
 	class PyMouseInputModule : public MouseInputModule
 	{
 	public:
@@ -671,16 +670,20 @@ void pybind_framework(py::module& m)
 		{
 			PYBIND11_OVERRIDE(void, MouseInputModule, onEvent, event);
 		}
+
+		void updateImpl()
+		{
+			PYBIND11_OVERRIDE(void, MouseInputModule, updateImpl);
+		}
 	};
 
 	py::class_<MouseInputModule, PyMouseInputModule, InputModule, std::shared_ptr<MouseInputModule>>(m, "MouseInputModule")
 		.def(py::init<>())
 		.def("enqueue_event", &MouseInputModule::enqueueEvent)
 		.def("var_cache_event", &MouseInputModule::varCacheEvent)
-		.def("on_event", &MouseInputModule::onEvent);
-	//.def("var_cache_event", &MouseInputModule::varCacheEvent)
-	//.def("var_cache_event", &MouseInputModule::varCacheEvent)
-
+		.def("on_event", &MouseInputModule::onEvent)
+		.def("updateImpl", &MouseInputModule::updateImpl)
+		.def("requireUpdate", &MouseInputModule::requireUpdate);
 
 	py::class_<OutputModule, Module, std::shared_ptr<OutputModule>>(m, "OutputModule")
 		.def(py::init<>())
