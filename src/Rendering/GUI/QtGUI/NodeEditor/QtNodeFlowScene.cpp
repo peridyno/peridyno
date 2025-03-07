@@ -64,10 +64,10 @@ namespace Qt
 		connect(this, &QtFlowScene::nodePlaced, this, &QtNodeFlowScene::addNode);
 		connect(this, &QtFlowScene::nodeDeleted, this, &QtNodeFlowScene::deleteNode);
 
-		connect(this, &QtFlowScene::nodeHotKey0Checked, this, &QtNodeFlowScene::enableRendering);
-		connect(this, &QtFlowScene::nodeHotKey1Checked, this, &QtNodeFlowScene::enablePhysics);
+// 		connect(this, &QtFlowScene::nodeHotKey0Checked, this, &QtNodeFlowScene::enableRendering);
+// 		connect(this, &QtFlowScene::nodeHotKey1Checked, this, &QtNodeFlowScene::enablePhysics);
 		
-		connect(this, &QtFlowScene::nodeHotKeyChecked, [this](QtNode& n, bool checked, int buttonId) {
+		connect(this, &QtFlowScene::nodeHotKeyClicked, [this](QtNode& n, bool checked, int buttonId) {
 
 			switch (buttonId) 
 			{
