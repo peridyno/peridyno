@@ -25,10 +25,11 @@ namespace dyno
 		Coord vel_prime = rot.transpose() * vel;
 		Coord omega_prime = rot.transpose() * omega;
 
+		Real strength = this->varStrength()->getValue();
 		switch (event.key)
 		{
 		case PKeyboardType::PKEY_W:
-			vel_prime[2] += 0.5f;
+			vel_prime[2] += strength;
 			vel_prime[2] = vel_prime[2] > 5.0 ? 5.0 : vel_prime[2];
 			vel_prime[2] = vel_prime[2] < -5.0 ? -5.0 : vel_prime[2];
 			break;
@@ -36,10 +37,10 @@ namespace dyno
 			vel_prime[2] *= 0.95f;
 			break;
 		case PKeyboardType::PKEY_A:
-			omega_prime.y += 0.5;
+			omega_prime.y += strength;
 			break;
 		case PKeyboardType::PKEY_D:
-			omega_prime.y -= 0.5;
+			omega_prime.y -= strength;
 			break;
 		default:
 			break;

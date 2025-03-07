@@ -50,11 +50,14 @@ std::shared_ptr<SceneGraph> createScene()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	auto ocean = scn->addNode(std::make_shared<Ocean<DataType3f>>());
+	ocean->varExtentX()->setValue(2);
+	ocean->varExtentZ()->setValue(2);
 
 	auto patch = scn->addNode(std::make_shared<OceanPatch<DataType3f>>());
 	patch->varWindType()->setValue(5);
 	patch->varPatchSize()->setValue(128.0f);
 	patch->connect(ocean->importOceanPatch());
+	patch->varResolution()->setValue(512);
 
 	auto wake = scn->addNode(std::make_shared<Wake<DataType3f>>());
 	wake->varWaterLevel()->setValue(4);
@@ -78,6 +81,8 @@ std::shared_ptr<SceneGraph> createScene()
 	boat->varDensity()->setValue(150.0f);
 	boat->varBarycenterOffset()->setValue(Vec3f(0.0f, 0.0f, -0.5f));
 	boat->stateVelocity()->setValue(Vec3f(0, 0, 0));
+	boat->varEnvelopeName()->setValue(getAssetPath() + "obj/boat_boundary.obj");
+	boat->varTextureMeshName()->setValue(getAssetPath() + "gltf/SailBoat/SailBoat.gltf");
 
 	auto steer = std::make_shared<Steer<DataType3f>>();
 	boat->stateVelocity()->connect(steer->inVelocity());

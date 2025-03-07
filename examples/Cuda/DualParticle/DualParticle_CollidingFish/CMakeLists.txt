@@ -3,7 +3,7 @@ if(PERIDYNO_LIBRARY_DUALPARTICLESYSTEM AND PERIDYNO_QT_GUI)
         Core 
         Framework 
         IO          
-        GlfwGUI
+        UbiGUI
         DualParticleSystem 
         GLRenderEngine)
     add_example(DualParticle_CollidingFish DualParticle LIB_DEPENDENCY)

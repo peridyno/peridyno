@@ -16,7 +16,7 @@ namespace dyno
 		this->statePointSet()->setDataPtr(ps);
 
 		auto render = std::make_shared<GLPointVisualModule>();
-		render->varPointSize()->setValue(0.25);
+		render->varPointSize()->setValue(0.01);
 		render->varBaseColor()->setValue(Color(1, 1, 0.1));
 		this->statePointSet()->connect(render->inPointSet());
 		this->graphicsPipeline()->pushModule(render);
