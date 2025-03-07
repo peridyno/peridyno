@@ -31,6 +31,8 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb/stb_image_write.h>
 
+#define PYTHON
+
 namespace dyno
 {
 	static void RecieveLogMessage(const Log::Message& m)
@@ -364,8 +366,9 @@ namespace dyno
 
 	void GlfwRenderWindow::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
+#ifdef PYTHON
 		std::cout << "GlfwRenderWindow::mouseButtonCallback" << std::endl;
-
+#endif // PYTHON
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 

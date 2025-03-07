@@ -46,6 +46,9 @@ namespace dyno
 		mMutex.lock();
 		if (!mEventQueue.empty())
 		{
+#ifdef PYTHON
+			std::cout << "onEvent" << std::endl;
+#endif // PYTHON
 			onEvent(mEventQueue.front());
 
 			mEventQueue.pop_front();

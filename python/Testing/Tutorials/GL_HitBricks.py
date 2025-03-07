@@ -1,22 +1,40 @@
 import PyPeridyno as dyno
+import pycuda.driver as cuda
+import pycuda.autoinit
+from pycuda.compiler import SourceModule
+
+# mod = SourceModule("""
+# __global__ void HitBoxes(
+# 	DArray<TOrientedBox3D<float>> box,
+# 	DArray<Vec3f> velocites,
+# 	TRay3D<float> ray,
+# 	int boxIndex)
+# {
+# 	int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+# 	if (tId >= box.size()) return;
+#
+# 	TSegment3D<float> seg;
+#
+# 	if (ray.intersect(box[tId], seg) > 0)
+# 	{
+# 		velocites[tId + boxIndex] += 10.0f * ray.direction;
+# 	};
+# }
+# """)
 
 class Hit(dyno.MouseInputModule):
     def __init__(self):
-       super().__init__()
+        super().__init__()
+        self.in_Topology = dyno.FInstanceDiscreteElements3f("Topology", "", dyno.FieldTypeEnum.In, self)
+        self.in_Velocity = dyno.FArray3fD("Velocity", "Rigid body velocities", dyno.FieldTypeEnum.In, self)
 
-    #     self.in_Topology = dyno.FInstanceDiscreteElements3f("Topology", "", dyno.FieldTypeEnum.In, self)
-    #     self.in_Velocity = dyno.FArray3fD("Velocity", "Rigid body velocities", dyno.FieldTypeEnum.In, self)
-    #
-    # def in_topology(self):
-    #     return self.in_Topology
-    #
-    # def in_velocity(self):
-    #     return self.in_Velocity
+    def in_topology(self):
+        return self.in_Topology
 
-    def on_event(self, event):
-        print("test")
+    def in_velocity(self):
+        return self.in_Velocity
 
-
+    def onEvent(self, event):
         # elements = self.in_topology().get_data_ptr()
         # velocities = self.in_velocity().get_data()
         #
@@ -24,8 +42,20 @@ class Hit(dyno.MouseInputModule):
         # boxInGlobal = dyno.DArrayTOrientedBox3D()
         #
         # elements.requestBoxInGlobal(boxInGlobal)
-        #
-        #
+        print("Python onEvent")
+        print(event.actionType)
+        if event.actionType == dyno.PActionType.AT_UNKOWN:
+            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+        if event.actionType == dyno.PActionType.AT_RELEASE:
+            print("111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+
+        if event.actionType == dyno.PActionType.AT_PRESS:
+            print("222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222")
+
+        if event.actionType == dyno.PActionType.AT_REPEAT:
+            print("333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333")
+
         # boxInGlobal.clear()
 
 
@@ -78,9 +108,9 @@ mapper.out_triangle_set().connect(sRender.in_triangle_set())
 rigid.graphics_pipeline().push_module(sRender)
 
 hit = Hit()
-# rigid.state_topology().connect(hit.in_topology())
-# rigid.state_velocity().connect(hit.in_velocity())
-# rigid.animation_pipeline().push_module(hit)
+rigid.state_topology().connect(hit.in_topology())
+rigid.state_velocity().connect(hit.in_velocity())
+rigid.animation_pipeline().push_module(hit)
 
 app = dyno.GlfwApp()
 app.set_scenegraph(scn)

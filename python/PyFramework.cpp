@@ -383,8 +383,25 @@ void pybind_framework(py::module& m)
 		.def("standard_object_pointer", &InstanceBase::standardObjectPointer)
 		.def("class_name", &InstanceBase::className);
 
+	class PyModule : public Module
+	{
+	public:
+		using Module::Module;
+
+		void updateImpl() override
+		{
+			PYBIND11_OVERRIDE(void, Module, updateImpl);
+		}
+
+		bool initializeImpl() override
+		{
+			PYBIND11_OVERRIDE(bool, Module, initializeImpl);
+		}
+	};
+
+
 	//module
-	py::class_<Module, OBase, std::shared_ptr<Module>>(m, "Module")
+	py::class_<Module, PyModule, OBase, std::shared_ptr<Module>>(m, "Module")
 		.def(py::init<>())
 		.def("initialize", &Module::initialize)
 		.def("update", &Module::update)
@@ -399,7 +416,9 @@ void pybind_framework(py::module& m)
 		.def("is_input_complete", &Module::isInputComplete)
 		.def("is_output_complete", &Module::isOutputCompete)
 		.def("var_force_update", &Module::varForceUpdate, py::return_value_policy::reference)
-		.def("set_update_always", &Module::setUpdateAlways);
+		.def("set_update_always", &Module::setUpdateAlways)
+		.def("initializeImpl", &Module::initializeImpl)
+		.def("updateImpl", &Module::updateImpl);
 
 	py::class_<DebugInfo, Module, std::shared_ptr<DebugInfo>>(m, "DebugInfo")
 		.def("print", &DebugInfo::print)
@@ -636,7 +655,7 @@ void pybind_framework(py::module& m)
 		.def_property_readonly("numLockEnabled", &dyno::PKeyboardEvent::numLockEnabled);
 
 	py::class_<dyno::PMouseEvent>(m, "PMouseEvent")
-		.def(pybind11::init<>())
+		.def(py::init<>())
 		.def_readwrite("buttonType", &dyno::PMouseEvent::buttonType)
 		.def_readwrite("actionType", &dyno::PMouseEvent::actionType)
 		.def_readwrite("mods", &dyno::PMouseEvent::mods)
@@ -649,247 +668,252 @@ void pybind_framework(py::module& m)
 		.def_property_readonly("altKeyPressed", &dyno::PMouseEvent::altKeyPressed)
 		.def_property_readonly("superKeyPressed", &dyno::PMouseEvent::superKeyPressed)
 		.def_property_readonly("capsLockEnabled", &dyno::PMouseEvent::capsLockEnabled)
-		.def_property_readonly("numLockEnabled", &dyno::PMouseEvent::numLockEnabled);
-	//.def(py::self == py::self&);
-//.def(py::self != py::self);
+		.def_property_readonly("numLockEnabled", &dyno::PMouseEvent::numLockEnabled)
+		.def("__ne__", [](dyno::PMouseEvent& self, const dyno::PMouseEvent& other) {
+		return self != other;
+			})
+		.def("__eq__", [](dyno::PMouseEvent& self, const dyno::PMouseEvent& other) {
+				return self == other;
+			});
 
-	py::class_<InputModule, Module, std::shared_ptr<InputModule>>(m, "InputModule")
-		.def(py::init<>())
-		.def("get_module_type", &InputModule::getModuleType);
 
-	py::class_<KeyboardInputModule, InputModule, std::shared_ptr<KeyboardInputModule>>(m, "KeyboardInputModule")
-		.def("enqueue_event", &KeyboardInputModule::enqueueEvent)
-		.def("var_cache_event", &KeyboardInputModule::varCacheEvent);
+			py::class_<InputModule, Module, std::shared_ptr<InputModule>>(m, "InputModule")
+				.def(py::init<>())
+				.def("get_module_type", &InputModule::getModuleType);
 
-	class PyMouseInputModule : public MouseInputModule
-	{
-	public:
-		using MouseInputModule::MouseInputModule;
+			py::class_<KeyboardInputModule, InputModule, std::shared_ptr<KeyboardInputModule>>(m, "KeyboardInputModule")
+				.def("enqueue_event", &KeyboardInputModule::enqueueEvent)
+				.def("var_cache_event", &KeyboardInputModule::varCacheEvent);
 
-		void onEvent(dyno::PMouseEvent event) override
-		{
-			PYBIND11_OVERRIDE(void, MouseInputModule, onEvent, event);
-		}
+			class PyMouseInputModule : public MouseInputModule
+			{
+			public:
+				using MouseInputModule::MouseInputModule;
 
-		void updateImpl()
-		{
-			PYBIND11_OVERRIDE(void, MouseInputModule, updateImpl);
-		}
-	};
+				void onEvent(dyno::PMouseEvent event) override
+				{
+					PYBIND11_OVERRIDE(void, MouseInputModule, onEvent, event);
+				}
 
-	py::class_<MouseInputModule, PyMouseInputModule, InputModule, std::shared_ptr<MouseInputModule>>(m, "MouseInputModule")
-		.def(py::init<>())
-		.def("enqueue_event", &MouseInputModule::enqueueEvent)
-		.def("var_cache_event", &MouseInputModule::varCacheEvent)
-		.def("on_event", &MouseInputModule::onEvent)
-		.def("updateImpl", &MouseInputModule::updateImpl)
-		.def("requireUpdate", &MouseInputModule::requireUpdate);
+				void updateImpl()
+				{
+					PYBIND11_OVERRIDE(void, MouseInputModule, updateImpl);
+				}
+			};
 
-	py::class_<OutputModule, Module, std::shared_ptr<OutputModule>>(m, "OutputModule")
-		.def(py::init<>())
-		.def("var_output_path", &OutputModule::varOutputPath, py::return_value_policy::reference)
-		.def("var_prefix", &OutputModule::varPrefix, py::return_value_policy::reference)
-		.def("var_start_frame", &OutputModule::varStartFrame, py::return_value_policy::reference)
-		.def("var_end_frame", &OutputModule::varEndFrame, py::return_value_policy::reference)
-		.def("var_stride", &OutputModule::varStride, py::return_value_policy::reference)
-		.def("var_reordering", &OutputModule::varReordering, py::return_value_policy::reference)
-		.def("in_frame_number", &OutputModule::inFrameNumber, py::return_value_policy::reference)
-		.def("get_module_type", &OutputModule::getModuleType);
+			py::class_<MouseInputModule, PyMouseInputModule, InputModule, std::shared_ptr<MouseInputModule>>(m, "MouseInputModule")
+				.def(py::init<>())
+				.def("enqueue_event", &MouseInputModule::enqueueEvent)
+				.def("var_cache_event", &MouseInputModule::varCacheEvent)
+				.def("on_event", &MouseInputModule::onEvent)
+				.def("updateImpl", &MouseInputModule::updateImpl)
+				.def("requireUpdate", &MouseInputModule::requireUpdate);
 
-	py::class_<DataSource, Module, std::shared_ptr<DataSource>>(m, "DataSource")
-		.def(py::init<>())
-		.def("captionVisible", &DataSource::captionVisible)
-		.def("get_module_type", &DataSource::getModuleType);
+			py::class_<OutputModule, Module, std::shared_ptr<OutputModule>>(m, "OutputModule")
+				.def(py::init<>())
+				.def("var_output_path", &OutputModule::varOutputPath, py::return_value_policy::reference)
+				.def("var_prefix", &OutputModule::varPrefix, py::return_value_policy::reference)
+				.def("var_start_frame", &OutputModule::varStartFrame, py::return_value_policy::reference)
+				.def("var_end_frame", &OutputModule::varEndFrame, py::return_value_policy::reference)
+				.def("var_stride", &OutputModule::varStride, py::return_value_policy::reference)
+				.def("var_reordering", &OutputModule::varReordering, py::return_value_policy::reference)
+				.def("in_frame_number", &OutputModule::inFrameNumber, py::return_value_policy::reference)
+				.def("get_module_type", &OutputModule::getModuleType);
 
-	//pipeline
-	py::class_<GraphicsPipeline, Pipeline, std::shared_ptr<GraphicsPipeline>>(m, "GraphicsPipeline", py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<Node*>());
+			py::class_<DataSource, Module, std::shared_ptr<DataSource>>(m, "DataSource")
+				.def(py::init<>())
+				.def("captionVisible", &DataSource::captionVisible)
+				.def("get_module_type", &DataSource::getModuleType);
 
-	py::class_<AnimationPipeline, Pipeline, std::shared_ptr<AnimationPipeline>>(m, "AnimationPipeline", py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<Node*>());
+			//pipeline
+			py::class_<GraphicsPipeline, Pipeline, std::shared_ptr<GraphicsPipeline>>(m, "GraphicsPipeline", py::buffer_protocol(), py::dynamic_attr())
+				.def(py::init<Node*>());
 
-	py::class_<TopologyModule, OBase, std::shared_ptr<TopologyModule>>(m, "TopologyModule")
-		.def(py::init<>())
-		.def("get_dof", &TopologyModule::getDOF)
-		.def("tag_as_changed", &TopologyModule::tagAsChanged)
-		.def("tag_as_unchanged", &TopologyModule::tagAsUnchanged)
-		.def("is_topology_changed", &TopologyModule::isTopologyChanged)
-		.def("update", &TopologyModule::update);
+			py::class_<AnimationPipeline, Pipeline, std::shared_ptr<AnimationPipeline>>(m, "AnimationPipeline", py::buffer_protocol(), py::dynamic_attr())
+				.def(py::init<Node*>());
 
-	py::class_<SceneGraph, OBase, std::shared_ptr<SceneGraph>>SG(m, "SceneGraph");
-	SG.def(py::init<>())
-		.def("advance", &SceneGraph::advance)
-		.def("take_one_frame", &SceneGraph::takeOneFrame)
-		.def("update_graphics_context", &SceneGraph::updateGraphicsContext)
-		.def("run", &SceneGraph::run)
-		.def("bounding_box", &SceneGraph::boundingBox)
-		.def("reset", py::overload_cast<>(&SceneGraph::reset))
-		.def("reset", py::overload_cast<std::shared_ptr<Node>>(&SceneGraph::reset))
-		.def("print_node_info", &SceneGraph::printNodeInfo)
-		.def("print_simulation_info", &SceneGraph::printSimulationInfo)
-		.def("print_rendering_info", &SceneGraph::printRenderingInfo)
-		.def("print_validation_info", &SceneGraph::printValidationInfo)
-		.def("is_validation_info_printable", &SceneGraph::isValidationInfoPrintable)
-		.def("is_node_info_printable", &SceneGraph::isNodeInfoPrintable)
-		.def("is_simulation_info_printable", &SceneGraph::isSimulationInfoPrintable)
-		.def("is_rendering_info_printable", &SceneGraph::isRenderingInfoPrintable)
-		.def("load", &SceneGraph::load)
-		.def("invoke", &SceneGraph::invoke)
-		//createNewScene
-		//.def("createNewScene", py::overload_cast<>()(&createNewScene<>))
-		.def("delete_node", &SceneGraph::deleteNode)
-		.def("propagate_node", &SceneGraph::propagateNode)
-		.def("is_empty", &SceneGraph::isEmpty)
-		.def("get_work_mode", &SceneGraph::getWorkMode)
-		.def("get_instance", &SceneGraph::getInstance)
-		.def("set_total_time", &SceneGraph::setTotalTime)
-		.def("get_total_time", &SceneGraph::getTotalTime)
-		.def("set_frame_rate", &SceneGraph::setFrameRate)
-		.def("get_frame_rate", &SceneGraph::getFrameRate)
-		.def("get_timecost_perframe", &SceneGraph::getTimeCostPerFrame)
-		.def("get_frame_interval", &SceneGraph::getFrameInterval)
-		.def("get_frame_number", &SceneGraph::getFrameNumber)
-		.def("is_interval_adaptive", &SceneGraph::isIntervalAdaptive)
-		.def("set_adaptive_interval", &SceneGraph::setAdaptiveInterval)
-		.def("set_gravity", &SceneGraph::setGravity)
-		.def("get_gravity", &SceneGraph::getGravity)
-		.def("set_upper_bound", &SceneGraph::setUpperBound)
-		.def("get_upper_bound", &SceneGraph::getUpperBound)
-		.def("set_lower_bound", &SceneGraph::setLowerBound)
-		.def("get_lower_bound", &SceneGraph::getLowerBound)
-		.def("begin", &SceneGraph::begin)
-		.def("end", &SceneGraph::end)
-		.def("mark_queue_update_required", &SceneGraph::markQueueUpdateRequired)
-		.def("on_mouse_event", py::overload_cast<dyno::PMouseEvent>(&SceneGraph::onMouseEvent))
-		.def("on_mouse_event", py::overload_cast<dyno::PMouseEvent, std::shared_ptr<Node>>(&SceneGraph::onMouseEvent))
-		.def("on_key_board_event", &SceneGraph::onKeyboardEvent)
-		//.def("traverse_backward", py::overload_cast<dyno::Action*>(&SceneGraph::traverseBackward))
-		//.def("traverse_forward", &SceneGraph::traverseForward)
-		//.def("traverse_forward_with_auth_sync", &SceneGraph::traverseForwardWithAutoSync)
-		.def("add_node", static_cast<std::shared_ptr<Node>(SceneGraph::*)(std::shared_ptr<Node>)>(&SceneGraph::addNode))
-		.def("add_node", static_cast<std::shared_ptr<dyno::StaticMeshLoader<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::StaticMeshLoader<dyno::DataType3f>>)>(&SceneGraph::addNode))
-		.def("add_node", static_cast<std::shared_ptr<dyno::VolumeBoundary<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::VolumeBoundary<dyno::DataType3f>>)>(&SceneGraph::addNode))
-		.def("add_node", static_cast<std::shared_ptr<dyno::ParticleFluid<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::ParticleFluid<dyno::DataType3f>>)>(&SceneGraph::addNode))
-		.def("add_node", static_cast<std::shared_ptr<dyno::PointsLoader<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::PointsLoader<dyno::DataType3f>>)>(&SceneGraph::addNode))
-		.def("add_node", static_cast<std::shared_ptr<dyno::MakeParticleSystem<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::MakeParticleSystem<dyno::DataType3f>>)>(&SceneGraph::addNode))
-		.def("add_node", static_cast<std::shared_ptr<dyno::GltfLoader<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::GltfLoader<dyno::DataType3f>>)>(&SceneGraph::addNode))
-		.def("add_node", static_cast<std::shared_ptr<dyno::ParametricModel<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::ParametricModel<dyno::DataType3f>>)>(&SceneGraph::addNode))
-		.def("add_node", static_cast<std::shared_ptr<dyno::GeometryLoader<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::GeometryLoader<dyno::DataType3f>>)>(&SceneGraph::addNode));
+			py::class_<TopologyModule, OBase, std::shared_ptr<TopologyModule>>(m, "TopologyModule")
+				.def(py::init<>())
+				.def("get_dof", &TopologyModule::getDOF)
+				.def("tag_as_changed", &TopologyModule::tagAsChanged)
+				.def("tag_as_unchanged", &TopologyModule::tagAsUnchanged)
+				.def("is_topology_changed", &TopologyModule::isTopologyChanged)
+				.def("update", &TopologyModule::update);
 
-	py::enum_<typename SceneGraph::EWorkMode>(m, "EWorkMode")
-		.value("EDIT_MODE", SceneGraph::EWorkMode::EDIT_MODE)
-		.value("RUNNING_MODE", SceneGraph::EWorkMode::RUNNING_MODE);
+			py::class_<SceneGraph, OBase, std::shared_ptr<SceneGraph>>SG(m, "SceneGraph");
+			SG.def(py::init<>())
+				.def("advance", &SceneGraph::advance)
+				.def("take_one_frame", &SceneGraph::takeOneFrame)
+				.def("update_graphics_context", &SceneGraph::updateGraphicsContext)
+				.def("run", &SceneGraph::run)
+				.def("bounding_box", &SceneGraph::boundingBox)
+				.def("reset", py::overload_cast<>(&SceneGraph::reset))
+				.def("reset", py::overload_cast<std::shared_ptr<Node>>(&SceneGraph::reset))
+				.def("print_node_info", &SceneGraph::printNodeInfo)
+				.def("print_simulation_info", &SceneGraph::printSimulationInfo)
+				.def("print_rendering_info", &SceneGraph::printRenderingInfo)
+				.def("print_validation_info", &SceneGraph::printValidationInfo)
+				.def("is_validation_info_printable", &SceneGraph::isValidationInfoPrintable)
+				.def("is_node_info_printable", &SceneGraph::isNodeInfoPrintable)
+				.def("is_simulation_info_printable", &SceneGraph::isSimulationInfoPrintable)
+				.def("is_rendering_info_printable", &SceneGraph::isRenderingInfoPrintable)
+				.def("load", &SceneGraph::load)
+				.def("invoke", &SceneGraph::invoke)
+				//createNewScene
+				//.def("createNewScene", py::overload_cast<>()(&createNewScene<>))
+				.def("delete_node", &SceneGraph::deleteNode)
+				.def("propagate_node", &SceneGraph::propagateNode)
+				.def("is_empty", &SceneGraph::isEmpty)
+				.def("get_work_mode", &SceneGraph::getWorkMode)
+				.def("get_instance", &SceneGraph::getInstance)
+				.def("set_total_time", &SceneGraph::setTotalTime)
+				.def("get_total_time", &SceneGraph::getTotalTime)
+				.def("set_frame_rate", &SceneGraph::setFrameRate)
+				.def("get_frame_rate", &SceneGraph::getFrameRate)
+				.def("get_timecost_perframe", &SceneGraph::getTimeCostPerFrame)
+				.def("get_frame_interval", &SceneGraph::getFrameInterval)
+				.def("get_frame_number", &SceneGraph::getFrameNumber)
+				.def("is_interval_adaptive", &SceneGraph::isIntervalAdaptive)
+				.def("set_adaptive_interval", &SceneGraph::setAdaptiveInterval)
+				.def("set_gravity", &SceneGraph::setGravity)
+				.def("get_gravity", &SceneGraph::getGravity)
+				.def("set_upper_bound", &SceneGraph::setUpperBound)
+				.def("get_upper_bound", &SceneGraph::getUpperBound)
+				.def("set_lower_bound", &SceneGraph::setLowerBound)
+				.def("get_lower_bound", &SceneGraph::getLowerBound)
+				.def("begin", &SceneGraph::begin)
+				.def("end", &SceneGraph::end)
+				.def("mark_queue_update_required", &SceneGraph::markQueueUpdateRequired)
+				.def("on_mouse_event", py::overload_cast<dyno::PMouseEvent>(&SceneGraph::onMouseEvent))
+				.def("on_mouse_event", py::overload_cast<dyno::PMouseEvent, std::shared_ptr<Node>>(&SceneGraph::onMouseEvent))
+				.def("on_key_board_event", &SceneGraph::onKeyboardEvent)
+				//.def("traverse_backward", py::overload_cast<dyno::Action*>(&SceneGraph::traverseBackward))
+				//.def("traverse_forward", &SceneGraph::traverseForward)
+				//.def("traverse_forward_with_auth_sync", &SceneGraph::traverseForwardWithAutoSync)
+				.def("add_node", static_cast<std::shared_ptr<Node>(SceneGraph::*)(std::shared_ptr<Node>)>(&SceneGraph::addNode))
+				.def("add_node", static_cast<std::shared_ptr<dyno::StaticMeshLoader<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::StaticMeshLoader<dyno::DataType3f>>)>(&SceneGraph::addNode))
+				.def("add_node", static_cast<std::shared_ptr<dyno::VolumeBoundary<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::VolumeBoundary<dyno::DataType3f>>)>(&SceneGraph::addNode))
+				.def("add_node", static_cast<std::shared_ptr<dyno::ParticleFluid<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::ParticleFluid<dyno::DataType3f>>)>(&SceneGraph::addNode))
+				.def("add_node", static_cast<std::shared_ptr<dyno::PointsLoader<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::PointsLoader<dyno::DataType3f>>)>(&SceneGraph::addNode))
+				.def("add_node", static_cast<std::shared_ptr<dyno::MakeParticleSystem<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::MakeParticleSystem<dyno::DataType3f>>)>(&SceneGraph::addNode))
+				.def("add_node", static_cast<std::shared_ptr<dyno::GltfLoader<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::GltfLoader<dyno::DataType3f>>)>(&SceneGraph::addNode))
+				.def("add_node", static_cast<std::shared_ptr<dyno::ParametricModel<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::ParametricModel<dyno::DataType3f>>)>(&SceneGraph::addNode))
+				.def("add_node", static_cast<std::shared_ptr<dyno::GeometryLoader<dyno::DataType3f>>(SceneGraph::*)(std::shared_ptr<dyno::GeometryLoader<dyno::DataType3f>>)>(&SceneGraph::addNode));
 
-	//py::class_<dyno::SceneGraphFactory>(m, "SceneGraphFactory");
-	//.def("instance", &dyno::SceneGraphFactory::instance, py::return_value_policy::reference)
-	//.def("active", &dyno::SceneGraphFactory::active)
-	//.def("create_new_scene", &dyno::SceneGraphFactory::createNewScene)
-	//.def("pop_scnene", &dyno::SceneGraphFactory::popScene)
-	//.def("pop_all_scene", &dyno::SceneGraphFactory::popAllScenes);
+			py::enum_<typename SceneGraph::EWorkMode>(m, "EWorkMode")
+				.value("EDIT_MODE", SceneGraph::EWorkMode::EDIT_MODE)
+				.value("RUNNING_MODE", SceneGraph::EWorkMode::RUNNING_MODE);
 
-	py::class_<dyno::SceneLoader>(m, "SceneLoader")
-		.def("load", &dyno::SceneLoader::load)
-		.def("save", &dyno::SceneLoader::save)
-		.def("can_load_file_by_extension", &dyno::SceneLoader::canLoadFileByExtension);
+			//py::class_<dyno::SceneGraphFactory>(m, "SceneGraphFactory");
+			//.def("instance", &dyno::SceneGraphFactory::instance, py::return_value_policy::reference)
+			//.def("active", &dyno::SceneGraphFactory::active)
+			//.def("create_new_scene", &dyno::SceneGraphFactory::createNewScene)
+			//.def("pop_scnene", &dyno::SceneGraphFactory::popScene)
+			//.def("pop_all_scene", &dyno::SceneGraphFactory::popAllScenes);
 
-	py::class_<dyno::SceneLoaderFactory>(m, "SceneLoaderFactory")
-		.def("get_instance", &dyno::SceneLoaderFactory::getInstance, py::return_value_policy::reference)
-		.def("get_entry_by_file_extension", &dyno::SceneLoaderFactory::getEntryByFileExtension)
-		.def("get_entry_by_file_name", &dyno::SceneLoaderFactory::getEntryByFileName)
-		.def("add_entry", &dyno::SceneLoaderFactory::addEntry)
-		.def("get_entry_list", &dyno::SceneLoaderFactory::getEntryList);
+			py::class_<dyno::SceneLoader>(m, "SceneLoader")
+				.def("load", &dyno::SceneLoader::load)
+				.def("save", &dyno::SceneLoader::save)
+				.def("can_load_file_by_extension", &dyno::SceneLoader::canLoadFileByExtension);
 
-	py::class_<dyno::SceneLoaderXML, dyno::SceneLoader>(m, "SceneLoaderXML")
-		.def("load", &dyno::SceneLoaderXML::load)
-		.def("save", &dyno::SceneLoaderXML::save);
+			py::class_<dyno::SceneLoaderFactory>(m, "SceneLoaderFactory")
+				.def("get_instance", &dyno::SceneLoaderFactory::getInstance, py::return_value_policy::reference)
+				.def("get_entry_by_file_extension", &dyno::SceneLoaderFactory::getEntryByFileExtension)
+				.def("get_entry_by_file_name", &dyno::SceneLoaderFactory::getEntryByFileName)
+				.def("add_entry", &dyno::SceneLoaderFactory::addEntry)
+				.def("get_entry_list", &dyno::SceneLoaderFactory::getEntryList);
 
-	//------------------------- New ------------------------------2024
+			py::class_<dyno::SceneLoaderXML, dyno::SceneLoader>(m, "SceneLoaderXML")
+				.def("load", &dyno::SceneLoaderXML::load)
+				.def("save", &dyno::SceneLoaderXML::save);
 
-	declare_p_enum(m);
+			//------------------------- New ------------------------------2024
 
-	declare_var<float>(m, "f");
-	declare_var<bool>(m, "b");
-	declare_var<uint>(m, "uint");
-	declare_var<int>(m, "int");
-	declare_var<std::string>(m, "s");
-	declare_var<dyno::Vec3f>(m, "3f");
-	declare_var<dyno::Vec3d>(m, "3d");
-	declare_var<dyno::Vec3i>(m, "3i");
-	declare_var<dyno::Vec3u>(m, "3u");
-	declare_var<dyno::Vec3c>(m, "3c");
-	declare_var<dyno::Vec3uc>(m, "3uc");
-	declare_var<dyno::TOrientedBox3D<Real>>(m, "TOrientedBox3D");
-	declare_var<dyno::FilePath>(m, "FilePath");
-	declare_var<dyno::Color>(m, "Color");
-	declare_var<dyno::RigidBody<dyno::DataType3f>>(m, "RigidBody3f");
-	declare_var<dyno::Quat<float>>(m, "QuatFloat");
-	declare_var<dyno::Curve>(m, "Curve");
-	declare_var<dyno::Ramp>(m, "Ramp");
+			declare_p_enum(m);
 
-	py::class_<dyno::FVar<dyno::PEnum>, FBase, std::shared_ptr<dyno::FVar<dyno::PEnum>>>(m, "FVarPEnum")
-		.def(py::init<>())
-		.def("size", &dyno::FVar<dyno::PEnum>::size)
-		.def("set_value", &dyno::FVar<dyno::PEnum>::setValue)
-		.def("get_value", &dyno::FVar<dyno::PEnum>::getValue)
-		.def("current_key", &dyno::FVar<dyno::PEnum>::currentKey)
-		.def("set_current_key", &dyno::FVar<dyno::PEnum>::setCurrentKey)
-		.def("serialize", &dyno::FVar<dyno::PEnum>::serialize)
-		//.def("deserialize", &dyno::FVar<dyno::PEnum>::deserialize)
-		.def("is_empty", &dyno::FVar<dyno::PEnum>::isEmpty)
-		.def("get_data_ptr", &dyno::FVar<dyno::PEnum>::getDataPtr);
+			declare_var<float>(m, "f");
+			declare_var<bool>(m, "b");
+			declare_var<uint>(m, "uint");
+			declare_var<int>(m, "int");
+			declare_var<std::string>(m, "s");
+			declare_var<dyno::Vec3f>(m, "3f");
+			declare_var<dyno::Vec3d>(m, "3d");
+			declare_var<dyno::Vec3i>(m, "3i");
+			declare_var<dyno::Vec3u>(m, "3u");
+			declare_var<dyno::Vec3c>(m, "3c");
+			declare_var<dyno::Vec3uc>(m, "3uc");
+			declare_var<dyno::TOrientedBox3D<Real>>(m, "TOrientedBox3D");
+			declare_var<dyno::FilePath>(m, "FilePath");
+			declare_var<dyno::Color>(m, "Color");
+			declare_var<dyno::RigidBody<dyno::DataType3f>>(m, "RigidBody3f");
+			declare_var<dyno::Quat<float>>(m, "QuatFloat");
+			declare_var<dyno::Curve>(m, "Curve");
+			declare_var<dyno::Ramp>(m, "Ramp");
 
-	declare_farray<int, DeviceType::GPU>(m, "1D");
-	declare_farray<float, DeviceType::GPU>(m, "1fD");
-	declare_farray<Vec3f, DeviceType::GPU>(m, "3fD");
-	declare_farray<CollisionMask, DeviceType::GPU>(m, "CollisionMask");
-	declare_farray<dyno::TContactPair<float>, DeviceType::GPU>(m, "TContactPair");
-	declare_farray<dyno::Attribute, DeviceType::GPU>(m, "Attribute");
+			py::class_<dyno::FVar<dyno::PEnum>, FBase, std::shared_ptr<dyno::FVar<dyno::PEnum>>>(m, "FVarPEnum")
+				.def(py::init<>())
+				.def("size", &dyno::FVar<dyno::PEnum>::size)
+				.def("set_value", &dyno::FVar<dyno::PEnum>::setValue)
+				.def("get_value", &dyno::FVar<dyno::PEnum>::getValue)
+				.def("current_key", &dyno::FVar<dyno::PEnum>::currentKey)
+				.def("set_current_key", &dyno::FVar<dyno::PEnum>::setCurrentKey)
+				.def("serialize", &dyno::FVar<dyno::PEnum>::serialize)
+				//.def("deserialize", &dyno::FVar<dyno::PEnum>::deserialize)
+				.def("is_empty", &dyno::FVar<dyno::PEnum>::isEmpty)
+				.def("get_data_ptr", &dyno::FVar<dyno::PEnum>::getDataPtr);
 
-	declare_array_list<int, DeviceType::GPU>(m, "1D");
-	declare_array_list<float, DeviceType::GPU>(m, "1fD");
-	declare_array_list<Vec3f, DeviceType::GPU>(m, "3fD");
-	declare_array_list<dyno::TBond<dyno::DataType3f>, DeviceType::GPU>(m, "TBondD3f");
+			declare_farray<int, DeviceType::GPU>(m, "1D");
+			declare_farray<float, DeviceType::GPU>(m, "1fD");
+			declare_farray<Vec3f, DeviceType::GPU>(m, "3fD");
+			declare_farray<CollisionMask, DeviceType::GPU>(m, "CollisionMask");
+			declare_farray<dyno::TContactPair<float>, DeviceType::GPU>(m, "TContactPair");
+			declare_farray<dyno::Attribute, DeviceType::GPU>(m, "Attribute");
 
-	declare_instance<TopologyModule>(m, "");
-	declare_instance<dyno::PointSet<dyno::DataType3f>>(m, "PointSet3f");
-	declare_instance<dyno::EdgeSet<dyno::DataType3f>>(m, "EdgeSet3f");
-	declare_instance<dyno::TriangleSet<dyno::DataType3f>>(m, "TriangleSet3f");
-	declare_instance<dyno::DiscreteElements<dyno::DataType3f>>(m, "DiscreteElements3f");
-	declare_instance<dyno::HeightField<dyno::DataType3f>>(m, "HeightField3f");
-	declare_instance<dyno::TextureMesh>(m, "TextureMesh");
-	declare_instance<dyno::LevelSet<dyno::DataType3f>>(m, "LevelSet3f");
+			declare_array_list<int, DeviceType::GPU>(m, "1D");
+			declare_array_list<float, DeviceType::GPU>(m, "1fD");
+			declare_array_list<Vec3f, DeviceType::GPU>(m, "3fD");
+			declare_array_list<dyno::TBond<dyno::DataType3f>, DeviceType::GPU>(m, "TBondD3f");
 
-	// New
-	declare_parametric_model<dyno::DataType3f>(m, "3f");
-	//import
-	declare_multi_node_port<dyno::ParticleEmitter<dyno::DataType3f>>(m, "ParticleEmitter3f");
-	declare_multi_node_port<dyno::ParticleSystem<dyno::DataType3f>>(m, "ParticleSystem3f");
-	declare_multi_node_port<dyno::TriangularSystem<dyno::DataType3f>>(m, "TriangularSystem3f");
-	declare_multi_node_port<dyno::CapillaryWave<dyno::DataType3f>>(m, "CapillaryWave3f");
-	declare_multi_node_port<dyno::Volume<dyno::DataType3f>>(m, "Volume3f");
-	declare_multi_node_port<dyno::RigidBodySystem<dyno::DataType3f>>(m, "RigidBodySystem3f");
-	declare_multi_node_port<dyno::Vessel<dyno::DataType3f>>(m, "Vessel3f");
+			declare_instance<TopologyModule>(m, "");
+			declare_instance<dyno::PointSet<dyno::DataType3f>>(m, "PointSet3f");
+			declare_instance<dyno::EdgeSet<dyno::DataType3f>>(m, "EdgeSet3f");
+			declare_instance<dyno::TriangleSet<dyno::DataType3f>>(m, "TriangleSet3f");
+			declare_instance<dyno::DiscreteElements<dyno::DataType3f>>(m, "DiscreteElements3f");
+			declare_instance<dyno::HeightField<dyno::DataType3f>>(m, "HeightField3f");
+			declare_instance<dyno::TextureMesh>(m, "TextureMesh");
+			declare_instance<dyno::LevelSet<dyno::DataType3f>>(m, "LevelSet3f");
 
-	declare_single_node_port<dyno::OceanBase<dyno::DataType3f>>(m, "OceanBase3f");
-	declare_single_node_port<dyno::Ocean<dyno::DataType3f>>(m, "Ocean3f");
-	declare_single_node_port<dyno::OceanPatch<dyno::DataType3f>>(m, "OceanPatch3f");
-	declare_single_node_port<dyno::GranularMedia<dyno::DataType3f>>(m, "GranularMedia3f");
-	declare_single_node_port<dyno::BasicShape<dyno::DataType3f>>(m, "BasicShape3f");
-	declare_single_node_port<dyno::RigidBodySystem<dyno::DataType3f>>(m, "RigidBodySystem3f");
-	declare_single_node_port<dyno::Vessel<dyno::DataType3f>>(m, "Vessel3f");
-	declare_single_node_port<dyno::VolumeOctree<dyno::DataType3f>>(m, "VolumeOctree3f");
-	declare_single_node_port<dyno::GhostParticles<dyno::DataType3f>>(m, "GhostParticles3f");
-	declare_single_node_port<dyno::ParticleSystem<dyno::DataType3f>>(m, "ParticleSystem3f");
-	//declare_semi_analytical_sfi_node<dyno::DataType3f>(m, "3f");
+			// New
+			declare_parametric_model<dyno::DataType3f>(m, "3f");
+			//import
+			declare_multi_node_port<dyno::ParticleEmitter<dyno::DataType3f>>(m, "ParticleEmitter3f");
+			declare_multi_node_port<dyno::ParticleSystem<dyno::DataType3f>>(m, "ParticleSystem3f");
+			declare_multi_node_port<dyno::TriangularSystem<dyno::DataType3f>>(m, "TriangularSystem3f");
+			declare_multi_node_port<dyno::CapillaryWave<dyno::DataType3f>>(m, "CapillaryWave3f");
+			declare_multi_node_port<dyno::Volume<dyno::DataType3f>>(m, "Volume3f");
+			declare_multi_node_port<dyno::RigidBodySystem<dyno::DataType3f>>(m, "RigidBodySystem3f");
+			declare_multi_node_port<dyno::Vessel<dyno::DataType3f>>(m, "Vessel3f");
 
-	declare_floating_number<dyno::DataType3f>(m, "3f");
+			declare_single_node_port<dyno::OceanBase<dyno::DataType3f>>(m, "OceanBase3f");
+			declare_single_node_port<dyno::Ocean<dyno::DataType3f>>(m, "Ocean3f");
+			declare_single_node_port<dyno::OceanPatch<dyno::DataType3f>>(m, "OceanPatch3f");
+			declare_single_node_port<dyno::GranularMedia<dyno::DataType3f>>(m, "GranularMedia3f");
+			declare_single_node_port<dyno::BasicShape<dyno::DataType3f>>(m, "BasicShape3f");
+			declare_single_node_port<dyno::RigidBodySystem<dyno::DataType3f>>(m, "RigidBodySystem3f");
+			declare_single_node_port<dyno::Vessel<dyno::DataType3f>>(m, "Vessel3f");
+			declare_single_node_port<dyno::VolumeOctree<dyno::DataType3f>>(m, "VolumeOctree3f");
+			declare_single_node_port<dyno::GhostParticles<dyno::DataType3f>>(m, "GhostParticles3f");
+			declare_single_node_port<dyno::ParticleSystem<dyno::DataType3f>>(m, "ParticleSystem3f");
+			//declare_semi_analytical_sfi_node<dyno::DataType3f>(m, "3f");
 
-	declare_camera(m);
-	declare_act_node_info(m);
-	declare_post_processing(m);
-	declare_reset_act(m);
-	declare_add_real_and_real<dyno::DataType3f>(m, "3f");
-	declare_divide_real_and_real<dyno::DataType3f>(m, "3f");
-	declare_multiply_real_and_real<dyno::DataType3f>(m, "3f");
-	declare_subtract_real_and_real<dyno::DataType3f>(m, "3f");
+			declare_floating_number<dyno::DataType3f>(m, "3f");
+
+			declare_camera(m);
+			declare_act_node_info(m);
+			declare_post_processing(m);
+			declare_reset_act(m);
+			declare_add_real_and_real<dyno::DataType3f>(m, "3f");
+			declare_divide_real_and_real<dyno::DataType3f>(m, "3f");
+			declare_multiply_real_and_real<dyno::DataType3f>(m, "3f");
+			declare_subtract_real_and_real<dyno::DataType3f>(m, "3f");
 }

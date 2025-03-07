@@ -47,27 +47,40 @@ public:
 
 protected:
 	void onEvent(PMouseEvent event) override {
-		auto elements = this->inTopology()->getDataPtr();
+		//auto elements = this->inTopology()->getDataPtr();
 
-		auto& velocities = this->inVelocity()->getData();
+		//auto& velocities = this->inVelocity()->getData();
 
-		ElementOffset offset = elements->calculateElementOffset();
+		//ElementOffset offset = elements->calculateElementOffset();
 
-		DArray<TOrientedBox3D<float>> boxInGlobal;
+		//DArray<TOrientedBox3D<float>> boxInGlobal;
 
-		elements->requestBoxInGlobal(boxInGlobal);
+		//elements->requestBoxInGlobal(boxInGlobal);
+
+		//if (event.actionType == AT_PRESS)
+		//{
+		//	cuExecute(velocities.size(),
+		//		HitBoxes,
+		//		boxInGlobal,
+		//		velocities,
+		//		event.ray,
+		//		offset.boxIndex());
+		//}
+
+		//boxInGlobal.clear();
+		std::cout << event.actionType << std::endl;
+
+		if (event.actionType == AT_UNKOWN)
+			printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
+		if (event.actionType == AT_RELEASE)
+			printf("111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111");
 
 		if (event.actionType == AT_PRESS)
-		{
-			cuExecute(velocities.size(),
-				HitBoxes,
-				boxInGlobal,
-				velocities,
-				event.ray,
-				offset.boxIndex());
-		}
+			printf("222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222");
 
-		boxInGlobal.clear();
+		if (event.actionType == AT_REPEAT)
+			printf("333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333");
 	}
 };
 
@@ -85,7 +98,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 		for (int j = 0; j < i + 1; j++)
 		{
 			rigidBody.position = 0.5f * Vec3f(0.5f, 1.1 - 0.13 * i, 0.12f + 0.21 * j + 0.1 * (8 - i));
-			
+
 			rigid->addBox(box, rigidBody);
 		}
 
