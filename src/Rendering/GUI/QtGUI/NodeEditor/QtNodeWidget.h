@@ -47,9 +47,12 @@ namespace Qt
 
 		bool allowExported() const override { return true; }
 
-		bool hotKey0Checked() const override { return mNode->isVisible(); }
+		bool hotKeyRenderChecked() const override { return mNode->isVisible(); }
 
-		bool hotKey1Checked() const override { return mNode->isActive(); }
+		bool hotKeySimChecked() const override { return mNode->isActive(); }
+
+		bool hotKeyAutoSyncChecked() const override { return mNode->isAutoSync(); }
+
 
 		/**
 		 * @brief To test whether nodaData can be set as the input data for portIndex

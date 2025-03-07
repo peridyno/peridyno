@@ -66,9 +66,34 @@ namespace Qt
 
 		connect(this, &QtFlowScene::nodeHotKey0Checked, this, &QtNodeFlowScene::enableRendering);
 		connect(this, &QtFlowScene::nodeHotKey1Checked, this, &QtNodeFlowScene::enablePhysics);
+		
+		connect(this, &QtFlowScene::nodeHotKeyChecked, [this](QtNode& n, bool checked, int buttonId) {
+
+			switch (buttonId) 
+			{
+				case 0:
+					enableRendering(n, !checked);
+					break;
+				case 1:
+					enablePhysics(n, !checked);
+					break;
+				case 2:
+					enableAutoSync(n, checked);
+					break;
+				case 3:
+					resetNode(n);
+					break;
+
+				default:
+					break;
+			}
+				
+			});
 		//connect(this, &QtFlowScene::nodeHotKey2Checked, this, &QtNodeFlowScene::Key2_Signal);
 
 		connect(this, &QtFlowScene::nodeContextMenu, this, &QtNodeFlowScene::showContextMenu);
+
+
 	}
 
 	QtNodeFlowScene::~QtNodeFlowScene()
@@ -389,6 +414,18 @@ namespace Qt
 		if (mEditingEnabled && nodeData != nullptr) {
 			auto node = nodeData->getNode();
 			node->setVisible(checked);
+			node->graphicsPipeline()->enable();
+			node->graphicsPipeline()->update();
+		}
+	}
+
+	void QtNodeFlowScene::enableAutoSync(QtNode& n, bool checked) 
+	{
+		auto nodeData = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
+
+		if (mEditingEnabled && nodeData != nullptr) {
+			auto node = nodeData->getNode();
+			node->setAutoSync(checked);
 		}
 	}
 
@@ -399,11 +436,23 @@ namespace Qt
 		if (mEditingEnabled && nodeData != nullptr) {
 			auto node = nodeData->getNode();
 			node->setActive(checked);
+			node->animationPipeline()->update();
+		}
+	}
+
+	void QtNodeFlowScene::resetNode(QtNode& n) 
+	{
+		auto nodeData = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
+
+		if (mEditingEnabled && nodeData != nullptr) {
+			auto node = nodeData->getNode();
+			node->reset();
 		}
 	}
 
 	void QtNodeFlowScene::showContextMenu(QtNode& n, const QPointF& pos)
 	{
+		
 		auto qDataModel = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
 		auto node = qDataModel->getNode();
 		if (node == nullptr) {
@@ -473,8 +522,8 @@ namespace Qt
 			showThisNodeOnly(n);
 		});
 
-		connect(resetNodeAct, &QAction::triggered, this, [=]() {
-			node->reset();
+		connect(resetNodeAct, &QAction::triggered, this, [&]() {
+			resetNode(n);
 		});
 
 		connect(activateAllNodesAct, &QAction::triggered, this, [&]() {
@@ -487,6 +536,7 @@ namespace Qt
 
 		connect(autoSyncAct, &QAction::triggered, this, [=](bool checked) {
 			node->setAutoSync(checked);
+			this->updateNodeGraphView();
 		});
 
 		connect(enableDiscendants, &QAction::triggered, this, [&]() {
@@ -519,12 +569,10 @@ namespace Qt
 		{
 			if (node->id() == n.id())
 			{
-				node->nodeGraphicsObject().setHotKey1Hovered(true);
 				this->enableRendering(*node, true);
 			}
 			else
 			{
-				node->nodeGraphicsObject().setHotKey1Hovered(false);
 				this->enableRendering(*node, false);
 			}
 		}
@@ -554,12 +602,10 @@ namespace Qt
 		{
 			if (node->id() == n.id())
 			{
-				node->nodeGraphicsObject().setHotKey0Hovered(true);
 				this->enablePhysics(*node, true);
 			}
 			else
 			{
-				node->nodeGraphicsObject().setHotKey0Hovered(false);
 				this->enablePhysics(*node, false);
 			}
 		}
@@ -574,7 +620,7 @@ namespace Qt
 		auto nodes = this->allNodes();
 		for (auto node : nodes)
 		{
-			auto a = node->nodeDataModel();
+			this->enablePhysics(*node, true);
 		}
 
 		this->updateNodeGraphView();
@@ -594,6 +640,8 @@ namespace Qt
 				dNode->setAutoSync(autoSync);
 			}
 		}
+
+		this->updateNodeGraphView();
 
 		nodes.clear();
 	}
@@ -625,6 +673,8 @@ namespace Qt
 
 			scn->traverseForward(dNode, &act);
 		}
+
+		this->updateNodeGraphView();
 	}
 
 	//TODO: show a message on how to use this node

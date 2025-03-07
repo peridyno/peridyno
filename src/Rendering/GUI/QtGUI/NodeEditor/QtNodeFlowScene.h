@@ -60,6 +60,10 @@ public Q_SLOTS:
 
 	void enablePhysics(QtNode& n, bool checked);
 
+	void enableAutoSync(QtNode& n, bool checked);
+
+	void resetNode(QtNode& n);
+
 	void showContextMenu(QtNode& n, const QPointF& pos);
 
 	void showHelper(QtNode& n);
