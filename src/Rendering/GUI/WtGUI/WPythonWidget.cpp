@@ -24,7 +24,7 @@ WPythonWidget::WPythonWidget()
 
 	mCodeEditor = layout->addWidget(std::make_unique<Wt::WText>(), 1);
 	mCodeEditor->setInline(false);
-	mCodeEditor->setWidth(Wt::WLength("640px"));
+	mCodeEditor->setWidth(Wt::WLength("900px"));
 
 	// ACE editor
 	std::string ref = mCodeEditor->jsRef(); // is a text string that will be the element when executed in JS

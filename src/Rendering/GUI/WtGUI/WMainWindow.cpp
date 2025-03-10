@@ -180,6 +180,28 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 	return panel0;
 }
 
+std::unique_ptr<Wt::WWidget> WMainWindow::initPython()
+{
+	auto pythonWidget = std::make_unique<WPythonWidget>();
+	pythonWidget->setHeight(900);
+	pythonWidget->setWidth(900);
+
+	pythonWidget->updateSceneGraph().connect([=](std::shared_ptr<dyno::SceneGraph> scene) {
+		if (scene)
+		{
+			std::cout << "delete" << std::endl;
+			setScene(scene);
+			//initLeftPanel(widget0);
+			//initNodeGraphics();
+			tab->removeTab(tab->widget(0));
+			tab->insertTab(0, initNodeGraphics(), "NodeGraphics", Wt::ContentLoading::Lazy);
+		}
+
+		});
+	return pythonWidget;
+}
+
+
 std::unique_ptr<Wt::WWidget> WMainWindow::initNodeTree()
 {
 	auto rootWidget = std::make_unique<Wt::WContainerWidget>();
@@ -262,17 +284,21 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	layout->setContentsMargins(0, 0, 0, 0);
 	parent->setMargin(0);
 
-	auto widget0 = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), 1);
-	Wt::WTabWidget* tab = widget0->addNew<Wt::WTabWidget>();
-	tab->setHeight(900);
-	tab->setWidth(900);
-	tab->addTab(initNodeGraphics(), "NodeGraphics", Wt::ContentLoading::Lazy);
-	tab->addTab(initNodeTree(), "NodeTree", Wt::ContentLoading::Eager);
-
 	// add node
 	auto panel = layout->addWidget(std::make_unique<Wt::WPanel>());
 	panel->setTitle("Add Node");
 	panel->setCollapsible(false);
+
+	auto widget0 = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), 1);
+	tab = widget0->addNew<Wt::WTabWidget>();
+	tab->setHeight(900);
+	tab->setWidth(900);
+	tab->addTab(initNodeGraphics(), "NodeGraphics", Wt::ContentLoading::Lazy);
+	tab->addTab(initPython(), "Python", Wt::ContentLoading::Lazy);
+
+	//tab->addTab(initNodeTree(), "NodeTree", Wt::ContentLoading::Eager);
+
+
 
 	auto widget3 = panel->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
 

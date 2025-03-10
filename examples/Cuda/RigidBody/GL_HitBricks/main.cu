@@ -47,40 +47,41 @@ public:
 
 protected:
 	void onEvent(PMouseEvent event) override {
-		//auto elements = this->inTopology()->getDataPtr();
+		auto elements = this->inTopology()->getDataPtr();
 
-		//auto& velocities = this->inVelocity()->getData();
+		auto& velocities = this->inVelocity()->getData();
 
-		//ElementOffset offset = elements->calculateElementOffset();
+		ElementOffset offset = elements->calculateElementOffset();
 
-		//DArray<TOrientedBox3D<float>> boxInGlobal;
+		DArray<TOrientedBox3D<float>> boxInGlobal;
 
-		//elements->requestBoxInGlobal(boxInGlobal);
-
-		//if (event.actionType == AT_PRESS)
-		//{
-		//	cuExecute(velocities.size(),
-		//		HitBoxes,
-		//		boxInGlobal,
-		//		velocities,
-		//		event.ray,
-		//		offset.boxIndex());
-		//}
-
-		//boxInGlobal.clear();
-		std::cout << event.actionType << std::endl;
-
-		if (event.actionType == AT_UNKOWN)
-			printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-
-		if (event.actionType == AT_RELEASE)
-			printf("111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111");
+		elements->requestBoxInGlobal(boxInGlobal);
 
 		if (event.actionType == AT_PRESS)
-			printf("222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222");
+		{
+			cuExecute(velocities.size(),
+				HitBoxes,
+				boxInGlobal,
+				velocities,
+				event.ray,
+				offset.boxIndex());
+		}
 
-		if (event.actionType == AT_REPEAT)
-			printf("333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333");
+		boxInGlobal.clear();
+
+		//std::cout << event.actionType << std::endl;
+
+		//if (event.actionType == AT_UNKOWN)
+		//	printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
+		//if (event.actionType == AT_RELEASE)
+		//	printf("111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111");
+
+		//if (event.actionType == AT_PRESS)
+		//	printf("222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222");
+
+		//if (event.actionType == AT_REPEAT)
+		//	printf("333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333");
 	}
 };
 

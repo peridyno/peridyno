@@ -61,6 +61,7 @@ private:
 	void initLeftPanel(Wt::WContainerWidget*);
 	std::unique_ptr<Wt::WWidget> initNodeGraphics();
 	std::unique_ptr<Wt::WWidget> initNodeTree();
+	std::unique_ptr<Wt::WWidget> initPython();
 
 	void start();
 	void stop();
@@ -81,4 +82,5 @@ private:
 	Wt::WPushButton* startButton;
 
 	Wt::WContainerWidget* widget0;
+	Wt::WTabWidget* tab;
 };
