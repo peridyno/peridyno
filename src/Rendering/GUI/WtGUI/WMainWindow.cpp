@@ -43,6 +43,8 @@ WMainWindow::WMainWindow()
 	auto layout = this->setLayout(std::make_unique<Wt::WBorderLayout>());
 	layout->setContentsMargins(0, 0, 0, 0);
 
+	pythonWidget = new WPythonWidget();
+
 	//create a navigation bar
 	auto naviBar = layout->addWidget(std::make_unique<Wt::WNavigationBar>(), Wt::LayoutPosition::North);
 	naviBar->addStyleClass("main-nav");
@@ -68,7 +70,6 @@ WMainWindow::WMainWindow()
 	auto widget1 = layout->addWidget(std::make_unique<Wt::WStackedWidget>(), Wt::LayoutPosition::West);
 	auto menu = naviBar->addMenu(std::make_unique<Wt::WMenu>(widget1), Wt::AlignmentFlag::Right);
 	initMenu(menu);
-
 }
 
 WMainWindow::~WMainWindow()
@@ -86,7 +87,6 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 	menu->setMargin(5, Wt::Side::Right);
 
 	auto sampleWidget = new WSampleWidget();
-	auto pythonWidget = new WPythonWidget();
 	auto saveWidget = new WSaveWidget(this);
 	auto logWidget = new WLogWidget(this);
 	auto logMessage = new WLogMessage();
@@ -100,27 +100,26 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 
 	menu->addItem("Samples", std::unique_ptr<WSampleWidget>(sampleWidget));
 
-	auto pythonItem = menu->addItem("Python", std::unique_ptr<WPythonWidget>(pythonWidget));
+	//auto pythonItem = menu->addItem("Python", std::unique_ptr<WPythonWidget>(pythonWidget));
 
 	auto saveItem = menu->addItem("Save", std::unique_ptr<WSaveWidget>(saveWidget));
 
 	auto lgoItem = menu->addItem("Log", std::unique_ptr<WLogWidget>(logWidget));
 
-	pythonWidget->updateSceneGraph().connect([=](std::shared_ptr<dyno::SceneGraph> scene) {
-		if (scene)
-		{
-			std::cout << "delete" << std::endl;
-			setScene(scene);
-			initLeftPanel(widget0);
-		}
-
-		});
+	//pythonWidget->updateSceneGraph().connect([=](std::shared_ptr<dyno::SceneGraph> scene) {
+	//	if (scene)
+	//	{
+	//		std::cout << "delete" << std::endl;
+	//		setScene(scene);
+	//		initLeftPanel(widget0);
+	//	}
+	//	});
 
 	sampleWidget->clicked().connect([=](Sample* sample)
 		{
 			if (sample != NULL)
 			{
-				pythonItem->select();
+				//pythonItem->select();
 				std::string path = sample->source();
 				std::ifstream ifs(path);
 				if (ifs.is_open())
@@ -139,7 +138,6 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 			}
 		});
 
-
 	logMessage->updateText().connect([=](std::string message)
 		{
 			std::ostringstream oss;
@@ -153,7 +151,6 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 			else {
 				std::cerr << "Unable to open file for writing." << std::endl;
 			}
-
 		});
 
 	auto hide = menu->addItem("<<", 0);
@@ -165,7 +162,12 @@ void WMainWindow::initMenu(Wt::WMenu* menu)
 
 std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 {
-	auto panel0 = std::make_unique<Wt::WPanel>();
+	auto rootWidget = std::make_unique<Wt::WContainerWidget>();
+	auto layout = rootWidget->setLayout(std::make_unique<Wt::WVBoxLayout>());
+	layout->setContentsMargins(0, 0, 0, 0);
+	rootWidget->setMargin(0);
+
+	auto panel0 = layout->addWidget(std::make_unique<Wt::WPanel>());
 	panel0->setTitleBar(false);
 	panel0->setCollapsible(false);
 	panel0->setMargin(0);
@@ -177,13 +179,75 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 		mFlowWidget = panel0->setCentralWidget(std::make_unique<WtFlowWidget>(mScene, this));
 	}
 
-	return panel0;
+	// node tree
+	auto panel1 = layout->addWidget(std::make_unique<Wt::WPanel>());
+	panel1->setTitle("Node Tree");
+	panel1->setCollapsible(true);
+	panel1->setMargin(0);
+	//panel0->setCentralWidget(std::make_unique<WtFlowWidget>());
+	//panel0->setStyleClass("scrollable-content");
+
+	auto treeView = panel1->setCentralWidget(std::make_unique<Wt::WTreeView>());
+	treeView->setMargin(0);
+	treeView->setSortingEnabled(false);
+	treeView->setSelectionMode(Wt::SelectionMode::Single);
+	treeView->setEditTriggers(Wt::EditTrigger::None);
+	treeView->setColumnResizeEnabled(true);
+	treeView->setModel(mNodeDataModel);
+	treeView->setColumnWidth(0, 100);
+	treeView->setColumnWidth(1, 280);
+	treeView->setSortingEnabled(false);
+
+	// module list
+	auto panel2 = layout->addWidget(std::make_unique<Wt::WPanel>());
+	panel2->setTitle("Module List");
+	panel2->setCollapsible(true);
+	//panel1->setStyleClass("scrollable-content");
+	auto tableView = panel2->setCentralWidget(std::make_unique<Wt::WTableView>());
+
+	tableView->setSortingEnabled(false);
+	tableView->setSelectionMode(Wt::SelectionMode::Single);
+	tableView->setEditTriggers(Wt::EditTrigger::None);
+	tableView->setModel(mModuleDataModel);
+
+	// Parameter list
+	auto panel3 = layout->addWidget(std::make_unique<Wt::WPanel>());
+	panel3->setTitle("Control Variable");
+	panel3->setCollapsible(true);
+	//panel2->setStyleClass("scrollable-content");
+
+	//action for selection change
+	treeView->clicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
+		{
+			auto node = mNodeDataModel->getNode(idx);
+			mModuleDataModel->setNode(node);
+			mParameterDataNode->setNode(node);
+			mParameterDataNode->createParameterPanel(panel2);
+		});
+
+	tableView->clicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
+		{
+			auto module = mModuleDataModel->getModule(idx);
+			mParameterDataNode->setModule(module);
+			mParameterDataNode->createParameterPanelModule(panel2);
+		});
+
+	tableView->doubleClicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
+		{
+			auto mod = mModuleDataModel->getModule(idx);
+			if (mod->getModuleType() == "VisualModule")
+			{
+				Wt::log("info") << mod->getName();
+			}
+		});
+
+	return rootWidget;
 }
 
 std::unique_ptr<Wt::WWidget> WMainWindow::initPython()
 {
-	auto pythonWidget = std::make_unique<WPythonWidget>();
-	pythonWidget->setHeight(900);
+	//auto pythonWidget = std::make_unique<WPythonWidget>();
+	pythonWidget->setHeight(700);
 	pythonWidget->setWidth(900);
 
 	pythonWidget->updateSceneGraph().connect([=](std::shared_ptr<dyno::SceneGraph> scene) {
@@ -196,11 +260,10 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initPython()
 			tab->removeTab(tab->widget(0));
 			tab->insertTab(0, initNodeGraphics(), "NodeGraphics", Wt::ContentLoading::Lazy);
 		}
-
 		});
-	return pythonWidget;
-}
 
+	return std::unique_ptr<WPythonWidget>(pythonWidget);
+}
 
 std::unique_ptr<Wt::WWidget> WMainWindow::initNodeTree()
 {
@@ -210,8 +273,6 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeTree()
 	auto layout = rootWidget->setLayout(std::make_unique<Wt::WVBoxLayout>());
 	layout->setContentsMargins(0, 0, 0, 0);
 	rootWidget->setMargin(0);
-
-
 
 	// node tree
 	auto panel0 = layout->addWidget(std::make_unique<Wt::WPanel>());
@@ -298,8 +359,6 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 
 	//tab->addTab(initNodeTree(), "NodeTree", Wt::ContentLoading::Eager);
 
-
-
 	auto widget3 = panel->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
 
 	auto layout3 = widget3->setLayout(std::make_unique<Wt::WHBoxLayout>());
@@ -313,7 +372,6 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 		Wt::WSuggestionPopup::generateMatcherJS(nodeOptions),
 		Wt::WSuggestionPopup::generateReplacerJS(nodeOptions)
 	));
-
 
 	auto& pages = dyno::NodeFactory::instance()->nodePages();
 	for (auto iPage = pages.begin(); iPage != pages.end(); iPage++)
@@ -373,7 +431,6 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 			mNodeDataModel->setScene(mScene);
 			name->setText("");
 		}
-
 		});
 
 	auto reorderNodeButton = layout3->addWidget(std::make_unique<Wt::WPushButton>("Reorder"));
@@ -524,4 +581,3 @@ std::shared_ptr<dyno::SceneGraph> WMainWindow::getScene()
 {
 	return mScene;
 }
-

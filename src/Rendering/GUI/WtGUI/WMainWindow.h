@@ -13,6 +13,7 @@
 
 #include "NodeFactory.h"
 #include <Wt/WSuggestionPopup.h>
+#include <WPythonWidget.h>
 
 namespace dyno
 {
@@ -78,6 +79,7 @@ private:
 
 	std::shared_ptr<dyno::SceneGraph>	mScene = nullptr;
 	std::shared_ptr<dyno::Node> mActiveNode;
+	WPythonWidget* pythonWidget;
 
 	Wt::WPushButton* startButton;
 
