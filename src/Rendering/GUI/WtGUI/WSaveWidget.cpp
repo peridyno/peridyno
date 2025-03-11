@@ -144,7 +144,7 @@ void WSaveWidget::createUploadPanel()
 			else if (std::holds_alternative<std::shared_ptr<SceneGraph>>(result))
 			{
 				mParent->setScene(std::get<std::shared_ptr<SceneGraph>>(result));
-				mParent->createLeftPanel();
+				mParent->createRightPanel();
 				mUploadOut->setText("File upload is finished.");
 			}
 		}

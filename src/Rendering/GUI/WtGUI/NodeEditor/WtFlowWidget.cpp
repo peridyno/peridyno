@@ -7,7 +7,7 @@ WtFlowWidget::WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene, WMainWindow*
 
 	mMainWindow = mainWindow;
 
-	resize(100, 100);
+	resize(900, 700);
 
 	std::cout << "WtFlowWidget" << std::endl;
 
@@ -17,6 +17,7 @@ WtFlowWidget::WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene, WMainWindow*
 	this->mouseMoved().connect(this, &WtFlowWidget::onMouseMove);
 	this->mouseWentUp().connect(this, &WtFlowWidget::onMouseWentUp);
 	this->mouseWheel().connect(this, &WtFlowWidget::onMouseWheel);
+
 }
 
 WtFlowWidget::~WtFlowWidget() {};
@@ -145,6 +146,9 @@ void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 	{
 		auto node = nodeMap[selectedNum];
 		auto nodeData = node->flowNodeData();
+
+		selectNodeSignal_.emit(selectedNum);
+
 		Wt::WPointF mousePoint = Wt::WPointF(event.widget().x, event.widget().y);
 		if (checkMouseInHotKey0(mousePoint, nodeData))
 		{
@@ -177,6 +181,10 @@ void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 			mMainWindow->updateCanvas();
 			update();
 		}
+	}
+	else
+	{
+		selectNodeSignal_.emit(-1);
 	}
 
 	if (drawLineFlag = true)

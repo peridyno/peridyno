@@ -37,19 +37,17 @@ public:
 
 	void setScene(std::shared_ptr<dyno::SceneGraph> scene);
 
-	WSimulationCanvas* simCanvas() { return mSceneCanvas; }
+	std::shared_ptr<dyno::SceneGraph> getScene();
 
-	void createLeftPanel();
+	void createRightPanel();
 
 	void updateCanvas();
 
 	void onKeyWentDown(const Wt::WKeyEvent& event);
 
-	WtFlowWidget* getFlowWidget() {
-		return mFlowWidget;
-	}
+	WSimulationCanvas* simCanvas() { return mSceneCanvas; }
 
-	std::shared_ptr<dyno::SceneGraph> getScene();
+	WtFlowWidget* getFlowWidget() { return mFlowWidget; }
 
 public:
 	// data models
@@ -58,11 +56,15 @@ public:
 	std::shared_ptr<WParameterDataNode> mParameterDataNode;
 
 private:
-	void initMenu(Wt::WMenu*);
-	void initLeftPanel(Wt::WContainerWidget*);
+	void initRightPanel(Wt::WContainerWidget*);
+	void initSimulationControl(Wt::WContainerWidget*);
+	void initAddNodePanel(Wt::WPanel* parent);
+
 	std::unique_ptr<Wt::WWidget> initNodeGraphics();
-	std::unique_ptr<Wt::WWidget> initNodeTree();
 	std::unique_ptr<Wt::WWidget> initPython();
+	std::unique_ptr<Wt::WWidget> initSample();
+	std::unique_ptr<Wt::WWidget> initSave();
+	std::unique_ptr<Wt::WWidget> initLog();
 
 	void start();
 	void stop();
@@ -70,6 +72,8 @@ private:
 	void reset();
 
 private:
+	int RightPanelHeight = 950;
+	int RightPanelWidth = 900;
 
 	WSimulationCanvas* mSceneCanvas;
 	WtFlowWidget* mFlowWidget;
@@ -83,6 +87,7 @@ private:
 
 	Wt::WPushButton* startButton;
 
-	Wt::WContainerWidget* widget0;
+	Wt::WContainerWidget* rightWidget;
+	Wt::WContainerWidget* bottomWidget;
 	Wt::WTabWidget* tab;
 };

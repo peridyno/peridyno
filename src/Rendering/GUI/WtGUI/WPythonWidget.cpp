@@ -16,7 +16,7 @@ WPythonWidget::WPythonWidget()
 {
 	this->setLayoutSizeAware(true);
 	this->setOverflow(Wt::Overflow::Auto);
-	this->setHeight(Wt::WLength("100%"));
+	//this->setHeight(Wt::WLength("100%"));
 	this->setMargin(0);
 
 	auto layout = this->setLayout(std::make_unique<Wt::WVBoxLayout>());
@@ -24,7 +24,7 @@ WPythonWidget::WPythonWidget()
 
 	mCodeEditor = layout->addWidget(std::make_unique<Wt::WText>(), 1);
 	mCodeEditor->setInline(false);
-	mCodeEditor->setWidth(Wt::WLength("900px"));
+	//mCodeEditor->setWidth(Wt::WLength("100%"));
 
 	// ACE editor
 	std::string ref = mCodeEditor->jsRef(); // is a text string that will be the element when executed in JS

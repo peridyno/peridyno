@@ -39,7 +39,6 @@ WMainWindow::WMainWindow()
 {
 	// disable page margin...
 	setMargin(0);
-
 	auto layout = this->setLayout(std::make_unique<Wt::WBorderLayout>());
 	layout->setContentsMargins(0, 0, 0, 0);
 
@@ -56,8 +55,10 @@ WMainWindow::WMainWindow()
 	//mSceneCanvas->setScene(mScene);
 
 	// scene info panel
-	widget0 = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), Wt::LayoutPosition::East);
-	widget0->setWidth(900);
+	rightWidget = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), Wt::LayoutPosition::East);
+	rightWidget->setWidth(RightPanelWidth);
+
+	bottomWidget = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), Wt::LayoutPosition::South);
 
 	// create data model
 	mNodeDataModel = std::make_shared<WNodeDataModel>();
@@ -68,8 +69,10 @@ WMainWindow::WMainWindow()
 
 	// menu
 	auto widget1 = layout->addWidget(std::make_unique<Wt::WStackedWidget>(), Wt::LayoutPosition::West);
-	auto menu = naviBar->addMenu(std::make_unique<Wt::WMenu>(widget1), Wt::AlignmentFlag::Right);
-	initMenu(menu);
+	//widget1->setWidth("30%");
+	//auto menu = naviBar->addMenu(std::make_unique<Wt::WMenu>(widget1), Wt::AlignmentFlag::Right);
+	//initMenu(menu);
+	initSimulationControl(bottomWidget);
 }
 
 WMainWindow::~WMainWindow()
@@ -77,290 +80,119 @@ WMainWindow::~WMainWindow()
 	Wt::log("warning") << "stop WMainWindows";
 }
 
-void WMainWindow::createLeftPanel()
+void WMainWindow::setScene(std::shared_ptr<dyno::SceneGraph> scene)
 {
-	initLeftPanel(widget0);
+	// try to stop the simulation
+	stop();
+
+	// setup scene graph
+	mScene = scene;
+	mSceneCanvas->setScene(mScene);
+	mNodeDataModel->setScene(mScene);
+	mModuleDataModel->setNode(NULL);
 }
 
-void WMainWindow::initMenu(Wt::WMenu* menu)
+std::shared_ptr<dyno::SceneGraph> WMainWindow::getScene()
 {
-	menu->setMargin(5, Wt::Side::Right);
-
-	auto sampleWidget = new WSampleWidget();
-	auto saveWidget = new WSaveWidget(this);
-	auto logWidget = new WLogWidget(this);
-	auto logMessage = new WLogMessage();
-
-	//auto paramsWidget = new WRenderParamsWidget(&mSceneCanvas->getRenderParams());
-	//menu->addItem("Settings", std::unique_ptr<WRenderParamsWidget>(paramsWidget));
-
-	/*paramsWidget->valueChanged().connect([=]() {
-		mSceneCanvas->update();
-		});*/
-
-	menu->addItem("Samples", std::unique_ptr<WSampleWidget>(sampleWidget));
-
-	//auto pythonItem = menu->addItem("Python", std::unique_ptr<WPythonWidget>(pythonWidget));
-
-	auto saveItem = menu->addItem("Save", std::unique_ptr<WSaveWidget>(saveWidget));
-
-	auto lgoItem = menu->addItem("Log", std::unique_ptr<WLogWidget>(logWidget));
-
-	//pythonWidget->updateSceneGraph().connect([=](std::shared_ptr<dyno::SceneGraph> scene) {
-	//	if (scene)
-	//	{
-	//		std::cout << "delete" << std::endl;
-	//		setScene(scene);
-	//		initLeftPanel(widget0);
-	//	}
-	//	});
-
-	sampleWidget->clicked().connect([=](Sample* sample)
-		{
-			if (sample != NULL)
-			{
-				//pythonItem->select();
-				std::string path = sample->source();
-				std::ifstream ifs(path);
-				if (ifs.is_open())
-				{
-					std::string content((std::istreambuf_iterator<char>(ifs)),
-						(std::istreambuf_iterator<char>()));
-					pythonWidget->setText(content);
-					pythonWidget->execute(content);
-					//menu->contentsStack()->setCurrentWidget(0);
-				}
-				else
-				{
-					std::string content = "Error: Not Find The Python File";
-					pythonWidget->setText(content);
-				}
-			}
-		});
-
-	logMessage->updateText().connect([=](std::string message)
-		{
-			std::ostringstream oss;
-			oss << mScene;
-			std::string filename = oss.str() + ".txt";
-			std::ofstream fileStream(filename, std::ios::out | std::ios::trunc);
-			if (fileStream.is_open()) {
-				fileStream << message;
-				fileStream.close();
-			}
-			else {
-				std::cerr << "Unable to open file for writing." << std::endl;
-			}
-		});
-
-	auto hide = menu->addItem("<<", 0);
-	hide->select();
-	hide->clicked().connect([=]() {
-		menu->contentsStack()->setCurrentWidget(0);
-		});
+	return mScene;
 }
 
-std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
+void WMainWindow::createRightPanel()
 {
-	auto rootWidget = std::make_unique<Wt::WContainerWidget>();
-	auto layout = rootWidget->setLayout(std::make_unique<Wt::WVBoxLayout>());
-	layout->setContentsMargins(0, 0, 0, 0);
-	rootWidget->setMargin(0);
+	initRightPanel(rightWidget);
+}
 
-	auto panel0 = layout->addWidget(std::make_unique<Wt::WPanel>());
-	panel0->setTitleBar(false);
-	panel0->setCollapsible(false);
-	panel0->setMargin(0);
-	//panel0->setHeight(900);
-
+void WMainWindow::updateCanvas()
+{
 	if (mScene)
 	{
-		//setScene(scn);
-		mFlowWidget = panel0->setCentralWidget(std::make_unique<WtFlowWidget>(mScene, this));
+		mSceneCanvas->update();
 	}
-
-	// node tree
-	auto panel1 = layout->addWidget(std::make_unique<Wt::WPanel>());
-	panel1->setTitle("Node Tree");
-	panel1->setCollapsible(true);
-	panel1->setMargin(0);
-	//panel0->setCentralWidget(std::make_unique<WtFlowWidget>());
-	//panel0->setStyleClass("scrollable-content");
-
-	auto treeView = panel1->setCentralWidget(std::make_unique<Wt::WTreeView>());
-	treeView->setMargin(0);
-	treeView->setSortingEnabled(false);
-	treeView->setSelectionMode(Wt::SelectionMode::Single);
-	treeView->setEditTriggers(Wt::EditTrigger::None);
-	treeView->setColumnResizeEnabled(true);
-	treeView->setModel(mNodeDataModel);
-	treeView->setColumnWidth(0, 100);
-	treeView->setColumnWidth(1, 280);
-	treeView->setSortingEnabled(false);
-
-	// module list
-	auto panel2 = layout->addWidget(std::make_unique<Wt::WPanel>());
-	panel2->setTitle("Module List");
-	panel2->setCollapsible(true);
-	//panel1->setStyleClass("scrollable-content");
-	auto tableView = panel2->setCentralWidget(std::make_unique<Wt::WTableView>());
-
-	tableView->setSortingEnabled(false);
-	tableView->setSelectionMode(Wt::SelectionMode::Single);
-	tableView->setEditTriggers(Wt::EditTrigger::None);
-	tableView->setModel(mModuleDataModel);
-
-	// Parameter list
-	auto panel3 = layout->addWidget(std::make_unique<Wt::WPanel>());
-	panel3->setTitle("Control Variable");
-	panel3->setCollapsible(true);
-	//panel2->setStyleClass("scrollable-content");
-
-	//action for selection change
-	treeView->clicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
-		{
-			auto node = mNodeDataModel->getNode(idx);
-			mModuleDataModel->setNode(node);
-			mParameterDataNode->setNode(node);
-			mParameterDataNode->createParameterPanel(panel2);
-		});
-
-	tableView->clicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
-		{
-			auto module = mModuleDataModel->getModule(idx);
-			mParameterDataNode->setModule(module);
-			mParameterDataNode->createParameterPanelModule(panel2);
-		});
-
-	tableView->doubleClicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
-		{
-			auto mod = mModuleDataModel->getModule(idx);
-			if (mod->getModuleType() == "VisualModule")
-			{
-				Wt::log("info") << mod->getName();
-			}
-		});
-
-	return rootWidget;
+	Wt::log("info") << "updateCanvas!!!";
+	Wt::log("info") << mScene->getFrameNumber();
 }
 
-std::unique_ptr<Wt::WWidget> WMainWindow::initPython()
+void WMainWindow::onKeyWentDown(const Wt::WKeyEvent& event)
 {
-	//auto pythonWidget = std::make_unique<WPythonWidget>();
-	pythonWidget->setHeight(700);
-	pythonWidget->setWidth(900);
-
-	pythonWidget->updateSceneGraph().connect([=](std::shared_ptr<dyno::SceneGraph> scene) {
-		if (scene)
-		{
-			std::cout << "delete" << std::endl;
-			setScene(scene);
-			//initLeftPanel(widget0);
-			//initNodeGraphics();
-			tab->removeTab(tab->widget(0));
-			tab->insertTab(0, initNodeGraphics(), "NodeGraphics", Wt::ContentLoading::Lazy);
-		}
-		});
-
-	return std::unique_ptr<WPythonWidget>(pythonWidget);
+	if (event.key() == Wt::Key::Delete || event.key() == Wt::Key::Backspace)
+	{
+		mFlowWidget->onKeyWentDown();
+	}
 }
 
-std::unique_ptr<Wt::WWidget> WMainWindow::initNodeTree()
-{
-	auto rootWidget = std::make_unique<Wt::WContainerWidget>();
-	//rootWidget->setHeight(900);
-	// vertical layout
-	auto layout = rootWidget->setLayout(std::make_unique<Wt::WVBoxLayout>());
-	layout->setContentsMargins(0, 0, 0, 0);
-	rootWidget->setMargin(0);
 
-	// node tree
-	auto panel0 = layout->addWidget(std::make_unique<Wt::WPanel>());
-	panel0->setTitle("Node Tree");
-	panel0->setCollapsible(true);
-	panel0->setMargin(0);
-	//panel0->setCentralWidget(std::make_unique<WtFlowWidget>());
-	//panel0->setStyleClass("scrollable-content");
-
-	auto treeView = panel0->setCentralWidget(std::make_unique<Wt::WTreeView>());
-	treeView->setMargin(0);
-	treeView->setSortingEnabled(false);
-	treeView->setSelectionMode(Wt::SelectionMode::Single);
-	treeView->setEditTriggers(Wt::EditTrigger::None);
-	treeView->setColumnResizeEnabled(true);
-	treeView->setModel(mNodeDataModel);
-	treeView->setColumnWidth(0, 100);
-	treeView->setColumnWidth(1, 280);
-	treeView->setSortingEnabled(false);
-
-	// module list
-	auto panel1 = layout->addWidget(std::make_unique<Wt::WPanel>());
-	panel1->setTitle("Module List");
-	panel1->setCollapsible(true);
-	//panel1->setStyleClass("scrollable-content");
-	auto tableView = panel1->setCentralWidget(std::make_unique<Wt::WTableView>());
-
-	tableView->setSortingEnabled(false);
-	tableView->setSelectionMode(Wt::SelectionMode::Single);
-	tableView->setEditTriggers(Wt::EditTrigger::None);
-	tableView->setModel(mModuleDataModel);
-
-	// Parameter list
-	auto panel2 = layout->addWidget(std::make_unique<Wt::WPanel>());
-	panel2->setTitle("Control Variable");
-	panel2->setCollapsible(true);
-	//panel2->setStyleClass("scrollable-content");
-
-	//action for selection change
-	treeView->clicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
-		{
-			auto node = mNodeDataModel->getNode(idx);
-			mModuleDataModel->setNode(node);
-			mParameterDataNode->setNode(node);
-			mParameterDataNode->createParameterPanel(panel2);
-		});
-
-	tableView->clicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
-		{
-			auto module = mModuleDataModel->getModule(idx);
-			mParameterDataNode->setModule(module);
-			mParameterDataNode->createParameterPanelModule(panel2);
-		});
-
-	tableView->doubleClicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
-		{
-			auto mod = mModuleDataModel->getModule(idx);
-			if (mod->getModuleType() == "VisualModule")
-			{
-				Wt::log("info") << mod->getName();
-			}
-		});
-	return rootWidget;
-}
-
-void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
+void WMainWindow::initRightPanel(Wt::WContainerWidget* parent)
 {
 	// vertical layout
 	auto layout = parent->setLayout(std::make_unique<Wt::WVBoxLayout>());
 	layout->setContentsMargins(0, 0, 0, 0);
 	parent->setMargin(0);
 
-	// add node
-	auto panel = layout->addWidget(std::make_unique<Wt::WPanel>());
-	panel->setTitle("Add Node");
-	panel->setCollapsible(false);
-
 	auto widget0 = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), 1);
 	tab = widget0->addNew<Wt::WTabWidget>();
-	tab->setHeight(900);
-	tab->setWidth(900);
-	tab->addTab(initNodeGraphics(), "NodeGraphics", Wt::ContentLoading::Lazy);
+	tab->setHeight("100%");
+	tab->setWidth("100%");
+	tab->addTab(initNodeGraphics(), "NodeGraphics", Wt::ContentLoading::Eager);
 	tab->addTab(initPython(), "Python", Wt::ContentLoading::Lazy);
+	tab->addTab(initSample(), "Sample", Wt::ContentLoading::Lazy);
+	tab->addTab(initSave(), "Save", Wt::ContentLoading::Lazy);
+	tab->addTab(initLog(), "Log", Wt::ContentLoading::Lazy);
+}
 
-	//tab->addTab(initNodeTree(), "NodeTree", Wt::ContentLoading::Eager);
+void WMainWindow::initSimulationControl(Wt::WContainerWidget* parent)
+{
+	// vertical layout
+	auto layout = parent->setLayout(std::make_unique<Wt::WVBoxLayout>());
+	layout->setContentsMargins(0, 0, 0, 0);
+	parent->setMargin(0);
 
+	// simulation control
+	auto panel3 = layout->addWidget(std::make_unique<Wt::WPanel>());
+	panel3->setTitle("Simulation Control");
+	panel3->setCollapsible(false);
+	//panel3->setHeight(50);
+	auto widget2 = panel3->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
+	auto layout2 = widget2->setLayout(std::make_unique<Wt::WHBoxLayout>());
+	//widget2->setHeight(5);
+	layout2->setContentsMargins(0, 0, 0, 0);
+	startButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Start"));
+	auto stopButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Stop"));
+	auto stepButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Step"));
+	auto resetButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Reset"));
+
+	startButton->setId("startButton");
+	stopButton->setId("stopButton");
+	stepButton->setId("stepButton");
+	resetButton->setId("resetButton");
+
+	// actions
+	startButton->clicked().connect(this, &WMainWindow::start);
+	stopButton->clicked().connect(this, &WMainWindow::stop);
+	stepButton->clicked().connect(this, &WMainWindow::step);
+	resetButton->clicked().connect(this, &WMainWindow::reset);
+
+	//startButton->clicked().connect([=] {
+	//	startButton->doJavaScript("var startButton = document.getElementById('startButton');"
+	//		"startButton.blur();");
+	//	});
+
+	stopButton->clicked().connect([=] {
+		stopButton->doJavaScript("var stopButton = document.getElementById('stopButton');"
+			"stopButton.blur();");
+		});
+	stepButton->clicked().connect([=] {
+		stepButton->doJavaScript("var stepButton = document.getElementById('stepButton');"
+			"stepButton.blur();");
+		});
+	resetButton->clicked().connect([=] {
+		resetButton->doJavaScript("var resetButton = document.getElementById('resetButton');"
+			"resetButton.blur();");
+		});
+}
+
+void WMainWindow::initAddNodePanel(Wt::WPanel* panel)
+{
 	auto widget3 = panel->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
-
 	auto layout3 = widget3->setLayout(std::make_unique<Wt::WHBoxLayout>());
 	layout3->setContentsMargins(0, 0, 0, 0);
 
@@ -438,49 +270,173 @@ void WMainWindow::initLeftPanel(Wt::WContainerWidget* parent)
 	reorderNodeButton->clicked().connect([=] {
 		mFlowWidget->reorderNode();
 		});
+}
 
-	// simulation control
+std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
+{
+	auto rootWidget = std::make_unique<Wt::WContainerWidget>();
+	auto layout = rootWidget->setLayout(std::make_unique<Wt::WVBoxLayout>());
+	layout->setContentsMargins(0, 0, 0, 0);
+	rootWidget->setMargin(0);
+
+	// add node
+	auto panel = layout->addWidget(std::make_unique<Wt::WPanel>());
+	panel->setTitle("Add Node");
+	panel->setCollapsible(false);
+	initAddNodePanel(panel);
+
+	auto panel0 = layout->addWidget(std::make_unique<Wt::WPanel>());
+	panel0->setTitleBar(false);
+	panel0->setCollapsible(false);
+	panel0->setMargin(0);
+	//panel0->setHeight(900);
+
+	if (mScene)
+	{
+		//setScene(scn);
+		mFlowWidget = panel0->setCentralWidget(std::make_unique<WtFlowWidget>(mScene, this));
+	}
+
+	// module list
+	auto panel2 = layout->addWidget(std::make_unique<Wt::WPanel>());
+	panel2->setTitle("Module List");
+	panel2->setCollapsible(true);
+	panel2->setStyleClass("scrollable-content");
+	auto tableView = panel2->setCentralWidget(std::make_unique<Wt::WTableView>());
+
+	tableView->setSortingEnabled(false);
+	tableView->setSelectionMode(Wt::SelectionMode::Single);
+	tableView->setEditTriggers(Wt::EditTrigger::None);
+	tableView->setModel(mModuleDataModel);
+
+	// Parameter list
 	auto panel3 = layout->addWidget(std::make_unique<Wt::WPanel>());
-	panel3->setTitle("Simulation Control");
-	panel3->setCollapsible(false);
-	//panel3->setHeight(50);
-	auto widget2 = panel3->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
-	auto layout2 = widget2->setLayout(std::make_unique<Wt::WHBoxLayout>());
-	//widget2->setHeight(5);
-	layout2->setContentsMargins(0, 0, 0, 0);
-	startButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Start"));
-	auto stopButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Stop"));
-	auto stepButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Step"));
-	auto resetButton = layout2->addWidget(std::make_unique<Wt::WPushButton>("Reset"));
+	panel3->setTitle("Control Variable");
+	panel3->setCollapsible(true);
+	panel3->setStyleClass("scrollable-content");
 
-	startButton->setId("startButton");
-	stopButton->setId("stopButton");
-	stepButton->setId("stepButton");
-	resetButton->setId("resetButton");
+	//action for selection change
+	mFlowWidget->selectNodeSignal().connect([=](int selectNum)
+		{
+			if (selectNum < 0)
+			{
+				std::cout << "selectNum:" << selectNum << std::endl;
+			}
+			else
+			{
 
-	// actions
-	startButton->clicked().connect(this, &WMainWindow::start);
-	stopButton->clicked().connect(this, &WMainWindow::stop);
-	stepButton->clicked().connect(this, &WMainWindow::step);
-	resetButton->clicked().connect(this, &WMainWindow::reset);
-
-	//startButton->clicked().connect([=] {
-	//	startButton->doJavaScript("var startButton = document.getElementById('startButton');"
-	//		"startButton.blur();");
-	//	});
-
-	stopButton->clicked().connect([=] {
-		stopButton->doJavaScript("var stopButton = document.getElementById('stopButton');"
-			"stopButton.blur();");
+				for (auto it = mScene->begin(); it != mScene->end(); it++)
+				{
+					auto m = it.get();
+					if (m->objectId() == selectNum)
+					{
+						mModuleDataModel->setNode(m);
+						mParameterDataNode->setNode(m);
+						mParameterDataNode->createParameterPanel(panel3);
+					}
+				}
+			}
 		});
-	stepButton->clicked().connect([=] {
-		stepButton->doJavaScript("var stepButton = document.getElementById('stepButton');"
-			"stepButton.blur();");
+
+	tableView->clicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
+		{
+			auto module = mModuleDataModel->getModule(idx);
+			mParameterDataNode->setModule(module);
+			mParameterDataNode->createParameterPanelModule(panel3);
 		});
-	resetButton->clicked().connect([=] {
-		resetButton->doJavaScript("var resetButton = document.getElementById('resetButton');"
-			"resetButton.blur();");
+
+	tableView->doubleClicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
+		{
+			auto mod = mModuleDataModel->getModule(idx);
+			if (mod->getModuleType() == "VisualModule")
+			{
+				Wt::log("info") << mod->getName();
+			}
 		});
+
+	return rootWidget;
+}
+
+std::unique_ptr<Wt::WWidget> WMainWindow::initPython()
+{
+	pythonWidget->setHeight(950);
+	pythonWidget->setWidth(900);
+
+	pythonWidget->updateSceneGraph().connect([=](std::shared_ptr<dyno::SceneGraph> scene) {
+		if (scene)
+		{
+			std::cout << "delete" << std::endl;
+			setScene(scene);
+			//initLeftPanel(widget0);
+			//initNodeGraphics();
+			tab->removeTab(tab->widget(0));
+			tab->insertTab(0, initNodeGraphics(), "NodeGraphics", Wt::ContentLoading::Lazy);
+		}
+		});
+
+	return std::unique_ptr<WPythonWidget>(pythonWidget);
+}
+
+std::unique_ptr<Wt::WWidget> WMainWindow::initSample()
+{
+	auto sampleWidget = new WSampleWidget();
+	sampleWidget->setStyleClass("scrollable-content-sample");
+	sampleWidget->setHeight(RightPanelHeight);
+
+	sampleWidget->clicked().connect([=](Sample* sample)
+		{
+			if (sample != NULL)
+			{
+				//pythonItem->select();
+				std::string path = sample->source();
+				std::ifstream ifs(path);
+				if (ifs.is_open())
+				{
+					std::string content((std::istreambuf_iterator<char>(ifs)),
+						(std::istreambuf_iterator<char>()));
+					pythonWidget->setText(content);
+					pythonWidget->execute(content);
+					//menu->contentsStack()->setCurrentWidget(0);
+				}
+				else
+				{
+					std::string content = "Error: Not Find The Python File";
+					pythonWidget->setText(content);
+				}
+			}
+		});
+
+	return std::unique_ptr<WSampleWidget>(sampleWidget);
+}
+
+std::unique_ptr<Wt::WWidget> WMainWindow::initSave()
+{
+	auto saveWidget = new WSaveWidget(this);
+
+	return std::unique_ptr<WSaveWidget>(saveWidget);
+}
+
+std::unique_ptr<Wt::WWidget> WMainWindow::initLog()
+{
+	auto logWidget = new WLogWidget(this);
+	auto logMessage = new WLogMessage();
+
+	logMessage->updateText().connect([=](std::string message)
+		{
+			std::ostringstream oss;
+			oss << mScene;
+			std::string filename = oss.str() + ".txt";
+			std::ofstream fileStream(filename, std::ios::out | std::ios::trunc);
+			if (fileStream.is_open()) {
+				fileStream << message;
+				fileStream.close();
+			}
+			else {
+				std::cerr << "Unable to open file for writing." << std::endl;
+			}
+		});
+
+	return std::unique_ptr<WLogWidget>(logWidget);
 }
 
 void WMainWindow::start()
@@ -545,39 +501,4 @@ void WMainWindow::reset()
 	}
 
 	Wt::log("info") << mScene->getFrameNumber();
-}
-
-void WMainWindow::updateCanvas()
-{
-	if (mScene)
-	{
-		mSceneCanvas->update();
-	}
-	Wt::log("info") << "updateCanvas!!!";
-	Wt::log("info") << mScene->getFrameNumber();
-}
-
-void WMainWindow::onKeyWentDown(const Wt::WKeyEvent& event)
-{
-	if (event.key() == Wt::Key::Delete || event.key() == Wt::Key::Backspace)
-	{
-		mFlowWidget->onKeyWentDown();
-	}
-}
-
-void WMainWindow::setScene(std::shared_ptr<dyno::SceneGraph> scene)
-{
-	// try to stop the simulation
-	stop();
-
-	// setup scene graph
-	mScene = scene;
-	mSceneCanvas->setScene(mScene);
-	mNodeDataModel->setScene(mScene);
-	mModuleDataModel->setNode(NULL);
-}
-
-std::shared_ptr<dyno::SceneGraph> WMainWindow::getScene()
-{
-	return mScene;
 }

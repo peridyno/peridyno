@@ -52,6 +52,8 @@ public:
 
 	void reorderNode();
 
+	Wt::Signal<int>& selectNodeSignal() { return selectNodeSignal_; };
+
 protected:
 	void paintEvent(Wt::WPaintDevice* paintDevice);
 
@@ -107,4 +109,6 @@ private:
 	Wt::WPointF mMousePoint = Wt::WPointF(0, 0);
 
 	std::vector<sceneConnection> sceneConnections;
+
+	Wt::Signal<int> selectNodeSignal_;
 };

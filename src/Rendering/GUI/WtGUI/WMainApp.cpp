@@ -190,7 +190,16 @@ WMainApp::WMainApp(const Wt::WEnvironment& env) : Wt::WApplication(env)
 	this->styleSheet().addRule(
 		".scrollable-content",
 		"overflow: auto;"
-		"max-height: 200px;"
+		"max-height: 250px;"
+		"border: 1px solid #ccc;"
+		"padding: 10px;"
+		"box-sizing: border-box;"
+	);
+
+	this->styleSheet().addRule(
+		".scrollable-content-sample",
+		"overflow: auto;"
+		"max-height: auto;"
 		"border: 1px solid #ccc;"
 		"padding: 10px;"
 		"box-sizing: border-box;"
@@ -204,7 +213,7 @@ WMainApp::WMainApp(const Wt::WEnvironment& env) : Wt::WApplication(env)
 
 	window->setScene(SceneGraphFactory::instance()->createDefaultScene());
 
-	window->createLeftPanel();
+	window->createRightPanel();
 
 	this->globalKeyWentDown().connect(window->simCanvas(), &WSimulationCanvas::onKeyWentDown);
 	this->globalKeyWentUp().connect(window->simCanvas(), &WSimulationCanvas::onKeyWentUp);
