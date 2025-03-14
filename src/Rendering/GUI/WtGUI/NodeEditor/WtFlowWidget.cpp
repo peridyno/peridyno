@@ -7,7 +7,7 @@ WtFlowWidget::WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene, WMainWindow*
 
 	mMainWindow = mainWindow;
 
-	resize(900, 700);
+	resize(900, 600);
 
 	std::cout << "WtFlowWidget" << std::endl;
 

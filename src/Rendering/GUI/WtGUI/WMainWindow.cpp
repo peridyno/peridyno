@@ -32,7 +32,6 @@
 
 #include <filesystem>
 
-//#include "Dynamics/Cuda/ParticleSystem/initializeParticleSystem.h"
 
 WMainWindow::WMainWindow()
 	: WContainerWidget(), bRunFlag(false)
@@ -221,6 +220,11 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel)
 		}
 	}
 
+	auto nodeMap = dyno::Object::getClassMap();
+	for (auto it = nodeMap->begin(); it != nodeMap->end(); ++it)
+	{
+		sp->addSuggestion(it->second->m_className);
+	}
 	auto name = layout3->addWidget(std::make_unique<Wt::WLineEdit>());
 	name->setPlaceholderText("node name");
 
@@ -258,10 +262,15 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel)
 		{
 			auto node_obj = dyno::Object::createObject(name->text().toUTF8());
 			std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
-			mScene->addNode(new_node);
-			mFlowWidget->updateForAddNode();
-			mNodeDataModel->setScene(mScene);
-			name->setText("");
+			if (new_node != nullptr)
+			{
+				mScene->addNode(new_node);
+				mFlowWidget->updateForAddNode();
+				mNodeDataModel->setScene(mScene);
+				name->setText("");
+				std::cout << new_node->caption() << std::endl;
+			}
+
 		}
 		});
 
