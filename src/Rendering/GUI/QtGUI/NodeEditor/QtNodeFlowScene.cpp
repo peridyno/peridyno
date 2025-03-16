@@ -72,10 +72,10 @@ namespace Qt
 			switch (buttonId) 
 			{
 				case 0:
-					enableRendering(n, !checked);
+					enableRendering(n, checked);
 					break;
 				case 1:
-					enablePhysics(n, !checked);
+					enablePhysics(n, checked);
 					break;
 				case 2:
 					enableAutoSync(n, checked);
@@ -413,7 +413,7 @@ namespace Qt
 
 		if (mEditingEnabled && nodeData != nullptr) {
 			auto node = nodeData->getNode();
-			node->setVisible(checked);
+			node->setVisible(!checked);
 			node->graphicsPipeline()->enable();
 			node->graphicsPipeline()->update();
 		}
@@ -435,7 +435,7 @@ namespace Qt
 
 		if (mEditingEnabled && nodeData != nullptr) {
 			auto node = nodeData->getNode();
-			node->setActive(checked);
+			node->setActive(!checked);
 			node->animationPipeline()->update();
 		}
 	}

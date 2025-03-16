@@ -47,9 +47,9 @@ namespace Qt
 
 		bool allowExported() const override { return true; }
 
-		bool hotKeyRenderChecked() const override { return mNode->isVisible(); }
+		bool hotKeyRenderChecked() const override { return !mNode->isVisible(); }
 
-		bool hotKeySimChecked() const override { return mNode->isActive(); }
+		bool hotKeySimChecked() const override { return !mNode->isActive(); }
 
 		bool hotKeyAutoSyncChecked() const override { return mNode->isAutoSync(); }
 
