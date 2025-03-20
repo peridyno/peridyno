@@ -13,7 +13,6 @@
 #include <memory>
 
 class WtNodeDataModel;
-//class FlowItemInterface;
 class WtNode;
 class WtConnection;
 class WtNodeGraphicsObject;

@@ -4,6 +4,7 @@
 #include <Wt/WServer.h>
 #include <Wt/WLogger.h>
 
+
 namespace dyno {
 	WtApp::WtApp(int argc /*= 0*/, char** argv /*= NULL*/)
 	{

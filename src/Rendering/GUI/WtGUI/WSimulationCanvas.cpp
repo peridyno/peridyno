@@ -106,7 +106,7 @@ WSimulationCanvas::WSimulationCanvas()
 {
 	this->setLayoutSizeAware(true);
 	this->setStyleClass("remote-framebuffer");
-	this->resize("50%", "50%");
+	this->resize("100%", "90%");
 
 	this->mouseWentUp().preventDefaultAction(true);
 	this->mouseWentDown().preventDefaultAction(true);

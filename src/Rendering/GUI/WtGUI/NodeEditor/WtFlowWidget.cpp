@@ -1,4 +1,6 @@
 #include "WtFlowWidget.h"
+#include <Wt/WEnvironment.h>
+#include <Wt/WApplication.h>
 
 WtFlowWidget::WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene, WMainWindow* mainWindow) :Wt::WPaintedWidget()
 {
@@ -7,9 +9,10 @@ WtFlowWidget::WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene, WMainWindow*
 
 	mMainWindow = mainWindow;
 
-	resize(900, 600);
+	this->resize(900, 600);
 
-	std::cout << "WtFlowWidget" << std::endl;
+	int viewportHeight = Wt::WApplication::instance()->environment().screenHeight();
+	std::cout << viewportHeight << std::endl;
 
 	setPreferredMethod(Wt::RenderMethod::HtmlCanvas);
 

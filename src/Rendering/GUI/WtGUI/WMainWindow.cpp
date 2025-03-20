@@ -46,32 +46,44 @@ WMainWindow::WMainWindow()
 	//create a navigation bar
 	auto naviBar = layout->addWidget(std::make_unique<Wt::WNavigationBar>(), Wt::LayoutPosition::North);
 	naviBar->addStyleClass("main-nav");
+	naviBar->setResponsive(true);
 	naviBar->setTitle("PeriDyno", "https://github.com/peridyno/peridyno");
 	naviBar->setMargin(0);
 
+	// create center
+	auto centerContainer = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), Wt::LayoutPosition::Center);
+	centerContainer->setMargin(0);
+
+	auto centerVbox = centerContainer->setLayout(std::make_unique<Wt::WVBoxLayout>());
+	centerVbox->setContentsMargins(0, 0, 0, 0);
+
+	mSceneCanvas = centerVbox->addWidget(std::make_unique<WSimulationCanvas>());
+	auto controlContainer = centerVbox->addWidget(std::make_unique<Wt::WContainerWidget>());
+	controlContainer->setMargin(0);
+	initSimulationControl(controlContainer);
 	// central canvas
-	mSceneCanvas = layout->addWidget(std::make_unique<WSimulationCanvas>(), Wt::LayoutPosition::Center);
-	//mSceneCanvas->setScene(mScene);
+	//mSceneCanvas = layout->addWidget(std::make_unique<WSimulationCanvas>(), Wt::LayoutPosition::Center);
 
 	// scene info panel
 	rightWidget = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), Wt::LayoutPosition::East);
 	rightWidget->setWidth(RightPanelWidth);
 
-	bottomWidget = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), Wt::LayoutPosition::South);
+	// bottom
+	//bottomWidget = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), Wt::LayoutPosition::South);
+	//initSimulationControl(bottomWidget);
+
+	// menu
+	auto widget1 = layout->addWidget(std::make_unique<Wt::WStackedWidget>(), Wt::LayoutPosition::West);
 
 	// create data model
 	mNodeDataModel = std::make_shared<WNodeDataModel>();
 	mModuleDataModel = std::make_shared<WModuleDataModel>();
 	mParameterDataNode = std::make_shared<WParameterDataNode>();
-
 	mParameterDataNode->changeValue().connect(this, &WMainWindow::updateCanvas);
 
-	// menu
-	auto widget1 = layout->addWidget(std::make_unique<Wt::WStackedWidget>(), Wt::LayoutPosition::West);
-	//widget1->setWidth("30%");
-	//auto menu = naviBar->addMenu(std::make_unique<Wt::WMenu>(widget1), Wt::AlignmentFlag::Right);
-	//initMenu(menu);
-	initSimulationControl(bottomWidget);
+
+	//std::cout << rightWidget->height() << std::endl;
+
 }
 
 WMainWindow::~WMainWindow()
@@ -127,10 +139,13 @@ void WMainWindow::initRightPanel(Wt::WContainerWidget* parent)
 	layout->setContentsMargins(0, 0, 0, 0);
 	parent->setMargin(0);
 
-	auto widget0 = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), 1);
+	auto widget0 = layout->addWidget(std::make_unique<Wt::WContainerWidget>());
+	widget0->resize("100%", "100%");
+	widget0->setMargin(0);
 	tab = widget0->addNew<Wt::WTabWidget>();
-	tab->setHeight("100%");
-	tab->setWidth("100%");
+	tab->resize("100%", "100%");
+	//tab->setHeight("100%");
+	//tab->setWidth("100%");
 	tab->addTab(initNodeGraphics(), "NodeGraphics", Wt::ContentLoading::Eager);
 	tab->addTab(initPython(), "Python", Wt::ContentLoading::Lazy);
 	tab->addTab(initSample(), "Sample", Wt::ContentLoading::Lazy);
@@ -223,7 +238,16 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel)
 	auto nodeMap = dyno::Object::getClassMap();
 	for (auto it = nodeMap->begin(); it != nodeMap->end(); ++it)
 	{
-		sp->addSuggestion(it->second->m_className);
+		auto node_obj = dyno::Object::createObject(it->second->m_className);
+		std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
+		if (new_node == nullptr)
+		{
+			continue;
+		}
+		else
+		{
+			sp->addSuggestion(it->second->m_className);
+		}
 	}
 	auto name = layout3->addWidget(std::make_unique<Wt::WLineEdit>());
 	name->setPlaceholderText("node name");
@@ -251,7 +275,6 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel)
 							mFlowWidget->updateForAddNode();
 							mNodeDataModel->setScene(mScene);
 							flag = false;
-							std::cout << "add" << std::endl;
 						}
 					}
 				}
@@ -268,7 +291,6 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel)
 				mFlowWidget->updateForAddNode();
 				mNodeDataModel->setScene(mScene);
 				name->setText("");
-				std::cout << new_node->caption() << std::endl;
 			}
 
 		}
@@ -298,12 +320,14 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 	panel0->setTitleBar(false);
 	panel0->setCollapsible(false);
 	panel0->setMargin(0);
-	//panel0->setHeight(900);
 
 	if (mScene)
 	{
-		//setScene(scn);
-		mFlowWidget = panel0->setCentralWidget(std::make_unique<WtFlowWidget>(mScene, this));
+		auto painteContainer = panel0->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
+		painteContainer->setMargin(0);
+		painteContainer->resize("100%", "100%");
+		mFlowWidget = painteContainer->addWidget(std::make_unique<WtFlowWidget>(mScene, this));
+		//mFlowWidget = panel0->setCentralWidget(std::make_unique<WtFlowWidget>(mScene, this));
 	}
 
 	// module list
