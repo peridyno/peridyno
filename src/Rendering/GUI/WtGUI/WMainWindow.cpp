@@ -1,37 +1,7 @@
 #include "WMainWindow.h"
-#include "WSceneDataModel.h"
-#include "WSimulationCanvas.h"
-#include "WSampleWidget.h"
-#include "WRenderParamsWidget.h"
-#include "WPythonWidget.h"
-#include "WParameterDataNode.h"
 
-#include <Wt/WVBoxLayout.h>
-#include <Wt/WHBoxLayout.h>
-#include <Wt/WBorderLayout.h>
-#include <Wt/WPushButton.h>
-#include <Wt/WPanel.h>
-#include <Wt/WApplication.h>
-#include <Wt/WMenu.h>
-#include <Wt/WPopupMenu.h>
-#include <Wt/WNavigationBar.h>
-#include <Wt/WTreeView.h>
-#include <Wt/WTableView.h>
-#include <Wt/WStackedWidget.h>
-#include <Wt/WText.h>
-#include <Wt/WTable.h>
-#include <Wt/WColorPicker.h>
-#include <Wt/WLogger.h>
-#include <Wt/WTabWidget.h>
-#include <Wt/WTextArea.h>
-
-#include <fstream>
-
-#include <SceneGraph.h>
-#include <SceneGraphFactory.h>
-
-#include <filesystem>
-
+#define WIDTH_SCALE 0.4
+#define HEIGHT_SCALE 0.75
 
 WMainWindow::WMainWindow()
 	: WContainerWidget(), bRunFlag(false)
@@ -42,6 +12,8 @@ WMainWindow::WMainWindow()
 	layout->setContentsMargins(0, 0, 0, 0);
 
 	pythonWidget = new WPythonWidget();
+	viewportHeight = Wt::WApplication::instance()->environment().screenHeight();
+	viewportWidth = Wt::WApplication::instance()->environment().screenWidth();
 
 	//create a navigation bar
 	auto naviBar = layout->addWidget(std::make_unique<Wt::WNavigationBar>(), Wt::LayoutPosition::North);
@@ -66,7 +38,7 @@ WMainWindow::WMainWindow()
 
 	// scene info panel
 	rightWidget = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), Wt::LayoutPosition::East);
-	rightWidget->setWidth(RightPanelWidth);
+	//rightWidget->setWidth(viewportWidth * WIDTH_SCALE);
 
 	// bottom
 	//bottomWidget = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), Wt::LayoutPosition::South);
@@ -144,10 +116,8 @@ void WMainWindow::initRightPanel(Wt::WContainerWidget* parent)
 	widget0->setMargin(0);
 	tab = widget0->addNew<Wt::WTabWidget>();
 	tab->resize("100%", "100%");
-	//tab->setHeight("100%");
-	//tab->setWidth("100%");
 	tab->addTab(initNodeGraphics(), "NodeGraphics", Wt::ContentLoading::Eager);
-	tab->addTab(initPython(), "Python", Wt::ContentLoading::Lazy);
+	tab->addTab(initPython(), "Python", Wt::ContentLoading::Eager);
 	tab->addTab(initSample(), "Sample", Wt::ContentLoading::Lazy);
 	tab->addTab(initSave(), "Save", Wt::ContentLoading::Lazy);
 	tab->addTab(initLog(), "Log", Wt::ContentLoading::Lazy);
@@ -325,8 +295,9 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 	{
 		auto painteContainer = panel0->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
 		painteContainer->setMargin(0);
-		painteContainer->resize("100%", "100%");
+		//painteContainer->resize("100%", "100%");
 		mFlowWidget = painteContainer->addWidget(std::make_unique<WtFlowWidget>(mScene, this));
+		mFlowWidget->resize(viewportWidth * WIDTH_SCALE, viewportHeight * 0.5);
 		//mFlowWidget = panel0->setCentralWidget(std::make_unique<WtFlowWidget>(mScene, this));
 	}
 
@@ -392,8 +363,7 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 
 std::unique_ptr<Wt::WWidget> WMainWindow::initPython()
 {
-	pythonWidget->setHeight(950);
-	pythonWidget->setWidth(900);
+	pythonWidget->resize(viewportWidth * WIDTH_SCALE, viewportHeight * HEIGHT_SCALE);
 
 	pythonWidget->updateSceneGraph().connect([=](std::shared_ptr<dyno::SceneGraph> scene) {
 		if (scene)
@@ -412,9 +382,12 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initPython()
 
 std::unique_ptr<Wt::WWidget> WMainWindow::initSample()
 {
-	auto sampleWidget = new WSampleWidget();
+	int maxColumns = viewportWidth * WIDTH_SCALE / 200;
+
+	auto sampleWidget = new WSampleWidget(maxColumns);
 	sampleWidget->setStyleClass("scrollable-content-sample");
-	sampleWidget->setHeight(RightPanelHeight);
+	sampleWidget->setHeight(viewportHeight * HEIGHT_SCALE);
+	sampleWidget->setWidth(viewportWidth * WIDTH_SCALE);
 
 	sampleWidget->clicked().connect([=](Sample* sample)
 		{
@@ -444,14 +417,32 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initSample()
 
 std::unique_ptr<Wt::WWidget> WMainWindow::initSave()
 {
-	auto saveWidget = new WSaveWidget(this);
+	auto rootWidget = std::make_unique<Wt::WContainerWidget>();
 
-	return std::unique_ptr<WSaveWidget>(saveWidget);
+	rootWidget->resize(viewportWidth * WIDTH_SCALE, viewportHeight * HEIGHT_SCALE);
+
+	rootWidget->setMargin(0);
+	rootWidget->setContentAlignment(Wt::AlignmentFlag::Middle);
+
+	auto saveWidget = rootWidget->addWidget(std::make_unique<WSaveWidget>(this, viewportWidth * WIDTH_SCALE / 2));
+
+	saveWidget->resize("100%", "100%");
+
+	Wt::WApplication::instance()->styleSheet().addRule(
+		".save-middle",
+		"justify-items: anchor-center;"
+	);
+
+	saveWidget->setStyleClass("save-middle");
+
+	return rootWidget;
 }
 
 std::unique_ptr<Wt::WWidget> WMainWindow::initLog()
 {
 	auto logWidget = new WLogWidget(this);
+	logWidget->resize(viewportWidth * WIDTH_SCALE, viewportHeight * HEIGHT_SCALE);
+
 	auto logMessage = new WLogMessage();
 
 	logMessage->updateText().connect([=](std::string message)

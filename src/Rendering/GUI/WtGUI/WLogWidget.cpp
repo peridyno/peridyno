@@ -39,12 +39,12 @@ WLogWidget::WLogWidget(WMainWindow* parent)
 {
 	this->setLayoutSizeAware(true);
 	//this->setOverflow(Wt::Overflow::Auto);
-	this->setHeight(Wt::WLength("95%"));
 	this->setMargin(10);
 
 	text = this->addNew<Wt::WTextArea>();
-	text->setHeight(Wt::WLength("95%"));
-	text->setWidth(500);
+	//text->setHeight(Wt::WLength("95%"));
+	text->resize("95%", "95%");
+	text->setStyleClass("save-middle");
 
 	auto downloadButton = this->addWidget(std::make_unique< Wt::WPushButton>("Update"));
 	downloadButton->setMargin(10, Wt::Side::Top);

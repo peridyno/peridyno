@@ -36,7 +36,7 @@ class WMainWindow;
 class WSaveWidget : public Wt::WContainerWidget
 {
 public:
-	WSaveWidget(WMainWindow* parent);
+	WSaveWidget(WMainWindow* parent, int width);
 	~WSaveWidget();
 
 private:
@@ -64,6 +64,7 @@ private:
 	WMainWindow* mParent;
 
 	std::shared_ptr<dyno::SceneGraph> mScene;
+	int mWidth;
 };
 
 class downloadResource : public Wt::WFileResource

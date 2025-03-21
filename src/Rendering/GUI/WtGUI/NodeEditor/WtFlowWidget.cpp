@@ -9,11 +9,6 @@ WtFlowWidget::WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene, WMainWindow*
 
 	mMainWindow = mainWindow;
 
-	this->resize(900, 600);
-
-	int viewportHeight = Wt::WApplication::instance()->environment().screenHeight();
-	std::cout << viewportHeight << std::endl;
-
 	setPreferredMethod(Wt::RenderMethod::HtmlCanvas);
 
 	this->mouseWentDown().connect(this, &WtFlowWidget::onMouseWentDown);

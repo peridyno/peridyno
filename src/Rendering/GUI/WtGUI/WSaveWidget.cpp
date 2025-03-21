@@ -1,7 +1,7 @@
 #include "WSaveWidget.h"
 #include <variant>
 
-WSaveWidget::WSaveWidget(WMainWindow* parent)
+WSaveWidget::WSaveWidget(WMainWindow* parent, int width)
 	: mParent(parent)
 {
 	this->setLayoutSizeAware(true);
@@ -11,9 +11,12 @@ WSaveWidget::WSaveWidget(WMainWindow* parent)
 
 	//auto layout = this->setLayout(std::make_unique<Wt::WBorderLayout>());
 
+	mWidth = width;
+
 	createSavePanel();
 
 	createUploadPanel();
+
 }
 
 WSaveWidget::~WSaveWidget() {}
@@ -24,7 +27,7 @@ void WSaveWidget::createSavePanel()
 	auto panel = this->addNew<Wt::WPanel>();
 	panel->setTitle("Save File");
 	panel->setCollapsible(false);
-	panel->setWidth(250);
+	panel->setWidth(mWidth);
 
 	auto container = panel->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
 	mSaveLayout = container->setLayout(std::make_unique<Wt::WVBoxLayout>());
@@ -77,7 +80,7 @@ void WSaveWidget::createUploadPanel()
 	auto panel = this->addNew<Wt::WPanel>();
 	panel->setTitle("Upload File");
 	panel->setCollapsible(false);
-	panel->setWidth(250);
+	panel->setWidth(mWidth);
 
 	auto container = panel->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
 	auto layout = container->setLayout(std::make_unique<Wt::WVBoxLayout>());

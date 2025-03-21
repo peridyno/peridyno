@@ -259,10 +259,10 @@ Wt::WContainerWidget* _createItem(Sample* sample)
 	return container;
 }
 
-WSampleWidget::WSampleWidget()
+WSampleWidget::WSampleWidget(int maxColumns)
 {
-	this->setHeight(Wt::WLength("100%"));
-	this->setOverflow(Wt::Overflow::Auto);
+	//this->setHeight(Wt::WLength("100%"));
+	//this->setOverflow(Wt::Overflow::Auto);
 
 	auto container = std::make_unique<Wt::WContainerWidget>();
 	auto gridLayout = std::make_unique<Wt::WGridLayout>();
@@ -270,10 +270,10 @@ WSampleWidget::WSampleWidget()
 	int row = 0;
 	int col = 0;
 
+
 	for (auto sample : SampleStore::getInstance()->getSamples())
 	{
 		auto item = _createItem(sample);
-		//this->addWidget(std::unique_ptr<Wt::WContainerWidget>(item));
 		gridLayout->addWidget(std::unique_ptr<Wt::WContainerWidget>(item), row, col);
 
 		item->clicked().connect([=]()
@@ -282,7 +282,7 @@ WSampleWidget::WSampleWidget()
 			});
 
 		col++;
-		if (col == 4)
+		if (col == maxColumns)
 		{
 			col = 0;
 			row++;
