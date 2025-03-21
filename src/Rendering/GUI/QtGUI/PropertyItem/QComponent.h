@@ -269,10 +269,10 @@ namespace dyno
 		};
 
 		virtual void updateDataToField() {};
-		Dir setMode(int s) { return Dir(s); }
-		void updateLabelShape()
+
+		void updateLabelShape(bool squard)
 		{
-			if (isSquard)
+			if (squard)
 			{
 				this->setLabelSize(w, w, w, w);
 				remapArrayToHeight(mCoordArray, w);
@@ -300,37 +300,12 @@ namespace dyno
 			this->mForceUpdate = true;
 			update();
 		}
-		void changeLabelSize()
-		{
-			if (!lockSize)
-			{
-				isSquard = !isSquard;
 
-				updateLabelShape();
-			}
-		}
 
 		void setLinearResample(int s)
 		{
 			LineResample = s;
 			this->mForceUpdate = true;
-			update();
-		}
-
-		void SetValueToDrawLabel(double value, int id)
-		{
-			switch (id)
-			{
-			case 0: NminX = value;
-				break;
-			case 1: mNewMinY = value;
-				break;
-			case 2: NmaxX = value;
-				break;
-			case 3: NmaxY = value;
-				break;
-			}
-			mForceUpdate = true;
 			update();
 		}
 
@@ -635,10 +610,7 @@ namespace dyno
 			}
 
 			int fp = -1;
-			int searchRadius = 10;
-
-			if (isSquard) { searchRadius = 20; }
-			else { searchRadius = 10; }
+			int searchRadius = 20; 
 
 			if (dis < searchRadius)
 			{
@@ -878,7 +850,7 @@ namespace dyno
 	public:
 		//Setting
 		bool useBezier = false;
-		bool isSquard = false;
+
 		bool useSort = true;
 		bool lockSize = false;
 		bool curveClose = false;
@@ -905,10 +877,7 @@ namespace dyno
 		int maxY = 0;
 		int minX = 0;
 		int minY = 0;
-		double NmaxX = 0;
-		double NmaxY = 0;
-		double NminX = 0;
-		double mNewMinY = 0;
+
 		bool mGeneratorXmin = 1;
 		bool mGeneratorXmax = 1;
 		bool mGeneratorYmin = 1;

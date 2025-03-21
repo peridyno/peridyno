@@ -3,16 +3,16 @@
 void dyno::Canvas::addPoint(float x, float y)
 {
 	Coord2D a = Coord2D(x, y);
-	mCoord.push_back(a);
+	mUserCoord.push_back(a);
 
 	UpdateFieldFinalCoord();
 }
 
 void dyno::Canvas::addPointAndHandlePoint(Coord2D point, Coord2D handle_1, Coord2D handle_2)
 {
-	mCoord.push_back(point);
-	myHandlePoint.push_back(handle_1);
-	myHandlePoint.push_back(handle_2);
+	mUserCoord.push_back(point);
+	mUserHandle.push_back(handle_1);
+	mUserHandle.push_back(handle_2);
 
 	UpdateFieldFinalCoord();
 }
@@ -34,60 +34,47 @@ void dyno::Canvas::useLinear()
 	setInterpMode(false);
 }
 
-void dyno::Canvas::addItemOriginalCoord(int x, int y)
-{
-	OriginalCoord s;
-	s.set(x, y);
-	Originalcoord.push_back(s);
-}
-
-void dyno::Canvas::addItemHandlePoint(int x, int y)
-{
-	OriginalCoord s;
-	s.set(x, y);
-	OriginalHandlePoint.push_back(s);
-}
 
 void dyno::Canvas::updateBezierCurve()
 {
 	mBezierPoint.clear();
 
-	int n = mCoord.size();
-	int bn = myHandlePoint.size();
+	int n = mUserCoord.size();
+	int bn = mUserHandle.size();
 
 	if (bn != 2 * n)
 	{
-		rebuildHandlePoint(mCoord);
+		rebuildHandlePoint(mUserCoord);
 	}
 
 	for (int i = 0; i < n - 1; i++)
 	{
-		Coord2D p0 = mCoord[i];
-		Coord2D p1 = myHandlePoint[2 * i + 1];
-		Coord2D p2 = myHandlePoint[2 * (i + 1)];
-		Coord2D p3 = mCoord[i + 1];
+		Coord2D p0 = mUserCoord[i];
+		Coord2D p1 = mUserHandle[2 * i + 1];
+		Coord2D p2 = mUserHandle[2 * (i + 1)];
+		Coord2D p3 = mUserCoord[i + 1];
 		updateBezierPointToBezierSet(p0, p1, p2, p3, mBezierPoint);
 	}
-	if (curveClose && n >= 3)
+	if (mClose && n >= 3)
 	{
-		Coord2D p0 = mCoord[n - 1];
-		Coord2D p1 = myHandlePoint[bn - 1];
-		Coord2D p2 = myHandlePoint[0];
-		Coord2D p3 = mCoord[0];
+		Coord2D p0 = mUserCoord[n - 1];
+		Coord2D p1 = mUserHandle[bn - 1];
+		Coord2D p2 = mUserHandle[0];
+		Coord2D p3 = mUserCoord[0];
 		updateBezierPointToBezierSet(p0, p1, p2, p3, mBezierPoint);
 	}
-	if (curveClose)
+	if (mClose)
 	{
-		if (mCoord.size())
+		if (mUserCoord.size())
 		{
-			mBezierPoint.push_back(mCoord[0]);
+			mBezierPoint.push_back(mUserCoord[0]);
 		}
 	}
 	else
 	{
-		if (mCoord.size())
+		if (mUserCoord.size())
 		{
-			mBezierPoint.push_back(mCoord[mCoord.size() - 1]);
+			mBezierPoint.push_back(mUserCoord[mUserCoord.size() - 1]);
 		}
 	}
 }
@@ -99,8 +86,8 @@ void dyno::Canvas::updateBezierPointToBezierSet(Coord2D p0, Coord2D p1, Coord2D 
 
 	int n = 4;
 	Coord2D Pf;
-	double t;
-	double unit = 1 / segment;
+	float t;
+	float unit = 1.0f / 15.0f;	//bezier resolution
 
 	for (t = 0; t < 1; t += unit)
 	{
@@ -130,10 +117,10 @@ void dyno::Canvas::updateBezierPointToBezierSet(Coord2D p0, Coord2D p1, Coord2D 
 void dyno::Canvas::updateResampleLinearLine()
 {
 	std::vector<Coord2D> temp;
-	temp.assign(mCoord.begin(), mCoord.end());
-	if (curveClose && temp.size() >= 3)
+	temp.assign(mUserCoord.begin(), mUserCoord.end());
+	if (mClose && temp.size() >= 3)
 	{
-		temp.push_back(mCoord[0]);
+		temp.push_back(mUserCoord[0]);
 	}
 	buildSegMent_Length_Map(temp);
 	resamplePointFromLine(temp);
@@ -143,22 +130,22 @@ void dyno::Canvas::updateResampleLinearLine()
 void dyno::Canvas::resamplePointFromLine(std::vector<Coord2D> pointSet)
 {
 	Coord2D P;//»­µã
-	float uL = Spacing / 100;
+	float uL = mSpacing / 100;
 	float curL = 0;
 	int n;
-	if (length_EndPoint_Map.size())
+	if (mLength_EndPoint_Map.size())
 	{
-		n = (--length_EndPoint_Map.end())->first / uL;
+		n = (--mLength_EndPoint_Map.end())->first / uL;
 	}
 	double addTempLength = 0;
 
 	mResamplePoint.clear();
-	if (mCoord.size() >= 2)
+	if (mUserCoord.size() >= 2)
 	{
 		for (size_t i = 0; i < mLengthArray.size(); i++)
 		{
 			double tempL = mLengthArray[i];
-			auto it = length_EndPoint_Map.find(tempL);
+			auto it = mLength_EndPoint_Map.find(tempL);
 			EndPoint ep = it->second;
 
 			while (true)
@@ -191,20 +178,20 @@ void dyno::Canvas::resamplePointFromLine(std::vector<Coord2D> pointSet)
 			}
 
 		}
-		if (curveClose)
+		if (mClose)
 		{
-			mResamplePoint.push_back(mCoord[0]);
+			mResamplePoint.push_back(mUserCoord[0]);
 		}
 		else
 		{
-			mResamplePoint.push_back(mCoord[mCoord.size() - 1]);
+			mResamplePoint.push_back(mUserCoord[mUserCoord.size() - 1]);
 		}
 	}
 }
 
 void dyno::Canvas::rebuildHandlePoint(std::vector<Coord2D> coordSet)
 {
-	myHandlePoint.clear();
+	mUserHandle.clear();
 	int ptnum = coordSet.size();
 	for (size_t i = 0; i < ptnum; i++)
 	{
@@ -246,15 +233,15 @@ void dyno::Canvas::rebuildHandlePoint(std::vector<Coord2D> coordSet)
 		p1 = P - N * length;
 		p2 = P + N * length;
 
-		myHandlePoint.push_back(Coord2D(p1));
-		myHandlePoint.push_back(Coord2D(p2));
+		mUserHandle.push_back(Coord2D(p1));
+		mUserHandle.push_back(Coord2D(p2));
 
 	}
 }
 
 void dyno::Canvas::buildSegMent_Length_Map(std::vector<Coord2D> BezierPtSet)
 {
-	length_EndPoint_Map.clear();
+	mLength_EndPoint_Map.clear();
 	mLengthArray.clear();
 	std::vector<Coord2D> temp;
 
@@ -269,7 +256,7 @@ void dyno::Canvas::buildSegMent_Length_Map(std::vector<Coord2D> BezierPtSet)
 			int f = k + 1;
 			length += sqrt(std::pow((BezierPtSet[f].x - BezierPtSet[e].x), 2) + std::pow((BezierPtSet[f].y - BezierPtSet[e].y), 2));
 			mLengthArray.push_back(length);
-			length_EndPoint_Map[length] = EndPoint(e, f);
+			mLength_EndPoint_Map[length] = EndPoint(e, f);
 
 		}
 	}
@@ -278,23 +265,15 @@ void dyno::Canvas::buildSegMent_Length_Map(std::vector<Coord2D> BezierPtSet)
 
 void dyno::Canvas::setInterpMode(bool useBezier)
 {
-	useBezierInterpolation = useBezier;
-	if (useBezier)
-	{
-		this->mInterpMode = Interpolation::Bezier;
-	}
-	else
-	{
-		this->mInterpMode = Interpolation::Linear;
-	}
+	mInterpMode = useBezier ? Interpolation::Bezier : Interpolation::Linear;
 }
 
 void dyno::Canvas::clearMyCoord()
 {
-	mCoord.clear();
-	Originalcoord.clear();
-	OriginalHandlePoint.clear();
+	mUserCoord.clear();
+
 	mBezierPoint.clear();
-	myHandlePoint.clear();
+	mUserHandle.clear();
 }
+
 

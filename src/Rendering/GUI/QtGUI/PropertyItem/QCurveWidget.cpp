@@ -28,51 +28,33 @@ namespace dyno
 
 		}
 
-
-
-		
-
-		//Enum List    Direction Mode
-
-		//Enum List    InterpMode
-		int curIndex2 = int(f->getValue().mInterpMode);
+		int curIndex2 = int(f->getValue().getInterpMode());
 		int enumNum2 = f->getValue().InterpolationCount;
 		QComboBox* combox2 = new QComboBox;
 		combox2->setMaximumWidth(256);
-			for (size_t i = 0; i < 2; i++)
-			{
-				auto enumName2 = f->getValue().InterpStrings[i];
-				combox2->addItem(QString::fromStdString(enumName2));
-			}
+		combox2->addItem(QString::fromStdString("Linear"));
+		combox2->addItem(QString::fromStdString("Bezier"));
 		combox2->setCurrentIndex(curIndex2);
 		combox2->setStyleSheet("background-color: qlineargradient(spread : pad, x1 : 0, y1 : 0, x2 : 0, y2 : 0.7, stop : 0 rgba(100, 100, 100, 255), stop : 1 rgba(35, 35, 35, 255)); ");
 
 		auto s = f->getValue();
 
-		//build RampWidget by field
-		//RampWidget name
 		QLabel* name = new QLabel();
 		name->setFixedSize(80, 18);
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 		name->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);//
 
-
-
 		//build DrawLabel
 		QCurveLabel* DrawLabel = new QCurveLabel(f);
 
-
-
-
 		connect(combox2, SIGNAL(currentIndexChanged(int)), DrawLabel, SLOT(changeInterpValue(int)));
 
-		//VLayout : combox2 / SquardButton / CloseButton
+		//VLayout : combox2 / CloseButton
 		QVBoxLayout* VLayout = new QVBoxLayout();
 		QSpacerItem* VSpacer = new QSpacerItem(10, 380, QSizePolicy::Minimum, QSizePolicy::Expanding);
 		VLayout->addItem(VSpacer);
 		VLayout->addWidget(combox2);
 		VLayout->setSpacing(5);
-
 
 		QGridLayout* Gridlayout = new QGridLayout;
 		Gridlayout->setContentsMargins(0, 0, 0, 0);
@@ -84,18 +66,20 @@ namespace dyno
 		Gridlayout->setColumnStretch(1, 5);
 		Gridlayout->setColumnStretch(2, 0);
 
-
 		QLabel* spacingName = new QLabel("Spacing");
 
 		mQDoubleSlider* spacingSlider = new mQDoubleSlider;
 		spacingSlider->nameLabel = spacingName;
 		spacingSlider->setRange(1, 40);
-		spacingSlider->setValue(f->getValue().Spacing);
+		spacingSlider->setValue(f->getValue().getSpacing());
 		spacingSlider->id = -1;
 		mQDoubleSpinner* spacingSpinner = new mQDoubleSpinner;
 		spacingSpinner->setRange(1, 40);
-		spacingSpinner->setValue(f->getValue().Spacing);
+		spacingSpinner->setValue(f->getValue().getSpacing());
 		spacingSpinner->id = -1;
+		DrawLabel->updateLabelShape(f->getValue().isSquard());
+		DrawLabel->useBezier = f->getValue().getInterpMode() == Canvas::Interpolation::Bezier ? true : false;
+
 		QObject::connect(spacingSlider, SIGNAL(valueChanged(double)), spacingSpinner, SLOT(setValue(double)));
 		QObject::connect(spacingSpinner, SIGNAL(valueChanged(double)), spacingSlider, SLOT(setValue(double)));
 		QObject::connect(spacingSpinner, SIGNAL(valueChangedAndID(double, int)), DrawLabel, SLOT(setSpacingToDrawLabel(double,int)));
@@ -107,77 +91,9 @@ namespace dyno
 		SpacingHlayout->addWidget(spacingSlider);
 		SpacingHlayout->addWidget(spacingSpinner);
 
-
-		QLabel* nameReal[4];
-		mQDoubleSlider* sliderReal[4];
-		mQDoubleSpinner* spinnerReal[4];
-		std::string nameString[4] = { "MinX","MinY","MaxX","MaxY" };
-
 		QHBoxLayout* Hlayout1 = new QHBoxLayout;
 		Hlayout1->setContentsMargins(0, 0, 0, 0);
 		Hlayout1->setSpacing(0);
-
-		QHBoxLayout* Hlayout2 = new QHBoxLayout;
-		Hlayout2->setContentsMargins(0, 0, 0, 0);
-		Hlayout2->setSpacing(0);
-
-		for (size_t i = 0; i < 4; i++) 
-		{
-			nameReal[i] = new QLabel(QString::fromStdString(nameString[i]));
-
-			sliderReal[i] = new mQDoubleSlider;
-			sliderReal[i]->id = i;
-
-			spinnerReal[i] = new mQDoubleSpinner;
-			spinnerReal[i]->id = i;
-
-			auto rangeArray = f->getValue().remapRange;
-
-			sliderReal[i]->setRange(rangeArray[2 * i], rangeArray[2 * i + 1]);
-			spinnerReal[i]->setRange(rangeArray[2 * i], rangeArray[2 * i + 1]);
-
-			QObject::connect(sliderReal[i], SIGNAL(valueChanged(double)), spinnerReal[i], SLOT(setValue(double)));
-			QObject::connect(spinnerReal[i], SIGNAL(valueChanged(double)), sliderReal[i], SLOT(setValue(double)));
-			QObject::connect(spinnerReal[i], SIGNAL(valueChangedAndID(double, int)), DrawLabel, SLOT(SetValueToDrawLabel(double, int)));
-
-			switch (i)
-			{
-				case 0: 
-					sliderReal[i]->setValue(f->getValue().NminX);
-					spinnerReal[i]->setValue(f->getValue().NminX);
-					break;
-
-				case 1: 
-					sliderReal[i]->setValue(f->getValue().mNewMinY);
-					spinnerReal[i]->setValue(f->getValue().mNewMinY);
-					break;
-
-				case 2: 
-					sliderReal[i]->setValue(f->getValue().NmaxX);
-					spinnerReal[i]->setValue(f->getValue().NmaxX);
-					break;
-
-				case 3: 
-					sliderReal[i]->setValue(f->getValue().NmaxY);
-					spinnerReal[i]->setValue(f->getValue().NmaxY);
-					break;
-			}
-
-
-
-			if (i < 2) 
-			{
-				Hlayout1->addWidget(nameReal[i]);
-				Hlayout1->addWidget(sliderReal[i]);
-				Hlayout1->addWidget(spinnerReal[i]);
-			}
-			else 
-			{
-				Hlayout2->addWidget(nameReal[i]);
-				Hlayout2->addWidget(sliderReal[i]);
-				Hlayout2->addWidget(spinnerReal[i]);
-			}
-		}
 
 		//Bool
 		QHBoxLayout* boolLayout = new QHBoxLayout;
@@ -190,7 +106,7 @@ namespace dyno
 		mQCheckBox* Checkbox = new mQCheckBox();
 		Checkbox->nameLabel = boolName;
 		Checkbox->QWidget::setFixedWidth(20); 
-		Checkbox->QAbstractButton::setChecked(f->getValue().resample);
+		Checkbox->QAbstractButton::setChecked(f->getValue().getResample());
 
 		connect(Checkbox, SIGNAL(mValueChanged(int)), DrawLabel, SLOT(setLinearResample(int)));
 		connect(Checkbox, SIGNAL(mValueChanged(int)), spacingSlider, SLOT(setNewVisable(int)));
@@ -198,64 +114,38 @@ namespace dyno
 
 		connect(combox2, SIGNAL(currentIndexChanged(int)), Checkbox, SLOT(updateChecked(int)));
 
-		if (f->getValue().resample == false)
+		if (f->getValue().getResample() == false)
 		{
 			spacingSlider->setVisible(false);
 			spacingSpinner->setVisible(false);
 			spacingName->setVisible(false);
 		}
 
-
 		boolLayout->addWidget(boolName, 0);
 		boolLayout->addStretch(1);
 		boolLayout->addWidget(Checkbox, 0);
 
-		//if (f->getDataPtr()->InterpMode == Ramp::Interpolation::Bezier) { boolName->setVisible(0); Checkbox->setVisible(0); }
-
-
-
-
-		if (f->getValue().useSquardButton)
 		{
-			QToggleButton* unfold = new QToggleButton(f->getValue().useSquard);
-
-			unfold->setText("Squard", "Rect");
-			unfold->setStyleSheet(
+			QToggleButton* curveCloseButton = new QToggleButton(f->getValue().getClose());
+			curveCloseButton->setText("Close", "Open");
+			curveCloseButton->setStyleSheet
+			(
 				"QPushButton{background-color: qlineargradient(spread : pad, x1 : 0, y1 : 0, x2 : 0, y2 : 0.7, stop : 0 rgba(100, 100, 100, 255), stop : 1 rgba(35, 35, 35, 255));}QPushButton:hover{background-color: qlineargradient(spread : pad, x1 : 0, y1 : 0, x2 : 0, y2 : 0.7, stop : 0 rgba(120,120,120, 255), stop : 1 rgba(90, 90, 90, 255));} "
 			);
-			connect(unfold, &QToggleButton::clicked, DrawLabel, &QCurveLabel::changeLabelSize);
-			unfold->setValue(f->getValue().useSquard);
-			VLayout->addWidget(unfold);
+			VLayout->addWidget(curveCloseButton); 
+			connect(curveCloseButton, &QToggleButton::clicked, DrawLabel, &QCurveLabel::setCurveClose);
+			curveCloseButton->setValue(f->getValue().getClose());
 		}
-
-		
-		{	
-			if(f->getValue().useColseButton)
-			{
-				QToggleButton* curveCloseButton = new QToggleButton(f->getValue().curveClose);
-				curveCloseButton->setText("Close", "Open");
-				curveCloseButton->setStyleSheet
-				(
-					"QPushButton{background-color: qlineargradient(spread : pad, x1 : 0, y1 : 0, x2 : 0, y2 : 0.7, stop : 0 rgba(100, 100, 100, 255), stop : 1 rgba(35, 35, 35, 255));}QPushButton:hover{background-color: qlineargradient(spread : pad, x1 : 0, y1 : 0, x2 : 0, y2 : 0.7, stop : 0 rgba(120,120,120, 255), stop : 1 rgba(90, 90, 90, 255));} "
-				);
-				VLayout->addWidget(curveCloseButton); 
-				connect(curveCloseButton, &QToggleButton::clicked, DrawLabel, &QCurveLabel::setCurveClose);
-				curveCloseButton->setValue(f->getValue().curveClose);
-			}
-		}
-
 
 		QVBoxLayout* TotalLayout = new QVBoxLayout();
 		TotalLayout->setContentsMargins(0, 0, 0, 0);
 		TotalLayout->setSpacing(5);
 		TotalLayout->addLayout(Gridlayout);
 		TotalLayout->addLayout(Hlayout1);
-		TotalLayout->addLayout(Hlayout2);
 		TotalLayout->addLayout(boolLayout);
 		TotalLayout->addLayout(SpacingHlayout);
 
 		this->setLayout(TotalLayout);
-		
 	}
 
 	void QCurveWidget::updateField()
@@ -272,10 +162,7 @@ namespace dyno
 	{
 		this->setField(f);
 		this->copySettingFromField();
-		if (isSquard)
-			this->setLabelSize(w, w, w, w);
-		else
-			this->setLabelSize(w, h, w, w);
+		this->setLabelSize(w, w, w, w);
 		this->setStyleSheet("background:rgba(110,115,100,1)");
 		this->setMouseTracking(true);
 	};
@@ -297,19 +184,19 @@ namespace dyno
 		//get data
 		if (mCoordArray.empty())
 		{
-			if (mField->getValue().Originalcoord.empty())		//If there is no data from the Widget in the field, it is initialized from the field
+			if (mField->getValue().getUserPoints().empty())		//If there is no data from the Widget in the field, it is initialized from the field
 			{
 
-				this->copyFromField(mField->getValue().mCoord, mReSortCoordArray);
+				this->copyFromField(mField->getValue().getUserPoints(), mReSortCoordArray);
 				mCoordArray.assign(mReSortCoordArray.begin(), mReSortCoordArray.end());
 				buildCoordToResortMap();
-				this->copyFromField(mField->getValue().myHandlePoint, mHandlePoints);
+				this->copyFromField(mField->getValue().getUserHandles(), mHandlePoints);
 			}
 			else		//use data from the Widget
 			{
-				this->copyFromField(mField->getValue().Originalcoord, mCoordArray);
+				this->copyFromField(mField->getValue().getUserPoints(), mCoordArray);
 				//this->copyFromField(field->getDataPtr()->OriginalHandlePoint, HandlePoints);
-				this->copyFromField(mField->getValue().OriginalHandlePoint, mHandlePoints);
+				this->copyFromField(mField->getValue().getUserHandles(), mHandlePoints);
 			}
 
 		}
@@ -937,38 +824,21 @@ namespace dyno
 		s.clearMyCoord();
 		for (auto it : mFloatCoord)
 		{
-			s.addFloatItemToCoord(it.x, it.y, s.mCoord);
+			s.addFloatItemToCoord(it.x, it.y, s.getUserPoints());
 		}
 
 		for (auto it : mHandleFloatCoord)
 		{
-			s.addFloatItemToCoord(it.x, it.y, s.myHandlePoint);
+			s.addFloatItemToCoord(it.x, it.y, s.getUserHandles());
 		}
 
-		for (auto it : mCoordArray)
-		{
-			s.addItemOriginalCoord(it.x, it.y);
-		}
-		for (auto it : mHandlePoints)
-		{
-			s.addItemHandlePoint(it.x, it.y);
-		}
+		s.getResample() = LineResample;
+		s.getSpacing() = spacing;
 
-		s.useBezierInterpolation = useBezier;
+		s.getClose() = curveClose;
 
-		s.resample = LineResample;
-		s.useSquard = isSquard;
-		s.Spacing = spacing;
-
-		s.NminX = NminX;
-		s.NmaxX = NmaxX;
-		s.mNewMinY = mNewMinY;
-		s.NmaxY = NmaxY;
-
-		s.curveClose = curveClose;
-
-		if (useBezier) { s.mInterpMode = Curve::Interpolation::Bezier; }
-		else { s.mInterpMode = Curve::Interpolation::Linear; }
+		if (useBezier) { s.getInterpMode() = Curve::Interpolation::Bezier; }
+		else { s.getInterpMode() = Curve::Interpolation::Linear; }
 
 		s.updateBezierCurve();
 		s.UpdateFieldFinalCoord();
@@ -977,14 +847,11 @@ namespace dyno
 
 	void QCurveLabel::copySettingFromField()
 	{
-		useBezier = mField->getValue().useBezierInterpolation;
-		LineResample = mField->getValue().resample;
-		spacing = mField->getValue().Spacing;
-		curveClose = mField->getValue().curveClose;
-		isSquard = mField->getValue().useSquard;
-		lockSize = mField->getValue().lockSize;
+		LineResample = mField->getValue().getResample();
+		spacing = mField->getValue().getSpacing();
+		curveClose = mField->getValue().getClose();
 
-		if (mField->getValue().mInterpMode == Canvas::Interpolation::Bezier) { InterpMode = Bezier; }
+		if (mField->getValue().getInterpMode() == Canvas::Interpolation::Bezier) { InterpMode = Bezier; }
 		else { InterpMode = Linear; }
 
 		useSort = false;

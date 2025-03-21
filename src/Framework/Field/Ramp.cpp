@@ -7,65 +7,38 @@ namespace dyno {
 
 	}
 
-	Ramp::Ramp(Direction dir)
-	{ 
-		Dirmode= dir;
-		useSquard = false;
-	}
-
 	Ramp::Ramp(const Ramp& ramp)
 	{
-		useSquard = false;
-		this->Dirmode = ramp.Dirmode;
-		//this->Bordermode = ramp.Bordermode;
-		this->mCoord = ramp.mCoord;
+
+		this->mUserCoord = ramp.mUserCoord;
 		this->FE_MyCoord = ramp.FE_MyCoord;
 		this->FE_HandleCoord = ramp.FE_HandleCoord;
 		this->mFinalCoord = ramp.mFinalCoord;
-		this->Originalcoord = ramp.Originalcoord;
-		this->OriginalHandlePoint = ramp.OriginalHandlePoint;
 
 		this->mBezierPoint = ramp.mBezierPoint;
 		this->myBezierPoint_H = ramp.myBezierPoint_H;
 		this->mResamplePoint = ramp.mResamplePoint;
-		this->myHandlePoint = ramp.myHandlePoint;
+		this->mUserHandle = ramp.mUserHandle;
 
 		this->mLengthArray = ramp.mLengthArray;
-		this->length_EndPoint_Map = ramp.length_EndPoint_Map;
+		this->mLength_EndPoint_Map = ramp.mLength_EndPoint_Map;
 
 		this->mInterpMode = ramp.mInterpMode;
 
-		this->remapRange[8] = ramp.mInterpMode;// "MinX","MinY","MaxX","MaxY"
+		this->mClose = ramp.mClose;
+		this->mResample = ramp.mResample;
 
-		this->lockSize = ramp.lockSize;
-		this->useBezierInterpolation = ramp.useBezierInterpolation;
-
-		this->useSquard = ramp.useSquard;
-		this->curveClose = ramp.curveClose;
-		this->resample = ramp.resample;
-
-		this->useColseButton = ramp.useColseButton;
-		this->useSquardButton = ramp.useSquardButton;
-
-		this->Spacing = ramp.Spacing;
-
-		this->NminX = ramp.NminX;
-		this->NmaxX = ramp.NmaxX;
-		this->mNewMinY = ramp.mNewMinY;
-		this->NmaxY = ramp.NmaxY;
-
-		this->segment = ramp.segment;
-		this->resampleResolution = ramp.resampleResolution;
-
-		this->xLess = ramp.xLess;
-		this->xGreater = ramp.xGreater;
-		this->yLess = ramp.yLess;
-		this->yGreater = ramp.yGreater;
+		this->mSpacing = ramp.mSpacing;
 
 	}
 
 	float Ramp::getCurveValueByX(float inputX)
 	{
+		float xLess = 1;
+		float xGreater = 0;
+		float yLess = 1;
+		float yGreater = 0;
+
 		if (mFinalCoord.size())
 		{
 			int l = mFinalCoord.size();
@@ -93,18 +66,14 @@ namespace dyno {
 	}
 
 
-
-
-
-
 	// C++ Bezier
 	void Ramp::updateBezierCurve()
 	{
 		Canvas::updateBezierCurve();
 
-		if (resample) 
+		if (mResample)
 		{
-			if (useBezierInterpolation)
+			if (mInterpMode == Canvas::Interpolation::Bezier)
 			{
 				updateResampleBezierCurve();
 				resamplePointFromLine(myBezierPoint_H);
@@ -117,56 +86,52 @@ namespace dyno {
 		}
 	}
 
-
-
 	void Ramp::updateResampleBezierCurve() 
 	{
-		float temp = segment;
-		segment = resampleResolution;
+
 		myBezierPoint_H.clear();
 
-		int n = mCoord.size();
-		int bn = myHandlePoint.size();
+		int n = mUserCoord.size();
+		int bn = mUserHandle.size();
 
 		if (bn != 2 * n)
 		{
-			rebuildHandlePoint(mCoord);
+			rebuildHandlePoint(mUserCoord);
 		}
 
 		for (int i = 0; i < n - 1; i++)
 		{
-			Coord2D p0 = mCoord[i];
-			Coord2D p1 = myHandlePoint[2 * i + 1];
-			Coord2D p2 = myHandlePoint[2 * (i + 1)];
-			Coord2D p3 = mCoord[i + 1];
+			Coord2D p0 = mUserCoord[i];
+			Coord2D p1 = mUserHandle[2 * i + 1];
+			Coord2D p2 = mUserHandle[2 * (i + 1)];
+			Coord2D p3 = mUserCoord[i + 1];
 			updateBezierPointToBezierSet(p0, p1, p2, p3, myBezierPoint_H);
 		}
-		if (curveClose && n >= 3)
+		if (mClose && n >= 3)
 		{
-			Coord2D p0 = mCoord[n - 1];
-			Coord2D p1 = myHandlePoint[bn - 1];
-			Coord2D p2 = myHandlePoint[0];
-			Coord2D p3 = mCoord[0];
+			Coord2D p0 = mUserCoord[n - 1];
+			Coord2D p1 = mUserHandle[bn - 1];
+			Coord2D p2 = mUserHandle[0];
+			Coord2D p3 = mUserCoord[0];
 			updateBezierPointToBezierSet(p0, p1, p2, p3, myBezierPoint_H);
 		}
-		if (curveClose)
+		if (mClose)
 		{
-			if (mCoord.size())
+			if (mUserCoord.size())
 			{
-				myBezierPoint_H.push_back(mCoord[0]);
+				myBezierPoint_H.push_back(mUserCoord[0]);
 			}
 		}
 		else
 		{
-			if (mCoord.size())
+			if (mUserCoord.size())
 			{
-				myBezierPoint_H.push_back(mCoord[mCoord.size() - 1]);
+				myBezierPoint_H.push_back(mUserCoord[mUserCoord.size() - 1]);
 			}
 		}
 
 		buildSegMent_Length_Map(myBezierPoint_H);
 
-		segment = temp;
 	}
 
 
@@ -189,20 +154,11 @@ namespace dyno {
 	}
 
 
-
-	//widget to field;
-
-
-
-
-
-
-
 	void Ramp::borderCloseResort() 
 	{
 
 		std::vector<Coord2D> tempHandle;
-		tempHandle.assign(myHandlePoint.begin(), myHandlePoint.end());
+		tempHandle.assign(mUserHandle.begin(), mUserHandle.end());
 		FE_HandleCoord.clear();
 		FE_MyCoord.clear();
 
@@ -213,23 +169,23 @@ namespace dyno {
 		Coord2D E1(-1, -1, -1);
 		Coord2D E2(-1, -1, -1);
 
-		for (int i = 0; i < mCoord.size(); i++)
+		for (int i = 0; i < mUserCoord.size(); i++)
 		{
-			if (mCoord[i].x == 0)
+			if (mUserCoord[i].x == 0)
 			{
-				Cfirst = mCoord[i];
+				Cfirst = mUserCoord[i];
 				F1 = tempHandle[2 * i];
 				F2 = tempHandle[2 * i + 1];
 			}
-			else if (mCoord[i].x == 1)
+			else if (mUserCoord[i].x == 1)
 			{
-				Cend = mCoord[i];
+				Cend = mUserCoord[i];
 				E1 = tempHandle[2 * i];
 				E2 = tempHandle[2 * i + 1];
 			}
 			else
 			{
-				FE_MyCoord.push_back(mCoord[i]);
+				FE_MyCoord.push_back(mUserCoord[i]);
 				FE_HandleCoord.push_back(tempHandle[2 * i]);
 				FE_HandleCoord.push_back(tempHandle[2 * i + 1]);
 			}
@@ -274,11 +230,11 @@ namespace dyno {
 
 		mFinalCoord.clear();
 
-		if (useBezierInterpolation)
+		if (mInterpMode == Canvas::Interpolation::Bezier)
 		{
-			if (resample) 
+			if (mResample)
 			{
-				if (mCoord.size() >= 2)
+				if (mUserCoord.size() >= 2)
 				{
 					updateBezierCurve();
 				}
@@ -289,12 +245,12 @@ namespace dyno {
 				mFinalCoord.assign(mBezierPoint.begin(), mBezierPoint.end());
 			}
 		}
-		else if ( !useBezierInterpolation)
+		else if (mInterpMode == Canvas::Interpolation::Linear)
 		{
 
-			if (resample) 
+			if (mResample)
 			{
-				if (mCoord.size() >= 2)
+				if (mUserCoord.size() >= 2)
 				{
 
 					updateResampleLinearLine();
@@ -303,17 +259,9 @@ namespace dyno {
 			}
 			else
 			{
-				mFinalCoord.assign(mCoord.begin(), mCoord.end());
+				mFinalCoord.assign(mUserCoord.begin(), mUserCoord.end());
 			}
 		}
-		
-
-		for (size_t i = 0; i < mFinalCoord.size(); i++)
-		{
-			mFinalCoord[i].x = (NmaxX - NminX) * mFinalCoord[i].x + NminX;
-			mFinalCoord[i].y = (NmaxY - mNewMinY) * mFinalCoord[i].y + mNewMinY;
-		}
-
 
 	}
 }
