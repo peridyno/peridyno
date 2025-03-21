@@ -569,11 +569,11 @@ namespace Qt
 		{
 			if (node->id() == n.id())
 			{
-				this->enableRendering(*node, true);
+				this->enableRendering(*node, false);
 			}
 			else
 			{
-				this->enableRendering(*node, false);
+				this->enableRendering(*node, true);
 			}
 		}
 
@@ -587,7 +587,7 @@ namespace Qt
 		auto nodes = this->allNodes();
 		for (auto node : nodes)
 		{
-			this->enableRendering(*node, true);
+			this->enableRendering(*node, false);
 		}
 
 		this->updateNodeGraphView();
@@ -602,11 +602,11 @@ namespace Qt
 		{
 			if (node->id() == n.id())
 			{
-				this->enablePhysics(*node, true);
+				this->enablePhysics(*node, false);
 			}
 			else
 			{
-				this->enablePhysics(*node, false);
+				this->enablePhysics(*node, true);
 			}
 		}
 
@@ -620,7 +620,7 @@ namespace Qt
 		auto nodes = this->allNodes();
 		for (auto node : nodes)
 		{
-			this->enablePhysics(*node, true);
+			this->enablePhysics(*node, false);
 		}
 
 		this->updateNodeGraphView();
