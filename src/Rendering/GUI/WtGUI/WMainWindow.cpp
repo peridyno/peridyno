@@ -297,7 +297,7 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 		painteContainer->setMargin(0);
 		//painteContainer->resize("100%", "100%");
 		mFlowWidget = painteContainer->addWidget(std::make_unique<WtFlowWidget>(mScene, this));
-		mFlowWidget->resize(viewportWidth * WIDTH_SCALE, viewportHeight * 0.5);
+		mFlowWidget->resize(viewportWidth * WIDTH_SCALE, viewportHeight * 0.4);
 		//mFlowWidget = panel0->setCentralWidget(std::make_unique<WtFlowWidget>(mScene, this));
 	}
 
