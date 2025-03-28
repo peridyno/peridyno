@@ -92,8 +92,6 @@ namespace Qt
 		//connect(this, &QtFlowScene::nodeHotKey2Checked, this, &QtNodeFlowScene::Key2_Signal);
 
 		connect(this, &QtFlowScene::nodeContextMenu, this, &QtNodeFlowScene::showContextMenu);
-
-
 	}
 
 	QtNodeFlowScene::~QtNodeFlowScene()
