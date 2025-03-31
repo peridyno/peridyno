@@ -424,6 +424,7 @@ namespace dyno
 	};
 
 
+
 	template<typename Real>
 	class PointJoint : public Joint<Real>
 	{

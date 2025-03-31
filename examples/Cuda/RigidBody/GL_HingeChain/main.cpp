@@ -33,9 +33,10 @@ std::shared_ptr<SceneGraph> creatBricks()
 	sphere.radius = scale * 2.5;
 	//auto sphereActor = rigid->addSphere(sphere, rigidBody, 0.001);
 	BoxInfo newbox, oldbox;
-	oldbox.center = scale * Vec3f(-2.0, 20, 0.5);
-	oldbox.halfLength = scale * Vec3f(0.05, 0.09, 0.02);
-	oldbox.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
+	oldbox.center = scale * Vec3f(-2.0, 2, 0.5);
+	oldbox.halfLength = Vec3f(0.1, 0.1, 0.1);
+	//oldbox.radius = 0.05;
+	//oldbox.rot = Quat1f(M_PI / 2, Vec3f(1, 0, 0));
 	rigidBody.linearVelocity = Vec3f(0, 0, 0);
 	auto oldBoxActor = rigid->addBox(oldbox, rigidBody);
 	rigidBody.linearVelocity = Vec3f(0, 0, 0);
@@ -45,22 +46,17 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 	for (int i = 0; i < 20; i++)
 	{
-		newbox.center = oldbox.center + scale * Vec3f(0.2, 0, 0);
+		//newbox.center = oldbox.center + scale * Vec3f(0.2, 0, 0);
 		newbox.halfLength = oldbox.halfLength;
-		newbox.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
+		//newbox.rot = Quat1f(M_PI / 2, Vec3f(1, 0, 0));
+		//newbox.radius = oldbox.radius; 
 		auto newBoxActor = rigid->addBox(newbox, rigidBody);
 		auto& hingeJoint = rigid->createHingeJoint(oldBoxActor, newBoxActor);
 		hingeJoint.setAnchorPoint((oldbox.center + newbox.center) / 2);
 		hingeJoint.setAxis(Vec3f(0, 0, 1));
-		hingeJoint.setRange(-M_PI, M_PI);
+		hingeJoint.setRange(-M_PI/2, M_PI/2);
 		oldbox = newbox;
 		oldBoxActor = newBoxActor;
-
-		if (i == 19)
-		{
-			auto& pointJoint = rigid->createPointJoint(newBoxActor);
-			pointJoint.setAnchorPoint(newbox.center);
-		}
 	}
 
 	
