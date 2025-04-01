@@ -105,12 +105,12 @@ namespace dyno
 			//bindShapetoActor
 			for (auto it : box_Id)
 			{
-				this->bind(actors[it], Pair<uint, uint>(it, i));
+				this->bindShape(actors[it], Pair<uint, uint>(it, i));
 			}
 			//bindShapetoActor
 			for (auto it : Wheel_Id)
 			{
-				this->bind(actors[it], Pair<uint, uint>(it, i));
+				this->bindShape(actors[it], Pair<uint, uint>(it, i));
 			}
 
 			rigidbody.offset = Vec3f(0);
@@ -231,12 +231,12 @@ namespace dyno
 			//bindShapetoActor
 			for (auto it : box_Id)
 			{
-				this->bind(actors[it], Pair<uint, uint>(it, i));
+				this->bindShape(actors[it], Pair<uint, uint>(it, i));
 			}
 			//bindShapetoActor
 			for (auto it : Wheel_Id)
 			{
-				this->bind(actors[it], Pair<uint, uint>(it, i));
+				this->bindShape(actors[it], Pair<uint, uint>(it, i));
 			}
 
 			rigidbody.offset = Vec3f(0);
@@ -334,7 +334,7 @@ namespace dyno
 
 				float r = (up[1] - down[1]) / 2;
 				this->bindCapsule(actor, capsule, 1000);
-				this->bind(actor, Pair<uint, uint>(it, i));
+				this->bindShape(actor, Pair<uint, uint>(it, i));
 
 			}
 
@@ -379,7 +379,7 @@ namespace dyno
 					this->bindCapsule(actor, capsule, 100000);
 				}
 
-				this->bind(actor, Pair<uint, uint>(cid, i));
+				this->bindShape(actor, Pair<uint, uint>(cid, i));
 
 
 			}
@@ -412,7 +412,7 @@ namespace dyno
 				capsule.center = Vec3f(-0.3, -0.2, 0.5);
 				this->bindCapsule(actor, capsule);
 
-				this->bind(actor, Pair<uint, uint>(head, i));
+				this->bindShape(actor, Pair<uint, uint>(head, i));
 			}
 			//Body
 			int body = 19;
@@ -432,7 +432,7 @@ namespace dyno
 				box.halfLength = (up - down) / Vec3f(3, 2, 3);
 
 				this->bindBox(actor, box);
-				this->bind(actor, Pair<uint, uint>(body, i));
+				this->bindShape(actor, Pair<uint, uint>(body, i));
 			}
 #endif // FULLBODY
 
@@ -470,7 +470,7 @@ namespace dyno
 				capsule.center = Vec3f(-(up[0] - down[0]) / 2, 0, 0);
 				this->bindSphere(actor, capsule, 1000000);
 
-				this->bind(actor, Pair<uint, uint>(cid, i));
+				this->bindShape(actor, Pair<uint, uint>(cid, i));
 			}
 
 #ifdef FULLBODY
@@ -650,12 +650,12 @@ namespace dyno
 			//bindShapetoActor
 			for (auto it : box_Id)
 			{
-				this->bind(actors[it], Pair<uint, uint>(it, i));
+				this->bindShape(actors[it], Pair<uint, uint>(it, i));
 			}
 			//bindShapetoActor
 			for (auto it : Wheel_Id)
 			{
-				this->bind(actors[it], Pair<uint, uint>(it, i));
+				this->bindShape(actors[it], Pair<uint, uint>(it, i));
 			}
 
 			rigidbody.offset = Vec3f(0);
@@ -779,12 +779,12 @@ namespace dyno
 			//bindShapetoActor
 			for (auto it : box_Id)
 			{
-				this->bind(actors[it], Pair<uint, uint>(it, i));
+				this->bindShape(actors[it], Pair<uint, uint>(it, i));
 			}
 			//bindShapetoActor
 			for (auto it : Wheel_Id)
 			{
-				this->bind(actors[it], Pair<uint, uint>(it, i));
+				this->bindShape(actors[it], Pair<uint, uint>(it, i));
 			}
 
 			rigidbody.offset = Vec3f(0);

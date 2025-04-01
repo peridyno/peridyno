@@ -288,7 +288,7 @@ namespace dyno
 				if (shapeId != -1 && Actors[i] != NULL)
 				{
 					////bindShapetoActor
-					this->bind(Actors[i], Pair<uint, uint>(shapeId, j));
+					this->bindShape(Actors[i], Pair<uint, uint>(shapeId, j));
 
 				}
 			}

@@ -67,7 +67,7 @@ std::shared_ptr<SceneGraph> creatCar()
 			capsule.halfLength = 0.1495;
 			rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation();
 			Actors[it] = jeep->addCapsule(capsule, rigidbody, 100);
-			jeep->bind(Actors[it], Pair<uint, uint>(it, 0));
+			jeep->bindShape(Actors[it], Pair<uint, uint>(it, 0));
 		}
 		else
 		{
@@ -79,7 +79,7 @@ std::shared_ptr<SceneGraph> creatCar()
 			box.halfLength = Vec3f(abs(tmp.x), abs(tmp.y), abs(tmp.z));
 			rigidbody.position = texMesh->shapes()[it]->boundingTransform.translation();
 			Actors[it] = jeep->addBox(box, rigidbody, 100);
-			jeep->bind(Actors[it], Pair<uint, uint>(it, 0));
+			jeep->bindShape(Actors[it], Pair<uint, uint>(it, 0));
 		}
 	}
 
@@ -130,7 +130,7 @@ std::shared_ptr<SceneGraph> creatCar()
 		}
 
 		
-		jeep->bind(Actors[it], Pair<uint, uint>(it, 0));
+		jeep->bindShape(Actors[it], Pair<uint, uint>(it, 0));
 	}
 
 	for (auto it : bridge_id)

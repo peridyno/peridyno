@@ -138,7 +138,7 @@ void declare_vechicle(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ArticulatedBody") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("bind", &Class::bind)
+		.def("bind", &Class::bindShape)
 		.def("state_texture_mesh", &Class::stateTextureMesh, py::return_value_policy::reference)
 		.def("var_file_path", &Class::varFilePath, py::return_value_policy::reference)
 		/*		.def("state_binding", &Class::stateBinding, py::return_value_policy::reference)
