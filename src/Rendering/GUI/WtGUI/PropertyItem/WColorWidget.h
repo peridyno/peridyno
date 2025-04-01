@@ -5,7 +5,7 @@
 
 #include <WParameterDataNode.h>
 
-#include "Color.h"
+#include "Field/Color.h"
 
 class WColorWidget : public Wt::WContainerWidget
 {

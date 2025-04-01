@@ -130,8 +130,8 @@ private:
 		// DualParticle
 		samples.push_back(new DualParticle_4Box);
 		samples.push_back(new DualParticle_CollidingFish);
-		//samples.push_back(new DualParticle_Fountain);
-		//samples.push_back(new DualParticle_Jets);
+		samples.push_back(new DualParticle_Fountain);
+		samples.push_back(new DualParticle_Jets);
 		samples.push_back(new Qt_DualParticle_FishAndBall);
 
 		// HeightField

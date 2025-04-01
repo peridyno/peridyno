@@ -9,7 +9,7 @@
 #include <Wt/WLogger.h>
 
 #include <FBase.h>
-#include "FilePath.h"
+#include "Field/FilePath.h"
 
 #include "WtGUI/PropertyItem/WRealFieldWidget.h"
 #include "WtGUI/PropertyItem/WVector3FieldWidget.h"
