@@ -39,14 +39,22 @@ void createTwoBoxes(std::shared_ptr<RigidBodySystem<DataType3f>> rigid)
 
 void createTwoTets(std::shared_ptr<RigidBodySystem<DataType3f>> rigid)
 {
-	RigidBodyInfo rigidBody;
-	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
-	
 	TetInfo tet0;
 	tet0.v[0] = Vec3f(0.45f, 0.3f, 0.45f);
 	tet0.v[1] = Vec3f(0.45f, 0.55f, 0.45f);
 	tet0.v[2] = Vec3f(0.7f, 0.3f, 0.45f);
 	tet0.v[3] = Vec3f(0.45f, 0.3f, 0.7f);
+	Vec3f center = (tet0.v[0] + tet0.v[1] + tet0.v[2] + tet0.v[3]) / 4;
+
+	tet0.v[0] -= center;
+	tet0.v[1] -= center;
+	tet0.v[2] -= center;
+	tet0.v[3] -= center;
+
+	RigidBodyInfo rigidBody;
+	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
+	rigidBody.position = center;
+
 	rigid->addTet(tet0, rigidBody);
 
 	TetInfo tet1;
@@ -54,6 +62,14 @@ void createTwoTets(std::shared_ptr<RigidBodySystem<DataType3f>> rigid)
 	tet1.v[1] = Vec3f(0.45f, 0.25f, 0.45f);
 	tet1.v[2] = Vec3f(0.7f, 0.0f, 0.45f);
 	tet1.v[3] = Vec3f(0.45f, 0.0f, 0.7f);
+	Vec3f center1 = (tet1.v[0] + tet1.v[1] + tet1.v[2] + tet1.v[3]) / 4;
+
+	tet1.v[0] -= center1;
+	tet1.v[1] -= center1;
+	tet1.v[2] -= center1;
+	tet1.v[3] -= center1;
+
+	rigidBody.position = center1;
 	rigid->addTet(tet1, rigidBody);
 }
 
@@ -71,6 +87,15 @@ void createTetBox(std::shared_ptr<RigidBodySystem<DataType3f>> rigid) {
 	tet0.v[1] = Vec3f(1.25f, 0.5f, 0.45f);
 	tet0.v[2] = Vec3f(1.5f, 0.25f, 0.45f);
 	tet0.v[3] = Vec3f(1.25f, 0.25f, 0.7f);
+
+	Vec3f center = (tet0.v[0] + tet0.v[1] + tet0.v[2] + tet0.v[3]) / 4;
+	rigidBody.position = center;
+
+	tet0.v[0] -= center;
+	tet0.v[1] -= center;
+	tet0.v[2] -= center;
+	tet0.v[3] -= center;
+
 	rigid->addTet(tet0, rigidBody);
 }
 
@@ -142,6 +167,15 @@ void createCapsuleTet(std::shared_ptr<RigidBodySystem<DataType3f>> rigid)
 	tet0.v[1] = Vec3f(0.45f, 0.25f, -0.45f);
 	tet0.v[2] = Vec3f(0.7f, 0.0f, -0.45f);
 	tet0.v[3] = Vec3f(0.45f, 0.0f, -0.2f);
+
+	Vec3f center = (tet0.v[0] + tet0.v[1] + tet0.v[2] + tet0.v[3]) / 4;
+	rigidBody.position = center;
+
+	tet0.v[0] -= center;
+	tet0.v[1] -= center;
+	tet0.v[2] -= center;
+	tet0.v[3] -= center;
+
 	rigid->addTet(tet0, rigidBody);
 
 	CapsuleInfo capsule;
@@ -164,6 +198,15 @@ void createTetCapsule(std::shared_ptr<RigidBodySystem<DataType3f>> rigid)
 	tet0.v[1] = Vec3f(1.25f, 0.55f, -0.45f);
 	tet0.v[2] = Vec3f(1.5f, 0.3f, -0.45f);
 	tet0.v[3] = Vec3f(1.25f, 0.3f, -0.2f);
+
+	Vec3f center = (tet0.v[0] + tet0.v[1] + tet0.v[2] + tet0.v[3]) / 4;
+	rigidBody.position = center;
+
+	tet0.v[0] -= center;
+	tet0.v[1] -= center;
+	tet0.v[2] -= center;
+	tet0.v[3] -= center;
+
 	rigid->addTet(tet0, rigidBody);
 
 	CapsuleInfo capsule;
@@ -224,6 +267,15 @@ void createSphereTet(std::shared_ptr<RigidBodySystem<DataType3f>> rigid)
 	tet.v[1] = Vec3f(0.45f, 0.55f, 1.59);
 	tet.v[2] = Vec3f(0.7f, 0.3f, 1.59);
 	tet.v[3] = Vec3f(0.45f, 0.3f, 1.89);
+
+	Vec3f center = (tet.v[0] + tet.v[1] + tet.v[2] + tet.v[3]) / 4;
+	rigidBody.position = center;
+
+	tet.v[0] -= center;
+	tet.v[1] -= center;
+	tet.v[2] -= center;
+	tet.v[3] -= center;
+
 	rigid->addTet(tet, rigidBody);
 
 	SphereInfo sphere;

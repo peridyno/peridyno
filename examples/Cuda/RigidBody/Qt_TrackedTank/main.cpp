@@ -11,12 +11,8 @@
 #include <GLWireframeVisualModule.h>
 
 #include <Mapping/DiscreteElementsToTriangleSet.h>
-#include <Mapping/ContactsToEdgeSet.h>
-#include <Mapping/ContactsToPointSet.h>
 
 #include <BasicShapes/PlaneModel.h>
-
-#include <Collision/NeighborElementQuery.h>
 
 #include "RigidBody/Vehicle.h"
 

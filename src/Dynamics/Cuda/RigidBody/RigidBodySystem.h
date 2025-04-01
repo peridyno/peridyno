@@ -94,6 +94,11 @@ namespace dyno
 			const CapsuleInfo& capsule,
 			const Real density = Real(100));
 
+		void bindTet(
+			const std::shared_ptr<PdActor> actor,
+			const TetInfo& tet,
+			const Real density = Real(100));
+
 		BallAndSocketJoint& createBallAndSocketJoint(
 			std::shared_ptr<PdActor> actor1,
 			std::shared_ptr<PdActor> actor2)

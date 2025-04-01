@@ -110,6 +110,12 @@ std::shared_ptr<SceneGraph> creatBricks()
 	tet.v[1] = Vec3f(0.5f, 1.2f, 0.5f);
 	tet.v[2] = Vec3f(0.6f, 1.1f, 0.5f);
 	tet.v[3] = Vec3f(0.5f, 1.1f, 0.6f);
+
+	rigidTet.position = (tet.v[0] + tet.v[1] + tet.v[2] + tet.v[3]) / 4;
+	tet.v[0] -= rigidTet.position;
+	tet.v[1] -= rigidTet.position;
+	tet.v[2] -= rigidTet.position;
+	tet.v[3] -= rigidTet.position;
 	rigid->addTet(tet, rigidTet);
 
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
