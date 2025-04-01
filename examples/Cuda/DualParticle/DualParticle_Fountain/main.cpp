@@ -29,6 +29,7 @@ std::shared_ptr<SceneGraph> createScene()
 	scn->setLowerBound(Vec3f(-3.0, -3.0, -3.0));
 
 	auto emitter = scn->addNode(std::make_shared<PoissonEmitter<DataType3f>>());
+	emitter->varSpacing()->setValue(0.0f);
 	emitter->varRotation()->setValue(Vec3f(0.0f, 0.0f, -180.0f));
 	emitter->varSamplingDistance()->setValue(0.008f);
 	emitter->varEmitterShape()->getDataPtr()->setCurrentKey(1);

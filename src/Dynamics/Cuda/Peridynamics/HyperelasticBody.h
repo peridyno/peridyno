@@ -7,7 +7,7 @@
 
 #include "Bond.h"
 #include "EnergyDensityFunction.h"
-#include "FilePath.h"
+#include "Field/FilePath.h"
 
 namespace dyno
 {

@@ -2,7 +2,7 @@
 #include "Node.h"
 #include "Topology/TriangleSet.h"
 #include "Field.h"
-#include "FilePath.h"
+#include "Field/FilePath.h"
 #include "GLPointVisualModule.h"
 
 namespace dyno

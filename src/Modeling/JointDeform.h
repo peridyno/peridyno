@@ -24,7 +24,7 @@
 #include "GLPointVisualModule.h"
 #include "GLWireframeVisualModule.h"
 
-#include "FilePath.h"
+#include "Field/FilePath.h"
 #include "SkinInfo.h"
 #include "JointInfo.h"
 

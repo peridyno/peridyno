@@ -30,6 +30,8 @@ namespace dyno
 
 		std::string getNodeType() override { return "Height Fields"; }
 
+		DEF_VAR(Real, WaterLevel, 0, "");
+
 	public:
 		DEF_NODE_PORT(OceanPatch<TDataType>, OceanPatch, "Ocean Patch");
 

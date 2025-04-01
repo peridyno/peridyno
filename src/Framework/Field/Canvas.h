@@ -12,13 +12,6 @@ namespace dyno {
 	{
 	public:
 
-		enum Direction
-		{
-			x = 0,
-			y = 1,
-			count = 2,
-		};
-
 		enum Interpolation
 		{
 			Linear = 0,
@@ -105,30 +98,16 @@ namespace dyno {
 		void clearMyCoord();
 
 		//Comands
-		void setCurveClose(bool s) { this->curveClose = s; UpdateFieldFinalCoord(); };
+		void setCurveClose(bool s) { this->mClose = s; UpdateFieldFinalCoord(); };
 		void setInterpMode(bool useBezier);
-		void setResample(bool s) { this->resample = s; UpdateFieldFinalCoord(); };
-		void setUseSquard(bool s) { useSquard = s; };
+		void setResample(bool s) { this->mResample = s; UpdateFieldFinalCoord(); };
+		virtual bool isSquard(){ return true; };
 		void useBezier();
 		void useLinear();
-		void setSpacing(double s) { this->Spacing = s; UpdateFieldFinalCoord(); };
-
-		//
-		void remapX(double minX, double maxX) { NminX = minX; NmaxX = maxX; UpdateFieldFinalCoord(); }
-		void remapY(double minY, double maxY) { mNewMinY = minY; NmaxY = maxY; UpdateFieldFinalCoord(); }
-		void remapXY(double minX, double maxX, double minY, double maxY) { NminX = minX; NmaxX = maxX; mNewMinY = minY; NmaxY = maxY; UpdateFieldFinalCoord(); }
-		
-		void setRange_MinX(float min, float max) { remapRange[0] = min; remapRange[1] = max; }// "MinX", "MinY", "MaxX", "MaxY"
-		void setRange_MaxX(float min, float max) { remapRange[4] = min; remapRange[5] = max; }
-		void setRange_MinY(float min, float max) { remapRange[2] = min; remapRange[3] = max; }
-		void setRange_MaxY(float min, float max) { remapRange[6] = min; remapRange[7] = max; }
-		void setRange(float min, float max) { setRange_MinX(min, max); setRange_MaxX(min, max); setRange_MinY(min, max); setRange_MaxY(min, max); };
-
-
+		void setSpacing(double s) { this->mSpacing = s; UpdateFieldFinalCoord(); };
 
 		//************** Widget Interface **************//
-		void addItemOriginalCoord(int x, int y);
-		void addItemHandlePoint(int x, int y);
+
 		virtual void updateBezierCurve();
 		void updateBezierPointToBezierSet(Coord2D p0, Coord2D p1, Coord2D p2, Coord2D p3, std::vector<Coord2D>& bezierSet);
 
@@ -139,6 +118,7 @@ namespace dyno {
 		std::vector<Coord2D> getPoints() { return mFinalCoord; }
 		unsigned getPointSize() { return this->mFinalCoord.size(); }
 
+		Canvas::Interpolation& getInterpMode() { return mInterpMode; }
 
 		virtual void UpdateFieldFinalCoord() {};
 
@@ -220,61 +200,35 @@ namespace dyno {
 			return;
 		}
 
+		std::vector<Coord2D>& getUserPoints() { return mUserCoord; }
+		std::vector<Coord2D>& getUserHandles() {return mUserHandle;}
 
-		void setVarByStr(std::string Str, Direction& value)
-		{
-			if (std::isdigit(Str[0]))
-			{
-				value = Direction(std::stoi(Str));
-			}
-			return;
-		}
+		bool& getResample() { return mResample; }
+		bool& getClose() { return mClose; }
+		float& getSpacing() { return mSpacing; }
 
 	protected:
 		void rebuildHandlePoint(std::vector<Coord2D> coordSet);
 		void buildSegMent_Length_Map(std::vector<Coord2D> BezierPtSet);
 
-		//IO
-		
-
-
-	public:
-		Canvas::Interpolation mInterpMode = Linear;
-		std::vector<Coord2D> mCoord;
-		std::vector<Coord2D> mBezierPoint;
-		std::vector<Coord2D> mFinalCoord;
-		std::vector<Coord2D> mResamplePoint;
-		std::vector<double> mLengthArray;
-		std::vector<Coord2D> myHandlePoint;
-		std::string InterpStrings[2] = { "Linear","Bezier" };
-		std::vector<OriginalCoord> Originalcoord;//qt Point Coord
-		std::vector<OriginalCoord> OriginalHandlePoint;//qt HandlePoint Coord
-
-		float remapRange[8] = { -3,3,-3,3,-3,3,-3,3 };// "MinX","MinY","MaxX","MaxY"
-
-		double NminX = 0;
-		double NmaxX = 1;
-		double mNewMinY = 0;
-		double NmaxY = 1;
-
-		bool lockSize = false;
-		bool useBezierInterpolation = false;
-		bool resample = true;
-		bool curveClose = false;
-		bool useColseButton = true;
-		bool useSquard = true;
-		bool useSquardButton = true;
-		float Spacing = 5;
-		float segment = 10;
-		float resampleResolution = 20;
-
-		std::map<float, EndPoint> length_EndPoint_Map;
 
 
 
 	protected:
 
+		Canvas::Interpolation mInterpMode = Linear;
+		float mSpacing = 5;
+		bool mResample = true;
+		bool mClose = false;
+		std::vector<Coord2D> mUserCoord;
+		std::vector<Coord2D> mUserHandle;
 
+		//
+		std::vector<Coord2D> mBezierPoint;
+		std::vector<Coord2D> mFinalCoord;
+		std::vector<Coord2D> mResamplePoint;
+		std::map<float, EndPoint> mLength_EndPoint_Map;
+		std::vector<double> mLengthArray;
 	};
 
 }

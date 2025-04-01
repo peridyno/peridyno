@@ -20,8 +20,8 @@
 #include "Topology/TriangleSet.h"
 #include "Topology/PolygonSet.h"
 #include "Topology/TextureMesh.h"
-#include "Color.h"
-#include "FilePath.h"
+#include "Field/Color.h"
+#include "Field/FilePath.h"
 
 
 namespace dyno

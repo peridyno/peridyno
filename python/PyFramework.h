@@ -45,8 +45,8 @@
 #include "SceneGraph.h"
 #include "Log.h"
 
-#include "Color.h"
-#include "FilePath.h"
+#include "Field/Color.h"
+#include "Field/FilePath.h"
 
 #include "Auxiliary/DataSource.h"
 #include "Collision/CollisionData.h"

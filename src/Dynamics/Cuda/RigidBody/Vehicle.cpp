@@ -21,7 +21,7 @@ namespace dyno
 	//Jeep
 	IMPLEMENT_TCLASS(Jeep, TDataType)
 
-	template<typename TDataType>
+		template<typename TDataType>
 	Jeep<TDataType>::Jeep() :
 		ArticulatedBody<TDataType>()
 	{
@@ -146,6 +146,15 @@ namespace dyno
 		auto driver = std::make_shared<CarDriver<DataType3f>>();
 		this->stateTopology()->connect(driver->inTopology());
 		this->animationPipeline()->pushModule(driver);
+
+		auto instance = std::make_shared<InstanceTransform<DataType3f>>();
+
+		this->stateCenter()->connect(instance->inCenter());
+		this->stateRotationMatrix()->connect(instance->inRotationMatrix());
+		this->stateBindingPair()->connect(instance->inBindingPair());
+		this->stateBindingTag()->connect(instance->inBindingTag());
+
+		this->animationPipeline()->pushModule(instance);
 	}
 
 	template<typename TDataType>
@@ -256,7 +265,7 @@ namespace dyno
 	//TrackedTank
 	IMPLEMENT_TCLASS(TrackedTank, TDataType)
 
-	template<typename TDataType>
+		template<typename TDataType>
 	TrackedTank<TDataType>::TrackedTank() :
 		ArticulatedBody<TDataType>()
 	{
@@ -307,14 +316,14 @@ namespace dyno
 			//wheel
 			std::vector <int> Wheel_Id = { 1,2,3,4,6,7,8,10,11,12,13,15,16,17 };
 			//Capsule
-			for (auto it : Wheel_Id) 
+			for (auto it : Wheel_Id)
 			{
 				auto up = texMesh->shapes()[it]->boundingBox.v1;
 				auto down = texMesh->shapes()[it]->boundingBox.v0;
 
 				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
 				rigidbody.angle = Quat1f(instances[i].rotation());
-				rigidbody.motionType = BodyType::Static;
+				rigidbody.motionType = BodyType::Dynamic;
 				auto actor = this->createRigidBody(rigidbody);
 				actors[it] = actor;
 
@@ -324,14 +333,14 @@ namespace dyno
 				capsule.halfLength = (up[2] - down[2]) / 2;
 
 				float r = (up[1] - down[1]) / 2;
-				this->bindCapsule(actor, capsule);		
+				this->bindCapsule(actor, capsule, 1000);
 				this->bind(actor, Pair<uint, uint>(it, i));
-				
+
 			}
-			
+
 
 			//Gear
-			std::vector<int> gear = {0,5,9,14};
+			std::vector<int> gear = { 0,5,9,14 };
 			for (size_t c = 0; c < 4; c++)
 			{
 				int cid = gear[c];
@@ -341,21 +350,21 @@ namespace dyno
 				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[cid]->boundingTransform.translation()) + instances[i].translation();
 				rigidbody.angle = Quat1f(instances[i].rotation());
 
-				rigidbody.motionType = BodyType::Static;
+				rigidbody.motionType = BodyType::Dynamic;
 				auto actor = this->createRigidBody(rigidbody);
 				actors[cid] = actor;
 
 				for (uint sec = 0; sec < 14; sec++)
 				{
 					CapsuleInfo capsule;
-					capsule.radius = 0.03;
+					capsule.radius = 0.015;
 					capsule.halfLength = (up[1] - down[1]) / 2;
-					Vec3f offset = sec <=6 ? Vec3f(-0.1,0,0): Vec3f(0.1, 0, 0);
+					Vec3f offset = sec <= 6 ? Vec3f(-0.1, 0, 0) : Vec3f(0.1, 0, 0);
 					float theta = sec * M_PI / 7;
 
-					capsule.rot = Quat1f(sec * M_PI / 7, Vec3f(1, 0, 0));
+					capsule.rot = Quat1f(sec * M_PI / 7 + M_PI / 14, Vec3f(1, 0, 0));
 					capsule.center = offset;
-					this->bindCapsule(actor, capsule);
+					this->bindCapsule(actor, capsule, 100000);
 
 					//row
 					float r = (up[1] - down[1]) / 3;
@@ -367,14 +376,14 @@ namespace dyno
 					capsule.radius = 0.05f;
 					capsule.halfLength = (up[0] - down[0]) / 2;
 					capsule.center = Vec3f(0, y, z);
-					this->bindCapsule(actor, capsule);
+					this->bindCapsule(actor, capsule, 100000);
 				}
 
 				this->bind(actor, Pair<uint, uint>(cid, i));
 
 
 			}
-			
+
 			//Gun
 			int head = 18;
 			{
@@ -384,13 +393,13 @@ namespace dyno
 				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[head]->boundingTransform.translation()) + instances[i].translation();
 				rigidbody.angle = Quat1f(instances[i].rotation());
 
-				rigidbody.motionType = BodyType::Static;
+				rigidbody.motionType = BodyType::Dynamic;
 				auto actor = this->createRigidBody(rigidbody);
 				actors[head] = actor;
 
 				BoxInfo box;
-				box.halfLength = Vec3f(0.8,0.4,1.2);
-				box.center = Vec3f(0,-0.2,-1);
+				box.halfLength = Vec3f(0.8, 0.4, 1.2);
+				box.center = Vec3f(0, -0.2, -1);
 
 				this->bindBox(actor, box);
 
@@ -398,7 +407,7 @@ namespace dyno
 				capsule.rot = Quat1f(M_PI / 2, Vec3f(1, 0, 0));
 				capsule.radius = 0.1f;
 				capsule.halfLength = (up[2] - down[2]) / 3;
-				capsule.center = Vec3f(0.3,-0.2,0.5);
+				capsule.center = Vec3f(0.3, -0.2, 0.5);
 				this->bindCapsule(actor, capsule);
 				capsule.center = Vec3f(-0.3, -0.2, 0.5);
 				this->bindCapsule(actor, capsule);
@@ -414,13 +423,13 @@ namespace dyno
 				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[body]->boundingTransform.translation()) + instances[i].translation();
 				rigidbody.angle = Quat1f(instances[i].rotation());
 
-				rigidbody.motionType = BodyType::Static;
+				rigidbody.motionType = BodyType::Dynamic;
 				auto actor = this->createRigidBody(rigidbody);
 				actors[body] = actor;
 
 				BoxInfo box;
 				box.rot = Quat1f(0, Vec3f(0, 0, 1));
-				box.halfLength = (up - down) / Vec3f(3,2,3);
+				box.halfLength = (up - down) / Vec3f(3, 2, 3);
 
 				this->bindBox(actor, box);
 				this->bind(actor, Pair<uint, uint>(body, i));
@@ -434,25 +443,32 @@ namespace dyno
 			{
 				auto up = texMesh->shapes()[cid]->boundingBox.v1;
 				auto down = texMesh->shapes()[cid]->boundingBox.v0;
-				
+
 				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[cid]->boundingTransform.translation()) + instances[i].translation();
 				rigidbody.angle = Quat1f(instances[i].rotation());
 
-				rigidbody.motionType = BodyType::Static;
+				rigidbody.motionType = BodyType::Dynamic;
+				rigidbody.bodyId = i * 2 + 1;
 				auto actor = this->createRigidBody(rigidbody);
 				actors[cid] = actor;
-				if(cid<90)
+				if (cid < 90)
 					caterpillarTrack_L.push_back(cid);
 				else
 					caterpillarTrack_R.push_back(cid);
 
 
-				CapsuleInfo capsule;
+				SphereInfo capsule;
 				capsule.rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
 				capsule.radius = 0.05;
-				capsule.halfLength = (up[0] - down[0]) / 2;
+				if(cid < 90)
+					capsule.center = Vec3f((up[0] - down[0]) / 2 - 0.05, 0, 0);
+				else
+					capsule.center = Vec3f((up[0] - down[0]) / 2 + 0.05, 0, 0);
+				//capsule.halfLength = (up[0] - down[0]) / 2;
 
-				this->bindCapsule(actor, capsule);
+				this->bindSphere(actor, capsule, 1000000);
+				capsule.center = Vec3f(-(up[0] - down[0]) / 2, 0, 0);
+				this->bindSphere(actor, capsule, 1000000);
 
 				this->bind(actor, Pair<uint, uint>(cid, i));
 			}
@@ -465,7 +481,7 @@ namespace dyno
 			{
 				auto& joint = this->createHingeJoint(actors[it], actors[body]);
 				joint.setAnchorPoint(actors[it]->center);
-				joint.setMoter(wheel_velocity);
+				//joint.setMoter(wheel_velocity);
 				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(1, 0, 0)));
 			}
 
@@ -502,7 +518,7 @@ namespace dyno
 					edges.push_back(TopologyModule::Edge(k, k + 1));
 				else
 					edges.push_back(TopologyModule::Edge(k, 0));
-				
+
 
 			}
 			auto edgeOffset = points.size();
@@ -540,7 +556,7 @@ namespace dyno
 	//UAV
 	IMPLEMENT_TCLASS(UAV, TDataType)
 
-	template<typename TDataType>
+		template<typename TDataType>
 	UAV<TDataType>::UAV() :
 		ArticulatedBody<TDataType>()
 	{
@@ -588,7 +604,7 @@ namespace dyno
 				auto down = texMesh->shapes()[it]->boundingBox.v0;
 
 				wheels[it].center = Vec3f(0.0f);
-				
+
 				auto rot = it == 0 || it == 3 ? Vec3f(90, 45, 0) : Vec3f(90, -45, 0);
 
 				Quat<Real> q =
@@ -622,7 +638,7 @@ namespace dyno
 
 				boxs[it].center = Vec3f(0.0f);
 
-				boxs[it].halfLength = (up - down) / 2 ;
+				boxs[it].halfLength = (up - down) / 2;
 
 				rigidbody.offset = Vec3f(0.0f, 0.0f, 0.0f);
 				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
@@ -644,7 +660,7 @@ namespace dyno
 
 			rigidbody.offset = Vec3f(0);
 
-			 
+
 
 			//wheel to Body
 			for (auto it : Wheel_Id)
@@ -669,7 +685,7 @@ namespace dyno
 	//UUV
 	IMPLEMENT_TCLASS(UUV, TDataType)
 
-	template<typename TDataType>
+		template<typename TDataType>
 	UUV<TDataType>::UUV() :
 		ArticulatedBody<TDataType>()
 	{

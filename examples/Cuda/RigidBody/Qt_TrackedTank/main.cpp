@@ -32,8 +32,8 @@ std::shared_ptr<SceneGraph> createSceneGraph()
 	auto tank = scn->addNode(std::make_shared<TrackedTank<DataType3f>>());
 
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
-	plane->varLengthX()->setValue(50);
-	plane->varLengthZ()->setValue(50);
+	plane->varLengthX()->setValue(500);
+	plane->varLengthZ()->setValue(500);
 	plane->varSegmentX()->setValue(10);
 	plane->varSegmentZ()->setValue(10);
 

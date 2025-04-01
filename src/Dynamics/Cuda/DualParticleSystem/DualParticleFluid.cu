@@ -48,7 +48,7 @@ namespace dyno
 		smoothingLength->varValue()->setValue(Real(0.012));
 
 		auto samplingDistance = std::make_shared<FloatingNumber<TDataType>>();
-		this->animationPipeline()->pushModule(smoothingLength);
+		this->animationPipeline()->pushModule(samplingDistance);
 		samplingDistance->varValue()->setValue(Real(0.005));
 
 		if (key == EVirtualParticleSamplingStrategy::SpatiallyAdaptiveStrategy)
@@ -127,6 +127,7 @@ namespace dyno
 		auto m_visModule = std::make_shared<ImplicitViscosity<TDataType>>();
 		m_visModule->varViscosity()->setValue(Real(0.3));
 		this->stateTimeStep()->connect(m_visModule->inTimeStep());
+		samplingDistance->outFloating()->connect(m_visModule->inSamplingDistance());
 		smoothingLength->outFloating()->connect(m_visModule->inSmoothingLength());
 		this->stateTimeStep()->connect(m_visModule->inTimeStep());
 		this->statePosition()->connect(m_visModule->inPosition());

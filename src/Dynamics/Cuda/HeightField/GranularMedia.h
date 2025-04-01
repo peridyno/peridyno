@@ -63,6 +63,8 @@ namespace dyno
 
 		DEF_INSTANCE_STATE(HeightField<TDataType>, HeightField, "Topology");
 
+		DEF_INSTANCE_STATE(HeightField<TDataType>, InitialHeightField, "Topology");
+
 	protected:
 		void resetStates() override;
 		void updateStates() override;

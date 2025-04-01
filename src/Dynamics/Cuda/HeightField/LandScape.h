@@ -17,7 +17,7 @@
 #include "Node/ParametricModel.h"
 
 #include "Topology/HeightField.h"
-#include "FilePath.h"
+#include "Field/FilePath.h"
 namespace dyno {
 
     template<typename TDataType>
@@ -31,6 +31,7 @@ namespace dyno {
         LandScape();
         ~LandScape();
 
+        DArray2D<Real>& getInitialHeights() { return mInitialHeights; }
     public:
  
         DEF_VAR(Real, PatchSize, Real(256), "Real patch size");

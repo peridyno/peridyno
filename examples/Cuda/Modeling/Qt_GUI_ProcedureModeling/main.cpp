@@ -63,7 +63,6 @@ int main()
 	ramp.setResample(true);
 	ramp.setSpacing(5);
 
-	ramp.remapXY(-0.5, 0.5, -0.5, 0.5);
 	curve->varCurve()->setValue(ramp);
 	//Create Spline
 	auto curve2 = scn->addNode(std::make_shared<PointFromCurve<DataType3f>>());
