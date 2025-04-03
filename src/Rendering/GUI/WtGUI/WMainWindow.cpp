@@ -240,7 +240,10 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel)
 					{
 						if (action->caption() == name->text().toUTF8())
 						{
-							mScene->addNode(action->action()());
+							auto new_node = mScene->addNode(action->action()());
+							new_node->setBlockCoord(Initial_x, Initial_y);
+							Initial_x += 20;
+							Initial_y += 20;
 							name->setText("");
 							mFlowWidget->updateForAddNode();
 							mNodeDataModel->setScene(mScene);
@@ -258,6 +261,11 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel)
 			if (new_node != nullptr)
 			{
 				mScene->addNode(new_node);
+				new_node->setBlockCoord(Initial_x, Initial_y);
+				Initial_x += 10;
+				Initial_y += 10;
+				std::cout << Initial_x << std::endl;
+				std::cout << "!!!!!!!!!!!" << std::endl;
 				mFlowWidget->updateForAddNode();
 				mNodeDataModel->setScene(mScene);
 				name->setText("");

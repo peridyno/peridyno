@@ -123,4 +123,7 @@ private:
 	Wt::WContainerWidget* rightWidget;
 	Wt::WContainerWidget* bottomWidget;
 	Wt::WTabWidget* tab;
+
+	int Initial_x = 0;
+	int Initial_y = 0;
 };

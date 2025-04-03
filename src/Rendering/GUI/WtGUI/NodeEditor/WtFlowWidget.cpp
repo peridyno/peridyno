@@ -488,7 +488,7 @@ void WtFlowWidget::enablePhysics(WtNode& n, bool checked)
 
 void WtFlowWidget::updateForAddNode()
 {
-	reorderFlag = true;
+	//reorderFlag = true;
 	update();
 	mScene->setFrameNumber(0);
 	mScene->reset();
