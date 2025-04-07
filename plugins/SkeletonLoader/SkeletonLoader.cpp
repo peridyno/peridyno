@@ -1,6 +1,11 @@
 #include "SkeletonLoader.h"
 #include "GLPhotorealisticRender.h"
 #include <stb/stb_image.h>
+#include "GLPointVisualModule.h"
+#include "GLWireframeVisualModule.h"
+#include <regex>
+#include "ImageLoader.h"
+
 #define STB_IMAGE_IMPLEMENTATION
 
 #define AXIS 0
@@ -27,6 +32,55 @@ namespace dyno
 		this->stateHierarchicalScene()->setDataPtr(std::make_shared<HierarchicalScene>());
 		this->setForceUpdate(false);
 
+		auto callback = std::make_shared<FCallBackFunc>(std::bind(&SkeletonLoader<TDataType>::varAnimationChange, this));
+		this->varImportAnimation()->attach(callback);
+		this->varImportAnimation()->setValue(false);
+
+		auto callbackImport = std::make_shared<FCallBackFunc>(std::bind(&SkeletonLoader<TDataType>::initFBX, this));
+		this->varFileName()->attach(callbackImport);
+		this->varUseInstanceTransform()->attach(callbackImport);
+
+		auto callbackTransform = std::make_shared<FCallBackFunc>(std::bind(&SkeletonLoader<TDataType>::transform, this));
+
+		this->varLocation()->attach(callbackTransform);
+		this->varScale()->attach(callbackTransform);
+		this->varRotation()->attach(callbackTransform);
+
+		{//JointRender
+			auto ptRender = std::make_shared<GLPointVisualModule>();
+			this->stateJointSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
+			this->stateJointSet()->connect(ptRender->inPointSet());
+			ptRender->varPointSize()->setValue(0.002);
+			ptRender->setColor(Color::Purple3());
+
+			auto wireRender = std::make_shared<GLWireframeVisualModule>();
+			this->stateJointSet()->connect(wireRender->inEdgeSet());
+			wireRender->varRenderMode()->setCurrentKey(GLWireframeVisualModule::EEdgeMode::CYLINDER);
+			wireRender->setColor(Color::Purple());
+
+			wireRender->varLineWidth()->setValue(0.002);
+			this->graphicsPipeline()->pushModule(ptRender);
+			this->graphicsPipeline()->pushModule(wireRender);
+		}
+
+
+	}
+
+
+	template<typename TDataType>
+	void SkeletonLoader<TDataType>::varAnimationChange()
+	{
+		auto importAnimation = this->varImportAnimation()->getValue();
+		if (importAnimation) 
+		{
+			this->setForceUpdate(true);
+			//this->varUseInstanceTransform()->setValue(false);
+		}
+		else 
+		{
+			this->setForceUpdate(false);
+
+		}
 	}
 
 
@@ -38,9 +92,17 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool SkeletonLoader<TDataType>::initFBX(const char* filepath)
+	bool SkeletonLoader<TDataType>::initFBX()
 	{
-		FILE* fp = fopen(filepath, "rb");
+		this->stateHierarchicalScene()->getDataPtr()->clear();
+		this->stateTextureMesh()->getDataPtr()->clear();
+
+		auto targetScene = this->stateHierarchicalScene()->getDataPtr();
+		auto filename = this->varFileName()->getData();
+		std::string filepath = filename.string();
+		std::cout << filepath <<"\n\n";
+
+		FILE* fp = fopen(filepath.c_str(), "rb");
 
 		if (!fp) return false;
 
@@ -50,31 +112,38 @@ namespace dyno
 		auto* content = new ofbx::u8[file_size];
 		fread(content, 1, file_size, fp);
 
-		this->mFbxScene = ofbx::load((ofbx::u8*)content, file_size, (ofbx::u64)ofbx::LoadFlags::NONE);
+		auto mFbxScene = ofbx::load((ofbx::u8*)content, file_size, (ofbx::u64)ofbx::LoadFlags::NONE);
 
-		float mFbxScale = this->mFbxScene->getGlobalSettings()->UnitScaleFactor;
-
-
-
-		int objectCount = mFbxScene->getAllObjectCount();
+		float mFbxScale = mFbxScene->getGlobalSettings()->UnitScaleFactor;
 		int meshCount = mFbxScene->getMeshCount();
-		int geoCount = mFbxScene->getGeometryCount();
-		int animationStackCount = mFbxScene->getAnimationStackCount();
-		int embeddedDataCount = mFbxScene->getEmbeddedDataCount();
+		float tempScale = 0.01;
 
-		printf("objectCount : %d \n", objectCount);
-		printf("meshCount : %d \n", meshCount);
-		printf("geoCount : %d \n", geoCount);
+		//Get Bones
+		auto allObj = mFbxScene->getAllObjects();
+		int objCount = mFbxScene->getAllObjectCount();
 
-		//printf("meshCount : %d\n",meshCount);
+		std::map<std::string, std::string> parentTag;
+		std::map<std::string, std::shared_ptr<ModelObject>> nameParentObj;
+		std::map<std::string, std::shared_ptr<Bone>> name2Bone;
+
+		std::vector<std::shared_ptr<Bone>> bonesInfo;
+		for (size_t objId = 0; objId < objCount; objId++)
+		{
+			//Bone
+			if (allObj[objId]->getType() == ofbx::Object::Type::LIMB_NODE)
+			{
+				name2Bone[allObj[objId]->name] = pushBone(allObj[objId], parentTag, nameParentObj, bonesInfo,tempScale);
+			}
+		}
+		
+		setBonesToScene(bonesInfo, targetScene);
+
 		std::vector<std::shared_ptr<MeshInfo>> meshs;
+		std::map<int, Mat4f> fbxinversematrix;
+
 		for (int id = 0; id < meshCount; id++)
 		{
-			//printf("*****************:\n");
-			//std::cout << mFbxScene->getMesh(id)->name << std::endl;
-
 			const ofbx::Mesh* currentMesh = (const ofbx::Mesh*)mFbxScene->getMesh(id);
-			//std:: cout<< "Mesh Name :  " << currentMesh->name << "\n";
 			
 			std::shared_ptr<MeshInfo> meshInfo = std::make_shared<MeshInfo>();
 
@@ -87,17 +156,14 @@ namespace dyno
 			auto locT = currentMesh->getLocalTranslation();
 			auto preR = currentMesh->getPreRotation();
 
-
 			meshInfo->localTranslation = Vec3f(locT.x, locT.y, locT.z);
 			meshInfo->localRotation = Vec3f(locR.x, locR.y, locR.z);
 			meshInfo->localScale = Vec3f(locS.x, locS.y, locS.z);
 			meshInfo->preRotation = Vec3f(preR.x, preR.y, preR.z);
 			meshInfo->pivot = Vec3f(pivot.x, pivot.y, pivot.z);
 			meshInfo->name = currentMesh->name;
-			
+						
 			auto positionCount = currentMesh->getGeometry()->getGeometryData().getPositions().count;	
-			float tempScale = 0.01;
-
 
 			for (size_t i = 0; i < positionCount; i++)
 			{
@@ -109,8 +175,8 @@ namespace dyno
 			{
 				auto indices = currentMesh->getGeometry()->getGeometryData().getPositions().indices[i];		
 				meshInfo->verticeId_pointId.push_back(indices);	
+				meshInfo->pointId_verticeId[indices].push_back(i);
 			}
-
 
 			auto normalCount = currentMesh->getGeometry()->getGeometryData().getNormals().count;
 			for (size_t i = 0; i < normalCount; i++)
@@ -134,8 +200,9 @@ namespace dyno
 			}
 
 			auto partitionCount = currentMesh->getGeometry()->getGeometryData().getPartitionCount();
-		
+			//auto vertexCount = currentMesh->getGeometry()->getGeometryData().getPartition(0).polygons->vertex_count();
 
+			// Polygons
 			for (size_t i = 0; i < partitionCount; i++)
 			{
 				auto polygonCount = currentMesh->getGeometry()->getGeometryData().getPartition(i).polygon_count;
@@ -252,7 +319,6 @@ namespace dyno
 				material->roughness = 1;
 
 
-
 				{
 					auto texture = mat->getTexture(ofbx::Texture::TextureType::DIFFUSE);
 					std::string textureName;
@@ -271,18 +337,19 @@ namespace dyno
 						std::string filename = textureName.substr(found + 1);
 
 						auto fbxFile = this->varFileName()->getValue();
-						size_t foundPath = fbxFile.string().find_last_of("/");
+						size_t foundPath = fbxFile.string().find_last_of("/")< fbxFile.string().size()? fbxFile.string().find_last_of("/") : fbxFile.string().find_last_of("\\");
+
 						std::string path = fbxFile.string().substr(0, foundPath);
 
 
-						std::string loadPath = path + std::string("\\\\") + filename;
+						std::string loadPath = path + std::string("/") + filename;
 						loadPath.pop_back();
 						dyno::CArray2D<dyno::Vec4f> textureData(1, 1);
 						textureData[0, 0] = dyno::Vec4f(1);
 
-						if (loadTexture(loadPath.c_str(), textureData))
-							material->texColor.assign(textureData);
 
+						if (ImageLoader::loadImage(loadPath.c_str(), textureData))// loadTexture
+							material->texColor.assign(textureData);
 					}
 				}
 				
@@ -316,134 +383,148 @@ namespace dyno
 						textureData[0, 0] = dyno::Vec4f(1);
 
 
-						if (loadTexture(loadPath.c_str(), textureData))
+						if (ImageLoader::loadImage(loadPath.c_str(), textureData))//loadTexture
 							material->texBump.assign(textureData);
 
 					}
 				}
 
 				meshInfo->materials.push_back(material);
+
 			}
 
-
-			//Pose
+			//Skin Weights
 			auto pose = currentMesh->getPose();
-			if (pose) 
+
+			if (pose)
 			{
-				auto poseMatrix = pose->getMatrix();
+				std::map<int, int> pointId_Channel;
 
-
-				////Skin
 
 				auto clusterCount = currentMesh->getSkin()->getClusterCount();
-				for (size_t i = 0; i < clusterCount; i++)
+				for (size_t clusterId = 0; clusterId < clusterCount; clusterId++)
 				{
+					auto cluster = currentMesh->getSkin()->getCluster(clusterId);
 
-					auto cluster = currentMesh->getSkin()->getCluster(i);
+					auto it = name2Bone.find(cluster->getLink()->name);
 
-					auto clusteName = cluster->name;
-					//std::cout << "Object Name: " << clusteName << "\n";
+					int boneId = it == name2Bone.end() ? -1 :it->second->id;
 
-					auto JointName = cluster->getLink()->name;
-					//std::cout << "Link Name: " << JointName << "\n";
 
-					////clusteName - JointName ;
-					//pushBone(cluster->getLink());
+					auto m = cluster->getTransformMatrix().m;//inverseMatrix
+
+					Mat4f inverseM= Mat4f(m[0], m[4], m[8], m[12] *tempScale,
+									m[1], m[5], m[9], m[13] * tempScale,
+									m[2], m[6], m[10], m[14] * tempScale,
+									m[3], m[7], m[11], m[15]);
+
+					bonesInfo[boneId]->inverseBindMatrix = inverseM;
 
 					auto indicesCount = cluster->getIndicesCount();
+
+					meshInfo->resizeSkin(meshInfo->vertices.size());
+
 
 					for (size_t j = 0; j < indicesCount; j++)
 					{
 						auto indices = cluster->getIndices()[j];
-					}
-
-					auto weightCount = cluster->getWeightsCount();
-
-					for (size_t j = 0; j < weightCount; j++)
-					{
 						auto weights = cluster->getWeights()[j];
+						if (weights <= 0.001)
+							continue;
+						auto vertices = meshInfo->pointId_verticeId[indices];
+						auto iter = pointId_Channel.find(indices);
 
+						int boneDataIndex = -1;
+						int channel = -1;
+
+						if (iter != pointId_Channel.end()) 
+						{
+							channel = iter->second;
+							pointId_Channel[indices] = iter->second + 1;
+						}
+						else 
+						{
+							channel = 0;
+							pointId_Channel[indices] = 1;
+						}
+
+						boneDataIndex = channel / 4;
+						channel = channel % 4;
+
+						if (boneDataIndex == 0)
+						{
+							for (auto vId : vertices)
+							{
+								meshInfo->boneWeights0[vId][channel] = weights;
+								meshInfo->boneIndices0[vId][channel] = boneId;
+							}
+						}
+						else if (boneDataIndex == 1)
+						{
+							for (auto vId : vertices)
+							{
+								meshInfo->boneWeights1[vId][channel] = weights;
+								meshInfo->boneIndices1[vId][channel] = boneId;
+							}
+						}
+						else if (boneDataIndex == 12)
+						{
+							for (auto vId : vertices)
+							{
+								meshInfo->boneWeights2[vId][channel] = weights;
+								meshInfo->boneIndices2[vId][channel] = boneId;
+							}
+						}
 					}
-
 				}
 			}
+			
 			
 			meshs.push_back(meshInfo);
 		}
 
 		updateTextureMesh(meshs);
-
-		//Get Bones
-		auto allObj = mFbxScene->getAllObjects();
-		int objCount = mFbxScene->getAllObjectCount();
-
-		std::map<std::string, std::string> parentTag;
-		std::map<std::string, std::shared_ptr<ModelObject>> nameParentObj;
-
-		std::vector<std::shared_ptr<Bone>> bonesInfo;
-		for (size_t objId = 0; objId < objCount; objId++)
-		{
-			//Bone
-			if (allObj[objId]->getType() == ofbx::Object::Type::LIMB_NODE)
-			{
-				pushBone(allObj[objId],parentTag, nameParentObj, bonesInfo);
-			}
-		}
-
 		buildHierarchy(parentTag, nameParentObj);
 
+		//const ofbx::GlobalSettings* settings = mFbxScene->getGlobalSettings();
+		//hierarchicalScene->mTimeStart = settings->TimeSpanStart;
+		//hierarchicalScene->mTimeEnd = settings->TimeSpanStop;
+
+
 		updateHierarchicalScene(meshs, bonesInfo);
+		
+		//this->stateHierarchicalScene()->getDataPtr()->mJointData->set
 
-		//Update joints animation curve;
-		for (int i = 0, n = mFbxScene->getAnimationStackCount(); i < n; ++i) {
-			const ofbx::AnimationStack* stack = mFbxScene->getAnimationStack(i);
-			for (int j = 0; stack->getLayer(j); ++j) {
-				const ofbx::AnimationLayer* layer = stack->getLayer(j);
-				for (int k = 0; layer->getCurveNode(k); ++k) {
-					const ofbx::AnimationCurveNode* node = layer->getCurveNode(k);
-					auto nodeTrans = node->getNodeLocalTransform(0);	
+		//targetScene->coutBoneHierarchial();
+		targetScene->updateSkinData(this->stateTextureMesh()->getDataPtr());
+			
+		updateAnimation(0);
+		if (this->varImportAnimation() && bonesInfo.size())
+		{
+			//Update joints animation curve;
+			for (int i = 0, n = mFbxScene->getAnimationStackCount(); i < n; ++i) {
+				const ofbx::AnimationStack* stack = mFbxScene->getAnimationStack(i);
+				for (int j = 0; stack->getLayer(j); ++j) {
+					const ofbx::AnimationLayer* layer = stack->getLayer(j);
+					for (int k = 0; layer->getCurveNode(k); ++k) {
+						const ofbx::AnimationCurveNode* node = layer->getCurveNode(k);
+						auto nodeTrans = node->getNodeLocalTransform(0);
 
-					char property[32];
-					node->getBoneLinkProperty().toString(property);
-
-					getCurveValue(node);	
+						getCurveValue(node, targetScene,tempScale);
+					}
 				}
 			}
+			targetScene->mJointAnimationData->updateTotalTime();
 		}
-
-
+		targetScene->showJointInfo();
 
 		delete[] content;
 		fclose(fp);
 
-
-
-
 		return true;
 
-
-
-
 	}
 
-
-
-
-
-	template<typename TDataType>
-	void SkeletonLoader<TDataType>::loadFBX()
-	{
-		auto filename = this->varFileName()->getData();
-		std::string filepath = filename.string();
-
-		this->stateHierarchicalScene()->getDataPtr()->clear();
-		this->stateTextureMesh()->getDataPtr()->clear();
-
-		initFBX(filepath.c_str());
-
-
-
-	}
 
 	
 
@@ -451,8 +532,14 @@ namespace dyno
 	void SkeletonLoader<TDataType>::resetStates()
 	{
 
-		loadFBX();
 
+	}
+
+	template<typename TDataType>
+	void SkeletonLoader<TDataType>::updateStates()
+	{
+		updateAnimation(this->stateElapsedTime()->getValue());
+		this->stateTextureMesh()->getDataPtr()->convert2TriangleSet(*this->stateTriangleSet()->getDataPtr());
 	}
 
 	template<typename TDataType>
@@ -461,6 +548,8 @@ namespace dyno
 
 		int x, y, comp;
 		stbi_set_flip_vertically_on_load(true);
+
+		std::string normalizedPath = std::regex_replace(path, std::regex(R"(\\+|/+)"), "/");
 
 		float* data = stbi_loadf(path, &x, &y, &comp, STBI_default);
 		if (data == 0)
@@ -480,8 +569,544 @@ namespace dyno
 			}
 		}
 
+
+
 		delete data;
 		return true;
+	}
+
+	template<typename TDataType>
+	void SkeletonLoader<TDataType>::coutName_Type(ofbx::Object::Type ty, ofbx::Object* obj)
+	{
+		{
+			std::cout << obj->name << "  -  ";
+			std::cout << obj->element.getFirstProperty()->getValue().toU64() << "\n";
+
+
+			switch (ty)
+			{
+			case ofbx::Object::Type::ROOT:
+				printf("0_ROOT\n");
+				break;
+
+			case ofbx::Object::Type::GEOMETRY:
+				printf("1_GEOMETRY\n");
+				break;
+
+			case ofbx::Object::Type::SHAPE:
+				printf("2_SHAPE\n");
+				break;
+
+			case ofbx::Object::Type::MATERIAL:
+				printf("3_MATERIAL\n");
+				break;
+
+			case ofbx::Object::Type::MESH:
+				printf("4_MESH\n");
+				break;
+
+			case ofbx::Object::Type::TEXTURE:
+				printf("5_TEXTURE\n");
+				break;
+
+			case ofbx::Object::Type::LIMB_NODE:
+				printf("6_LIMB_NODE\n");
+				break;
+
+			case ofbx::Object::Type::NULL_NODE:
+				printf("7_NULL_NODE\n");
+				break;
+
+			case ofbx::Object::Type::NODE_ATTRIBUTE:
+				printf("8_NODE_ATTRIBUTE\n");
+				break;
+
+			case ofbx::Object::Type::CLUSTER:
+				printf("9_CLUSTER\n");
+				break;
+
+			case ofbx::Object::Type::SKIN:
+				printf("10_SKIN\n");
+				break;
+
+			case ofbx::Object::Type::BLEND_SHAPE:
+				printf("11_BLEND_SHAPE\n");
+				break;
+
+			case ofbx::Object::Type::BLEND_SHAPE_CHANNEL:
+				printf("12_BLEND_SHAPE_CHANNEL\n");
+				break;
+
+			case ofbx::Object::Type::ANIMATION_STACK:
+				printf("13_BLEND_SHAPE\n");
+				break;
+
+			case ofbx::Object::Type::ANIMATION_LAYER:
+				printf("14_BLEND_SHAPE\n");
+				break;
+
+			case ofbx::Object::Type::ANIMATION_CURVE:
+				printf("15_BLEND_SHAPE\n");
+				break;
+
+			case ofbx::Object::Type::ANIMATION_CURVE_NODE:
+				printf("16_ANIMATION_CURVE_NODE\n");
+				break;
+
+			case ofbx::Object::Type::POSE:
+				printf("17_POSE  ");
+				break;
+
+			default:
+				break;
+			}
+
+		}
+	}
+
+	template<typename TDataType>
+	void SkeletonLoader<TDataType>::getCurveValue(const ofbx::AnimationCurveNode* node, std::shared_ptr<HierarchicalScene> scene,float scale)
+	{
+		if (!node->getBone())
+			return;
+
+		auto objId = scene->getObjIndexByName(std::string(node->getBone()->name));
+
+
+		if (objId == -1)
+			return;
+
+		auto propertyData = node->getBoneLinkProperty();
+
+		if (propertyData == "Lcl Translation")
+		{
+			auto x = node->getCurve(0);
+			auto y = node->getCurve(1);
+			auto z = node->getCurve(2);
+			if (x)
+			{
+				for (size_t m = 0; m < x->getKeyCount(); m++)
+				{
+					auto time = Real(x->getKeyTime()[m]) / REFTIME;
+					auto value = x->getKeyValue()[m] * scale;
+					//std::cout << "x : " << value <<std::endl;
+					this->stateHierarchicalScene()->getDataPtr()->mJointAnimationData->mJoint_KeyId_tT_X[objId].push_back(time);
+					this->stateHierarchicalScene()->getDataPtr()->mJointAnimationData->mJoint_KeyId_T_X[objId].push_back(value);
+				}
+			}
+			if (y)
+			{
+				for (size_t m = 0; m < y->getKeyCount(); m++)
+				{
+					auto time = Real(y->getKeyTime()[m]) / REFTIME;
+					auto value = y->getKeyValue()[m] * scale;
+					//std::cout << "y : " << value << std::endl;
+					this->stateHierarchicalScene()->getDataPtr()->mJointAnimationData->mJoint_KeyId_tT_Y[objId].push_back(time);
+					this->stateHierarchicalScene()->getDataPtr()->mJointAnimationData->mJoint_KeyId_T_Y[objId].push_back(value);
+				}
+			}
+
+			if (z)
+			{
+				for (size_t m = 0; m < z->getKeyCount(); m++)
+				{
+					auto time = Real(z->getKeyTime()[m]) / REFTIME;
+					auto value = z->getKeyValue()[m] * scale;
+					//std::cout << "z : " << value << std::endl;
+					this->stateHierarchicalScene()->getDataPtr()->mJointAnimationData->mJoint_KeyId_tT_Z[objId].push_back(time);
+					this->stateHierarchicalScene()->getDataPtr()->mJointAnimationData->mJoint_KeyId_T_Z[objId].push_back(value);
+				}
+			}
+		}
+
+		if (propertyData == "Lcl Rotation")
+		{
+			auto x = node->getCurve(0);
+			auto y = node->getCurve(1);
+			auto z = node->getCurve(2);
+
+			if (x)
+			{
+				for (size_t m = 0; m < x->getKeyCount(); m++)
+				{
+					auto time = Real(x->getKeyTime()[m]) / REFTIME;
+					auto value = x->getKeyValue()[m];
+
+					this->stateHierarchicalScene()->getDataPtr()->mJointAnimationData->mJoint_KeyId_tR_X[objId].push_back(time);
+					this->stateHierarchicalScene()->getDataPtr()->mJointAnimationData->mJoint_KeyId_R_X[objId].push_back(value);
+
+				}
+			}
+
+			if (y)
+			{
+				for (size_t m = 0; m < y->getKeyCount(); m++)
+				{
+					auto time = Real(y->getKeyTime()[m]) / REFTIME;
+					auto value = y->getKeyValue()[m];
+
+					this->stateHierarchicalScene()->getDataPtr()->mJointAnimationData->mJoint_KeyId_tR_Y[objId].push_back(time);
+					this->stateHierarchicalScene()->getDataPtr()->mJointAnimationData->mJoint_KeyId_R_Y[objId].push_back(value);
+
+				}
+			}
+
+			if (z)
+			{
+				for (size_t m = 0; m < z->getKeyCount(); m++)
+				{
+					auto time = Real(z->getKeyTime()[m]) / REFTIME;
+					auto value = z->getKeyValue()[m];
+
+					this->stateHierarchicalScene()->getDataPtr()->mJointAnimationData->mJoint_KeyId_tR_Z[objId].push_back(time);
+					this->stateHierarchicalScene()->getDataPtr()->mJointAnimationData->mJoint_KeyId_R_Z[objId].push_back(value);
+
+				}
+			}
+
+		}
+
+		if (propertyData == "Lcl Scaling")
+		{
+			auto x = node->getCurve(0);
+			auto y = node->getCurve(1);
+			auto z = node->getCurve(2);
+
+			if (x)
+			{
+				for (size_t m = 0; m < x->getKeyCount(); m++)
+				{
+					auto time = Real(x->getKeyTime()[m]) / REFTIME;
+					auto value = x->getKeyValue()[m];
+
+					this->stateHierarchicalScene()->getDataPtr()->mJointAnimationData->mJoint_KeyId_tS_X[objId].push_back(time);
+					this->stateHierarchicalScene()->getDataPtr()->mJointAnimationData->mJoint_KeyId_S_X[objId].push_back(value);
+
+				}
+			}
+			if (y)
+			{
+				for (size_t m = 0; m < y->getKeyCount(); m++)
+				{
+					auto time = Real(y->getKeyTime()[m]) / REFTIME;
+					auto value = y->getKeyValue()[m];
+
+					this->stateHierarchicalScene()->getDataPtr()->mJointAnimationData->mJoint_KeyId_tS_Y[objId].push_back(time);
+					this->stateHierarchicalScene()->getDataPtr()->mJointAnimationData->mJoint_KeyId_S_Y[objId].push_back(value);
+				}
+			}
+
+			if (z)
+			{
+				for (size_t m = 0; m < z->getKeyCount(); m++)
+				{
+					auto time = Real(z->getKeyTime()[m]) / REFTIME;
+					auto value = z->getKeyValue()[m];
+
+					this->stateHierarchicalScene()->getDataPtr()->mJointAnimationData->mJoint_KeyId_tS_Z[objId].push_back(time);
+					this->stateHierarchicalScene()->getDataPtr()->mJointAnimationData->mJoint_KeyId_S_Z[objId].push_back(value);
+
+				}
+			}
+
+		}
+
+		this->stateTextureMesh()->getDataPtr()->safeConvert2TriangleSet(*this->stateTriangleSet()->getDataPtr());
+
+	}
+
+
+	template<typename TDataType>
+	void SkeletonLoader<TDataType>::buildHierarchy(const std::map<std::string, std::string>& obj_parent, const std::map<std::string, std::shared_ptr<ModelObject>>& name_ParentObj)
+	{
+		//std::cout << parentTag.size()<< " -- " << name_ParentObj.size() << "\n";
+		for (auto it : obj_parent)
+		{
+			//Parent
+			std::pair<std::string, std::string> element = it;
+			std::string objName = it.first;
+
+			while (true)
+			{
+				if (element.second != std::string("No parent object"))
+				{
+					std::string parentName = element.second;
+
+					std::shared_ptr<ModelObject> obj = name_ParentObj.find(objName)->second;
+					std::shared_ptr<ModelObject> parent = nullptr;
+
+					auto parentIter = name_ParentObj.find(parentName);
+					if (parentIter != name_ParentObj.end())
+						parent = parentIter->second;
+
+					if (parent != nullptr)
+					{
+						obj->parent.push_back(parent);
+						element = *obj_parent.find(parentName);
+					}
+					else
+						break;
+				}
+				else
+					break;
+			}
+
+			//Child
+			auto parentIter = name_ParentObj.find(it.second);
+			if (parentIter != name_ParentObj.end())
+			{
+				std::shared_ptr<ModelObject> parent = parentIter->second;
+				parent->child.push_back(name_ParentObj.find(objName)->second);
+			}
+		}
+	}
+
+	template<typename TDataType>
+	std::shared_ptr<Bone> SkeletonLoader<TDataType>::pushBone(const ofbx::Object* bone, std::map<std::string, std::string>& parentTag, std::map<std::string, std::shared_ptr<ModelObject>>& name_ParentObj, std::vector<std::shared_ptr<Bone>>& bonesInfo, float scale)
+	{
+		auto it = parentTag.find(std::string(bone->name));
+		std::shared_ptr<Bone> temp = nullptr;
+		if (it != parentTag.end()) {}
+		else {
+
+			temp = std::make_shared<Bone>();
+
+			temp->name = bone->name;
+			temp->preRotation = Vec3f(bone->getPreRotation().x, bone->getPreRotation().y, bone->getPreRotation().z);
+			temp->localTranslation = Vec3f(bone->getLocalTranslation().x, bone->getLocalTranslation().y, bone->getLocalTranslation().z) * scale;
+			temp->localRotation = Vec3f(bone->getLocalRotation().x, bone->getLocalRotation().y, bone->getLocalRotation().z);
+			temp->localScale = Vec3f(bone->getLocalScaling().x, bone->getLocalScaling().y, bone->getLocalScaling().z);
+			temp->pivot = Vec3f(bone->getRotationPivot().x, bone->getRotationPivot().y, bone->getRotationPivot().z);
+
+			//temp->localTransform = Mat3f();
+			bonesInfo.push_back(temp);
+
+			if (bone->parent)
+			{
+				parentTag[std::string(bone->name)] = std::string(bone->parent->name);
+				name_ParentObj[std::string(bone->name)] = bonesInfo[bonesInfo.size() - 1];
+			}
+			else
+			{
+				parentTag[std::string(bone->name)] = std::string("No parent object");
+				name_ParentObj[std::string(bone->name)] = nullptr;
+			}
+
+		}
+		return temp;
+	}
+
+	template<typename TDataType>
+	void SkeletonLoader<TDataType>::updateTextureMesh(const std::vector<std::shared_ptr<MeshInfo>>& meshsInfo)
+	{
+		auto texMesh = this->stateTextureMesh()->getDataPtr();
+
+		std::vector<int> mesh_VerticesNum;
+		std::vector<int> mesh_NormalNum;
+		std::vector<int> mesh_UvNum;
+
+		std::vector<Vec3f> texVertices;
+		std::vector<Vec3f> texNormals;
+		std::vector<Vec2f> texCoords;
+
+		for (auto it : meshsInfo)
+		{
+			mesh_VerticesNum.push_back(it->vertices.size());
+			mesh_NormalNum.push_back(it->normals.size());
+			mesh_UvNum.push_back(it->texcoords.size());
+
+			texVertices.insert(texVertices.end(), it->vertices.begin(), it->vertices.end());
+			texNormals.insert(texNormals.end(), it->normals.begin(), it->normals.end());
+			texCoords.insert(texCoords.end(), it->texcoords.begin(), it->texcoords.end());
+		}
+
+		texMesh->vertices().assign(texVertices);
+		texMesh->normals().assign(texNormals);
+		texMesh->texCoords().assign(texCoords);
+
+		std::vector<uint> shapeID;
+		shapeID.resize(texVertices.size());
+
+		int tempID = 0;
+		int offset = 0;
+		for (size_t i = 0; i < meshsInfo.size(); i++)
+		{
+			auto shape = std::make_shared<Shape>();
+
+			int meshFaceGroupNum = meshsInfo[i]->facegroup_triangles.size();
+			for (size_t j = 0; j < meshFaceGroupNum; j++)
+			{
+				auto triangles = meshsInfo[i]->facegroup_triangles[j];
+
+				for (size_t k = 0; k < triangles.size(); k++)
+				{
+					triangles[k][0] = triangles[k][0] + offset;
+					triangles[k][1] = triangles[k][1] + offset;
+					triangles[k][2] = triangles[k][2] + offset;
+					shapeID[triangles[k][0]] = tempID;
+					shapeID[triangles[k][1]] = tempID;
+					shapeID[triangles[k][2]] = tempID;
+				}
+				shape->vertexIndex.assign(triangles);
+				shape->normalIndex.assign(triangles);
+				shape->texCoordIndex.assign(triangles);
+
+				tempID++;
+
+				texMesh->materials().push_back(meshsInfo[i]->materials[j]);
+				shape->material = meshsInfo[i]->materials[j];
+				shape->boundingBox = meshsInfo[i]->boundingBox[j];
+				shape->boundingTransform = meshsInfo[i]->boundingTransform[j];
+
+
+				texMesh->shapes().push_back(shape);
+			}
+			offset += mesh_VerticesNum[i];
+		}
+
+		texMesh->shapeIds().assign(shapeID);
+	}
+
+	template<typename TDataType>
+	void SkeletonLoader<TDataType>::setMeshToScene(const std::vector<std::shared_ptr<MeshInfo>>& meshsInfo, std::shared_ptr<HierarchicalScene> scene)
+	{
+		for (auto mesh : meshsInfo)
+		{
+			scene->mModelObjects.push_back(mesh);
+			scene->mMeshs.push_back(mesh);
+		}
+	}
+
+	template<typename TDataType>
+	void SkeletonLoader<TDataType>::setBonesToScene(const std::vector< std::shared_ptr<Bone>>& bonesInfo, std::shared_ptr<HierarchicalScene> scene)
+	{
+		for (auto bone : bonesInfo)
+		{
+			scene->pushBackBone(bone);
+		}
+	}
+
+	template<typename TDataType>
+	void SkeletonLoader<TDataType>::updateHierarchicalScene(const std::vector<std::shared_ptr<MeshInfo>>& meshsInfo, const std::vector< std::shared_ptr<Bone>>& bonesInfo)
+	{
+		auto hierarchicalScene = this->stateHierarchicalScene()->getDataPtr();
+		hierarchicalScene->clear();
+
+		for (auto bone : bonesInfo)
+		{
+			hierarchicalScene->pushBackBone(bone);
+		}
+
+		for (auto mesh : meshsInfo)
+		{
+			hierarchicalScene->pushBackMesh(mesh);
+		}
+
+		if(bonesInfo.size())
+			hierarchicalScene->UpdateJointData();
+	}
+
+	template<typename TDataType>
+	void SkeletonLoader<TDataType>::transform()
+	{
+		updateAnimation(0);
+	}
+
+	template<typename TDataType>
+	void SkeletonLoader<TDataType>::updateAnimation(float time)
+	{
+		auto targetScene = this->stateHierarchicalScene()->getDataPtr();
+
+		Mat4f nodeRotation = this->computeQuaternion().toMatrix4x4();;
+		Vec3f nodeLocation = this->varLocation()->getValue();
+		Vec3f nodeSale = this->varScale()->getValue();
+		Mat4f scaleMatrix = Mat4f(nodeSale[0],0,0,0,0, nodeSale[1],0,0,0,0, nodeSale[2],0,0,0,0,1);
+
+		Mat4f nodeTransform = Mat4f(
+			nodeRotation(0, 0) * nodeSale[0], nodeRotation(0, 1), nodeRotation(0, 2), nodeLocation[0],
+			nodeRotation(1, 0), nodeRotation(1, 1) * nodeSale[1], nodeRotation(1, 2), nodeLocation[1],
+			nodeRotation(2, 0), nodeRotation(2, 1), nodeRotation(2, 2) * nodeSale[2], nodeLocation[2],
+			nodeRotation(3, 0), nodeRotation(3, 1), nodeRotation(3, 2), nodeRotation(3, 3)) * scaleMatrix;
+
+		if(targetScene->mJointAnimationData->isValid())
+			targetScene->mJointAnimationData->updateAnimationPose(time);
+
+
+		for (size_t i = 0; i < targetScene->mSkinData->size(); i++)//
+		{
+			auto& bindJoint0 = targetScene->mSkinData->V_jointID_0[i];
+			auto& bindJoint1 = targetScene->mSkinData->V_jointID_1[i];
+			auto& bindJoint2 = targetScene->mSkinData->V_jointID_2[i];
+
+			auto& bindWeight0 = targetScene->mSkinData->V_jointWeight_0[i];
+			auto& bindWeight1 = targetScene->mSkinData->V_jointWeight_1[i];
+			auto& bindWeight2 = targetScene->mSkinData->V_jointWeight_2[i];
+
+
+
+			targetScene->skinAnimation(
+				targetScene->mSkinData->initialPosition,
+				this->stateTextureMesh()->getDataPtr()->vertices(),
+				targetScene->mJointData->mJointInverseBindMatrix,
+				targetScene->mJointData->mJointWorldMatrix,
+
+				bindJoint0,
+				bindJoint1,
+				bindJoint2,
+				bindWeight0,
+				bindWeight1,
+				bindWeight2,
+
+				nodeTransform,
+				false,
+
+				targetScene->mSkinData->skin_VerticeRange[i]
+			);
+
+			targetScene->skinAnimation(
+				targetScene->mSkinData->initialNormal,
+				targetScene->mSkinData->mesh->normals(),
+				targetScene->mJointData->mJointInverseBindMatrix,
+				targetScene->mJointData->mJointWorldMatrix,
+
+				bindJoint0,
+				bindJoint1,
+				bindJoint2,
+				bindWeight0,
+				bindWeight1,
+				bindWeight2,
+
+				nodeTransform,
+				true,
+
+				targetScene->mSkinData->skin_VerticeRange[i]
+			);
+
+		}
+
+		//draw Joint
+		{
+			std::vector<Vec3f> jointPoints;
+			CArray<Mat4f> c_Matrix;
+			c_Matrix.assign(targetScene->mJointData->mJointWorldMatrix);
+			for (int i = 0; i < c_Matrix.size(); i++)
+			{
+				auto worldMartix = c_Matrix[i];
+				Vec4f p4 = nodeTransform * (worldMartix * Vec4f(0, 0, 0, 1));
+				jointPoints.push_back(Vec3f(p4.x, p4.y, p4.z));
+			}
+			std::vector<TopologyModule::Edge> jointEdges;
+			auto joints = targetScene->getBones();
+			for (auto j : joints)
+			{
+				if (j->parent.size())
+					jointEdges.push_back(TopologyModule::Edge(j->id, j->parent[0]->id));
+			}
+			auto jointSet = this->stateJointSet()->getDataPtr();
+			jointSet->setPoints(jointPoints);
+			jointSet->setEdges(jointEdges);
+		}
+
 	}
 
 	DEFINE_CLASS(SkeletonLoader);

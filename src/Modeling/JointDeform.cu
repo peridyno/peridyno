@@ -30,14 +30,14 @@ namespace dyno
 	template<typename TDataType>
 	JointDeform<TDataType>::JointDeform()
 	{
-		this->stateTextureMesh()->setDataPtr(std::make_shared<TextureMesh>());
+		//this->stateTextureMesh()->setDataPtr(std::make_shared<TextureMesh>());
 
 		auto render = std::make_shared<GLPhotorealisticRender>();
-		this->stateTextureMesh()->connect(render->inTextureMesh());
+		//this->stateTextureMesh()->connect(render->inTextureMesh());
 		this->graphicsPipeline()->pushModule(render);
 
 		auto instanceRender = std::make_shared<GLPhotorealisticInstanceRender>();
-		this->stateTextureMesh()->connect(instanceRender->inTextureMesh());
+		//this->stateTextureMesh()->connect(instanceRender->inTextureMesh());
 		this->inInstanceTransform()->connect(instanceRender->inTransform());
 		this->graphicsPipeline()->pushModule(instanceRender);
 		
@@ -53,7 +53,7 @@ namespace dyno
 	template<typename TDataType>
 	void JointDeform<TDataType>::resetStates()
 	{
-		{
+		/*{
 			auto& joint = this->inJoint()->getData();
 			auto& skin = this->inSkin()->getData();
 
@@ -73,7 +73,7 @@ namespace dyno
 			textureMesh->shapes() = skin.mesh->shapes();
 			textureMesh->materials() = skin.mesh->materials();
 
-		}
+		}*/
 	}
 
 	template<typename TDataType>
@@ -97,15 +97,15 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void JointDeform<TDataType>::updateAnimation(int frameNumber)
+	void JointDeform<TDataType>::updateAnimation(float time)
 	{
 		{
 			//update Points
 			auto& skinInfo = this->inSkin()->getData();
 			auto& jointInfo = this->inJoint()->getData();
 
-			auto textureMesh = this->stateTextureMesh()->getDataPtr();
-
+			//auto textureMesh = this->stateTextureMesh()->getDataPtr();
+			auto textureMesh = this->inTextureMesh()->getDataPtr();
 
 			for (size_t i = 0; i < skinInfo.size(); i++)//
 			{
@@ -115,10 +115,9 @@ namespace dyno
 				auto& bindWeight0 = skinInfo.V_jointWeight_0[i];
 				auto& bindWeight1 = skinInfo.V_jointWeight_1[i];
 
-				for (size_t j = 0; j < skinInfo.skin_VerticeRange[i].size(); j++)
-				{
+
 					//
-					Vec2u& range = skinInfo.skin_VerticeRange[i][j];
+					Vec2u& range = skinInfo.skin_VerticeRange[i];
 
 					skinAnimation(skinInfo.initialPosition,
 						textureMesh->vertices(),
@@ -151,7 +150,7 @@ namespace dyno
 						range
 					);
 
-				}
+				
 			}
 
 

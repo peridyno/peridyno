@@ -25,8 +25,8 @@
 #include "GLWireframeVisualModule.h"
 
 #include "Field/FilePath.h"
-#include "SkinInfo.h"
-#include "JointInfo.h"
+#include "Topology/SkinInfo.h"
+#include "Topology/JointInfo.h"
 
 
 namespace dyno

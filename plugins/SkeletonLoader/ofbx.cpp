@@ -1157,6 +1157,7 @@ struct GeometryPartitionImpl {
 };
 
 struct GeometryDataImpl : GeometryData {
+	bool has_vertices = false;
 	Vec3AttributesImpl positions;
 	Vec3AttributesImpl normals;
 	Vec3AttributesImpl tangents;
@@ -1176,13 +1177,18 @@ struct GeometryDataImpl : GeometryData {
 		return res;
 	}
 
+	bool hasVertices() const override { return has_vertices; }
+
 	Vec3Attributes getPositions() const override { return positions; }
 	Vec3Attributes getNormals() const override { return patchAttributes<Vec3Attributes>(normals); }
 	Vec2Attributes getUVs(int index) const override { return patchAttributes<Vec2Attributes>(uvs[index]); }
 	Vec4Attributes getColors() const override { return patchAttributes<Vec4Attributes>(colors); }
 	Vec3Attributes getTangents() const override { return patchAttributes<Vec3Attributes>(tangents); }
 	int getPartitionCount() const override { return (int)partitions.size(); }
-	
+
+	const int getMaterialMapSize() const override { return (int)materials.size(); }
+	const int* getMaterialMap() const override { return materials.empty() ? nullptr : &materials[0]; }
+
 	GeometryPartition getPartition(int index) const override { 
 		if (index >= partitions.size()) return {nullptr, 0, 0, 0};
 		return {
@@ -1849,6 +1855,7 @@ struct CameraImpl : public Camera
 
 	double nearPlane = 0.1;
 	double farPlane = 1000.0;
+	double orthoZoom = 1.f;
 	bool autoComputeClipPanes = true;
 	
 	GateFit gateFit = GateFit::HORIZONTAL;
@@ -1873,6 +1880,7 @@ struct CameraImpl : public Camera
 
 	double getNearPlane() const override { return nearPlane; }
 	double getFarPlane() const override { return farPlane; }
+	double getOrthoZoom() const override { return orthoZoom; }
 	bool doesAutoComputeClipPanes() const override { return autoComputeClipPanes; }
 
 	GateFit getGateFit() const override { return gateFit; }
@@ -2451,6 +2459,9 @@ struct OptionalError<Object*> parseCamera(Scene& scene, const Element& element, 
 	CameraImpl* camera = allocator.allocate<CameraImpl>(scene, element);
 
 	camera->projectionType = static_cast<Camera::ProjectionType>(resolveEnumProperty(*camera, "ProjectionType", (int)Camera::ProjectionType::PERSPECTIVE));
+	// try "CameraProjectionType" too, see https://github.com/nem0/OpenFBX/issues/105
+	camera->projectionType = static_cast<Camera::ProjectionType>(resolveEnumProperty(*camera, "CameraProjectionType", (int)camera->projectionType));
+
 	camera->apertureMode = static_cast<Camera::ApertureMode>(resolveEnumProperty(*camera, "ApertureMode", (int)Camera::ApertureMode::HORIZANDVERT));
 	camera->gateFit = static_cast<Camera::GateFit>(resolveEnumProperty(*camera, "GateFit", (int)Camera::GateFit::HORIZONTAL));
 
@@ -2512,6 +2523,10 @@ struct OptionalError<Object*> parseCamera(Scene& scene, const Element& element, 
 			else if (prop->first_property->value == "FarPlane")
 			{
 				camera->farPlane = prop->getProperty(4)->getValue().toDouble();
+			}
+			else if (prop->first_property->value == "OrthoZoom" || prop->first_property->value == "CameraOrthoZoom")
+			{
+				camera->orthoZoom = prop->getProperty(4)->getValue().toDouble();
 			}
 		}
 		prop = prop->sibling;
@@ -3123,26 +3138,34 @@ static OptionalError<Object*> parseAnimationCurve(const Scene& scene, const Elem
 	return curve;
 }
 
-static OptionalError<Object*> parseGeometry(const Element& element, GeometryImpl& geom, std::vector<ParseDataJob> &jobs, Allocator& allocator) {
+static OptionalError<Object*> parseGeometry(const Element& element, GeometryImpl& geom, std::vector<ParseDataJob> &jobs, u16 flags, Allocator& allocator) {
 	assert(element.first_property);
 
+	const bool ignore_geometry = (flags & (u16)LoadFlags::IGNORE_GEOMETRY) != 0;
+	const bool keep_matertial_map = (flags & (u16)LoadFlags::KEEP_MATERIAL_MAP) != 0;
+
+	if (keep_matertial_map || !ignore_geometry) {
+		if (!parseGeometryMaterials(geom, element, jobs)) return Error("Invalid materials");
+	}
+	
 	const Element* vertices_element = findChild(element, "Vertices");
-	if (!vertices_element || !vertices_element->first_property)
-	{
+	if (!vertices_element || !vertices_element->first_property) {
 		return &geom;
 	}
 
+	geom.has_vertices = true;
 	const Element* polys_element = findChild(element, "PolygonVertexIndex");
 	if (!polys_element || !polys_element->first_property) return Error("Indices missing");
 
-	if (!pushJob(jobs, *vertices_element->first_property, geom.positions.values)) return Error("Invalid vertices");
-	if (!pushJob(jobs, *polys_element->first_property, geom.positions.indices)) return Error("Invalid vertices");
+	if (!ignore_geometry) {
+		if (!pushJob(jobs, *vertices_element->first_property, geom.positions.values)) return Error("Invalid vertices");
+		if (!pushJob(jobs, *polys_element->first_property, geom.positions.indices)) return Error("Invalid vertices");
 
-	if (!parseGeometryMaterials(geom, element, jobs)) return Error("Invalid materials");
-	if (!parseGeometryUVs(geom, element, jobs)) return Error("Invalid vertex attributes");
-	if (!parseGeometryTangents(geom, element, jobs)) return Error("Invalid vertex attributes");
-	if (!parseGeometryColors(geom, element, jobs)) return Error("Invalid vertex attributes");
-	if (!parseGeometryNormals(geom, element, jobs)) return Error("Invalid vertex attributes");
+		if (!parseGeometryUVs(geom, element, jobs)) return Error("Invalid vertex attributes");
+		if (!parseGeometryTangents(geom, element, jobs)) return Error("Invalid vertex attributes");
+		if (!parseGeometryColors(geom, element, jobs)) return Error("Invalid vertex attributes");
+		if (!parseGeometryNormals(geom, element, jobs)) return Error("Invalid vertex attributes");
+	}
 
 	return &geom;
 }
@@ -3406,6 +3429,7 @@ static bool parseObjects(const Element& root, Scene& scene, u16 flags, Allocator
 	const bool ignore_limbs = (flags & (u16)LoadFlags::IGNORE_LIMBS) != 0;
 	const bool ignore_meshes = (flags & (u16)LoadFlags::IGNORE_MESHES) != 0;
 	const bool ignore_models = (flags & (u16)LoadFlags::IGNORE_MODELS) != 0;
+	const bool keep_matertial_map = (flags & (u16)LoadFlags::KEEP_MATERIAL_MAP) != 0;
 
 	const Element* objs = findChild(root, "Objects");
 	if (!objs) return true;
@@ -3438,18 +3462,18 @@ static bool parseObjects(const Element& root, Scene& scene, u16 flags, Allocator
 
 		if (iter.second.object == scene.m_root) continue;
 
-		if (iter.second.element->id == "Geometry" && !ignore_geometry)
+		if (iter.second.element->id == "Geometry")
 		{
 			Property* last_prop = iter.second.element->first_property;
 			while (last_prop->next) last_prop = last_prop->next;
 			if (last_prop && last_prop->value == "Mesh")
 			{
 				GeometryImpl* geom = allocator.allocate<GeometryImpl>(scene, *iter.second.element);
-				parseGeometry(*iter.second.element, *geom, jobs, allocator);
+				parseGeometry(*iter.second.element, *geom, jobs, flags, allocator);
 				obj = geom;
 				scene.m_geometries.push_back(geom);
 			}
-			else if (last_prop && last_prop->value == "Shape")
+			else if (last_prop && last_prop->value == "Shape" && !ignore_geometry)
 			{
 				obj = allocator.allocate<ShapeImpl>(scene, *iter.second.element);
 			}
@@ -3680,7 +3704,7 @@ static bool parseObjects(const Element& root, Scene& scene, u16 flags, Allocator
 					Texture::TextureType type = Texture::COUNT;
 					if (con.to_property == "NormalMap")
 						type = Texture::NORMAL;
-					else if (con.to_property == "DiffuseColor" || con.to_property == "Maya|baseColor")
+					else if (con.to_property == "DiffuseColor")
 						type = Texture::DIFFUSE;
 					else if (con.to_property == "SpecularColor")
 						type = Texture::SPECULAR;

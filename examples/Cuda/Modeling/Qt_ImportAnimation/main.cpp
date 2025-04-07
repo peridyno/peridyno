@@ -12,7 +12,8 @@
 #include <GLRenderEngine.h>
 #include "JointDeform.h"
 #include "SkeletonLoader/SkeletonLoader.h"
-
+#include "ObjIO/ObjLoader.h"
+#include "TextureMeshLoader.h"
 
 
 /**
@@ -29,6 +30,34 @@ int main()
 	gltfanimation->varFileName()->setValue(getAssetPath() + "gltf/AnimationBone/Bone.gltf");
 	gltfanimation->varImportAnimation()->setValue(true);
 	gltfanimation->varUseInstanceTransform()->setValue(false);
+	gltfanimation->varLocation()->setValue(Vec3f(-2,0,0));
+
+	auto fbxAnimation = scn->addNode(std::make_shared<SkeletonLoader<DataType3f>>());
+	fbxAnimation->varFileName()->setValue(getAssetPath() + "fbx/Dog.fbx");
+	fbxAnimation->varUseInstanceTransform()->setValue(false);
+	fbxAnimation->varImportAnimation()->setValue(true);
+	fbxAnimation->varLocation()->setValue(Vec3f(1,0,0));
+
+	auto fbxRun = scn->addNode(std::make_shared<SkeletonLoader<DataType3f>>());
+	fbxRun->varFileName()->setValue(getAssetPath() + "fbx/FastRun.fbx");
+	fbxRun->varUseInstanceTransform()->setValue(false);
+	fbxRun->varImportAnimation()->setValue(true);
+	fbxRun->varLocation()->setValue(Vec3f(-1, 0, 0));
+
+	auto dancing = scn->addNode(std::make_shared<SkeletonLoader<DataType3f>>());
+	dancing->varFileName()->setValue(getAssetPath() + "fbx/SwingDancing.fbx");
+	dancing->varUseInstanceTransform()->setValue(false);
+	dancing->varImportAnimation()->setValue(true);
+	dancing->varLocation()->setValue(Vec3f(2, 0, 0));
+
+	auto robot = scn->addNode(std::make_shared<SkeletonLoader<DataType3f>>());
+	robot->varFileName()->setValue(getAssetPath() + "fbx/HumanoidRobot.fbx");
+	robot->varUseInstanceTransform()->setValue(false);
+	robot->varImportAnimation()->setValue(true);
+	robot->varLocation()->setValue(Vec3f(0, 0, 0));
+
+
+
 
 	Modeling::initStaticPlugin();
 	RigidBody::initStaticPlugin();
