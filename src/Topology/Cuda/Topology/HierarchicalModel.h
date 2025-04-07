@@ -6,6 +6,8 @@
 #include <random>
 #include "TextureMesh.h"
 #include "Quat.h"
+#include "Topology/JointInfo.h"
+#include "Topology/SkinInfo.h"
 
 #define ERRORTIME -2321.51
 
@@ -17,19 +19,12 @@ namespace dyno
 	class ModelObject : public Object
 	{
 	public:
+
 		ModelObject() {};
-		~ModelObject() 
-		{
-			child.clear();
-			parent.clear();
+		~ModelObject();
+		bool operator==(const ModelObject& model);
 
-
-		};
-
-		bool operator==(const ModelObject& model)
-		{
-			return name == model.name;
-		}
+	public:
 
 		std::string name;
 		Mat4f localTransform = Mat4f::identityMatrix();
@@ -41,37 +36,32 @@ namespace dyno
 
 		std::vector<std::shared_ptr<ModelObject>> child;
 		std::vector<std::shared_ptr<ModelObject>> parent;// bone - parent - root
-
 		int id = -1;
-
-		std::vector<Real> m_Translation_Times[3];
-		std::vector<Real> m_Translation_Values[3];
-
-		std::vector<Real> m_Rotation_Times[3];
-		std::vector<Real> m_Rotation_Values[3];
-
-		std::vector<Real> m_Scale_Times[3];
-		std::vector<Real> m_Scale_Values[3];
-
-		Vec3f getFrameTranslation(Real time);
-		Vec3f getFrameRotation(Real time);
-		Vec3f getFrameScale(Real time);
-
-		
 	};
 
 
 	class Bone : public ModelObject
 	{
 	public:
+
 		Bone() {};
 
+	public:
+
+		Mat4f inverseBindMatrix = Mat4f::identityMatrix();
 	};
+
 
 	class MeshInfo : public ModelObject
 	{
 	public:
-		MeshInfo() {};
+		MeshInfo();
+
+		~MeshInfo();
+
+		void resizeSkin(int size);
+
+		unsigned int size() { return vertices.size(); }
 
 		std::vector<Vec3f> vertices;
 		std::vector<int> verticeId_pointId;
@@ -100,203 +90,117 @@ namespace dyno
 	class HierarchicalScene : public Object
 	{
 	public:
-		HierarchicalScene() 
+		HierarchicalScene();
+		
+		~HierarchicalScene();
+
+		void clear();
+
+		int findMeshIndexByName(std::string name);
+		int findObjectIndexByName(std::string name);
+		void pushBackBone(std::shared_ptr<Bone> bone);
+		void pushBackMesh(std::shared_ptr<MeshInfo> mesh);
+		std::shared_ptr<ModelObject> getObjectByName(std::string name);
+		int getObjIndexByName(std::string name);
+		int getBoneIndexByName(std::string name);
+		void updateWorldMatrix();
+		void updateInverseBindMatrix();
+		void updateWorldTransformByKeyFrame(Real time);
+		Real getVectorDataByTime(std::vector<Real> data, std::vector<Real> timeCode, Real time);
+		int findMaxSmallerIndex(const std::vector<float>& arr, float v);
+		std::vector<std::shared_ptr<Bone>>& getBones() { return mBones; }
+		void skinAnimation(
+			DArray<Vec3f>& intialPosition,
+			DArray<Vec3f>& worldPosition,
+			DArray<Mat4f>& joint_inverseBindMatrix,
+			DArray<Mat4f>& WorldMatrix,
+			DArray<Vec4f>& bind_joints_0,
+			DArray<Vec4f>& bind_joints_1,
+			DArray<Vec4f>& bind_joints_2,
+			DArray<Vec4f>& weights_0,
+			DArray<Vec4f>& weights_1,
+			DArray<Vec4f>& weights_2,
+			Mat4f transform,
+			bool isNormal,
+			Vec2u range
+		);
+
+		void UpdateJointData();
+
+		void coutBoneHierarchial();
+
+		void updateSkinData(std::shared_ptr<TextureMesh> texMesh);
+
+		Mat4f createLocalTransform(std::shared_ptr<ModelObject> object);
+
+		void coutMatrix(int id, Mat4f c)
 		{
-			mTimeStart = -1;
-			mTimeEnd = -1;
-		}
-		~HierarchicalScene() { clear(); }
-
-		void clear() 
-		{
-			mModelObjects.clear();
-		}
-
-		int findMeshIndexByName(std::string name)
-		{
-			int id = 0;
-			for (auto it : mMeshs) {
-				if (it->name == name)
-					return id;
-
-				id++;
-			}
-			return -1;
-		}
-
-		std::shared_ptr<ModelObject> getObjectByName(std::string name)
-		{
-			for (auto it : mModelObjects) {
-				if (it->name == name) 
-				{
-					return it;
-				}
-			}
-
-			return nullptr;
-		}
-
-		int getObjIndexByName(std::string name)
-		{
-			int id = 0;
-			for (auto it : mModelObjects) {
-				if (it->name == name)
-					return id;
-
-				id++;
-			}
-			return -1;
-		}
-
-		int getBoneIndexByName(std::string name) 
-		{
-			int id = 0;
-			for (auto it : mBones) {
-				if (it->name == name)
-					return id;
-
-				id++;
-			}
-			return -1;
+			printf("********** step: %d  ***********\n%f,%f,%f,%f\n%f,%f,%f,%f\n%f,%f,%f,%f\n%f,%f,%f,%f\n ***********************\n\n",
+				id,
+				c(0, 0), c(0, 1), c(0, 2), c(0, 3),
+				c(1, 0), c(1, 1), c(1, 2), c(1, 3),
+				c(2, 0), c(2, 1), c(2, 2), c(2, 3),
+				c(3, 0), c(3, 1), c(3, 2), c(3, 3)
+			);
 		}
 
-
-		void updateInverseBindMatrix() 
+		void showJointInfo()
 		{
-			for (auto it : mBones)
-			{
-				//build inverseBindMatrix
-				std::cout << "********************" << it->name << "\n";
-				int select = getBoneIndexByName(it->name);
-				if (select == -1)continue;
-
-				Mat4f inverseMatrix = it->localTransform.inverse();
-				for (size_t i = 0; i < it->parent.size(); i++)
-				{
-					auto parent = it->parent[i];
-					inverseMatrix *= parent->localTransform.inverse();
-					std::cout << parent->name << "\n";
-				};
-
-				mBoneInverseBindMatrix[select] = inverseMatrix;
-			}
-		}
-
-		void updateFrameWorldTransform(Real time) //Ê±¼ä²åÖµ
-		{
-			
-			//update Animation to mBoneRotations/mBoneTranslations/mBoneScales
-			for (size_t i = 0; i < mBones.size(); i++)
-			{
-				int select = getBoneIndexByName(mBones[i]->name);
-				if (select == -1)continue;
-
-				auto iterR = mBones[select];
-
-				//Rotation
-				mBoneRotations[select].x = getVectorDataByTime(mBones[select]->m_Rotation_Values[0], mBones[select]->m_Rotation_Times[0], time);
-				mBoneRotations[select].y = getVectorDataByTime(mBones[select]->m_Rotation_Values[1], mBones[select]->m_Rotation_Times[1], time);
-				mBoneRotations[select].z = getVectorDataByTime(mBones[select]->m_Rotation_Values[2], mBones[select]->m_Rotation_Times[2], time);
-				//Translation
-				mBoneTranslations[select].x = getVectorDataByTime(mBones[select]->m_Translation_Values[0], mBones[select]->m_Translation_Times[0], time);
-				mBoneTranslations[select].y = getVectorDataByTime(mBones[select]->m_Translation_Values[1], mBones[select]->m_Translation_Times[1], time);
-				mBoneTranslations[select].z = getVectorDataByTime(mBones[select]->m_Translation_Values[2], mBones[select]->m_Translation_Times[2], time);
-				//Scale
-				mBoneScales[select].x = getVectorDataByTime(mBones[select]->m_Scale_Values[0], mBones[select]->m_Scale_Times[0], time);
-				mBoneScales[select].y = getVectorDataByTime(mBones[select]->m_Scale_Values[1], mBones[select]->m_Scale_Times[1], time);
-				mBoneScales[select].z = getVectorDataByTime(mBones[select]->m_Scale_Values[2], mBones[select]->m_Scale_Times[2], time);
-			}
+			std::string str;
 
 			for (auto it : mBones)
 			{
-				int select = getBoneIndexByName(it->name);
-				if (select == -1)continue;
-
-				Mat4f worldMatrix = it->localTransform;
-				for (size_t i = 0; i < it->parent.size(); i++){
-					auto parent = it->parent[i];
-					worldMatrix *= parent->localTransform;
-				};
-				
-				mBoneWorldMatrix[select] = worldMatrix;
-			}
-			currentTime = time;
-			
-		};
-
-		Real getVectorDataByTime(std::vector<Real> data,std::vector<Real> timeCode,Real time)
-		{
-			if (!bool(data.size()))
-				return 0;
-
-			int idx = findMaxSmallerIndex(timeCode, time);
-			if (idx >= data.size() - 1) {				//   [size-1]<=[tId]  
-				return data[data.size() - 1];
-			}
-			else if(idx >= 0) {
-				if (data[idx] != data[idx + 1]) {
-					float weight = (time - timeCode[idx]) / (timeCode[idx + 1] - timeCode[idx]);
-					return lerp(data[idx], data[idx + 1], weight);
+				if (!it->parent.size()) 
+				{
+					str.append(it->name);
+					buildTree(str,it->child,1);
 				}
-				else
-					return data[idx];
 			}
-			else {
-				return data[0];
-			}
+			std::cout << str << "\n";
 		}
 
-		int findMaxSmallerIndex(const std::vector<float>& arr, float v) {
-			int left = 0;
-			int right = arr.size() - 1;
-			int maxIndex = -1;
+	private :
 
-			if (arr.size() >= 1)
+		void buildTree(std::string& str, const std::vector<std::shared_ptr<ModelObject>>& child, uint level)
+		{
+			str.append("\n");
+
+			for (auto chi : child)
 			{
-				if (arr[0] > v)
-					return 0;
-
-				if (arr[arr.size() - 1] < v)
-					return arr.size() - 1;
-			}
-
-			while (left <= right) {
-				int mid = left + (right - left) / 2;
-
-				if (arr[mid] <= v) {
-					maxIndex = mid;
-					left = mid + 1;
+				for (size_t i = 0; i < level; i++)
+				{
+					str.append(" ");
 				}
-				else {
-					right = mid - 1;
-				}
+				str.append("-");
+				str.append(chi->name);
+				buildTree(str, chi->child,level + 1);
 			}
-
-			return maxIndex;
 		}
 
 	public:
 
 		std::vector<std::shared_ptr<ModelObject>> mModelObjects;
 		std::vector<std::shared_ptr<MeshInfo>> mMeshs;
-		std::vector<std::shared_ptr<Bone>> mBones;;
+		std::vector<std::shared_ptr<Bone>> mBones;
 		std::vector<Vec3f> mBoneRotations;
 		std::vector<Vec3f> mBoneTranslations;
 		std::vector<Vec3f> mBoneScales;
 		std::vector<Mat4f> mBoneWorldMatrix;
 		std::vector<Mat4f> mBoneInverseBindMatrix;
+		std::vector<Mat4f> mBoneLocalMatrix;
+
+		std::shared_ptr<JointInfo> mJointData;
+		std::shared_ptr<SkinInfo> mSkinData;
+		std::shared_ptr<JointAnimationInfo> mJointAnimationData;
 
 		float mTimeStart = -1;
 		float mTimeEnd = -1;
 
 
 	private:
-		Real lerp(Real v0, Real v1, float weight)
-		{
-			return v0 + (v1 - v0) * weight;
-		}
+		Real lerp(Real v0, Real v1, float weight);
 		Real currentTime = ERRORTIME;
 	};
 	
-
+	
 }

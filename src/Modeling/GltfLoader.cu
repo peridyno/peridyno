@@ -268,6 +268,18 @@ namespace dyno
 
 		std::vector<std::vector<int>> joint_child;	//build edgeset;
 
+		for (auto it : nodeId_Dir)
+		{
+			auto dir = it.second;
+			std::cout << node_Name[it.first] << " ::  ";
+			for (auto jid : dir)
+			{
+				std::cout << node_Name[jid] << " - ";
+			}
+			std::cout << "\n";
+		}
+
+
 		//get Local Transform T S R M 
 		getJointsTransformData(all_Nodes, joint_child, joint_rotation, joint_scale, joint_translation, joint_matrix, *newModel);
 
@@ -283,6 +295,7 @@ namespace dyno
 		for (auto jId : all_Joints)
 		{
 			localMatrix[jId] = joint_matrix[jId];
+
 		}
 
 		this->stateJointLocalMatrix()->assign(localMatrix);
@@ -327,7 +340,7 @@ namespace dyno
 		loadGLTFShape(*newModel, texMesh, filename, &initialPosition,&initialNormal, &d_mesh_Matrix,&d_shape_meshId, this->stateSkin()->getDataPtr());
 		
 
-		this->updateTransform();
+
 		
 		this->stateSkin()->getDataPtr()->mesh = texMesh;
 
@@ -337,7 +350,7 @@ namespace dyno
 
 		
 
-		this->stateJointsData()->getDataPtr()->UpdateJointInfo(
+		this->stateJointsData()->getDataPtr()->setGltfJointInfo(
 			this->stateJointInverseBindMatrix()->getData(),
 			this->stateJointLocalMatrix()->getData(),
 			this->stateJointWorldMatrix()->getData(),
@@ -350,21 +363,24 @@ namespace dyno
 
 		this->stateJointsData()->getDataPtr()->setJointName(joint_Name);
 
-		this->stateAnimation()->getDataPtr()->setAnimationData(
+		this->stateAnimation()->getDataPtr()->setGLTFAnimationData(
 			joint_T_f_anim,
 			joint_T_Time,
 			joint_S_f_anim,
 			joint_S_Time,
 			joint_R_f_anim,
 			joint_R_Time,
-			this->stateJointsData()->getDataPtr()
+			this->stateJointsData()->getDataPtr(),
+			true
 			);
 
-		this->stateAnimation()->getDataPtr()->setLoop(false);
+
 
 		this->updateAnimation(0);
 
 		delete newModel;
+
+		this->updateTransform();
 	}
 
 	// ***************************** function *************************** //
@@ -377,7 +393,7 @@ namespace dyno
 		auto animation = this->stateAnimation()->getDataPtr();
 		if (all_Joints.size())	//Animation
 		{
-			if (varImportAnimation()->getValue() && (!animation->mJoint_Index_Translation.empty() && !animation->mJoint_Index_Rotation.empty() && !animation->mJoint_Index_Scale.empty()))
+			if (varImportAnimation()->getValue() && animation->isGltfAnimation())
 				updateAnimation(this->stateFrameNumber()->getValue());
 
 		}
@@ -499,7 +515,7 @@ namespace dyno
 		ParametricModel<TDataType>::updateStates();
 		auto animation = this->stateAnimation()->getDataPtr();
 
-		if (joint_output.empty() || !this->varImportAnimation()->getValue() || (animation->mJoint_Index_Rotation.empty()&& animation->mJoint_Index_Translation.empty()&&animation->mJoint_Index_Scale.empty()))
+		if (joint_output.empty() || !this->varImportAnimation()->getValue() || !animation->isGltfAnimation())
 			return;
 
 		updateAnimation(this->stateFrameNumber()->getValue());
@@ -517,36 +533,36 @@ namespace dyno
 		auto mesh = this->stateTextureMesh()->getDataPtr();
 
 
-		this->stateAnimation()->getDataPtr()->updateAnimationPose(this->stateElapsedTime()->getValue()* this->varAnimationSpeed()->getValue());
-
-
-		//update Joints
-		cuExecute(all_Joints.size(),
-			jointAnimation,
-			this->stateJointSet()->getDataPtr()->getPoints(),
-			this->stateJointsData()->getDataPtr()->mJointWorldMatrix,
-			d_joints,
-			this->stateTransform()->getValue()
-		);
-
-
-		//update Points
-
-		auto& skinInfo = this->stateSkin()->getData();
-
-
-		for (size_t i = 0; i < skinInfo.size(); i++)//
+		if (this->varImportAnimation()->getValue() == true) 
 		{
-			auto& bindJoint0 = skinInfo.V_jointID_0[i];
-			auto& bindJoint1 = skinInfo.V_jointID_1[i];
+		
+			this->stateAnimation()->getDataPtr()->updateAnimationPose(this->stateElapsedTime()->getValue() * this->varAnimationSpeed()->getValue());
 
-			auto& bindWeight0 = skinInfo.V_jointWeight_0[i];
-			auto& bindWeight1 = skinInfo.V_jointWeight_1[i];
 
-			for (size_t j = 0; j < skinInfo.skin_VerticeRange[i].size(); j++)
+			//update Joints
+			cuExecute(all_Joints.size(),
+				jointAnimation,
+				this->stateJointSet()->getDataPtr()->getPoints(),
+				this->stateJointsData()->getDataPtr()->mJointWorldMatrix,
+				d_joints,
+				this->stateTransform()->getValue()
+			);
+			//update Points
+
+			auto& skinInfo = this->stateSkin()->getData();
+
+
+			for (size_t i = 0; i < skinInfo.size(); i++)//
 			{
+				auto& bindJoint0 = skinInfo.V_jointID_0[i];
+				auto& bindJoint1 = skinInfo.V_jointID_1[i];
+
+				auto& bindWeight0 = skinInfo.V_jointWeight_0[i];
+				auto& bindWeight1 = skinInfo.V_jointWeight_1[i];
+
+
 				//
-				Vec2u& range = skinInfo.skin_VerticeRange[i][j];
+				Vec2u& range = skinInfo.skin_VerticeRange[i];
 
 				skinAnimation(initialPosition,
 					mesh->vertices(),
@@ -579,8 +595,14 @@ namespace dyno
 					range
 				);
 
+
 			}
+
 		}
+
+
+
+		
 		
 
 	};

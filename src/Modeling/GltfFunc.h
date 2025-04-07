@@ -8,7 +8,7 @@
 #include "Topology/TextureMesh.h"
 #include "tinygltf/tiny_gltf.h"
 #include "Field/FilePath.h"
-#include "SkinInfo.h"
+#include "Topology/SkinInfo.h"
 
 #define NULL_TIME (-9599.99)
 
@@ -89,7 +89,6 @@ namespace dyno
 		int& maxJointId
 	);
 
-	std::vector<int> getJointDirByJointIndex(int Index, std::map<joint, std::vector<int>> jointId_joint_Dir);
 
 	void getMeshMatrix(
 		tinygltf::Model& model,

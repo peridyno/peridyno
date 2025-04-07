@@ -25,8 +25,8 @@
 #include "GLWireframeVisualModule.h"
 
 #include "Field/FilePath.h"
-#include "SkinInfo.h"
-#include "JointInfo.h"
+#include "Topology/SkinInfo.h"
+#include "Topology/JointInfo.h"
 
 namespace dyno
 {
@@ -62,8 +62,10 @@ namespace dyno
 
 		DEF_INSTANCE_IN(JointInfo, Joint, "Joint");
 		DEF_INSTANCE_IN(SkinInfo, Skin, "Skin");	
+		DEF_INSTANCE_IN(JointAnimationInfo, Animation, "Animation");
+		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "");
 		DEF_ARRAYLIST_IN(Transform3f, InstanceTransform, DeviceType::GPU, "InstanceTransform");
-		DEF_INSTANCE_STATE(TextureMesh, TextureMesh, "");
+		
 
 	protected:
 		void resetStates() override;
@@ -76,7 +78,7 @@ namespace dyno
 
 	private:
 
-		void updateAnimation(int frameNumber);
+		void updateAnimation(float time);
 
 
 	};

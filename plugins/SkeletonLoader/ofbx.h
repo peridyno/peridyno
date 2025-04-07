@@ -30,7 +30,7 @@ using JobProcessor = void (*)(JobFunction, void*, void*, u32, u32);
 enum class LoadFlags : u16
 {
 	NONE = 0,
-	UNUSED = 1 << 0, // can be reused
+	KEEP_MATERIAL_MAP = 1 << 0, // keep material map even if IGNORE_GEOMETRY is used
 	IGNORE_GEOMETRY = 1 << 1,
 	IGNORE_BLEND_SHAPES = 1 << 2,
 	IGNORE_CAMERAS = 1 << 3,
@@ -394,6 +394,7 @@ struct Camera : Object
 
 	virtual double getNearPlane() const = 0;
 	virtual double getFarPlane() const = 0;
+	virtual double getOrthoZoom() const = 0;
 	virtual bool doesAutoComputeClipPanes() const = 0;
 
 	virtual GateFit getGateFit() const = 0;
@@ -536,6 +537,7 @@ struct GeometryPartition {
 	const int triangles_count; // number of triangles after polygon triangulation, can be used for preallocation
 };
 
+// if we use LoadFlags::IGNORE_GEOMETRY, values here are empty/invalid, with a few exceptions
 struct GeometryData {
 	virtual ~GeometryData() {}
 	
@@ -546,6 +548,14 @@ struct GeometryData {
 	virtual Vec3Attributes getTangents() const = 0;
 	virtual int getPartitionCount() const = 0;
 	virtual GeometryPartition getPartition(int partition_index) const = 0;
+	
+	// if we use LoadFlags::KEEP_MATERIAL_MAP, following is valid even if we use IGNORE_GEOMETRY
+	virtual const int getMaterialMapSize() const = 0;
+	virtual const int* getMaterialMap() const = 0;
+
+	// returns true if there are vertices in the geometry
+	// this has valid value even if we use LoadFlags::IGNORE_GEOMETRY
+	virtual bool hasVertices() const = 0;
 };
 
 

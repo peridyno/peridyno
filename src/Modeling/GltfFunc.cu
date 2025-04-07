@@ -1,5 +1,6 @@
 
 #include "GltfFunc.h"
+#include "Topology/JointInfo.h"
 #include "ImageLoader.h"
 
 #define NULL_POSITION (-959959.9956)
@@ -180,7 +181,7 @@ namespace dyno
 
 		int primitive_PointOffest;
 		int currentShape = 0;
-		std::map<int, std::vector<Vec2u>> shape2VerticeRange;
+		std::map<int, Vec2u> shape2VerticeRange;
 
 		std::map<int, int> shape_meshId;
 		//skin_VerticeRange;
@@ -195,6 +196,7 @@ namespace dyno
 				std::vector<dyno::TopologyModule::Triangle> texCoordIndex;
 
 				int primNum = model.meshes[mId].primitives.size();
+				
 
 				for (size_t pId = 0; pId < primNum; pId++)	//shape
 				{
@@ -209,9 +211,7 @@ namespace dyno
 
 					//Set Vertices
 					getVec3fByAttributeName(model, primitive, std::string("POSITION"), vertices);
-					shape2VerticeRange[tempShapeId].push_back(Vec2u(tempSize, vertices.size() - 1));
-					tempShapeId++;
-					tempSize = vertices.size();
+
 
 					//Set Normal
 					getVec3fByAttributeName(model, primitive, std::string("NORMAL"), normals);
@@ -281,6 +281,9 @@ namespace dyno
 					}
 					currentShape++;
 				}
+				shape2VerticeRange[tempShapeId] = Vec2u(tempSize, vertices.size() - 1);
+				tempShapeId++;
+				tempSize = vertices.size();
 			}
 		}
 
@@ -330,7 +333,7 @@ namespace dyno
 
 			if (skinData != nullptr) 
 			{
-				skinData->clearSkinInfo();
+				skinData->clear();
 				{
 					int tempShapeId = 0;
 					for (int mId = 0; mId < model.meshes.size(); mId++)
@@ -981,26 +984,7 @@ namespace dyno
 		}
 	}
 
-	std::vector<int> getJointDirByJointIndex(int Index, std::map<joint, std::vector<int>> jointId_joint_Dir)
-	{
-		std::vector<int> jointDir;
-		std::map<int, std::vector<int>>::const_iterator iter;
 
-		//get skeletal chain
-		iter = jointId_joint_Dir.find(Index);
-		if (iter == jointId_joint_Dir.end())
-		{
-			std::cout << "Error: not found JointIndex \n";
-			return jointDir;
-		}
-
-		jointDir = iter->second;
-		return jointDir;
-	}
-
-
-
-	
 
 
 	void buildInverseBindMatrices(

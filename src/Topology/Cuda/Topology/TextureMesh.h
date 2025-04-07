@@ -18,6 +18,7 @@
 
 #include "Module/TopologyModule.h"
 #include "Primitive/Primitive3D.h"
+#include "TriangleSet.h"
 
 
 namespace dyno
@@ -84,6 +85,35 @@ namespace dyno
 		void merge(const std::shared_ptr<TextureMesh>& texMesh01, const std::shared_ptr<TextureMesh>& texMesh02);
 
 		void clear();
+
+		void safeConvert2TriangleSet(TriangleSet<DataType3f>& triangleSet) 
+		{
+			triangleSet.setPoints(this->vertices());
+			auto& triangles = triangleSet.getTriangles();
+
+			int size = 0;
+			for (auto it : mShapes)
+			{
+				size += it->vertexIndex.size();
+			}
+			triangles.resize(size);
+
+			convert2TriangleSet(triangleSet);
+		}
+
+		void convert2TriangleSet(TriangleSet<DataType3f>& triangleSet) 
+		{
+			triangleSet.setPoints(this->vertices());
+			auto& triangles = triangleSet.getTriangles();
+
+			int offset = 0;
+			for (size_t i = 0; i < mShapes.size(); i++)
+			{
+				auto shape = mShapes[i];
+				triangles.assign(shape->vertexIndex, shape->vertexIndex.size(), offset,0);
+				offset += shape->vertexIndex.size();
+			}
+		}
 
 	private:
 		DArray<Vec3f> mVertices;

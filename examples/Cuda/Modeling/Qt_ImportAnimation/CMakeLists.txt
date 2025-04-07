@@ -7,6 +7,7 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
         SemiAnalyticalScheme
         Multiphysics
         SkeletonLoader
+        ObjIO
         QtGUI)
     add_example(Qt_ImportAnimation Modeling LIB_DEPENDENCY)
 endif()

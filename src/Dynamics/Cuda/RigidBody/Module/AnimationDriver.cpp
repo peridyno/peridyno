@@ -35,7 +35,7 @@ namespace dyno
 		auto hinge_DriveObjName = this->varDriverName()->getValue();
 
 
-		for (size_t i = 0; i < hinge_DriveObjName.size(); i++)
+	/*	for (size_t i = 0; i < hinge_DriveObjName.size(); i++)
 		{
 			auto name = hinge_DriveObjName[i];
 			auto bone = hierarchicalScene->getObjectByName(name);
@@ -136,7 +136,7 @@ namespace dyno
 		}
 
 
-		d_hinge.assign(c_hinge);
+		d_hinge.assign(c_hinge);*/
 
 
 	}
