@@ -414,7 +414,7 @@ namespace dyno {
 			else {
 				const float d = 1.0f - q;
 				const float hh = h * h;
-				return (1.0 - pow(q, 4.0f)) * scale;
+				return (1.0 - glm::pow(q, 4.0f)) * scale;
 			}
 		}
 
@@ -466,7 +466,7 @@ namespace dyno {
 			if (q > 1.0f) return 0.0f;
 			else {
 				Real p = 1.0 - q;
-				return alpha * pow(p, 4.0) * (1 + 4 * q) * scale;
+				return alpha * glm::pow(p, 4.0) * (1 + 4 * q) * scale;
 			}
 		}
 
@@ -477,7 +477,7 @@ namespace dyno {
 			if (q > 1.0f) return 0.0f;
 			else {
 				Real p = 1.0 - q;
-				Real p3 = pow(p, 3.0);
+				Real p3 = glm::pow(p, 3.0);
 				return scale * 4 * alpha * (p * p3 - p3 * (1 + 4 * q));
 			}
 
@@ -515,7 +515,7 @@ namespace dyno {
 			else {
 				//const float d = 1.0f - q;
 				//const float hh = h * h;
-				return (1.0 - pow(q, 4.0f));
+				return (1.0 - glm::pow(q, 4.0f));
 			}
 		}
 
