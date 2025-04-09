@@ -80,5 +80,7 @@ private:
 
 	bool mMouseButtonDown = false;
 
+	int mCursorX = -1;
+	int mCursorY = -1;
 	int mtempCursorX = -1;
 };
