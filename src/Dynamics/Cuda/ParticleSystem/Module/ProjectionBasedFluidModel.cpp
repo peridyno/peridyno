@@ -42,6 +42,7 @@ namespace dyno
 		viscosity->varViscosity()->setValue(Real(0.5));
 		this->inTimeStep()->connect(viscosity->inTimeStep());
 		this->varSmoothingLength()->connect(viscosity->inSmoothingLength());
+		this->varSamplingDistance()->connect(viscosity->inSamplingDistance());
 		this->inPosition()->connect(viscosity->inPosition());
 		this->inVelocity()->connect(viscosity->inVelocity());
 		nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());

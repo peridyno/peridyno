@@ -10,8 +10,10 @@ namespace dyno
 	GhostFluid<TDataType>::GhostFluid()
 		: ParticleFluid<TDataType>()
 	{
+		this->animationPipeline()->clear();
+
 		auto model = std::make_shared<ProjectionBasedFluidModel<DataType3f>>();
-		model->varSmoothingLength()->setValue(0.01);
+		model->varSmoothingLength()->setValue(0.0125);
 		
 		this->stateTimeStep()->connect(model->inTimeStep());
 		this->statePositionMerged()->connect(model->inPosition());
