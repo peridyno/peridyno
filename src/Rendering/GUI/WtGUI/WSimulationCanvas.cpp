@@ -338,15 +338,8 @@ void WSimulationCanvas::onMouseReleased(const Wt::WMouseEvent& evt)
 		{
 			int x = evt.widget().x;
 			int y = evt.widget().y;
-
-			//int w = std::abs(mCursorX - x);
-			//int h = std::abs(mCursorY - y);
 			int w = mCamera->viewportWidth();
 			int h = mCamera->viewportHeight();
-			//x = std::min(mCursorX, x);
-			//y = std::min(mCursorY, y);
-			// flip y
-			//y = this->height - y - 1;
 
 			makeCurrent();
 			const auto& selection = this->select(x, y, w, h);

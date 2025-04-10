@@ -16,7 +16,6 @@
 #include <Wt/WNavigationBar.h>
 #include <Wt/WTreeView.h>
 #include <Wt/WTableView.h>
-#include <Wt/WStackedWidget.h>
 #include <Wt/WText.h>
 #include <Wt/WTable.h>
 #include <Wt/WColorPicker.h>
@@ -36,12 +35,15 @@
 #include <Wt/WContainerWidget.h>
 #include "WParameterDataNode.h"
 #include "NodeEditor/WtFlowWidget.h"
+#include "WNodeGraphics.h"
+#include "WModuleGraphics.h"
 #include "WSaveWidget.h"
 #include "WLogWidget.h"
 #include "NodeFactory.h"
 #include "WPythonWidget.h"
 #include "WSceneDataModel.h"
 #include "WSimulationCanvas.h"
+#include "WSimulationControl.h"
 #include "WSampleWidget.h"
 #include "WRenderParamsWidget.h"
 #include "WPythonWidget.h"
@@ -89,39 +91,33 @@ public:
 	std::shared_ptr<WParameterDataNode> mParameterDataNode;
 
 private:
+	void initNavigationBar(Wt::WBorderLayout*);
+	void initCenterContainer(Wt::WBorderLayout*);
 	void initRightPanel(Wt::WContainerWidget*);
-	void initSimulationControl(Wt::WContainerWidget*);
 	void initAddNodePanel(Wt::WPanel* parent);
+
 
 	std::unique_ptr<Wt::WWidget> initNodeGraphics();
 	std::unique_ptr<Wt::WWidget> initPython();
 	std::unique_ptr<Wt::WWidget> initSample();
 	std::unique_ptr<Wt::WWidget> initSave();
 	std::unique_ptr<Wt::WWidget> initLog();
-
-	void start();
-	void stop();
-	void step();
-	void reset();
+	std::unique_ptr<Wt::WWidget> initModuleGraphics();
 
 private:
 	int viewportHeight;
 	int viewportWidth;
 
-	WSimulationCanvas* mSceneCanvas;
-	WtFlowWidget* mFlowWidget;
-
-	bool	bRunFlag;
-	bool	mReset;
-
 	std::shared_ptr<dyno::SceneGraph>	mScene = nullptr;
 	std::shared_ptr<dyno::Node> mActiveNode;
+
+	WSimulationCanvas* mSceneCanvas;
+	WSimulationControl* controlContainer;
+	WtFlowWidget* mFlowWidget;
 	WPythonWidget* pythonWidget;
 
-	Wt::WPushButton* startButton;
-
 	Wt::WContainerWidget* rightWidget;
-	Wt::WContainerWidget* bottomWidget;
+
 	Wt::WTabWidget* tab;
 
 	int Initial_x = 0;
