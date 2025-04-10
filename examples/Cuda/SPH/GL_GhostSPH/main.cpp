@@ -132,7 +132,7 @@ std::shared_ptr<SceneGraph> createScene()
 	//Create a container
 	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
 	cubeBoundary->varLocation()->setValue(Vec3f(0.0f, 0.5f, 0.0f));
-	cubeBoundary->varLength()->setValue(Vec3f(1.0f));
+	cubeBoundary->varLength()->setValue(Vec3f(0.4f, 1.0f, 0.4f));
 
 	auto cube2vol = scn->addNode(std::make_shared<BasicShapeToVolume<DataType3f>>());
 	cube2vol->varGridSpacing()->setValue(0.02f);

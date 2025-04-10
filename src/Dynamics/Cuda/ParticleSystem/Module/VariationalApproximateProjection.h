@@ -19,6 +19,7 @@
 
 //ParticleSystem
 #include "ParticleApproximation.h"
+#include "ParticleSystem/Module/Kernel.h"
 
 namespace dyno 
 {
@@ -44,7 +45,6 @@ namespace dyno
 		VariationalApproximateProjection();
 		~VariationalApproximateProjection() override;
 		
-	public:
 		DEF_VAR(Real, RestDensity, Real(1000), "");
 
 		DEF_VAR_IN(Real, TimeStep, "Time step size");
@@ -59,13 +59,18 @@ namespace dyno
 		
 		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "");
 
-
-	protected:
 		void compute() override;
 
+		void resizeArray(int num);
+
+		void varChanged();
+		
+	protected:
+
 	private:
+
 		Real mAlphaMax;
-		Real mAMax;
+		Real mAMax = 0.0f;
 		Real mAirPressure = 0.0f;
 
 		Real mTangential = 0.1f;
@@ -91,6 +96,8 @@ namespace dyno
 
 		Reduction<Real>* m_reduce;
 		Arithmetic<Real>* m_arithmetic;
+
+		CorrectedMPSKernel<Real> Mpskernel;
 
 		std::shared_ptr<SummationDensity<TDataType>> mDensityCalculator;
 	};

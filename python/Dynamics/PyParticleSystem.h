@@ -167,8 +167,8 @@ void declare_position_based_fluid_model(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("PositionBasedFluidModel") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_sampling_distance", &Class::varSamplingDistance, py::return_value_policy::reference)
-		.def("var_smoothing_length", &Class::varSmoothingLength, py::return_value_policy::reference)
+		.def("in_sampling_distance", &Class::inSamplingDistance, py::return_value_policy::reference)
+		.def("in_smoothing_length", &Class::inSmoothingLength, py::return_value_policy::reference)
 		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
 		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
 		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference);
@@ -182,8 +182,8 @@ void declare_projection_based_fluid_model(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ProjectionBasedFluidModel") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_sampling_distance", &Class::varSamplingDistance, py::return_value_policy::reference)
-		.def("var_smoothing_length", &Class::varSmoothingLength, py::return_value_policy::reference)
+		.def("in_sampling_distance", &Class::inSamplingDistance, py::return_value_policy::reference)
+		.def("in_smoothing_length", &Class::inSmoothingLength, py::return_value_policy::reference)
 		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
 		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
 		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
