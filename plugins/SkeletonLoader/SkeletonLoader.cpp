@@ -5,6 +5,8 @@
 #include "GLWireframeVisualModule.h"
 #include <regex>
 #include "ImageLoader.h"
+#include "Mapping/TextureMeshToTriangleSet.h"
+
 
 #define STB_IMAGE_IMPLEMENTATION
 
@@ -21,13 +23,19 @@ namespace dyno
 	{
 		auto defaultTopo = std::make_shared<DiscreteElements<TDataType>>();
 		this->stateTopology()->setDataPtr(defaultTopo);
-		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
+
 		this->statePolygonSet()->setDataPtr(std::make_shared<PolygonSet<TDataType>>());
 		this->stateTextureMesh()->setDataPtr(std::make_shared<TextureMesh>());
 
 		auto texmeshRender = std::make_shared<GLPhotorealisticRender>();
 		this->stateTextureMesh()->connect(texmeshRender->inTextureMesh());
 		this->graphicsPipeline()->pushModule(texmeshRender);
+
+		auto convert2TriSet = std::make_shared<TextureMeshToTriangleSet<TDataType>>();
+		this->stateTextureMesh()->connect(convert2TriSet->inTextureMesh());
+
+		this->animationPipeline()->getParentNode()->addOutputField(convert2TriSet->outTriangleSet());
+		this->animationPipeline()->pushModule(convert2TriSet);
 
 		this->stateHierarchicalScene()->setDataPtr(std::make_shared<HierarchicalScene>());
 		this->setForceUpdate(false);
@@ -39,8 +47,10 @@ namespace dyno
 		auto callbackImport = std::make_shared<FCallBackFunc>(std::bind(&SkeletonLoader<TDataType>::initFBX, this));
 		this->varFileName()->attach(callbackImport);
 		this->varUseInstanceTransform()->attach(callbackImport);
+		this->varImportAnimation()->attach(callbackImport);
 
-		auto callbackTransform = std::make_shared<FCallBackFunc>(std::bind(&SkeletonLoader<TDataType>::transform, this));
+
+		auto callbackTransform = std::make_shared<FCallBackFunc>(std::bind(&SkeletonLoader<TDataType>::updateTransform, this));
 
 		this->varLocation()->attach(callbackTransform);
 		this->varScale()->attach(callbackTransform);
@@ -63,6 +73,20 @@ namespace dyno
 			this->graphicsPipeline()->pushModule(wireRender);
 		}
 
+		{
+			//this->stateShapeCenter()->setDataPtr(std::make_shared<PointSet<TDataType>>());
+			//auto ptRender = std::make_shared<GLPointVisualModule>();
+
+			//this->stateShapeCenter()->connect(ptRender->inPointSet());
+			//ptRender->varPointSize()->setValue(0.01);
+			//ptRender->setColor(Color::Red());
+
+			//this->graphicsPipeline()->pushModule(ptRender);
+			//ptRender->varVisible()->setValue(false);
+		}
+
+		this->stateTextureMesh()->promoteOuput();
+
 
 	}
 
@@ -74,14 +98,13 @@ namespace dyno
 		if (importAnimation) 
 		{
 			this->setForceUpdate(true);
-			//this->varUseInstanceTransform()->setValue(false);
 		}
 		else 
 		{
 			this->setForceUpdate(false);
-
 		}
 	}
+
 
 
 	template<typename TDataType>
@@ -89,6 +112,10 @@ namespace dyno
 	{
 		this->stateTextureMesh()->getDataPtr()->clear();
 		this->stateHierarchicalScene()->getDataPtr()->clear();
+
+		initialPosition.clear();
+		initialNormal.clear();
+		initialShapeCenter.clear();
 	}
 
 	template<typename TDataType>
@@ -156,13 +183,24 @@ namespace dyno
 			auto locT = currentMesh->getLocalTranslation();
 			auto preR = currentMesh->getPreRotation();
 
-			meshInfo->localTranslation = Vec3f(locT.x, locT.y, locT.z);
+			meshInfo->localTranslation = Vec3f(locT.x, locT.y, locT.z) * tempScale;
 			meshInfo->localRotation = Vec3f(locR.x, locR.y, locR.z);
 			meshInfo->localScale = Vec3f(locS.x, locS.y, locS.z);
 			meshInfo->preRotation = Vec3f(preR.x, preR.y, preR.z);
-			meshInfo->pivot = Vec3f(pivot.x, pivot.y, pivot.z);
+			meshInfo->pivot = Vec3f(pivot.x, pivot.y, pivot.z) * tempScale;
 			meshInfo->name = currentMesh->name;
 						
+			if (currentMesh->parent!=NULL)
+			{
+				parentTag[std::string(currentMesh->name)] = std::string(currentMesh->parent->name);
+				nameParentObj[std::string(currentMesh->name)] = meshInfo;
+			}
+			else
+			{
+				parentTag[std::string(currentMesh->name)] = std::string("No parent object");
+				nameParentObj[std::string(currentMesh->name)] = nullptr;
+			}
+
 			auto positionCount = currentMesh->getGeometry()->getGeometryData().getPositions().count;	
 
 			for (size_t i = 0; i < positionCount; i++)
@@ -256,25 +294,8 @@ namespace dyno
 				}
 				meshInfo->facegroup_polygons.push_back(polygons);
 				meshInfo->boundingBox.push_back(TAlignedBox3D<Real>(boundingMin, boundingMax));
-				if(this->varUseInstanceTransform()->getValue())
-					meshInfo->boundingTransform.push_back(Transform3f((boundingMax + boundingMin) / 2,Mat3f::identityMatrix(),Vec3f(1)));
-				else
-					meshInfo->boundingTransform.push_back(Transform3f());
 
-				for (size_t j = 0; j < polygonCount; j++)
-				{
-					auto& index = polygons[j];
-
-					auto from = currentMesh->getGeometry()->getGeometryData().getPartition(i).polygons[j].from_vertex;
-					auto verticesCount = currentMesh->getGeometry()->getGeometryData().getPartition(i).polygons[j].vertex_count;
-
-					for (size_t k = 0; k < verticesCount; k++)
-					{
-						int polyId = k + from;
-
-						meshInfo->vertices[polyId] = meshInfo->vertices[polyId] - meshInfo->boundingTransform[i].translation();
-					}
-				}
+				
 
 				TopologyModule::Triangle tri;
 				std::vector<TopologyModule::Triangle> triangles;
@@ -483,7 +504,7 @@ namespace dyno
 			meshs.push_back(meshInfo);
 		}
 
-		updateTextureMesh(meshs);
+		
 		buildHierarchy(parentTag, nameParentObj);
 
 		//const ofbx::GlobalSettings* settings = mFbxScene->getGlobalSettings();
@@ -492,14 +513,16 @@ namespace dyno
 
 
 		updateHierarchicalScene(meshs, bonesInfo);
+
+		updateTextureMesh(meshs);
 		
 		//this->stateHierarchicalScene()->getDataPtr()->mJointData->set
 
 		//targetScene->coutBoneHierarchial();
-		targetScene->updateSkinData(this->stateTextureMesh()->getDataPtr());
+		
 			
 		updateAnimation(0);
-		if (this->varImportAnimation() && bonesInfo.size())
+		if (this->varImportAnimation()->getValue() && bonesInfo.size())
 		{
 			//Update joints animation curve;
 			for (int i = 0, n = mFbxScene->getAnimationStackCount(); i < n; ++i) {
@@ -518,6 +541,7 @@ namespace dyno
 		}
 		targetScene->showJointInfo();
 
+
 		delete[] content;
 		fclose(fp);
 
@@ -532,14 +556,16 @@ namespace dyno
 	void SkeletonLoader<TDataType>::resetStates()
 	{
 
-
+		Node::resetStates();
+		this->animationPipeline()->update();
 	}
 
 	template<typename TDataType>
 	void SkeletonLoader<TDataType>::updateStates()
 	{
+
 		updateAnimation(this->stateElapsedTime()->getValue());
-		this->stateTextureMesh()->getDataPtr()->convert2TriangleSet(*this->stateTriangleSet()->getDataPtr());
+		Node::updateStates();
 	}
 
 	template<typename TDataType>
@@ -811,8 +837,6 @@ namespace dyno
 
 		}
 
-		this->stateTextureMesh()->getDataPtr()->safeConvert2TriangleSet(*this->stateTriangleSet()->getDataPtr());
-
 	}
 
 
@@ -929,15 +953,16 @@ namespace dyno
 
 		int tempID = 0;
 		int offset = 0;
+		std::vector<int> shapeId2MeshId;
 		for (size_t i = 0; i < meshsInfo.size(); i++)
 		{
-			auto shape = std::make_shared<Shape>();
-
+			
 			int meshFaceGroupNum = meshsInfo[i]->facegroup_triangles.size();
 			for (size_t j = 0; j < meshFaceGroupNum; j++)
 			{
 				auto triangles = meshsInfo[i]->facegroup_triangles[j];
 
+				auto shape = std::make_shared<Shape>();
 				for (size_t k = 0; k < triangles.size(); k++)
 				{
 					triangles[k][0] = triangles[k][0] + offset;
@@ -955,16 +980,68 @@ namespace dyno
 
 				texMesh->materials().push_back(meshsInfo[i]->materials[j]);
 				shape->material = meshsInfo[i]->materials[j];
-				shape->boundingBox = meshsInfo[i]->boundingBox[j];
-				shape->boundingTransform = meshsInfo[i]->boundingTransform[j];
 
-
+				shapeId2MeshId.resize(texMesh->shapes().size() + 1);
+				shapeId2MeshId[texMesh->shapes().size()] = meshsInfo[i]->id;
+				
 				texMesh->shapes().push_back(shape);
+
 			}
 			offset += mesh_VerticesNum[i];
 		}
 
 		texMesh->shapeIds().assign(shapeID);
+
+		initialPosition.assign(texMesh->vertices());
+		initialNormal.assign(texMesh->normals());
+
+		
+		std::vector<Mat4f> worldMatrix = this->stateHierarchicalScene()->getDataPtr()->getObjectWorldMatrix();
+		DArray<Mat4f> dWorldMatrix;
+
+		dWorldMatrix.assign(worldMatrix);
+		DArray<int> shapeId_MeshId;
+		shapeId_MeshId.assign(shapeId2MeshId);
+
+		this->stateHierarchicalScene()->getDataPtr()->shapeTransform(
+			initialPosition,
+			texMesh->vertices(),
+			initialNormal,
+			texMesh->normals(),
+			dWorldMatrix,
+			texMesh->shapeIds(),
+			shapeId_MeshId
+		);
+		
+
+		//update BoundingBox 
+
+
+
+		this->stateHierarchicalScene()->getDataPtr()->updateSkinData(this->stateTextureMesh()->getDataPtr());
+
+		//ToCenter
+		if (varUseInstanceTransform()->getValue())
+		{
+			initialShapeCenter = texMesh->updateTexMeshBoundingBox();
+
+			DArray<Vec3f> unCenterPosition;
+			DArray<Vec3f> d_ShapeCenter;
+
+			d_ShapeCenter.assign(initialShapeCenter);	// Used to "ToCenter"
+			unCenterPosition.assign(this->stateTextureMesh()->getDataPtr()->vertices());
+
+			this->stateHierarchicalScene()->getDataPtr()->shapeToCenter(unCenterPosition,
+				this->stateTextureMesh()->getDataPtr()->vertices(),
+				this->stateTextureMesh()->getDataPtr()->shapeIds(),
+				d_ShapeCenter
+			);
+
+		}
+
+		updateTransform();
+
+
 	}
 
 	template<typename TDataType>
@@ -973,7 +1050,7 @@ namespace dyno
 		for (auto mesh : meshsInfo)
 		{
 			scene->mModelObjects.push_back(mesh);
-			scene->mMeshs.push_back(mesh);
+			scene->mMeshes.push_back(mesh);
 		}
 	}
 
@@ -1007,9 +1084,34 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void SkeletonLoader<TDataType>::transform()
+	void SkeletonLoader<TDataType>::updateTransform()
 	{
-		updateAnimation(0);
+
+
+		if(this->stateHierarchicalScene()->getDataPtr()->getBones().size())
+			updateAnimation(0);
+		else
+		{
+			auto& shape = this->stateTextureMesh()->getDataPtr()->shapes();
+			if (varUseInstanceTransform()->getValue())
+			{
+				for (size_t i = 0; i < shape.size(); i++)
+				{
+					auto quat = this->computeQuaternion();
+					shape[i]->boundingTransform.translation() = quat.rotate(initialShapeCenter[i]) * this->varScale()->getValue() + this->varLocation()->getValue();
+					shape[i]->boundingTransform.rotation() = quat.toMatrix3x3();
+					shape[i]->boundingTransform.scale() = this->varScale()->getValue();
+				}
+			}
+			else
+			{
+				for (size_t i = 0; i < shape.size(); i++)
+				{
+					shape[i]->boundingTransform.translation() = Vec3f(0);
+				}
+			}
+
+		}
 	}
 
 	template<typename TDataType>
@@ -1017,16 +1119,7 @@ namespace dyno
 	{
 		auto targetScene = this->stateHierarchicalScene()->getDataPtr();
 
-		Mat4f nodeRotation = this->computeQuaternion().toMatrix4x4();;
-		Vec3f nodeLocation = this->varLocation()->getValue();
-		Vec3f nodeSale = this->varScale()->getValue();
-		Mat4f scaleMatrix = Mat4f(nodeSale[0],0,0,0,0, nodeSale[1],0,0,0,0, nodeSale[2],0,0,0,0,1);
-
-		Mat4f nodeTransform = Mat4f(
-			nodeRotation(0, 0) * nodeSale[0], nodeRotation(0, 1), nodeRotation(0, 2), nodeLocation[0],
-			nodeRotation(1, 0), nodeRotation(1, 1) * nodeSale[1], nodeRotation(1, 2), nodeLocation[1],
-			nodeRotation(2, 0), nodeRotation(2, 1), nodeRotation(2, 2) * nodeSale[2], nodeLocation[2],
-			nodeRotation(3, 0), nodeRotation(3, 1), nodeRotation(3, 2), nodeRotation(3, 3)) * scaleMatrix;
+		Mat4f nodeTransform = getNodeTransformMatrix();
 
 		if(targetScene->mJointAnimationData->isValid())
 			targetScene->mJointAnimationData->updateAnimationPose(time);

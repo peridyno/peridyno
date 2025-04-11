@@ -105,6 +105,12 @@ namespace dyno
 		{
 			triangleSet.setPoints(this->vertices());
 			auto& triangles = triangleSet.getTriangles();
+			int num = 0;
+			for (size_t i = 0; i < mShapes.size(); i++)
+			{
+				num += mShapes[i]->vertexIndex.size();
+			}
+			triangles.resize(num);
 
 			int offset = 0;
 			for (size_t i = 0; i < mShapes.size(); i++)
@@ -114,6 +120,10 @@ namespace dyno
 				offset += shape->vertexIndex.size();
 			}
 		}
+
+
+		std::vector<Vec3f> updateTexMeshBoundingBox();
+
 
 	private:
 		DArray<Vec3f> mVertices;

@@ -161,7 +161,7 @@ namespace dyno
 	void HierarchicalScene::clear()
 	{
 		mModelObjects.clear();
-		mMeshs.clear();
+		mMeshes.clear();
 		mBones.clear();
 		mBoneRotations.clear();
 		mBoneTranslations.clear();
@@ -180,7 +180,7 @@ namespace dyno
 	int HierarchicalScene::findMeshIndexByName(std::string name)
 	{
 		int id = 0;
-		for (auto it : mMeshs) {
+		for (auto it : mMeshes) {
 			if (it->name == name)
 				return id;
 
@@ -334,7 +334,7 @@ namespace dyno
 	};
 
 
-	void HierarchicalScene::updateWorldMatrix()
+	void HierarchicalScene::updateBoneWorldMatrix()
 	{
 		if (mBoneWorldMatrix.size() != mBones.size())
 			mBoneWorldMatrix.resize(mBones.size());
@@ -354,10 +354,30 @@ namespace dyno
 				};
 
 				mBoneWorldMatrix[select] = worldMatrix;
+				it->worldTransform = worldMatrix;
 			}
 		}
 
+	}
 
+	void HierarchicalScene::updateMeshWorldMatrix()
+	{
+		for (auto it : mMeshes)
+		{
+
+			int select = getObjIndexByName(it->name);
+			if (select == -1)continue;
+
+			{
+				Mat4f worldMatrix = it->localTransform;
+
+				for (size_t i = 0; i < it->parent.size(); i++) {
+					auto parent = it->parent[i];
+					worldMatrix = parent->localTransform * worldMatrix;
+				};
+				it->worldTransform = worldMatrix;
+			}
+		}
 	}
 
 	Real HierarchicalScene::getVectorDataByTime(std::vector<Real> data, std::vector<Real> timeCode, Real time)
@@ -421,7 +441,7 @@ namespace dyno
 	void HierarchicalScene::pushBackMesh(std::shared_ptr<MeshInfo> mesh)
 	{
 		mModelObjects.push_back(mesh);
-		mMeshs.push_back(mesh);
+		mMeshes.push_back(mesh);
 		mesh->id = mModelObjects.size() - 1;
 		createLocalTransform(mesh);
 
@@ -463,7 +483,7 @@ namespace dyno
 	void HierarchicalScene::UpdateJointData()
 	{
 		this->updateInverseBindMatrix();
-		this->updateWorldMatrix();
+		this->updateBoneWorldMatrix();
 
 		std::vector<int> JointsId;
 		std::map<int, std::vector<int>> jointDir;
@@ -532,9 +552,9 @@ namespace dyno
 	{
 
 		int tempSize = 0;
-		for (int meshId = 0; meshId < mMeshs.size(); meshId++)
+		for (int meshId = 0; meshId < mMeshes.size(); meshId++)
 		{
-			auto mesh = mMeshs[meshId];
+			auto mesh = mMeshes[meshId];
 			mSkinData->pushBack_Data(mesh->boneWeights0, mesh->boneWeights1, mesh->boneIndices0, mesh->boneIndices1, &mesh->boneWeights2, &mesh->boneIndices2);
 
 			mSkinData->skin_VerticeRange[meshId] = Vec2u(tempSize, tempSize + mesh->vertices.size());
@@ -589,4 +609,181 @@ namespace dyno
 		return v0 + (v1 - v0) * weight;
 	}
 
+	void HierarchicalScene::showJointInfo()
+	{
+		std::string str;
+
+		for (auto it : mBones)
+		{
+			if (!it->parent.size())
+			{
+				str.append(it->name);
+				buildTree(str, it->child, 1);
+			}
+		}
+		std::cout << str << "\n";
+	}
+
+
+	template< typename Coord, typename Mat4f, typename Vec3f >
+	__global__ void ShapeTransform(
+		DArray<Coord> intialPosition,
+		DArray<Vec3f> worldPosition,
+		DArray<Coord> intialNormal,
+		DArray<Vec3f> Normal,
+		DArray<Mat4f> WorldMatrix,
+		DArray<uint> vertexId_shape,
+		DArray<int> shapeId_MeshId
+	)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= intialPosition.size()) return;
+
+		int shape = vertexId_shape[pId];
+
+		int MeshId = shapeId_MeshId[shape];
+
+		Vec4f tempV = Vec4f(intialPosition[pId][0], intialPosition[pId][1], intialPosition[pId][2], 1);
+		Vec4f tempN = Vec4f(intialNormal[pId][0], intialNormal[pId][1], intialNormal[pId][2], 0);
+		if (pId == 1)
+		{
+			auto iP = intialPosition[pId];
+		}
+
+		tempV = WorldMatrix[MeshId] * tempV;
+		tempN = WorldMatrix[MeshId] * tempN;
+
+		worldPosition[pId] = Coord(tempV[0], tempV[1], tempV[2]);
+		Normal[pId] = Coord(tempN[0], tempN[1], tempN[2]);
+
+	}
+
+
+	template< typename Vec3f, typename Mat4f>
+	void HierarchicalScene::shapeTransform(
+		DArray<Vec3f>& intialPosition,
+		DArray<Vec3f>& worldPosition,
+		DArray<Vec3f>& intialNormal,
+		DArray<Vec3f>& Normal,
+		DArray<Mat4f>& WorldMatrix,
+		DArray<uint>& vertexId_shape,
+		DArray<int>& shapeId_MeshId
+	) 
+	{
+		cuExecute(intialPosition.size(),
+			ShapeTransform,
+			intialPosition,
+			worldPosition,
+			intialNormal,
+			Normal,
+			WorldMatrix,
+			vertexId_shape,
+			shapeId_MeshId
+		);
+	}
+
+	template void HierarchicalScene::shapeTransform <Vec3f, Mat4f>(
+		DArray<Vec3f>& intialPosition,
+		DArray<Vec3f>& worldPosition,
+		DArray<Vec3f>& intialNormal,
+		DArray<Vec3f>& Normal,
+		DArray<Mat4f>& WorldMatrix,
+		DArray<uint>& vertexId_shape,
+		DArray<int>& shapeId_MeshId
+		);
+
+	template< typename Vec3f, typename Mat4f >
+	__global__ void TextureMeshTransform(
+		DArray<Vec3f> intialPosition,
+		DArray<Vec3f> worldPosition,
+		DArray<Vec3f> intialNormal,
+		DArray<Vec3f> Normal,
+		Mat4f WorldMatrix
+	)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= intialPosition.size()) return;
+
+		Vec4f tempV = Vec4f(intialPosition[pId][0], intialPosition[pId][1], intialPosition[pId][2], 1);
+		Vec4f tempN = Vec4f(intialNormal[pId][0], intialNormal[pId][1], intialNormal[pId][2], 0);
+		if (pId == 1)
+		{
+			auto iP = intialPosition[pId];
+		}
+
+		tempV = WorldMatrix * tempV;
+		tempN = WorldMatrix * tempN;
+
+		worldPosition[pId] = Vec3f(tempV[0], tempV[1], tempV[2]);
+		Normal[pId] = Vec3f(tempN[0], tempN[1], tempN[2]);
+
+
+	}
+
+	template< typename Vec3f, typename Mat4f>
+	void HierarchicalScene::textureMeshTransform(
+		DArray<Vec3f>& intialPosition,
+		DArray<Vec3f>& worldPosition,
+		DArray<Vec3f>& intialNormal,
+		DArray<Vec3f>& Normal,
+		Mat4f& WorldMatrix
+	) 
+	{
+		cuExecute(intialPosition.size(),
+			TextureMeshTransform,
+			intialPosition,
+			worldPosition,
+			intialNormal,
+			Normal,
+			WorldMatrix
+		);
+	}
+
+	template void HierarchicalScene::textureMeshTransform <Vec3f, Mat4f>(DArray<Vec3f>& intialPosition,
+		DArray<Vec3f>& worldPosition,
+		DArray<Vec3f>& intialNormal,
+		DArray<Vec3f>& Normal,
+		Mat4f& WorldMatrix
+		);
+
+
+	template< typename Vec3f, typename uint>
+	__global__ void ShapeToCenter(
+		DArray<Vec3f> iniPos,
+		DArray<Vec3f> finalPos,
+		DArray<uint> shapeId,
+		DArray<Vec3f> t
+	)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= iniPos.size()) return;
+
+		finalPos[pId] = iniPos[pId] - t[shapeId[pId]];
+		Vec4f P = Vec4f(finalPos[pId][0], finalPos[pId][1], finalPos[pId][2], 1);
+
+		finalPos[pId] = Vec3f(P[0], P[1], P[2]);
+
+	}
+	template< typename Vec3f, typename uint>
+	void HierarchicalScene::shapeToCenter(DArray<Vec3f>& iniPos,
+		DArray<Vec3f>& finalPos,
+		DArray<uint>& shapeId,
+		DArray<Vec3f>& t
+	) 
+	{
+		cuExecute(iniPos.size(),
+			ShapeToCenter,
+			iniPos,
+			finalPos,
+			shapeId,
+			t
+		);
+	
+	}
+
+	template void HierarchicalScene::shapeToCenter <Vec3f, uint>(DArray<Vec3f>& iniPos,
+		DArray<Vec3f>& finalPos,
+		DArray<uint>& shapeId,
+		DArray<Vec3f>& t
+		);
 }

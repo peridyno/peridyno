@@ -28,6 +28,7 @@ namespace dyno
 
 		std::string name;
 		Mat4f localTransform = Mat4f::identityMatrix();
+		Mat4f worldTransform = Mat4f::identityMatrix();
 		Vec3f localTranslation = Vec3f(0);
 		Vec3f localRotation = Vec3f(0);
 		Vec3f localScale = Vec3f(1);
@@ -103,7 +104,8 @@ namespace dyno
 		std::shared_ptr<ModelObject> getObjectByName(std::string name);
 		int getObjIndexByName(std::string name);
 		int getBoneIndexByName(std::string name);
-		void updateWorldMatrix();
+		void updateBoneWorldMatrix();
+		void updateMeshWorldMatrix();
 		void updateInverseBindMatrix();
 		void updateWorldTransformByKeyFrame(Real time);
 		Real getVectorDataByTime(std::vector<Real> data, std::vector<Real> timeCode, Real time);
@@ -144,19 +146,55 @@ namespace dyno
 			);
 		}
 
-		void showJointInfo()
-		{
-			std::string str;
+		void showJointInfo();
 
-			for (auto it : mBones)
+		template< typename Vec3f, typename Mat4f>
+		void textureMeshTransform(
+			DArray<Vec3f>& intialPosition,
+			DArray<Vec3f>& worldPosition,
+			DArray<Vec3f>& intialNormal,
+			DArray<Vec3f>& Normal,
+			Mat4f& WorldMatrix
+		);
+
+
+		template< typename Vec3f, typename Mat4f>
+		void shapeTransform(
+			DArray<Vec3f>& intialPosition,
+			DArray<Vec3f>& worldPosition,
+			DArray<Vec3f>& intialNormal,
+			DArray<Vec3f>& Normal,
+			DArray<Mat4f>& WorldMatrix,
+			DArray<uint>& vertexId_shape,
+			DArray<int>& shapeId_MeshId
+		);
+
+		template< typename Vec3f, typename uint>
+		void shapeToCenter(DArray<Vec3f>& iniPos,
+			DArray<Vec3f>& finalPos,
+			DArray<uint>& shapeId,
+			DArray<Vec3f>& t
+			);
+
+		std::vector<std::shared_ptr<MeshInfo>>& getMeshes() { return mMeshes; }
+
+		std::vector<Mat4f> getObjectWorldMatrix()
+		{
+			this->updateMeshWorldMatrix();
+			auto objects = mModelObjects;
+			int maxId = 0;
+			for (auto obj : objects)
 			{
-				if (!it->parent.size()) 
-				{
-					str.append(it->name);
-					buildTree(str,it->child,1);
-				}
+				maxId = maxId >= obj->id ? maxId : obj->id;
 			}
-			std::cout << str << "\n";
+			std::vector<Mat4f> meshWorldMatrix(maxId + 1);
+
+			for (auto obj : objects)
+			{
+				if (obj->id != -1)
+					meshWorldMatrix[obj->id] = obj->worldTransform;
+			}
+			return meshWorldMatrix;
 		}
 
 	private :
@@ -177,10 +215,13 @@ namespace dyno
 			}
 		}
 
+		
+		
+
 	public:
 
 		std::vector<std::shared_ptr<ModelObject>> mModelObjects;
-		std::vector<std::shared_ptr<MeshInfo>> mMeshs;
+		std::vector<std::shared_ptr<MeshInfo>> mMeshes;
 		std::vector<std::shared_ptr<Bone>> mBones;
 		std::vector<Vec3f> mBoneRotations;
 		std::vector<Vec3f> mBoneTranslations;

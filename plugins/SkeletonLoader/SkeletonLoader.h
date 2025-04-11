@@ -51,27 +51,29 @@ namespace dyno
 		virtual ~SkeletonLoader();
 
 	public:
-		DEF_VAR(Real, Radius, 0.0075, " Radius of Capsule");
+
+		/**
+		* @brief FBX file
+		*/
+		DEF_VAR(FilePath, FileName, "", "");
 		DEF_VAR(bool, ImportAnimation, true, "ImportAnimation");
+
 			/**
 		* @brief Capsule Topology
 		*/	
 		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
 		DEF_INSTANCE_STATE(TextureMesh, TextureMesh, "TextureMesh");
 
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "TextureMesh");
+
 		DEF_INSTANCE_STATE(PolygonSet<TDataType>,PolygonSet,"PolygonSet");
 		DEF_INSTANCE_STATE(HierarchicalScene, HierarchicalScene, "ModelObjects");
 
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, JointSet, "TextureMesh");
-
+		//DEF_INSTANCE_STATE(PointSet<TDataType>, ShapeCenter, "");
 
 		DEF_VAR(bool,UseInstanceTransform,true,"reset pivot by bounding");
 
-		/**
-		* @brief FBX file
-		*/
-		DEF_VAR(FilePath, FileName, "", "");
+		DEF_VAR(Real, Radius, 0.0075, " Radius of Capsule");
 		
 
 
@@ -85,7 +87,7 @@ namespace dyno
 
 		void updateStates() override;
 
-		void transform();
+		void updateTransform();
 
 		void updateAnimation(float time);
 
@@ -109,5 +111,29 @@ namespace dyno
 		void getCurveValue(const ofbx::AnimationCurveNode* node, std::shared_ptr<HierarchicalScene> scene,float scale);
 
 		void coutName_Type(ofbx::Object::Type ty, ofbx::Object* obj);
+
+		Mat4f getNodeTransformMatrix() 
+		{
+			Mat4f nodeRotation = this->computeQuaternion().toMatrix4x4();;
+			Vec3f nodeLocation = this->varLocation()->getValue();
+			Vec3f nodeSale = this->varScale()->getValue();
+			Mat4f scaleMatrix = Mat4f(nodeSale[0], 0, 0, 0, 0, nodeSale[1], 0, 0, 0, 0, nodeSale[2], 0, 0, 0, 0, 1);
+
+			Mat4f nodeTransform = Mat4f(
+				nodeRotation(0, 0) * nodeSale[0], nodeRotation(0, 1), nodeRotation(0, 2), nodeLocation[0],
+				nodeRotation(1, 0), nodeRotation(1, 1) * nodeSale[1], nodeRotation(1, 2), nodeLocation[1],
+				nodeRotation(2, 0), nodeRotation(2, 1), nodeRotation(2, 2) * nodeSale[2], nodeLocation[2],
+				nodeRotation(3, 0), nodeRotation(3, 1), nodeRotation(3, 2), nodeRotation(3, 3)) * scaleMatrix;
+			return nodeTransform;
+		}
+
+
+	
+	private:
+
+		DArray<Vec3f> initialPosition;
+		DArray<Vec3f> initialNormal;
+		
+		std::vector<Vec3f> initialShapeCenter;
 	};
 }

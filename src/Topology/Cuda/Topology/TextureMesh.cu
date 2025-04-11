@@ -226,4 +226,98 @@ namespace dyno
 		mShapes.clear();
 	}
 
+
+	template<typename uint>
+	__global__ void  C_Shape_PointCounter(
+		DArray<int> counter,
+		DArray<uint> point_ShapeIds,
+		uint target
+	)
+	{
+		uint tId = threadIdx.x + blockDim.x * blockIdx.x;
+		if (tId >= point_ShapeIds.size()) return;
+
+		counter[tId] = (point_ShapeIds[tId] == target) ? 1 : 0;
+	}
+
+	template<typename Vec3f>
+	__global__ void  C_SetupPoints(
+		DArray<Vec3f> newPos,
+		DArray<Vec3f> pos,
+		DArray<int> radix
+	)
+	{
+		uint tId = threadIdx.x + blockDim.x * blockIdx.x;
+		if (tId >= pos.size()) return;
+
+		if (tId < pos.size() - 1 && radix[tId] != radix[tId + 1])
+		{
+			newPos[radix[tId]] = pos[tId];
+		}
+		else if (tId == pos.size() - 1 && pos.size() > 2)
+		{
+			if (radix[tId] != radix[tId - 1])
+				newPos[radix[tId]] = pos[tId];
+		}
+
+	}
+
+
+	std::vector<Vec3f> TextureMesh::updateTexMeshBoundingBox()
+	{
+		std::vector<Vec3f> c_shapeCenter;
+		c_shapeCenter.resize(this->shapes().size());
+		//counter
+		for (uint i = 0; i < this->shapes().size(); i++)
+		{
+			DArray<int> counter;
+			counter.resize(this->vertices().size());
+
+
+			cuExecute(this->vertices().size(),
+				C_Shape_PointCounter,
+				counter,
+				this->shapeIds(),
+				i
+			);
+
+			Reduction<int> reduce;
+			int num = reduce.accumulate(counter.begin(), counter.size());
+
+			DArray<Vec3f> targetPoints;
+			targetPoints.resize(num);
+
+			Scan<int> scan;
+			scan.exclusive(counter.begin(), counter.size());
+
+			cuExecute(this->vertices().size(),
+				C_SetupPoints,
+				targetPoints,
+				this->vertices(),
+				counter
+			);
+
+
+			Reduction<Vec3f> reduceBounding;
+
+			auto& bounding = this->shapes()[i]->boundingBox;
+			Vec3f lo = reduceBounding.minimum(targetPoints.begin(), targetPoints.size());
+			Vec3f hi = reduceBounding.maximum(targetPoints.begin(), targetPoints.size());
+
+			//updateBoundingBox
+			bounding.v0 = lo;
+			bounding.v1 = hi;
+			this->shapes()[i]->boundingTransform.translation() = (lo + hi) / 2;
+
+			c_shapeCenter[i] = (lo + hi) / 2;
+
+			
+			targetPoints.clear();
+			counter.clear();
+
+		}
+		return c_shapeCenter;
+	}
+
+
 }
