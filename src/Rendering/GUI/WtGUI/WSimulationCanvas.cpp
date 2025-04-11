@@ -1,20 +1,17 @@
 #include "WSimulationCanvas.h"
-#include "ImageEncoder.h"
 
-#include <Wt/WApplication.h>
-#include <Wt/WMemoryResource.h>
-#include <Wt/WImage.h>
+#include "ImageEncoder.h"
+#include "imgui_impl_wt.h"
 
 #include <GLFW/glfw3.h>
+#include <GLRenderEngine.h>
+#include <ImGuizmo.h>
 
 #include <SceneGraph.h>
-#include <GLRenderEngine.h>
-#include <OrbitCamera.h>
-#include <TrackballCamera.h>
 
-#include "imgui_impl_wt.h"
-#include "ImWidget.h"
-#include <ImGuizmo.h>
+#include <Wt/WApplication.h>
+#include <Wt/WImage.h>
+#include <Wt/WMemoryResource.h>
 
 using namespace dyno;
 

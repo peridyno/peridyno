@@ -1,5 +1,8 @@
 #include "WLogWidget.h"
 
+#include <cstdio>
+#include <Wt/WPushButton.h>
+
 WLogMessage* WLogMessage::instance = nullptr;
 
 WLogMessage::WLogMessage()

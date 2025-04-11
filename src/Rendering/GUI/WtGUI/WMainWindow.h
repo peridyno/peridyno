@@ -1,54 +1,12 @@
 #pragma once
 
-#include <Wt/WLineEdit.h>
-#include <Wt/WPushButton.h>
-#include <Wt/WTemplate.h>
-#include <Wt/WText.h>
-#include <Wt/WSuggestionPopup.h>
-#include <Wt/WApplication.h>
-#include <Wt/WVBoxLayout.h>
-#include <Wt/WHBoxLayout.h>
 #include <Wt/WBorderLayout.h>
-#include <Wt/WPushButton.h>
-#include <Wt/WPanel.h>
-#include <Wt/WMenu.h>
-#include <Wt/WPopupMenu.h>
-#include <Wt/WNavigationBar.h>
-#include <Wt/WTreeView.h>
-#include <Wt/WTableView.h>
-#include <Wt/WText.h>
-#include <Wt/WTable.h>
-#include <Wt/WColorPicker.h>
-#include <Wt/WLogger.h>
-#include <Wt/WTabWidget.h>
-#include <Wt/WTextArea.h>
-#include <Wt/WApplication.h>
-#include <Wt/WEnvironment.h>
-
-#include <fstream>
-#include <filesystem>
-
-#include <SceneGraph.h>
-#include <SceneGraphFactory.h>
-
-
 #include <Wt/WContainerWidget.h>
-#include "WParameterDataNode.h"
-#include "NodeEditor/WtFlowWidget.h"
-#include "WNodeGraphics.h"
-#include "WModuleGraphics.h"
-#include "WSaveWidget.h"
-#include "WLogWidget.h"
-#include "NodeFactory.h"
-#include "WPythonWidget.h"
-#include "WSceneDataModel.h"
-#include "WSimulationCanvas.h"
-#include "WSimulationControl.h"
-#include "WSampleWidget.h"
-#include "WRenderParamsWidget.h"
-#include "WPythonWidget.h"
-#include "WParameterDataNode.h"
+#include <Wt/WPanel.h>
+#include <Wt/WTabWidget.h>
 
+#include "WPythonWidget.h"
+#include "WSimulationControl.h"
 
 namespace dyno
 {
@@ -63,6 +21,7 @@ class WParameterDataNode;
 class WSimulationCanvas;
 class WPushButton;
 class WtFlowWidget;
+class WNodeGraphics;
 
 class WMainWindow : public Wt::WContainerWidget
 {
@@ -114,7 +73,8 @@ private:
 	WSimulationCanvas* mSceneCanvas;
 	WSimulationControl* controlContainer;
 	WtFlowWidget* mFlowWidget;
-	WPythonWidget* pythonWidget;
+	WPythonWidget* pythonWidget = new WPythonWidget();
+	std::unique_ptr<WNodeGraphics> nodeGraphicsWidget;
 
 	Wt::WContainerWidget* rightWidget;
 

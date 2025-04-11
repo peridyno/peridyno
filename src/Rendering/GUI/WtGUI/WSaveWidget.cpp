@@ -1,5 +1,15 @@
 #include "WSaveWidget.h"
+#include "WMainWindow.h"
+
+#include <filesystem>
+#include <SceneLoaderFactory.h>
 #include <variant>
+#include <Wt/WAnchor.h>
+#include <Wt/WLineEdit.h>
+#include <Wt/WMessageBox.h>
+#include <Wt/WPanel.h>
+#include <Wt/WProgressBar.h>
+#include <Wt/WPushButton.h>
 
 WSaveWidget::WSaveWidget(WMainWindow* parent, int width)
 	: mParent(parent)
@@ -144,9 +154,9 @@ void WSaveWidget::createUploadPanel()
 					Wt::WMessageBox::show("Error", "Unknown Error!", Wt::StandardButton::Ok);
 				}
 			}
-			else if (std::holds_alternative<std::shared_ptr<SceneGraph>>(result))
+			else if (std::holds_alternative<std::shared_ptr<dyno::SceneGraph>>(result))
 			{
-				mParent->setScene(std::get<std::shared_ptr<SceneGraph>>(result));
+				mParent->setScene(std::get<std::shared_ptr<dyno::SceneGraph>>(result));
 				mParent->createRightPanel();
 				mUploadOut->setText("File upload is finished.");
 			}

@@ -1,14 +1,6 @@
 #pragma once
-
 #include <Wt/WAbstractItemModel.h>
 #include <Wt/WAbstractTableModel.h>
-#include <Wt/WText.h>
-#include <Wt/WPanel.h>
-#include <Wt/WTable.h>
-#include <Wt/WDoubleSpinBox.h>
-#include <Wt/WLogger.h>
-
-#include <FBase.h>
 
 namespace dyno
 {

@@ -232,7 +232,7 @@ namespace dyno
 			output->setText("Output");
 			layout->addWidget(output, 0, 1, Qt::AlignRight);
 
-			mPropertyLayout[1]->addWidget(title);
+			mPropertyLayout[1]->addWidget(title); 
 		}
 
 		std::vector<FBase*>& fields = node->getAllFields();

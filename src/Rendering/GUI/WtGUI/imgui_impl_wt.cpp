@@ -1,9 +1,8 @@
+#include "imgui_impl_wt.h"
+
+#include "imgui_impl_opengl3.h"
 #include <imgui.h>
 #include <imgui_internal.h>
-
-#include "imgui_impl_wt.h"
-#include "imgui_impl_opengl3.h"
-
 #include <Wt/WEvent.h>
 
 ImGuiBackendWt::ImGuiBackendWt(Wt::WContainerWidget* parent)

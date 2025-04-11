@@ -1,6 +1,7 @@
 #include "WtFlowWidget.h"
 #include <Wt/WEnvironment.h>
 #include <Wt/WApplication.h>
+#include <Wt/WMessageBox.h>
 
 WtFlowWidget::WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene, WMainWindow* mainWindow) :Wt::WPaintedWidget()
 {

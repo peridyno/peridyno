@@ -2,10 +2,10 @@
 #include "WMainWindow.h"
 #include "WSimulationCanvas.h"
 
-#include <Wt/WLinkedCssStyleSheet.h>
+#include "SceneGraphFactory.h"
+
 #include <Wt/WEnvironment.h>
 #include <Wt/WHBoxLayout.h>
-#include <Wt/WBootstrap5Theme.h>
 #include <Wt/WBootstrap3Theme.h>
 
 // for test data
@@ -93,7 +93,7 @@ WMainApp::WMainApp(const Wt::WEnvironment& env) : Wt::WApplication(env)
 
 	window = layout->addWidget(std::make_unique<WMainWindow>());
 
-	window->setScene(SceneGraphFactory::instance()->createDefaultScene());
+	window->setScene(dyno::SceneGraphFactory::instance()->createDefaultScene());
 
 	window->createRightPanel();
 

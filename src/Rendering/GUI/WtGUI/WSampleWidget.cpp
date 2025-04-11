@@ -1,11 +1,10 @@
 #include "WSampleWidget.h"
 
-#include <Wt/WPushButton.h>
+#include <Wt/WCssDecorationStyle.h>
 #include <Wt/WGridLayout.h>
-#include <Wt/WVBoxLayout.h>
 #include <Wt/WImage.h>
 #include <Wt/WLabel.h>
-#include <Wt/WCssDecorationStyle.h>
+#include <Wt/WVBoxLayout.h>
 
 #include <Platform.h>
 

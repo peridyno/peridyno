@@ -1,4 +1,9 @@
 #include "WSimulationControl.h"
+#include <Wt/WApplication.h>
+#include <Wt/WHBoxLayout.h>
+#include <Wt/WPanel.h>
+#include <Wt/WPushButton.h>
+#include <Wt/WVBoxLayout.h>
 
 WSimulationControl::WSimulationControl()
 {

@@ -1,10 +1,9 @@
 #include "WPythonWidget.h"
 
-#include <Wt/WTextArea.h>
+#include <Wt/WJavaScript.h>
+#include <Wt/WMessageBox.h>
 #include <Wt/WPushButton.h>
 #include <Wt/WVBoxLayout.h>
-#include <Wt/WMessageBox.h>
-#include <Wt/WJavaScript.h>
 
 #include <SceneGraph.h>
 

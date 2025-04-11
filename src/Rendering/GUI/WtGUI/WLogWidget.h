@@ -1,15 +1,13 @@
 #pragma once
 #include <Wt/WContainerWidget.h>
-#include <Wt/WVBoxLayout.h>
-#include <Wt/WText.h>
-#include <Wt/WSignal.h>
-#include <Wt/WTextArea.h>
-#include <Wt/WLabel.h>
-#include <Wt/WPushButton.h>
 
-#include <cstdio>
+#include <Wt/WSignal.h>
+#include <Wt/WText.h>
+#include <Wt/WTextArea.h>
+
 #include "Log.h"
 #include "WMainWindow.h"
+
 
 class WLogMessage
 {

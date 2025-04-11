@@ -1,14 +1,7 @@
 #pragma once
 
-// Wt
-#include <Wt/WApplication.h>
 #include <Wt/WContainerWidget.h>
-#include <Wt/WVBoxLayout.h>
-#include <Wt/WHBoxLayout.h>
-#include <Wt/WPanel.h>
-#include <Wt/WPushButton.h>
 
-// dyno
 #include <SceneGraph.h>
 
 #include "WSimulationCanvas.h"

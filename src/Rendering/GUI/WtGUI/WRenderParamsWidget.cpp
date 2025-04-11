@@ -1,18 +1,13 @@
 #include "WRenderParamsWidget.h"
-#include "WSimulationCanvas.h"
 
-#include <Wt/WPushButton.h>
-#include <Wt/WPanel.h>
+#include <Wt/WBorderLayout.h>
+#include <Wt/WCheckBox.h>
 #include <Wt/WColorPicker.h>
 #include <Wt/WDoubleSpinBox.h>
-#include <Wt/WLabel.h>
-#include <Wt/WTable.h>
-#include <Wt/WCheckBox.h>
-#include <Wt/WHBoxLayout.h>
-#include <Wt/WVBoxLayout.h>
-#include <Wt/WGridLayout.h>
-#include <Wt/WBorderLayout.h>
+#include <Wt/WPanel.h>
+#include <Wt/WPushButton.h>
 #include <Wt/WSlider.h>
+#include <Wt/WTable.h>
 #include <Wt/WText.h>
 
 #include <GLRenderEngine.h>

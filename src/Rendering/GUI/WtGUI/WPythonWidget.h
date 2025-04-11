@@ -1,5 +1,4 @@
 #pragma once
-
 #include <Wt/WContainerWidget.h>
 #include <Wt/WSignal.h>
 

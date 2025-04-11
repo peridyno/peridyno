@@ -1,5 +1,30 @@
 #include "WMainWindow.h"
 
+#include "NodeEditor/WtFlowWidget.h"
+#include "NodeFactory.h"
+#include "WLogWidget.h"
+#include "WModuleGraphics.h"
+#include "WNodeGraphics.h"
+#include "WParameterDataNode.h"
+#include "WSampleWidget.h"
+#include "WSaveWidget.h"
+#include "WSceneDataModel.h"
+#include "WSimulationCanvas.h"
+
+#include <fstream>
+#include <SceneGraph.h>
+
+#include <Wt/WApplication.h>
+#include <Wt/WEnvironment.h>
+#include <Wt/WHBoxLayout.h>
+#include <Wt/WLineEdit.h>
+#include <Wt/WLogger.h>
+#include <Wt/WNavigationBar.h>
+#include <Wt/WPushButton.h>
+#include <Wt/WSuggestionPopup.h>
+#include <Wt/WTableView.h>
+#include <Wt/WVBoxLayout.h>
+
 #define WIDTH_SCALE 0.4
 #define HEIGHT_SCALE 0.75
 
@@ -13,7 +38,7 @@ WMainWindow::WMainWindow() : WContainerWidget()
 	viewportHeight = Wt::WApplication::instance()->environment().screenHeight();
 	viewportWidth = Wt::WApplication::instance()->environment().screenWidth();
 
-	pythonWidget = new WPythonWidget();
+	
 
 	// init
 	initNavigationBar(layout);
@@ -231,59 +256,41 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel)
 
 std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 {
-	//auto rootWidget = std::make_unique<Wt::WContainerWidget>();
-	//auto layout = rootWidget->setLayout(std::make_unique<Wt::WVBoxLayout>());
-	//layout->setContentsMargins(0, 0, 0, 0);
-	//rootWidget->setMargin(0);
-
-	//// add node
-	//auto panel = layout->addWidget(std::make_unique<Wt::WPanel>());
-	//panel->setTitle("Add Node");
-	//panel->setCollapsible(false);
-	//initAddNodePanel(panel);
-
-	//auto panel0 = layout->addWidget(std::make_unique<Wt::WPanel>());
-	//panel0->setTitleBar(false);
-	//panel0->setCollapsible(false);
-	//panel0->setMargin(0);
-
-	auto nodeGraphicsWidget = std::make_unique<WNodeGraphics>();
-
+	nodeGraphicsWidget = std::make_unique<WNodeGraphics>();
+	initAddNodePanel(nodeGraphicsWidget->addPanel);
 	if (mScene)
 	{
-		nodeGraphicsWidget->setSceneGraph(mScene);
-		if (nodeGraphicsWidget->nodePanel)
-		{
-			auto painteContainer = nodeGraphicsWidget->nodePanel->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
-			painteContainer->setMargin(0);
-			mFlowWidget = painteContainer->addWidget(std::make_unique<WtFlowWidget>(mScene, this));
-			mFlowWidget->resize(viewportWidth * WIDTH_SCALE, viewportHeight * 0.4);
-		}
+		auto painteContainer = nodeGraphicsWidget->nodePanel->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
+		painteContainer->setMargin(0);
+		mFlowWidget = painteContainer->addWidget(std::make_unique<WtFlowWidget>(mScene, this));
+		mFlowWidget->resize(viewportWidth * WIDTH_SCALE, viewportHeight * 0.4);
 	}
+
+	// Parameter list
+	auto parameterPanel = nodeGraphicsWidget->layout->addWidget(std::make_unique<Wt::WPanel>());
+	parameterPanel->setTitle("Control Variable");
+	parameterPanel->setCollapsible(true);
+	parameterPanel->setStyleClass("scrollable-content");
 
 	//action for selection change
-	if (mFlowWidget)
-	{
-		mFlowWidget->selectNodeSignal().connect([=](int selectNum)
+	mFlowWidget->selectNodeSignal().connect([=](int selectNum)
+		{
+			if (selectNum > 0)
 			{
-				if (selectNum > 0)
+				for (auto it = mScene->begin(); it != mScene->end(); it++)
 				{
-					for (auto it = mScene->begin(); it != mScene->end(); it++)
+					auto m = it.get();
+					if (m->objectId() == selectNum)
 					{
-						auto m = it.get();
-						if (m->objectId() == selectNum)
-						{
-							mModuleDataModel->setNode(m);
-							mParameterDataNode->setNode(m);
-
-							//mParameterDataNode->createParameterPanel(panel3);
-						}
+						mModuleDataModel->setNode(m);
+						mParameterDataNode->setNode(m);
+						mParameterDataNode->createParameterPanel(parameterPanel);
 					}
 				}
-			});
-	}
-	
-	return nodeGraphicsWidget;
+			}
+		});
+
+	return std::move(nodeGraphicsWidget);
 }
 
 std::unique_ptr<Wt::WWidget> WMainWindow::initModuleGraphics()
