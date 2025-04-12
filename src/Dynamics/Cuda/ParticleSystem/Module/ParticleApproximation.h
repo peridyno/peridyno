@@ -23,14 +23,14 @@ namespace dyno
 
 #define cuIntegralAdh(size, type, scale, Func,...){					\
 		uint pDims = cudaGridSize((uint)size, BLOCK_SIZE);				\
-		if (type == KT_Smooth)											\
+		if (type == ParticleApproximation<TDataType>::KT_Smooth)											\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return SmoothKernel<Real>::integral(r, h, s);	\
 			};																\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, ParticleApproximation<TDataType>::mScalingFactor);	\
 		}																\
-		else if (type == KT_Spiky)										\
+		else if (type == ParticleApproximation<TDataType>::KT_Spiky)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return SpikyKernel<Real>::integral(r, h, s);					\
@@ -61,63 +61,63 @@ namespace dyno
 
 #define cuZerothOrder(size, type, scale, Func,...){					\
 		uint pDims = cudaGridSize((uint)size, BLOCK_SIZE);				\
-		if (type == KT_Smooth)											\
+		if (type == ParticleApproximation<TDataType>::KT_Smooth)											\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return SmoothKernel<Real>::weight(r, h, s);	\
 			};																\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_Spiky)										\
+		else if (type == ParticleApproximation<TDataType>::KT_Spiky)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return SpikyKernel<Real>::weight(r, h, s);					\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_Cubic)										\
+		else if (type == ParticleApproximation<TDataType>::KT_Cubic)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return CubicKernel<Real>::weight(r, h, s);					\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_Constant)										\
+		else if (type == ParticleApproximation<TDataType>::KT_Constant)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return ConstantKernel<Real>::weight(r, h, s);					\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_Quartic)										\
+		else if (type == ParticleApproximation<TDataType>::KT_Quartic)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return QuarticKernel<Real>::weight(r, h, s);					\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_Corrected)										\
+		else if (type == ParticleApproximation<TDataType>::KT_Corrected)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return CorrectedKernel<Real>::weight(r, h, s);					\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_CorrectedQuatic)										\
+		else if (type == ParticleApproximation<TDataType>::KT_CorrectedQuatic)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return CorrectedQuaticKernel<Real>::weight(r, h, s);					\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_WendlandC2)										\
+		else if (type == ParticleApproximation<TDataType>::KT_WendlandC2)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return WendlandC2Kernel<Real>::weight(r, h, s);					\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_CorrectedMPSKernel)										\
+		else if (type == ParticleApproximation<TDataType>::KT_CorrectedMPSKernel)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return CorrectedMPSKernel<Real>::weight(r, h, s);					\
@@ -129,63 +129,63 @@ namespace dyno
 
 #define cuFirstOrder(size, type, scale, Func,...){					\
 		uint pDims = cudaGridSize((uint)size, BLOCK_SIZE);				\
-		if (type == KT_Smooth)											\
+		if (type == ParticleApproximation<TDataType>::KT_Smooth)											\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return SmoothKernel<Real>::gradient(r, h, s);	\
 			};																\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_Spiky)										\
+		else if (type == ParticleApproximation<TDataType>::KT_Spiky)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return SpikyKernel<Real>::gradient(r, h, s);					\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_Cubic)										\
+		else if (type == ParticleApproximation<TDataType>::KT_Cubic)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return CubicKernel<Real>::gradient(r, h, s);					\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_Constant)										\
+		else if (type == ParticleApproximation<TDataType>::KT_Constant)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return ConstantKernel<Real>::gradient(r, h, s);					\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_Quartic)										\
+		else if (type == ParticleApproximation<TDataType>::KT_Quartic)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return QuarticKernel<Real>::gradient(r, h, s);					\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_Corrected)										\
+		else if (type == ParticleApproximation<TDataType>::KT_Corrected)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return CorrectedKernel<Real>::gradient(r, h, s);					\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_CorrectedQuatic)										\
+		else if (type == ParticleApproximation<TDataType>::KT_CorrectedQuatic)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return CorrectedQuaticKernel<Real>::gradient(r, h, s);					\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_WendlandC2)										\
+		else if (type == ParticleApproximation<TDataType>::KT_WendlandC2)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return WendlandC2Kernel<Real>::gradient(r, h, s);					\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_CorrectedMPSKernel)										\
+		else if (type == ParticleApproximation<TDataType>::KT_CorrectedMPSKernel)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return CorrectedMPSKernel<Real>::gradient(r, h, s);					\
@@ -197,63 +197,63 @@ namespace dyno
 
 #define cuSecondOrder(size, type, scale, Func,...){					\
 		uint pDims = cudaGridSize((uint)size, BLOCK_SIZE);				\
-		if (type == KT_Smooth)											\
+		if (type == ParticleApproximation<TDataType>::KT_Smooth)											\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return ConstantKernel<Real>::weightRR(r, h, s);	\
 			};																\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_Spiky)										\
+		else if (type == ParticleApproximation<TDataType>::KT_Spiky)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return ConstantKernel<Real>::weightRR(r, h, s);					\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_Cubic)										\
+		else if (type == ParticleApproximation<TDataType>::KT_Cubic)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return ConstantKernel<Real>::weightRR(r, h, s);					\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_Constant)										\
+		else if (type == ParticleApproximation<TDataType>::KT_Constant)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return ConstantKernel<Real>::weightRR(r, h, s);				\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_Quartic)										\
+		else if (type == ParticleApproximation<TDataType>::KT_Quartic)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return ConstantKernel<Real>::weightRR(r, h, s);					\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_Corrected)										\
+		else if (type == ParticleApproximation<TDataType>::KT_Corrected)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return CorrectedKernel<Real>::weightRR(r, h, s);					\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_CorrectedQuatic)										\
+		else if (type == ParticleApproximation<TDataType>::KT_CorrectedQuatic)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return CorrectedQuaticKernel<Real>::weightRR(r, h, s);					\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_WendlandC2)										\
+		else if (type == ParticleApproximation<TDataType>::KT_WendlandC2)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return ConstantKernel<Real>::weightRR(r, h, s);						\
 			};															\
 			Func << <pDims, BLOCK_SIZE >> > (__VA_ARGS__, lambdaFunc, scale);	\
 		}																\
-		else if (type == KT_CorrectedMPSKernel)										\
+		else if (type == ParticleApproximation<TDataType>::KT_CorrectedMPSKernel)										\
 		{																\
 			auto lambdaFunc = [=] __device__(Real r, Real h, Real s) -> Real {		\
 				return CorrectedMPSKernel<Real>::weightRR(r, h, s);					\
