@@ -3,20 +3,16 @@
 #include <Log.h>
 
 #include <BasicShapes/CubeModel.h>
-
 #include <Volume/BasicShapeToVolume.h>
-
 #include <Multiphysics/VolumeBoundary.h>
 
 #include <ParticleSystem/ParticleFluid.h>
-#include "ParticleSystem/GhostParticles.h"
+#include <ParticleSystem/GhostParticles.h>
 #include <ParticleSystem/GhostFluid.h>
 
 #include <Module/CalculateNorm.h>
-
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
-
 #include <ColorMapping.h>
 #include <ImColorbar.h>
 
@@ -128,7 +124,6 @@ std::shared_ptr<SceneGraph> createScene()
 	scn->setUpperBound(Vec3f(0.5, 1, 0.5));
 	scn->setLowerBound(Vec3f(-0.5, 0, -0.5));
 
-
 	//Create a container
 	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
 	cubeBoundary->varLocation()->setValue(Vec3f(0.0f, 0.5f, 0.0f));
@@ -148,13 +143,9 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto incompressibleFluid = scn->addNode(std::make_shared<GhostFluid<DataType3f>>());
 	incompressibleFluid->setDt(0.001f);
+	incompressibleFluid->varSmoothingLength()->setValue(2.5f);
 	fluid->connect(incompressibleFluid->importInitialStates());
 	ghost->connect(incompressibleFluid->importBoundaryParticles());
-// 	incompressibleFluid->setFluidParticles(fluid);
-// 	incompressibleFluid->setBoundaryParticles(ghost);
-
-// 	root->addAncestor(incompressibleFluid.get());
-// 	root->addParticleSystem(fluid);
 	incompressibleFluid->connect(boundary->importParticleSystems());
 
 	return scn;
