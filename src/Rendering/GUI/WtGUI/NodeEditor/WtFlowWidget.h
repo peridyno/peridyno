@@ -82,7 +82,7 @@ private:
 	Wt::WPointF mTranslateNode = Wt::WPointF(0, 0);
 
 	bool isDragging = false;
-	bool isSelected = false;
+	int selectType = -1;
 	int selectedNum = 0;
 	bool canMoveNode = false;
 

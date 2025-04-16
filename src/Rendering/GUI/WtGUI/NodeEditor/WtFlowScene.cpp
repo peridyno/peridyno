@@ -85,12 +85,12 @@ void WtFlowScene::deleteConnection(WtConnection& connection)
 	}
 }
 
-WtNode& WtFlowScene::createNode(std::unique_ptr<WtNodeDataModel>&& dataModel, Wt::WPainter* painter, bool isSelected)
+WtNode& WtFlowScene::createNode(std::unique_ptr<WtNodeDataModel>&& dataModel, Wt::WPainter* painter, int selectType)
 {
 	Wt::WPaintDevice* paintDevice = painter->device();
 
 	auto node = detail::make_unique<WtNode>(std::move(dataModel), paintDevice);
-	auto ngo = detail::make_unique<WtNodeGraphicsObject>(*this, *node, painter, isSelected);
+	auto ngo = detail::make_unique<WtNodeGraphicsObject>(*this, *node, painter, selectType);
 
 	node->setGraphicsObject(std::move(ngo));
 

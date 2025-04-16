@@ -45,6 +45,7 @@ private:
 public:
 	Wt::WColor NormalBoundaryColor;
 	Wt::WColor SelectedBoundaryColor;
+	Wt::WColor SelectedDragColor;
 	Wt::WColor GradientColor0;
 	Wt::WColor GradientColor1;
 	Wt::WColor GradientColor2;

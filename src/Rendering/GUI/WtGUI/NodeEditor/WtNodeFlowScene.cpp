@@ -1,56 +1,21 @@
 #include "WtNodeFlowScene.h"
 
 
-WtNodeFlowScene::WtNodeFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::SceneGraph> scene, bool isSelected, int selectNum)
+WtNodeFlowScene::WtNodeFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::SceneGraph> scene, int selectType, int selectNum)
 	: WtFlowScene()
 {
 	_painter = painter;
 	mScene = scene;
 	_selectNum = selectNum;
-	_isSelected = isSelected;
+	_selectType = selectType;
 
 	auto classMap = dyno::Object::getClassMap();
 	auto ret = std::make_shared<WtDataModelRegistry>();
 	int id = 0;
 
-	/*for (auto const c : *classMap)
-	{
-		id++;
-
-		std::string str = c.first;
-		if (str == "LargeOcean<DataType3f>")
-		{
-			continue;
-		}
-		auto obj = dyno::Object::createObject(str);
-		std::shared_ptr<dyno::Node> node(dynamic_cast<dyno::Node*>(obj));
-
-		if (node != nullptr)
-		{
-			WtDataModelRegistry::RegistryItemCreator creator = [str]()
-				{
-					auto node_obj = dyno::Object::createObject(str);
-					std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
-					auto dat = std::make_unique<WtNodeWidget>(std::move(new_node));
-					return dat;
-				};
-			std::string category = node->getNodeType();
-			ret->registerModel<WtNodeWidget>(category, creator);
-		}
-	}*/
-
 	this->setRegistry(ret);
 
 	createNodeGraphView();
-	//reorderAllNodes();
-
-	//connect(this, &QtFlowScene::nodeMoved, this, &QtNodeFlowScene::moveNode);
-	//connect(this, &QtFlowScene::nodePlaced, this, &QtNodeFlowScene::addNode);
-	//connect(this, &QtFlowScene::nodeDeleted, this, &QtNodeFlowScene::deleteNode);
-	//connect(this, &QtFlowScene::nodeHotKey0Checked, this, &QtNodeFlowScene::enableRendering);
-	//connect(this, &QtFlowScene::nodeHotKey1Checked, this, &QtNodeFlowScene::enablePhysics);
-	////connect(this, &QtFlowScene::nodeHotKey2Checked, this, &QtNodeFlowScene::Key2_Signal);
-	//connect(this, &QtFlowScene::nodeContextMenu, this, &QtNodeFlowScene::showContextMenu);
 }
 
 WtNodeFlowScene::~WtNodeFlowScene() {}
@@ -72,12 +37,12 @@ void WtNodeFlowScene::createNodeGraphView()
 
 			auto type = std::make_unique<WtNodeWidget>(m);
 
-			bool b = false;
-			if (_isSelected)
+			int b = -1;
+			if (_selectType)
 			{
 				if (_selectNum == mId)
 				{
-					b = true;
+					b = _selectType;
 				}
 			}
 

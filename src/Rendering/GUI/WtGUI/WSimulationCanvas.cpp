@@ -329,14 +329,17 @@ void WSimulationCanvas::onMouseReleased(const Wt::WMouseEvent& evt)
 
 	if (this->getSelectionMode() == RenderWindow::OBJECT_MODE)
 	{
-		if (evt.button() == Wt::MouseButton::Left
-			&& !ImGuizmo::IsUsing()
-			&& !ImGui::GetIO().WantCaptureMouse)
+		if (evt.button() == Wt::MouseButton::Left)
+			//&& !ImGuizmo::IsUsing()
+			//&& !ImGui::GetIO().WantCaptureMouse)
 		{
+			int width = mCamera->viewportWidth();
+			int height = mCamera->viewportHeight();
 			int x = evt.widget().x;
-			int y = evt.widget().y;
-			int w = mCamera->viewportWidth();
-			int h = mCamera->viewportHeight();
+			int y = std::abs(height - evt.widget().y);
+
+			int w = std::abs(mCursorX - x);
+			int h = std::abs(mCursorY - y);
 
 			makeCurrent();
 			const auto& selection = this->select(x, y, w, h);

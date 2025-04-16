@@ -101,6 +101,7 @@ void WtNodeStyle::loadJsonFromByteArray(std::string const& jsonData)
 	json obj = j.at("NodeStyle");
 	STYLE_READ_COLOR(obj, NormalBoundaryColor);
 	STYLE_READ_COLOR(obj, SelectedBoundaryColor);
+	STYLE_READ_COLOR(obj, SelectedDragColor);
 	STYLE_READ_COLOR(obj, GradientColor0);
 	STYLE_READ_COLOR(obj, GradientColor1);
 	STYLE_READ_COLOR(obj, GradientColor2);

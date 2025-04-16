@@ -17,7 +17,7 @@ class WtNodeFlowScene : public WtFlowScene
 {
 public:
 	WtNodeFlowScene(std::shared_ptr<WtDataModelRegistry> registry, Wt::WPainter* painter);
-	WtNodeFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::SceneGraph> scene, bool isSelected, int selectNum);
+	WtNodeFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::SceneGraph> scene, int selectType, int selectNum);
 	~WtNodeFlowScene();
 
 	void addNode(WtNode& n);
@@ -88,7 +88,7 @@ private:
 
 	std::map<dyno::ObjectId, WtNode*> OutNodeMap;
 
-	bool _isSelected;
+	int _selectType;
 	int _selectNum;
 
 	bool _isSelectedPoint;

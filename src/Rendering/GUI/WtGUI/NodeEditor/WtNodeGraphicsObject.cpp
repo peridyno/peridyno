@@ -37,8 +37,16 @@ void WtNodePainter::drawNodeRect(
 {
 	WtNodeStyle const& nodeStyle = model->nodeStyle();
 
-	auto color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
-
+	auto color = nodeStyle.NormalBoundaryColor;
+	if (graphicsObject.selectType() == 1)
+	{
+		color = nodeStyle.SelectedBoundaryColor;
+	}
+	if (graphicsObject.selectType() == 2)
+	{
+		color = nodeStyle.SelectedDragColor;
+	}
+	
 	if (geom.hovered())
 	{
 		Wt::WPen p(color);
@@ -282,7 +290,16 @@ void WtNodePainter::drawHotKeys(
 {
 	WtNodeStyle const& nodeStyle = model->nodeStyle();
 
-	auto color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
+	//auto color = graphicsObject.selectType() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
+	auto color = nodeStyle.NormalBoundaryColor;
+	if (graphicsObject.selectType() == 1)
+	{
+		color = nodeStyle.SelectedBoundaryColor;
+	}
+	if (graphicsObject.selectType() == 2)
+	{
+		color = nodeStyle.SelectedDragColor;
+	}
 
 	const Wt::WPen& pen = painter->pen();
 
@@ -458,7 +475,16 @@ void WtNodePainter::drawValidationRect(
 	{
 		WtNodeStyle const& nodeStyle = model->nodeStyle();
 
-		auto color = graphicsObject.isSelected() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
+		//auto color = graphicsObject.selectType() ? nodeStyle.SelectedBoundaryColor : nodeStyle.NormalBoundaryColor;
+		auto color = nodeStyle.NormalBoundaryColor;
+		if (graphicsObject.selectType() == 1)
+		{
+			color = nodeStyle.SelectedBoundaryColor;
+		}
+		if (graphicsObject.selectType() == 2)
+		{
+			color = nodeStyle.SelectedDragColor;
+		}
 
 		if (geom.hovered())
 		{
@@ -501,18 +527,14 @@ void WtNodePainter::drawValidationRect(
 
 //WtNodeGraphicsObject
 
-WtNodeGraphicsObject::WtNodeGraphicsObject(WtFlowScene& scene, WtNode& node, Wt::WPainter* painter, bool isSelected)
+WtNodeGraphicsObject::WtNodeGraphicsObject(WtFlowScene& scene, WtNode& node, Wt::WPainter* painter, int selectType)
 	: _scene(scene)
 	, _node(node)
 	, _painter(painter)
 	, _locked(false)
 	, _flowNodeData(node.flowNodeData())
-	, _isSelected(isSelected)
+	, _selectType(selectType)
 {
-	//this->mouseWentDown().connect(this, &WtNodeGraphicsObject::onMouseWentDown);
-	//this->mouseMoved().connect(this, &WtNodeGraphicsObject::onMouseMove);
-	//this->mouseWentUp().connect(this, &WtNodeGraphicsObject::onMouseWentUp);
-	//this->mouseWheel().connect(this, &WtNodeGraphicsObject::onMouseWheel);
 }
 
 WtNodeGraphicsObject::~WtNodeGraphicsObject() {}

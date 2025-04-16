@@ -26,7 +26,7 @@ void WtFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 	isDragging = true;
 	mLastMousePos = Wt::WPointF(event.widget().x, event.widget().y);
 	mLastDelta = Wt::WPointF(0, 0);
-	if (isSelected)
+	if (selectType > 0)
 	{
 		auto origin = nodeMap[selectedNum]->flowNodeData().getNodeOrigin();
 		mTranslateNode = Wt::WPointF(origin.x(), origin.y());
@@ -86,6 +86,10 @@ void WtFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 				}
 			}
 		}
+		else
+		{
+			selectType = 2;
+		}
 	}
 
 }
@@ -93,14 +97,14 @@ void WtFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 void WtFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
 {
 	sinkPoint = Wt::WPointF(event.widget().x / mZoomFactor - mTranslate.x(), event.widget().y / mZoomFactor - mTranslate.y());
-	if (isDragging && !isSelected)
+	if (isDragging && selectType < 0)
 	{
 		Wt::WPointF delta = Wt::WPointF(event.dragDelta().x, event.dragDelta().y);
 		mTranslate = Wt::WPointF(mTranslate.x() + delta.x() - mLastDelta.x(), mTranslate.y() + delta.y() - mLastDelta.y());
 		update();
 		mLastDelta = delta;
 	}
-	else if (isDragging && isSelected)
+	else if (isDragging && selectType > 0)
 	{
 		Wt::WPointF delta = Wt::WPointF(event.dragDelta().x, event.dragDelta().y);
 		mTranslateNode = Wt::WPointF(mTranslateNode.x() + delta.x() - mLastDelta.x(), mTranslateNode.y() + delta.y() - mLastDelta.y());
@@ -117,7 +121,7 @@ void WtFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
 			auto mousePoint = Wt::WPointF(event.widget().x, event.widget().y);
 			if (checkMouseInNodeRect(mousePoint, nodeData))
 			{
-				isSelected = true;
+				selectType = 1;
 				connectionOutNode = node;
 				selectedNum = m->objectId();
 				canMoveNode = true;
@@ -126,7 +130,7 @@ void WtFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
 			}
 			else
 			{
-				isSelected = false;
+				selectType = -1;
 				selectedNum = 0;
 				canMoveNode = false;
 				//update();
@@ -141,7 +145,7 @@ void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 	mLastDelta = Wt::WPointF(0, 0);
 	mTranslateNode = Wt::WPointF(0, 0);
 	Wt::WPointF mouseWentUpPosition = Wt::WPointF(event.widget().x, event.widget().y);
-	if (isSelected)
+	if (selectType > 0)
 	{
 		auto node = nodeMap[selectedNum];
 		auto nodeData = node->flowNodeData();
@@ -236,11 +240,11 @@ void WtFlowWidget::onMouseWheel(const Wt::WMouseEvent& event)
 
 void WtFlowWidget::onKeyWentDown()
 {
-	if (isSelected)
+	if (selectType > 0)
 	{
 		auto node = nodeMap[selectedNum];
 		deleteNode(*node);
-		isSelected = false;
+		selectType = -1;
 		selectedNum = 0;
 		updateForAddNode();
 	}
@@ -266,16 +270,16 @@ void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 
 	if (reorderFlag)
 	{
-		node_scene = new WtNodeFlowScene(&painter, mScene, isSelected, selectedNum);
+		node_scene = new WtNodeFlowScene(&painter, mScene, selectType, selectedNum);
 		node_scene->reorderAllNodes();
 		reorderFlag = false;
 	}
 
-	node_scene = new WtNodeFlowScene(&painter, mScene, isSelected, selectedNum);
+	node_scene = new WtNodeFlowScene(&painter, mScene, selectType, selectedNum);
 
 	nodeMap = node_scene->getNodeMap();
 
-	if (isDragging && isSelected && !drawLineFlag)
+	if (isDragging && selectType > 0 && !drawLineFlag)
 	{
 		auto node = nodeMap[selectedNum];
 		moveNode(*node, mTranslateNode);
