@@ -41,10 +41,12 @@ WSimulationControl::WSimulationControl()
 		stopButton->doJavaScript("var stopButton = document.getElementById('stopButton');"
 			"stopButton.blur();");
 		});
+
 	stepButton->clicked().connect([=] {
 		stepButton->doJavaScript("var stepButton = document.getElementById('stepButton');"
 			"stepButton.blur();");
 		});
+
 	resetButton->clicked().connect([=] {
 		resetButton->doJavaScript("var resetButton = document.getElementById('resetButton');"
 			"resetButton.blur();");

@@ -29,18 +29,9 @@ WtNodeGeometry::WtNodeGeometry(std::unique_ptr<WtNodeDataModel> const& dataModel
 	, _draggingPos(-1000, -1000)
 	, _dataModel(dataModel)
 	, _fontMetrics(paintDevice->fontMetrics())
-	//, _boldFontMetrics(Wt::WFont())
-	//, TipsWidget(new QDialog)
-	//, TipsWidget_(new QDockWidget)
-	//, PortTipsWidget(new QDialog)
 	, isPortTipsShow(new bool(false))
 	, isNodeTipsShow(new bool(false))
 {
-	//Wt::WFont f;
-	//Wt::WFontMetrics test(f, 1, 1, 1);
-	////f.setBold(true);
-	////this->InitText();
-	//_boldFontMetrics = Wt::WFontMetrics(f);
 }
 
 WtNodeGeometry::~WtNodeGeometry()
@@ -558,23 +549,6 @@ double WtNodeGeometry::calculateWidth(int num) const
 	return height * num / 2.5;
 }
 
-//Wt::WPointF WtNodeGeometry::calculateNodePositionBetweenNodePorts(
-//	PortIndex targetPortIndex, PortType targetPort, WtNode* targetNode,
-//	PortIndex sourcePortIndex, PortType sourcePort, WtNode* sourceNode,
-//	WtNode& newNode)
-//{
-//	//Calculating the nodes position in the scene. It'll be positioned half way between the two ports that it "connects".
-//	//The first line calculates the halfway point between the ports (node position + port position on the node for both nodes averaged).
-//	//The second line offsets this coordinate with the size of the new node, so that the new nodes center falls on the originally
-//	//calculated coordinate, instead of it's upper left corner.
-//
-//	//auto converterNodePos = (sourceNode->nodeGraphicsObject().pos() + sourceNode->nodeGeometry().portScenePosition(sourcePortIndex, sourcePort) +
-//	//	targetNode->nodeGraphicsObject().pos() + targetNode->nodeGeometry().portScenePosition(targetPortIndex, targetPort)) / 2.0f;
-//	//converterNodePos.setX(converterNodePos.x() - newNode.nodeGeometry().width() / 2.0f);
-//	//converterNodePos.setY(converterNodePos.y() - newNode.nodeGeometry().height() / 2.0f);
-//	//return converterNodePos;
-//}
-
 unsigned int WtNodeGeometry::portWidth(PortType portType) const
 {
 	unsigned width = 0;
@@ -698,12 +672,6 @@ WtNode::WtNode(std::unique_ptr<WtNodeDataModel>&& dataModel, Wt::WPaintDevice* p
 {
 	_nodeGeometry.recalculateSize();
 
-	// propagate data: model => node
-	//connect(_nodeDataModel.get(), &WtNodeDataModel::dataUpdated,
-	//	this, &WtNode::onDataUpdated);
-
-	//connect(_nodeDataModel.get(), &WtNodeDataModel::embeddedWidgetSizeUpdated,
-	//	this, &WtNode::onNodeSizeUpdated);
 }
 
 WtNode::~WtNode() = default;
@@ -712,21 +680,6 @@ Wt::Guid WtNode::id() const
 {
 	return _uid;
 }
-
-//void WtNode::reactToPossibleConnection(PortType reactingPortType, NodeDataType const& reactingDataType, Wt::WPointF const& scenePoint)
-//{
-//	Wt::WTransform const t = _nodeGraphicsObject->sceneTransform();
-//
-//	Wt::WPointF p = t.inverted().map(scenePoint);
-//
-//	_nodeGeometry.setDraggingPosition(p);
-//
-//	_nodeGraphicsObject->update();
-//
-//	_nodeState.setReaction(WtNodeState::REACTING,
-//		reactingPortType,
-//		reactingDataType);
-//}
 
 void WtNode::resetReactionToConnection()
 {

@@ -58,6 +58,8 @@ protected:
 	void paintEvent(Wt::WPaintDevice* paintDevice);
 
 private:
+	bool checkMouseInAllNodeRect(Wt::WPointF mousePoint);
+
 	bool checkMouseInNodeRect(Wt::WPointF mousePoint, WtFlowNodeData nodeData);
 
 	bool checkMouseInHotKey0(Wt::WPointF mousePoint, WtFlowNodeData nodeData);

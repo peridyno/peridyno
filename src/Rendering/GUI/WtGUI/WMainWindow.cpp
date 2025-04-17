@@ -38,8 +38,6 @@ WMainWindow::WMainWindow() : WContainerWidget()
 	viewportHeight = Wt::WApplication::instance()->environment().screenHeight();
 	viewportWidth = Wt::WApplication::instance()->environment().screenWidth();
 
-	
-
 	// init
 	initNavigationBar(layout);
 	initCenterContainer(layout);
@@ -285,10 +283,27 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 						mModuleDataModel->setNode(m);
 						mParameterDataNode->setNode(m);
 						mParameterDataNode->createParameterPanel(parameterPanel);
+						mSceneCanvas->selectNode(m);
+						mSceneCanvas->update();
 					}
 				}
 			}
 		});
+
+	if (mSceneCanvas)
+	{
+		mSceneCanvas->selectNodeSignal().connect([=](std::shared_ptr<dyno::Node> node)
+			{
+				if (node)
+				{
+					mModuleDataModel->setNode(node);
+					mParameterDataNode->setNode(node);
+					mParameterDataNode->createParameterPanel(parameterPanel);
+				}
+			});
+	}
+
+
 
 	return std::move(nodeGraphicsWidget);
 }

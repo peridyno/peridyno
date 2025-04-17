@@ -88,6 +88,9 @@ void WtFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 		}
 		else
 		{
+			// selectType = 2: selected & drag
+			// selectType = 1: mouse move node
+			// selectType = -1: no select
 			selectType = 2;
 		}
 	}
@@ -113,27 +116,20 @@ void WtFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
 	}
 	else
 	{
-		for (auto it = mScene->begin(); it != mScene->end(); it++)
+		auto mousePoint = Wt::WPointF(event.widget().x, event.widget().y);
+		if (checkMouseInAllNodeRect(mousePoint) && selectType != 2)
 		{
-			auto m = it.get();
-			auto node = nodeMap[m->objectId()];
-			auto nodeData = node->flowNodeData();
-			auto mousePoint = Wt::WPointF(event.widget().x, event.widget().y);
-			if (checkMouseInNodeRect(mousePoint, nodeData))
-			{
-				selectType = 1;
-				connectionOutNode = node;
-				selectedNum = m->objectId();
-				canMoveNode = true;
-				update();
-				break;
-			}
-			else
+			selectType = 1;
+			update();
+		}
+		else
+		{
+			if (selectType != 2)
 			{
 				selectType = -1;
 				selectedNum = 0;
 				canMoveNode = false;
-				//update();
+				update();
 			}
 		}
 	}
@@ -153,6 +149,14 @@ void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 		selectNodeSignal_.emit(selectedNum);
 
 		Wt::WPointF mousePoint = Wt::WPointF(event.widget().x, event.widget().y);
+		if (!checkMouseInAllNodeRect(mousePoint) && selectType == 2)
+		{
+			selectType = -1;
+			selectedNum = 0;
+			canMoveNode = false;
+			update();
+		}
+
 		if (checkMouseInHotKey0(mousePoint, nodeData))
 		{
 			auto nodeWidget = dynamic_cast<WtNodeWidget*>(node->nodeDataModel());
@@ -289,6 +293,24 @@ void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 	{
 		drawSketchLine(&painter, sourcePoint, sinkPoint);
 	}
+}
+
+bool WtFlowWidget::checkMouseInAllNodeRect(Wt::WPointF mousePoint)
+{
+	for (auto it = mScene->begin(); it != mScene->end(); it++)
+	{
+		auto m = it.get();
+		auto node = nodeMap[m->objectId()];
+		auto nodeData = node->flowNodeData();
+		if (checkMouseInNodeRect(mousePoint, nodeData))
+		{
+			connectionOutNode = node;
+			selectedNum = m->objectId();
+			canMoveNode = true;
+			return true;
+		}
+	}
+	return false;
 }
 
 bool WtFlowWidget::checkMouseInNodeRect(Wt::WPointF mousePoint, WtFlowNodeData nodeData)

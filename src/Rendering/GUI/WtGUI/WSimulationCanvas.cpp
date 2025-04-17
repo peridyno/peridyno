@@ -7,11 +7,12 @@
 #include <GLRenderEngine.h>
 #include <ImGuizmo.h>
 
-#include <SceneGraph.h>
+#include "SceneGraph.h"
 
 #include <Wt/WApplication.h>
 #include <Wt/WImage.h>
 #include <Wt/WMemoryResource.h>
+
 
 using namespace dyno;
 
@@ -344,6 +345,9 @@ void WSimulationCanvas::onMouseReleased(const Wt::WMouseEvent& evt)
 			makeCurrent();
 			const auto& selection = this->select(x, y, w, h);
 			doneCurrent();
+
+			_selectNodeSignal.emit(this->getCurrentSelectedNode());
+			;
 		}
 	}
 
@@ -379,6 +383,13 @@ void WSimulationCanvas::onKeyWentDown(const Wt::WKeyEvent& evt)
 
 void WSimulationCanvas::onKeyWentUp(const Wt::WKeyEvent& evt)
 {
+}
+
+void WSimulationCanvas::selectNode(std::shared_ptr<dyno::Node> node)
+{
+	makeCurrent();
+	this->select(node);
+	doneCurrent();
 }
 
 void WSimulationCanvas::render(Wt::WFlags<Wt::RenderFlag> flags)

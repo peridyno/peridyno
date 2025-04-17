@@ -46,6 +46,9 @@ public:
 	void onKeyWentDown(const Wt::WKeyEvent& evt);
 	void onKeyWentUp(const Wt::WKeyEvent& evt);
 
+	void selectNode(std::shared_ptr<dyno::Node> node);
+	Wt::Signal<std::shared_ptr<dyno::Node>>& selectNodeSignal() { return _selectNodeSignal; };
+
 protected:
 	void initializeGL();
 	void makeCurrent();
@@ -83,4 +86,6 @@ private:
 	int mCursorX = -1;
 	int mCursorY = -1;
 	int mtempCursorX = -1;
+
+	Wt::Signal<std::shared_ptr<dyno::Node>> _selectNodeSignal;
 };
