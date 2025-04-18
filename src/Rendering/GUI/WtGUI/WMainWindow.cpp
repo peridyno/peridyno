@@ -265,10 +265,8 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 	}
 
 	// Parameter list
-	auto parameterPanel = nodeGraphicsWidget->layout->addWidget(std::make_unique<Wt::WPanel>());
-	parameterPanel->setTitle("Control Variable");
-	parameterPanel->setCollapsible(true);
-	parameterPanel->setStyleClass("scrollable-content");
+	auto parameterWidget = nodeGraphicsWidget->layout->addWidget(std::make_unique<Wt::WContainerWidget>());;
+
 
 	//action for selection change
 	mFlowWidget->selectNodeSignal().connect([=](int selectNum)
@@ -282,7 +280,7 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 					{
 						mModuleDataModel->setNode(m);
 						mParameterDataNode->setNode(m);
-						mParameterDataNode->createParameterPanel(parameterPanel);
+						mParameterDataNode->createParameterPanel(parameterWidget);
 						mSceneCanvas->selectNode(m);
 						mSceneCanvas->update();
 					}
@@ -298,12 +296,12 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 				{
 					mModuleDataModel->setNode(node);
 					mParameterDataNode->setNode(node);
-					mParameterDataNode->createParameterPanel(parameterPanel);
+					mParameterDataNode->createParameterPanel(parameterWidget);
+
+					mFlowWidget->setSelectNode(node);
 				}
 			});
 	}
-
-
 
 	return std::move(nodeGraphicsWidget);
 }

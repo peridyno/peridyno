@@ -54,6 +54,8 @@ public:
 
 	Wt::Signal<int>& selectNodeSignal() { return selectNodeSignal_; };
 
+	void setSelectNode(std::shared_ptr<dyno::Node> node);
+
 protected:
 	void paintEvent(Wt::WPaintDevice* paintDevice);
 

@@ -266,6 +266,13 @@ void WtFlowWidget::zoomOut()
 	update();
 }
 
+void WtFlowWidget::setSelectNode(std::shared_ptr<dyno::Node> node)
+{
+	selectType = 2;
+	selectedNum = node->objectId();
+	update();
+}
+
 void WtFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 {
 	Wt::WPainter painter(paintDevice);

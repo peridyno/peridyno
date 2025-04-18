@@ -50,7 +50,7 @@ public:
 		Wt::Orientation orientation = Wt::Orientation::Horizontal,
 		Wt::ItemDataRole role = Wt::ItemDataRole::Display) const;
 
-	void createParameterPanel(Wt::WPanel* panel);
+	void createParameterPanel(Wt::WContainerWidget* parameterWidget);
 	void createParameterPanelModule(Wt::WPanel* panel);
 
 	void updateNode();
@@ -80,12 +80,13 @@ private:
 
 	std::shared_ptr<dyno::Node> mNode;
 	std::shared_ptr<dyno::Module> mModule;
-	Wt::WTable* table;
 	Wt::Signal<int> changeValue_;
 
 	void castToDerived(Wt::WContainerWidget* fw);
 
 	void addScalarFieldWidget(Wt::WTable* table, std::string label, dyno::FBase* field, int labelWidth = 150, int widgetWidth = 300);
+
+	void addStateFieldWidget(dyno::FBase* field);
 
 	static std::map<std::string, FieldWidgetMeta> sFieldWidgetMeta;
 };
