@@ -1,4 +1,4 @@
-#include "SkeletonLoader.h"
+#include "FBXLoader.h"
 #include "GLPhotorealisticRender.h"
 #include <stb/stb_image.h>
 #include "GLPointVisualModule.h"
@@ -15,14 +15,15 @@
 
 namespace dyno
 {
-	IMPLEMENT_TCLASS(SkeletonLoader, TDataType)
+	IMPLEMENT_TCLASS(FBXLoader, TDataType)
 
 	template<typename TDataType>
-	SkeletonLoader<TDataType>::SkeletonLoader()
+	FBXLoader<TDataType>::FBXLoader()
 		: ParametricModel<TDataType>()
 	{
 		auto defaultTopo = std::make_shared<DiscreteElements<TDataType>>();
 		this->stateTopology()->setDataPtr(defaultTopo);
+		this->varAnimationSpeed()->setRange(0.01,10);
 
 		this->statePolygonSet()->setDataPtr(std::make_shared<PolygonSet<TDataType>>());
 		this->stateTextureMesh()->setDataPtr(std::make_shared<TextureMesh>());
@@ -40,21 +41,25 @@ namespace dyno
 		this->stateHierarchicalScene()->setDataPtr(std::make_shared<HierarchicalScene>());
 		this->setForceUpdate(false);
 
-		auto callback = std::make_shared<FCallBackFunc>(std::bind(&SkeletonLoader<TDataType>::varAnimationChange, this));
+		auto callback = std::make_shared<FCallBackFunc>(std::bind(&FBXLoader<TDataType>::varAnimationChange, this));
 		this->varImportAnimation()->attach(callback);
 		this->varImportAnimation()->setValue(false);
 
-		auto callbackImport = std::make_shared<FCallBackFunc>(std::bind(&SkeletonLoader<TDataType>::initFBX, this));
+		auto callbackImport = std::make_shared<FCallBackFunc>(std::bind(&FBXLoader<TDataType>::initFBX, this));
 		this->varFileName()->attach(callbackImport);
 		this->varUseInstanceTransform()->attach(callbackImport);
 		this->varImportAnimation()->attach(callbackImport);
 
 
-		auto callbackTransform = std::make_shared<FCallBackFunc>(std::bind(&SkeletonLoader<TDataType>::updateTransform, this));
+		auto callbackTransform = std::make_shared<FCallBackFunc>(std::bind(&FBXLoader<TDataType>::updateTransform, this));
 
 		this->varLocation()->attach(callbackTransform);
 		this->varScale()->attach(callbackTransform);
 		this->varRotation()->attach(callbackTransform);
+
+		//auto normalCallback = std::make_shared<FCallBackFunc>(std::bind(&SkeletonLoader<TDataType>::updateNormal, this));
+		//this->varRecalculateNormal()->attach(normalCallback);
+		//this->varFlipNormal()->attach(normalCallback);
 
 		{//JointRender
 			auto ptRender = std::make_shared<GLPointVisualModule>();
@@ -92,7 +97,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void SkeletonLoader<TDataType>::varAnimationChange()
+	void FBXLoader<TDataType>::varAnimationChange()
 	{
 		auto importAnimation = this->varImportAnimation()->getValue();
 		if (importAnimation) 
@@ -108,7 +113,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	SkeletonLoader<TDataType>::~SkeletonLoader()
+	FBXLoader<TDataType>::~FBXLoader()
 	{
 		this->stateTextureMesh()->getDataPtr()->clear();
 		this->stateHierarchicalScene()->getDataPtr()->clear();
@@ -119,7 +124,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	bool SkeletonLoader<TDataType>::initFBX()
+	bool FBXLoader<TDataType>::initFBX()
 	{
 		this->stateHierarchicalScene()->getDataPtr()->clear();
 		this->stateTextureMesh()->getDataPtr()->clear();
@@ -164,9 +169,12 @@ namespace dyno
 		}
 		
 		setBonesToScene(bonesInfo, targetScene);
+		std::vector<Mat4f> currentPoseInverseMatrix;
+
+
 
 		std::vector<std::shared_ptr<MeshInfo>> meshs;
-		std::map<int, Mat4f> fbxinversematrix;
+
 
 		for (int id = 0; id < meshCount; id++)
 		{
@@ -202,19 +210,22 @@ namespace dyno
 			}
 
 			auto positionCount = currentMesh->getGeometry()->getGeometryData().getPositions().count;	
+			auto positionValueCount = currentMesh->getGeometry()->getGeometryData().getPositions().values_count;
+			meshInfo->points.resize(positionValueCount);
 
 			for (size_t i = 0; i < positionCount; i++)
 			{
 				auto pos = currentMesh->getGeometry()->getGeometryData().getPositions().get(i) ;
 				meshInfo->vertices.push_back(Vec3f(pos.x,pos.y,pos.z) * tempScale);
+				if (pos.x == 5.22856617)
+					printf("x");
+				auto indices = currentMesh->getGeometry()->getGeometryData().getPositions().indices[i];
+				meshInfo->verticeId_pointId.push_back(indices);
+				meshInfo->pointId_verticeId[indices].push_back(i);
+
+				meshInfo->points[indices] = Vec3f(pos.x, pos.y, pos.z) * tempScale;
 			}
 
-			for (size_t i = 0; i < positionCount; i++)
-			{
-				auto indices = currentMesh->getGeometry()->getGeometryData().getPositions().indices[i];		
-				meshInfo->verticeId_pointId.push_back(indices);	
-				meshInfo->pointId_verticeId[indices].push_back(i);
-			}
 
 			auto normalCount = currentMesh->getGeometry()->getGeometryData().getNormals().count;
 			for (size_t i = 0; i < normalCount; i++)
@@ -270,7 +281,7 @@ namespace dyno
 						int polyId = k + from;
 						index.insert(polyId);
 
-						Vec3f pos = meshInfo->vertices[polyId];
+						/*Vec3f pos = meshInfo->vertices[polyId];
 						if (pos.x > boundingMax.x)boundingMax.x = pos.x;
 						else boundingMax.x = boundingMax.x;
 
@@ -287,18 +298,19 @@ namespace dyno
 						else boundingMin.y = boundingMin.y;
 
 						if (pos.z < boundingMin.z)boundingMin.z = pos.z;
-						else boundingMin.z = boundingMin.z;
+						else boundingMin.z = boundingMin.z;*/
 
 
 					}
 				}
 				meshInfo->facegroup_polygons.push_back(polygons);
-				meshInfo->boundingBox.push_back(TAlignedBox3D<Real>(boundingMin, boundingMax));
+				//meshInfo->boundingBox.push_back(TAlignedBox3D<Real>(boundingMin, boundingMax));
 
 				
 
 				TopologyModule::Triangle tri;
 				std::vector<TopologyModule::Triangle> triangles;
+				std::vector<TopologyModule::Triangle> triangleNormalIndex;
 				for (size_t j = 0; j < polygonCount; j++)
 				{
 					auto from = currentMesh->getGeometry()->getGeometryData().getPartition(i).polygons[j].from_vertex;
@@ -308,16 +320,21 @@ namespace dyno
 					{
 						int polyId = k + from;
 
+						tri[0] = meshInfo->verticeId_pointId[from];
+						tri[1] = meshInfo->verticeId_pointId[k + from + 1] ;
+						tri[2] = meshInfo->verticeId_pointId[k + from + 2];
+
+						triangles.push_back(tri);
+
 						tri[0] = from;
 						tri[1] = k + from + 1;
 						tri[2] = k + from + 2;
-
-						triangles.push_back(tri);
+						triangleNormalIndex.push_back(tri);
 					}
 				}
 
 				meshInfo->facegroup_triangles.push_back(triangles);
-
+				meshInfo->facegroup_normalIndex.push_back(triangleNormalIndex);
 			}
 
 			//Material
@@ -443,7 +460,7 @@ namespace dyno
 
 					auto indicesCount = cluster->getIndicesCount();
 
-					meshInfo->resizeSkin(meshInfo->vertices.size());
+					meshInfo->resizeSkin(meshInfo->points.size());
 
 
 					for (size_t j = 0; j < indicesCount; j++)
@@ -452,7 +469,7 @@ namespace dyno
 						auto weights = cluster->getWeights()[j];
 						if (weights <= 0.001)
 							continue;
-						auto vertices = meshInfo->pointId_verticeId[indices];
+						//auto vertices = meshInfo->pointId_verticeId[indices];
 						auto iter = pointId_Channel.find(indices);
 
 						int boneDataIndex = -1;
@@ -474,27 +491,27 @@ namespace dyno
 
 						if (boneDataIndex == 0)
 						{
-							for (auto vId : vertices)
-							{
-								meshInfo->boneWeights0[vId][channel] = weights;
-								meshInfo->boneIndices0[vId][channel] = boneId;
-							}
+							//for (auto vId : vertices)
+							//{
+								meshInfo->boneWeights0[indices][channel] = weights;
+								meshInfo->boneIndices0[indices][channel] = boneId;
+							//}
 						}
 						else if (boneDataIndex == 1)
 						{
-							for (auto vId : vertices)
-							{
-								meshInfo->boneWeights1[vId][channel] = weights;
-								meshInfo->boneIndices1[vId][channel] = boneId;
-							}
+							//for (auto vId : vertices)
+							//{
+								meshInfo->boneWeights1[indices][channel] = weights;
+								meshInfo->boneIndices1[indices][channel] = boneId;
+							//}
 						}
-						else if (boneDataIndex == 12)
+						else if (boneDataIndex == 2)
 						{
-							for (auto vId : vertices)
-							{
-								meshInfo->boneWeights2[vId][channel] = weights;
-								meshInfo->boneIndices2[vId][channel] = boneId;
-							}
+							//for (auto vId : vertices)
+							//{
+								meshInfo->boneWeights2[indices][channel] = weights;
+								meshInfo->boneIndices2[indices][channel] = boneId;
+							//}
 						}
 					}
 				}
@@ -515,13 +532,8 @@ namespace dyno
 		updateHierarchicalScene(meshs, bonesInfo);
 
 		updateTextureMesh(meshs);
-		
-		//this->stateHierarchicalScene()->getDataPtr()->mJointData->set
 
-		//targetScene->coutBoneHierarchial();
-		
-			
-		updateAnimation(0);
+
 		if (this->varImportAnimation()->getValue() && bonesInfo.size())
 		{
 			//Update joints animation curve;
@@ -541,6 +553,43 @@ namespace dyno
 		}
 		targetScene->showJointInfo();
 
+		////update Normal
+		//if (targetScene->mJointAnimationData->isValid())
+		//{
+		//	//targetScene->mJointAnimationData->updateAnimationPose(0);
+		//	//targetScene->mSkinData->initialNormal.assign(targetScene->mSkinData->mesh->normals());
+
+		//	for (size_t i = 0; i < targetScene->mSkinData->size(); i++)//
+		//	{
+		//		auto& bindJoint0 = targetScene->mSkinData->V_jointID_0[i];
+		//		auto& bindJoint1 = targetScene->mSkinData->V_jointID_1[i];
+		//		auto& bindJoint2 = targetScene->mSkinData->V_jointID_2[i];
+
+		//		auto& bindWeight0 = targetScene->mSkinData->V_jointWeight_0[i];
+		//		auto& bindWeight1 = targetScene->mSkinData->V_jointWeight_1[i];
+		//		auto& bindWeight2 = targetScene->mSkinData->V_jointWeight_2[i];
+
+		//		targetScene->getVerticesNormalInBindPose(
+		//			targetScene->mSkinData->initialNormal,
+		//			targetScene->mJointData->mJointInverseBindMatrix,
+		//			targetScene->mJointAnimationData->mSkeleton->mJointWorldMatrix,
+
+		//			mPoint2Vertice,
+		//			bindJoint0,
+		//			bindJoint1,
+		//			bindJoint2,
+		//			bindWeight0,
+		//			bindWeight1,
+		//			bindWeight2,
+
+		//			targetScene->mSkinData->skin_VerticeRange[i]
+		//		);
+		//	}
+		//}
+
+		//updateNormal();
+
+		updateTransform();
 
 		delete[] content;
 		fclose(fp);
@@ -553,23 +602,22 @@ namespace dyno
 	
 
 	template<typename TDataType>
-	void SkeletonLoader<TDataType>::resetStates()
+	void FBXLoader<TDataType>::resetStates()
 	{
-
+		updateTransform();
 		Node::resetStates();
-		this->animationPipeline()->update();
 	}
 
 	template<typename TDataType>
-	void SkeletonLoader<TDataType>::updateStates()
+	void FBXLoader<TDataType>::updateStates()
 	{
 
-		updateAnimation(this->stateElapsedTime()->getValue());
+		updateAnimation(this->stateElapsedTime()->getValue() * this->varAnimationSpeed()->getValue());
 		Node::updateStates();
 	}
 
 	template<typename TDataType>
-	bool SkeletonLoader<TDataType>::loadTexture(const char* path, dyno::CArray2D<dyno::Vec4f>& img)
+	bool FBXLoader<TDataType>::loadTexture(const char* path, dyno::CArray2D<dyno::Vec4f>& img)
 	{
 
 		int x, y, comp;
@@ -602,7 +650,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void SkeletonLoader<TDataType>::coutName_Type(ofbx::Object::Type ty, ofbx::Object* obj)
+	void FBXLoader<TDataType>::coutName_Type(ofbx::Object::Type ty, ofbx::Object* obj)
 	{
 		{
 			std::cout << obj->name << "  -  ";
@@ -691,7 +739,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void SkeletonLoader<TDataType>::getCurveValue(const ofbx::AnimationCurveNode* node, std::shared_ptr<HierarchicalScene> scene,float scale)
+	void FBXLoader<TDataType>::getCurveValue(const ofbx::AnimationCurveNode* node, std::shared_ptr<HierarchicalScene> scene,float scale)
 	{
 		if (!node->getBone())
 			return;
@@ -841,7 +889,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void SkeletonLoader<TDataType>::buildHierarchy(const std::map<std::string, std::string>& obj_parent, const std::map<std::string, std::shared_ptr<ModelObject>>& name_ParentObj)
+	void FBXLoader<TDataType>::buildHierarchy(const std::map<std::string, std::string>& obj_parent, const std::map<std::string, std::shared_ptr<ModelObject>>& name_ParentObj)
 	{
 		//std::cout << parentTag.size()<< " -- " << name_ParentObj.size() << "\n";
 		for (auto it : obj_parent)
@@ -886,7 +934,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	std::shared_ptr<Bone> SkeletonLoader<TDataType>::pushBone(const ofbx::Object* bone, std::map<std::string, std::string>& parentTag, std::map<std::string, std::shared_ptr<ModelObject>>& name_ParentObj, std::vector<std::shared_ptr<Bone>>& bonesInfo, float scale)
+	std::shared_ptr<Bone> FBXLoader<TDataType>::pushBone(const ofbx::Object* bone, std::map<std::string, std::string>& parentTag, std::map<std::string, std::shared_ptr<ModelObject>>& name_ParentObj, std::vector<std::shared_ptr<Bone>>& bonesInfo, float scale)
 	{
 		auto it = parentTag.find(std::string(bone->name));
 		std::shared_ptr<Bone> temp = nullptr;
@@ -921,46 +969,58 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void SkeletonLoader<TDataType>::updateTextureMesh(const std::vector<std::shared_ptr<MeshInfo>>& meshsInfo)
+	void FBXLoader<TDataType>::updateTextureMesh(const std::vector<std::shared_ptr<MeshInfo>>& meshsInfo)
 	{
 		auto texMesh = this->stateTextureMesh()->getDataPtr();
 
 		std::vector<int> mesh_VerticesNum;
 		std::vector<int> mesh_NormalNum;
 		std::vector<int> mesh_UvNum;
+		std::vector<int> mesh_PointsNum;
 
 		std::vector<Vec3f> texVertices;
+		std::vector<Vec3f> texPoints;
 		std::vector<Vec3f> texNormals;
 		std::vector<Vec2f> texCoords;
+
+		CArrayList<int> c_point2Vertice;
 
 		for (auto it : meshsInfo)
 		{
 			mesh_VerticesNum.push_back(it->vertices.size());
 			mesh_NormalNum.push_back(it->normals.size());
 			mesh_UvNum.push_back(it->texcoords.size());
+			mesh_PointsNum.push_back(it->points.size());
 
 			texVertices.insert(texVertices.end(), it->vertices.begin(), it->vertices.end());
+			texPoints.insert(texPoints.end(), it->points.begin(), it->points.end());
 			texNormals.insert(texNormals.end(), it->normals.begin(), it->normals.end());
-			texCoords.insert(texCoords.end(), it->texcoords.begin(), it->texcoords.end());
+			texCoords.insert(texCoords.end(), it->texcoords.begin(), it->texcoords.end());			
 		}
 
-		texMesh->vertices().assign(texVertices);
+		texMesh->vertices().assign(texPoints);
 		texMesh->normals().assign(texNormals);
 		texMesh->texCoords().assign(texCoords);
-
+		
+		this->stateHierarchicalScene()->getDataPtr()->updatePoint2Vertice(mPoint2Vertice,mVertice2Point);
+		
 		std::vector<uint> shapeID;
-		shapeID.resize(texVertices.size());
+		shapeID.resize(texPoints.size());
 
 		int tempID = 0;
 		int offset = 0;
+		int verticeOffset = 0;
+
 		std::vector<int> shapeId2MeshId;
 		for (size_t i = 0; i < meshsInfo.size(); i++)
 		{
 			
 			int meshFaceGroupNum = meshsInfo[i]->facegroup_triangles.size();
+
 			for (size_t j = 0; j < meshFaceGroupNum; j++)
 			{
 				auto triangles = meshsInfo[i]->facegroup_triangles[j];
+				auto normalIndex = meshsInfo[i]->facegroup_normalIndex[j];
 
 				auto shape = std::make_shared<Shape>();
 				for (size_t k = 0; k < triangles.size(); k++)
@@ -972,9 +1032,17 @@ namespace dyno
 					shapeID[triangles[k][1]] = tempID;
 					shapeID[triangles[k][2]] = tempID;
 				}
+
+				for (size_t k = 0; k < normalIndex.size(); k++)
+				{
+					normalIndex[k][0] = normalIndex[k][0] + verticeOffset;
+					normalIndex[k][1] = normalIndex[k][1] + verticeOffset;
+					normalIndex[k][2] = normalIndex[k][2] + verticeOffset;
+				}
+
 				shape->vertexIndex.assign(triangles);
-				shape->normalIndex.assign(triangles);
-				shape->texCoordIndex.assign(triangles);
+				shape->normalIndex.assign(normalIndex);
+				shape->texCoordIndex.assign(normalIndex);
 
 				tempID++;
 
@@ -987,7 +1055,8 @@ namespace dyno
 				texMesh->shapes().push_back(shape);
 
 			}
-			offset += mesh_VerticesNum[i];
+			offset += mesh_PointsNum[i];
+			verticeOffset += mesh_VerticesNum[i];
 		}
 
 		texMesh->shapeIds().assign(shapeID);
@@ -1039,13 +1108,10 @@ namespace dyno
 
 		}
 
-		updateTransform();
-
-
 	}
 
 	template<typename TDataType>
-	void SkeletonLoader<TDataType>::setMeshToScene(const std::vector<std::shared_ptr<MeshInfo>>& meshsInfo, std::shared_ptr<HierarchicalScene> scene)
+	void FBXLoader<TDataType>::setMeshToScene(const std::vector<std::shared_ptr<MeshInfo>>& meshsInfo, std::shared_ptr<HierarchicalScene> scene)
 	{
 		for (auto mesh : meshsInfo)
 		{
@@ -1055,7 +1121,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void SkeletonLoader<TDataType>::setBonesToScene(const std::vector< std::shared_ptr<Bone>>& bonesInfo, std::shared_ptr<HierarchicalScene> scene)
+	void FBXLoader<TDataType>::setBonesToScene(const std::vector< std::shared_ptr<Bone>>& bonesInfo, std::shared_ptr<HierarchicalScene> scene)
 	{
 		for (auto bone : bonesInfo)
 		{
@@ -1064,7 +1130,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void SkeletonLoader<TDataType>::updateHierarchicalScene(const std::vector<std::shared_ptr<MeshInfo>>& meshsInfo, const std::vector< std::shared_ptr<Bone>>& bonesInfo)
+	void FBXLoader<TDataType>::updateHierarchicalScene(const std::vector<std::shared_ptr<MeshInfo>>& meshsInfo, const std::vector< std::shared_ptr<Bone>>& bonesInfo)
 	{
 		auto hierarchicalScene = this->stateHierarchicalScene()->getDataPtr();
 		hierarchicalScene->clear();
@@ -1084,7 +1150,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void SkeletonLoader<TDataType>::updateTransform()
+	void FBXLoader<TDataType>::updateTransform()
 	{
 
 
@@ -1115,7 +1181,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void SkeletonLoader<TDataType>::updateAnimation(float time)
+	void FBXLoader<TDataType>::updateAnimation(float time)
 	{
 		auto targetScene = this->stateHierarchicalScene()->getDataPtr();
 
@@ -1124,6 +1190,7 @@ namespace dyno
 		if(targetScene->mJointAnimationData->isValid())
 			targetScene->mJointAnimationData->updateAnimationPose(time);
 
+		auto texMesh = this->stateTextureMesh()->getDataPtr();
 
 		for (size_t i = 0; i < targetScene->mSkinData->size(); i++)//
 		{
@@ -1155,13 +1222,17 @@ namespace dyno
 
 				targetScene->mSkinData->skin_VerticeRange[i]
 			);
+		
 
-			targetScene->skinAnimation(
+
+
+			targetScene->skinVerticesAnimation(
 				targetScene->mSkinData->initialNormal,
 				targetScene->mSkinData->mesh->normals(),
 				targetScene->mJointData->mJointInverseBindMatrix,
 				targetScene->mJointData->mJointWorldMatrix,
 
+				mPoint2Vertice,
 				bindJoint0,
 				bindJoint1,
 				bindJoint2,
@@ -1174,7 +1245,6 @@ namespace dyno
 
 				targetScene->mSkinData->skin_VerticeRange[i]
 			);
-
 		}
 
 		//draw Joint
@@ -1202,5 +1272,5 @@ namespace dyno
 
 	}
 
-	DEFINE_CLASS(SkeletonLoader);
+	DEFINE_CLASS(FBXLoader);
 }

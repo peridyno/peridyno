@@ -39,16 +39,16 @@ namespace dyno
 	
 	
 	template<typename TDataType>
-	class SkeletonLoader : public ParametricModel<TDataType>
+	class FBXLoader : public ParametricModel<TDataType>
 	{
-		DECLARE_TCLASS(SkeletonLoader, TDataType)
+		DECLARE_TCLASS(FBXLoader, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
 
-		SkeletonLoader();
-		virtual ~SkeletonLoader();
+		FBXLoader();
+		virtual ~FBXLoader();
 
 	public:
 
@@ -57,6 +57,8 @@ namespace dyno
 		*/
 		DEF_VAR(FilePath, FileName, "", "");
 		DEF_VAR(bool, ImportAnimation, true, "ImportAnimation");
+		//DEF_VAR(bool, RecalculateNormal, false, "RecalculateNormal");
+		//DEF_VAR(bool, FlipNormal, false, "FlipNormal");
 
 			/**
 		* @brief Capsule Topology
@@ -71,10 +73,10 @@ namespace dyno
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, JointSet, "TextureMesh");
 		//DEF_INSTANCE_STATE(PointSet<TDataType>, ShapeCenter, "");
 
-		DEF_VAR(bool,UseInstanceTransform,true,"reset pivot by bounding");
+		DEF_VAR(bool,UseInstanceTransform,true,"Reset pivot by bounding");
 
-		DEF_VAR(Real, Radius, 0.0075, " Radius of Capsule");
-		
+		DEF_VAR(Real, Radius, 0.0075, "Radius of Capsule");
+		DEF_VAR(Real, AnimationSpeed, 1, "Speed");
 
 
 	protected:
@@ -127,13 +129,31 @@ namespace dyno
 			return nodeTransform;
 		}
 
-
+		void updateNormal() 
+		{
+			//auto targetScene = this->stateHierarchicalScene()->getDataPtr();
+			//auto texMesh = this->stateTextureMesh()->getDataPtr();
+			//CArray<Vec3f> Normal0;
+			//Normal0.assign(initialNormal);
+			//if (this->varRecalculateNormal()->getValue())
+			//{
+			//	targetScene->computeTexMeshVerticesNormal(texMesh->shapes(),initialPosition,initialNormal,&mVertice2Point);
+			//	targetScene->flipNormal(initialNormal);
+			//}
+			//CArray<Vec3f> Normal1;
+			//Normal1.assign(initialNormal);
+		
+			//
+			//updateTransform();
+			
+		}
 	
 	private:
 
 		DArray<Vec3f> initialPosition;
 		DArray<Vec3f> initialNormal;
-		
+		DArrayList<int> mPoint2Vertice;
+		DArray<int> mVertice2Point;
 		std::vector<Vec3f> initialShapeCenter;
 	};
 }

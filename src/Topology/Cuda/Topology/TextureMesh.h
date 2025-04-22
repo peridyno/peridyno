@@ -86,44 +86,18 @@ namespace dyno
 
 		void clear();
 
-		void safeConvert2TriangleSet(TriangleSet<DataType3f>& triangleSet) 
-		{
-			triangleSet.setPoints(this->vertices());
-			auto& triangles = triangleSet.getTriangles();
+		void safeConvert2TriangleSet(TriangleSet<DataType3f>& triangleSet);
 
-			int size = 0;
-			for (auto it : mShapes)
-			{
-				size += it->vertexIndex.size();
-			}
-			triangles.resize(size);
-
-			convert2TriangleSet(triangleSet);
-		}
-
-		void convert2TriangleSet(TriangleSet<DataType3f>& triangleSet) 
-		{
-			triangleSet.setPoints(this->vertices());
-			auto& triangles = triangleSet.getTriangles();
-			int num = 0;
-			for (size_t i = 0; i < mShapes.size(); i++)
-			{
-				num += mShapes[i]->vertexIndex.size();
-			}
-			triangles.resize(num);
-
-			int offset = 0;
-			for (size_t i = 0; i < mShapes.size(); i++)
-			{
-				auto shape = mShapes[i];
-				triangles.assign(shape->vertexIndex, shape->vertexIndex.size(), offset,0);
-				offset += shape->vertexIndex.size();
-			}
-		}
-
+		void convert2TriangleSet(TriangleSet<DataType3f>& triangleSet);
 
 		std::vector<Vec3f> updateTexMeshBoundingBox();
 
+		template<typename Vec3f>
+		void transPoint2Vertices(
+			DArray<Vec3f>& pAttribute,
+			DArray<Vec3f>& vAttribute,
+			DArrayList<int>& contactList
+		);
 
 	private:
 		DArray<Vec3f> mVertices;

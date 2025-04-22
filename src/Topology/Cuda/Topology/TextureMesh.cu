@@ -12,6 +12,41 @@ namespace dyno
 		this->clear();
 	}
 
+	void TextureMesh::safeConvert2TriangleSet(TriangleSet<DataType3f>& triangleSet)
+	{
+		triangleSet.setPoints(this->vertices());
+		auto& triangles = triangleSet.getTriangles();
+
+		int size = 0;
+		for (auto it : mShapes)
+		{
+			size += it->vertexIndex.size();
+		}
+		triangles.resize(size);
+
+		convert2TriangleSet(triangleSet);
+	}
+
+	void TextureMesh::convert2TriangleSet(TriangleSet<DataType3f>& triangleSet)
+	{
+		triangleSet.setPoints(this->vertices());
+		auto& triangles = triangleSet.getTriangles();
+		int num = 0;
+		for (size_t i = 0; i < mShapes.size(); i++)
+		{
+			num += mShapes[i]->vertexIndex.size();
+		}
+		triangles.resize(num);
+
+		int offset = 0;
+		for (size_t i = 0; i < mShapes.size(); i++)
+		{
+			auto shape = mShapes[i];
+			triangles.assign(shape->vertexIndex, shape->vertexIndex.size(), offset, 0);
+			offset += shape->vertexIndex.size();
+		}
+	}
+
 	template<typename Vec3f>
 	__global__ void mergeVec3f(
 		DArray<Vec3f> v0,
@@ -318,6 +353,48 @@ namespace dyno
 		}
 		return c_shapeCenter;
 	}
+
+	template<typename Vec3f>
+	__global__ void TransPoint2Vertices(
+		DArray<Vec3f> pAttribute,
+		DArray<Vec3f> vAttribute,
+		DArrayList<int> contactList)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= contactList.size()) return;
+
+		auto& list = contactList[pId];
+		int vId = 0;
+		for (int i = 0; i < list.size(); i++)
+		{
+			vId = list[i];
+			vAttribute[vId] = pAttribute[pId];
+		}
+	}
+
+	template<typename Vec3f>
+	void TextureMesh::transPoint2Vertices(
+		DArray<Vec3f>& pAttribute,
+		DArray<Vec3f>& vAttribute,
+		DArrayList<int>& contactList
+	)
+	{
+		
+		cuExecute(pAttribute.size(),
+			TransPoint2Vertices,
+			pAttribute,
+			vAttribute,
+			contactList
+		);	
+	}
+
+	template void TextureMesh::transPoint2Vertices <Vec3f>(
+		DArray<Vec3f>& pAttribute,
+		DArray<Vec3f>& vAttribute,
+		DArrayList<int>& contactList
+		);
+
+	
 
 
 }

@@ -376,11 +376,10 @@ namespace dyno
 
 
 
-		this->updateAnimation(0);
-
 		delete newModel;
 
 		this->updateTransform();
+		this->updateAnimation(0);
 	}
 
 	// ***************************** function *************************** //
@@ -717,9 +716,14 @@ namespace dyno
 	template<typename TDataType>
 	void GltfLoader<TDataType>::updateTransformState()
 	{
-		Vec3f location = this->varLocation()->getValue();
+		Vec3f loc = this->varLocation()->getValue();
 		Vec3f scale = this->varScale()->getValue();
-		Mat4f mT = Mat4f(1, 0, 0, location[0], 0, 1, 0, location[1], 0, 0, 1, location[2], 0, 0, 0, 1);
+		Mat4f mT = Mat4f(
+			1, 0, 0, loc.x,
+			0, 1, 0, loc.y,
+			0, 0, 1, loc.z,
+			0, 0, 0, 1
+		);
 		Mat4f mS = Mat4f(scale[0], 0, 0, 0, 0, scale[1], 0, 0, 0, 0, scale[2], 0, 0, 0, 0, 1);
 		Mat4f mR = this->computeQuaternion().toMatrix4x4();
 		Mat4f transform = mT * mS * mR;
@@ -776,10 +780,6 @@ namespace dyno
 
 		worldPosition[pId] = Coord(tempV[0], tempV[1], tempV[2]);
 		Normal[pId] = Coord(tempN[0], tempN[1], tempN[2]);
-		if (pId == 1)
-		{
-			auto iP = worldPosition[pId];
-		}
 		
 	}
 

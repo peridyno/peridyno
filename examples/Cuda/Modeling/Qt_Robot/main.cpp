@@ -11,7 +11,7 @@
 #include "GltfLoader.h"
 #include <GLRenderEngine.h>
 #include "JointDeform.h"
-#include "SkeletonLoader/SkeletonLoader.h"
+#include "FBXLoader/FBXLoader.h"
 #include "RigidBody/Module/AnimationDriver.h"
 #include "RigidBody/Module/CarDriver.h"
 #include "BasicShapes/PlaneModel.h"
@@ -30,7 +30,7 @@ int main()
 	//Create SceneGraph
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
-	auto fbx = scn->addNode(std::make_shared<SkeletonLoader<DataType3f>>());
+	auto fbx = scn->addNode(std::make_shared<FBXLoader<DataType3f>>());
 	fbx->varFileName()->setValue(getAssetPath() + "fbx/HumanoidRobot.fbx");
 	fbx->reset();
 

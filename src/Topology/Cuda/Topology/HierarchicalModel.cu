@@ -135,6 +135,348 @@ namespace dyno
 
 	}
 
+	template< typename Coord, typename Vec4f, typename Mat4f, typename Vec2u>
+	__global__ void verticesAnimation(
+		DArray<Coord> intialVertices,
+		DArray<Coord> Vertices,
+		DArray<Mat4f> joint_inverseBindMatrix,
+		DArray<Mat4f> WorldMatrix,
+
+		DArrayList<int> point2Vertice,
+		DArray<Vec4f> bind_joints_0,
+		DArray<Vec4f> bind_joints_1,
+		DArray<Vec4f> bind_joints_2,
+		DArray<Vec4f> weights_0,
+		DArray<Vec4f> weights_1,
+		DArray<Vec4f> weights_2,
+
+		Mat4f transform,
+		bool isNormal,
+
+		Vec2u range
+	)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= point2Vertice.size()) return;
+
+		if (pId < range[0] || pId >= range[1])
+			return;
+
+		List<int>& list = point2Vertice[pId];
+
+		for (int k = 0; k < list.size(); k++)
+		{
+			int vId = list[k];
+			Vec3f initialP = intialVertices[vId];
+
+			Vec4f result = Vec4f(0, 0, 0, float(!isNormal));
+
+			int skinPId = pId - range[0];
+
+			Vec3f offest;
+
+			bool j0 = bind_joints_0.size();
+			bool j1 = bind_joints_1.size();
+			bool j2 = bind_joints_2.size();
+
+			if (j0)
+			{
+				for (unsigned int i = 0; i < 4; i++)
+				{
+					int jointId = int(bind_joints_0[skinPId][i]);
+					Real weight = weights_0[skinPId][i];
+
+					offest = intialVertices[vId];
+
+					Vec4f v_bone_space = joint_inverseBindMatrix[jointId] * Vec4f(offest[0], offest[1], offest[2], float(!isNormal));//
+
+					result += (transform * WorldMatrix[jointId] * v_bone_space) * weight;
+
+				}
+			}
+			if (j1)
+			{
+				for (unsigned int i = 0; i < 4; i++)
+				{
+					int jointId = int(bind_joints_1[skinPId][i]);
+					Real weight = weights_1[skinPId][i];
+
+					offest = intialVertices[vId];
+					Vec4f v_bone_space = joint_inverseBindMatrix[jointId] * Vec4f(offest[0], offest[1], offest[2], float(!isNormal));//
+
+					result += (transform * WorldMatrix[jointId] * v_bone_space) * weight;
+
+
+				}
+			}
+			if (j2)
+			{
+				for (unsigned int i = 0; i < 4; i++)
+				{
+					int jointId = int(bind_joints_2[skinPId][i]);
+					Real weight = weights_2[skinPId][i];
+
+					offest = intialVertices[vId];
+					Vec4f v_bone_space = joint_inverseBindMatrix[jointId] * Vec4f(offest[0], offest[1], offest[2], float(!isNormal));//
+
+					result += (transform * WorldMatrix[jointId] * v_bone_space) * weight;
+				}
+			}
+
+
+			if (j0 || j1 || j2)
+			{
+
+				Vertices[vId][0] = result[0];
+				Vertices[vId][1] = result[1];
+				Vertices[vId][2] = result[2];
+			}
+
+			if (isNormal) 
+			{
+				Vertices[vId] = Vertices[vId].normalize();
+
+
+
+			}
+		}
+
+	}
+
+	void HierarchicalScene::skinVerticesAnimation(
+		DArray<Vec3f>& intialVertices,
+		DArray<Vec3f>& Vertices,
+		DArray<Mat4f>& joint_inverseBindMatrix,
+		DArray<Mat4f>& WorldMatrix,
+
+		DArrayList<int>& point2Vertice,
+		DArray<Vec4f>& bind_joints_0,
+		DArray<Vec4f>& bind_joints_1,
+		DArray<Vec4f>& bind_joints_2,
+		DArray<Vec4f>& weights_0,
+		DArray<Vec4f>& weights_1,
+		DArray<Vec4f>& weights_2,
+
+		Mat4f transform,
+		bool isNormal,
+
+		Vec2u range
+	) 
+	{
+		cuExecute(point2Vertice.size(),
+			verticesAnimation,
+			intialVertices,
+			Vertices,
+			joint_inverseBindMatrix,
+			WorldMatrix,
+			point2Vertice,
+			bind_joints_0,
+			bind_joints_1,
+			bind_joints_2,
+			weights_0,
+			weights_1,
+			weights_2,
+			transform,
+			isNormal,
+			range
+		);
+	}
+
+
+	template< typename Vec3f, typename Vec4f, typename Mat4f, typename Vec2u>
+	__global__ void GetVerticesNormalInBindPose(
+		DArray<Vec3f> initialNormal,
+		DArray<Mat4f> joint_inverseBindMatrix,
+		DArray<Mat4f> WorldMatrix,
+
+		DArrayList<int> point2Vertice,
+		DArray<Vec4f> bind_joints_0,
+		DArray<Vec4f> bind_joints_1,
+		DArray<Vec4f> bind_joints_2,
+		DArray<Vec4f> weights_0,
+		DArray<Vec4f> weights_1,
+		DArray<Vec4f> weights_2,
+
+		Vec2u range
+	)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= point2Vertice.size()) return;
+
+		if (pId < range[0] || pId >= range[1])
+			return;
+
+		List<int>& list = point2Vertice[pId];
+
+		for (int k = 0; k < list.size(); k++)
+		{
+			int vId = list[k];
+
+			Vec3f N = initialNormal[vId];
+
+			int skinPId = pId - range[0];
+
+			bool j0 = bind_joints_0.size();
+			bool j1 = bind_joints_1.size();
+			bool j2 = bind_joints_2.size();
+
+			Vec3f result = Vec3f(0);
+
+			float add = 0;
+
+			if (j0)
+			{
+				for (unsigned int i = 0; i < 4; i++)
+				{
+					int jointId = int(bind_joints_0[skinPId][i]);
+					Real weight = weights_0[skinPId][i];
+
+					Mat4f temp = WorldMatrix[jointId] * joint_inverseBindMatrix[jointId];
+					Mat3f temp3 = Mat3f(temp(0, 0), temp(0, 1), temp(0, 2),
+						temp(1, 0), temp(1, 1), temp(1, 2),
+						temp(2, 0), temp(2, 1), temp(2, 2)
+					);
+
+					result += (temp3.inverse() * N) * weight;
+					add += weight;
+				}
+			}
+			if (j1)
+			{
+				for (unsigned int i = 0; i < 4; i++)
+				{
+					int jointId = int(bind_joints_1[skinPId][i]);
+					Real weight = weights_1[skinPId][i];
+
+					Mat4f temp = WorldMatrix[jointId] * joint_inverseBindMatrix[jointId];
+					Mat3f temp3 = Mat3f(temp(0, 0), temp(0, 1), temp(0, 2),
+						temp(1, 0), temp(1, 1), temp(1, 2),
+						temp(2, 0), temp(2, 1), temp(2, 2)
+					);
+
+					result += (temp3.inverse() * N) * weight;
+					add += weight;
+				}
+			}
+			if (j2)
+			{
+				for (unsigned int i = 0; i < 4; i++)
+				{
+					int jointId = int(bind_joints_2[skinPId][i]);
+					Real weight = weights_2[skinPId][i];
+
+					Mat4f temp = WorldMatrix[jointId] * joint_inverseBindMatrix[jointId];
+					Mat3f temp3 = Mat3f(temp(0, 0), temp(0, 1), temp(0, 2),
+						temp(1, 0), temp(1, 1), temp(1, 2),
+						temp(2, 0), temp(2, 1), temp(2, 2)
+					);
+
+					result += (temp3.inverse() * N) * weight;
+					add += weight;
+				}
+			}
+
+			if (j0 || j1 || j2)
+			{
+				initialNormal[vId][0] = result[0];
+				initialNormal[vId][1] = result[1];
+				initialNormal[vId][2] = result[2];
+			}
+
+			initialNormal[vId] = initialNormal[vId].normalize();
+			if (pId == 6737) 
+			{
+				printf("N: %f,%f,%f\n", initialNormal[vId][0], initialNormal[vId][1], initialNormal[vId][2]);
+			}
+		}
+	}
+
+	void HierarchicalScene::getVerticesNormalInBindPose(
+		DArray<Vec3f>& initialNormal,
+		DArray<Mat4f>& joint_inverseBindMatrix,
+		DArray<Mat4f>& WorldMatrix,
+
+		DArrayList<int>& point2Vertice,
+		DArray<Vec4f>& bind_joints_0,
+		DArray<Vec4f>& bind_joints_1,
+		DArray<Vec4f>& bind_joints_2,
+		DArray<Vec4f>& weights_0,
+		DArray<Vec4f>& weights_1,
+		DArray<Vec4f>& weights_2,
+
+		Vec2u range
+	) 
+	{
+		cuExecute(initialNormal.size(),
+			GetVerticesNormalInBindPose,
+			initialNormal,
+			joint_inverseBindMatrix,
+			WorldMatrix,
+
+			point2Vertice,
+			bind_joints_0,
+			bind_joints_1,
+			bind_joints_2,
+			weights_0,
+			weights_1,
+			weights_2,
+
+			range
+		);
+	}
+
+	void HierarchicalScene::updatePoint2Vertice(DArrayList<int>& d_p2v,DArray<int>& d_v2p)
+	{
+		int num = 0;
+		int verticeNum = 0;
+
+		for (auto it : this->getMeshes())
+		{
+			num += it->points.size();
+			verticeNum += it->vertices.size();
+		}
+
+		std::vector<int> v2p(verticeNum);
+		CArray<uint> instanceNum(num); 
+		
+		int pIdOffset = 0;
+		for (auto it : this->getMeshes())
+		{	
+			for (auto p2v : it->pointId_verticeId)
+			{
+				int pId = p2v.first + pIdOffset;
+				instanceNum[pId] = p2v.second.size();					
+			}
+			pIdOffset += it->points.size();
+		}
+
+		CArrayList<int> cArrayList;
+		cArrayList.resize(instanceNum);
+
+		pIdOffset = 0;
+		int vIdOffset = 0;
+		for (auto it : this->getMeshes())
+		{
+			for (auto p2v : it->pointId_verticeId)
+			{
+				int pId = p2v.first + pIdOffset;
+
+				auto& list = cArrayList[pId];
+				for (size_t k = 0; k < p2v.second.size(); k++)
+				{
+					int vId = p2v.second[k] + vIdOffset;
+					list.insert(vId);
+					v2p[vId] = pId;
+				}
+			}
+			pIdOffset += it->points.size();
+			vIdOffset += it->vertices.size();
+		}
+		d_p2v.assign(cArrayList);
+		d_v2p.assign(v2p);
+	}
+
+
 	ModelObject:: ~ModelObject() 
 	{
 		child.clear();
@@ -557,8 +899,8 @@ namespace dyno
 			auto mesh = mMeshes[meshId];
 			mSkinData->pushBack_Data(mesh->boneWeights0, mesh->boneWeights1, mesh->boneIndices0, mesh->boneIndices1, &mesh->boneWeights2, &mesh->boneIndices2);
 
-			mSkinData->skin_VerticeRange[meshId] = Vec2u(tempSize, tempSize + mesh->vertices.size());
-			tempSize += mesh->vertices.size();
+			mSkinData->skin_VerticeRange[meshId] = Vec2u(tempSize, tempSize + mesh->points.size());
+			tempSize += mesh->points.size();
 		}
 
 		mSkinData->mesh = texMesh;
@@ -786,4 +1128,144 @@ namespace dyno
 		DArray<uint>& shapeId,
 		DArray<Vec3f>& t
 		);
+
+
+	template< typename Triangle, typename Vec3f >
+	__global__ void computeTriangleNormal(
+		DArray<Triangle> triangle,
+		DArray<Vec3f> pos,
+		DArray<Vec3f> triangleNormal
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= triangle.size()) return;
+
+		int pA = triangle[tId][0];
+		int pB = triangle[tId][1];
+		int pC = triangle[tId][2];
+		Vec3f AB = pos[pB] - pos[pA];
+		Vec3f BC = pos[pC] - pos[pB];
+		AB = AB.normalize();
+		BC = BC.normalize();
+
+		triangleNormal[tId] = BC.cross(AB);
+		triangleNormal[tId] = triangleNormal[tId].normalize();
+	}
+
+	template< typename Triangle, typename Vec3f >
+	__global__ void computeVerticesNormal(
+		DArray<Triangle> normalIndex,
+		DArray<int> ver2Point,
+		DArrayList<int> point2Triangle,
+		DArray<Vec3f> triangleNormal,
+		DArray<Vec3f> verticesNormal
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= normalIndex.size()) return;
+
+		for (int i = 0; i < 3; i++)
+		{
+			int vId = normalIndex[tId][i];
+			int pId = ver2Point[vId];
+
+			Vec3f vN = Vec3f(0);
+			for (int j = 0; j < point2Triangle[pId].size(); j++)
+			{
+				int triId = point2Triangle[pId][j];
+
+				vN += triangleNormal[triId];
+			}
+
+			verticesNormal[vId] = vN.normalize();
+		}
+
+	}
+
+	__global__ void initialV2P(
+		DArray<int> ver2Point
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= ver2Point.size()) return;
+
+		ver2Point[tId] = tId;
+	}
+
+
+	void HierarchicalScene::computeTexMeshVerticesNormal(
+		std::vector<std::shared_ptr<Shape>>& shapes,
+		DArray<Vec3f>& Position,
+		DArray<Vec3f>& Normal,
+		DArray<int>* vertices2Point)
+	{
+		for (auto shape : shapes)
+		{
+			auto triSetHelper = std::make_shared<TriangleSet<DataType3f>>();
+			triSetHelper->setPoints(Position);
+			triSetHelper->setTriangles(shape->vertexIndex);
+			triSetHelper->update();
+
+			DArray<Vec3f> triNormal;
+			triNormal.resize(shape->vertexIndex.size());
+
+
+			DArrayList<int>& point2Tri = triSetHelper->getVertex2Triangles();
+
+			cuExecute(shape->vertexIndex.size(),
+				computeTriangleNormal,
+				shape->vertexIndex,
+				Position,
+				triNormal
+			);
+
+			DArray<int> d_v2p;
+			DArray<int>& v2p = *vertices2Point;
+			if (!vertices2Point)
+			{
+				
+				d_v2p.resize(Position.size());
+
+				cuExecute(d_v2p.size(),
+					initialV2P,
+					d_v2p
+				);
+				v2p = d_v2p;
+			}
+
+			cuExecute(shape->normalIndex.size(),
+				computeVerticesNormal,
+				shape->normalIndex,
+				v2p,
+				point2Tri,
+				triNormal,
+				Normal
+			);
+
+			triNormal.clear();
+			d_v2p.clear();
+		}
+
+	}
+
+	template< typename Vec3f >
+	__global__ void flipNormalData(
+		DArray<Vec3f> normal
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= normal.size()) return;
+
+		normal[tId] = normal[tId] * -1;
+	}
+
+	void HierarchicalScene::flipNormal(DArray<Vec3f>& Normal) 
+	{
+		cuExecute(Normal.size(),
+			flipNormalData,
+			Normal
+		);
+	}
+
+	
 }

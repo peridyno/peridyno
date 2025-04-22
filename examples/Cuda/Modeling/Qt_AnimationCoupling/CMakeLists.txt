@@ -7,7 +7,7 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
         SemiAnalyticalScheme
         Multiphysics
         FBXLoader
-        ObjIO
-        QtGUI)
-    add_example(Qt_ImportAnimation Modeling LIB_DEPENDENCY)
+        UbiGUI
+        ObjIO)
+    add_example(Qt_AnimationCoupling Modeling LIB_DEPENDENCY)
 endif()

@@ -2,5 +2,5 @@
 
 if(PERIDYNO_PLUGIN_FBX)
     set(LIB_DEPENDENCY Core Framework Topology GLRenderEngine IO )
-    add_plugin(SkeletonLoader LIB_DEPENDENCY)
+    add_plugin(FBXLoader LIB_DEPENDENCY)
 endif()

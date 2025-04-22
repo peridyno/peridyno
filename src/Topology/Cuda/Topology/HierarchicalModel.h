@@ -64,13 +64,21 @@ namespace dyno
 
 		unsigned int size() { return vertices.size(); }
 
+
+
+
+		std::vector<Vec3f> points;
 		std::vector<Vec3f> vertices;
+		
 		std::vector<int> verticeId_pointId;
 		std::map<int,std::vector<int>> pointId_verticeId;
+		
+
 		std::vector<Vec3f> normals;
 		std::vector<Vec2f> texcoords;
 		std::vector<Vec3f> verticesColor;
 		std::vector<std::vector<TopologyModule::Triangle>> facegroup_triangles;
+		std::vector<std::vector<TopologyModule::Triangle>> facegroup_normalIndex;
 		std::vector<CArrayList<uint>> facegroup_polygons;
 
 		std::vector<std::shared_ptr<Material>> materials;
@@ -126,6 +134,64 @@ namespace dyno
 			bool isNormal,
 			Vec2u range
 		);
+
+		void skinVerticesAnimation(
+			DArray<Vec3f>& intialVertices,
+			DArray<Vec3f>& Vertices,
+			DArray<Mat4f>& joint_inverseBindMatrix,
+			DArray<Mat4f>& WorldMatrix,
+
+			DArrayList<int>& point2Vertice,
+			DArray<Vec4f>& bind_joints_0,
+			DArray<Vec4f>& bind_joints_1,
+			DArray<Vec4f>& bind_joints_2,
+			DArray<Vec4f>& weights_0,
+			DArray<Vec4f>& weights_1,
+			DArray<Vec4f>& weights_2,
+
+			Mat4f transform,
+			bool isNormal,
+
+			Vec2u range
+		);
+
+		void c_skinVerticesAnimation(
+			DArray<Vec3f>& intialVertices,
+			DArray<Vec3f>& Vertices,
+			DArray<Mat4f>& joint_inverseBindMatrix,
+			DArray<Mat4f>& WorldMatrix,
+
+			DArrayList<int>& point2Vertice,
+			DArray<Vec4f>& bind_joints_0,
+			DArray<Vec4f>& bind_joints_1,
+			DArray<Vec4f>& bind_joints_2,
+			DArray<Vec4f>& weights_0,
+			DArray<Vec4f>& weights_1,
+			DArray<Vec4f>& weights_2,
+
+			Mat4f transform,
+			bool isNormal,
+
+			Vec2u range
+		);
+
+		void getVerticesNormalInBindPose(
+			DArray<Vec3f>& initialNormal,
+			DArray<Mat4f>& joint_inverseBindMatrix,
+			DArray<Mat4f>& WorldMatrix,
+
+			DArrayList<int>& point2Vertice,
+			DArray<Vec4f>& bind_joints_0,
+			DArray<Vec4f>& bind_joints_1,
+			DArray<Vec4f>& bind_joints_2,
+			DArray<Vec4f>& weights_0,
+			DArray<Vec4f>& weights_1,
+			DArray<Vec4f>& weights_2,
+
+			Vec2u range
+		);
+
+		void updatePoint2Vertice(DArrayList<int>& d_p2v, DArray<int>& d_v2p);
 
 		void UpdateJointData();
 
@@ -196,6 +262,15 @@ namespace dyno
 			}
 			return meshWorldMatrix;
 		}
+
+		void computeTexMeshVerticesNormal(
+			std::vector<std::shared_ptr<Shape>>& shapes,
+			DArray<Vec3f>& Position,
+			DArray<Vec3f>& Normal,
+			DArray<int>* vertices2Point = nullptr);
+
+		void flipNormal(DArray<Vec3f>& Normal);
+		
 
 	private :
 
