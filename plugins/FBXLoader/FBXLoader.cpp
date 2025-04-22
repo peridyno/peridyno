@@ -120,6 +120,8 @@ namespace dyno
 
 		initialPosition.clear();
 		initialNormal.clear();
+		mPoint2Vertice.clear();
+		mVertice2Point.clear();
 		initialShapeCenter.clear();
 	}
 
@@ -611,8 +613,8 @@ namespace dyno
 	template<typename TDataType>
 	void FBXLoader<TDataType>::updateStates()
 	{
-
-		updateAnimation(this->stateElapsedTime()->getValue() * this->varAnimationSpeed()->getValue());
+		if(this->varImportAnimation()->getValue())
+			updateAnimation(this->stateElapsedTime()->getValue() * this->varAnimationSpeed()->getValue());
 		Node::updateStates();
 	}
 
@@ -1099,6 +1101,8 @@ namespace dyno
 
 			d_ShapeCenter.assign(initialShapeCenter);	// Used to "ToCenter"
 			unCenterPosition.assign(this->stateTextureMesh()->getDataPtr()->vertices());
+			CArray<Vec3f> cshapeCenter;
+			cshapeCenter.assign(d_ShapeCenter);
 
 			this->stateHierarchicalScene()->getDataPtr()->shapeToCenter(unCenterPosition,
 				this->stateTextureMesh()->getDataPtr()->vertices(),
@@ -1154,11 +1158,15 @@ namespace dyno
 	{
 
 
-		if(this->stateHierarchicalScene()->getDataPtr()->getBones().size())
+		if(this->stateHierarchicalScene()->getDataPtr()->getBones().size()&&this->varImportAnimation()->getValue())
 			updateAnimation(0);
 		else
 		{
 			auto& shape = this->stateTextureMesh()->getDataPtr()->shapes();
+			auto vertices = this->stateTextureMesh()->getDataPtr()->vertices();
+			CArray<Vec3f> cv;
+			cv.assign(vertices);
+
 			if (varUseInstanceTransform()->getValue())
 			{
 				for (size_t i = 0; i < shape.size(); i++)
