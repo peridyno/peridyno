@@ -23,13 +23,13 @@ namespace dyno
 		this->pushModule(integrator);
 
 		auto nbrQuery =std::make_shared<NeighborPointQuery<TDataType>>();
-		this->varSmoothingLength()->connect(nbrQuery->inRadius());
+		this->inSmoothingLength()->connect(nbrQuery->inRadius());
 		this->inPosition()->connect(nbrQuery->inPosition());
 		this->pushModule(nbrQuery);
 
 		auto density = std::make_shared<VariationalApproximateProjection<TDataType>>();
-		this->varSmoothingLength()->connect(density->inSmoothingLength());
-		this->varSamplingDistance()->connect(density->inSamplingDistance());
+		this->inSmoothingLength()->connect(density->inSmoothingLength());
+		this->inSamplingDistance()->connect(density->inSamplingDistance());
 		this->inTimeStep()->connect(density->inTimeStep());
 		this->inPosition()->connect(density->inPosition());
 		this->inVelocity()->connect(density->inVelocity());
@@ -41,7 +41,8 @@ namespace dyno
 		auto viscosity = std::make_shared<ImplicitViscosity<TDataType>>();
 		viscosity->varViscosity()->setValue(Real(0.5));
 		this->inTimeStep()->connect(viscosity->inTimeStep());
-		this->varSmoothingLength()->connect(viscosity->inSmoothingLength());
+		this->inSmoothingLength()->connect(viscosity->inSmoothingLength());
+		this->inSamplingDistance()->connect(viscosity->inSamplingDistance());
 		this->inPosition()->connect(viscosity->inPosition());
 		this->inVelocity()->connect(viscosity->inVelocity());
 		nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());

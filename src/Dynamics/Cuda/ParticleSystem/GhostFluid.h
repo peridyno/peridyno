@@ -41,7 +41,7 @@ namespace dyno
 
 
 	public:
-		DEF_NODE_PORT(GhostParticles<TDataType>, BoundaryParticles, "Initial boundary ghost particles");
+		DEF_NODE_PORTS(GhostParticles<TDataType>, BoundaryParticle, "Initial boundary ghost particles");
 
 	protected:
 		void resetStates() override;

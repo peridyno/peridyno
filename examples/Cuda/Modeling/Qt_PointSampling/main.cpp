@@ -115,7 +115,7 @@ std::shared_ptr<SceneGraph> createScene()
 	meshes_2->varScale()->setValue(Vec3f(0.4, 0.4, 0.4));
 
 	auto pointset_2 = scn->addNode(std::make_shared<ParticleRelaxtionOnMesh<DataType3f>>());
-	pointset_2->varIterationNumber()->setValue(80);
+	pointset_2->varIterationNumber()->setValue(30);
 	pointset_2->varSamplingDistance()->setValue(0.005);
 	pointset_2->varThickness()->setValue(0.045);
 	meshes_2->stateTriangleSet()->connect(pointset_2->inTriangleSet());

@@ -40,16 +40,9 @@ namespace dyno
 	{
 		this->varVirtualParticleSamplingStrategy()->getDataPtr()->setCurrentKey(key);
 		this->varReshuffleParticles()->setValue(false);
+		this->varSmoothingLength()->setValue(2.4);
 
 		this->animationPipeline()->clear();
-
-		auto smoothingLength = std::make_shared<FloatingNumber<TDataType>>();
-		this->animationPipeline()->pushModule(smoothingLength);
-		smoothingLength->varValue()->setValue(Real(0.012));
-
-		auto samplingDistance = std::make_shared<FloatingNumber<TDataType>>();
-		this->animationPipeline()->pushModule(samplingDistance);
-		samplingDistance->varValue()->setValue(Real(0.005));
 
 		if (key == EVirtualParticleSamplingStrategy::SpatiallyAdaptiveStrategy)
 		{
@@ -81,29 +74,29 @@ namespace dyno
 		vpGen->outVirtualParticles()->connect(this->stateVirtualPosition());
 
 		auto m_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
-		smoothingLength->outFloating()->connect(m_nbrQuery->inRadius());
+		this->stateSmoothingLength()->connect(m_nbrQuery->inRadius());
 		this->statePosition()->connect(m_nbrQuery->inPosition());
 		this->animationPipeline()->pushModule(m_nbrQuery);
 
 		auto m_rv_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
-		smoothingLength->outFloating()->connect(m_rv_nbrQuery->inRadius());
+		this->stateSmoothingLength()->connect(m_rv_nbrQuery->inRadius());
 		this->statePosition()->connect(m_rv_nbrQuery->inOther());
 		vpGen->outVirtualParticles()->connect(m_rv_nbrQuery->inPosition());
 		this->animationPipeline()->pushModule(m_rv_nbrQuery);
 
 		auto m_vr_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
-		smoothingLength->outFloating()->connect(m_vr_nbrQuery->inRadius());
+		this->stateSmoothingLength()->connect(m_vr_nbrQuery->inRadius());
 		this->statePosition()->connect(m_vr_nbrQuery->inPosition());
 		vpGen->outVirtualParticles()->connect(m_vr_nbrQuery->inOther());
 		this->animationPipeline()->pushModule(m_vr_nbrQuery);
 
 		auto m_vv_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
-		smoothingLength->outFloating()->connect(m_vv_nbrQuery->inRadius());
+		this->stateSmoothingLength()->connect(m_vv_nbrQuery->inRadius());
 		vpGen->outVirtualParticles()->connect(m_vv_nbrQuery->inPosition());
 		this->animationPipeline()->pushModule(m_vv_nbrQuery);
 
 		auto m_dualIsph = std::make_shared<DualParticleIsphModule<TDataType>>();
-		smoothingLength->outFloating()->connect(m_dualIsph->varSmoothingLength());
+		this->stateSmoothingLength()->connect(m_dualIsph->varSmoothingLength());
 		this->stateTimeStep()->connect(m_dualIsph->inTimeStep());
 		this->statePosition()->connect(m_dualIsph->inRPosition());
 		vpGen->outVirtualParticles()->connect(m_dualIsph->inVPosition());
@@ -127,8 +120,8 @@ namespace dyno
 		auto m_visModule = std::make_shared<ImplicitViscosity<TDataType>>();
 		m_visModule->varViscosity()->setValue(Real(0.3));
 		this->stateTimeStep()->connect(m_visModule->inTimeStep());
-		samplingDistance->outFloating()->connect(m_visModule->inSamplingDistance());
-		smoothingLength->outFloating()->connect(m_visModule->inSmoothingLength());
+		this->stateSamplingDistance()->connect(m_visModule->inSamplingDistance());
+		this->stateSmoothingLength()->connect(m_visModule->inSmoothingLength());
 		this->stateTimeStep()->connect(m_visModule->inTimeStep());
 		this->statePosition()->connect(m_visModule->inPosition());
 		this->stateVelocity()->connect(m_visModule->inVelocity());

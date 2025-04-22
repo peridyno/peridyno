@@ -25,8 +25,8 @@ namespace dyno
 		virtual ~PositionBasedFluidModel() {};
 
 	public:
-		DEF_VAR(Real, SamplingDistance, 0.005, "Sampling distance");
-		DEF_VAR(Real, SmoothingLength, 0.006, "Smoothing length");
+		DEF_VAR_IN(Real, SamplingDistance, "Sampling distance");
+		DEF_VAR_IN(Real, SmoothingLength, "Smoothing length");
 
 		DEF_VAR_IN(Real, TimeStep, "Time step size!");
 

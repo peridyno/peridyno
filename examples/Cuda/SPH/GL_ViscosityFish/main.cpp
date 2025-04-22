@@ -45,9 +45,7 @@ std::shared_ptr<SceneGraph> createScene()
 	fluid->animationPipeline()->clear();
 	{
 
-		auto smoothingLength = std::make_shared<FloatingNumber<DataType3f>>();
-		fluid->animationPipeline()->pushModule(smoothingLength);
-		smoothingLength->varValue()->setValue(Real(0.0125));
+		fluid->varSmoothingLength()->setValue(2.5);
 
 		auto integrator = std::make_shared<ParticleIntegrator<DataType3f>>();
 		fluid->stateTimeStep()->connect(integrator->inTimeStep());
@@ -56,7 +54,7 @@ std::shared_ptr<SceneGraph> createScene()
 		fluid->animationPipeline()->pushModule(integrator);
 
 		auto nbrQuery = std::make_shared<NeighborPointQuery<DataType3f>>();
-		smoothingLength->outFloating()->connect(nbrQuery->inRadius());
+		fluid->stateSmoothingLength()->connect(nbrQuery->inRadius());
 		fluid->statePosition()->connect(nbrQuery->inPosition());
 		fluid->animationPipeline()->pushModule(nbrQuery);
 
@@ -64,7 +62,7 @@ std::shared_ptr<SceneGraph> createScene()
 		simple->varViscosity()->setValue(500);
 		simple->varSimpleIterationEnable()->setValue(false);
 		fluid->stateTimeStep()->connect(simple->inTimeStep());
-		smoothingLength->outFloating()->connect(simple->inSmoothingLength());
+		fluid->stateSmoothingLength()->connect(simple->inSmoothingLength());
 		fluid->statePosition()->connect(simple->inPosition());
 		fluid->stateVelocity()->connect(simple->inVelocity());
 
