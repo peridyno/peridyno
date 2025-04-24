@@ -146,7 +146,7 @@ void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 		auto node = nodeMap[selectedNum];
 		auto nodeData = node->flowNodeData();
 
-		selectNodeSignal_.emit(selectedNum);
+		_selectNodeSignal.emit(selectedNum);
 
 		Wt::WPointF mousePoint = Wt::WPointF(event.widget().x, event.widget().y);
 		if (!checkMouseInAllNodeRect(mousePoint) && selectType == 2)
@@ -155,6 +155,7 @@ void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 			selectedNum = 0;
 			canMoveNode = false;
 			update();
+			_updateCanvas.emit();
 		}
 
 		if (checkMouseInHotKey0(mousePoint, nodeData))
@@ -191,7 +192,7 @@ void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 	}
 	else
 	{
-		selectNodeSignal_.emit(-1);
+		_selectNodeSignal.emit(-1);
 	}
 
 	if (drawLineFlag = true)

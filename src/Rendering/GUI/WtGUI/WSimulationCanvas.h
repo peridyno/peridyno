@@ -47,6 +47,7 @@ public:
 	void onKeyWentUp(const Wt::WKeyEvent& evt);
 
 	void selectNode(std::shared_ptr<dyno::Node> node);
+
 	Wt::Signal<std::shared_ptr<dyno::Node>>& selectNodeSignal() { return _selectNodeSignal; };
 
 protected:

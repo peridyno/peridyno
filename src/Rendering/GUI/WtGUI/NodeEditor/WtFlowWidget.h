@@ -52,7 +52,9 @@ public:
 
 	void reorderNode();
 
-	Wt::Signal<int>& selectNodeSignal() { return selectNodeSignal_; };
+	Wt::Signal<int>& selectNodeSignal() { return _selectNodeSignal; };
+
+	Wt::Signal<>& updateCanvas() { return _updateCanvas; }
 
 	void setSelectNode(std::shared_ptr<dyno::Node> node);
 
@@ -114,5 +116,7 @@ private:
 
 	std::vector<sceneConnection> sceneConnections;
 
-	Wt::Signal<int> selectNodeSignal_;
+	Wt::Signal<int> _selectNodeSignal;
+
+	Wt::Signal<> _updateCanvas;
 };

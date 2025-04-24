@@ -36,6 +36,8 @@ public:
 	void createRightPanel();
 
 	void updateCanvas();
+	
+	void updateNodeGraphics();
 
 	void onKeyWentDown(const Wt::WKeyEvent& event);
 

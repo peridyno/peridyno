@@ -49,7 +49,9 @@ WMainWindow::WMainWindow() : WContainerWidget()
 	mNodeDataModel = std::make_shared<WNodeDataModel>();
 	mModuleDataModel = std::make_shared<WModuleDataModel>();
 	mParameterDataNode = std::make_shared<WParameterDataNode>();
+
 	mParameterDataNode->changeValue().connect(this, &WMainWindow::updateCanvas);
+	mParameterDataNode->changeValue().connect(this, &WMainWindow::updateNodeGraphics);
 }
 
 WMainWindow::~WMainWindow()
@@ -88,6 +90,18 @@ void WMainWindow::updateCanvas()
 	}
 	Wt::log("info") << "updateCanvas!!!";
 	Wt::log("info") << mScene->getFrameNumber();
+}
+
+void WMainWindow::updateNodeGraphics()
+{
+	if (mFlowWidget)
+	{
+		mFlowWidget->update();
+		//createRightPanel();
+	}
+
+	//createRightPanel();
+	Wt::log("info") << "updateNodeGraphics!!!";
 }
 
 void WMainWindow::onKeyWentDown(const Wt::WKeyEvent& event)
@@ -138,7 +152,7 @@ void WMainWindow::initRightPanel(Wt::WContainerWidget* parent)
 	tab = widget0->addNew<Wt::WTabWidget>();
 	tab->resize("100%", "100%");
 	tab->addTab(initNodeGraphics(), "NodeGraphics", Wt::ContentLoading::Eager);
-	tab->addTab(initModuleGraphics(), "ModuleGraphics", Wt::ContentLoading::Lazy);
+	tab->addTab(initModuleGraphics(), "ModuleGraphics", Wt::ContentLoading::Eager);
 	tab->addTab(initPython(), "Python", Wt::ContentLoading::Eager);
 	tab->addTab(initSample(), "Sample", Wt::ContentLoading::Lazy);
 	tab->addTab(initSave(), "Save", Wt::ContentLoading::Lazy);
@@ -288,6 +302,11 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 			}
 		});
 
+	mFlowWidget->updateCanvas().connect([=]()
+		{
+			mSceneCanvas->update();
+		});
+
 	if (mSceneCanvas)
 	{
 		mSceneCanvas->selectNodeSignal().connect([=](std::shared_ptr<dyno::Node> node)
@@ -301,6 +320,8 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 					mFlowWidget->setSelectNode(node);
 				}
 			});
+
+		
 	}
 
 	return std::move(nodeGraphicsWidget);

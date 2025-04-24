@@ -20,6 +20,7 @@
 #include "WtGUI/PropertyItem/WFileWidget.h"
 #include "WtGUI/PropertyItem/WEnumFieldWidget.h"
 #include "WtGUI/PropertyItem/WColorWidget.h"
+#include "WtGUI/PropertyItem/WStateFieldWidget.h"
 
 namespace dyno
 {
@@ -86,7 +87,7 @@ private:
 
 	void addScalarFieldWidget(Wt::WTable* table, std::string label, dyno::FBase* field, int labelWidth = 150, int widgetWidth = 300);
 
-	void addStateFieldWidget(dyno::FBase* field);
+	void addStateFieldWidget(Wt::WTable* table, dyno::FBase* field);
 
 	static std::map<std::string, FieldWidgetMeta> sFieldWidgetMeta;
 };
