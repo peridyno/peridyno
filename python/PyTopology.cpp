@@ -226,7 +226,6 @@ void pybind_topology(py::module& m)
 	declare_grid_set<dyno::DataType3f>(m, "3f");
 	declare_height_field<dyno::DataType3f>(m, "3f");
 	declare_hexahedron_set<dyno::DataType3f>(m, "3f");
-	declare_joint_tree<dyno::DataType3f>(m, "3f");
 	declare_linear_bvh<dyno::DataType3f>(m, "3f");
 	declare_polygon_set<dyno::DataType3f>(m, "3f");
 

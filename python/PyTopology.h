@@ -738,29 +738,6 @@ void declare_hexahedron_set(py::module& m, std::string typestr) {
 		.def("copy_from", &Class::copyFrom);
 }
 
-#include "Topology/JointTree.h"
-template <typename TDataType>
-void declare_joint_tree(py::module& m, std::string typestr) {
-	using Class = dyno::JointTree<TDataType>;
-	using Parent = dyno::TopologyModule;
-	std::string pyclass_name = std::string("JointTree") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("copy_from", &Class::copyFrom)
-		.def("scale", &Class::scale)
-		.def("translate", &Class::translate)
-		.def("get_global_transform", &Class::getGlobalTransform)
-		.def("get_transform", &Class::getTransform)
-		.def("get_quat", &Class::getQuat)
-		.def("get_global_quat", &Class::getGlobalQuat)
-		.def("get_coord_by_matrix", &Class::getCoordByMatrix)
-		.def("get_coord_by_quat", &Class::getCoordByQuat)
-		.def("get_global_coord", &Class::getGlobalCoord)
-		.def("set_anim_translation", &Class::setAnimTranslation)
-		.def("set_anim_rotation", &Class::setAnimRotation)
-		.def("set_anim_scaling", &Class::setAnimScaling);
-}
-
 #include "Topology/LinearBVH.h"
 template <typename TDataType>
 void declare_linear_bvh(py::module& m, std::string typestr) {

@@ -166,7 +166,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	//*************************************** Fluid ***************************************//
 	//Particle fluid node
 	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
-	fluid->setDt(0.004f);
+	fluid->setDt(0.002f);
 
 	{
 		fluid->animationPipeline()->clear();
@@ -247,7 +247,7 @@ std::shared_ptr<SceneGraph> creatScene()
 
 int main()
 {
-	UbiApp window;
+	UbiApp window(GUIType::GUI_QT);
 	window.setSceneGraph(creatScene());
 	window.initialize(1366, 768);
 

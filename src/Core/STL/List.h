@@ -50,7 +50,7 @@ namespace dyno
 
 		DYN_FUNC void clear();
 
-		DYN_FUNC uint size();
+		DYN_FUNC const uint size() const;
 
 		DYN_FUNC inline iterator insert(T val);
 
