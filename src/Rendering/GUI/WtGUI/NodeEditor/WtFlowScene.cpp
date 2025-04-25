@@ -3,11 +3,6 @@
 WtFlowScene::WtFlowScene(std::shared_ptr<WtDataModelRegistry> registry)
 	: _registry(registry)
 {
-	//setItemIndexMethod(QGraphicsScene::NoIndex);
-	//// This connection should come first
-	//connect(this, &QtFlowScene::connectionCreated, this, &QtFlowScene::setupConnectionSignals);
-	//connect(this, &QtFlowScene::connectionCreated, this, &QtFlowScene::sendConnectionCreatedToNodes);
-	//connect(this, &QtFlowScene::connectionDeleted, this, &QtFlowScene::sendConnectionDeletedToNodes);
 
 }
 

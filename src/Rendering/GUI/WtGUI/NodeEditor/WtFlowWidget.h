@@ -6,11 +6,7 @@
 #include "WtNodeFlowScene.h"
 #include "WtNodeGraphicsObject.h"
 #include "WtFlowNodeData.h"
-#include "WMainWindow.h"
 #include "WtInteraction.h"
-
-class WGridLayout;
-class WMainWindow;
 
 enum PortState { in, out };
 
@@ -24,8 +20,7 @@ struct sceneConnection {
 class WtFlowWidget : public Wt::WPaintedWidget
 {
 public:
-	//WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene);
-	WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene, WMainWindow* mainWindow);
+	WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene);
 	~WtFlowWidget();
 
 public:
@@ -102,8 +97,6 @@ private:
 
 	connectionPointData outPoint;
 	connectionPointData inPoint;
-
-	WMainWindow* mMainWindow = nullptr;
 
 	WtNodeFlowScene* node_scene = nullptr;
 	std::shared_ptr<dyno::SceneGraph> mScene;

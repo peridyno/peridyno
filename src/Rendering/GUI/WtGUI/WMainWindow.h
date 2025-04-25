@@ -5,8 +5,11 @@
 #include <Wt/WPanel.h>
 #include <Wt/WTabWidget.h>
 
+#include "WModuleGraphics.h"
+#include "WNodeGraphics.h"
 #include "WPythonWidget.h"
 #include "WSimulationControl.h"
+#include <NodeEditor/WtModuleFlowWidget.h>
 
 namespace dyno
 {
@@ -21,6 +24,7 @@ class WParameterDataNode;
 class WSimulationCanvas;
 class WPushButton;
 class WtFlowWidget;
+class WtModuleFlowWidget;
 class WNodeGraphics;
 
 class WMainWindow : public Wt::WContainerWidget
@@ -70,13 +74,15 @@ private:
 	int viewportWidth;
 
 	std::shared_ptr<dyno::SceneGraph>	mScene = nullptr;
-	std::shared_ptr<dyno::Node> mActiveNode;
+	std::shared_ptr<dyno::Node> mActiveNode = nullptr;
 
 	WSimulationCanvas* mSceneCanvas;
 	WSimulationControl* controlContainer;
 	WtFlowWidget* mFlowWidget;
+	WtModuleFlowWidget* mModuleFlowWidget;
 	WPythonWidget* pythonWidget = new WPythonWidget();
 	std::unique_ptr<WNodeGraphics> nodeGraphicsWidget;
+	std::unique_ptr<WModuleGraphics> moduleGraphicsWidget;
 
 	Wt::WContainerWidget* rightWidget;
 

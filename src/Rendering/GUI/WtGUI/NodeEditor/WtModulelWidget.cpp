@@ -1,4 +1,4 @@
-#include "WtModelWidget.h"
+#include "WtModulelWidget.h"
 
 WtModuleWidget::WtModuleWidget(std::shared_ptr<Module> base)
 {

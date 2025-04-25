@@ -3,12 +3,10 @@
 #include <Wt/WApplication.h>
 #include <Wt/WMessageBox.h>
 
-WtFlowWidget::WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene, WMainWindow* mainWindow) :Wt::WPaintedWidget()
+WtFlowWidget::WtFlowWidget(std::shared_ptr<dyno::SceneGraph> scene) :Wt::WPaintedWidget()
 {
 	mZoomFactor = 1.0;
 	mScene = scene;
-
-	mMainWindow = mainWindow;
 
 	setPreferredMethod(Wt::RenderMethod::HtmlCanvas);
 
@@ -170,7 +168,8 @@ void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 			{
 				enableRendering(*node, true);
 			}
-			mMainWindow->updateCanvas();
+			//mMainWindow->updateCanvas();
+			_updateCanvas.emit();
 			update();
 		}
 
@@ -186,7 +185,8 @@ void WtFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 			{
 				enablePhysics(*node, true);
 			}
-			mMainWindow->updateCanvas();
+			//mMainWindow->updateCanvas();
+			_updateCanvas.emit();
 			update();
 		}
 	}
@@ -527,8 +527,9 @@ void WtFlowWidget::updateForAddNode()
 	update();
 	mScene->setFrameNumber(0);
 	mScene->reset();
-	mMainWindow->updateCanvas();
-	mMainWindow->setScene(mScene);
+	_updateCanvas.emit();
+	//mMainWindow->updateCanvas();
+	//mMainWindow->setScene(mScene);
 }
 
 void WtFlowWidget::reorderNode()

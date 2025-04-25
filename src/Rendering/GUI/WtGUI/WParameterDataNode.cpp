@@ -197,17 +197,11 @@ void WParameterDataNode::createParameterPanel(Wt::WContainerWidget* parameterWid
 				{
 					std::string template_name = var->getTemplateName();
 					addScalarFieldWidget(controlTable, var->getObjectName(), var);
-					Wt::log("info") << var->getTemplateName();
 				}
 			}
 			else if (var->getFieldType() == dyno::FieldTypeEnum::State)
 			{
-				/*int row = stateTable->rowCount();
-				auto cell0 = stateTable->elementAt(row, 0);
-				auto cell1 = stateTable->elementAt(row, 1);*/
-
 				addStateFieldWidget(stateTable, var);
-				//Wt::log("info") << var->getDescription();
 			}
 		}
 	}
@@ -229,12 +223,10 @@ void WParameterDataNode::createParameterPanelModule(Wt::WPanel* panel)
 				{
 					std::string template_name = var->getTemplateName();
 					addScalarFieldWidget(table, var->getObjectName(), var);
-					Wt::log("info") << var->getTemplateName();
 				}
 			}
 			else if (var->getFieldType() == dyno::FieldTypeEnum::State)
 			{
-				//addStateFieldWidget(var);
 				Wt::log("info") << var->getDescription();
 			}
 		}
