@@ -150,7 +150,7 @@ void WMainWindow::initRightPanel(Wt::WContainerWidget* parent)
 	tab->resize("100%", "100%");
 	tab->addTab(initNodeGraphics(), "NodeGraphics", Wt::ContentLoading::Eager);
 	tab->addTab(initModuleGraphics(), "ModuleGraphics", Wt::ContentLoading::Eager);
-	tab->addTab(initPython(), "Python", Wt::ContentLoading::Eager);
+	tab->addTab(initPython(), "Python", Wt::ContentLoading::Lazy);
 	tab->addTab(initSample(), "Sample", Wt::ContentLoading::Lazy);
 	tab->addTab(initSave(), "Save", Wt::ContentLoading::Lazy);
 	tab->addTab(initLog(), "Log", Wt::ContentLoading::Lazy);
@@ -227,7 +227,7 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel)
 							Initial_x += 20;
 							Initial_y += 20;
 							name->setText("");
-							mNodeFlowWidget->updateForAddNode();
+							mNodeFlowWidget->updateAll();
 							mNodeDataModel->setScene(mScene);
 							flag = false;
 						}
@@ -248,7 +248,7 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel)
 				Initial_y += 10;
 				std::cout << Initial_x << std::endl;
 				std::cout << "!!!!!!!!!!!" << std::endl;
-				mNodeFlowWidget->updateForAddNode();
+				mNodeFlowWidget->updateAll();
 				mNodeDataModel->setScene(mScene);
 				name->setText("");
 			}
@@ -334,8 +334,8 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initModuleGraphics()
 	{
 		auto painteContainer = moduleGraphicsWidget->modulePanel->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
 		painteContainer->setMargin(0);
-		/*mModuleFlowWidget = painteContainer->addWidget(std::make_unique<WtModuleFlowWidget>(mScene));
-		mModuleFlowWidget->resize(viewportWidth * WIDTH_SCALE, viewportHeight * 0.4);*/
+		mModuleFlowWidget = painteContainer->addWidget(std::make_unique<WtModuleFlowWidget>(mScene));
+		mModuleFlowWidget->resize(viewportWidth * WIDTH_SCALE, viewportHeight * 0.4);
 	}
 
 	// Parameter list

@@ -74,7 +74,7 @@ private:
 	WSimulationCanvas* mSceneCanvas;
 	WSimulationControl* controlContainer;
 	WtNodeFlowWidget* mNodeFlowWidget;
-	//WtModuleFlowWidget* mModuleFlowWidget;
+	WtModuleFlowWidget* mModuleFlowWidget;
 	WPythonWidget* pythonWidget = new WPythonWidget();
 	std::unique_ptr<WNodeGraphics> nodeGraphicsWidget;
 	std::unique_ptr<WModuleGraphics> moduleGraphicsWidget;

@@ -40,8 +40,6 @@ public:
 
 	void enablePhysics(WtNode& n, bool checked);
 
-	void updateForAddNode();
-
 	void setSelectNode(std::shared_ptr<dyno::Node> node);
 
 protected:
@@ -61,10 +59,6 @@ protected:
 
 	void disconnect(std::shared_ptr<Node> exportNode, std::shared_ptr<Node> inportNode, connectionPointData inPoint, connectionPointData outPoint, WtNode* inWtNode, WtNode* outWtNode);
 
-	Wt::WPainterPath cubicPath(Wt::WPointF source, Wt::WPointF sink);
-	std::pair<Wt::WPointF, Wt::WPointF> pointsC1C2(Wt::WPointF source, Wt::WPointF sink);
-	void drawSketchLine(Wt::WPainter* painter, Wt::WPointF source, Wt::WPointF sink);
-
 protected:
 	Wt::WPointF mTranslateNode = Wt::WPointF(0, 0);
 
@@ -80,8 +74,6 @@ protected:
 	WtNodeFlowScene* node_scene = nullptr;
 	std::map<dyno::ObjectId, WtNode*> nodeMap;
 	WtNode* connectionOutNode;
-
-	std::shared_ptr<dyno::SceneGraph> mScene;
 
 	std::shared_ptr<Node> mOutNode;
 	std::vector<sceneConnection> sceneConnections;

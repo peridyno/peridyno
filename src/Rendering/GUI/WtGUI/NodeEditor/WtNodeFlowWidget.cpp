@@ -4,16 +4,13 @@
 #include <Wt/WMessageBox.h>
 
 WtNodeFlowWidget::WtNodeFlowWidget(std::shared_ptr<dyno::SceneGraph> scene)
-	: WtFlowWidget()
+	: WtFlowWidget(scene)
 {
-	mScene = scene;
-
 	setPreferredMethod(Wt::RenderMethod::HtmlCanvas);
 
 	this->mouseWentDown().connect(this, &WtNodeFlowWidget::onMouseWentDown);
 	this->mouseMoved().connect(this, &WtNodeFlowWidget::onMouseMove);
 	this->mouseWentUp().connect(this, &WtNodeFlowWidget::onMouseWentUp);
-
 }
 
 WtNodeFlowWidget::~WtNodeFlowWidget() {};
@@ -23,6 +20,14 @@ void WtNodeFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 	isDragging = true;
 	mLastMousePos = Wt::WPointF(event.widget().x, event.widget().y);
 	mLastDelta = Wt::WPointF(0, 0);
+	if (!checkMouseInAllNodeRect(Wt::WPointF(event.widget().x, event.widget().y)))
+	{
+		selectType = -1;
+		selectedNum = 0;
+		canMoveNode = false;
+		update();
+
+	}
 	if (selectType > 0)
 	{
 		auto origin = nodeMap[selectedNum]->flowNodeData().getNodeOrigin();
@@ -113,20 +118,20 @@ void WtNodeFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
 	}
 	else
 	{
-		auto mousePoint = Wt::WPointF(event.widget().x, event.widget().y);
-		if (checkMouseInAllNodeRect(mousePoint) && selectType != 2)
+		for (auto it = mScene->begin(); it != mScene->end(); it++)
 		{
-			selectType = 1;
-			update();
-		}
-		else
-		{
-			if (selectType != 2)
+			auto m = it.get();
+			auto node = nodeMap[m->objectId()];
+			auto nodeData = node->flowNodeData();
+			auto mousePoint = Wt::WPointF(event.widget().x, event.widget().y);
+			if (checkMouseInNodeRect(mousePoint, nodeData) && selectType != 2)
 			{
-				selectType = -1;
-				selectedNum = 0;
-				canMoveNode = false;
+				selectType = 1;
+				connectionOutNode = node;
+				selectedNum = m->objectId();
+				canMoveNode = true;
 				update();
+				break;
 			}
 		}
 	}
@@ -225,7 +230,6 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 			}
 		}
 	}
-
 	drawLineFlag = false;
 	update();
 }
@@ -238,7 +242,7 @@ void WtNodeFlowWidget::onKeyWentDown()
 		deleteNode(*node);
 		selectType = -1;
 		selectedNum = 0;
-		updateForAddNode();
+		updateAll();
 	}
 }
 
@@ -287,7 +291,10 @@ bool WtNodeFlowWidget::checkMouseInAllNodeRect(Wt::WPointF mousePoint)
 		auto nodeData = node->flowNodeData();
 		if (checkMouseInNodeRect(mousePoint, nodeData))
 		{
-			connectionOutNode = node;
+			//if (drawLineFlag)
+			//{
+			//	connectionOutNode = node;
+			//}
 			selectedNum = m->objectId();
 			canMoveNode = true;
 			return true;
@@ -495,76 +502,6 @@ void WtNodeFlowWidget::enablePhysics(WtNode& n, bool checked)
 		node->setActive(checked);
 	}
 }
-
-void WtNodeFlowWidget::updateForAddNode()
-{
-	update();
-	mScene->setFrameNumber(0);
-	mScene->reset();
-	_updateCanvas.emit();
-}
-
-void WtNodeFlowWidget::drawSketchLine(Wt::WPainter* painter, Wt::WPointF source, Wt::WPointF sink)
-{
-	auto const& connectionStyle = WtStyleCollection::connectionStyle();
-
-	Wt::WPen p;
-	p.setWidth(connectionStyle.constructionLineWidth());
-	p.setColor(connectionStyle.constructionColor());
-	p.setStyle(Wt::PenStyle::DashLine);
-
-	painter->setPen(p);
-	painter->setBrush(Wt::BrushStyle::None);
-
-	auto cubic = cubicPath(source, sink);
-
-	painter->drawPath(cubic);
-}
-
-Wt::WPainterPath WtNodeFlowWidget::cubicPath(Wt::WPointF source, Wt::WPointF sink)
-{
-	auto c1c2 = pointsC1C2(source, sink);
-
-	//cubic spline
-	Wt::WPainterPath cubic(source);
-
-	cubic.cubicTo(c1c2.first, c1c2.second, sink);
-
-	return cubic;
-}
-
-std::pair<Wt::WPointF, Wt::WPointF> WtNodeFlowWidget::pointsC1C2(Wt::WPointF source, Wt::WPointF sink)
-{
-	const double defaultOffset = 200;
-
-	double xDistance = sink.x() - source.x();
-
-	double horizontalOffset = std::min(defaultOffset, std::abs(xDistance));
-
-	double verticalOffset = 0;
-
-	double ratioX = 0.5;
-
-	if (xDistance <= 0)
-	{
-		double yDistance = sink.y() - source.y();
-
-		double vector = yDistance < 0 ? -1.0 : 1.0;
-
-		verticalOffset = std::min(defaultOffset, std::abs(yDistance)) * vector;
-
-		ratioX = 1.0;
-	}
-
-	horizontalOffset *= ratioX;
-
-	Wt::WPointF c1(source.x() + horizontalOffset, source.y() + verticalOffset);
-	Wt::WPointF c2(sink.x() - horizontalOffset, sink.y() - verticalOffset);
-
-	return std::make_pair(c1, c2);
-}
-
-
 
 void WtNodeFlowWidget::disconnect(std::shared_ptr<Node> exportNode, std::shared_ptr<Node> inportNode, connectionPointData inPoint, connectionPointData outPoint, WtNode* inWtNode, WtNode* outWtNode)
 {

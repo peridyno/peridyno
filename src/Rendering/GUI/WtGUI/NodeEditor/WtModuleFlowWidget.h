@@ -1,19 +1,18 @@
-//#pragma once
-//
-//#include "WtFlowWidget.h"
-//
-//class WtFlowWidget;
-//
-//class WtModuleFlowWidget : public WtFlowWidget
-//{
-//public:
-//	WtModuleFlowWidget(std::shared_ptr<dyno::SceneGraph> scene);
-//	~WtModuleFlowWidget();
-//
-//	void onMouseMove(const Wt::WMouseEvent& event);
-//	void onMouseWentDown(const Wt::WMouseEvent& event);
-//	void onMouseWentUp(const Wt::WMouseEvent& event);
-//
-//protected:
-//	void paintEvent(Wt::WPaintDevice* paintDevice);
-//};
+#pragma once
+
+#include "WtFlowWidget.h"
+
+class WtModuleFlowWidget : public WtFlowWidget
+{
+public:
+	WtModuleFlowWidget(std::shared_ptr<dyno::SceneGraph> scene);
+	~WtModuleFlowWidget();
+
+	void onMouseMove(const Wt::WMouseEvent& event) override;
+	void onMouseWentDown(const Wt::WMouseEvent& event) override;
+	void onMouseWentUp(const Wt::WMouseEvent& event) override;
+	void onKeyWentDown() override;
+
+protected:
+	void paintEvent(Wt::WPaintDevice* paintDevice);
+};
