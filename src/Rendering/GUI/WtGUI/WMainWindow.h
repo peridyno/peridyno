@@ -9,7 +9,11 @@
 #include "WNodeGraphics.h"
 #include "WPythonWidget.h"
 #include "WSimulationControl.h"
-#include <NodeEditor/WtModuleFlowWidget.h>
+#include "WSceneDataModel.h"
+#include "WParameterDataNode.h"
+
+#include "NodeEditor/WtNodeFlowWidget.h"
+#include "NodeEditor/WtModuleFlowWidget.h"
 
 namespace dyno
 {
@@ -17,15 +21,6 @@ namespace dyno
 	class SceneGraphFactory;
 	class Node;
 };
-
-class WNodeDataModel;
-class WModuleDataModel;
-class WParameterDataNode;
-class WSimulationCanvas;
-class WPushButton;
-class WtFlowWidget;
-class WtModuleFlowWidget;
-class WNodeGraphics;
 
 class WMainWindow : public Wt::WContainerWidget
 {
@@ -47,7 +42,7 @@ public:
 
 	WSimulationCanvas* simCanvas() { return mSceneCanvas; }
 
-	WtFlowWidget* getFlowWidget() { return mFlowWidget; }
+	WtNodeFlowWidget* getFlowWidget() { return mNodeFlowWidget; }
 
 public:
 	// data models
@@ -78,8 +73,8 @@ private:
 
 	WSimulationCanvas* mSceneCanvas;
 	WSimulationControl* controlContainer;
-	WtFlowWidget* mFlowWidget;
-	WtModuleFlowWidget* mModuleFlowWidget;
+	WtNodeFlowWidget* mNodeFlowWidget;
+	//WtModuleFlowWidget* mModuleFlowWidget;
 	WPythonWidget* pythonWidget = new WPythonWidget();
 	std::unique_ptr<WNodeGraphics> nodeGraphicsWidget;
 	std::unique_ptr<WModuleGraphics> moduleGraphicsWidget;

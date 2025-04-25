@@ -1,11 +1,51 @@
-#include "WtModuleFlowWidget.h"
-
-
-WtModuleFlowWidget::WtModuleFlowWidget(std::shared_ptr<dyno::SceneGraph> scene)
-	: WtFlowWidget(scene)
-{
-}
-
-WtModuleFlowWidget::~WtModuleFlowWidget()
-{
-}
+//#include "WtModuleFlowWidget.h"
+//
+//
+//WtModuleFlowWidget::WtModuleFlowWidget(std::shared_ptr<dyno::SceneGraph> scene)
+//	: WtFlowWidget(scene)
+//{
+//	std::cout << "!!!!" << std::endl;
+//}
+//
+//WtModuleFlowWidget::~WtModuleFlowWidget(){}
+//
+//void WtModuleFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
+//{
+//	isDragging = true;
+//	mLastMousePos = Wt::WPointF(event.widget().x, event.widget().y);
+//	mLastDelta = Wt::WPointF(0, 0);
+//	std::cout << "Moduel" << std::endl;
+//}
+//
+//void WtModuleFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
+//{
+//	sinkPoint = Wt::WPointF(event.widget().x / mZoomFactor - mTranslate.x(), event.widget().y / mZoomFactor - mTranslate.y());
+//	if (isDragging)
+//	{
+//		Wt::WPointF delta = Wt::WPointF(event.dragDelta().x, event.dragDelta().y);
+//		mTranslate = Wt::WPointF(mTranslate.x() + delta.x() - mLastDelta.x(), mTranslate.y() + delta.y() - mLastDelta.y());
+//		update();
+//		mLastDelta = delta;
+//	}
+//}
+//
+//void WtModuleFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
+//{
+//	isDragging = false;
+//	mLastDelta = Wt::WPointF(0, 0);
+//	mTranslateNode = Wt::WPointF(0, 0);
+//	Wt::WPointF mouseWentUpPosition = Wt::WPointF(event.widget().x, event.widget().y);
+//
+//	drawLineFlag = false;
+//	update();
+//}
+//
+//void WtModuleFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
+//{
+//	Wt::WPainter painter(paintDevice);
+//	painter.scale(mZoomFactor, mZoomFactor);
+//	painter.translate(mTranslate);
+//
+//	painter.setBrush(Wt::WBrush(Wt::WColor(Wt::StandardColor::Blue)));
+//	painter.drawRect(0, 0, 100, 50);
+//}

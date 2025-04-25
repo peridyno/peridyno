@@ -94,9 +94,9 @@ void WMainWindow::updateCanvas()
 
 void WMainWindow::updateNodeGraphics()
 {
-	if (mFlowWidget)
+	if (mNodeFlowWidget)
 	{
-		mFlowWidget->update();
+		mNodeFlowWidget->update();
 	}
 	Wt::log("info") << "updateNodeGraphics!!!";
 }
@@ -105,7 +105,7 @@ void WMainWindow::onKeyWentDown(const Wt::WKeyEvent& event)
 {
 	if (event.key() == Wt::Key::Delete || event.key() == Wt::Key::Backspace)
 	{
-		mFlowWidget->onKeyWentDown();
+		mNodeFlowWidget->onKeyWentDown();
 	}
 }
 
@@ -227,7 +227,7 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel)
 							Initial_x += 20;
 							Initial_y += 20;
 							name->setText("");
-							mFlowWidget->updateForAddNode();
+							mNodeFlowWidget->updateForAddNode();
 							mNodeDataModel->setScene(mScene);
 							flag = false;
 						}
@@ -248,7 +248,7 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel)
 				Initial_y += 10;
 				std::cout << Initial_x << std::endl;
 				std::cout << "!!!!!!!!!!!" << std::endl;
-				mFlowWidget->updateForAddNode();
+				mNodeFlowWidget->updateForAddNode();
 				mNodeDataModel->setScene(mScene);
 				name->setText("");
 			}
@@ -259,7 +259,7 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel)
 	auto reorderNodeButton = layout3->addWidget(std::make_unique<Wt::WPushButton>("Reorder"));
 
 	reorderNodeButton->clicked().connect([=] {
-		mFlowWidget->reorderNode();
+		mNodeFlowWidget->reorderNode();
 		});
 }
 
@@ -271,8 +271,8 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 	{
 		auto painteContainer = nodeGraphicsWidget->nodePanel->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
 		painteContainer->setMargin(0);
-		mFlowWidget = painteContainer->addWidget(std::make_unique<WtFlowWidget>(mScene));
-		mFlowWidget->resize(viewportWidth * WIDTH_SCALE, viewportHeight * 0.4);
+		mNodeFlowWidget = painteContainer->addWidget(std::make_unique<WtNodeFlowWidget>(mScene));
+		mNodeFlowWidget->resize(viewportWidth * WIDTH_SCALE, viewportHeight * 0.4);
 	}
 
 	// Parameter list
@@ -280,7 +280,7 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 
 
 	//action for selection change
-	mFlowWidget->selectNodeSignal().connect([=](int selectNum)
+	mNodeFlowWidget->selectNodeSignal().connect([=](int selectNum)
 		{
 			if (selectNum > 0)
 			{
@@ -300,7 +300,7 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 			}
 		});
 
-	mFlowWidget->updateCanvas().connect([=]()
+	mNodeFlowWidget->updateCanvas().connect([=]()
 		{
 			this->updateCanvas();
 		});
@@ -315,7 +315,7 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 					mParameterDataNode->setNode(node);
 					mParameterDataNode->createParameterPanel(parameterWidget);
 
-					mFlowWidget->setSelectNode(node);
+					mNodeFlowWidget->setSelectNode(node);
 					mActiveNode = node;
 				}
 			});
@@ -334,8 +334,8 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initModuleGraphics()
 	{
 		auto painteContainer = moduleGraphicsWidget->modulePanel->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
 		painteContainer->setMargin(0);
-		//mModuleFlowWidget = painteContainer->addWidget(std::make_unique<WtModuleFlowWidget>(mScene, this));
-		//mModuleFlowWidget->resize(viewportWidth * WIDTH_SCALE, viewportHeight * 0.4);
+		/*mModuleFlowWidget = painteContainer->addWidget(std::make_unique<WtModuleFlowWidget>(mScene));
+		mModuleFlowWidget->resize(viewportWidth * WIDTH_SCALE, viewportHeight * 0.4);*/
 	}
 
 	// Parameter list
