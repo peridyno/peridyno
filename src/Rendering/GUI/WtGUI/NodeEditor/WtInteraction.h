@@ -2,7 +2,6 @@
 
 #include "WtNode.h"
 #include "WtConnection.h"
-#include "WtNode.h"
 #include "WtNodeFlowScene.h"
 
 class WtDataModelRegistry;

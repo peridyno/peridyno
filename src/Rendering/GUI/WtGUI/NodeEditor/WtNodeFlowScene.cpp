@@ -167,13 +167,6 @@ void WtNodeFlowScene::createNodeGraphView()
 		createNodeConnections(it.get());
 	}
 
-	//clearScene();
-	//for (auto it = scn->begin(); it != scn->end(); it++)
-	//{
-	//	auto node_ptr = it.get();
-	//	std::cout << node_ptr->getClassInfo()->getClassName() << ": " << node_ptr.use_count() << std::endl;
-	//}
-
 	nodeMap.clear();
 }
 

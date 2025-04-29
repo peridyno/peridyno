@@ -294,7 +294,10 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 						mParameterDataNode->createParameterPanel(parameterWidget);
 						mSceneCanvas->selectNode(m);
 						mSceneCanvas->update();
+						mModuleFlowWidget->setNode(m);
 						mActiveNode = m;
+						//tab->removeTab(tab->widget(1));
+						//tab->insertTab(1, initModuleGraphics(), "initModuleGraphics", Wt::ContentLoading::Lazy);
 					}
 				}
 			}
@@ -316,7 +319,6 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 					mParameterDataNode->createParameterPanel(parameterWidget);
 
 					mNodeFlowWidget->setSelectNode(node);
-					mActiveNode = node;
 				}
 			});
 
@@ -334,7 +336,7 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initModuleGraphics()
 	{
 		auto painteContainer = moduleGraphicsWidget->modulePanel->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
 		painteContainer->setMargin(0);
-		mModuleFlowWidget = painteContainer->addWidget(std::make_unique<WtModuleFlowWidget>(mScene));
+		mModuleFlowWidget = painteContainer->addWidget(std::make_unique<WtModuleFlowWidget>(mScene, mActiveNode));
 		mModuleFlowWidget->resize(viewportWidth * WIDTH_SCALE, viewportHeight * 0.4);
 	}
 
@@ -395,7 +397,6 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initPython()
 	pythonWidget->updateSceneGraph().connect([=](std::shared_ptr<dyno::SceneGraph> scene) {
 		if (scene)
 		{
-			std::cout << "delete" << std::endl;
 			setScene(scene);
 
 			tab->removeTab(tab->widget(0));

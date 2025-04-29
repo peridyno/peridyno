@@ -208,7 +208,6 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 			auto nodeData = node->flowNodeData();
 			if (checkMouseInPoints(mouseWentUpPosition, nodeData, PortState::in))
 			{
-				std::cout << "node data" << std::endl;
 				auto connectionInNode = node;
 
 				if (outPoint.portType == PortType::Out)
