@@ -1,9 +1,8 @@
 #include "WtModuleFlowWidget.h"
 
 
-WtModuleFlowWidget::WtModuleFlowWidget(std::shared_ptr<dyno::SceneGraph> scene, std::shared_ptr<dyno::Node> node)
+WtModuleFlowWidget::WtModuleFlowWidget(std::shared_ptr<dyno::SceneGraph> scene)
 	: WtFlowWidget(scene)
-	, mNode(node)
 {
 	this->mouseWentDown().connect(this, &WtModuleFlowWidget::onMouseWentDown);
 	this->mouseMoved().connect(this, &WtModuleFlowWidget::onMouseMove);
@@ -67,5 +66,5 @@ void WtModuleFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 	//	reorderFlag = false;
 	//}
 
-	mModuleFlowScene = new WtModuleFlowScene(&painter, mNode, mScene);
+	mModuleFlowScene = new WtModuleFlowScene(&painter, mNode);
 }

@@ -6,7 +6,7 @@
 class WtModuleFlowWidget : public WtFlowWidget
 {
 public:
-	WtModuleFlowWidget(std::shared_ptr<dyno::SceneGraph> scene, std::shared_ptr<dyno::Node> node);
+	WtModuleFlowWidget(std::shared_ptr<dyno::SceneGraph> scene);
 	~WtModuleFlowWidget();
 
 	void onMouseMove(const Wt::WMouseEvent& event) override;
