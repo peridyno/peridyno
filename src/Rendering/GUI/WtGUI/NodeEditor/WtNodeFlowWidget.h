@@ -9,14 +9,14 @@
 #include "WtFlowNodeData.h"
 #include "WtInteraction.h"
 
-enum PortState { in, out };
-
-struct sceneConnection {
-	std::shared_ptr<Node> exportNode;
-	std::shared_ptr<Node> inportNode;
-	connectionPointData inPoint;
-	connectionPointData outPoint;
-};
+//enum PortState { in, out };
+//
+//struct sceneConnection {
+//	std::shared_ptr<Node> exportNode;
+//	std::shared_ptr<Node> inportNode;
+//	connectionPointData inPoint;
+//	connectionPointData outPoint;
+//};
 
 class WtNodeFlowWidget : public WtFlowWidget
 {
@@ -45,9 +45,7 @@ public:
 protected:
 	void paintEvent(Wt::WPaintDevice* paintDevice);
 
-	bool checkMouseInAllNodeRect(Wt::WPointF mousePoint);
-
-	bool checkMouseInNodeRect(Wt::WPointF mousePoint, WtFlowNodeData nodeData);
+	bool checkMouseInAllRect(Wt::WPointF mousePoint);
 
 	bool checkMouseInHotKey0(Wt::WPointF mousePoint, WtFlowNodeData nodeData);
 
@@ -60,11 +58,6 @@ protected:
 	void disconnect(std::shared_ptr<Node> exportNode, std::shared_ptr<Node> inportNode, connectionPointData inPoint, connectionPointData outPoint, WtNode* inWtNode, WtNode* outWtNode);
 
 protected:
-	Wt::WPointF mTranslateNode = Wt::WPointF(0, 0);
-
-	int selectType = -1;
-	int selectedNum = 0;
-
 	Wt::WPointF sourcePoint;
 	Wt::WPointF sinkPoint;
 

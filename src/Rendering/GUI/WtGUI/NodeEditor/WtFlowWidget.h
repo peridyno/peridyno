@@ -8,6 +8,17 @@
 
 #include <SceneGraph.h>
 
+#include "WtFlowNodeData.h"
+
+enum PortState { in, out };
+
+struct sceneConnection {
+	std::shared_ptr<Node> exportNode;
+	std::shared_ptr<Node> inportNode;
+	connectionPointData inPoint;
+	connectionPointData outPoint;
+};
+
 class WtFlowWidget : public Wt::WPaintedWidget
 {
 public:
@@ -25,6 +36,8 @@ public:
 
 	void reorderNode();
 	void updateAll();
+
+	bool checkMouseInNodeRect(Wt::WPointF mousePoint, WtFlowNodeData nodeData);
 
 	Wt::WPainterPath cubicPath(Wt::WPointF source, Wt::WPointF sink);
 	std::pair<Wt::WPointF, Wt::WPointF> pointsC1C2(Wt::WPointF source, Wt::WPointF sink);
@@ -47,10 +60,14 @@ protected:
 	bool drawLineFlag = false;
 
 	Wt::WPointF mTranslate = Wt::WPointF(0, 0);
+	Wt::WPointF mTranslateNode = Wt::WPointF(0, 0);
 	Wt::WPointF mMousePoint = Wt::WPointF(0, 0);
 
 	std::shared_ptr<dyno::SceneGraph> mScene;
 
 	Wt::Signal<int> _selectNodeSignal;
 	Wt::Signal<> _updateCanvas;
+
+	int selectType = -1;
+	int selectedNum = 0;
 };

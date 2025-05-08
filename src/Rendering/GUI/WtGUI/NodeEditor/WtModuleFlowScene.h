@@ -16,6 +16,10 @@ public:
 	~WtModuleFlowScene();
 
 public:
+	void enableEditing();
+
+	void disableEditing();
+
 	void updateModuleGraphView();
 
 	void reorderAllModules();
@@ -36,6 +40,8 @@ private:
 
 	//A virtual module to store all state variables
 	std::shared_ptr<dyno::Module> mStates = nullptr;
+
+	bool mEditingEnabled = true;
 
 	float mDx = 100.0f;
 	float mDy = 50.0f;

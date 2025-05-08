@@ -653,8 +653,8 @@ void WtNodeFlowScene::reorderAllNodes()
 	//updateNodeGraphView();
 }
 
-std::map<dyno::ObjectId, WtNode*> WtNodeFlowScene::getNodeMap()
-{
-	return OutNodeMap;
-}
+//std::map<dyno::ObjectId, WtNode*> WtNodeFlowScene::getNodeMap()
+//{
+//	return OutNodeMap;
+//}
 

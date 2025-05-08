@@ -62,7 +62,7 @@ public:
 	 */
 	void reorderAllNodes();
 
-	std::map<dyno::ObjectId, WtNode*> getNodeMap();
+	//std::map<dyno::ObjectId, WtNode*> getNodeMap();
 
 private:
 	void showThisNodeOnly(WtNode& n);
@@ -86,7 +86,7 @@ private:
 
 	std::shared_ptr<dyno::SceneGraph> mScene = nullptr;
 
-	std::map<dyno::ObjectId, WtNode*> OutNodeMap;
+	//std::map<dyno::ObjectId, WtNode*> OutNodeMap;
 
 	int _selectType;
 	int _selectNum;

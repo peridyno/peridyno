@@ -20,7 +20,7 @@ void WtNodeFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 	isDragging = true;
 	mLastMousePos = Wt::WPointF(event.widget().x, event.widget().y);
 	mLastDelta = Wt::WPointF(0, 0);
-	if (!checkMouseInAllNodeRect(Wt::WPointF(event.widget().x, event.widget().y)))
+	if (!checkMouseInAllRect(Wt::WPointF(event.widget().x, event.widget().y)))
 	{
 		selectType = -1;
 		selectedNum = 0;
@@ -151,7 +151,7 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 		_selectNodeSignal.emit(selectedNum);
 
 		Wt::WPointF mousePoint = Wt::WPointF(event.widget().x, event.widget().y);
-		if (!checkMouseInAllNodeRect(mousePoint) && selectType == 2)
+		if (!checkMouseInAllRect(mousePoint) && selectType == 2)
 		{
 			selectType = -1;
 			selectedNum = 0;
@@ -281,7 +281,7 @@ void WtNodeFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 	}
 }
 
-bool WtNodeFlowWidget::checkMouseInAllNodeRect(Wt::WPointF mousePoint)
+bool WtNodeFlowWidget::checkMouseInAllRect(Wt::WPointF mousePoint)
 {
 	for (auto it = mScene->begin(); it != mScene->end(); it++)
 	{
@@ -290,29 +290,12 @@ bool WtNodeFlowWidget::checkMouseInAllNodeRect(Wt::WPointF mousePoint)
 		auto nodeData = node->flowNodeData();
 		if (checkMouseInNodeRect(mousePoint, nodeData))
 		{
-			//if (drawLineFlag)
-			//{
-			//	connectionOutNode = node;
-			//}
 			selectedNum = m->objectId();
 			canMoveNode = true;
 			return true;
 		}
 	}
 	return false;
-}
-
-bool WtNodeFlowWidget::checkMouseInNodeRect(Wt::WPointF mousePoint, WtFlowNodeData nodeData)
-{
-	Wt::WPointF bottomRight = Wt::WPointF(nodeData.getNodeBoundingRect().bottomRight().x() + nodeData.getNodeOrigin().x()
-		, nodeData.getNodeBoundingRect().bottomRight().y() + nodeData.getNodeOrigin().y());
-
-	Wt::WPointF absTopLeft = Wt::WPointF((nodeData.getNodeOrigin().x() + mTranslate.x() - 10) * mZoomFactor, (nodeData.getNodeOrigin().y() + mTranslate.y() - 10) * mZoomFactor);
-	Wt::WPointF absBottomRight = Wt::WPointF((bottomRight.x() + mTranslate.x() + 10) * mZoomFactor, (bottomRight.y() + mTranslate.y() + 10) * mZoomFactor);
-
-	Wt::WRectF absRect = Wt::WRectF(absTopLeft, absBottomRight);
-
-	return absRect.contains(mousePoint);
 }
 
 bool WtNodeFlowWidget::checkMouseInHotKey0(Wt::WPointF mousePoint, WtFlowNodeData nodeData)
@@ -472,14 +455,14 @@ void WtNodeFlowWidget::disconnectionsFromNode(WtNode& node)
 }
 
 
-void WtNodeFlowWidget::moveNode(WtNode& n, const Wt::WPointF& newLocaton)
+void WtNodeFlowWidget::moveNode(WtNode& n, const Wt::WPointF& newLocation)
 {
 	auto nodeData = dynamic_cast<WtNodeWidget*>(n.nodeDataModel());
 
 	if (mEditingEnabled && nodeData != nullptr)
 	{
 		auto node = nodeData->getNode();
-		node->setBlockCoord(newLocaton.x(), newLocaton.y());
+		node->setBlockCoord(newLocation.x(), newLocation.y());
 	}
 }
 

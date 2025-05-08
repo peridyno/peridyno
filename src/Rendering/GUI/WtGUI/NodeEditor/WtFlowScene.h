@@ -11,6 +11,7 @@
 #include "WtConnectionGraphicsObject.h"
 #include "WtConnection.h"
 #include <memory>
+#include <Object.h>
 
 class WtNodeDataModel;
 class WtNode;
@@ -71,6 +72,8 @@ public:
 
 	void clearNode(WtNode& node);
 
+	std::map<dyno::ObjectId, WtNode*> getNodeMap();
+
 public:
 
 	std::unordered_map<Wt::Guid, std::unique_ptr<WtNode> > const& nodes() const;
@@ -93,6 +96,9 @@ public:
 
 	//void loadFromMemory(const QByteArray& data);
 
+public:
+	std::map<dyno::ObjectId, WtNode*> OutNodeMap;
+
 private:
 
 	using SharedConnection = std::shared_ptr<WtConnection>;
@@ -106,4 +112,6 @@ private:
 
 	std::unordered_map<Wt::Guid, SharedConnection> _connections;
 	std::unordered_map<Wt::Guid, UniqueNode>       _nodes;
+
+	
 };

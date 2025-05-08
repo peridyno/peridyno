@@ -16,10 +16,23 @@ public:
 
 	void setNode(std::shared_ptr<dyno::Node> node);
 
+	void deleteModule();
+
+	void moveModule(WtNode& n, const Wt::WPointF& newLocation);
+
+
 protected:
 	void paintEvent(Wt::WPaintDevice* paintDevice);
+
+	bool checkMouseInAllRect(Wt::WPointF mousePoint);
+
+	bool checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nodeData, PortState portState);
 
 private:
 	std::shared_ptr<dyno::Node> mNode;
 	WtModuleFlowScene* mModuleFlowScene = nullptr;
+	std::map<dyno::ObjectId, WtNode*> moduleMap;
+
+	int selectType = -1;
+	int selectedNum = 0;
 };

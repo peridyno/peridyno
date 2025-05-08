@@ -227,6 +227,11 @@ void WtFlowScene::clearNode(WtNode& node)
 	_nodes.erase(node.id());
 }
 
+std::map<dyno::ObjectId, WtNode*> WtFlowScene::getNodeMap()
+{
+	return OutNodeMap;
+}
+
 std::unordered_map<Wt::Guid, std::unique_ptr<WtNode> > const& WtFlowScene::nodes() const
 {
 	return _nodes;
@@ -264,6 +269,7 @@ std::vector<WtNode*> WtFlowScene::allNodes() const
 
 	return nodes;
 }
+
 
 //std::vector<WtNode*> WtFlowScene::selectedNodes() const
 //{

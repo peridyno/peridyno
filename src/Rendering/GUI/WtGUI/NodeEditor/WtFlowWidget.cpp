@@ -50,6 +50,19 @@ void WtFlowWidget::updateAll()
 	_updateCanvas.emit();
 }
 
+bool WtFlowWidget::checkMouseInNodeRect(Wt::WPointF mousePoint, WtFlowNodeData nodeData)
+{
+	Wt::WPointF bottomRight = Wt::WPointF(nodeData.getNodeBoundingRect().bottomRight().x() + nodeData.getNodeOrigin().x()
+		, nodeData.getNodeBoundingRect().bottomRight().y() + nodeData.getNodeOrigin().y());
+
+	Wt::WPointF absTopLeft = Wt::WPointF((nodeData.getNodeOrigin().x() + mTranslate.x() - 10) * mZoomFactor, (nodeData.getNodeOrigin().y() + mTranslate.y() - 10) * mZoomFactor);
+	Wt::WPointF absBottomRight = Wt::WPointF((bottomRight.x() + mTranslate.x() + 10) * mZoomFactor, (bottomRight.y() + mTranslate.y() + 10) * mZoomFactor);
+
+	Wt::WRectF absRect = Wt::WRectF(absTopLeft, absBottomRight);
+
+	return absRect.contains(mousePoint);
+}
+
 Wt::WPainterPath WtFlowWidget::cubicPath(Wt::WPointF source, Wt::WPointF sink)
 {
 	auto c1c2 = pointsC1C2(source, sink);
