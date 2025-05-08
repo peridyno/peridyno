@@ -68,7 +68,8 @@ namespace dyno
 
 
 		DEF_INSTANCE_STATE(PolygonSet<TDataType>,PolygonSet,"PolygonSet");
-		DEF_INSTANCE_STATE(HierarchicalScene, HierarchicalScene, "ModelObjects");
+		DEF_INSTANCE_STATE(HierarchicalScene, HierarchicalScene, "HierarchicalScene");
+		DEF_INSTANCE_STATE(JointAnimationInfo, JointAnimationInfo, "JointAnimationInfo");
 
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, JointSet, "TextureMesh");
 		//DEF_INSTANCE_STATE(PointSet<TDataType>, ShapeCenter, "");

@@ -56,26 +56,19 @@ namespace dyno
 
 	}
 
+
+
 	void JointInfo::updateWorldMatrixByTransform()
 	{
 		DArray<int> jointIds;
 		jointIds.assign(mAllJoints);
 
-		cuExecute(mAllJoints.size(),
-			updateLocalMatrix,
-			mCurrentTranslation,
-			mCurrentScale,
-			mCurrentRotation,
-			mJointLocalMatrix,
-			jointIds
-		);
+		mJointLocalMatrix = getLocalMatrix(this->currentPose);
 
 
 		std::vector<Mat4f> c_joint_Mat4f;
 		c_joint_Mat4f.resize(mMaxJointID + 1);
 
-		CArray<Mat4f> c_JointLocalMatrix;
-		c_JointLocalMatrix.assign(mJointLocalMatrix);
 
 		for (size_t i = 0; i < mAllJoints.size(); i++)
 		{
@@ -91,9 +84,9 @@ namespace dyno
 				joint select = jD[k];
 				//printf("-  %d : ", select);//
 				if(useLeftHandedCoordSystem)
-					tempMatrix = c_JointLocalMatrix[select] * tempMatrix;
+					tempMatrix = mJointLocalMatrix[select] * tempMatrix;
 				else
-					tempMatrix *= c_JointLocalMatrix[select];
+					tempMatrix *= mJointLocalMatrix[select];
 
 			}
 			//printf("\n");
@@ -125,7 +118,7 @@ namespace dyno
 	void JointInfo::setJoint(const JointInfo& j)
 	{
 		mJointInverseBindMatrix.assign(j.mJointInverseBindMatrix);
-		mJointLocalMatrix.assign(j.mJointLocalMatrix);
+		mJointLocalMatrix=(j.mJointLocalMatrix);
 		mJointWorldMatrix.assign(j.mJointWorldMatrix);
 		mAllJoints = j.mAllJoints;
 		mJointDir = j.mJointDir;
@@ -134,22 +127,18 @@ namespace dyno
 		mBindPoseScale = j.mBindPoseScale;
 		mBindPoseRotation = j.mBindPoseRotation;
 
-		mCurrentTranslation.assign(j.mCurrentTranslation);
-		mCurrentRotation.assign(j.mCurrentRotation);
-		mCurrentScale.assign(j.mCurrentScale);
-
 		mJointName = j.mJointName;
 	}
 
 	bool JointInfo::isEmpty()
 	{
-		if (mJointInverseBindMatrix.isEmpty() || mJointLocalMatrix.isEmpty() || mJointWorldMatrix.isEmpty())
+		if (mJointInverseBindMatrix.isEmpty() || mJointLocalMatrix.empty() || mJointWorldMatrix.isEmpty())
 			return true;
 	}
 
 	void JointInfo::setGltfJointInfo(
 		DArray<Mat4f>& InverseBindMatrix,
-		DArray<Mat4f>& LocalMatrix,
+		std::vector<Mat4f>& LocalMatrix,
 		DArray<Mat4f>& WorldMatrix,
 		std::vector<int>& allJoints,
 		std::map<joint, std::vector<joint>>& jointDir,
@@ -160,7 +149,9 @@ namespace dyno
 	{
 		this->useLeftHandedCoordSystem = false;
 		mJointInverseBindMatrix.assign(InverseBindMatrix);
-		mJointLocalMatrix.assign(LocalMatrix);
+
+		mJointLocalMatrix = LocalMatrix;
+		
 		mJointWorldMatrix.assign(WorldMatrix);
 		mAllJoints = allJoints;
 		mJointDir = jointDir;
@@ -206,32 +197,30 @@ namespace dyno
 		mJointLocalMatrix.clear();
 		mJointWorldMatrix.clear();
 
-		mCurrentTranslation.clear();
-		mCurrentRotation.clear();
-		mCurrentScale.clear();
+
 	};
 
-	JointInfo::JointInfo(
-		DArray<Mat4f>& InverseBindMatrix,
-		DArray<Mat4f>& LocalMatrix,
-		DArray<Mat4f>& WorldMatrix,
-		std::vector<int>& allJoints,
-		std::map<joint, std::vector<joint>>& jointDir,
-		std::map<joint, Vec3f>& bindPoseTranslation,
-		std::map<joint, Vec3f>& bindPoseScale,
-		std::map<joint, Quat1f>& bindPoseRotation
-	) 
-	{
-		setGltfJointInfo(InverseBindMatrix,
-			LocalMatrix,
-			WorldMatrix,
-			allJoints,
-			jointDir,
-			bindPoseTranslation,
-			bindPoseScale,
-			bindPoseRotation
-		);
-	}
+	//JointInfo::JointInfo(
+	//	DArray<Mat4f>& InverseBindMatrix,
+	//	DArray<Mat4f>& LocalMatrix,
+	//	DArray<Mat4f>& WorldMatrix,
+	//	std::vector<int>& allJoints,
+	//	std::map<joint, std::vector<joint>>& jointDir,
+	//	std::map<joint, Vec3f>& bindPoseTranslation,
+	//	std::map<joint, Vec3f>& bindPoseScale,
+	//	std::map<joint, Quat1f>& bindPoseRotation
+	//) 
+	//{
+	//	setGltfJointInfo(InverseBindMatrix,
+	//		LocalMatrix,
+	//		WorldMatrix,
+	//		allJoints,
+	//		jointDir,
+	//		bindPoseTranslation,
+	//		bindPoseScale,
+	//		bindPoseRotation
+	//	);
+	//}
 
 
 	float JointAnimationInfo::calculateMinTime(const std::map<joint, std::vector<Real>>& timeCodes) {
@@ -516,7 +505,7 @@ namespace dyno
 		mJointInverseBindMatrix.assign(InverseBindMatrix);
 		
 		mJointWorldMatrix.assign(WorldMatrix);
-		mJointLocalMatrix.assign(LocalMatrix);
+		mJointLocalMatrix = LocalMatrix;
 
 		mAllJoints = allJoints;
 		mJointDir = jointDir;

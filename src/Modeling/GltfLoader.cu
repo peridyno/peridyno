@@ -111,7 +111,6 @@ namespace dyno
 		auto animationCallback = std::make_shared<FCallBackFunc>(std::bind(&GltfLoader<TDataType>::varAnimation, this));
 
 		this->stateJointSet()->setDataPtr(std::make_shared<EdgeSet<DataType3f>>());
-		this->stateShapeCenter()->setDataPtr(std::make_shared<PointSet<DataType3f>>());
 
 		this->varImportAnimation()->attach(callback);
 		this->varImportAnimation()->attach(animationCallback);
@@ -153,13 +152,6 @@ namespace dyno
 
 		this->stateAnimation()->setDataPtr(std::make_shared<JointAnimationInfo>());
 		this->stateAnimation()->promoteOuput();
-
-		auto glShapeCenter = std::make_shared<GLPointVisualModule>();
-		glShapeCenter->setColor(Color(1.0f, 1.0f, 0.0f));
-		glShapeCenter->varPointSize()->setValue(this->varJointRadius()->getValue() * 2);
-		glShapeCenter->setVisible(true);
-		this->stateShapeCenter()->connect(glShapeCenter->inPointSet());
-		this->graphicsPipeline()->pushModule(glShapeCenter);
 
 		auto showBoundingBox = std::make_shared<BoundingBoxOfTextureMesh>();
 		this->stateTextureMesh()->connect(showBoundingBox->inTextureMesh());
@@ -352,7 +344,7 @@ namespace dyno
 
 		this->stateJointsData()->getDataPtr()->setGltfJointInfo(
 			this->stateJointInverseBindMatrix()->getData(),
-			this->stateJointLocalMatrix()->getData(),
+			localMatrix,
 			this->stateJointWorldMatrix()->getData(),
 			all_Joints,
 			jointId_joint_Dir,
@@ -387,6 +379,8 @@ namespace dyno
 	template<typename TDataType>
 	void GltfLoader<TDataType>::updateTransform()
 	{
+		if (!bool(this->stateTextureMesh()->getDataPtr()->shapes().size()))
+			return;
 		//updateModelTransformMatrix
 		this->updateTransformState();
 		auto animation = this->stateAnimation()->getDataPtr();
@@ -504,7 +498,6 @@ namespace dyno
 			}
 		}
 
-		this->stateShapeCenter()->getDataPtr()->setPoints(d_ShapeCenter);
 
 	}
 

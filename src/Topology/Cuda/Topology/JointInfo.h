@@ -40,6 +40,15 @@ namespace dyno {
 			mScale.resize(s);
 		};
 
+		Pose& operator=(const Pose& other) {
+			if (this != &other) {
+				mTranslation = other.mTranslation;
+				mQuatRotation = other.mQuatRotation;
+				mScale = other.mScale;
+			}
+			return *this;
+		}
+
 		std::vector<Vec3f> mTranslation;
 		std::vector<Quat1f> mQuatRotation;
 		std::vector<Vec3f> mScale;
@@ -68,7 +77,7 @@ namespace dyno {
 
 		void setGltfJointInfo(
 			DArray<Mat4f>& InverseBindMatrix,
-			DArray<Mat4f>& LocalMatrix,
+			std::vector<Mat4f>& LocalMatrix,
 			DArray<Mat4f>& WorldMatrix,
 			std::vector<int>& allJoints,
 			std::map<joint, std::vector<joint>>& jointDir,
@@ -119,27 +128,67 @@ namespace dyno {
 
 		void setPose(Pose pose) 
 		{
-			mCurrentTranslation.assign(pose.mTranslation);
-			mCurrentRotation.assign(pose.mQuatRotation);
-			mCurrentScale.assign(pose.mScale);
-
+			this->currentPose = pose;
 			updateWorldMatrixByTransform();
-
 		};
 
 
+		int findJointIndexByName(const std::string& value)
+		{
+			for (const auto& pair : mJointName)
+			{
+				if (pair.second == value)
+				{
+					return pair.first; // 找到返回 key
+				}
+			}
+			return -1; // 未找到
+		}
+
+		std::vector<Mat4f> getLocalMatrix(Pose& pose)
+		{
+			std::vector<Mat4f> localMatrix(this->mMaxJointID + 1);
+
+			auto translation = pose.mTranslation;
+			auto rotation = pose.mQuatRotation;
+			auto scale = pose.mScale;
+
+			for (size_t i = 0; i < mAllJoints.size(); i++)
+			{
+				int joint = mAllJoints[i];
+
+				Mat4f r = rotation[joint].toMatrix4x4();
+				Mat4f s = Mat4f
+				(scale[joint][0], 0, 0, 0,
+					0, scale[joint][1], 0, 0,
+					0, 0, scale[joint][2], 0,
+					0, 0, 0, 1
+				);
+				Mat4f t = Mat4f
+				(1, 0, 0, translation[joint][0],
+					0, 1, 0, translation[joint][1],
+					0, 0, 1, translation[joint][2],
+					0, 0, 0, 1
+				);
+				localMatrix[joint] = t * s * r;
+
+				Mat4f c = localMatrix[joint];
+			}
+
+			return localMatrix;
+		}
 
 	public:
 
 		std::map<int, std::string> mJointName;
 
 		DArray<Mat4f> mJointInverseBindMatrix;
-		DArray<Mat4f> mJointLocalMatrix;
+		std::vector<Mat4f> mJointLocalMatrix;
 		DArray<Mat4f> mJointWorldMatrix;
 
-		DArray<Vec3f> mCurrentTranslation;
-		DArray<Quat<Real>> mCurrentRotation;
-		DArray<Vec3f> mCurrentScale;
+
+		
+		Pose currentPose;
 
 		std::vector<Vec3f>  mBindPoseTranslation;
 		std::vector<Vec3f>  mBindPoseScale;
@@ -161,7 +210,6 @@ namespace dyno {
 
 	class JointAnimationInfo : public OBase
 	{
-		//这个结构要在开始时候直接把所有动画数据读入内存，供给动画状态机使用。
 		typedef int joint;
 
 	public:
@@ -285,7 +333,12 @@ namespace dyno {
 		float& getBlendOutTime() { return mBlendOutTime; }
 
 		float& getPlayRate() { return mPlayRate; }
+
 		void updateTotalTime();
+
+		std::shared_ptr<JointInfo>& getSkeleton() { return mSkeleton; }
+
+		void setSkeleton(std::shared_ptr<JointInfo> sk) { mSkeleton = sk; }
 
 	private:
 

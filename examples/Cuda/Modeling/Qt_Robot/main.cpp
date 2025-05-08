@@ -32,6 +32,7 @@ int main()
 
 	auto fbx = scn->addNode(std::make_shared<FBXLoader<DataType3f>>());
 	fbx->varFileName()->setValue(getAssetPath() + "fbx/HumanoidRobot.fbx");
+	fbx->varImportAnimation()->setValue(true);
 	fbx->reset();
 
 	auto robot = scn->addNode(std::make_shared<ConfigurableBody<DataType3f>>());
@@ -44,34 +45,34 @@ int main()
 	Vec3f angle = Vec3f(0, 0, 90);
 	Quat<Real> q = Quat<Real>(angle[2] * M_PI / 180, angle[1] * M_PI / 180, angle[0] * M_PI / 180);
 
-	std::string Hip = std::string("model:Hip");
+	std::string Hip = std::string("Model::Hip");
 
-	std::string Trochanter_R = std::string("model:Trochanter_R");
-	std::string Thigh_R = std::string("model:Thigh_R");
-	std::string Shank_R = std::string("model:Shank_R");
-	std::string Foot_R = std::string("model:Foot_R");
+	std::string Trochanter_R = std::string("Model::Trochanter_R");
+	std::string Thigh_R = std::string("Model::Thigh_R");
+	std::string Shank_R = std::string("Model::Shank_R");
+	std::string Foot_R = std::string("Model::Foot_R");
 
-	std::string Trochanter_L = std::string("model:Trochanter_L");
-	std::string Thigh_L = std::string("model:Thigh_L");
-	std::string Shank_L = std::string("model:Shank_L");
-	std::string Foot_L = std::string("model:Foot_L");
+	std::string Trochanter_L = std::string("Model::Trochanter_L");
+	std::string Thigh_L = std::string("Model::Thigh_L");
+	std::string Shank_L = std::string("Model::Shank_L");
+	std::string Foot_L = std::string("Model::Foot_L");
 
-	std::string Spine = std::string("model:Spine");
-	std::string Body = std::string("model:Body");
-	std::string Neck = std::string("model:Neck");
-	std::string Head = std::string("model:Head");
+	std::string Spine = std::string("Model::Spine");
+	std::string Body = std::string("Model::Body");
+	std::string Neck = std::string("Model::Neck1");
+	std::string Head = std::string("Model::Head");
 
-	std::string Shoulder_R = std::string("model:Shoulder_R");
-	std::string UpperArm_R = std::string("model:UpperArm_R");
-	std::string LowerArm_R = std::string("model:LowerArm_R");
-	std::string Wrist_R = std::string("model:Wrist_R");
-	std::string Hand_R = std::string("model:Hand_R");
+	std::string Shoulder_R = std::string("Model::Shoulder_R");
+	std::string UpperArm_R = std::string("Model::UpperArm_R");
+	std::string LowerArm_R = std::string("Model::LowerArm_R");
+	std::string Wrist_R = std::string("Model::Wrist_R");
+	std::string Hand_R = std::string("Model::Hand_R");
 
-	std::string Shoulder_L = std::string("model:Shoulder_L");
-	std::string UpperArm_L = std::string("model:UpperArm_L");
-	std::string LowerArm_L = std::string("model:LowerArm_L");
-	std::string Wrist_L = std::string("model:Wrist_L");
-	std::string Hand_L = std::string("model:Hand_L");
+	std::string Shoulder_L = std::string("Model::Shoulder_L");
+	std::string UpperArm_L = std::string("Model::UpperArm_L");
+	std::string LowerArm_L = std::string("Model::LowerArm_L");
+	std::string Wrist_L = std::string("Model::Wrist_L");
+	std::string Hand_L = std::string("Model::Hand_L");
 
 
 	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Hip, 0), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Hip), Box, Transform3f(), 100));//
@@ -87,16 +88,16 @@ int main()
 	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Body, 10), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Body), Box, Transform3f(), 100));
 	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Neck, 11), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Neck), Box, Transform3f(), 100));
 	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Head, 12), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Head), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Shoulder_R, 13), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Shoulder_R), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(UpperArm_R, 14), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(UpperArm_R), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(LowerArm_R, 15), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(LowerArm_R), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Wrist_R, 16), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Wrist_R), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Hand_R, 17), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Hand_R), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Shoulder_L, 18), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Shoulder_L), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(UpperArm_L, 19), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(UpperArm_L), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(LowerArm_L, 20), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(LowerArm_L), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Wrist_L, 21), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Wrist_L), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Hand_L, 22), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Hand_L), Box, Transform3f(), 100));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Shoulder_R, 13), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Shoulder_R), Box, Transform3f(), 20));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(UpperArm_R, 14), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(UpperArm_R), Box, Transform3f(), 40));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(LowerArm_R, 15), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(LowerArm_R), Box, Transform3f(), 40));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Wrist_R, 16), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Wrist_R), Box, Transform3f(), 10));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Hand_R, 17), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Hand_R), Box, Transform3f(), 10));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Shoulder_L, 18), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Shoulder_L), Box, Transform3f(), 20));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(UpperArm_L, 19), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(UpperArm_L), Box, Transform3f(), 40));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(LowerArm_L, 20), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(LowerArm_L), Box, Transform3f(), 40));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Wrist_L, 21), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Wrist_L), Box, Transform3f(), 10));
+	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Hand_L, 22), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Hand_L), Box, Transform3f(), 10));
 
 	for (size_t i = 0; i < configData.mVehicleRigidBodyInfo.size(); i++)
 	{
@@ -110,16 +111,18 @@ int main()
 	Vec3f bodyOffset = Vec3f(0, -0.25, 0);
 	Vec3f handOffset = Vec3f(0.02, 0, 0);
 
-	Vec3f axis = Vec3f(-1,0,0);
+	Vec3f axis = Vec3f(1,0,0);
 
 	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Trochanter_R, 1), Name_Shape(Hip, 0), Hinge, axis, offset, true, 0,true,-90,90));
 	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Trochanter_L, 5), Name_Shape(Hip, 0), Hinge, axis, offset, true, 0, true, -90, 90));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Thigh_R, 2), Name_Shape(Hip, 0), Hinge, axis, thighOffset, true, 0, true, -90, 90));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Thigh_L, 6), Name_Shape(Hip, 0), Hinge, axis, thighOffset, true, 0, true, -90, 90));
 	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Shank_R, 3), Name_Shape(Thigh_R, 2), Hinge, axis, shankOffset, true, 0, true, -90, 90));
 	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Shank_L, 7), Name_Shape(Thigh_L, 6), Hinge, axis, shankOffset, true, 0, true, -90, 90));
 	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Foot_R, 4), Name_Shape(Shank_R, 3), Hinge, axis, footOffset, true, 0, true, -90, 90));
 	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Foot_L, 8), Name_Shape(Shank_L, 7), Hinge, axis, footOffset, true, 0, true, -90, 90));
+
+
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Thigh_R, 2), Name_Shape(Trochanter_R, 1), Fixed, axis, thighOffset, true, 0, true, -90, 90));
+	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Thigh_L, 6), Name_Shape(Trochanter_L, 5), Fixed, axis, thighOffset, true, 0, true, -90, 90));
 
 	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Spine, 9), Name_Shape(Hip, 0), Fixed, Vec3f(0, 1, 0), offset, true, 0, true, -90, 90));
 	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Body, 10), Name_Shape(Spine, 9), Fixed, Vec3f(1, 0, 0), bodyOffset, true, 0, true, -90, 90));
@@ -150,24 +153,25 @@ int main()
 	auto animDriver = std::make_shared<AnimationDriver<DataType3f>>();
 	multibody->animationPipeline()->pushModule(animDriver);
 
-	std::vector<std::string> driveName(8, "NULL");
 
-	driveName[0] = std::string("Hip_R");
-	driveName[1] = std::string("Hip_L");
-	driveName[2] = std::string("Hip_R");
-	driveName[3] = std::string("Hip_L");
+	std::vector<Animation2JointConfig> config(6);
 
-	driveName[4] = std::string("Knee_R");
-	driveName[5] = std::string("Knee_L");
-	driveName[6] = std::string("Ankle_R");
-	driveName[7] = std::string("Ankle_L");
+	float weight = 1;
+
+	config[0] = Animation2JointConfig(std::string("Model::R_Hip01"), 0, 1, weight);
+	config[1] = Animation2JointConfig(std::string("Model::L_Hip01"), 1, 1, weight);
+
+	config[2] = Animation2JointConfig(std::string("Model::R_Knee"), 2, 1, weight);
+	config[3] = Animation2JointConfig(std::string("Model::L_Knee"), 3, 1, weight);
+
+	config[4] = Animation2JointConfig(std::string("Model::R_Foot"), 4, 1, weight);
+	config[5] = Animation2JointConfig(std::string("Model::L_Foot"), 5, 1, weight);
 
 
-
-	animDriver->varDriverName()->setValue(driveName);
+	animDriver->varBindingConfiguration()->setValue(config);
 	animDriver->varSpeed()->setValue(1);
 	multibody->stateTimeStep()->connect(animDriver->inDeltaTime());
-	fbx->stateHierarchicalScene()->connect(animDriver->inHierarchicalScene());
+	fbx->stateJointAnimationInfo()->connect(animDriver->inJointAnimationInfo());
 	multibody->stateTopology()->connect(animDriver->inTopology());
 
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());

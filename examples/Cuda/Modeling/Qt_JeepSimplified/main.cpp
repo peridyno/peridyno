@@ -152,12 +152,12 @@ std::shared_ptr<SceneGraph> creatScene()
 	cube->varLocation()->setValue(Vec3f(0,0.15,3.436) );
 	cube->varLength()->setValue(Vec3f(2.1,0.12,18));
 	cube->varScale()->setValue(Vec3f(2, 1, 0.932));
-	cube->graphicsPipeline()->disable();
+	cube->setVisible(false);
 
 	auto cubeSmapler = scn->addNode(std::make_shared<ShapeSampler<DataType3f>>());
 	cubeSmapler->varSamplingDistance()->setValue(0.004f * total_scale);
 	cube->connect(cubeSmapler->importShape());
-	cubeSmapler->graphicsPipeline()->disable();
+	cubeSmapler->setVisible(false);
 
 	//MakeParticleSystem
 	auto particleSystem = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());

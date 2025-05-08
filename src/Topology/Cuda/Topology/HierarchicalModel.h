@@ -100,11 +100,12 @@ namespace dyno
 	{
 	public:
 		HierarchicalScene();
-		
+
 		~HierarchicalScene();
 
 		void clear();
 
+		int minMeshIndex();
 		int findMeshIndexByName(std::string name);
 		int findObjectIndexByName(std::string name);
 		void pushBackBone(std::shared_ptr<Bone> bone);
@@ -240,7 +241,7 @@ namespace dyno
 			DArray<Vec3f>& finalPos,
 			DArray<uint>& shapeId,
 			DArray<Vec3f>& t
-			);
+		);
 
 		std::vector<std::shared_ptr<MeshInfo>>& getMeshes() { return mMeshes; }
 
@@ -270,9 +271,11 @@ namespace dyno
 			DArray<int>* vertices2Point = nullptr);
 
 		void flipNormal(DArray<Vec3f>& Normal);
-		
 
-	private :
+		std::shared_ptr<JointAnimationInfo>& getJointAnimation() { return mJointAnimationData; }
+
+
+	private:
 
 		void buildTree(std::string& str, const std::vector<std::shared_ptr<ModelObject>>& child, uint level)
 		{
@@ -286,11 +289,10 @@ namespace dyno
 				}
 				str.append("-");
 				str.append(chi->name);
-				buildTree(str, chi->child,level + 1);
+				buildTree(str, chi->child, level + 1);
 			}
 		}
 
-		
 		
 
 	public:

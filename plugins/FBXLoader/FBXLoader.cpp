@@ -27,6 +27,7 @@ namespace dyno
 
 		this->statePolygonSet()->setDataPtr(std::make_shared<PolygonSet<TDataType>>());
 		this->stateTextureMesh()->setDataPtr(std::make_shared<TextureMesh>());
+		this->stateJointAnimationInfo()->setDataPtr(std::make_shared<JointAnimationInfo>());
 
 		auto texmeshRender = std::make_shared<GLPhotorealisticRender>();
 		this->stateTextureMesh()->connect(texmeshRender->inTextureMesh());
@@ -552,6 +553,7 @@ namespace dyno
 				}
 			}
 			targetScene->mJointAnimationData->updateTotalTime();
+			this->stateJointAnimationInfo()->setDataPtr(targetScene->mJointAnimationData);
 		}
 		targetScene->showJointInfo();
 
@@ -613,7 +615,7 @@ namespace dyno
 	template<typename TDataType>
 	void FBXLoader<TDataType>::updateStates()
 	{
-		if(this->varImportAnimation()->getValue())
+		if(this->varImportAnimation()->getValue()&&!this->varUseInstanceTransform()->getValue())
 			updateAnimation(this->stateElapsedTime()->getValue() * this->varAnimationSpeed()->getValue());
 		Node::updateStates();
 	}
@@ -1149,8 +1151,11 @@ namespace dyno
 			hierarchicalScene->pushBackMesh(mesh);
 		}
 
-		if(bonesInfo.size())
+		if (bonesInfo.size()) 
+		{
 			hierarchicalScene->UpdateJointData();
+
+		}
 	}
 
 	template<typename TDataType>
@@ -1158,7 +1163,7 @@ namespace dyno
 	{
 
 
-		if(this->stateHierarchicalScene()->getDataPtr()->getBones().size()&&this->varImportAnimation()->getValue())
+		if(this->stateHierarchicalScene()->getDataPtr()->getBones().size()&& this->varImportAnimation()->getValue() && !this->varUseInstanceTransform()->getValue())
 			updateAnimation(0);
 		else
 		{

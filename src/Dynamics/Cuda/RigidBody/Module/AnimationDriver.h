@@ -17,9 +17,13 @@
 #include "Module/KeyboardInputModule.h"
 #include "Topology/DiscreteElements.h"
 #include "Topology/HierarchicalModel.h"
+#include "Field/VehicleInfo.h"
 
 namespace dyno 
 {
+
+
+
 	template<typename TDataType>
 	class AnimationDriver : public KeyboardInputModule
 	{
@@ -39,11 +43,14 @@ namespace dyno
 		AnimationDriver();
 		~AnimationDriver() override {};
 
+
+
 		DEF_VAR(Real, Speed,4,"Speed");
-		DEF_VAR(std::vector<std::string>, DriverName, std::vector<std::string>(), "Speed");
+
+		DEF_VAR(std::vector<Animation2JointConfig>, BindingConfiguration, std::vector<Animation2JointConfig>(), "Animation Joint Config");
 
 		DEF_INSTANCE_IN(DiscreteElements<TDataType>, Topology, "Topology");
-		DEF_INSTANCE_IN(HierarchicalScene, HierarchicalScene,"Animation objects");
+		DEF_INSTANCE_IN(JointAnimationInfo, JointAnimationInfo,"Animation objects");
 		DEF_VAR_IN(Real, DeltaTime,"");
 
 
@@ -54,6 +61,31 @@ namespace dyno
 	protected:
 
 		void onEvent(PKeyboardEvent event) override;
+
+		void getFrameAndWeight(float time,Vec3i& keyFrame,Vec3f& weight, std::vector<std::vector<Real>*> animTime)
+		{
+			for (size_t channel = 0; channel < 3; channel++)
+			{
+				float tempTime = std::fmod(time, (*animTime[channel]).back());
+
+				std::vector<Real>& animData = *animTime[channel];
+				for (size_t j = 0; j < animData.size() - 1; j++)
+				{
+					if (tempTime > animData[j] && tempTime <= animData[j + 1])
+					{
+						float v = (tempTime - animData[j]) / (animData[j + 1] - animData[j]);
+						weight[channel] = v;
+						keyFrame[channel] = j;
+						break;
+					}
+
+				}
+			}
+			
+
+		}
+		
+
 
 	private:
 

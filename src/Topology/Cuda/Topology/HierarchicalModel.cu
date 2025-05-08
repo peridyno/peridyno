@@ -523,12 +523,22 @@ namespace dyno
 	{
 		int id = 0;
 		for (auto it : mMeshes) {
-			if (it->name == name)
+			if (it->name == name) 
+			{
 				return id;
-
-			id++;
+			}
+			else
+			{
+				id++;
+			}
 		}
+		std::cout << name << " not found !! "<<"\n";
 		return -1;
+	}
+
+	int HierarchicalScene::minMeshIndex() 
+	{
+		return mMeshes[0]->id;
 	}
 
 	int HierarchicalScene::findObjectIndexByName(std::string name)

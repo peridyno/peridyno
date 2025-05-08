@@ -112,7 +112,6 @@ namespace dyno
 	
 		DEF_INSTANCE_STATE(TextureMesh, TextureMesh, "");
 
-		DEF_INSTANCE_STATE(PointSet<TDataType>, ShapeCenter, "");
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, JointSet, "");
 
 		DEF_INSTANCE_STATE(JointAnimationInfo, Animation,"");

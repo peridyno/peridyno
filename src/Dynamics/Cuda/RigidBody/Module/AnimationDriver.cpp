@@ -14,10 +14,14 @@ namespace dyno
 	template<typename TDataType>
 	void AnimationDriver<TDataType>::onEvent(PKeyboardEvent event)
 	{
-		auto hierarchicalScene = this->inHierarchicalScene()->constDataPtr();
+		auto AnimationInfo = this->inJointAnimationInfo()->constDataPtr();
+		auto skeleton = AnimationInfo->getSkeleton();
+		if (!skeleton) 
+		{
+			printf("Error : No Skeleton \n");
+		}
 
-		float inputTimeStart = hierarchicalScene->mTimeStart;
-		float inputTimeEnd = hierarchicalScene->mTimeEnd;
+		float inputTimeEnd = AnimationInfo->getTotalTime();
 
 		auto topo = TypeInfo::cast<DiscreteElements<DataType3f>>(this->inTopology()->getDataPtr());
 
@@ -25,64 +29,45 @@ namespace dyno
 		CArray<HingeJoint> c_hinge;
 		c_hinge.assign(d_hinge);
 
-		std::vector<std::vector<Real>*> animRot; 
-		std::vector<std::vector<Real>*> animTime;
-
-		animRot.resize(c_hinge.size());
-		animTime.resize(c_hinge.size());
+		std::map<int, std::vector<std::vector<Real>*>> animRot;
+		std::map<int, std::vector<std::vector<Real>*>> animTime;
 
 
-		auto hinge_DriveObjName = this->varDriverName()->getValue();
+		auto binding = this->varBindingConfiguration()->getValue();
 
 
-	/*	for (size_t i = 0; i < hinge_DriveObjName.size(); i++)
+		for (size_t i = 0; i < binding.size(); i++)
 		{
-			auto name = hinge_DriveObjName[i];
-			auto bone = hierarchicalScene->getObjectByName(name);
-			if(bone)
+
+
+			auto name = binding[i].JointName;
+			auto hingeId = binding[i].JointId;
+
+			auto boneId = skeleton->findJointIndexByName(name);
+			if (boneId != -1)
 			{
-				animRot[i] = bone->m_Rotation_Values;
-				animTime[i] = bone->m_Rotation_Times;
+				std::vector<std::vector<Real>*> tempV(3);
+				std::vector<std::vector<Real>*> tempT(3);
+				animRot[hingeId] = tempV;
+				animTime[hingeId] = tempT;
+
+				animRot[hingeId][0] = &AnimationInfo->mJoint_KeyId_R_X[boneId];
+				animTime[hingeId][0] = &AnimationInfo->mJoint_KeyId_tR_X[boneId];
+
+				animRot[hingeId][1] = &AnimationInfo->mJoint_KeyId_R_Y[boneId];
+				animTime[hingeId][1] = &AnimationInfo->mJoint_KeyId_tR_Y[boneId];
+
+				animRot[hingeId][2] = &AnimationInfo->mJoint_KeyId_R_Z[boneId];
+				animTime[hingeId][2] = &AnimationInfo->mJoint_KeyId_tR_Z[boneId];
+
 			}
 		}
+
 
 		move += this->inDeltaTime()->getValue() * this->varSpeed()->getValue();
 
 		float weight = 0;
 		int keyFrame = -1;
-
-		float currentFrameinAnim = fmod(move, inputTimeEnd - inputTimeStart) + inputTimeStart;
-
-		for (size_t hingeId = 0; hingeId < animTime.size(); hingeId++)
-		{
-			if (!animTime[hingeId])
-				continue;
-
-			auto animTimeZ = animTime[hingeId][2];
-
-			if (currentFrameinAnim < animTimeZ[0]) 
-			{
-				weight = -1;
-				keyFrame = 1;
-			}
-			if (currentFrameinAnim > animTimeZ[animTimeZ.size()-1])
-			{
-				weight = -1;
-				keyFrame = animTimeZ.size()-1;
-			}
-
-			for (size_t j = 0; j < animTimeZ.size(); j++)
-			{
-				if (currentFrameinAnim > animTimeZ[j] && currentFrameinAnim <= animTimeZ[j + 1])
-				{
-					float v = (currentFrameinAnim - animTimeZ[j]) / (animTimeZ[j + 1] - animTimeZ[j]);
-					weight = v;
-					keyFrame = j;
-					break;
-				}
-			}	
-		}
-
 
 
 		float angleDivede = -1.0;
@@ -112,31 +97,53 @@ namespace dyno
 		};
 
 
-
-		if (keyFrame != -1) 
+		for (size_t i = 0; i < binding.size(); i++)
 		{
-			for (size_t hingeId = 0; hingeId < animRot.size(); hingeId++)
+			int hingeId = binding[i].JointId;
+			int axis = binding[i].Axis;
+			float intensity = binding[i].Intensity;
+
+			if (!animRot[hingeId].size())
+				continue;
+
+			Vec3i keyFrame = Vec3i(-1);
+			Vec3f weight = Vec3f(-1);
+
+			getFrameAndWeight(move, keyFrame, weight,animTime[hingeId]);
+
+			std::vector<Real>& animX = *animRot[hingeId][0];
+			std::vector<Real>& animY = *animRot[hingeId][1];
+			std::vector<Real>& animZ = *animRot[hingeId][2];
+
+			std::vector<Real>& currentAnimation = animX;
+
+			switch (axis)
 			{
-				if (!animRot[hingeId])
-					continue;
-				auto animX = animRot[hingeId][0];
-				auto animY = animRot[hingeId][1];
-				auto animZ = animRot[hingeId][2];
-
-				Real angle = 0;
-				if (weight == -1){
-					angle = animZ[keyFrame] * M_PI / 180 / angleDivede;
-				}
-				else {
-					angle = lerp(animZ[keyFrame], animZ[keyFrame + 1], weight) * M_PI / 180 / angleDivede;
-				}
-
-				c_hinge[hingeId].setRange(angle, angle + epsilonAngle);
+			case 0:
+				currentAnimation = animX;
+				break;
+			case 1:
+				currentAnimation = animY;
+				break;
+			case 2:
+				currentAnimation = animZ;
+				break;
+			default:
+				break;
 			}
+
+			Real angle = 0;
+			if (weight[axis] == -1) {
+				angle = currentAnimation[keyFrame[axis]] * M_PI / 180 / angleDivede;
+			}
+			else {
+				angle = lerp(currentAnimation[keyFrame[axis]], currentAnimation[keyFrame[axis] + 1], weight[axis]) * M_PI / 180 / angleDivede * intensity;
+			}
+
+			c_hinge[hingeId].setRange(angle, angle + epsilonAngle);
 		}
 
-
-		d_hinge.assign(c_hinge);*/
+		d_hinge.assign(c_hinge);
 
 
 	}
