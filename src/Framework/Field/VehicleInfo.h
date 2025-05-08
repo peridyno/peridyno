@@ -126,6 +126,30 @@ namespace dyno {
 
 	};
 
+	class Animation2JointConfig
+	{
+	public:
+
+		Animation2JointConfig() {}
+		Animation2JointConfig(std::string name, int id, uint axis)
+		{
+			this->JointName = name;
+			this->JointId = id;
+			this->Axis = axis;
+		}
+		Animation2JointConfig(std::string name, int id, uint axis, float intensity)
+		{
+			this->JointName = name;
+			this->JointId = id;
+			this->Axis = axis;
+			this->Intensity = intensity;
+		}
+		std::string JointName;
+		int JointId = -1;
+		uint Axis = 0;
+		float Intensity = 1;
+	};
+
 
 }
 #include "VehicleInfo.inl"
