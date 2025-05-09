@@ -275,51 +275,6 @@ void declare_extrude_model(py::module& m, std::string typestr) {
 		.def("in_point_set", &Class::inPointSet, py::return_value_policy::reference);
 }
 
-<<<<<<< HEAD
-=======
-#include "GltfLoader.h"
-template <typename TDataType>
-void declare_gltf_loader(py::module& m, std::string typestr) {
-	using Class = dyno::GltfLoader<TDataType>;
-	using Parent = dyno::ParametricModel<TDataType>;
-	std::string pyclass_name = std::string("GltfLoader") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("var_file_name", &Class::varFileName, py::return_value_policy::reference)
-		.def("var_import_animation", &Class::varImportAnimation, py::return_value_policy::reference)
-		.def("var_joint_radius", &Class::varJointRadius, py::return_value_policy::reference)
-		.def("state_tex_coord_0", &Class::stateTexCoord_0, py::return_value_policy::reference)
-		.def("state_tex_coord_1", &Class::stateTexCoord_1, py::return_value_policy::reference)
-		.def("state_initial_matrix", &Class::stateInitialMatrix, py::return_value_policy::reference)
-
-		.def("state_transform", &Class::stateTransform, py::return_value_policy::reference)
-
-		.def("state_joint_inverse_bind_matrix", &Class::stateJointInverseBindMatrix, py::return_value_policy::reference)
-		.def("state_joint_local_matrix", &Class::stateJointLocalMatrix, py::return_value_policy::reference)
-		.def("state_jont_world_matrix", &Class::stateJointWorldMatrix, py::return_value_policy::reference)
-
-		.def("state_texture_mesh", &Class::stateTextureMesh, py::return_value_policy::reference)
-
-		.def("state_joint_set", &Class::stateJointSet, py::return_value_policy::reference);
-}
-
-#include "Group.h"
-template <typename TDataType>
-void declare_group(py::module& m, std::string typestr) {
-	using Class = dyno::Group<TDataType>;
-	using Parent = dyno::Node;
-	std::string pyclass_name = std::string("Group") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("var_point_id", &Class::varPointId, py::return_value_policy::reference)
-		.def("var_edge_id", &Class::varEdgeId, py::return_value_policy::reference)
-		.def("var_primitive_id", &Class::varPrimitiveId, py::return_value_policy::reference)
-		.def("in_point_id", &Class::inPointId, py::return_value_policy::reference)
-		.def("in_edge_id", &Class::inEdgeId, py::return_value_policy::reference)
-		.def("in_primitive_id", &Class::inPrimitiveId, py::return_value_policy::reference);
-}
-
->>>>>>> public
 #include "Commands/Merge.h"
 template <typename TDataType>
 void declare_merge(py::module& m, std::string typestr) {
@@ -617,7 +572,7 @@ void declare_gltf_loader(py::module& m, std::string typestr) {
 		.def("state_joints_data", &Class::stateJointsData, py::return_value_policy::reference)
 		.def("state_texture_mesh", &Class::stateTextureMesh, py::return_value_policy::reference)
 
-		.def("state_shape_center", &Class::stateShapeCenter, py::return_value_policy::reference)
+		.def("state_texture_mesh", &Class::stateTextureMesh, py::return_value_policy::reference)
 		.def("state_joint_set", &Class::stateJointSet, py::return_value_policy::reference)
 		.def("state_animation", &Class::stateAnimation, py::return_value_policy::reference);
 }
@@ -656,10 +611,10 @@ void declare_joint_deform(py::module& m, std::string typestr) {
 		.def("in_joint", &Class::inJoint, py::return_value_policy::reference)
 		.def("in_skin", &Class::inSkin, py::return_value_policy::reference)
 		.def("in_instance_transform", &Class::inInstanceTransform, py::return_value_policy::reference)
-		.def("state_texture_mesh", &Class::stateTextureMesh, py::return_value_policy::reference);
+		.def("in_texture_mesh", &Class::inTextureMesh, py::return_value_policy::reference);
 }
 
-#include "JointInfo.h"
+#include "Topology/JointInfo.h"
 void declare_joint_info(py::module& m) {
 	using Class = dyno::JointInfo;
 	using Parent = dyno::OBase;
@@ -667,26 +622,32 @@ void declare_joint_info(py::module& m) {
 	std::string pyclass_name = std::string("JointInfo");
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def(py::init<dyno::Array<dyno::Mat4f, DeviceType::GPU>&, dyno::Array<dyno::Mat4f, DeviceType::GPU>&, dyno::Array<dyno::Mat4f, DeviceType::GPU>&, std::vector<int>&, std::map<joint, std::vector<joint>>&, std::map<joint, dyno::Vec3f>&, std::map<joint, dyno::Vec3f>&, std::map<joint, dyno::Quat1f>&>())
-		.def("update_joint_info", &Class::UpdateJointInfo)
+		//.def(py::init<dyno::Array<dyno::Mat4f, DeviceType::GPU>&, dyno::Array<dyno::Mat4f, DeviceType::GPU>&, dyno::Array<dyno::Mat4f, DeviceType::GPU>&, std::vector<int>&, std::map<joint, std::vector<joint>>&, std::map<joint, dyno::Vec3f>&, std::map<joint, dyno::Vec3f>&, std::map<joint, dyno::Quat1f>&>())
+		.def("set_gltf_joint_info", &Class::setGltfJointInfo)
+		.def("clear", &Class::clear)
+		.def("set_joint_info", &Class::SetJointInfo)
 		.def("set_joint", &Class::setJoint)
 		.def("is_empty", &Class::isEmpty)
 		.def("update_world_matrix_by_transform", &Class::updateWorldMatrixByTransform)
-		.def("update_current_pose", &Class::updateCurrentPose)
 		.def("set_joint_name", &Class::setJointName)
+		.def("set_left_handed_coord_system", &Class::setLeftHandedCoordSystem)
+		.def("set_pose", &Class::setPose)
+		.def("find_joint_index_by_name", &Class::findJointIndexByName)
+		.def("get_local_matrix", &Class::getLocalMatrix)
 		.def_readwrite("mJointName", &Class::mJointName)
 
 		.def_readwrite("mJointInverseBindMatrix", &Class::mJointInverseBindMatrix)
 		.def_readwrite("mJointLocalMatrix", &Class::mJointLocalMatrix)
 		.def_readwrite("mJointWorldMatrix", &Class::mJointWorldMatrix)
 
+		.def_readwrite("currentPose", &Class::currentPose)
+
 		.def_readwrite("mBindPoseTranslation", &Class::mBindPoseTranslation)
 		.def_readwrite("mBindPoseScale", &Class::mBindPoseScale)
 		.def_readwrite("mBindPoseRotation", &Class::mBindPoseRotation)
+		.def_readwrite("mBindPoseRotator", &Class::mBindPoseRotator)
 
-		.def_readwrite("mCurrentTranslation", &Class::mCurrentTranslation)
-		.def_readwrite("mCurrentRotation", &Class::mCurrentRotation)
-		.def_readwrite("mCurrentScale", &Class::mCurrentScale)
+		.def_readwrite("mBindPosePreRotator", &Class::mBindPosePreRotator)
 
 		.def_readwrite("mAllJoints", &Class::mAllJoints)
 		.def_readwrite("mJointDir", &Class::mJointDir)
@@ -701,15 +662,18 @@ void declare_joint_animation_info(py::module& m) {
 	std::string pyclass_name = std::string("JointAnimationInfo");
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("set_animation_data", &Class::setAnimationData)
-		.def("update_joints_transform", &Class::updateJointsTransform)
-		.def("update_transform", &Class::updateTransform)
+		.def("set_gltf_animation_data", &Class::setGLTFAnimationData)
+		.def("clear", &Class::clear)
+		.def("is_gltf_animation", &Class::isGltfAnimation)
+		.def("resize_joints_data", &Class::resizeJointsData)
 		.def("get_joints_translation", &Class::getJointsTranslation)
 		.def("get_joints_rotation", &Class::getJointsRotation)
 		.def("get_joints_scale", &Class::getJointsScale)
 		.def("get_total_time", &Class::getTotalTime)
 		.def("find_max_smaller_index", &Class::findMaxSmallerIndex)
-		.def("lerp", &Class::lerp)
+
+		//.def("lerp", py::overload_cast<std::vector<Coord>, std::vector<dyno::TopologyModule::Triangle>&>(&Class::lerp))
+		//override
 		.def("normalize", &Class::normalize)
 		.def("slerp", &Class::slerp)
 		.def("nlerp", &Class::nlerp)

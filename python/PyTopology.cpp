@@ -140,7 +140,7 @@ void pybind_topology(py::module& m)
 	declare_height_field<dyno::DataType3f>(m, "3f");
 	declare_quad_set<dyno::DataType3f>(m, "3f");
 	declare_hexahedron_set<dyno::DataType3f>(m, "3f");
-	declare_joint_tree<dyno::DataType3f>(m, "3f");
+	//declare_joint_tree<dyno::DataType3f>(m, "3f");
 	declare_level_set<dyno::DataType3f>(m, "3f");
 	declare_linear_bvh<dyno::DataType3f>(m, "3f");
 	declare_polygon_set<dyno::DataType3f>(m, "3f");
@@ -327,41 +327,7 @@ void pybind_topology(py::module& m)
 		.def_readwrite("facegroup_triangles", &dyno::MeshInfo::facegroup_triangles)
 		//.def_readwrite("facegroup_polygons", &dyno::MeshInfo::facegroup_polygons)
 
-<<<<<<< HEAD
 		.def_readwrite("materials", &dyno::MeshInfo::materials)
-=======
-	declare_texture_mesh(m);
-	declare_attribute(m);
-	declare_quad_set<dyno::DataType3f>(m, "3f");
-	declare_point_set_to_triangle_set<dyno::DataType3f>(m, "3f");
-	declare_anchor_point_to_point_set<dyno::DataType3f>(m, "3f");
-	declare_bounding_box_to_edge_set<dyno::DataType3f>(m, "3f");
-	declare_extract_edge_set_from_polygon_set<dyno::DataType3f>(m, "3f");
-	declare_extract_triangle_set_from_polygon_set<dyno::DataType3f>(m, "3f");
-	declare_extract_qaud_set_from_polygon_set<dyno::DataType3f>(m, "3f");
-	declare_frame_to_point_set<dyno::DataType3f>(m, "3f");
-	declare_marching_cubes<dyno::DataType3f>(m, "3f");
-	declare_marching_cubes_helper<dyno::DataType3f>(m, "3f");
-	declare_merge_simplex_set<dyno::DataType3f>(m, "3f");
-	declare_point_set_to_point_set<dyno::DataType3f>(m, "3f");
-	declare_quad_set_to_triangle_set<dyno::DataType3f>(m, "3f");
-	declare_split_simplex_set<dyno::DataType3f>(m, "3f");
-	declare_tetrahedron_set_to_point_set<dyno::DataType3f>(m, "3f");
-	declare_texture_mesh_to_triangle_set<dyno::DataType3f>(m, "3f");
-	declare_volume_clipper<dyno::DataType3f>(m, "3f");
-	declare_calculate_maximum<dyno::DataType3f>(m, "3f");
-	declare_calculate_minimum<dyno::DataType3f>(m, "3f");
-	declare_animation_curve<dyno::DataType3f>(m, "3f");
-	declare_discrete_elements<dyno::DataType3f>(m, "3f");
-	declare_distance_field3D<dyno::DataType3f>(m, "3f");
-	declare_frame<dyno::DataType3f>(m, "3f");
-	declare_grid_hash<dyno::DataType3f>(m, "3f");
-	declare_grid_set<dyno::DataType3f>(m, "3f");
-	declare_height_field<dyno::DataType3f>(m, "3f");
-	declare_hexahedron_set<dyno::DataType3f>(m, "3f");
-	declare_linear_bvh<dyno::DataType3f>(m, "3f");
-	declare_polygon_set<dyno::DataType3f>(m, "3f");
->>>>>>> public
 
 		.def_readwrite("boundingBox", &dyno::MeshInfo::boundingBox)
 		.def_readwrite("boundingTransform", &dyno::MeshInfo::boundingTransform)
@@ -380,13 +346,38 @@ void pybind_topology(py::module& m)
 		.def("get_object_by_name", &dyno::HierarchicalScene::getObjectByName)
 		.def("get_obj_index_by_name", &dyno::HierarchicalScene::getObjIndexByName)
 		.def("get_bone_index_by_name", &dyno::HierarchicalScene::getBoneIndexByName)
+		.def("update_bone_world_matrix", &dyno::HierarchicalScene::updateBoneWorldMatrix)
+		.def("update_mesh_world_matrix", &dyno::HierarchicalScene::updateMeshWorldMatrix)
 		.def("update_inverse_bind_matrix", &dyno::HierarchicalScene::updateInverseBindMatrix)
-		.def("update_frame_world_transform", &dyno::HierarchicalScene::updateFrameWorldTransform)
+		.def("update_world_transform_by_key_frame", &dyno::HierarchicalScene::updateWorldTransformByKeyFrame)
 		.def("get_vector_data_by_time", &dyno::HierarchicalScene::getVectorDataByTime)
 		.def("find_max_smaller_index", &dyno::HierarchicalScene::findMaxSmallerIndex)
+		.def("getBones", &dyno::HierarchicalScene::getBones)
+		.def("skinAnimation", &dyno::HierarchicalScene::skinAnimation)
+		.def("skinVerticesAnimation", &dyno::HierarchicalScene::skinVerticesAnimation)
+		//.def("c_skinVerticesAnimation", &dyno::HierarchicalScene::c_skinVerticesAnimation)
+		.def("getVerticesNormalInBindPose", &dyno::HierarchicalScene::getVerticesNormalInBindPose)
+
+		.def("updatePoint2Vertice", &dyno::HierarchicalScene::updatePoint2Vertice)
+		.def("UpdateJointData", &dyno::HierarchicalScene::UpdateJointData)
+		.def("coutBoneHierarchial", &dyno::HierarchicalScene::coutBoneHierarchial)
+		.def("updateSkinData", &dyno::HierarchicalScene::updateSkinData)
+		.def("createLocalTransform", &dyno::HierarchicalScene::createLocalTransform)
+
+		.def("coutMatrix", &dyno::HierarchicalScene::coutMatrix)
+		.def("showJointInfo", &dyno::HierarchicalScene::showJointInfo)
+		//.def("textureMeshTransform", &dyno::HierarchicalScene::textureMeshTransform)
+		//.def("shapeTransform", &dyno::HierarchicalScene::shapeTransform)
+		//.def("shapeToCenter", &dyno::HierarchicalScene::shapeToCenter)
+
+		.def("getMeshes", &dyno::HierarchicalScene::getMeshes)
+		.def("getObjectWorldMatrix", &dyno::HierarchicalScene::getObjectWorldMatrix)
+		.def("computeTexMeshVerticesNormal", &dyno::HierarchicalScene::computeTexMeshVerticesNormal)
+		.def("flipNormal", &dyno::HierarchicalScene::flipNormal)
+		.def("getJointAnimation", &dyno::HierarchicalScene::getJointAnimation)
 
 		.def_readwrite("mModelObjects", &dyno::HierarchicalScene::mModelObjects)
-		.def_readwrite("mMeshs", &dyno::HierarchicalScene::mMeshs)
+		.def_readwrite("mMeshes", &dyno::HierarchicalScene::mMeshes)
 		.def_readwrite("mBones", &dyno::HierarchicalScene::mBones)
 		.def_readwrite("mBoneRotations", &dyno::HierarchicalScene::mBoneRotations)
 		.def_readwrite("mBoneTranslations", &dyno::HierarchicalScene::mBoneTranslations)

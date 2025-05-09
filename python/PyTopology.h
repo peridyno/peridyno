@@ -844,65 +844,64 @@ void declare_hexahedron_set(py::module& m, std::string typestr) {
 		.def("copy_from", &Class::copyFrom);
 }
 
-<<<<<<< HEAD
-#include "Topology/JointTree.h"
-template <typename TDataType>
-void declare_joint_tree(py::module& m, std::string typestr) {
-	using Class = dyno::JointTree<TDataType>;
-	using Parent = dyno::TopologyModule;
-	std::string pyclass_name = std::string("JointTree") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("copy_from", &Class::copyFrom)
-
-		.def("scale", &Class::scale)
-		.def("translate", &Class::translate)
-		.def("get_global_transform", &Class::getGlobalTransform)
-		.def("get_transform", &Class::getTransform)
-		.def("get_quat", &Class::getQuat)
-		.def("get_global_quat", &Class::getGlobalQuat)
-		.def("get_coord_by_matrix", &Class::getCoordByMatrix)
-		.def("get_coord_by_quat", &Class::getCoordByQuat)
-
-		.def("get_global_coord", &Class::getGlobalCoord)
-
-		.def("set_anim_translation", &Class::setAnimTranslation)
-		.def("set_anim_rotation", &Class::setAnimRotation)
-		.def("set_anim_scaling", &Class::setAnimScaling)
-
-		.def("apply_animation_by_one", &Class::applyAnimationByOne)
-		.def("apply_animation_all", &Class::applyAnimationAll)
-
-		.def_readwrite("id", &Class::id)
-
-		.def_readwrite("PreRotation", &Class::PreRotation)
-		.def_readwrite("PreScaling", &Class::PreScaling)
-		.def_readwrite("PreTranslation", &Class::PreTranslation)
-
-		.def_readwrite("tmp", &Class::tmp)
-
-		.def_readwrite("LclTranslation", &Class::LclTranslation)
-		.def_readwrite("LclRotation", &Class::LclRotation)
-		.def_readwrite("LclScaling", &Class::LclScaling)
-
-		.def_readwrite("AnimTranslation", &Class::AnimTranslation)
-		.def_readwrite("AnimRotation", &Class::AnimRotation)
-		.def_readwrite("AnimScaling", &Class::AnimScaling)
-
-		.def_readwrite("CurTranslation", &Class::CurTranslation)
-		.def_readwrite("CurRotation", &Class::CurRotation)
-		.def_readwrite("CurScaling", &Class::CurScaling)
-
-		.def_readwrite("GlCoord", &Class::GlCoord)
-		.def_readwrite("LastCoord", &Class::LastCoord)
-		.def_readwrite("GlobalTransform", &Class::GlobalTransform)
-
-		.def_readwrite("GlT", &Class::GlT)
-		.def_readwrite("GlR", &Class::GlR)
-		.def_readwrite("GlS", &Class::GlS)
-		.def_readwrite("children", &Class::children)
-		.def_readwrite("parent", &Class::parent);
-}
+//#include "Topology/JointTree.h"
+//template <typename TDataType>
+//void declare_joint_tree(py::module& m, std::string typestr) {
+//	using Class = dyno::JointTree<TDataType>;
+//	using Parent = dyno::TopologyModule;
+//	std::string pyclass_name = std::string("JointTree") + typestr;
+//	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+//		.def(py::init<>())
+//		.def("copy_from", &Class::copyFrom)
+//
+//		.def("scale", &Class::scale)
+//		.def("translate", &Class::translate)
+//		.def("get_global_transform", &Class::getGlobalTransform)
+//		.def("get_transform", &Class::getTransform)
+//		.def("get_quat", &Class::getQuat)
+//		.def("get_global_quat", &Class::getGlobalQuat)
+//		.def("get_coord_by_matrix", &Class::getCoordByMatrix)
+//		.def("get_coord_by_quat", &Class::getCoordByQuat)
+//
+//		.def("get_global_coord", &Class::getGlobalCoord)
+//
+//		.def("set_anim_translation", &Class::setAnimTranslation)
+//		.def("set_anim_rotation", &Class::setAnimRotation)
+//		.def("set_anim_scaling", &Class::setAnimScaling)
+//
+//		.def("apply_animation_by_one", &Class::applyAnimationByOne)
+//		.def("apply_animation_all", &Class::applyAnimationAll)
+//
+//		.def_readwrite("id", &Class::id)
+//
+//		.def_readwrite("PreRotation", &Class::PreRotation)
+//		.def_readwrite("PreScaling", &Class::PreScaling)
+//		.def_readwrite("PreTranslation", &Class::PreTranslation)
+//
+//		.def_readwrite("tmp", &Class::tmp)
+//
+//		.def_readwrite("LclTranslation", &Class::LclTranslation)
+//		.def_readwrite("LclRotation", &Class::LclRotation)
+//		.def_readwrite("LclScaling", &Class::LclScaling)
+//
+//		.def_readwrite("AnimTranslation", &Class::AnimTranslation)
+//		.def_readwrite("AnimRotation", &Class::AnimRotation)
+//		.def_readwrite("AnimScaling", &Class::AnimScaling)
+//
+//		.def_readwrite("CurTranslation", &Class::CurTranslation)
+//		.def_readwrite("CurRotation", &Class::CurRotation)
+//		.def_readwrite("CurScaling", &Class::CurScaling)
+//
+//		.def_readwrite("GlCoord", &Class::GlCoord)
+//		.def_readwrite("LastCoord", &Class::LastCoord)
+//		.def_readwrite("GlobalTransform", &Class::GlobalTransform)
+//
+//		.def_readwrite("GlT", &Class::GlT)
+//		.def_readwrite("GlR", &Class::GlR)
+//		.def_readwrite("GlS", &Class::GlS)
+//		.def_readwrite("children", &Class::children)
+//		.def_readwrite("parent", &Class::parent);
+//}
 
 #include "Topology/LevelSet.h"
 template <typename TDataType>
@@ -917,8 +916,6 @@ void declare_level_set(py::module& m, std::string typestr) {
 }
 
 
-=======
->>>>>>> public
 #include "Topology/LinearBVH.h"
 template <typename TDataType>
 void declare_linear_bvh(py::module& m, std::string typestr) {

@@ -26,18 +26,8 @@ namespace dyno
 
 		tinyxml2::XMLElement* root = doc.RootElement();
 
-<<<<<<< HEAD
-		tinyxml2::XMLElement* versionXML = root->FirstChildElement("Version");
-		std::string version = TOSTRING(PERIDYNO_VERSION);
-		if (version.compare(versionXML->GetText()) != 0)
-		{
-			return "Error Version";
-		}
-
-=======
 		scn->setUpperBound(decodeVec3f(root->Attribute("UpperBound")));
 		scn->setLowerBound(decodeVec3f(root->Attribute("LowerBound")));
->>>>>>> public
 
 		std::vector<std::shared_ptr<Node>> nodes;
 		tinyxml2::XMLElement* nodeXML = root->FirstChildElement("Node");
@@ -143,10 +133,6 @@ namespace dyno
 
 		// 		const char* declaration = "<?xml version=\"0.6.0\" encoding=\"UTF-8\">";
 		// 		doc.Parse(declaration);
-<<<<<<< HEAD
-
-=======
->>>>>>> public
 
 		tinyxml2::XMLElement* root = doc.NewElement("SceneGraph");
 
@@ -226,19 +212,6 @@ namespace dyno
 						}
 					}
 				}
-<<<<<<< HEAD
-				if (fieldFound && nSrcPar != nullptr) {
-
-					tinyxml2::XMLElement* connection = doc.NewElement("Connection");
-					connection->SetAttribute("SourceId", indices[nSrcPar->objectId()]);
-					connection->SetAttribute("From", 0);
-					connection->SetAttribute("TargetId", indices[node->objectId()]);
-					connection->SetAttribute("To", uint(i));
-					nodeConnectionsXml->InsertEndChild(connection);
-				}
-
-=======
->>>>>>> public
 			}
 
 			auto fieldInp = node->getInputFields();
@@ -257,18 +230,8 @@ namespace dyno
 					auto parSrc = fieldSrc->parent();
 					if (parSrc != nullptr)
 					{
-<<<<<<< HEAD
-						Node* nodeSrc = dynamic_cast<Node*>(parSrc);
-						auto outId = nodeSrc->objectId();
-						auto fieldsOut = nodeSrc->getOutputFields();
-						uint outFieldIndex = 0;
-						bool fieldFound = false;
-
-						for (outFieldIndex = 0; outFieldIndex < fieldsOut.size(); outFieldIndex++)
-=======
 						Node* nodeSrc = dynamic_cast<Node*>(parSrc);// [node->field] - [node->field]
 						if (nodeSrc != nullptr)
->>>>>>> public
 						{
 							auto fieldsSrc = nodeSrc->getAllFields();
 
@@ -295,15 +258,6 @@ namespace dyno
 								nodeConnectionsXml->InsertEndChild(connection);
 							}
 						}
-<<<<<<< HEAD
-						if (fieldFound) {
-							tinyxml2::XMLElement* connection = doc.NewElement("Connection");
-							connection->SetAttribute("SourceId", indices[parSrc->objectId()]);
-							connection->SetAttribute("From", 1 + outFieldIndex);
-							connection->SetAttribute("TargetId", indices[node->objectId()]);
-							connection->SetAttribute("To", uint(i + ports.size()));
-							nodeConnectionsXml->InsertEndChild(connection);
-=======
 
 
 						Module* moduleSrc = dynamic_cast<Module*>(parSrc);// [node->Module->field] - [node->field]
@@ -385,32 +339,16 @@ namespace dyno
 								connection->SetAttribute("From", Index);
 								nodeConnectionsXml->InsertEndChild(connection);
 							}
->>>>>>> public
 						}
 					}
 				}
 			}
-<<<<<<< HEAD
-
-=======
->>>>>>> public
 
 			for (auto s : node->getOutputFields())
 			{
 				auto fieldSrc = s->getSource();
 				if (fieldSrc != nullptr)
 				{
-<<<<<<< HEAD
-					fieldsOut.push_back(field);
-				}
-				else if (field->getFieldType() == dyno::FieldTypeEnum::In)
-				{
-					auto fieldSrc = field->getSource();
-					if (fieldSrc != nullptr) {
-
-						auto parSrc = fieldSrc->parent();
-						if (parSrc != nullptr)
-=======
 					auto parSrc = fieldSrc->parent();
 					int ToIndex = -1;
 					auto fields = node->getAllFields();
@@ -418,7 +356,6 @@ namespace dyno
 					{
 						auto t = fields[i];
 						if (t == s)
->>>>>>> public
 						{
 							ToIndex = i;
 							break;
@@ -640,14 +577,10 @@ namespace dyno
 									{
 										bool fieldFound = false;
 										auto n = src->getModuleList().size();
-<<<<<<< HEAD
-										for (auto f : fieldsOut)
-=======
 										FieldTypeEnum type;
 										auto fields = src->getAllFields();
 										int nodeExportIndex = 0;
 										for (auto f : fields)
->>>>>>> public
 										{
 											if (f == fieldSrc)
 											{
@@ -655,11 +588,7 @@ namespace dyno
 												type = f->getFieldType();
 												break;
 											}
-<<<<<<< HEAD
-											outFieldIndex++;
-=======
 											nodeExportIndex++;
->>>>>>> public
 										}
 
 										if (fieldFound)
@@ -679,32 +608,11 @@ namespace dyno
 					}
 				}
 
-<<<<<<< HEAD
-				indices.clear();
-				};
-
-			savePipeline(node->animationPipeline(), "Simulation");
-
-			// 			//Insert graphics pipeline
-			// 			tinyxml2::XMLElement* graphicsPipelineXml = doc.NewElement("Rendering");
-			// 			nodeXml->InsertEndChild(graphicsPipelineXml);
-			// 
-			// 			auto graphicsPipeline = node->graphicsPipeline();
-			// 			for each (auto m in graphicsPipeline->activeModules())
-			// 			{
-			// 				tinyxml2::XMLElement* moduleXml = doc.NewElement("Module");
-			// 				moduleXml->SetAttribute("Class", m->getClassInfo()->getClassName().c_str());
-			// 				moduleXml->SetAttribute("Coordinate", encodeVec2f(Vec2f(m->bx(), m->by())).c_str());
-			// 				graphicsPipelineXml->InsertEndChild(moduleXml);
-			// 			}
-
-=======
 				ModuleIndices.clear();
 			};
 
 			savePipeline(node->animationPipeline(), "Simulation");
 
->>>>>>> public
 			savePipeline(node->graphicsPipeline(), "Rendering");
 
 
@@ -775,11 +683,6 @@ namespace dyno
 			info.id0 = atoi(connectionXml->Attribute("From"));
 			info.id1 = atoi(connectionXml->Attribute("To"));
 
-<<<<<<< HEAD
-			infoVec.push_back(info);
-
-
-=======
 			auto sourceModuleId = connectionXml->Attribute("SourceModuleId");
 			auto sourceModulePiplineId = connectionXml->Attribute("SourceModulePipline");
 			if (sourceModuleId != nullptr && sourceModulePiplineId != nullptr)
@@ -791,7 +694,6 @@ namespace dyno
 
 			infoVec.push_back(info);
 
->>>>>>> public
 			connectionXml = connectionXml->NextSiblingElement("Connection");
 		}
 
@@ -800,190 +702,12 @@ namespace dyno
 		infoVec.clear();
 
 		auto& fields = node->getAllFields();
-<<<<<<< HEAD
-		std::vector<FBase*> states;
-		for (auto field : fields)
-		{
-			if (field->getFieldType() == dyno::FieldTypeEnum::State)
-			{
-				states.push_back(field);
-			}
-			else if (field->getFieldType() == dyno::FieldTypeEnum::In)
-			{
-
-				states.push_back(field);
-
-			}
-		}
-		/**
-		 * Construct the animation pipeline
-		 */
-		std::vector<Module*> animationModules;
-		node->animationPipeline()->clear();
-		tinyxml2::XMLElement* animationPipelineXml = nodeXML->FirstChildElement("Simulation");
-		tinyxml2::XMLElement* animationModuleXml = animationPipelineXml->FirstChildElement("Module");
-
-		auto processModule = [&](tinyxml2::XMLElement* moduleXml, std::shared_ptr<Pipeline> pipeline, std::vector<Module*>& modules) {
-			const char* name = moduleXml->Attribute("Class");
-			if (name) {
-				std::shared_ptr<Module> module(dynamic_cast<Module*>(Object::createObject(name)));
-				if (module != nullptr) {
-					pipeline->pushModule(module);
-					modules.push_back(module.get());
-=======
->>>>>>> public
 
 
-<<<<<<< HEAD
-					tinyxml2::XMLElement* varsXml = moduleXml->FirstChildElement("Variables");
-					tinyxml2::XMLElement* varXml = varsXml->FirstChildElement("Field");
-
-					while (varXml)
-					{
-						std::string name = varXml->Attribute("Name");
-						std::string str = varXml->GetText();
-						str2Field[name]->deserialize(str);
-
-						varXml = varXml->NextSiblingElement("Field");
-					}
-
-					str2Field.clear();
-				}
-			}
-			};
-
-		while (animationModuleXml)
-		{
-			processModule(animationModuleXml, node->animationPipeline(), animationModules);
-			// 			const char* name = animationModuleXml->Attribute("Class");
-			// 			if (name) {
-			// 				std::shared_ptr<Module> module(dynamic_cast<Module*>(Object::createObject(name)));
-			// 				if (module != nullptr) {
-			// 					node->animationPipeline()->pushModule(module);
-			// 					animationModules.push_back(module.get());
-			// 				}
-			// 			}
-
-			animationModuleXml = animationModuleXml->NextSiblingElement("Module");
-		}
-		tinyxml2::XMLElement* animationConnectionsXml = animationPipelineXml->FirstChildElement("Connections");
-		tinyxml2::XMLElement* animationConnectionXml = animationConnectionsXml->FirstChildElement("Connection");
-		while (animationConnectionXml)
-		{
-			int src = atoi(animationConnectionXml->Attribute("SourceId"));
-			int dst = atoi(animationConnectionXml->Attribute("TargetId"));
-
-			int id0 = atoi(animationConnectionXml->Attribute("From"));
-			int id1 = atoi(animationConnectionXml->Attribute("To"));
-
-			FBase* fout = src == -1 ? states[id0] : animationModules[src]->getOutputFields()[id0];
-			FBase* fin = animationModules[dst]->getInputFields()[id1];
-
-			fout->connect(fin);
-
-			animationConnectionXml = animationConnectionXml->NextSiblingElement("Connection");
-		}
-		animationModules.clear();
-
-		/**
-		 * Construct the graphics pipeline
-		 */
-		std::vector<Module*> renderingModules;
-		node->graphicsPipeline()->clear();
-		tinyxml2::XMLElement* renderingPipelineXml = nodeXML->FirstChildElement("Rendering");
-		tinyxml2::XMLElement* renderingModuleXml = renderingPipelineXml->FirstChildElement("Module");
-		while (renderingModuleXml)
-		{
-			processModule(renderingModuleXml, node->graphicsPipeline(), renderingModules);
-			// 			const char* name = renderingModuleXml->Attribute("Class");
-			// 			if (name) {
-			// 				std::shared_ptr<Module> module(dynamic_cast<Module*>(Object::createObject(name)));
-			// 				if (module != nullptr) {
-			// 					node->graphicsPipeline()->pushModule(module);
-			// 					renderingModules.push_back(module.get());
-			// 				}
-			// 			}
-
-			renderingModuleXml = renderingModuleXml->NextSiblingElement("Module");
-		}
-
-		tinyxml2::XMLElement* renderingConnectionsXml = renderingPipelineXml->FirstChildElement("Connections");
-		tinyxml2::XMLElement* renderingConnectionXml = renderingConnectionsXml->FirstChildElement("Connection");
-		while (renderingConnectionXml)
-		{
-			int src = atoi(renderingConnectionXml->Attribute("SourceId"));
-			int dst = atoi(renderingConnectionXml->Attribute("TargetId"));
-
-			int id0 = atoi(renderingConnectionXml->Attribute("From"));
-			int id1 = atoi(renderingConnectionXml->Attribute("To"));
-
-			if (id0 < states.size())
-			{
-				FBase* fout = src == -1 ? states[id0] : renderingModules[src]->getOutputFields()[id0];
-				FBase* fin = renderingModules[dst]->getInputFields()[id1];
-
-				fout->connect(fin);
-			}
-
-
-			renderingConnectionXml = renderingConnectionXml->NextSiblingElement("Connection");
-		}
-		renderingModules.clear();
-=======
->>>>>>> public
 
 		return node;
 	}
 
-<<<<<<< HEAD
-	std::shared_ptr<Module> SceneLoaderXML::processModule(tinyxml2::XMLElement* moduleXML)
-	{
-		const char* className = moduleXML->Attribute("class");
-		if (!className)
-			return nullptr;
-
-		const char* dataType = moduleXML->Attribute("datatype");
-		std::string templateClass = std::string(className);
-		if (dataType)
-		{
-			templateClass += std::string("<") + std::string(dataType) + std::string(">");
-		}
-		std::shared_ptr<Module> module(dynamic_cast<Module*>(Object::createObject(templateClass)));
-
-		return module;
-	}
-
-	bool SceneLoaderXML::addModule(std::shared_ptr<Node> node, std::shared_ptr<Module> module)
-	{
-		if (module->getModuleType() == "MechanicalState")
-		{
-			return true;
-		}
-
-		return false;
-	}
-
-	std::vector<std::string> SceneLoaderXML::split(std::string str, std::string pattern)
-	{
-		std::string::size_type pos;
-		std::vector<std::string> result;
-		str += pattern;
-		size_t size = (uint)str.size();
-
-		for (size_t i = 0; i < size; i++)
-		{
-			pos = str.find(pattern, i);
-			if (pos < size)
-			{
-				std::string s = str.substr(i, pos - i);
-				result.push_back(s);
-				i = pos + pattern.size() - 1;
-			}
-		}
-		return result;
-	}
-=======
->>>>>>> public
 
 	std::string SceneLoaderXML::encodeVec3f(const Vec3f v)
 	{

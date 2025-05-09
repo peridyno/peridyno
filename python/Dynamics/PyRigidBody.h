@@ -14,9 +14,9 @@ void declare_animation_driver(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("var_speed", &Class::varSpeed, py::return_value_policy::reference)
-		.def("var_driver_name", &Class::varDriverName, py::return_value_policy::reference)
+		.def("var_binding_configuration", &Class::varBindingConfiguration, py::return_value_policy::reference)
 		.def("in_topology", &Class::inTopology, py::return_value_policy::reference)
-		.def("in_hierarchical_scene", &Class::inHierarchicalScene, py::return_value_policy::reference)
+		.def("in_joint_animation_info", &Class::inJointAnimationInfo, py::return_value_policy::reference)
 		.def("in_delta_time", &Class::inDeltaTime, py::return_value_policy::reference);
 }
 
@@ -318,7 +318,7 @@ void declare_articulated_body(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ArticulatedBody") + typestr;
 	py::class_<Class, Parent1, Parent2, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("bind", &Class::bind)
+		//.def("bind", &Class::bind)
 		.def("var_file_path", &Class::varFilePath, py::return_value_policy::reference)
 		.def("var_vehicles_transform", &Class::varVehiclesTransform, py::return_value_policy::reference)
 		.def("state_texture_mesh", &Class::stateTextureMesh, py::return_value_policy::reference)
@@ -429,7 +429,6 @@ void declare_tracked_tank(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TrackedTank") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-<<<<<<< HEAD
 		.def("state_caterpillar_track", &Class::statecaterpillarTrack, py::return_value_policy::reference);
 }
 
@@ -449,14 +448,6 @@ void declare_uuv(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("UUV") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>());
-=======
-		.def("bind", &Class::bindShape)
-		.def("state_texture_mesh", &Class::stateTextureMesh, py::return_value_policy::reference)
-		.def("var_file_path", &Class::varFilePath, py::return_value_policy::reference)
-		/*		.def("state_binding", &Class::stateBinding, py::return_value_policy::reference)
-				.def("state_binding_tag", &Class::stateBindingTag, py::return_value_policy::reference)*/
-		.def("state_instance_transform", &Class::stateInstanceTransform, py::return_value_policy::reference);
->>>>>>> public
 }
 
 // class: TContactPair      - For Examples_1: QT_Bricks
