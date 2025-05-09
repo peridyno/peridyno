@@ -44,6 +44,27 @@ namespace dyno
 		case KT_Smooth:
 			kern = new SmoothKernel<Real>();
 			break;
+		case KT_Cubic:
+			kern = new CubicKernel<Real>();
+			break;
+		case KT_Constant:
+			kern = new ConstantKernel<Real>();
+			break;
+		case KT_Quartic:
+			kern = new QuarticKernel<Real>();
+			break;
+		case KT_Corrected:
+			kern = new CorrectedKernel<Real>();
+			break;
+		case KT_CorrectedQuatic:
+			kern = new CorrectedQuaticKernel<Real>();
+			break;
+		case KT_WendlandC2:
+			kern = new WendlandC2Kernel<Real>();
+			break;
+		case KT_CorrectedMPSKernel:
+			kern = new CorrectedMPSKernel<Real>();
+			break;
 		default:
 			break;
 		}

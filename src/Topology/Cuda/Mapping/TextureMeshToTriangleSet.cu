@@ -157,54 +157,25 @@ namespace dyno
 	{
 		this->setForceUpdate(false);
 
-		mTM2TS = std::make_shared<TextureMeshToTriangleSet<TDataType>>();
+		auto mTM2TS = std::make_shared<TextureMeshToTriangleSet<TDataType>>();
 
 		this->inTextureMesh()->connect(mTM2TS->inTextureMesh());
 		mTM2TS->outTriangleSet()->connect(this->outTriangleSet());
+		this->animationPipeline()->pushModule(mTM2TS);
 	}
 
 	template<typename TDataType>
 	void TextureMeshToTriangleSetNode<TDataType>::resetStates()
 	{
-		auto mesh = this->inTextureMesh()->constDataPtr();
-
-		uint N = mesh->shapes().size();
-
-		CArrayList<Transform3f> hostT;
-		hostT.resize(N, 1);
-
-		for (uint i = 0; i < N; i++)
-		{
-			hostT[i].insert(mesh->shapes()[i]->boundingTransform);
-		}
-
-		mTM2TS->inTransform()->assign(hostT);
-
-		hostT.clear();
-
-		mTM2TS->update();
+		Node::resetStates();
+		this->animationPipeline()->update();
 	}
 
 	template<typename TDataType>
 	void TextureMeshToTriangleSetNode<TDataType>::updateStates()
 	{
-		auto mesh = this->inTextureMesh()->constDataPtr();
+		Node::updateStates();
 
-		uint N = mesh->shapes().size();
-
-		CArrayList<Transform3f> hostT;
-		hostT.resize(N, 1);
-
-		for (uint i = 0; i < N; i++)
-		{
-			hostT[i].insert(mesh->shapes()[i]->boundingTransform);
-		}
-
-		mTM2TS->inTransform()->assign(hostT);
-
-		hostT.clear();
-
-		mTM2TS->update();
 	}
 
 	DEFINE_CLASS(TextureMeshToTriangleSetNode);

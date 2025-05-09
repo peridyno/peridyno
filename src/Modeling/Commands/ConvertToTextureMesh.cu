@@ -245,6 +245,8 @@ namespace dyno
 	void ConvertToTextureMesh<TDataType>::createUV()
 	{
 		std::shared_ptr<TextureMesh> texMesh = this->stateTextureMesh()->getDataPtr();
+		if (!bool(texMesh->shapes().size()))
+			return;
 		auto& TargetTriangles = texMesh->shapes()[0]->vertexIndex;
 		auto& TargetPoints = texMesh->vertices();
 		auto& Normals = texMesh->normals();

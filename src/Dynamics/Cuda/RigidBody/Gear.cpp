@@ -65,7 +65,7 @@ namespace dyno
 			this->bindCapsule(actor, capsule);
 		}
 
-		this->bind(actor, Pair<uint, uint>(0, 0));
+		this->bindShape(actor, Pair<uint, uint>(0, 0));
 
 		//**************************************************//
 		ArticulatedBody<TDataType>::resetStates();

@@ -6,14 +6,17 @@ namespace dyno
 {
 	IMPLEMENT_TCLASS(GhostFluid, TDataType)
 
-	template<typename TDataType>
+		template<typename TDataType>
 	GhostFluid<TDataType>::GhostFluid()
 		: ParticleFluid<TDataType>()
 	{
+		this->animationPipeline()->clear();
+
 		auto model = std::make_shared<ProjectionBasedFluidModel<DataType3f>>();
-		model->varSmoothingLength()->setValue(0.01);
-		
+
 		this->stateTimeStep()->connect(model->inTimeStep());
+		this->stateSamplingDistance()->connect(model->inSamplingDistance());
+		this->stateSmoothingLength()->connect(model->inSmoothingLength());
 		this->statePositionMerged()->connect(model->inPosition());
 		this->stateVelocityMerged()->connect(model->inVelocity());
 		this->stateNormalMerged()->connect(model->inNormal());
@@ -84,10 +87,18 @@ namespace dyno
 		auto& pos = this->statePosition()->constData();
 		auto& vel = this->stateVelocity()->constData();
 
-		auto boundaryParticles = this->getBoundaryParticles();
-
 		int totalNumber = 0;
-		uint numOfGhostParticles = boundaryParticles != nullptr ? boundaryParticles->statePosition()->size() : 0;
+
+		uint numOfGhostParticles = 0;
+		auto boundaryParticles = this->getBoundaryParticles();
+		if (boundaryParticles.size() > 0)
+		{
+			for (int i = 0; i < boundaryParticles.size(); i++)
+			{
+				numOfGhostParticles += boundaryParticles[i]->statePosition()->size();
+			}
+		}
+
 		uint numOfFluidParticles = pos.size();
 
 		totalNumber += (numOfFluidParticles + numOfGhostParticles);
@@ -115,17 +126,23 @@ namespace dyno
 		auto& normMerged = this->stateNormalMerged()->getData();
 		normMerged.reset();
 
-		if (boundaryParticles != nullptr)
+		if (boundaryParticles.size() > 0)
 		{
-			auto& bPos = boundaryParticles->statePosition()->constData();
-			auto& bVel = boundaryParticles->stateVelocity()->constData();
-			auto& bNor = boundaryParticles->stateNormal()->constData();
-			posMerged.assign(bPos, bPos.size(), offset, 0);
-			velMerged.assign(bVel, bVel.size(), offset, 0);
-			normMerged.assign(bNor, bNor.size(), offset, 0);
+
+			for (int i = 0; i < boundaryParticles.size(); i++)
+			{
+				auto& bPos = boundaryParticles[i]->statePosition()->constData();
+				auto& bVel = boundaryParticles[i]->stateVelocity()->constData();
+				auto& bNor = boundaryParticles[i]->stateNormal()->constData();
+				posMerged.assign(bPos, bPos.size(), offset, 0);
+				velMerged.assign(bVel, bVel.size(), offset, 0);
+				normMerged.assign(bNor, bNor.size(), offset, 0);
+				int b_num = bPos.size();
+				offset += b_num;
+			}
+
 		}
 
-		//Initialize the attribute field
 		auto& attMerged = this->stateAttributeMerged()->getData();
 		if (numOfFluidParticles != 0)
 		{
@@ -135,9 +152,9 @@ namespace dyno
 				offset);
 		}
 
-		if (boundaryParticles != nullptr)
+		for (int i = 0; i < boundaryParticles.size(); i++)
 		{
-			auto& bAtt = boundaryParticles->stateAttribute()->getData();
+			auto& bAtt = boundaryParticles[i]->stateAttribute()->getData();
 			cuExecute(bAtt.size(),
 				SetupBoundaryAttributes,
 				attMerged,

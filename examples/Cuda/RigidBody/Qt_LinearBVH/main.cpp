@@ -97,6 +97,12 @@ std::shared_ptr<SceneGraph> createBoxes()
 	tet.v[3] = Vec3f(0.5f, 1.1f, 0.6f);
 
 	RigidBodyInfo tetRigid;
+	tetRigid.position = (tet.v[0] + tet.v[1] + tet.v[2] + tet.v[3]) / 4;
+	tet.v[0] -= tetRigid.position;
+	tet.v[1] -= tetRigid.position;
+	tet.v[2] -= tetRigid.position;
+	tet.v[3] -= tetRigid.position;
+
 	rigid->addTet(tet, tetRigid);
 
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();

@@ -29,11 +29,23 @@ namespace dyno
 	ParticleFluid<TDataType>::ParticleFluid()
 		: ParticleSystem<TDataType>()
 	{
-		auto smoothingLength = this->animationPipeline()->template createModule<FloatingNumber<TDataType>>();
-		smoothingLength->varValue()->setValue(Real(0.006));
+		this->varSamplingDistance()->setRange(0.001, 1);
+		this->varSmoothingLength()->setRange(1, 3);
 
-		auto samplingDistance = this->animationPipeline()->template createModule<FloatingNumber<TDataType>>();
-		samplingDistance->varValue()->setValue(Real(0.005));
+		auto callback = std::make_shared<FCallBackFunc>(
+			[=]() {
+				auto d = this->varSamplingDistance()->getValue();
+				auto h = this->varSmoothingLength()->getValue();
+				this->stateSamplingDistance()->setValue(d);
+				this->stateSmoothingLength()->setValue(d * h);
+			}
+		);
+
+		this->varSamplingDistance()->attach(callback);
+		this->varSmoothingLength()->attach(callback);
+
+		this->varSmoothingLength()->setValue(1.2);
+
 
 		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
 		this->stateTimeStep()->connect(integrator->inTimeStep());
@@ -42,13 +54,13 @@ namespace dyno
 		this->animationPipeline()->pushModule(integrator);
 
 		auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
-		smoothingLength->outFloating()->connect(nbrQuery->inRadius());
+		this->stateSmoothingLength()->connect(nbrQuery->inRadius());
 		this->statePosition()->connect(nbrQuery->inPosition());
 		this->animationPipeline()->pushModule(nbrQuery);
 
 		auto density = std::make_shared<SemiImplicitDensitySolver<TDataType>>();
-		smoothingLength->outFloating()->connect(density->inSmoothingLength());
-		samplingDistance->outFloating()->connect(density->inSamplingDistance());
+		this->stateSamplingDistance()->connect(density->inSamplingDistance());
+		this->stateSmoothingLength()->connect(density->inSmoothingLength());
 		this->stateTimeStep()->connect(density->inTimeStep());
 		this->statePosition()->connect(density->inPosition());
 		this->stateVelocity()->connect(density->inVelocity());
@@ -58,8 +70,8 @@ namespace dyno
 		auto viscosity = std::make_shared<ImplicitViscosity<TDataType>>();
 		viscosity->varViscosity()->setValue(Real(1.0));
 		this->stateTimeStep()->connect(viscosity->inTimeStep());
-		smoothingLength->outFloating()->connect(viscosity->inSmoothingLength());
-		samplingDistance->outFloating()->connect(viscosity->inSamplingDistance());
+		this->stateSmoothingLength()->connect(viscosity->inSmoothingLength());
+		this->stateSamplingDistance()->connect(viscosity->inSamplingDistance());
 		this->statePosition()->connect(viscosity->inPosition());
 		this->stateVelocity()->connect(viscosity->inVelocity());
 		nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());

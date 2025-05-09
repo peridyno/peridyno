@@ -68,28 +68,7 @@ namespace dyno
 
 		this->animationPipeline()->pushModule(iterSolver);
 
-		/*auto driver = std::make_shared<SimpleVechicleDriver>();
-
-		this->stateFrameNumber()->connect(driver->inFrameNumber());
-		this->stateInstanceTransform()->connect(driver->inInstanceTransform());
-
-		this->animationPipeline()->pushModule(driver);*/
-
 		this->inTriangleSet()->tagOptional(true);
-
-		// 		auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
-		// 		this->stateTopology()->connect(mapper->inDiscreteElements());
-		// 		this->graphicsPipeline()->pushModule(mapper);
-		// 
-		// 		auto sRender = std::make_shared<GLSurfaceVisualModule>();
-		// 		sRender->setColor(Color(0.3f, 0.5f, 0.9f));
-		// 		sRender->setAlpha(0.2f);
-		// 		sRender->setRoughness(0.7f);
-		// 		sRender->setMetallic(3.0f);
-		// 		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
-		// 		this->graphicsPipeline()->pushModule(sRender);
-		// 		sRender->setVisible(false);
-
 		this->inTriangleSet()->tagOptional(true);
 	}
 
@@ -288,8 +267,7 @@ namespace dyno
 				if (shapeId != -1 && Actors[i] != NULL)
 				{
 					////bindShapetoActor
-					this->bind(Actors[i], Pair<uint, uint>(shapeId, j));
-
+					this->bindShape(Actors[i], Pair<uint, uint>(shapeId, j));
 				}
 			}
 
@@ -347,10 +325,6 @@ namespace dyno
 				}
 
 				//Joint(Actor)
-
-
-
-
 			}
 		}
 

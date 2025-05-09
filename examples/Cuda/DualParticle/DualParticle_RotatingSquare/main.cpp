@@ -60,13 +60,7 @@ std::shared_ptr<SceneGraph> createScene()
 	{
 		fluid->varReshuffleParticles()->setValue(false);
 
-		auto smoothingLength = std::make_shared<FloatingNumber<DataType3f>>();
-		fluid->animationPipeline()->pushModule(smoothingLength);
-		smoothingLength->varValue()->setValue(Real(0.012));
-
-		auto samplingDistance = std::make_shared<FloatingNumber<DataType3f>>();
-		fluid->animationPipeline()->pushModule(smoothingLength);
-		samplingDistance->varValue()->setValue(Real(0.005));
+		fluid->varSmoothingLength()->setValue(2.4);
 
 		std::shared_ptr<VirtualParticleGenerator<DataType3f>> vpGen;
 
@@ -103,29 +97,29 @@ std::shared_ptr<SceneGraph> createScene()
 		vpGen->outVirtualParticles()->connect(fluid->stateVirtualPosition());
 
 		auto m_nbrQuery = std::make_shared<NeighborPointQuery<DataType3f>>();
-		smoothingLength->outFloating()->connect(m_nbrQuery->inRadius());
+		fluid->stateSmoothingLength()->connect(m_nbrQuery->inRadius());
 		fluid->statePosition()->connect(m_nbrQuery->inPosition());
 		fluid->animationPipeline()->pushModule(m_nbrQuery);
 
 		auto m_rv_nbrQuery = std::make_shared<NeighborPointQuery<DataType3f>>();
-		smoothingLength->outFloating()->connect(m_rv_nbrQuery->inRadius());
+		fluid->stateSmoothingLength()->connect(m_rv_nbrQuery->inRadius());
 		fluid->statePosition()->connect(m_rv_nbrQuery->inOther());
 		vpGen->outVirtualParticles()->connect(m_rv_nbrQuery->inPosition());
 		fluid->animationPipeline()->pushModule(m_rv_nbrQuery);
 
 		auto m_vr_nbrQuery = std::make_shared<NeighborPointQuery<DataType3f>>();
-		smoothingLength->outFloating()->connect(m_vr_nbrQuery->inRadius());
+		fluid->stateSmoothingLength()->connect(m_vr_nbrQuery->inRadius());
 		fluid->statePosition()->connect(m_vr_nbrQuery->inPosition());
 		vpGen->outVirtualParticles()->connect(m_vr_nbrQuery->inOther());
 		fluid->animationPipeline()->pushModule(m_vr_nbrQuery);
 
 		auto m_vv_nbrQuery = std::make_shared<NeighborPointQuery<DataType3f>>();
-		smoothingLength->outFloating()->connect(m_vv_nbrQuery->inRadius());
+		fluid->stateSmoothingLength()->connect(m_vv_nbrQuery->inRadius());
 		vpGen->outVirtualParticles()->connect(m_vv_nbrQuery->inPosition());
 		fluid->animationPipeline()->pushModule(m_vv_nbrQuery);
 
 		auto m_dualIsph = std::make_shared<DualParticleIsphModule<DataType3f>>();
-		smoothingLength->outFloating()->connect(m_dualIsph->varSmoothingLength());
+		fluid->stateSmoothingLength()->connect(m_dualIsph->varSmoothingLength());
 		fluid->stateTimeStep()->connect(m_dualIsph->inTimeStep());
 		fluid->statePosition()->connect(m_dualIsph->inRPosition());
 		vpGen->outVirtualParticles()->connect(m_dualIsph->inVPosition());
@@ -148,7 +142,7 @@ std::shared_ptr<SceneGraph> createScene()
 		auto m_visModule = std::make_shared<ImplicitViscosity<DataType3f>>();
 		m_visModule->varViscosity()->setValue(Real(0.1));
 		fluid->stateTimeStep()->connect(m_visModule->inTimeStep());
-		smoothingLength->outFloating()->connect(m_visModule->inSmoothingLength());
+		fluid->stateSmoothingLength()->connect(m_visModule->inSmoothingLength());
 		fluid->stateTimeStep()->connect(m_visModule->inTimeStep());
 		fluid->statePosition()->connect(m_visModule->inPosition());
 		fluid->stateVelocity()->connect(m_visModule->inVelocity());

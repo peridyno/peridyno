@@ -34,6 +34,8 @@ namespace dyno
 		TextureMeshToTriangleSet();
 		~TextureMeshToTriangleSet() override;
 
+		std::string caption() override { return "TextureMeshToTriangleSetModule"; }
+
 		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "");
 
 		DEF_ARRAYLIST_IN(Transform, Transform, DeviceType::GPU, "");
@@ -65,6 +67,5 @@ namespace dyno
 		void updateStates() override;
 
 	private:
-		std::shared_ptr<TextureMeshToTriangleSet<TDataType>> mTM2TS;
 	};
 }

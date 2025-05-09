@@ -25,8 +25,8 @@
 #include "GLWireframeVisualModule.h"
 
 #include "Field/FilePath.h"
-#include "SkinInfo.h"
-#include "JointInfo.h"
+#include "Topology/SkinInfo.h"
+#include "Topology/JointInfo.h"
 
 
 namespace dyno
@@ -112,7 +112,6 @@ namespace dyno
 	
 		DEF_INSTANCE_STATE(TextureMesh, TextureMesh, "");
 
-		DEF_INSTANCE_STATE(PointSet<TDataType>, ShapeCenter, "");
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, JointSet, "");
 
 		DEF_INSTANCE_STATE(JointAnimationInfo, Animation,"");

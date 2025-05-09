@@ -327,7 +327,41 @@ void pybind_topology(py::module& m)
 		.def_readwrite("facegroup_triangles", &dyno::MeshInfo::facegroup_triangles)
 		//.def_readwrite("facegroup_polygons", &dyno::MeshInfo::facegroup_polygons)
 
+<<<<<<< HEAD
 		.def_readwrite("materials", &dyno::MeshInfo::materials)
+=======
+	declare_texture_mesh(m);
+	declare_attribute(m);
+	declare_quad_set<dyno::DataType3f>(m, "3f");
+	declare_point_set_to_triangle_set<dyno::DataType3f>(m, "3f");
+	declare_anchor_point_to_point_set<dyno::DataType3f>(m, "3f");
+	declare_bounding_box_to_edge_set<dyno::DataType3f>(m, "3f");
+	declare_extract_edge_set_from_polygon_set<dyno::DataType3f>(m, "3f");
+	declare_extract_triangle_set_from_polygon_set<dyno::DataType3f>(m, "3f");
+	declare_extract_qaud_set_from_polygon_set<dyno::DataType3f>(m, "3f");
+	declare_frame_to_point_set<dyno::DataType3f>(m, "3f");
+	declare_marching_cubes<dyno::DataType3f>(m, "3f");
+	declare_marching_cubes_helper<dyno::DataType3f>(m, "3f");
+	declare_merge_simplex_set<dyno::DataType3f>(m, "3f");
+	declare_point_set_to_point_set<dyno::DataType3f>(m, "3f");
+	declare_quad_set_to_triangle_set<dyno::DataType3f>(m, "3f");
+	declare_split_simplex_set<dyno::DataType3f>(m, "3f");
+	declare_tetrahedron_set_to_point_set<dyno::DataType3f>(m, "3f");
+	declare_texture_mesh_to_triangle_set<dyno::DataType3f>(m, "3f");
+	declare_volume_clipper<dyno::DataType3f>(m, "3f");
+	declare_calculate_maximum<dyno::DataType3f>(m, "3f");
+	declare_calculate_minimum<dyno::DataType3f>(m, "3f");
+	declare_animation_curve<dyno::DataType3f>(m, "3f");
+	declare_discrete_elements<dyno::DataType3f>(m, "3f");
+	declare_distance_field3D<dyno::DataType3f>(m, "3f");
+	declare_frame<dyno::DataType3f>(m, "3f");
+	declare_grid_hash<dyno::DataType3f>(m, "3f");
+	declare_grid_set<dyno::DataType3f>(m, "3f");
+	declare_height_field<dyno::DataType3f>(m, "3f");
+	declare_hexahedron_set<dyno::DataType3f>(m, "3f");
+	declare_linear_bvh<dyno::DataType3f>(m, "3f");
+	declare_polygon_set<dyno::DataType3f>(m, "3f");
+>>>>>>> public
 
 		.def_readwrite("boundingBox", &dyno::MeshInfo::boundingBox)
 		.def_readwrite("boundingTransform", &dyno::MeshInfo::boundingTransform)

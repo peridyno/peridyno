@@ -135,12 +135,12 @@ std::shared_ptr<SceneGraph> creatCar()
 		joint6.setRange(M_PI / 24, M_PI / 24);
 
 
-		jeep->bind(bodyActor, Pair<uint, uint>(5, i));
-		jeep->bind(spareTireActor, Pair<uint, uint>(4, i));
-		jeep->bind(frontLeftTireActor, Pair<uint, uint>(0, i));
-		jeep->bind(frontRightTireActor, Pair<uint, uint>(1, i));
-		jeep->bind(rearLeftTireActor, Pair<uint, uint>(2, i));
-		jeep->bind(rearRightTireActor, Pair<uint, uint>(3, i));
+		jeep->bindShape(bodyActor, Pair<uint, uint>(5, i));
+		jeep->bindShape(spareTireActor, Pair<uint, uint>(4, i));
+		jeep->bindShape(frontLeftTireActor, Pair<uint, uint>(0, i));
+		jeep->bindShape(frontRightTireActor, Pair<uint, uint>(1, i));
+		jeep->bindShape(rearLeftTireActor, Pair<uint, uint>(2, i));
+		jeep->bindShape(rearRightTireActor, Pair<uint, uint>(3, i));
 	}
 
 	auto multibody = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());

@@ -275,6 +275,51 @@ void declare_extrude_model(py::module& m, std::string typestr) {
 		.def("in_point_set", &Class::inPointSet, py::return_value_policy::reference);
 }
 
+<<<<<<< HEAD
+=======
+#include "GltfLoader.h"
+template <typename TDataType>
+void declare_gltf_loader(py::module& m, std::string typestr) {
+	using Class = dyno::GltfLoader<TDataType>;
+	using Parent = dyno::ParametricModel<TDataType>;
+	std::string pyclass_name = std::string("GltfLoader") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("var_file_name", &Class::varFileName, py::return_value_policy::reference)
+		.def("var_import_animation", &Class::varImportAnimation, py::return_value_policy::reference)
+		.def("var_joint_radius", &Class::varJointRadius, py::return_value_policy::reference)
+		.def("state_tex_coord_0", &Class::stateTexCoord_0, py::return_value_policy::reference)
+		.def("state_tex_coord_1", &Class::stateTexCoord_1, py::return_value_policy::reference)
+		.def("state_initial_matrix", &Class::stateInitialMatrix, py::return_value_policy::reference)
+
+		.def("state_transform", &Class::stateTransform, py::return_value_policy::reference)
+
+		.def("state_joint_inverse_bind_matrix", &Class::stateJointInverseBindMatrix, py::return_value_policy::reference)
+		.def("state_joint_local_matrix", &Class::stateJointLocalMatrix, py::return_value_policy::reference)
+		.def("state_jont_world_matrix", &Class::stateJointWorldMatrix, py::return_value_policy::reference)
+
+		.def("state_texture_mesh", &Class::stateTextureMesh, py::return_value_policy::reference)
+
+		.def("state_joint_set", &Class::stateJointSet, py::return_value_policy::reference);
+}
+
+#include "Group.h"
+template <typename TDataType>
+void declare_group(py::module& m, std::string typestr) {
+	using Class = dyno::Group<TDataType>;
+	using Parent = dyno::Node;
+	std::string pyclass_name = std::string("Group") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("var_point_id", &Class::varPointId, py::return_value_policy::reference)
+		.def("var_edge_id", &Class::varEdgeId, py::return_value_policy::reference)
+		.def("var_primitive_id", &Class::varPrimitiveId, py::return_value_policy::reference)
+		.def("in_point_id", &Class::inPointId, py::return_value_policy::reference)
+		.def("in_edge_id", &Class::inEdgeId, py::return_value_policy::reference)
+		.def("in_primitive_id", &Class::inPrimitiveId, py::return_value_policy::reference);
+}
+
+>>>>>>> public
 #include "Commands/Merge.h"
 template <typename TDataType>
 void declare_merge(py::module& m, std::string typestr) {

@@ -429,6 +429,7 @@ void declare_tracked_tank(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TrackedTank") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
+<<<<<<< HEAD
 		.def("state_caterpillar_track", &Class::statecaterpillarTrack, py::return_value_policy::reference);
 }
 
@@ -448,6 +449,14 @@ void declare_uuv(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("UUV") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>());
+=======
+		.def("bind", &Class::bindShape)
+		.def("state_texture_mesh", &Class::stateTextureMesh, py::return_value_policy::reference)
+		.def("var_file_path", &Class::varFilePath, py::return_value_policy::reference)
+		/*		.def("state_binding", &Class::stateBinding, py::return_value_policy::reference)
+				.def("state_binding_tag", &Class::stateBindingTag, py::return_value_policy::reference)*/
+		.def("state_instance_transform", &Class::stateInstanceTransform, py::return_value_policy::reference);
+>>>>>>> public
 }
 
 // class: TContactPair      - For Examples_1: QT_Bricks

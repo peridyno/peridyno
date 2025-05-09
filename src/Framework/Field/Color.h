@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include <Platform.h>
 
+#include <glm/glm.hpp>
+
 namespace dyno
 {
 	class Color
@@ -28,7 +30,7 @@ namespace dyno
 			}
 
 			h /= 60;       // sector 0 to 5
-			i = (int)floor(h);
+			i = (int)glm::floor(h);
 			f = h - i;        // factorial part of h
 			p = v * (1 - s);
 			q = v * (1 - s * f);

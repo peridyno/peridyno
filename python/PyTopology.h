@@ -844,6 +844,7 @@ void declare_hexahedron_set(py::module& m, std::string typestr) {
 		.def("copy_from", &Class::copyFrom);
 }
 
+<<<<<<< HEAD
 #include "Topology/JointTree.h"
 template <typename TDataType>
 void declare_joint_tree(py::module& m, std::string typestr) {
@@ -916,6 +917,8 @@ void declare_level_set(py::module& m, std::string typestr) {
 }
 
 
+=======
+>>>>>>> public
 #include "Topology/LinearBVH.h"
 template <typename TDataType>
 void declare_linear_bvh(py::module& m, std::string typestr) {

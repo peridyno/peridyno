@@ -43,6 +43,7 @@
 
 #include <Mapping/TextureMeshToTriangleSet.h>
 #include <Mapping/MergeTriangleSet.h>
+#include "FBXLoader/FBXLoader.h"
 
 using namespace dyno;
 
@@ -100,64 +101,29 @@ std::shared_ptr<SceneGraph> creatScene()
 	scn->setUpperBound(Vec3f(0.5f, 1.0f, 4.0f) * total_scale);
 
 
-	// Create Var
-	Vec3f velocity = Vec3f(0,0,6);
-	Color color = Color(1, 1, 1);
+	auto dancing = scn->addNode(std::make_shared<FBXLoader<DataType3f>>());
+	dancing->varFileName()->setValue(getAssetPath() + "fbx/SwingDancing.fbx");
+	dancing->varUseInstanceTransform()->setValue(false);
+	dancing->varImportAnimation()->setValue(true);
+	dancing->varLocation()->setValue(Vec3f(0.1, 0, -0.5));
+	dancing->varScale()->setValue(Vec3f(1.8));
 
-	Vec3f LocationBody = Vec3f(0, 0.01, -1);
+	auto tex2TriSet = scn->addNode(std::make_shared<TextureMeshToTriangleSetNode<DataType3f>>());
+	dancing->stateTextureMesh()->connect(tex2TriSet->inTextureMesh());
 
-	Vec3f anglurVel = Vec3f(100,0,0); 
-	Vec3f scale = Vec3f(0.4,0.4,0.4);
-
-
-	auto jeep = scn->addNode(std::make_shared<Jeep<DataType3f>>());
-
-	auto multibody = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
-	jeep->connect(multibody->importVehicles());
-
-	auto gltfRoad = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
-	gltfRoad->varFileName()->setValue(getAssetPath() + "gltf/Road_Gltf/Road_Tex.gltf");
-	gltfRoad->varLocation()->setValue(Vec3f(0, 0, 3.488));
-
-	auto roadMeshConverter = std::make_shared<TextureMeshToTriangleSet<DataType3f>>();
-	gltfRoad->stateTextureMesh()->connect(roadMeshConverter->inTextureMesh());
-	gltfRoad->animationPipeline()->pushModule(roadMeshConverter);
-
-	auto tsJeep = gltfRoad->animationPipeline()->promoteOutputToNode(roadMeshConverter->outTriangleSet());
-
-	auto transformer = std::make_shared<InstanceTransform<DataType3f>>();
-	jeep->stateCenter()->connect(transformer->inCenter());
-	jeep->stateBindingPair()->connect(transformer->inBindingPair());
-	jeep->stateBindingTag()->connect(transformer->inBindingTag());
-	jeep->stateRotationMatrix()->connect(transformer->inRotationMatrix());
-	jeep->stateInstanceTransform()->connect(transformer->inInstanceTransform());
-	jeep->animationPipeline()->pushModule(transformer);
-
-	auto texMeshConverter = std::make_shared<TextureMeshToTriangleSet<DataType3f>>();
-	jeep->stateTextureMesh()->connect(texMeshConverter->inTextureMesh());
-	transformer->outInstanceTransform()->connect(texMeshConverter->inTransform());
-	jeep->animationPipeline()->pushModule(texMeshConverter);
-	jeep->varLocation()->setValue(Vec3f(0,0.329f,-2.9f));
-
-	auto tsMerger = scn->addNode(std::make_shared<MergeTriangleSet<DataType3f>>());
-	//texMeshConverter->outTriangleSet()->connect(tsMerger->inFirst());
-	jeep->animationPipeline()->promoteOutputToNode(texMeshConverter->outTriangleSet())->connect(tsMerger->inFirst());
-	tsJeep->connect(tsMerger->inSecond());
-
-	tsJeep->connect(multibody->inTriangleSet());
 
 	//*************************************** Cube Sample ***************************************//
 	// Cube 
 	auto cube = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
-	cube->varLocation()->setValue(Vec3f(0,0.15,3.436) );
-	cube->varLength()->setValue(Vec3f(2.1,0.12,18));
+	cube->varLocation()->setValue(Vec3f(0,0.35,-0.6) );
+	cube->varLength()->setValue(Vec3f(2.8, 0.7, 6));
 	cube->varScale()->setValue(Vec3f(2, 1, 0.932));
-	cube->setVisible(false);
+	cube->graphicsPipeline()->disable();
 
 	auto cubeSmapler = scn->addNode(std::make_shared<ShapeSampler<DataType3f>>());
 	cubeSmapler->varSamplingDistance()->setValue(0.004f * total_scale);
 	cube->connect(cubeSmapler->importShape());
-	cubeSmapler->setVisible(false);
+	cubeSmapler->graphicsPipeline()->disable();
 
 	//MakeParticleSystem
 	auto particleSystem = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
@@ -166,7 +132,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	//*************************************** Fluid ***************************************//
 	//Particle fluid node
 	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
-	fluid->setDt(0.002f);
+	fluid->setDt(0.004f);
 
 	{
 		fluid->animationPipeline()->clear();
@@ -222,14 +188,17 @@ std::shared_ptr<SceneGraph> creatScene()
 	meshBoundary->varThickness()->setValue(0.005f * total_scale);
 
 	fluid->connect(meshBoundary->importParticleSystems());
-	tsMerger->stateTriangleSet()->connect(meshBoundary->inTriangleSet());
+	tex2TriSet->outTriangleSet()->connect(meshBoundary->inTriangleSet());
 
 	//Create a boundary
 	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
-	cubeBoundary->varLocation()->setValue(Vec3f(0.0f, 3.006f, 3.476f));
-	cubeBoundary->varScale()->setValue(Vec3f(1.0f, 1.0f, 0.875f));
-	cubeBoundary->varLength()->setValue(Vec3f(9.2f, 6.0f, 19.200f));
-	cubeBoundary->setVisible(false);
+	cubeBoundary->varLocation()->setValue(Vec3f(0.0f, 3.006f, -0.6));
+	cubeBoundary->varScale()->setValue(Vec3f(2, 1, 0.932));
+	cubeBoundary->varLength()->setValue(Vec3f(2.9f, 6.0f, 6.200f));
+
+
+	auto glSurface = cubeBoundary->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
+	glSurface->setVisible(false);
 
 	auto cube2vol = scn->addNode(std::make_shared<BasicShapeToVolume<DataType3f>>());
 	cube2vol->varGridSpacing()->setValue(0.1f);
@@ -241,6 +210,7 @@ std::shared_ptr<SceneGraph> creatScene()
 
 	fluid->connect(container->importParticleSystems());
 
+	cubeBoundary->setVisible(true);
 
 	return scn;
 }

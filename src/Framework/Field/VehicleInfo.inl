@@ -119,8 +119,6 @@ namespace dyno {
 	template<>
 	inline bool FVar<VehicleBind>::deserialize(const std::string& str)
 	{
-		std::cout << "deserialize" << "\n";
-
 		if (str.empty())
 			return false;
 
@@ -153,7 +151,6 @@ namespace dyno {
 						if (std::isdigit(substr[0]))
 						{
 							rigids.resize(std::stoi(substr));
-							std::cout << "resize Rigids :" << std::stoi(substr) << "\n";
 						}
 
 						break;
@@ -162,7 +159,6 @@ namespace dyno {
 						{
 							joints.resize(std::stoi(substr));
 						}
-						std::cout << "resize Joint :" << std::stoi(substr) << "\n";
 						break;
 					default:
 						break;
@@ -409,7 +405,96 @@ namespace dyno {
 		return true;
 	}
 
-	template class FVar<VehicleBind>;
+	inline void convertAnimationJointConfigToStr(Animation2JointConfig& bind, std::string& Str)
+	{
+		Str.append(bind.JointName + " ");
+		Str.append(std::to_string(bind.JointId) + " ");
+		Str.append(std::to_string(bind.Axis) + " ");
+		Str.append(std::to_string(bind.Intensity) + " ");
+	}
+
+	
+	template<>
+	inline std::string FVar<std::vector<Animation2JointConfig>>::serialize()
+	{
+		std::string finalText;
+		//serialize Array
+		auto values = this->getValue();
+		finalText.append(std::to_string(values.size()) + " ");
+		for (auto it : values)
+		{
+			convertAnimationJointConfigToStr(it, finalText);
+			finalText.append("\n");
+		}
+
+		return finalText;
+	}
+	template<>
+	inline bool FVar<std::vector<Animation2JointConfig>>::deserialize(const std::string& str)
+	{
+		if (str.empty())
+			return false;
+
+		std::stringstream ss(str);
+		std::string substr;
+
+		std::vector<Animation2JointConfig> animBinds;
+
+
+		int strID = -1;
+
+		int arrayID = -1;
+		int dataID = -1;
+
+		while (ss >> substr)
+		{
+			std::cout << substr << "\n";
+			if (substr == " " || substr == "\n")
+				continue;
+
+			strID++;
+
+			switch (strID)
+			{
+			case 0:
+				if (std::isdigit(substr[0]))
+					animBinds.resize(std::stoi(substr));
+
+				break;
+
+			}
+
+			arrayID = (strID - 1) / 4;
+			dataID = (strID - 1) % 4;
+
+			switch (dataID)
+			{
+
+			case 0:
+				animBinds[arrayID].JointName = substr;
+				break;
+
+			case 1:
+				animBinds[arrayID].JointId = std::stoi(substr);
+				break;
+
+			case 2:
+				animBinds[arrayID].Axis = std::stoi(substr);
+				break;
+
+			case 3:
+				animBinds[arrayID].Intensity = std::stod(substr);
+				break;
+			}
+
+			
+		}
+
+		this->setValue(animBinds);
+		return true;
+	}
+
+	template class FVar<std::vector<Animation2JointConfig>>;
 }
 
 #endif // !VEHICLEINFO_SERIALIZATION

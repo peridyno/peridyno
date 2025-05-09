@@ -17,8 +17,8 @@ namespace dyno
 		virtual ~ProjectionBasedFluidModel() {};
 
 	public:
-		DEF_VAR(Real, SmoothingLength, Real(0.006), "The smoothing length in SPH");
-		DEF_VAR(Real, SamplingDistance, Real(0.005), "Particle samplilng distance");
+		DEF_VAR_IN(Real, SmoothingLength, "The smoothing length in SPH");
+		DEF_VAR_IN(Real, SamplingDistance, "Particle samplilng distance");
 
 		DEF_VAR_IN(Real, TimeStep, "Time step size!");
 
