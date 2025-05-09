@@ -177,7 +177,6 @@ void declare_gltf_loader(py::module& m, std::string typestr) {
 
 		.def("state_texture_mesh", &Class::stateTextureMesh, py::return_value_policy::reference)
 
-		.def("state_shape_center", &Class::stateShapeCenter, py::return_value_policy::reference)
 		.def("state_joint_set", &Class::stateJointSet, py::return_value_policy::reference);
 }
 
