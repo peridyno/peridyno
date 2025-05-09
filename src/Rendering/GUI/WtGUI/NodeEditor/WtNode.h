@@ -15,6 +15,7 @@
 #include "WtFlowNodeData.h"
 #include <memory>
 #include <unordered_map>
+#include <Module.h>
 
 class WtNodeGraphicsObject;
 class WtNodeDataModel;
@@ -286,6 +287,14 @@ public:
 
 	WtFlowNodeData& flowNodeData() { return _flowNodeData; }
 
+	void setNode(std::shared_ptr<dyno::Node> node) { mNode = node; }
+
+	void setModule(std::shared_ptr<dyno::Module> module) { mModule = module; }
+
+	std::shared_ptr<dyno::Node> getNode() { return mNode; }
+
+	std::shared_ptr<dyno::Module> getModule() { return mModule; }
+
 	void addConnection(PortIndex portIndex, std::shared_ptr<WtConnection> connection)
 	{
 		_portConnection.insert(std::make_pair(portIndex, connection));
@@ -328,4 +337,8 @@ private:
 	WtFlowNodeData _flowNodeData;
 
 	std::map<PortIndex, std::shared_ptr<WtConnection>> _portConnection;
+
+	std::shared_ptr<dyno::Module> mModule;
+
+	std::shared_ptr<dyno::Node> mNode;
 };

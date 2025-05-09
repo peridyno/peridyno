@@ -48,6 +48,7 @@ void WtNodeFlowScene::createNodeGraphView()
 
 			auto& node = this->createNode(std::move(type), _painter, b);
 
+			node.setNode(m);
 			nodeMap[mId] = &node;
 			OutNodeMap[mId] = &node;
 

@@ -213,6 +213,8 @@ void WtModuleFlowScene::showModuleFlow(std::shared_ptr<dyno::Node> node)
 
 			auto& node = this->createNode(std::move(type), _painter, -1);
 
+			node.setModule(m);
+
 			moduleMap[mId] = &node;
 
 			OutNodeMap[mId] = &node;

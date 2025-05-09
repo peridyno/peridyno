@@ -26,12 +26,13 @@ protected:
 
 	bool checkMouseInAllRect(Wt::WPointF mousePoint);
 
-	bool checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nodeData, PortState portState);
-
 private:
 	std::shared_ptr<dyno::Node> mNode;
+	
 	WtModuleFlowScene* mModuleFlowScene = nullptr;
 	std::map<dyno::ObjectId, WtNode*> moduleMap;
+
+	std::shared_ptr<dyno::Module> mOutModule;
 
 	int selectType = -1;
 	int selectedNum = 0;

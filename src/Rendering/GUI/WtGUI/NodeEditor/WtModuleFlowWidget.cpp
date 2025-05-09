@@ -34,6 +34,57 @@ void WtModuleFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 		{
 			drawLineFlag = true;
 
+			// change module
+			if (moduleMap.find(selectedNum) != moduleMap.end())
+			{
+				mOutModule = moduleMap.find(selectedNum)->second->getModule();
+			}
+
+
+		/*	if (outPoint.portType == PortType::In)
+			{
+				auto existConnection = moduleMap[selectedNum]->getIndexConnection(outPoint.portIndex);
+				if (existConnection != nullptr)
+				{
+					auto outNode = existConnection->getNode(PortType::Out);
+					for (auto it = mScene->begin(); it != mScene->end(); it++)
+					{
+						auto m = it.get();
+						auto node = moduleMap[m->objectId()];
+						auto outPortIndex = existConnection->getPortIndex(PortType::Out);
+						auto exportPortsData = outNode->flowNodeData().getPointsData();
+						connectionPointData exportPointData;
+						for (auto point : exportPortsData)
+						{
+							if (point.portIndex == outPortIndex)
+							{
+								exportPointData = point;
+								break;
+							}
+						}
+
+						if (node == outNode)
+						{
+							for (auto it = sceneConnections.begin(); it != sceneConnections.end(); )
+							{
+								if (it->exportNode == mOutNode && it->inportNode == m && it->inPoint.portIndex == outPoint.portIndex && it->outPoint.portIndex == exportPointData.portIndex)
+								{
+									it = sceneConnections.erase(it);
+								}
+								else
+								{
+									++it;
+								}
+							}
+
+							disconnect(m, mOutNode, outPoint, exportPointData, nodeMap[selectedNum], outNode);
+							sourcePoint = getPortPosition(outNode->flowNodeData().getNodeOrigin(), exportPointData);
+
+						}
+					}
+
+				}
+			}*/
 		}
 		else
 		{
@@ -46,6 +97,8 @@ void WtModuleFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
 {
 	if (mNode == nullptr)
 		return;
+
+	sinkPoint = Wt::WPointF(event.widget().x / mZoomFactor - mTranslate.x(), event.widget().y / mZoomFactor - mTranslate.y());
 
 	if (isDragging && selectType < 0)
 	{
@@ -71,7 +124,7 @@ void WtModuleFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
 			{
 				auto m = moduleMap[module->objectId()];
 				auto moduleData = m->flowNodeData();
-				if (checkMouseInNodeRect(mousePoint, moduleData) && selectType != 2)
+				if (checkMouseInRect(mousePoint, moduleData) && selectType != 2)
 				{
 					selectType = 1;
 					//connectionOutNode = node;
@@ -191,7 +244,7 @@ bool WtModuleFlowWidget::checkMouseInAllRect(Wt::WPointF mousePoint)
 		{
 			auto m = moduleMap[module->objectId()];
 			auto moduleData = m->flowNodeData();
-			if (checkMouseInNodeRect(mousePoint, moduleData))
+			if (checkMouseInRect(mousePoint, moduleData))
 			{
 				selectedNum = module->objectId();
 				canMoveNode = true;
@@ -200,9 +253,4 @@ bool WtModuleFlowWidget::checkMouseInAllRect(Wt::WPointF mousePoint)
 		}
 		return false;
 	}
-}
-
-bool WtModuleFlowWidget::checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nodeData, PortState portState)
-{
-	return false;
 }

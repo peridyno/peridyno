@@ -50,7 +50,7 @@ void WtFlowWidget::updateAll()
 	_updateCanvas.emit();
 }
 
-bool WtFlowWidget::checkMouseInNodeRect(Wt::WPointF mousePoint, WtFlowNodeData nodeData)
+bool WtFlowWidget::checkMouseInRect(Wt::WPointF mousePoint, WtFlowNodeData nodeData)
 {
 	Wt::WPointF bottomRight = Wt::WPointF(nodeData.getNodeBoundingRect().bottomRight().x() + nodeData.getNodeOrigin().x()
 		, nodeData.getNodeBoundingRect().bottomRight().y() + nodeData.getNodeOrigin().y());
@@ -61,6 +61,77 @@ bool WtFlowWidget::checkMouseInNodeRect(Wt::WPointF mousePoint, WtFlowNodeData n
 	Wt::WRectF absRect = Wt::WRectF(absTopLeft, absBottomRight);
 
 	return absRect.contains(mousePoint);
+}
+
+bool WtFlowWidget::checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nodeData, PortState portState)
+{
+	auto pointsData = nodeData.getPointsData();
+	Wt::WPointF origin = nodeData.getNodeOrigin();
+	Wt::WPointF	trueMouse = Wt::WPointF(mousePoint.x() / mZoomFactor - mTranslate.x(), mousePoint.y() / mZoomFactor - mTranslate.y());
+
+	for (connectionPointData pointData : pointsData)
+	{
+		if (pointData.portShape == PortShape::Bullet)
+		{
+			Wt::WPointF topLeft = Wt::WPointF(pointData.diamond_out[3].x() + origin.x(), pointData.diamond_out[2].y() + origin.y());
+			Wt::WPointF bottomRight = Wt::WPointF(pointData.diamond_out[1].x() + origin.x(), pointData.diamond_out[0].y() + origin.y());
+			Wt::WRectF diamondBoundingRect = Wt::WRectF(topLeft, bottomRight);
+			if (diamondBoundingRect.contains(trueMouse))
+			{
+				sourcePoint = Wt::WPointF((topLeft.x() + bottomRight.x()) / 2, (topLeft.y() + bottomRight.y()) / 2);
+				if (portState == PortState::out)
+				{
+					outPoint = pointData;
+				}
+				if (portState == PortState::in)
+				{
+					inPoint = pointData;
+				}
+				return true;
+			}
+		}
+		else if (pointData.portShape == PortShape::Diamond)
+		{
+			Wt::WPointF topLeft = Wt::WPointF(pointData.diamond[3].x() + origin.x(), pointData.diamond[2].y() + origin.y());
+			Wt::WPointF bottomRight = Wt::WPointF(pointData.diamond[1].x() + origin.x(), pointData.diamond[0].y() + origin.y());
+			Wt::WRectF diamondBoundingRect = Wt::WRectF(topLeft, bottomRight);
+			if (diamondBoundingRect.contains(trueMouse))
+			{
+				sourcePoint = Wt::WPointF((topLeft.x() + bottomRight.x()) / 2, (topLeft.y() + bottomRight.y()) / 2);
+				if (portState == PortState::out)
+				{
+					outPoint = pointData;
+				}
+				if (portState == PortState::in)
+				{
+					inPoint = pointData;
+				}
+				return true;
+			}
+		}
+		else if (pointData.portShape == PortShape::Point)
+		{
+			auto rectTopLeft = pointData.pointRect.topLeft();
+			auto rectBottomRight = pointData.pointRect.bottomRight();
+			Wt::WPointF topLeft = Wt::WPointF(rectTopLeft.x() + origin.x(), rectTopLeft.y() + origin.y());
+			Wt::WPointF bottomRight = Wt::WPointF(rectBottomRight.x() + origin.x(), rectBottomRight.y() + origin.y());
+			Wt::WRectF diamondBoundingRect = Wt::WRectF(topLeft, bottomRight);
+			if (diamondBoundingRect.contains(trueMouse))
+			{
+				sourcePoint = Wt::WPointF((topLeft.x() + bottomRight.x()) / 2, (topLeft.y() + bottomRight.y()) / 2);
+				if (portState == PortState::out)
+				{
+					outPoint = pointData;
+				}
+				if (portState == PortState::in)
+				{
+					inPoint = pointData;
+				}
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 Wt::WPainterPath WtFlowWidget::cubicPath(Wt::WPointF source, Wt::WPointF sink)

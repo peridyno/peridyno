@@ -35,14 +35,12 @@ void WtNodeFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 		if (checkMouseInPoints(mLastMousePos, nodeMap[selectedNum]->flowNodeData(), PortState::out))
 		{
 			drawLineFlag = true;
-			for (auto it = mScene->begin(); it != mScene->end(); it++)
+
+			if (nodeMap.find(selectedNum) != nodeMap.end())
 			{
-				auto m = it.get();
-				if (m->objectId() == selectedNum)
-				{
-					mOutNode = m;
-				}
+				mOutNode = nodeMap.find(selectedNum)->second->getNode();
 			}
+
 			if (outPoint.portType == PortType::In)
 			{
 				auto existConnection = nodeMap[selectedNum]->getIndexConnection(outPoint.portIndex);
@@ -124,7 +122,7 @@ void WtNodeFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
 			auto node = nodeMap[m->objectId()];
 			auto nodeData = node->flowNodeData();
 			auto mousePoint = Wt::WPointF(event.widget().x, event.widget().y);
-			if (checkMouseInNodeRect(mousePoint, nodeData) && selectType != 2)
+			if (checkMouseInRect(mousePoint, nodeData) && selectType != 2)
 			{
 				selectType = 1;
 				connectionOutNode = node;
@@ -288,7 +286,7 @@ bool WtNodeFlowWidget::checkMouseInAllRect(Wt::WPointF mousePoint)
 		auto m = it.get();
 		auto node = nodeMap[m->objectId()];
 		auto nodeData = node->flowNodeData();
-		if (checkMouseInNodeRect(mousePoint, nodeData))
+		if (checkMouseInRect(mousePoint, nodeData))
 		{
 			selectedNum = m->objectId();
 			canMoveNode = true;
@@ -326,77 +324,6 @@ bool WtNodeFlowWidget::checkMouseInHotKey1(Wt::WPointF mousePoint, WtFlowNodeDat
 	Wt::WPointF	trueMouse = Wt::WPointF(mousePoint.x() / mZoomFactor - mTranslate.x(), mousePoint.y() / mZoomFactor - mTranslate.y());
 
 	return absRect.contains(trueMouse);
-}
-
-bool WtNodeFlowWidget::checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nodeData, PortState portState)
-{
-	auto pointsData = nodeData.getPointsData();
-	Wt::WPointF origin = nodeData.getNodeOrigin();
-	Wt::WPointF	trueMouse = Wt::WPointF(mousePoint.x() / mZoomFactor - mTranslate.x(), mousePoint.y() / mZoomFactor - mTranslate.y());
-
-	for (connectionPointData pointData : pointsData)
-	{
-		if (pointData.portShape == PortShape::Bullet)
-		{
-			Wt::WPointF topLeft = Wt::WPointF(pointData.diamond_out[3].x() + origin.x(), pointData.diamond_out[2].y() + origin.y());
-			Wt::WPointF bottomRight = Wt::WPointF(pointData.diamond_out[1].x() + origin.x(), pointData.diamond_out[0].y() + origin.y());
-			Wt::WRectF diamondBoundingRect = Wt::WRectF(topLeft, bottomRight);
-			if (diamondBoundingRect.contains(trueMouse))
-			{
-				sourcePoint = Wt::WPointF((topLeft.x() + bottomRight.x()) / 2, (topLeft.y() + bottomRight.y()) / 2);
-				if (portState == PortState::out)
-				{
-					outPoint = pointData;
-				}
-				if (portState == PortState::in)
-				{
-					inPoint = pointData;
-				}
-				return true;
-			}
-		}
-		else if (pointData.portShape == PortShape::Diamond)
-		{
-			Wt::WPointF topLeft = Wt::WPointF(pointData.diamond[3].x() + origin.x(), pointData.diamond[2].y() + origin.y());
-			Wt::WPointF bottomRight = Wt::WPointF(pointData.diamond[1].x() + origin.x(), pointData.diamond[0].y() + origin.y());
-			Wt::WRectF diamondBoundingRect = Wt::WRectF(topLeft, bottomRight);
-			if (diamondBoundingRect.contains(trueMouse))
-			{
-				sourcePoint = Wt::WPointF((topLeft.x() + bottomRight.x()) / 2, (topLeft.y() + bottomRight.y()) / 2);
-				if (portState == PortState::out)
-				{
-					outPoint = pointData;
-				}
-				if (portState == PortState::in)
-				{
-					inPoint = pointData;
-				}
-				return true;
-			}
-		}
-		else if (pointData.portShape == PortShape::Point)
-		{
-			auto rectTopLeft = pointData.pointRect.topLeft();
-			auto rectBottomRight = pointData.pointRect.bottomRight();
-			Wt::WPointF topLeft = Wt::WPointF(rectTopLeft.x() + origin.x(), rectTopLeft.y() + origin.y());
-			Wt::WPointF bottomRight = Wt::WPointF(rectBottomRight.x() + origin.x(), rectBottomRight.y() + origin.y());
-			Wt::WRectF diamondBoundingRect = Wt::WRectF(topLeft, bottomRight);
-			if (diamondBoundingRect.contains(trueMouse))
-			{
-				sourcePoint = Wt::WPointF((topLeft.x() + bottomRight.x()) / 2, (topLeft.y() + bottomRight.y()) / 2);
-				if (portState == PortState::out)
-				{
-					outPoint = pointData;
-				}
-				if (portState == PortState::in)
-				{
-					inPoint = pointData;
-				}
-				return true;
-			}
-		}
-	}
-	return false;
 }
 
 Wt::WPointF WtNodeFlowWidget::getPortPosition(Wt::WPointF origin, connectionPointData portData)

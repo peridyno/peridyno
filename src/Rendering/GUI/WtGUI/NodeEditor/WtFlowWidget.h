@@ -37,7 +37,9 @@ public:
 	void reorderNode();
 	void updateAll();
 
-	bool checkMouseInNodeRect(Wt::WPointF mousePoint, WtFlowNodeData nodeData);
+	bool checkMouseInRect(Wt::WPointF mousePoint, WtFlowNodeData nodeData);
+
+	bool checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nodeData, PortState portState);
 
 	Wt::WPainterPath cubicPath(Wt::WPointF source, Wt::WPointF sink);
 	std::pair<Wt::WPointF, Wt::WPointF> pointsC1C2(Wt::WPointF source, Wt::WPointF sink);
@@ -70,4 +72,10 @@ protected:
 
 	int selectType = -1;
 	int selectedNum = 0;
+
+	Wt::WPointF sourcePoint;
+	Wt::WPointF sinkPoint;
+
+	connectionPointData outPoint;
+	connectionPointData inPoint;
 };
