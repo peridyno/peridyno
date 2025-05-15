@@ -1,7 +1,9 @@
+#include "AutoLayoutDAG.h"
 #include "WtModuleFlowScene.h"
 #include "WtNodeWidget.h"
 #include <DirectedAcyclicGraph.h>
-#include "AutoLayoutDAG.h"
+
+#include "Object.h"
 
 namespace dyno
 {
@@ -195,7 +197,7 @@ void WtModuleFlowScene::showModuleFlow(std::shared_ptr<dyno::Node> node)
 	if (node == nullptr)
 		return;
 
-	auto& mlist = node->getModuleList();
+	//auto& mlist = node->getModuleList();
 
 	std::map<dyno::ObjectId, WtNode*> moduleMap;
 
@@ -215,9 +217,7 @@ void WtModuleFlowScene::showModuleFlow(std::shared_ptr<dyno::Node> node)
 
 			node.setModule(m);
 
-			moduleMap[mId] = &node;
-
-			OutNodeMap[mId] = &node;
+			moduleMap[mId] = OutNodeMap[mId] = &node;
 
 			Wt::WPointF posView(m->bx(), m->by());
 

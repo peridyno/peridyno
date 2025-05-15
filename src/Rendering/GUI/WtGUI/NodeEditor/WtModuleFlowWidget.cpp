@@ -39,52 +39,6 @@ void WtModuleFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 			{
 				mOutModule = moduleMap.find(selectedNum)->second->getModule();
 			}
-
-
-		/*	if (outPoint.portType == PortType::In)
-			{
-				auto existConnection = moduleMap[selectedNum]->getIndexConnection(outPoint.portIndex);
-				if (existConnection != nullptr)
-				{
-					auto outNode = existConnection->getNode(PortType::Out);
-					for (auto it = mScene->begin(); it != mScene->end(); it++)
-					{
-						auto m = it.get();
-						auto node = moduleMap[m->objectId()];
-						auto outPortIndex = existConnection->getPortIndex(PortType::Out);
-						auto exportPortsData = outNode->flowNodeData().getPointsData();
-						connectionPointData exportPointData;
-						for (auto point : exportPortsData)
-						{
-							if (point.portIndex == outPortIndex)
-							{
-								exportPointData = point;
-								break;
-							}
-						}
-
-						if (node == outNode)
-						{
-							for (auto it = sceneConnections.begin(); it != sceneConnections.end(); )
-							{
-								if (it->exportNode == mOutNode && it->inportNode == m && it->inPoint.portIndex == outPoint.portIndex && it->outPoint.portIndex == exportPointData.portIndex)
-								{
-									it = sceneConnections.erase(it);
-								}
-								else
-								{
-									++it;
-								}
-							}
-
-							disconnect(m, mOutNode, outPoint, exportPointData, nodeMap[selectedNum], outNode);
-							sourcePoint = getPortPosition(outNode->flowNodeData().getNodeOrigin(), exportPointData);
-
-						}
-					}
-
-				}
-			}*/
 		}
 		else
 		{
@@ -194,9 +148,7 @@ void WtModuleFlowWidget::deleteModule()
 
 void WtModuleFlowWidget::moveModule(WtNode& n, const Wt::WPointF& newLocation)
 {
-	WtModuleWidget* mw = dynamic_cast<WtModuleWidget*>(n.nodeDataModel());
-
-	auto m = mw == nullptr ? nullptr : mw->getModule();
+	auto m = n.getModule();
 
 	if (m != nullptr)
 	{
@@ -237,20 +189,16 @@ void WtModuleFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 
 bool WtModuleFlowWidget::checkMouseInAllRect(Wt::WPointF mousePoint)
 {
-	auto mlist = mNode->getModuleList();
-	for (const auto& module : mlist)
+	for (auto module : moduleMap)
 	{
-		if (moduleMap.find(module->objectId()) != moduleMap.end())
+		auto moduleData = module.second->flowNodeData();
+
+		if (checkMouseInRect(mousePoint, moduleData))
 		{
-			auto m = moduleMap[module->objectId()];
-			auto moduleData = m->flowNodeData();
-			if (checkMouseInRect(mousePoint, moduleData))
-			{
-				selectedNum = module->objectId();
-				canMoveNode = true;
-				return true;
-			}
+			selectedNum = module.second->getModule()->objectId();
+			canMoveNode = true;
+			return true;
 		}
-		return false;
 	}
+	return false;
 }

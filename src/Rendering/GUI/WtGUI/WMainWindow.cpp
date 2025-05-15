@@ -310,11 +310,11 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 	{
 		mSceneCanvas->selectNodeSignal().connect([=](std::shared_ptr<dyno::Node> node)
 			{
-				if (node)
+				if (node != nullptr)
 				{
-					mModuleDataModel->setNode(node);
-					mParameterDataNode->setNode(node);
-					mParameterDataNode->createParameterPanel(parameterWidget);
+					//mModuleDataModel->setNode(node);
+					//mParameterDataNode->setNode(node);
+					//mParameterDataNode->createParameterPanel(parameterWidget);
 
 					mNodeFlowWidget->setSelectNode(node);
 				}

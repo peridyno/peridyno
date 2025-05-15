@@ -160,7 +160,7 @@ WSimulationCanvas::WSimulationCanvas()
 
 	mImageData.resize(width * height * 3);	// initialize image buffer
 	mJpegEncoder = std::make_unique<ImageEncoderNV>();
-	mJpegEncoder->SetQuality(100);
+	mJpegEncoder->SetQuality(70);
 	mJpegResource = std::make_unique<Wt::WMemoryResource>("image/jpeg");
 
 	mRenderEngine = std::make_shared<dyno::GLRenderEngine>();

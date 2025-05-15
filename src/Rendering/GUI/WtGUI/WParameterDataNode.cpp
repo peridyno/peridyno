@@ -165,6 +165,9 @@ Wt::cpp17::any WParameterDataNode::headerData(int section, Wt::Orientation orien
 
 void WParameterDataNode::createParameterPanel(Wt::WContainerWidget* parameterWidget)
 {
+	if (parameterWidget == nullptr)
+		return;
+
 	parameterWidget->setMargin(0);
 	//parameterWidget->setStyleClass("scrollable-content");
 	auto layout = parameterWidget->setLayout(std::make_unique<Wt::WVBoxLayout>());
