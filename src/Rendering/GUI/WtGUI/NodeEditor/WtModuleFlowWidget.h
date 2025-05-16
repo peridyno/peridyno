@@ -20,17 +20,20 @@ public:
 
 	void moveModule(WtNode& n, const Wt::WPointF& newLocation);
 
-
 protected:
 	void paintEvent(Wt::WPaintDevice* paintDevice);
 
 	bool checkMouseInAllRect(Wt::WPointF mousePoint);
+
+	void disconnect(std::shared_ptr<Module> exportModule, std::shared_ptr<Module> inportModule, connectionPointData inPoint, connectionPointData outPoint, WtNode* inWtNode, WtNode* outWtNode);
 
 private:
 	std::shared_ptr<dyno::Node> mNode;
 	
 	WtModuleFlowScene* mModuleFlowScene = nullptr;
 	std::map<dyno::ObjectId, WtNode*> moduleMap;
+
+	WtNode* connectionOutNode;
 
 	std::shared_ptr<dyno::Module> mOutModule;
 

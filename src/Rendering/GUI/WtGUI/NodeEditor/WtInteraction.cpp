@@ -11,6 +11,17 @@ WtInteraction::WtInteraction(WtNode& node, WtConnection& connection, WtFlowScene
 
 {}
 
+WtInteraction::WtInteraction(WtNode& node, WtConnection& connection, connectionPointData inPoint, connectionPointData outPoint, std::shared_ptr<dyno::Module> inModule, std::shared_ptr<dyno::Module> outModule)
+	: _node(&node)
+	, _connection(&connection)
+	, _inPoint(inPoint)
+	, _outPoint(outPoint)
+	, _inModule(inModule)
+	, _outModule(outModule)
+
+{
+}
+
 bool WtInteraction::canConnect(PortIndex& portIndex, TypeConverter& converter)
 {
 	// 1) QtConnection requires a port
@@ -138,7 +149,6 @@ bool WtInteraction::isNodePortAccessible(PortType portType, PortIndex portIndex)
 
 void WtInteraction::setInData(PortIndex portIndex)
 {
-	// error
 	if (_inPoint.portShape == PortShape::Diamond || _inPoint.portShape == PortShape::Bullet)
 	{
 		_outNode->connect(_inNode->getImportNodes()[portIndex]);
@@ -156,7 +166,17 @@ void WtInteraction::setInData(PortIndex portIndex)
 			}
 		}
 
-		auto field = _outNode->getOutputFields()[_outPoint.portIndex - outFieldNum];
+		dyno::FBase* field;
+
+		if (_outNode == nullptr && _outModule != nullptr)
+		{
+			field = _outModule->getOutputFields()[_outPoint.portIndex - outFieldNum];
+		}
+		else
+		{
+			field = _outNode->getOutputFields()[_outPoint.portIndex - outFieldNum];
+		}
+
 
 		if (field != NULL)
 		{
@@ -176,9 +196,20 @@ void WtInteraction::setInData(PortIndex portIndex)
 					}
 				}
 			}
-			auto inField = _inNode->getInputFields()[_inPoint.portIndex - fieldNum];
 
-			field->connect(inField);
+			dyno::FBase* inField;
+
+			if (_inNode == nullptr && _inModule != nullptr)
+			{
+				inField = _inModule->getInputFields()[_inPoint.portIndex - fieldNum];
+			}
+			else
+			{
+				inField = _inNode->getInputFields()[_inPoint.portIndex - fieldNum];
+			}
+
+			if(inField != nullptr)
+				field->connect(inField);
 		}
 	}
 }

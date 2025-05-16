@@ -1,4 +1,5 @@
 #include "WtModuleFlowWidget.h"
+#include "WtInteraction.h"
 
 
 WtModuleFlowWidget::WtModuleFlowWidget(std::shared_ptr<dyno::SceneGraph> scene)
@@ -38,6 +39,51 @@ void WtModuleFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 			if (moduleMap.find(selectedNum) != moduleMap.end())
 			{
 				mOutModule = moduleMap.find(selectedNum)->second->getModule();
+			}
+
+			if (outPoint.portType == PortType::In)
+			{
+				auto existConnection = moduleMap[selectedNum]->getIndexConnection(outPoint.portIndex);
+
+				if (existConnection != nullptr)
+				{
+					auto outNode = existConnection->getNode(PortType::Out);
+
+					for (auto m : moduleMap)
+					{
+						auto node = m.second;
+						auto outPortIndex = existConnection->getPortIndex(PortType::Out);
+						auto exportPortsData = outNode->flowNodeData().getPointsData();
+						connectionPointData exportPointData;
+						for (auto point : exportPortsData)
+						{
+							if (point.portIndex == outPortIndex)
+							{
+								exportPointData = point;
+								break;
+							}
+						}
+
+						if (node == outNode)
+						{
+							for (auto it = sceneConnections.begin(); it != sceneConnections.end(); )
+							{
+								if (it->exportModule == mOutModule && it->inportModule == m.second->getModule() && it->inPoint.portIndex == outPoint.portIndex && it->outPoint.portIndex == exportPointData.portIndex)
+								{
+									it = sceneConnections.erase(it);
+								}
+								else
+								{
+									++it;
+								}
+							}
+
+							disconnect(m.second->getModule(), mOutModule, outPoint, exportPointData, moduleMap[selectedNum], outNode);
+							sourcePoint = getPortPosition(outNode->flowNodeData().getNodeOrigin(), exportPointData);
+
+						}
+					}
+				}
 			}
 		}
 		else
@@ -81,7 +127,7 @@ void WtModuleFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
 				if (checkMouseInRect(mousePoint, moduleData) && selectType != 2)
 				{
 					selectType = 1;
-					//connectionOutNode = node;
+					connectionOutNode = m;
 					selectedNum = module->objectId();
 					canMoveNode = true;
 					update();
@@ -121,6 +167,36 @@ void WtModuleFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 	else
 	{
 		_selectNodeSignal.emit(-1);
+	}
+
+	if (drawLineFlag = true)
+	{
+		for (auto module : moduleMap)
+		{
+			auto node = module.second;
+			auto nodeData = node->flowNodeData();
+			if (checkMouseInPoints(mouseWentUpPosition, nodeData, PortState::in))
+			{
+				auto connectionInNode = node;
+
+				if (outPoint.portType == PortType::Out)
+				{
+					WtConnection connection(outPoint.portType, *connectionOutNode, outPoint.portIndex);
+					WtInteraction interaction(*connectionInNode, connection, inPoint, outPoint, node->getModule(), mOutModule);
+					if (interaction.tryConnect())
+					{
+						sceneConnection temp;
+						temp.exportModule = node->getModule();
+						temp.inportModule = mOutModule;
+						temp.inPoint = inPoint;
+						temp.outPoint = outPoint;
+						sceneConnections.push_back(temp);
+						update();
+					}
+				}
+
+			}
+		}
 	}
 
 	drawLineFlag = false;
@@ -183,7 +259,7 @@ void WtModuleFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 
 	if (drawLineFlag)
 	{
-		//drawSketchLine(&painter, sourcePoint, sinkPoint);
+		drawSketchLine(&painter, sourcePoint, sinkPoint);
 	}
 }
 
@@ -201,4 +277,50 @@ bool WtModuleFlowWidget::checkMouseInAllRect(Wt::WPointF mousePoint)
 		}
 	}
 	return false;
+}
+
+void WtModuleFlowWidget::disconnect(std::shared_ptr<Module> exportModule, std::shared_ptr<Module> inportModule, connectionPointData inPoint, connectionPointData outPoint, WtNode* inWtNode, WtNode* outWtNode)
+{
+	auto inportIndex = inPoint.portIndex;
+
+	if (inPoint.portShape == PortShape::Point)
+	{
+		auto outFieldNum = 0;
+		auto outPoints = outWtNode->flowNodeData().getPointsData();
+		for (auto point : outPoints)
+		{
+			if (point.portShape == PortShape::Point)
+			{
+				outFieldNum = point.portIndex;
+				break;
+			}
+		}
+
+		auto field = exportModule->getOutputFields()[outPoint.portIndex - outFieldNum];
+
+		if (field != NULL)
+		{
+			auto node_data = inWtNode->flowNodeData();
+
+			auto points = node_data.getPointsData();
+
+			int fieldNum = 0;
+
+			for (auto point : points)
+			{
+				if (point.portType == PortType::In)
+				{
+					if (point.portShape == PortShape::Bullet || point.portShape == PortShape::Diamond)
+					{
+						fieldNum++;
+					}
+				}
+			}
+
+			auto inField = inportModule->getInputFields()[inPoint.portIndex - fieldNum];
+
+			field->disconnect(inField);
+		}
+	}
+
 }

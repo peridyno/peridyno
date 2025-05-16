@@ -51,8 +51,6 @@ protected:
 
 	bool checkMouseInHotKey1(Wt::WPointF mousePoint, WtFlowNodeData nodeData);
 
-	Wt::WPointF WtNodeFlowWidget::getPortPosition(Wt::WPointF origin, connectionPointData portData);
-
 	void disconnect(std::shared_ptr<Node> exportNode, std::shared_ptr<Node> inportNode, connectionPointData inPoint, connectionPointData outPoint, WtNode* inWtNode, WtNode* outWtNode);
 
 protected:
@@ -61,5 +59,4 @@ protected:
 	WtNode* connectionOutNode;
 
 	std::shared_ptr<Node> mOutNode;
-	std::vector<sceneConnection> sceneConnections;
 };
