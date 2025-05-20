@@ -4,7 +4,6 @@
 #include "NodeFactory.h"
 #include "WLogWidget.h"
 
-
 #include "WParameterDataNode.h"
 #include "WSampleWidget.h"
 #include "WSaveWidget.h"
@@ -156,7 +155,7 @@ void WMainWindow::initRightPanel(Wt::WContainerWidget* parent)
 	tab->addTab(initLog(), "Log", Wt::ContentLoading::Lazy);
 }
 
-void WMainWindow::initAddNodePanel(Wt::WPanel* panel)
+void WMainWindow::initAddNodePanel(Wt::WPanel* panel, AddNodeType addNodeType)
 {
 	auto widget3 = panel->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
 	auto layout3 = widget3->setLayout(std::make_unique<Wt::WHBoxLayout>());
@@ -201,8 +200,10 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel)
 			sp->addSuggestion(it->second->m_className);
 		}
 	}
+
 	auto name = layout3->addWidget(std::make_unique<Wt::WLineEdit>());
-	name->setPlaceholderText("node name");
+
+	addNodeType == NodeType ? name->setPlaceholderText("Input Node Name") : name->setPlaceholderText("Input Module Name");
 
 	sp->forEdit(name);
 
@@ -246,20 +247,48 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel)
 				new_node->setBlockCoord(Initial_x, Initial_y);
 				Initial_x += 10;
 				Initial_y += 10;
-				std::cout << Initial_x << std::endl;
-				std::cout << "!!!!!!!!!!!" << std::endl;
 				mNodeFlowWidget->updateAll();
 				mNodeDataModel->setScene(mScene);
 				name->setText("");
 			}
-
 		}
 		});
 
 	auto reorderNodeButton = layout3->addWidget(std::make_unique<Wt::WPushButton>("Reorder"));
 
-	reorderNodeButton->clicked().connect([=] {
-		mNodeFlowWidget->reorderNode();
+	if (addNodeType == NodeType)
+	{
+		reorderNodeButton->clicked().connect([=] {
+			mNodeFlowWidget->reorderNode();
+			});
+	}
+	else
+	{
+		reorderNodeButton->clicked().connect([=] {
+			mModuleFlowWidget->reorderNode();
+			});
+	}
+}
+
+void WMainWindow::initPipelinePanel(Wt::WPanel* parent)
+{
+	auto widget = parent->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
+	auto layout = widget->setLayout(std::make_unique<Wt::WHBoxLayout>());
+
+	layout->setContentsMargins(0, 0, 0, 0);
+	auto ResetButton = layout->addWidget(std::make_unique<Wt::WPushButton>("Reset"));
+	auto AnimationButton = layout->addWidget(std::make_unique<Wt::WPushButton>("Animation"));
+	auto RenderingButton = layout->addWidget(std::make_unique<Wt::WPushButton>("Rendering"));
+
+	// actions
+	ResetButton->clicked().connect([=] {
+		mModuleFlowWidget->showResetPipeline();
+		});
+	AnimationButton->clicked().connect([=] {
+		mModuleFlowWidget->showAnimationPipeline();
+		});
+	RenderingButton->clicked().connect([=] {
+		mModuleFlowWidget->showGraphicsPipeline();
 		});
 }
 
@@ -278,7 +307,6 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 	// Parameter list
 	auto parameterWidget = nodeGraphicsWidget->layout->addWidget(std::make_unique<Wt::WContainerWidget>());;
 
-
 	//action for selection change
 	mNodeFlowWidget->selectNodeSignal().connect([=](int selectNum)
 		{
@@ -295,7 +323,6 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 						mSceneCanvas->selectNode(m);
 						mModuleFlowWidget->setNode(m);
 						mSceneCanvas->update();
-						
 					}
 				}
 			}
@@ -319,8 +346,6 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 					mNodeFlowWidget->setSelectNode(node);
 				}
 			});
-
-		
 	}
 
 	return std::move(nodeGraphicsWidget);
@@ -329,7 +354,9 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 std::unique_ptr<Wt::WWidget> WMainWindow::initModuleGraphics()
 {
 	moduleGraphicsWidget = std::make_unique<WModuleGraphics>();
-	initAddNodePanel(moduleGraphicsWidget->addPanel);
+	initAddNodePanel(moduleGraphicsWidget->addPanel, ModuleType);
+	initPipelinePanel(moduleGraphicsWidget->pipelinePanel);
+
 	if (mScene)
 	{
 		auto painteContainer = moduleGraphicsWidget->modulePanel->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
@@ -340,52 +367,8 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initModuleGraphics()
 
 	// Parameter list
 	auto parameterWidget = moduleGraphicsWidget->layout->addWidget(std::make_unique<Wt::WContainerWidget>());;
-	
 
 	return std::move(moduleGraphicsWidget);
-
-
-	//auto rootWidget = std::make_unique<Wt::WContainerWidget>();
-	//auto layout = rootWidget->setLayout(std::make_unique<Wt::WVBoxLayout>());
-	//layout->setContentsMargins(0, 0, 0, 0);
-	//rootWidget->setMargin(0);
-	//rootWidget->setWidth(viewportWidth * WIDTH_SCALE);
-
-	//// module list
-	//auto panel2 = layout->addWidget(std::make_unique<Wt::WPanel>());
-	//panel2->setTitle("Module List");
-	//panel2->setCollapsible(true);
-	//panel2->setStyleClass("scrollable-content");
-	//auto tableView = panel2->setCentralWidget(std::make_unique<Wt::WTableView>());
-
-	//tableView->setSortingEnabled(false);
-	//tableView->setSelectionMode(Wt::SelectionMode::Single);
-	//tableView->setEditTriggers(Wt::EditTrigger::None);
-	//tableView->setModel(mModuleDataModel);
-
-	//// Parameter list
-	//auto panel3 = layout->addWidget(std::make_unique<Wt::WPanel>());
-	//panel3->setTitle("Control Variable");
-	//panel3->setCollapsible(true);
-	//panel3->setStyleClass("scrollable-content");
-
-	//tableView->clicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
-	//	{
-	//		auto module = mModuleDataModel->getModule(idx);
-	//		mParameterDataNode->setModule(module);
-	//		mParameterDataNode->createParameterPanelModule(panel3);
-	//	});
-
-	//tableView->doubleClicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
-	//	{
-	//		auto mod = mModuleDataModel->getModule(idx);
-	//		if (mod->getModuleType() == "VisualModule")
-	//		{
-	//			Wt::log("info") << mod->getName();
-	//		}
-	//	});
-
-	//return rootWidget;
 }
 
 std::unique_ptr<Wt::WWidget> WMainWindow::initPython()

@@ -22,6 +22,8 @@ namespace dyno
 	class Node;
 };
 
+enum AddNodeType { NodeType, ModuleType };
+
 class WMainWindow : public Wt::WContainerWidget
 {
 public:
@@ -35,7 +37,7 @@ public:
 	void createRightPanel();
 
 	void updateCanvas();
-	
+
 	void updateNodeGraphics();
 
 	void onKeyWentDown(const Wt::WKeyEvent& event);
@@ -54,8 +56,8 @@ private:
 	void initNavigationBar(Wt::WBorderLayout*);
 	void initCenterContainer(Wt::WBorderLayout*);
 	void initRightPanel(Wt::WContainerWidget*);
-	void initAddNodePanel(Wt::WPanel* parent);
-
+	void initAddNodePanel(Wt::WPanel* parent, AddNodeType addNodeType = NodeType);
+	void initPipelinePanel(Wt::WPanel* parent);
 
 	std::unique_ptr<Wt::WWidget> initNodeGraphics();
 	std::unique_ptr<Wt::WWidget> initPython();

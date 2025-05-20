@@ -9,10 +9,12 @@
 #include <Object.h>
 //#include <QtGUI/NodeEditor/QtModuleFlowScene.cpp>
 
+enum class PipelineType {Reset, Animation, Graphics};
+
 class WtModuleFlowScene : public WtFlowScene
 {
 public:
-	WtModuleFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::Node> node);
+	WtModuleFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::Node> node, PipelineType pipelineType);
 	~WtModuleFlowScene();
 
 public:
@@ -41,9 +43,10 @@ private:
 	//A virtual module to store all state variables
 	std::shared_ptr<dyno::Module> mStates = nullptr;
 
+	PipelineType mPipelineType;
+
 	bool mEditingEnabled = true;
 
 	float mDx = 100.0f;
 	float mDy = 50.0f;
-
 };

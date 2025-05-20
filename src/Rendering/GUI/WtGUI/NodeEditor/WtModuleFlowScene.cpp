@@ -20,11 +20,12 @@ namespace dyno
 Wt::WPointF SimStatePos = Wt::WPointF(0.0f, 0.0f);
 Wt::WPointF RenStatePos = Wt::WPointF(0.0f, 0.0f);
 
-WtModuleFlowScene::WtModuleFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::Node> node)
+WtModuleFlowScene::WtModuleFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::Node> node , PipelineType pipelineType)
 	: _painter(painter)
 	, mNode(node)
+	, mPipelineType(pipelineType)
 {
-	if(node != nullptr)
+	if (node != nullptr)
 		showModuleFlow(mNode);
 
 	//reorderAllModules();
@@ -68,14 +69,14 @@ void WtModuleFlowScene::disableEditing()
 
 void WtModuleFlowScene::updateModuleGraphView()
 {
-	disableEditing();
+	//disableEditing();
 
 	clearScene();
 
 	if (mNode != nullptr)
 		showModuleFlow(mNode);
 
-	enableEditing();
+	//enableEditing();
 }
 
 void WtModuleFlowScene::reorderAllModules()
@@ -183,7 +184,6 @@ void WtModuleFlowScene::reorderAllModules()
 		RenStatePos = Wt::WPointF(mStates->bx(), mStates->by());
 	}
 
-
 	wtNodeMapper.clear();
 	moduleMapper.clear();
 
@@ -203,7 +203,20 @@ void WtModuleFlowScene::showModuleFlow(std::shared_ptr<dyno::Node> node)
 
 	// To show the animation pipeline
 	if (mActivePipeline == nullptr)
-		mActivePipeline = node->graphicsPipeline();
+	{
+		if (mPipelineType ==PipelineType::Reset)
+		{
+			mActivePipeline = node->resetPipeline();
+		}
+		else if (mPipelineType == PipelineType::Animation)
+		{
+			mActivePipeline = node->animationPipeline();
+		}
+		else if (mPipelineType == PipelineType::Graphics)
+		{
+			mActivePipeline = node->graphicsPipeline();
+		}
+	}
 
 	auto& modules = mActivePipeline->allModules();
 

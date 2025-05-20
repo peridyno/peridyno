@@ -1,7 +1,6 @@
 #include "WtModuleFlowWidget.h"
 #include "WtInteraction.h"
 
-
 WtModuleFlowWidget::WtModuleFlowWidget(std::shared_ptr<dyno::SceneGraph> scene)
 	: WtFlowWidget(scene)
 {
@@ -10,7 +9,7 @@ WtModuleFlowWidget::WtModuleFlowWidget(std::shared_ptr<dyno::SceneGraph> scene)
 	this->mouseWentUp().connect(this, &WtModuleFlowWidget::onMouseWentUp);
 }
 
-WtModuleFlowWidget::~WtModuleFlowWidget(){}
+WtModuleFlowWidget::~WtModuleFlowWidget() {}
 
 void WtModuleFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 {
@@ -80,7 +79,6 @@ void WtModuleFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 
 							disconnect(m.second->getModule(), mOutModule, outPoint, exportPointData, moduleMap[selectedNum], outNode);
 							sourcePoint = getPortPosition(outNode->flowNodeData().getNodeOrigin(), exportPointData);
-
 						}
 					}
 				}
@@ -134,7 +132,6 @@ void WtModuleFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
 					break;
 				}
 			}
-			
 		}
 	}
 }
@@ -194,7 +191,6 @@ void WtModuleFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 						update();
 					}
 				}
-
 			}
 		}
 	}
@@ -219,7 +215,6 @@ void WtModuleFlowWidget::setNode(std::shared_ptr<dyno::Node> node)
 
 void WtModuleFlowWidget::deleteModule()
 {
-	
 }
 
 void WtModuleFlowWidget::moveModule(WtNode& n, const Wt::WPointF& newLocation)
@@ -232,6 +227,27 @@ void WtModuleFlowWidget::moveModule(WtNode& n, const Wt::WPointF& newLocation)
 	}
 }
 
+void WtModuleFlowWidget::showResetPipeline()
+{
+	pipelineType = PipelineType::Reset;
+	update();
+	reorderFlag = true;
+}
+
+void WtModuleFlowWidget::showAnimationPipeline()
+{
+	pipelineType = PipelineType::Animation;
+	update();
+	reorderFlag = true;
+}
+
+void WtModuleFlowWidget::showGraphicsPipeline()
+{
+	pipelineType = PipelineType::Graphics;
+	update();
+	reorderFlag = true;
+}
+
 void WtModuleFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 {
 	Wt::WPainter painter(paintDevice);
@@ -242,12 +258,12 @@ void WtModuleFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 	{
 		if (reorderFlag)
 		{
-			mModuleFlowScene = new WtModuleFlowScene(&painter, mNode);
+			mModuleFlowScene = new WtModuleFlowScene(&painter, mNode, pipelineType);
 			mModuleFlowScene->reorderAllModules();
 			reorderFlag = false;
 		}
 
-		mModuleFlowScene = new WtModuleFlowScene(&painter, mNode);
+		mModuleFlowScene = new WtModuleFlowScene(&painter, mNode, pipelineType);
 		moduleMap = mModuleFlowScene->getNodeMap();
 	}
 
@@ -322,5 +338,4 @@ void WtModuleFlowWidget::disconnect(std::shared_ptr<Module> exportModule, std::s
 			field->disconnect(inField);
 		}
 	}
-
 }

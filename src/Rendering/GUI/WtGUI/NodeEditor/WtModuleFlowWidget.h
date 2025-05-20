@@ -20,6 +20,12 @@ public:
 
 	void moveModule(WtNode& n, const Wt::WPointF& newLocation);
 
+	void showResetPipeline();
+
+	void showAnimationPipeline();
+
+	void showGraphicsPipeline();
+
 protected:
 	void paintEvent(Wt::WPaintDevice* paintDevice);
 
@@ -29,13 +35,15 @@ protected:
 
 private:
 	std::shared_ptr<dyno::Node> mNode;
-	
+
 	WtModuleFlowScene* mModuleFlowScene = nullptr;
 	std::map<dyno::ObjectId, WtNode*> moduleMap;
 
 	WtNode* connectionOutNode;
 
 	std::shared_ptr<dyno::Module> mOutModule;
+
+	PipelineType pipelineType = PipelineType::Animation;
 
 	int selectType = -1;
 	int selectedNum = 0;
