@@ -28,6 +28,8 @@ public:
 
 	void showModuleFlow(std::shared_ptr<dyno::Node> node);
 
+	void addModule(std::shared_ptr<dyno::Module> new_module);
+
 	void showResetPipeline();
 
 	void showAnimationPipeline();

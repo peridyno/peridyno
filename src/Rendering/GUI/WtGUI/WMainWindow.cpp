@@ -45,12 +45,11 @@ WMainWindow::WMainWindow() : WContainerWidget()
 	rightWidget = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), Wt::LayoutPosition::East);
 
 	// create data model
-	mNodeDataModel = std::make_shared<WNodeDataModel>();
-	mModuleDataModel = std::make_shared<WModuleDataModel>();
 	mParameterDataNode = std::make_shared<WParameterDataNode>();
 
 	mParameterDataNode->changeValue().connect(this, &WMainWindow::updateCanvas);
 	mParameterDataNode->changeValue().connect(this, &WMainWindow::updateNodeGraphics);
+	//mParameterDataNode->changeValue().connect(this, );
 }
 
 WMainWindow::~WMainWindow()
@@ -66,8 +65,6 @@ void WMainWindow::setScene(std::shared_ptr<dyno::SceneGraph> scene)
 	// setup scene graph
 	mScene = scene;
 	mSceneCanvas->setScene(mScene);
-	mNodeDataModel->setScene(mScene);
-	mModuleDataModel->setNode(NULL);
 	controlContainer->setSceneGraph(mScene);
 }
 
@@ -171,47 +168,9 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel, AddNodeType addNodeType)
 	));
 
 	auto& pages = dyno::NodeFactory::instance()->nodePages();
-	for (auto iPage = pages.begin(); iPage != pages.end(); iPage++)
+
+	if (addNodeType == AddNodeType::NodeType)
 	{
-		auto& groups = iPage->second->groups();
-		{
-			for (auto iGroup = groups.begin(); iGroup != groups.end(); iGroup++)
-			{
-				auto& actions = iGroup->second->actions();
-				for (auto action : actions)
-				{
-					sp->addSuggestion(action->caption());
-				}
-			}
-		}
-	}
-
-	auto nodeMap = dyno::Object::getClassMap();
-	for (auto it = nodeMap->begin(); it != nodeMap->end(); ++it)
-	{
-		auto node_obj = dyno::Object::createObject(it->second->m_className);
-		std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
-		if (new_node == nullptr)
-		{
-			continue;
-		}
-		else
-		{
-			sp->addSuggestion(it->second->m_className);
-		}
-	}
-
-	auto name = layout3->addWidget(std::make_unique<Wt::WLineEdit>());
-
-	addNodeType == NodeType ? name->setPlaceholderText("Input Node Name") : name->setPlaceholderText("Input Module Name");
-
-	sp->forEdit(name);
-
-	auto addNodeButton = layout3->addWidget(std::make_unique<Wt::WPushButton>("Add"));
-
-	addNodeButton->clicked().connect([=] {
-		bool flag = true;
-
 		for (auto iPage = pages.begin(); iPage != pages.end(); iPage++)
 		{
 			auto& groups = iPage->second->groups();
@@ -221,42 +180,120 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel, AddNodeType addNodeType)
 					auto& actions = iGroup->second->actions();
 					for (auto action : actions)
 					{
-						if (action->caption() == name->text().toUTF8())
-						{
-							auto new_node = mScene->addNode(action->action()());
-							new_node->setBlockCoord(Initial_x, Initial_y);
-							Initial_x += 20;
-							Initial_y += 20;
-							name->setText("");
-							mNodeFlowWidget->updateAll();
-							mNodeDataModel->setScene(mScene);
-							flag = false;
-						}
+						sp->addSuggestion(action->caption());
 					}
 				}
 			}
 		}
 
-		if (flag)
+		auto nodeMap = dyno::Object::getClassMap();
+		for (auto it = nodeMap->begin(); it != nodeMap->end(); ++it)
 		{
-			auto node_obj = dyno::Object::createObject(name->text().toUTF8());
+			auto node_obj = dyno::Object::createObject(it->second->m_className);
 			std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
-			if (new_node != nullptr)
+			if (new_node == nullptr)
 			{
-				mScene->addNode(new_node);
-				new_node->setBlockCoord(Initial_x, Initial_y);
-				Initial_x += 10;
-				Initial_y += 10;
-				mNodeFlowWidget->updateAll();
-				mNodeDataModel->setScene(mScene);
-				name->setText("");
+				continue;
+			}
+			else
+			{
+				sp->addSuggestion(it->second->m_className);
 			}
 		}
+	}
+	else if (addNodeType == AddNodeType::ModuleType)
+	{
+		auto nodeMap = dyno::Object::getClassMap();
+		for (auto it = nodeMap->begin(); it != nodeMap->end(); ++it)
+		{
+			auto node_obj = dyno::Object::createObject(it->second->m_className);
+			std::shared_ptr<dyno::Module> new_node(dynamic_cast<dyno::Module*>(node_obj));
+			if (new_node == nullptr)
+			{
+				continue;
+			}
+			else
+			{
+				sp->addSuggestion(it->second->m_className);
+			}
+		}
+	}
+
+	
+
+	auto name = layout3->addWidget(std::make_unique<Wt::WLineEdit>());
+
+	addNodeType == AddNodeType::NodeType ? name->setPlaceholderText("Input Node Name") : name->setPlaceholderText("Input Module Name");
+
+	sp->forEdit(name);
+
+	auto addNodeButton = layout3->addWidget(std::make_unique<Wt::WPushButton>("Add"));
+
+	addNodeButton->clicked().connect([=] {
+		if (addNodeType == AddNodeType::NodeType)
+		{
+			bool flag = true;
+
+			for (auto iPage = pages.begin(); iPage != pages.end(); iPage++)
+			{
+				auto& groups = iPage->second->groups();
+				{
+					for (auto iGroup = groups.begin(); iGroup != groups.end(); iGroup++)
+					{
+						auto& actions = iGroup->second->actions();
+						for (auto action : actions)
+						{
+							if (action->caption() == name->text().toUTF8())
+							{
+								auto new_node = mScene->addNode(action->action()());
+								new_node->setBlockCoord(Initial_x, Initial_y);
+								Initial_x += 20;
+								Initial_y += 20;
+								name->setText("");
+								mNodeFlowWidget->updateAll();
+								flag = false;
+							}
+						}
+					}
+				}
+			}
+
+			if (flag)
+			{
+				auto node_obj = dyno::Object::createObject(name->text().toUTF8());
+				std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
+				if (new_node != nullptr)
+				{
+					mScene->addNode(new_node);
+					new_node->setBlockCoord(Initial_x, Initial_y);
+					Initial_x += 10;
+					Initial_y += 10;
+					mNodeFlowWidget->updateAll();
+					name->setText("");
+				}
+			}
+		}
+		else
+		{
+			auto node_obj = dyno::Object::createObject(name->text().toUTF8());
+			std::shared_ptr<dyno::Module> new_module(dynamic_cast<dyno::Module*>(node_obj));
+			if (new_module != nullptr)
+			{
+				mModuleFlowWidget->addModule(new_module);
+				new_module->setBlockCoord(Initial_x, Initial_y);
+				Initial_x += 10;
+				Initial_y += 10;
+				mModuleFlowWidget->updateAll();
+				name->setText("");
+
+			}
+		}
+		
 		});
 
 	auto reorderNodeButton = layout3->addWidget(std::make_unique<Wt::WPushButton>("Reorder"));
 
-	if (addNodeType == NodeType)
+	if (addNodeType == AddNodeType::NodeType)
 	{
 		reorderNodeButton->clicked().connect([=] {
 			mNodeFlowWidget->reorderNode();
@@ -317,7 +354,6 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 					auto m = it.get();
 					if (m->objectId() == selectNum)
 					{
-						mModuleDataModel->setNode(m);
 						mParameterDataNode->setNode(m);
 						mParameterDataNode->createParameterPanel(parameterWidget);
 						mSceneCanvas->selectNode(m);
@@ -339,7 +375,7 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 			{
 				if (node != nullptr)
 				{
-					//mModuleDataModel->setNode(node);
+
 					//mParameterDataNode->setNode(node);
 					//mParameterDataNode->createParameterPanel(parameterWidget);
 
@@ -354,7 +390,7 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 std::unique_ptr<Wt::WWidget> WMainWindow::initModuleGraphics()
 {
 	moduleGraphicsWidget = std::make_unique<WModuleGraphics>();
-	initAddNodePanel(moduleGraphicsWidget->addPanel, ModuleType);
+	initAddNodePanel(moduleGraphicsWidget->addPanel, AddNodeType::ModuleType);
 	initPipelinePanel(moduleGraphicsWidget->pipelinePanel);
 
 	if (mScene)
@@ -366,7 +402,17 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initModuleGraphics()
 	}
 
 	// Parameter list
-	auto parameterWidget = moduleGraphicsWidget->layout->addWidget(std::make_unique<Wt::WContainerWidget>());;
+	auto parameterWidget = moduleGraphicsWidget->layout->addWidget(std::make_unique<Wt::WContainerWidget>());
+
+	//action for selection change
+	mModuleFlowWidget->selectModuleSignal().connect([=](std::shared_ptr<dyno::Module> module)
+		{
+			if (module != nullptr)
+			{
+				mParameterDataNode->setModule(module);
+				mParameterDataNode->createParameterPanelModule(parameterWidget);
+			}
+		});
 
 	return std::move(moduleGraphicsWidget);
 }

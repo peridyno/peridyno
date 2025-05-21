@@ -16,6 +16,8 @@ public:
 
 	void setNode(std::shared_ptr<dyno::Node> node);
 
+	void addModule(std::shared_ptr<dyno::Module> new_module);
+
 	void deleteModule();
 
 	void moveModule(WtNode& n, const Wt::WPointF& newLocation);

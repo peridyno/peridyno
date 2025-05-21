@@ -149,7 +149,7 @@ void WtModuleFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 		auto node = moduleMap[selectedNum];
 		auto nodeData = node->flowNodeData();
 
-		_selectNodeSignal.emit(selectedNum);
+		_selectModuleSignal.emit(node->getModule());
 
 		Wt::WPointF mousePoint = Wt::WPointF(event.widget().x, event.widget().y);
 		if (!checkMouseInAllRect(mousePoint) && selectType == 2)
@@ -163,7 +163,7 @@ void WtModuleFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 	}
 	else
 	{
-		_selectNodeSignal.emit(-1);
+		_selectModuleSignal.emit(nullptr);
 	}
 
 	if (drawLineFlag = true)
@@ -213,8 +213,20 @@ void WtModuleFlowWidget::setNode(std::shared_ptr<dyno::Node> node)
 	update();
 }
 
+void WtModuleFlowWidget::addModule(std::shared_ptr<dyno::Module> new_module)
+{
+	if (mModuleFlowScene != nullptr)
+	{
+		mModuleFlowScene->addModule(new_module);
+	}
+}
+
 void WtModuleFlowWidget::deleteModule()
 {
+	if (mModuleFlowScene != nullptr)
+	{
+		//mModuleFlowScene->deleteModule();
+	}
 }
 
 void WtModuleFlowWidget::moveModule(WtNode& n, const Wt::WPointF& newLocation)

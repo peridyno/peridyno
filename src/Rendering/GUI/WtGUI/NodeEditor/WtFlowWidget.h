@@ -54,6 +54,8 @@ public:
 
 	Wt::Signal<int>& selectNodeSignal() { return _selectNodeSignal; };
 
+	Wt::Signal<std::shared_ptr<dyno::Module>>& selectModuleSignal() { return _selectModuleSignal; }
+
 	Wt::Signal<>& updateCanvas() { return _updateCanvas; }
 
 
@@ -75,6 +77,7 @@ protected:
 	std::shared_ptr<dyno::SceneGraph> mScene;
 
 	Wt::Signal<int> _selectNodeSignal;
+	Wt::Signal<std::shared_ptr<dyno::Module>> _selectModuleSignal;
 	Wt::Signal<> _updateCanvas;
 
 	int selectType = -1;

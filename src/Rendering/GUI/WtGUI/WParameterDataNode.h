@@ -52,7 +52,7 @@ public:
 		Wt::ItemDataRole role = Wt::ItemDataRole::Display) const;
 
 	void createParameterPanel(Wt::WContainerWidget* parameterWidget);
-	void createParameterPanelModule(Wt::WPanel* panel);
+	void createParameterPanelModule(Wt::WContainerWidget* parameterWidget);
 
 	void updateNode();
 	void updateModule();

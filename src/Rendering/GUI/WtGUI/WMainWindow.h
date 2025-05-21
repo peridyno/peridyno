@@ -22,7 +22,7 @@ namespace dyno
 	class Node;
 };
 
-enum AddNodeType { NodeType, ModuleType };
+enum class AddNodeType { NodeType, ModuleType };
 
 class WMainWindow : public Wt::WContainerWidget
 {
@@ -48,15 +48,13 @@ public:
 
 public:
 	// data models
-	std::shared_ptr<WNodeDataModel>		mNodeDataModel;
-	std::shared_ptr<WModuleDataModel>	mModuleDataModel;
 	std::shared_ptr<WParameterDataNode> mParameterDataNode;
 
 private:
 	void initNavigationBar(Wt::WBorderLayout*);
 	void initCenterContainer(Wt::WBorderLayout*);
 	void initRightPanel(Wt::WContainerWidget*);
-	void initAddNodePanel(Wt::WPanel* parent, AddNodeType addNodeType = NodeType);
+	void initAddNodePanel(Wt::WPanel* parent, AddNodeType addNodeType = AddNodeType::NodeType);
 	void initPipelinePanel(Wt::WPanel* parent);
 
 	std::unique_ptr<Wt::WWidget> initNodeGraphics();
