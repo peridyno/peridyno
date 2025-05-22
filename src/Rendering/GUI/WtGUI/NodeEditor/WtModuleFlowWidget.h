@@ -49,6 +49,4 @@ private:
 
 	int selectType = -1;
 	int selectedNum = 0;
-
-	std::vector<sceneConnection> nodeConnections;
 };

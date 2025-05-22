@@ -88,6 +88,7 @@ void WtNodeFlowScene::createNodeGraphView()
 							{
 								auto outBlock = nodeMap[node->objectId()];
 								createConnection(*inBlock, i, *outBlock, 0, _painter);
+								addConnection(inBlock->getNode(), outBlock->getNode());
 							}
 						}
 					}
@@ -106,6 +107,7 @@ void WtNodeFlowScene::createNodeGraphView()
 								{
 									auto outBlock = nodeMap[outId];
 									createConnection(*inBlock, i, *outBlock, 0, _painter);
+									addConnection(inBlock->getNode(), outBlock->getNode());
 								}
 							}
 						}
@@ -155,6 +157,7 @@ void WtNodeFlowScene::createNodeGraphView()
 								{
 									auto outBlock = nodeMap[outId];
 									createConnection(*inBlock, i + ports.size(), *outBlock, outFieldIndex, _painter);
+									addConnection(inBlock->getNode(), outBlock->getNode());
 								}
 							}
 						}
@@ -229,8 +232,6 @@ void WtNodeFlowScene::disableEditing()
 
 void WtNodeFlowScene::addNodeByString(std::string NodeName)
 {
-	Wt::log("info") << NodeName;
-
 	auto node_obj = dyno::Object::createObject(NodeName);
 	std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
 	auto dat = std::make_unique<WtNodeWidget>(std::move(new_node));
@@ -654,8 +655,10 @@ void WtNodeFlowScene::reorderAllNodes()
 	//updateNodeGraphView();
 }
 
-//std::map<dyno::ObjectId, WtNode*> WtNodeFlowScene::getNodeMap()
-//{
-//	return OutNodeMap;
-//}
-
+void WtNodeFlowScene::addConnection(std::shared_ptr<dyno::Node> exportNode, std::shared_ptr<dyno::Node> inportNode)
+{
+	connectionData temp;
+	temp.exportNode = exportNode;
+	temp.inportNode = inportNode;
+	sceneConnections.push_back(temp);
+}

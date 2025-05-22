@@ -66,18 +66,6 @@ void WtModuleFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 
 						if (node == outNode)
 						{
-							for (auto it = nodeConnections.begin(); it != nodeConnections.end(); )
-							{
-								if (it->exportModule == mOutModule && it->inportModule == m.second->getModule() && it->inPoint.portIndex == outPoint.portIndex && it->outPoint.portIndex == exportPointData.portIndex)
-								{
-									it = nodeConnections.erase(it);
-								}
-								else
-								{
-									++it;
-								}
-							}
-
 							disconnect(m.second->getModule(), mOutModule, outPoint, exportPointData, moduleMap[selectedNum], outNode);
 							sourcePoint = getPortPosition(outNode->flowNodeData().getNodeOrigin(), exportPointData);
 						}
@@ -183,21 +171,13 @@ void WtModuleFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 					WtInteraction interaction(*connectionInNode, connection, inPoint, outPoint, node->getModule(), mOutModule);
 					if (interaction.tryConnect())
 					{
-						sceneConnection temp;
-						temp.exportModule = node->getModule();
-						temp.inportModule = mOutModule;
-						temp.inPoint = inPoint;
-						temp.outPoint = outPoint;
-						nodeConnections.push_back(temp);
 						update();
 					}
 				}
 			}
 		}
 	}
-
 	drawLineFlag = false;
-	update();
 }
 
 void WtModuleFlowWidget::onKeyWentDown()
@@ -233,10 +213,9 @@ void WtModuleFlowWidget::deleteModule(std::shared_ptr<dyno::Module> delete_modul
 {
 	if (mModuleFlowScene != nullptr)
 	{
+		auto nodeConnections = mModuleFlowScene->getConnections();
 		for (auto c : nodeConnections)
 		{
-			std::cout << c.exportModule->getName() << std::endl;
-
 			if (c.exportModule == delete_module || c.inportModule == delete_module)
 			{
 				Wt::WMessageBox::show("Error",
@@ -245,10 +224,8 @@ void WtModuleFlowWidget::deleteModule(std::shared_ptr<dyno::Module> delete_modul
 				return;
 			}
 		}
-
 		mModuleFlowScene->deleteModule(delete_module);
 	}
-
 	updateAll();
 }
 

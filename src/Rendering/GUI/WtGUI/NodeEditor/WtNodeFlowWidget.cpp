@@ -65,18 +65,6 @@ void WtNodeFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 
 						if (node == outNode)
 						{
-							for (auto it = sceneConnections.begin(); it != sceneConnections.end(); )
-							{
-								if (it->exportNode == mOutNode && it->inportNode == m && it->inPoint.portIndex == outPoint.portIndex && it->outPoint.portIndex == exportPointData.portIndex)
-								{
-									it = sceneConnections.erase(it);
-								}
-								else
-								{
-									++it;
-								}
-							}
-
 							disconnect(m, mOutNode, outPoint, exportPointData, nodeMap[selectedNum], outNode);
 							sourcePoint = getPortPosition(outNode->flowNodeData().getNodeOrigin(), exportPointData);
 
@@ -187,7 +175,6 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 			{
 				enablePhysics(*node, true);
 			}
-			//mMainWindow->updateCanvas();
 			_updateCanvas.emit();
 			update();
 		}
@@ -211,15 +198,9 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 				if (outPoint.portType == PortType::Out)
 				{
 					WtConnection connection(outPoint.portType, *connectionOutNode, outPoint.portIndex);
-					WtInteraction interaction(*connectionInNode, connection, *node_scene, inPoint, outPoint, m, mOutNode);
+					WtInteraction interaction(*connectionInNode, connection, *mNodeFlowScene, inPoint, outPoint, m, mOutNode);
 					if (interaction.tryConnect())
 					{
-						sceneConnection temp;
-						temp.exportNode = m;
-						temp.inportNode = mOutNode;
-						temp.inPoint = inPoint;
-						temp.outPoint = outPoint;
-						sceneConnections.push_back(temp);
 						update();
 					}
 				}
@@ -228,7 +209,6 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 		}
 	}
 	drawLineFlag = false;
-	update();
 }
 
 void WtNodeFlowWidget::onKeyWentDown()
@@ -258,14 +238,14 @@ void WtNodeFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 
 	if (reorderFlag)
 	{
-		node_scene = new WtNodeFlowScene(&painter, mScene, selectType, selectedNum);
-		node_scene->reorderAllNodes();
+		mNodeFlowScene = new WtNodeFlowScene(&painter, mScene, selectType, selectedNum);
+		mNodeFlowScene->reorderAllNodes();
 		reorderFlag = false;
 	}
 
-	node_scene = new WtNodeFlowScene(&painter, mScene, selectType, selectedNum);
+	mNodeFlowScene = new WtNodeFlowScene(&painter, mScene, selectType, selectedNum);
 
-	nodeMap = node_scene->getNodeMap();
+	nodeMap = mNodeFlowScene->getNodeMap();
 
 	if (isDragging && selectType > 0 && !drawLineFlag)
 	{
@@ -334,7 +314,9 @@ void WtNodeFlowWidget::deleteNode(WtNode& n)
 	{
 		auto node = nodeData->getNode();
 
-		for (auto c : sceneConnections)
+		auto connections = mNodeFlowScene->getConnections();
+
+		for (auto c : connections)
 		{
 			std::cout << c.exportNode->objectId() << std::endl;
 
@@ -350,12 +332,6 @@ void WtNodeFlowWidget::deleteNode(WtNode& n)
 		mScene->deleteNode(node);
 	}
 }
-
-void WtNodeFlowWidget::disconnectionsFromNode(WtNode& node)
-{
-
-}
-
 
 void WtNodeFlowWidget::moveNode(WtNode& n, const Wt::WPointF& newLocation)
 {

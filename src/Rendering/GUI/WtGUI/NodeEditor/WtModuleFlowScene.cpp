@@ -302,6 +302,7 @@ void WtModuleFlowScene::showModuleFlow(std::shared_ptr<dyno::Node> node)
 							{
 								auto outBlock = moduleMap[outId];
 								createConnection(*inBlock, i, *outBlock, outFieldIndex, _painter);
+								addConnection(inBlock->getModule(), outBlock->getModule());
 							}
 						}
 					}
@@ -371,4 +372,12 @@ void WtModuleFlowScene::showGraphicsPipeline()
 	mActivePipeline = pipeline;
 
 	updateModuleGraphView();
+}
+
+void WtModuleFlowScene::addConnection(std::shared_ptr<dyno::Module> exportModule, std::shared_ptr<dyno::Module> inportModule)
+{
+	connectionData temp;
+	temp.exportModule = exportModule;
+	temp.inportModule = inportModule;
+	nodeConnections.push_back(temp);
 }

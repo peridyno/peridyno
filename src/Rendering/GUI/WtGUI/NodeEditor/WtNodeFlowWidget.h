@@ -9,15 +9,6 @@
 #include "WtFlowNodeData.h"
 #include "WtInteraction.h"
 
-//enum PortState { in, out };
-//
-//struct sceneConnection {
-//	std::shared_ptr<Node> exportNode;
-//	std::shared_ptr<Node> inportNode;
-//	connectionPointData inPoint;
-//	connectionPointData outPoint;
-//};
-
 class WtNodeFlowWidget : public WtFlowWidget
 {
 public:
@@ -54,11 +45,9 @@ protected:
 	void disconnect(std::shared_ptr<Node> exportNode, std::shared_ptr<Node> inportNode, connectionPointData inPoint, connectionPointData outPoint, WtNode* inWtNode, WtNode* outWtNode);
 
 protected:
-	WtNodeFlowScene* node_scene = nullptr;
+	WtNodeFlowScene* mNodeFlowScene = nullptr;
 	std::map<dyno::ObjectId, WtNode*> nodeMap;
 	WtNode* connectionOutNode;
 
 	std::shared_ptr<Node> mOutNode;
-
-	std::vector<sceneConnection> sceneConnections;
 };

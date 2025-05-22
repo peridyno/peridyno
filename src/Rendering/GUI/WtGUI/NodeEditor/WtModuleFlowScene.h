@@ -7,6 +7,7 @@
 #include <Node.h>
 #include <SceneGraph.h>
 #include <Object.h>
+#include "WtFlowWidget.h"
 //#include <QtGUI/NodeEditor/QtModuleFlowScene.cpp>
 
 enum class PipelineType {Reset, Animation, Graphics};
@@ -38,6 +39,11 @@ public:
 
 	void showGraphicsPipeline();
 
+	std::vector<connectionData> getConnections() { return nodeConnections; }
+
+private:
+	void addConnection(std::shared_ptr<dyno::Module> exportModule, std::shared_ptr<dyno::Module> inportModule);
+
 private:
 	Wt::WPainter* _painter;
 	std::shared_ptr<dyno::Node> mNode;
@@ -53,4 +59,6 @@ private:
 
 	float mDx = 100.0f;
 	float mDy = 50.0f;
+
+	std::vector<connectionData> nodeConnections;
 };

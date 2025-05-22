@@ -10,6 +10,7 @@
 #include "Action.h"
 #include "DirectedAcyclicGraph.h"
 #include "AutoLayoutDAG.h"
+#include "WtFlowWidget.h"
 
 using dyno::SceneGraph;
 
@@ -62,7 +63,12 @@ public:
 	 */
 	void reorderAllNodes();
 
+	std::vector<connectionData> getConnections() { return sceneConnections; }
+
 	//std::map<dyno::ObjectId, WtNode*> getNodeMap();
+
+private:
+	void addConnection(std::shared_ptr<dyno::Node> exportNode, std::shared_ptr<dyno::Node> inportNode);
 
 private:
 	void showThisNodeOnly(WtNode& n);
@@ -93,4 +99,6 @@ private:
 
 	bool _isSelectedPoint;
 	Wt::WPointF _mousePoint = Wt::WPointF(0, 0);
+
+	std::vector<connectionData> sceneConnections;
 };

@@ -13,7 +13,7 @@
 
 enum PortState { in, out };
 
-struct sceneConnection {
+struct connectionData {
 	std::shared_ptr<Node> exportNode;
 	std::shared_ptr<Node> inportNode;
 	std::shared_ptr<dyno::Module> exportModule;
