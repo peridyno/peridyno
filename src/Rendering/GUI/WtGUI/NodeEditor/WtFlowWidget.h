@@ -88,6 +88,4 @@ protected:
 
 	connectionPointData outPoint;
 	connectionPointData inPoint;
-
-	std::vector<sceneConnection> sceneConnections;
 };

@@ -1,5 +1,6 @@
 #include "WtModuleFlowWidget.h"
 #include "WtInteraction.h"
+#include <Wt/WMessageBox.h>
 
 WtModuleFlowWidget::WtModuleFlowWidget(std::shared_ptr<dyno::SceneGraph> scene)
 	: WtFlowWidget(scene)
@@ -65,11 +66,11 @@ void WtModuleFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 
 						if (node == outNode)
 						{
-							for (auto it = sceneConnections.begin(); it != sceneConnections.end(); )
+							for (auto it = nodeConnections.begin(); it != nodeConnections.end(); )
 							{
 								if (it->exportModule == mOutModule && it->inportModule == m.second->getModule() && it->inPoint.portIndex == outPoint.portIndex && it->outPoint.portIndex == exportPointData.portIndex)
 								{
-									it = sceneConnections.erase(it);
+									it = nodeConnections.erase(it);
 								}
 								else
 								{
@@ -187,7 +188,7 @@ void WtModuleFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 						temp.inportModule = mOutModule;
 						temp.inPoint = inPoint;
 						temp.outPoint = outPoint;
-						sceneConnections.push_back(temp);
+						nodeConnections.push_back(temp);
 						update();
 					}
 				}
@@ -204,7 +205,14 @@ void WtModuleFlowWidget::onKeyWentDown()
 	if (mNode == nullptr)
 		return;
 
-	return;
+	if (selectType > 0)
+	{
+		auto module = moduleMap[selectedNum]->getModule();
+		deleteModule(module);
+		selectType = -1;
+		selectedNum = 0;
+		updateAll();
+	}
 }
 
 void WtModuleFlowWidget::setNode(std::shared_ptr<dyno::Node> node)
@@ -216,18 +224,34 @@ void WtModuleFlowWidget::setNode(std::shared_ptr<dyno::Node> node)
 void WtModuleFlowWidget::addModule(std::shared_ptr<dyno::Module> new_module)
 {
 	if (mModuleFlowScene != nullptr)
-	{
 		mModuleFlowScene->addModule(new_module);
-	}
+
+	updateAll();
 }
 
-void WtModuleFlowWidget::deleteModule()
+void WtModuleFlowWidget::deleteModule(std::shared_ptr<dyno::Module> delete_module)
 {
 	if (mModuleFlowScene != nullptr)
 	{
-		//mModuleFlowScene->deleteModule();
+		for (auto c : nodeConnections)
+		{
+			std::cout << c.exportModule->getName() << std::endl;
+
+			if (c.exportModule == delete_module || c.inportModule == delete_module)
+			{
+				Wt::WMessageBox::show("Error",
+					"<p>Please disconnect before deleting the module </p>",
+					Wt::StandardButton::Ok);
+				return;
+			}
+		}
+
+		mModuleFlowScene->deleteModule(delete_module);
 	}
+
+	updateAll();
 }
+
 
 void WtModuleFlowWidget::moveModule(WtNode& n, const Wt::WPointF& newLocation)
 {

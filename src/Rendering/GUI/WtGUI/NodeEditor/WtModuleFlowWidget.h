@@ -18,7 +18,7 @@ public:
 
 	void addModule(std::shared_ptr<dyno::Module> new_module);
 
-	void deleteModule();
+	void deleteModule(std::shared_ptr<dyno::Module> delete_module);
 
 	void moveModule(WtNode& n, const Wt::WPointF& newLocation);
 
@@ -49,4 +49,6 @@ private:
 
 	int selectType = -1;
 	int selectedNum = 0;
+
+	std::vector<sceneConnection> nodeConnections;
 };

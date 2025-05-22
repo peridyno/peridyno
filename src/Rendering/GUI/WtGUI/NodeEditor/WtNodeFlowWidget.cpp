@@ -336,6 +336,8 @@ void WtNodeFlowWidget::deleteNode(WtNode& n)
 
 		for (auto c : sceneConnections)
 		{
+			std::cout << c.exportNode->objectId() << std::endl;
+
 			if (c.exportNode == node || c.inportNode == node)
 			{
 				Wt::WMessageBox::show("Error",

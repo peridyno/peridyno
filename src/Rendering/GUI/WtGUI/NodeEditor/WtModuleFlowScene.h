@@ -30,6 +30,8 @@ public:
 
 	void addModule(std::shared_ptr<dyno::Module> new_module);
 
+	void deleteModule(std::shared_ptr<dyno::Module> delete_module);
+
 	void showResetPipeline();
 
 	void showAnimationPipeline();

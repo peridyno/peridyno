@@ -59,4 +59,6 @@ protected:
 	WtNode* connectionOutNode;
 
 	std::shared_ptr<Node> mOutNode;
+
+	std::vector<sceneConnection> sceneConnections;
 };

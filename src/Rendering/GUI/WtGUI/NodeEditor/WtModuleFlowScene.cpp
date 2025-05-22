@@ -326,6 +326,17 @@ void WtModuleFlowScene::addModule(std::shared_ptr<dyno::Module> new_module)
 	}
 }
 
+void WtModuleFlowScene::deleteModule(std::shared_ptr<dyno::Module> delete_module)
+{
+	if (mActivePipeline == nullptr)
+		return;
+
+	if (mEditingEnabled && delete_module != nullptr)
+	{
+		mActivePipeline->popModule(delete_module);
+	}
+}
+
 void WtModuleFlowScene::showResetPipeline()
 {
 	auto pipeline = mNode->resetPipeline();

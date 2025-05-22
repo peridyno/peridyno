@@ -99,9 +99,21 @@ void WMainWindow::updateNodeGraphics()
 
 void WMainWindow::onKeyWentDown(const Wt::WKeyEvent& event)
 {
+
 	if (event.key() == Wt::Key::Delete || event.key() == Wt::Key::Backspace)
 	{
-		mNodeFlowWidget->onKeyWentDown();
+		if (tab->currentIndex() == 0)
+		{
+			mNodeFlowWidget->onKeyWentDown();
+		}
+		else if (tab->currentIndex() == 1)
+		{
+			mModuleFlowWidget->onKeyWentDown();
+		}
+		else
+		{
+			return;
+		}
 	}
 }
 
