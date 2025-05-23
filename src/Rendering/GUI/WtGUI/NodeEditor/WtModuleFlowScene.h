@@ -15,7 +15,7 @@ enum class PipelineType {Reset, Animation, Graphics};
 class WtModuleFlowScene : public WtFlowScene
 {
 public:
-	WtModuleFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::Node> node, PipelineType pipelineType);
+	WtModuleFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::Node> node, PipelineType pipelineType, std::shared_ptr<dyno::Module> states);
 	~WtModuleFlowScene();
 
 public:
@@ -40,6 +40,8 @@ public:
 	void showGraphicsPipeline();
 
 	std::vector<connectionData> getConnections() { return nodeConnections; }
+
+	//void setStates(std::shared_ptr<dyno::Module> states) { mStates = states; }
 
 private:
 	void addConnection(std::shared_ptr<dyno::Module> exportModule, std::shared_ptr<dyno::Module> inportModule);

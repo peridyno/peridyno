@@ -47,6 +47,8 @@ private:
 
 	PipelineType pipelineType = PipelineType::Animation;
 
+	std::shared_ptr<dyno::Module> mStates = nullptr;
+
 	int selectType = -1;
 	int selectedNum = 0;
 };

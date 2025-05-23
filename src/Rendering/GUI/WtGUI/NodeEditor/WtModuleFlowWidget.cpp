@@ -2,6 +2,18 @@
 #include "WtInteraction.h"
 #include <Wt/WMessageBox.h>
 
+namespace dyno
+{
+	class WtStates : public Module
+	{
+		DECLARE_CLASS(WtStates);
+	public:
+		WtStates() {};
+	};
+
+	IMPLEMENT_CLASS(WtStates);
+}
+
 WtModuleFlowWidget::WtModuleFlowWidget(std::shared_ptr<dyno::SceneGraph> scene)
 	: WtFlowWidget(scene)
 {
@@ -198,6 +210,19 @@ void WtModuleFlowWidget::onKeyWentDown()
 void WtModuleFlowWidget::setNode(std::shared_ptr<dyno::Node> node)
 {
 	mNode = node;
+
+	mStates = std::make_shared<dyno::WtStates>();
+
+	auto& fields = node->getAllFields();
+	for (auto field : fields)
+	{
+		if (field->getFieldType() == dyno::FieldTypeEnum::State
+			|| field->getFieldType() == dyno::FieldTypeEnum::In)
+		{
+			mStates->addOutputField(field);
+		}
+	}
+
 	update();
 }
 
@@ -271,12 +296,12 @@ void WtModuleFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 	{
 		if (reorderFlag)
 		{
-			mModuleFlowScene = new WtModuleFlowScene(&painter, mNode, pipelineType);
+			mModuleFlowScene = new WtModuleFlowScene(&painter, mNode, pipelineType, mStates);
 			mModuleFlowScene->reorderAllModules();
 			reorderFlag = false;
 		}
 
-		mModuleFlowScene = new WtModuleFlowScene(&painter, mNode, pipelineType);
+		mModuleFlowScene = new WtModuleFlowScene(&painter, mNode, pipelineType, mStates);
 		moduleMap = mModuleFlowScene->getNodeMap();
 	}
 

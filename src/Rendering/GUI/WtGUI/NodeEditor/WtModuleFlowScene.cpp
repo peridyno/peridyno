@@ -5,25 +5,16 @@
 
 #include "Object.h"
 
-namespace dyno
-{
-	class WtStates : public Module
-	{
-		DECLARE_CLASS(WtStates);
-	public:
-		WtStates() {};
-	};
 
-	IMPLEMENT_CLASS(WtStates);
-}
 
 Wt::WPointF SimStatePos = Wt::WPointF(0.0f, 0.0f);
 Wt::WPointF RenStatePos = Wt::WPointF(0.0f, 0.0f);
 
-WtModuleFlowScene::WtModuleFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::Node> node , PipelineType pipelineType)
+WtModuleFlowScene::WtModuleFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::Node> node , PipelineType pipelineType, std::shared_ptr<dyno::Module> states)
 	: _painter(painter)
 	, mNode(node)
 	, mPipelineType(pipelineType)
+	, mStates(states)
 {
 	if (node != nullptr)
 		showModuleFlow(mNode);
@@ -238,23 +229,28 @@ void WtModuleFlowScene::showModuleFlow(std::shared_ptr<dyno::Node> node)
 			//this->nodePlaced(node);
 		};
 
-	//Create a dummy module to store all state variables
-	mStates = std::make_shared<dyno::WtStates>();
+	////Create a dummy module to store all state variables
+	//mStates = std::make_shared<dyno::WtStates>();
 
-	auto& fields = node->getAllFields();
-	for (auto field : fields)
+	//auto& fields = node->getAllFields();
+	//for (auto field : fields)
+	//{
+	//	if (field->getFieldType() == dyno::FieldTypeEnum::State
+	//		|| field->getFieldType() == dyno::FieldTypeEnum::In)
+	//	{
+	//		mStates->addOutputField(field);
+	//	}
+	//}
+
+	if (mStates != nullptr)
 	{
-		if (field->getFieldType() == dyno::FieldTypeEnum::State
-			|| field->getFieldType() == dyno::FieldTypeEnum::In)
-		{
-			mStates->addOutputField(field);
-		}
+		Wt::WPointF pos = mActivePipeline == node->animationPipeline() ? SimStatePos : RenStatePos;
+		mStates->setBlockCoord(pos.x(), pos.y());
+
+		addModuleWidget(mStates);
 	}
 
-	Wt::WPointF pos = mActivePipeline == node->animationPipeline() ? SimStatePos : RenStatePos;
-	mStates->setBlockCoord(pos.x(), pos.y());
 
-	addModuleWidget(mStates);
 
 	for (auto m : modules)
 	{
