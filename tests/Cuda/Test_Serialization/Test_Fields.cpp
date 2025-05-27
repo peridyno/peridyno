@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "Field.h"
-#include "FilePath.h"
+#include "Field/FilePath.h"
 using namespace dyno;
 
 TEST(Fields, serialize)

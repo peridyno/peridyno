@@ -44,5 +44,12 @@ TEST(Capsule, obb)
 	TManifold<Real> manifold;
 	CollisionDetection<float>::request(manifold, cap, b0);
 
-	EXPECT_EQ(manifold.contactCount > 0, true);
+	EXPECT_EQ(manifold.contactCount == 0, true);
+
+	Capsule cap1 = Capsule(Coord3D(1.9, 0, 0), Quat1f(), 1, 1);
+	CollisionDetection<float>::request(manifold, cap1, b0);
+
+	EXPECT_EQ(manifold.contactCount == 2, true);
+
+	return;
 }

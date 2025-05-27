@@ -85,30 +85,30 @@ std::shared_ptr<SceneGraph> createScene()
 	// capsules[3] = capsule(Vec3f(-0.6f, 0.5f, 0.0f), 0.25f, 0.5f);
 	
 	
-	auto satC2C = scn->addNode(std::make_shared<CollisionDetector<DataType3f>>());
-	cubes[0]->connect(satC2C->importShapeB());
-	cubes[1]->connect(satC2C->importShapeA());
-
-	auto satS2S = scn->addNode(std::make_shared<CollisionDetector<DataType3f>>());
-	spheres[0]->connect(satS2S->importShapeB());
-	spheres[1]->connect(satS2S->importShapeA());
-
-	auto satCa2Ca = scn->addNode(std::make_shared<CollisionDetector<DataType3f>>());
-	capsules[0]->connect(satCa2Ca->importShapeB());
-	capsules[1]->connect(satCa2Ca->importShapeA());
+// 	auto satC2C = scn->addNode(std::make_shared<CollisionDetector<DataType3f>>());
+// 	cubes[0]->connect(satC2C->importShapeB());
+// 	cubes[1]->connect(satC2C->importShapeA());
+// 
+// 	auto satS2S = scn->addNode(std::make_shared<CollisionDetector<DataType3f>>());
+// 	spheres[0]->connect(satS2S->importShapeB());
+// 	spheres[1]->connect(satS2S->importShapeA());
+// 
+// 	auto satCa2Ca = scn->addNode(std::make_shared<CollisionDetector<DataType3f>>());
+// 	capsules[0]->connect(satCa2Ca->importShapeB());
+// 	capsules[1]->connect(satCa2Ca->importShapeA());
 
 	auto satC2Ca = scn->addNode(std::make_shared<CollisionDetector<DataType3f>>());
 	cubes[0]->connect(satC2Ca->importShapeB());
 	capsules[2]->connect(satC2Ca->importShapeA());
 
 
-	auto satC2S = scn->addNode(std::make_shared<CollisionDetector<DataType3f>>());
-	cubes[0]->connect(satC2S->importShapeB());
-	spheres[2]->connect(satC2S->importShapeA());
-
-	auto satCa2S = scn->addNode(std::make_shared<CollisionDetector<DataType3f>>());
-	capsules[0]->connect(satCa2S->importShapeB());
-	spheres[3]->connect(satCa2S->importShapeA());
+// 	auto satC2S = scn->addNode(std::make_shared<CollisionDetector<DataType3f>>());
+// 	cubes[0]->connect(satC2S->importShapeB());
+// 	spheres[2]->connect(satC2S->importShapeA());
+// 
+// 	auto satCa2S = scn->addNode(std::make_shared<CollisionDetector<DataType3f>>());
+// 	capsules[0]->connect(satCa2S->importShapeB());
+// 	spheres[3]->connect(satCa2S->importShapeA());
 	return scn;
 }
 
