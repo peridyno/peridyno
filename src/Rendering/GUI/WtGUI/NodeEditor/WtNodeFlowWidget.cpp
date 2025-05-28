@@ -47,10 +47,11 @@ void WtNodeFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 				if (existConnection != nullptr)
 				{
 					auto outNode = existConnection->getNode(PortType::Out);
-					for (auto it = mScene->begin(); it != mScene->end(); it++)
+
+					for (auto nodePair : nodeMap)
 					{
-						auto m = it.get();
-						auto node = nodeMap[m->objectId()];
+						auto node = nodePair.second;
+						auto nodePtr = node->getNode();
 						auto outPortIndex = existConnection->getPortIndex(PortType::Out);
 						auto exportPortsData = outNode->flowNodeData().getPointsData();
 						connectionPointData exportPointData;
@@ -65,20 +66,19 @@ void WtNodeFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 
 						if (node == outNode)
 						{
-							disconnect(m, mOutNode, outPoint, exportPointData, nodeMap[selectedNum], outNode);
+							disconnect(nodePtr, mOutNode, outPoint, exportPointData, nodeMap[selectedNum], outNode);
 							sourcePoint = getPortPosition(outNode->flowNodeData().getNodeOrigin(), exportPointData);
 
 						}
 					}
-
 				}
 			}
 		}
 		else
 		{
-			// selectType = 2: selected & drag
-			// selectType = 1: mouse move node
-			// selectType = -1: no select
+			/// selectType = 2: selected & drag
+			/// selectType = 1: mouse move node
+			/// selectType = -1: no select
 			selectType = 2;
 		}
 	}
@@ -104,17 +104,16 @@ void WtNodeFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
 	}
 	else
 	{
-		for (auto it = mScene->begin(); it != mScene->end(); it++)
+		auto mousePoint = Wt::WPointF(event.widget().x, event.widget().y);
+		for (auto nodePair : nodeMap)
 		{
-			auto m = it.get();
-			auto node = nodeMap[m->objectId()];
+			auto node = nodePair.second;
 			auto nodeData = node->flowNodeData();
-			auto mousePoint = Wt::WPointF(event.widget().x, event.widget().y);
 			if (checkMouseInRect(mousePoint, nodeData) && selectType != 2)
 			{
 				selectType = 1;
 				connectionOutNode = node;
-				selectedNum = m->objectId();
+				selectedNum = node->getNode()->objectId();
 				canMoveNode = true;
 				update();
 				break;
@@ -148,8 +147,8 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 
 		if (checkMouseInHotKey0(mousePoint, nodeData))
 		{
-			auto nodeWidget = dynamic_cast<WtNodeWidget*>(node->nodeDataModel());
-			auto m = nodeWidget->getNode();
+			auto m = node->getNode();
+
 			if (m->isVisible())
 			{
 				enableRendering(*node, false);
@@ -158,15 +157,13 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 			{
 				enableRendering(*node, true);
 			}
-			//mMainWindow->updateCanvas();
 			_updateCanvas.emit();
 			update();
 		}
 
 		if (checkMouseInHotKey1(mousePoint, nodeData))
 		{
-			auto nodeWidget = dynamic_cast<WtNodeWidget*>(node->nodeDataModel());
-			auto m = nodeWidget->getNode();
+			auto m = node->getNode();
 			if (m->isActive())
 			{
 				enablePhysics(*node, false);
@@ -186,10 +183,9 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 
 	if (drawLineFlag = true)
 	{
-		for (auto it = mScene->begin(); it != mScene->end(); it++)
+		for (auto nodePair : nodeMap)
 		{
-			auto m = it.get();
-			auto node = nodeMap[m->objectId()];
+			auto node = nodePair.second;
 			auto nodeData = node->flowNodeData();
 			if (checkMouseInPoints(mouseWentUpPosition, nodeData, PortState::in))
 			{
@@ -198,7 +194,7 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 				if (outPoint.portType == PortType::Out)
 				{
 					WtConnection connection(outPoint.portType, *connectionOutNode, outPoint.portIndex);
-					WtInteraction interaction(*connectionInNode, connection, *mNodeFlowScene, inPoint, outPoint, m, mOutNode);
+					WtInteraction interaction(*connectionInNode, connection, *mNodeFlowScene, inPoint, outPoint, node->getNode(), mOutNode);
 					if (interaction.tryConnect())
 					{
 						update();
@@ -261,14 +257,13 @@ void WtNodeFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 
 bool WtNodeFlowWidget::checkMouseInAllRect(Wt::WPointF mousePoint)
 {
-	for (auto it = mScene->begin(); it != mScene->end(); it++)
+	for (auto nodePair : nodeMap)
 	{
-		auto m = it.get();
-		auto node = nodeMap[m->objectId()];
+		auto node = nodePair.second;
 		auto nodeData = node->flowNodeData();
 		if (checkMouseInRect(mousePoint, nodeData))
 		{
-			selectedNum = m->objectId();
+			selectedNum = node->getNode()->objectId();
 			canMoveNode = true;
 			return true;
 		}
@@ -308,12 +303,10 @@ bool WtNodeFlowWidget::checkMouseInHotKey1(Wt::WPointF mousePoint, WtFlowNodeDat
 
 void WtNodeFlowWidget::deleteNode(WtNode& n)
 {
-	auto nodeData = dynamic_cast<WtNodeWidget*>(n.nodeDataModel());
+	auto node = n.getNode();
 
-	if (mEditingEnabled && nodeData != nullptr)
+	if (mEditingEnabled && node != nullptr)
 	{
-		auto node = nodeData->getNode();
-
 		auto connections = mNodeFlowScene->getConnections();
 
 		for (auto c : connections)
@@ -335,30 +328,30 @@ void WtNodeFlowWidget::deleteNode(WtNode& n)
 
 void WtNodeFlowWidget::moveNode(WtNode& n, const Wt::WPointF& newLocation)
 {
-	auto nodeData = dynamic_cast<WtNodeWidget*>(n.nodeDataModel());
+	auto node = n.getNode();
 
-	if (mEditingEnabled && nodeData != nullptr)
+	if (mEditingEnabled && node != nullptr)
 	{
-		auto node = nodeData->getNode();
 		node->setBlockCoord(newLocation.x(), newLocation.y());
 	}
 }
 
 void WtNodeFlowWidget::enableRendering(WtNode& n, bool checked)
 {
-	auto nodeData = dynamic_cast<WtNodeWidget*>(n.nodeDataModel());
+	auto node = n.getNode();
 
-	if (mEditingEnabled && nodeData != nullptr) {
-		auto node = nodeData->getNode();
+	if (mEditingEnabled && node != nullptr) 
+	{
 		node->setVisible(checked);
 	}
 }
 
 void WtNodeFlowWidget::enablePhysics(WtNode& n, bool checked)
 {
-	auto nodeData = dynamic_cast<WtNodeWidget*>(n.nodeDataModel());
-	if (mEditingEnabled && nodeData != nullptr) {
-		auto node = nodeData->getNode();
+	auto node = n.getNode();
+
+	if (mEditingEnabled && node != nullptr) 
+	{
 		node->setActive(checked);
 	}
 }

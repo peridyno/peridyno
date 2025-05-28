@@ -10,11 +10,13 @@
 Wt::WPointF SimStatePos = Wt::WPointF(0.0f, 0.0f);
 Wt::WPointF RenStatePos = Wt::WPointF(0.0f, 0.0f);
 
-WtModuleFlowScene::WtModuleFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::Node> node , PipelineType pipelineType, std::shared_ptr<dyno::Module> states)
+WtModuleFlowScene::WtModuleFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::Node> node , PipelineType pipelineType, std::shared_ptr<dyno::Module> states, int selectType, int selectNum)
 	: _painter(painter)
 	, mNode(node)
 	, mPipelineType(pipelineType)
 	, mStates(states)
+	, _selectType(selectType)
+	, _selectNum(selectNum)
 {
 	if (node != nullptr)
 		showModuleFlow(mNode);
@@ -217,7 +219,14 @@ void WtModuleFlowScene::showModuleFlow(std::shared_ptr<dyno::Node> node)
 
 			auto type = std::make_unique<WtModuleWidget>(m);
 
-			auto& node = this->createNode(std::move(type), _painter, -1);
+			int sType = -1;
+			if (_selectType)
+			{
+				if (_selectNum == mId)
+					sType = _selectType;
+			}
+
+			auto& node = this->createNode(std::move(type), _painter, sType);
 
 			node.setModule(m);
 
@@ -230,18 +239,6 @@ void WtModuleFlowScene::showModuleFlow(std::shared_ptr<dyno::Node> node)
 		};
 
 	////Create a dummy module to store all state variables
-	//mStates = std::make_shared<dyno::WtStates>();
-
-	//auto& fields = node->getAllFields();
-	//for (auto field : fields)
-	//{
-	//	if (field->getFieldType() == dyno::FieldTypeEnum::State
-	//		|| field->getFieldType() == dyno::FieldTypeEnum::In)
-	//	{
-	//		mStates->addOutputField(field);
-	//	}
-	//}
-
 	if (mStates != nullptr)
 	{
 		Wt::WPointF pos = mActivePipeline == node->animationPipeline() ? SimStatePos : RenStatePos;

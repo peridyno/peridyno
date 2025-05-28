@@ -115,25 +115,23 @@ void WtModuleFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
 	}
 	else
 	{
-		auto mlist = mNode->getModuleList();
 		auto mousePoint = Wt::WPointF(event.widget().x, event.widget().y);
-		for (const auto& module : mlist)
+		for (auto modulePair : moduleMap)
 		{
-			if (moduleMap.find(module->objectId()) != moduleMap.end())
+			auto m = modulePair.second;
+			auto moduleData = m->flowNodeData();
+			if (checkMouseInRect(mousePoint, moduleData) && selectType != 2)
 			{
-				auto m = moduleMap[module->objectId()];
-				auto moduleData = m->flowNodeData();
-				if (checkMouseInRect(mousePoint, moduleData) && selectType != 2)
-				{
-					selectType = 1;
-					connectionOutNode = m;
-					selectedNum = module->objectId();
-					canMoveNode = true;
-					update();
-					break;
-				}
+				selectType = 1;
+				connectionOutNode = m;
+				selectedNum = m->getModule()->objectId();
+				canMoveNode = true;
+				update();
+				break;
 			}
 		}
+
+
 	}
 }
 
@@ -296,12 +294,12 @@ void WtModuleFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 	{
 		if (reorderFlag)
 		{
-			mModuleFlowScene = new WtModuleFlowScene(&painter, mNode, pipelineType, mStates);
+			mModuleFlowScene = new WtModuleFlowScene(&painter, mNode, pipelineType, mStates, selectType, selectedNum);
 			mModuleFlowScene->reorderAllModules();
 			reorderFlag = false;
 		}
 
-		mModuleFlowScene = new WtModuleFlowScene(&painter, mNode, pipelineType, mStates);
+		mModuleFlowScene = new WtModuleFlowScene(&painter, mNode, pipelineType, mStates, selectType, selectedNum);
 		moduleMap = mModuleFlowScene->getNodeMap();
 	}
 
