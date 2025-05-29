@@ -294,10 +294,12 @@ namespace dyno
                 out[outCount++] = cv;
             }
             else if (Behind(da) && InFront(db))
-            {
-                cv.v = a.v + (b.v - a.v) * (da / (da - db));
-                out[outCount++] = cv;
-                out[outCount++] = b;
+			{
+				cv.v = a.v + (b.v - a.v) * (da / (da - db));
+				out[outCount++] = b;
+
+                //Remove the duplicated point in case inCount == 2
+                if (inCount > 2) out[outCount++] = cv;
             }
 
             a = b;
@@ -353,6 +355,50 @@ namespace dyno
 
         return outCount;
     }
+
+	template<typename Real>
+	DYN_FUNC int clipEdgeAgainstRectangle(ClipVertex* outVerts, float* outDepths, const Vector<Real, 3>& rPos, const Vector<Real, 3>& e, unsigned char* clipEdges, const SquareMatrix<Real, 3>& basis, ClipVertex* incident)
+	{
+		int inCount = 2;
+		int outCount;
+		ClipVertex in[2];
+		ClipVertex out[2];
+
+		for (int i = 0; i < inCount; ++i)
+			in[i].v = basis.transpose() * (incident[i].v - rPos);
+
+		outCount = orthographic(out, Real(1.0), e.x, 0, clipEdges[0], in, inCount);
+
+		if (outCount == 0)
+			return 0;
+
+		inCount = orthographic(in, Real(1.0), e.y, 1, clipEdges[1], out, outCount);
+
+		if (inCount == 0)
+			return 0;
+
+		outCount = orthographic(out, Real(-1.0), e.x, 0, clipEdges[2], in, inCount);
+
+		if (outCount == 0)
+			return 0;
+
+		inCount = orthographic(in, Real(-1.0), e.y, 1, clipEdges[3], out, outCount);
+
+		// Keep incident vertices behind the reference face
+		outCount = 0;
+		for (int i = 0; i < inCount; ++i)
+		{
+			Real d = in[i].v.z - e.z;
+
+			if (d <= Real(0.0))
+			{
+				outVerts[outCount].v = basis * in[i].v + rPos;
+				outDepths[outCount++] = d;
+			}
+		}
+
+		return outCount;
+	}
 
     //--------------------------------------------------------------------------------------------------
     template<typename Real>
@@ -3879,167 +3925,240 @@ namespace dyno
     }
 
     template<typename Real>
-    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Capsule3D& cap, const OBox3D& box)
+    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const OBox3D& box, const Capsule3D& cap)
     {
-        Segment3D c(cap.centerline());
-        Real r0 = cap.radius;
-
         m.contactCount = 0;
 
+        Vector<Real, 3> v = cap.center - box.center;
 
-        Segment3D s0(cap.centerline());
-        Segment3D ints = s0;
-        
-        int segInter = s0.intersect(box, ints);
-        
-        bool bInter = false;
+        Real capExtent = cap.halfLength;
+        Real radius = cap.radius;
+        Matrix3D rotCap = cap.rotation.toMatrix3x3();
 
-        // Check if intersection
-        if (segInter == 0)
+        Vector<Real, 3> boxExt = box.extent;
+
+		Matrix3D rotBox;
+        rotBox.setCol(0, box.u);
+        rotBox.setCol(1, box.v);
+        rotBox.setCol(2, box.w);
+
+		// Vector from capsule to box in box's space
+		Vector<Real, 3> t = rotBox.transpose() * v;
+
+        // Rotation of capsule in box's space
+        Matrix3D C = rotBox.transpose() * rotCap;
+
+        auto centerline = cap.centerline().direction();
+        Vector<Real, 3> nCapLocal = rotBox.transpose() * centerline.normalize();
+
+		bool parallel = false;
+		const float kCosTol = float(1.0e-6);
+        Matrix3D absC;
+        for (int i = 0; i < 3; ++i)
         {
-            Segment3D dir = s0.proximity(box);
-            Real sMax = dir.direction().norm() - r0;
-            //printf("Capsule 2 Box Broad: %.4f\n", sMax);
-            if (sMax < 0) bInter = true;
+            float val = abs(nCapLocal[i]);
+			if (val <= kCosTol)
+				parallel = true;
+
+            for (int j = 0; j < 3; ++j)
+            {
+                absC(i, j) = abs(C(i, j));
+            }
+        }
+
+        Matrix3D absC_t = absC.transpose();
+
+		// Query states
+		Real s;
+		Real bMax = -REAL_MAX;
+        Real eMax = -REAL_MAX;
+        Real dirMax = -REAL_MAX;
+		int bAxis = ~0;
+		int eAxis = ~0;
+        int dirAxis = ~0;
+		Vector<Real, 3> nB;
+		Vector<Real, 3> nE;
+        Vector<Real, 3> nDir;
+
+        // box's x axis
+        s = abs(t.x) - (box.extent.x + absC_t.col(0).dot(Vector<Real, 3>(0, capExtent, 0))) - radius;
+		if (trackFaceAxis(bAxis, bMax, nB, 0, s, rotBox.col(0)))
+			return;
+
+        // box's y axis
+		s = abs(t.y) - (box.extent.y + absC_t.col(1).dot(Vector<Real, 3>(0, capExtent, 0))) - radius;
+		if (trackFaceAxis(bAxis, bMax, nB, 1, s, rotBox.col(1)))
+            return;
+
+        // box's z axis
+		s = abs(t.z) - (box.extent.z + absC_t.col(2).dot(Vector<Real, 3>(0, capExtent, 0))) - radius;
+		if (trackFaceAxis(bAxis, bMax, nB, 2, s, rotBox.col(2)))
+            return;
+		
+        if (!parallel)
+        {
+			// Edge axis checks
+			float rA;
+			float rB;
+            Vector<Real, 3> eSepAxis;
+
+            // Cross( box.x, centerline )
+            eSepAxis = Vector<Real, 3>(Real(0), -nCapLocal.z, nCapLocal.y);
+			rA = boxExt.y * abs(nCapLocal.z) + boxExt.z * abs(nCapLocal.y);
+			rB = radius * eSepAxis.norm();
+			s = abs(t.z * nCapLocal.y - t.y * nCapLocal.z) - (rA + rB);
+			if (trackEdgeAxis(eAxis, eMax, nE, 3, s, eSepAxis))
+				return;
+
+			// Cross( box.y, centerline )
+			eSepAxis = Vector<Real, 3>(nCapLocal.z, Real(0), -nCapLocal.x);
+			rA = boxExt.x * abs(nCapLocal.z) + boxExt.z * abs(nCapLocal.x);
+			rB = radius * eSepAxis.norm();
+			s = abs(t.x * nCapLocal.z - t.z * nCapLocal.x) - (rA + rB);
+			if (trackEdgeAxis(eAxis, eMax, nE, 4, s, eSepAxis))
+				return;
+
+			// Cross( box.z, centerline )
+			eSepAxis = Vector<Real, 3>(-nCapLocal.y, nCapLocal.x, Real(0));
+			rA = boxExt.x * abs(nCapLocal.y) + boxExt.y * abs(nCapLocal.x);
+			rB = radius * eSepAxis.norm();
+			s = abs(t.y * nCapLocal.x - t.x * nCapLocal.y) - (rA + rB);
+			if (trackEdgeAxis(eAxis, eMax, nE, 5, s, eSepAxis))
+				return;
+        }
+
+        TSegment3D<Real> interSeg(Vector<Real, 3>(0), Vector<Real, 3>(0));
+        TSegment3D<Real> capCenterline = cap.centerline();
+        auto num = capCenterline.intersect(box, interSeg);
+        bool intersected = num > 0 || interSeg.lengthSquared() > REAL_EPSILON_SQUARED ? true : false;
+
+        TSegment3D<Real> prox;
+        if (!intersected)
+        {
+            prox = capCenterline.proximity(box);
+
+            Vector<Real, 3> dirSepAxis = prox.direction();
+            s = dirSepAxis.norm() * dirSepAxis.norm() - radius * dirSepAxis.norm();
+			if (trackEdgeAxis(dirAxis, dirMax, nDir, 6, s, dirSepAxis))
+				return;
+		}
+
+		// Artificial axis bias to improve frame coherence
+		const float kRelTol = float(0.95);
+		const float kAbsTol = float(0.01);
+        const float kAbsTol2 = float(0.00001);
+		int axis;
+		float sMax;
+        float ebMax = std::max(eMax, bMax);
+		Vector<Real, 3> n;
+
+        if (intersected)
+		{
+			axis = bAxis;
+			sMax = bMax;
+			n = nB;
         }
         else
         {
-            bInter = true;
+			if (dirMax > ebMax + kAbsTol2)
+			{
+				axis = dirAxis;
+				sMax = dirMax;
+				n = nDir;
+			}
+			else
+			{
+				if (kRelTol * eMax > bMax + kAbsTol)
+				{
+					axis = eAxis;
+					sMax = eMax;
+					n = nE;
+				}
+				else
+				{
+					axis = bAxis;
+					sMax = bMax;
+					n = nB;
+				}
+			}
         }
 
-        if (!bInter) return;
+		if (n.dot(v) < float(0.0))
+			n = -n;
 
-        // like SAT (Select collision direction)
-        { 
-            Real sMax = (Real)INT_MAX;
-            Real sIntersect; // >0
-            Real lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2;
-            Real l1, u1, l2, u2;
-            Vector<Real, 3> axis = Vector<Real, 3>(0, 1, 0);
-            Vector<Real, 3> axisTmp = axis;
+        if (axis < 3)
+        {
+            //Move the center line
+            Vector<Real, 3> p0 = capCenterline.startPoint() - radius * n;
+            Vector<Real, 3> p1 = capCenterline.endPoint() - radius * n;
 
-            Real boundary1, boundary2, b1, b2;
+            TSegment3D<Real> centerline_translated(p0, p1);
 
-            //u
-            axisTmp = box.u / box.u.norm();
-            if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, box, cap) == false)
-            {
-                m.contactCount = 0;
-                return;
-            }
-            else
-            {
-                if (sIntersect < sMax)
-                {
-                    sMax = sIntersect;
-                    lowerBoundary1 = l1;
-                    lowerBoundary2 = l2;
-                    upperBoundary1 = u1;
-                    upperBoundary2 = u2;
-                    boundary1 = b1;
-                    boundary2 = b2;
-                    axis = axisTmp;
-                }
-            }
-
-
-            //v
-            axisTmp = box.v / box.v.norm();
-            if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, box, cap) == false)
-            {
-                m.contactCount = 0;
-                return;
-            }
-            else
-            {
-                if (sIntersect < sMax)
-                {
-                    sMax = sIntersect;
-                    lowerBoundary1 = l1;
-                    lowerBoundary2 = l2;
-                    upperBoundary1 = u1;
-                    upperBoundary2 = u2;
-                    boundary1 = b1;
-                    boundary2 = b2;
-                    axis = axisTmp;
-                }
-            }
-
-            //w
-            axisTmp = box.w / box.w.norm();
-            if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, box, cap) == false)
-            {
-                m.contactCount = 0;
-                return;
-            }
-            else
-            {
-                if (sIntersect < sMax)
-                {
-                    sMax = sIntersect;
-                    lowerBoundary1 = l1;
-                    lowerBoundary2 = l2;
-                    upperBoundary1 = u1;
-                    upperBoundary2 = u2;
-                    boundary1 = b1;
-                    boundary2 = b2;
-                    axis = axisTmp;
-                }
-            }
+            TSegment3D<Real> centerline_inter;
+            auto num = centerline_translated.intersect(box, centerline_inter);
             
-            //dir generated by cross product from capsule and box
-            Vector<Real, 3> dirCap = c.direction();
-            for (int j = 0; j < 3; j++)
-            {
-                Vector<Real, 3> boxDir = (j == 0) ? (box.u) : ((j == 1) ? (box.v) : (box.w));
-                axisTmp = dirCap.cross(boxDir);
-                if (axisTmp.norm() > EPSILON)
-                {
-                    axisTmp /= axisTmp.norm();
-                }
-                else //parallel, choose an arbitary direction
-                {
-                    if (abs(dirCap[0]) > EPSILON)
-                        axisTmp = Vector<Real, 3>(dirCap[1], -dirCap[0], 0);
-                    else
-                        axisTmp = Vector<Real, 3>(0, dirCap[2], -dirCap[1]);
-                    axisTmp /= axisTmp.norm();
-                }
-                if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, box, cap) == false)
-                {
-                    m.contactCount = 0;
-                    return;
-                }
-                else
-                {
-                    if (sIntersect < sMax)
-                    {
-                        sMax = sIntersect;
-                        lowerBoundary1 = l1;
-                        lowerBoundary2 = l2;
-                        upperBoundary1 = u1;
-                        upperBoundary2 = u2;
-                        boundary1 = b1;
-                        boundary2 = b2;
-                        axis = axisTmp;
-                    }
-                }
-            }
+            ClipVertex incident[2];
+            incident[0].v = p0;
+            incident[1].v = p1;
 
+            Transform3D rtx(box.center, rotBox);
 
-            setupContactCaps(boundary1, boundary2, axis, cap, box, -sMax, m);
+			unsigned char clipEdges[4];
+			Matrix3D basis;
+			Vector<Real, 3> e;
+			computeReferenceEdgesAndBasis(clipEdges, &basis, &e, boxExt, rtx, n, axis);
 
-            //for (uint i = 0; i < m.contactCount; i++)
-            //{
-            //	m.contacts[i].position += (cap.radius + m.contacts[i].penetration) * m.normal;
-            //}
+			// Clip the incident face against the reference face side planes
+			ClipVertex out[2];
+			float depths[2];
+			int outNum;
+			outNum = clipEdgeAgainstRectangle(out, depths, rtx.translation(), e, clipEdges, basis, incident);
+
+			if (outNum)
+			{
+				m.contactCount = outNum;
+				m.normal = n;
+
+				for (int i = 0; i < outNum; ++i)
+				{
+                    m.contacts[i].position = out[i].v;
+					m.contacts[i].penetration = depths[i];
+				}
+			}
+        }
+        else if (axis < 6)
+        {
+			n = rotBox * n;
+
+			Vector<Real, 3> PA, QA;
+			computeSupportEdge(PA, QA, rotBox, box.center, boxExt, n);
+
+            Vector<Real, 3> PB = cap.startPoint();
+            Vector<Real, 3> QB = cap.endPoint();
+
+			Vector<Real, 3> CA, CB;
+			edgesContact(CA, CB, PA, QA, PB, QB);
+
+			m.normal = n;
+			m.contactCount = 1;
+
+			m.contacts[0].penetration = sMax;
+			m.contacts[0].position = CB - radius * n;
+        }
+        else
+        {
+			m.normal = n;
+			m.contactCount = 1;
+
+			m.contacts[0].penetration = sMax;
+			m.contacts[0].position = prox.v0 - radius * n;
         }
     }
 
     template<typename Real>
-    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const OBox3D& box, const Capsule3D& cap)
+    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Capsule3D& cap, const OBox3D& box)
     {
-        request(m, cap, box);
+        request(m, box, cap);
         
         swapContactPair(m);
     }

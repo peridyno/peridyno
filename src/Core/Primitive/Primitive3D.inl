@@ -2771,7 +2771,7 @@ namespace dyno
 		{
 			interSeg.v0 = v0 + t0 * lineDir;
 			interSeg.v1 = v0 + t1 * lineDir;
-			return 2;
+			return abs(t1 - t0) > EPSILON ? 2 : 1;
 		}
 		else if ((0.0f <= t1 && t1 <= 1.0f))
 		{
@@ -2787,6 +2787,8 @@ namespace dyno
 		}
 		else
 		{
+			interSeg.v0 = v0;
+			interSeg.v1 = v1;
 			return 0;
 		}
 	}

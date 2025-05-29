@@ -405,6 +405,9 @@ namespace dyno
 		DYN_FUNC TSegment3D(const Coord3D& p0, const Coord3D& p1);
 		DYN_FUNC TSegment3D(const TSegment3D<Real>& segment);
 
+		/**
+		 * @brief return a segment pointing from the input segment to the other primitive
+		 */
 		DYN_FUNC TSegment3D<Real> proximity(const TSegment3D<Real>& segment) const;
 
 		DYN_FUNC TSegment3D<Real> proximity(const TPlane3D<Real>& plane) const;

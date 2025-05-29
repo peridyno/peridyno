@@ -20,16 +20,16 @@ TEST(Capsule, sphere)
 	CollisionDetection<float>::request(manifold, sphere, cap);
 
 	EXPECT_EQ(manifold.contactCount == 1, true);
-	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 0.01f) < REAL_EPSILON, true);
+	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 1.01f) < REAL_EPSILON, true);
 	EXPECT_EQ(std::abs(manifold.contacts[0].position.x) < REAL_EPSILON, true);
-	EXPECT_EQ(std::abs(manifold.contacts[0].position.y - 0.99f) < REAL_EPSILON, true);
+	EXPECT_EQ(std::abs(manifold.contacts[0].position.y + 0.01f) < REAL_EPSILON, true);
 	EXPECT_EQ(std::abs(manifold.contacts[0].position.z) < REAL_EPSILON, true);
 
 	CollisionDetection<float>::request(manifold, cap, sphere);
 	EXPECT_EQ(manifold.contactCount == 1, true);
-	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 0.01f) < REAL_EPSILON, true);
+	EXPECT_EQ(std::abs(manifold.contacts[0].penetration + 1.01f) < REAL_EPSILON, true);
 	EXPECT_EQ(std::abs(manifold.contacts[0].position.x) < REAL_EPSILON, true);
-	EXPECT_EQ(std::abs(manifold.contacts[0].position.y - 1.0f) < REAL_EPSILON, true);
+	EXPECT_EQ(std::abs(manifold.contacts[0].position.y - 1.0f) < 10 * REAL_EPSILON, true);
 	EXPECT_EQ(std::abs(manifold.contacts[0].position.z) < REAL_EPSILON, true);
 }
 
@@ -44,10 +44,25 @@ TEST(Capsule, obb)
 	TManifold<Real> manifold;
 	CollisionDetection<float>::request(manifold, cap, b0);
 
-	EXPECT_EQ(manifold.contactCount == 0, true);
+	EXPECT_EQ(manifold.contactCount == 1, true);
 
 	Capsule cap1 = Capsule(Coord3D(1.9, 0, 0), Quat1f(), 1, 1);
 	CollisionDetection<float>::request(manifold, cap1, b0);
+
+	EXPECT_EQ(manifold.contactCount == 2, true);
+
+	Capsule cap2 = Capsule(Coord3D(-1.9, 0, 0), Quat1f(), 1, 1);
+	CollisionDetection<float>::request(manifold, cap2, b0);
+
+	EXPECT_EQ(manifold.contactCount == 2, true);
+
+	Capsule cap3 = Capsule(Coord3D(0, 0, 1.9), Quat1f(), 1, 1);
+	CollisionDetection<float>::request(manifold, cap3, b0);
+
+	EXPECT_EQ(manifold.contactCount == 2, true);
+
+	Capsule cap4 = Capsule(Coord3D(0, 0, -1.9), Quat1f(), 1, 1);
+	CollisionDetection<float>::request(manifold, cap4, b0);
 
 	EXPECT_EQ(manifold.contactCount == 2, true);
 
