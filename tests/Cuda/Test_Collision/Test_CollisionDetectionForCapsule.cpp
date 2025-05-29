@@ -68,3 +68,23 @@ TEST(Capsule, obb)
 
 	return;
 }
+
+TEST(Capsule, capsule)
+{
+	using Capsule = TCapsule3D<float>;
+
+	Capsule cap0 = Capsule(Coord3D(0, 0.0, 0), Quat1f(), 1, 1);
+	Capsule cap1 = Capsule(Coord3D(1.9, 0, 0), Quat1f(), 1, 1);
+
+	TManifold<Real> manifold;
+	CollisionDetection<float>::request(manifold, cap0, cap1);
+	EXPECT_EQ(manifold.contactCount == 2, true);
+	EXPECT_EQ(abs(manifold.contacts[0].penetration + 0.1) < EPSILON, true);
+
+	Capsule cap2 = Capsule(Coord3D(0, 3.9, 0), Quat1f(), 1, 1);
+	CollisionDetection<float>::request(manifold, cap0, cap2);
+	EXPECT_EQ(manifold.contactCount == 1, true);
+	EXPECT_EQ(abs(manifold.contacts[0].penetration + 0.1) < EPSILON, true);
+
+	return;
+}

@@ -3236,19 +3236,69 @@ namespace dyno
         Segment3D s1(cap1.centerline());
         Real r0 = cap0.radius + cap1.radius;
 
-        // From cap0 to cap1
-        Segment3D dir = s0.proximity(s1);
+        auto n0 = s0.direction().normalize();
+        auto n1 = s1.direction().normalize();
 
-        dir = Point3D(dir.endPoint()) - Point3D(dir.startPoint());
+        Vector<Real, 3> s0xs1 = n0.cross(n1);
 
-        Real sMax = dir.direction().norm() - r0;
-        if (sMax >= 0)
-            return;
+        Real absTol = Real(0.0001);
 
-        m.normal = dir.direction().normalize();
-        m.contacts[0].penetration = sMax;
-        m.contacts[0].position = dir.v0 + (cap0.radius + sMax) * m.normal;
-        m.contactCount = 1;
+        bool parallel = s0xs1.norm() < absTol ? true : false;
+        bool overlap = true;
+        //If parallel
+        if (parallel)
+		{
+            TLine3D<Real> line(s0.v0, s0.direction());
+
+			TPoint3D<Real> p0 = TPoint3D<Real>(s1.v0).project(line);
+			TPoint3D<Real> p1 = TPoint3D<Real>(s1.v1).project(line);
+
+            Vector<Real, 3> dir = s1.v0 - p0.origin;
+            Real d = dir.norm();
+            Real interpenetration = d - r0;
+
+            if (interpenetration >= 0)
+                return;
+
+			Real t0 = s0.parameter(p0.origin);
+			Real t1 = s0.parameter(p1.origin);
+
+            auto interval = Interval<Real>(0, 1).intersect(Interval<Real>(t0, t1));
+
+            if (!interval.isEmpty())
+            {
+				Vector<Real, 3> clamp_p0 = s0.v0 + interval.leftLimit() * s0.direction();
+				Vector<Real, 3> clamp_p1 = s0.v0 + interval.rightLimit() * s0.direction();
+
+				m.normal = dir.normalize();
+				m.contacts[0].penetration = interpenetration;
+				m.contacts[0].position = clamp_p0 + (cap0.radius + interpenetration) * m.normal;
+				m.contacts[1].penetration = interpenetration;
+				m.contacts[1].position = clamp_p1 + (cap0.radius + interpenetration) * m.normal;
+                m.contactCount = 2;
+            }
+            else
+            {
+                overlap = false;
+            }
+        }
+       
+        if (!parallel || (parallel && !overlap))
+        {
+			// From cap0 to cap1
+			Segment3D dir = s0.proximity(s1);
+
+			dir = Point3D(dir.endPoint()) - Point3D(dir.startPoint());
+
+			Real sMax = dir.direction().norm() - r0;
+			if (sMax >= 0)
+				return;
+
+			m.normal = dir.direction().normalize();
+			m.contacts[0].penetration = sMax;
+			m.contacts[0].position = dir.v0 + (cap0.radius + sMax) * m.normal;
+			m.contactCount = 1;
+        }
     }
 
 

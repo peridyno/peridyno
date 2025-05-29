@@ -190,7 +190,7 @@ namespace dyno
         DYN_FUNC static void request(Manifold& m, const Capsule3D& cap, const Sphere3D& sphere);
         
         //=========================================
-        DYN_FUNC static void request(Manifold& m, const Capsule3D& cap0, const Capsule3D& cap1);//untested
+        DYN_FUNC static void request(Manifold& m, const Capsule3D& cap0, const Capsule3D& cap1);
 
         DYN_FUNC static void request(Manifold& m, const Sphere3D& sphere, const Triangle3D& tri);//untested
         DYN_FUNC static void request(Manifold& m, const Triangle3D& tri, const Sphere3D& sphere);//untested
