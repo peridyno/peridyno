@@ -44,8 +44,5 @@ namespace dyno
 
 		emit fieldChanged();
 	}
-
-
-
 }
 

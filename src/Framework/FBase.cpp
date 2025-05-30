@@ -247,6 +247,16 @@ namespace dyno
 		return mTackTime < topField->mTickTime;
 	}
 
+	bool FBase::isActive()
+	{
+		return mActive;
+	}
+
+	void FBase::setActive(bool b)
+	{
+		mActive = b;
+	}
+
 	void FBase::tick()
 	{
 		FBase* topField = this->getTopField();

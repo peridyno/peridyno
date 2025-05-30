@@ -122,7 +122,7 @@ namespace dyno
 		std::vector<FBase*>& fields = module->getAllFields();
 		for  (FBase * var : fields)
 		{
-			if (var != nullptr) {
+			if (var != nullptr && var->isActive()) {
 				if (var->getFieldType() == FieldTypeEnum::Param)
 				{
 					if (var->getClassName() == std::string("FVar"))
@@ -238,7 +238,7 @@ namespace dyno
 		std::vector<FBase*>& fields = node->getAllFields();
 		for  (FBase * var : fields)
 		{
-			if (var != nullptr) {
+			if (var != nullptr && var->isActive()) {
 				if (var->getFieldType() == FieldTypeEnum::Param)
 				{
 					if (var->getClassName() == std::string("FVar"))

@@ -72,6 +72,9 @@ public:
 
 	bool isModified();
 
+	bool isActive();
+	void setActive(bool b);
+
 	void tick();
 	void tack();
 
@@ -151,6 +154,8 @@ private:
 
 	bool m_autoDestroyable = true;
 	bool m_derived = false;
+
+	bool mActive = true;
 
 	float m_min = -FLT_MAX;
 	float m_max = FLT_MAX;
