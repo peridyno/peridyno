@@ -41,6 +41,8 @@ namespace dyno
 		this->varHeight()->setRange(0, 100);
 		this->varHeightSegment()->setRange(1, 10000);
 
+		this->varScale()->setRange(0.001, 100);
+
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&CapsuleModel<TDataType>::varChanged, this));
 
 
