@@ -301,7 +301,7 @@ namespace dyno
 		//Setup a sphere primitive
 		TSphere3D<Real> ball;
 		ball.center = center;
-		ball.radius = radius;
+		ball.radius = radius * s;
 		this->outSphere()->setValue(ball);
 
 		if (this->varType()->getDataPtr()->currentKey() == SphereType::Icosahedron)

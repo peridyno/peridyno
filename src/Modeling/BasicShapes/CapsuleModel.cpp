@@ -78,6 +78,8 @@ namespace dyno
 		this->stateTriangleSet()->promoteOuput();
 		this->statePolygonSet()->promoteOuput();
 
+		tempScale = this->varScale()->getValue();
+
 	}
 
 	template<typename TDataType>
@@ -133,10 +135,24 @@ namespace dyno
 		auto rot = this->varRotation()->getValue();
 		auto scale = this->varScale()->getValue();
 
-		auto radius = this->varRadius()->getValue();
+		Real radiusScale = scale.x;
+
+		if (scale.x != tempScale.x ) 
+		{
+			radiusScale = scale.x;
+		}
+		else if (scale.z != tempScale.z)
+		{
+			radiusScale = scale.z;
+
+		}
+		tempScale = Vec3f(radiusScale, scale.y, radiusScale);
+		this->varScale()->setValue(Coord(tempScale), false);
+
+		auto radius = this->varRadius()->getValue() * radiusScale;
 		auto latitude = this->varLatitude()->getValue();
 		auto longitude = this->varLongitude()->getValue();
-		Real halfHeight = this->varHeight()->getValue() / 2;
+		Real halfHeight = this->varHeight()->getValue() / 2 * scale.y;
 		auto row = this->varHeightSegment()->getValue();
 
 		Quat<Real> q = this->computeQuaternion();
@@ -145,6 +161,11 @@ namespace dyno
 		TCapsule3D<Real> capsulePrim = TCapsule3D<Real>(center, q, radius, halfHeight);
 
 		this->outCapsule()->setValue(capsulePrim);
+
+
+
+
+
 
 		auto polySet = this->statePolygonSet()->getDataPtr();
 
@@ -359,7 +380,7 @@ namespace dyno
 			int numpt = vertices.size();
 
 			for (int i = 0; i < numpt; i++) {
-				vertices[i] = RV(vertices[i] * scale + RV(center));
+				vertices[i] = RV(vertices[i] + RV(center));
 			}
 
 			polySet->setPoints(vertices);
