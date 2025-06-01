@@ -285,10 +285,10 @@ namespace dyno
             // B
             if (On(da) || On(db))
             {
-                if (InFront(db)) 
+                if (InFront(db) || On(db)) 
                     out[outCount++] = b;
             }
-            else if (((InFront(da) && InFront(db))))
+            else if ((InFront(da) && InFront(db)))
             {
                 out[outCount++] = b;
             }
