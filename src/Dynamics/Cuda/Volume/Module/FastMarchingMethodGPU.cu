@@ -196,6 +196,7 @@ namespace dyno
 			pointType(i, j, k) = GridType::Tentative;
 	}
 
+	//Refer to Algorithm 1.3 in "Improved Fast Iterative Algorithm for Eikonal Equation for GPU Computing", Yuhao Huang 2021
 	template<typename Real, typename Coord, typename TDataType>
 	__global__ void FSMI_BooleanOp(
 		DArray3D<Real> distance,
@@ -232,7 +233,7 @@ namespace dyno
 		case 0://A intersect B
 			op = a > b ? a : b;
 			type(i, j, k) = (a <= 0 && b <= 0) ? GridType::Accepted : GridType::Infinite;
-			outside(i, j, k) = (a <= 0 && b <= 0) ? true : false;
+			outside(i, j, k) = (a <= 0 && b <= 0) ? false : true;
 			break;
 		case 1://A union B
 			op = a > b ? b : a;
@@ -242,7 +243,7 @@ namespace dyno
 		case 2://A minus B
 			op = a > -b ? a : -b;
 			type(i, j, k) = (a <= 0 && -b <= 0) ? GridType::Accepted : GridType::Infinite;
-			outside(i, j, k) = (a <= 0 && -b <= 0) ? true : false;
+			outside(i, j, k) = (a <= 0 && -b <= 0) ? false : true;
 			break;
 		default:
 			break;

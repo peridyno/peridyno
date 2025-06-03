@@ -6,6 +6,29 @@
 
 namespace dyno
 {
+// Axes are:
+//
+//      y
+//      |     
+//      |   
+//      | 
+//      +----- x
+//	  /
+//	 /
+//  z
+
+// Vertex and edge layout:
+//
+//            3             2
+//            +-------------+               +-----2-------+   
+//          / |           / |             / |            /|   
+//        /   |         /   |          11   3         10   1
+//    7 +-----+-------+  6  |         +-----+6------+     |   
+//      |   0 +-------+-----+ 1       |     +-----0-+-----+   
+//      |   /         |   /           7   8         5   9
+//      | /           | /             | /           | /       
+//    4 +-------------+ 5             +------4------+         
+
 	__device__
 	uint edgeTable[256] =
 	{
@@ -1106,7 +1129,7 @@ namespace dyno
 		vertlist[8] = vertexInterp(scalar[8], v[0], v[4], field[0], field[4], d0, d4);
 		vertlist[9] = vertexInterp(scalar[9], v[1], v[5], field[1], field[5], d1, d5);
 		vertlist[10] = vertexInterp(scalar[10], v[2], v[6], field[2], field[6], d2, d6);
-		vertlist[11] = vertexInterp(scalar[10], v[3], v[7], field[3], field[7], d3, d7);
+		vertlist[11] = vertexInterp(scalar[11], v[3], v[7], field[3], field[7], d3, d7);
 
 		int index1D = i + j * (nx - 1) + k * (nx - 1) * (ny - 1);
 
