@@ -25,3 +25,6 @@
 [submodule "data"]
 	path = data
 	url = https://gitee.com/peridyno/data.git
+[submodule "external/partio"]
+	path = external/partio
+	url = https://github.com/wdas/partio.git

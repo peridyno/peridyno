@@ -149,7 +149,8 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	if(PERIDYNO_LIBRARY_PLUGIN)
 		option(PERIDYNO_PLUGIN_ALEMBIC "Enable binding the abc exporter library" OFF)
 		option(PERIDYNO_PLUGIN_GMSH "Enable binding the Gmsh library" OFF)
-		
+		option(PERIDYNO_PLUGIN_PARTIO "Enable binding the partio library (.BGEO)" OFF)
+
 		if(PERIDYNO_PLUGIN_ALEMBIC)
 			add_subdirectory(external/Imath)
 			add_subdirectory(external/alembic/)
@@ -158,6 +159,10 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 		if(PERIDYNO_PLUGIN_GMSH)
 			add_subdirectory(external/gmsh-fork)
 		endif()
+		
+		if(PERIDYNO_PLUGIN_PARTIO)
+			add_subdirectory(external/partio)
+		endif()				
 	endif()
 
 	# VTK rendering support, off by default
