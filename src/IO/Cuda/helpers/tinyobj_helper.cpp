@@ -7,7 +7,7 @@
 
 namespace dyno
 {
-	bool loadTextureMeshFromObj(std::shared_ptr<TextureMesh> texMesh, const FilePath& fullname)
+	bool loadTextureMeshFromObj(std::shared_ptr<TextureMesh> texMesh, const FilePath& fullname, bool dotransform)
 	{
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
@@ -133,6 +133,8 @@ namespace dyno
 			tShapes[sId]->texCoordIndex.assign(texCoordIndex);
 
 			auto shapeCenter = (lo + hi) / 2;
+			if(!dotransform)
+				shapeCenter = Vec3f(0);
 			tShapes[sId]->boundingBox = TAlignedBox3D<Real>(lo, hi);
 			tShapes[sId]->boundingTransform = Transform3f(shapeCenter, Quat1f().toMatrix3x3());
 

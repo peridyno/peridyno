@@ -75,6 +75,8 @@ namespace dyno
 		DArray<Tet3D> tets,
 		DArray<Capsule3D> caps,
 		DArray<Triangle3D> tris,
+		DArray<MedialCone3D> cones,
+		DArray<MedialSlab3D> slabs,
 		ElementOffset elementOffset,
 		Real boundary_expand)
 	{
@@ -112,6 +114,16 @@ namespace dyno
 			box = tris[tId - elementOffset.triangleIndex()].aabb();
 			break;
 		}
+		case ET_MEDIALCONE:
+		{
+			box = cones[tId - elementOffset.medialConeIndex()].aabb();
+			break;
+		}
+		case ET_MEDIALSLAB:
+		{
+			box = slabs[tId - elementOffset.medialSlabIndex()].aabb();
+			break;
+		}
 		default:
 			break;
 		}
@@ -145,6 +157,8 @@ namespace dyno
 		DArray<TopologyModule::Tetrahedron> tet_element_ids,
 		DArray<Capsule3D> caps,
 		DArray<Triangle3D> triangles,
+		DArray<MedialCone3D> cones,
+		DArray<MedialSlab3D> slabs,
 		DArray<Attribute> attribute,
 		DArray<Pair<uint, uint>> shape2RigidBodyMapping,
 		ElementOffset elementOffset,
@@ -418,7 +432,35 @@ namespace dyno
 			Real radius = cap.radius;
 			CollisionDetection<Real>::request(manifold, seg, sphere, radius + dHat, dHat);
 		}
-		
+		else if (eleType_i == ET_MEDIALCONE && eleType_j == ET_MEDIALCONE && checkCollision(mask_i, mask_j, ET_MEDIALCONE, ET_MEDIALCONE))			//medial-cone-cone
+		{
+			auto cone1 = cones[ids.bodyId1 - elementOffset.medialConeIndex()];
+			auto cone2 = cones[ids.bodyId2 - elementOffset.medialConeIndex()];
+
+			CollisionDetection<Real>::request(manifold, cone1, cone2);
+		}
+		else if (eleType_i == ET_MEDIALCONE && eleType_j == ET_MEDIALSLAB && checkCollision(mask_i, mask_j, ET_MEDIALCONE, ET_MEDIALSLAB))			//medial-cone-slab
+		{
+			auto cone = cones[ids.bodyId1 - elementOffset.medialConeIndex()];
+			auto slab = slabs[ids.bodyId2 - elementOffset.medialSlabIndex()];
+
+			CollisionDetection<Real>::request(manifold, cone, slab);
+		}
+		else if (eleType_i == ET_MEDIALSLAB && eleType_j == ET_MEDIALCONE && checkCollision(mask_i, mask_j, ET_MEDIALSLAB, ET_MEDIALCONE))			//medial-slab-cone
+		{
+			auto cone = cones[ids.bodyId2 - elementOffset.medialConeIndex()];
+			auto slab = slabs[ids.bodyId1 - elementOffset.medialSlabIndex()];
+
+			CollisionDetection<Real>::request(manifold, slab, cone);	
+		}
+		else if (eleType_i == ET_MEDIALSLAB && eleType_j == ET_MEDIALSLAB && checkCollision(mask_i, mask_j, ET_MEDIALSLAB, ET_MEDIALSLAB))			//medial-slab-slab
+		{
+			auto slab1 = slabs[ids.bodyId1 - elementOffset.medialSlabIndex()];
+			auto slab2 = slabs[ids.bodyId2 - elementOffset.medialSlabIndex()];
+
+			CollisionDetection<Real>::request(manifold, slab1, slab2);
+		}
+
 		count[tId] = manifold.contactCount;
 
 		//printf("%d %d; num: %d \n", mappedId1, mappedId2, manifold.contactCount);
@@ -533,6 +575,8 @@ namespace dyno
 		DArray<Tet3D>& tetInGlobal = inTopo->tetsInGlobal();
 		DArray<Capsule3D>& capsuleInGlobal = inTopo->capsulesInGlobal();
 		DArray<Triangle3D>& triangleInGlobal = inTopo->trianglesInGlobal();
+		DArray<MedialCone3D>& coneInGlobal = inTopo->medialConesInGlobal();
+		DArray<MedialSlab3D>& slabInGlobal = inTopo->medialSlabsInGlobal();
 
 		cuExecute(t_num,
 			NEQ_SetupAABB,
@@ -542,6 +586,8 @@ namespace dyno
 			tetInGlobal,
 			capsuleInGlobal,
 			triangleInGlobal,
+			coneInGlobal,
+			slabInGlobal,
 			elementOffset,
 			dHat);
 
@@ -615,6 +661,8 @@ namespace dyno
 					inTopo->getTetElementMapping(),
 					capsuleInGlobal,
 					triangleInGlobal,
+					coneInGlobal,
+					slabInGlobal,
 					this->inAttribute()->getData(),
 					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
@@ -639,6 +687,8 @@ namespace dyno
 					inTopo->getTetElementMapping(),
 					capsuleInGlobal,
 					triangleInGlobal,
+					coneInGlobal,
+					slabInGlobal,
 					dummyAttribute,
 					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
@@ -666,6 +716,8 @@ namespace dyno
 					inTopo->getTetElementMapping(),
 					capsuleInGlobal,
 					triangleInGlobal,
+					coneInGlobal,
+					slabInGlobal,
 					this->inAttribute()->getData(),
 					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
@@ -690,6 +742,8 @@ namespace dyno
 					inTopo->getTetElementMapping(),
 					capsuleInGlobal,
 					triangleInGlobal,
+					coneInGlobal,
+					slabInGlobal,
 					dummyAttribute,
 					inTopo->shape2RigidBodyMapping(),
 					elementOffset,

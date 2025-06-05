@@ -5667,4 +5667,337 @@ namespace dyno
         request(m, sphere, tri);
         m.normal *= -1;
     }
+
+    template<typename Real> 
+    DYN_FUNC bool solveLinearSystem22(
+        Real m00, Real m01,
+        Real m10, Real m11,
+        Real v0,  Real v1, 
+        Real& s, Real& t) 
+    {
+        // Calculate determinant directly to avoid matrix construction
+        const Real det = m00 * m11 - m01 * m10;
+        
+        // Check matrix singularity with relative tolerance
+        if (abs(det) < Real(100) * std::numeric_limits<Real>::epsilon()) {
+            return false;
+        }
+
+        // Compute inverse elements explicitly
+        const Real invDet = Real(1) / det;
+        
+        // Solve using Cramer's rule
+        s = (m11 * v0 - m01 * v1) * invDet;
+        t = (m00 * v1 - m10 * v0) * invDet;
+
+        return true;
+    }
+
+    template<typename Real>
+    DYN_FUNC Real minimizeQuardratic1D(Real a, Real b, Real c, Real& t_min)
+    {
+        if (std::abs(a) < EPSILON) {
+            if (b > 0.0) { 
+                t_min = 0.0;
+                return c;
+            }
+            else {
+                t_min = 1.0;
+                return a + b + c; 
+            }
+        }
+
+
+        double t_vertex = -b / (2.0 * a);
+
+
+        t_min = clamp(t_vertex, 0.0, 1.0);
+
+ 
+        double f0 = c; // f(0)
+        double f1 = a + b + c; // f(1)
+        double f_tmin = a * t_min * t_min + b * t_min + c;
+
+
+        if (f_tmin <= f0 && f_tmin <= f1) {
+            return f_tmin; 
+        }
+        else if (f0 <= f1) {
+            t_min = 0.0;
+            return f0;
+        }
+        else {
+            t_min = 1.0;
+            return f1; 
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const MedialCone3D& cone1, const MedialCone3D& cone2)
+    {
+        m.contactCount = 0;
+
+        Vec3f positionOffset = (cone1.v[0] + cone1.v[1] + cone2.v[0] + cone2.v[1]) / 4.0f;
+
+        Vec3f cone1_p1 = cone1.v[0] - positionOffset;
+        Vec3f cone1_p2 = cone1.v[1] - positionOffset;
+        Vec3f cone2_p1 = cone2.v[0] - positionOffset;
+        Vec3f cone2_p2 = cone2.v[1] - positionOffset;
+
+        Segment3D seg1(cone1_p1, cone1_p2);
+        Segment3D seg2(cone2_p1, cone2_p2);
+
+        Vec3f vA = seg1.direction();
+        Vec3f vB = seg2.direction();
+        Vec3f w0 = seg1.startPoint() - seg2.startPoint();
+        
+        Real drA = cone1.radius[1] - cone1.radius[0];
+        Real drB = cone2.radius[1] - cone2.radius[0];
+        Real r0Sum = cone1.radius[0] + cone2.radius[0];
+
+        // construct 2D function
+        Real squaredTermS = vA.dot(vA) - drA * drA;
+        Real squaredTermT = vB.dot(vB) - drB * drB;
+        Real crossTermST = -2.0 * vA.dot(vB) - 2.0 * drA * drB;
+        Real linearTermS = 2.0 * vA.dot(w0) - 2.0 * drA * (r0Sum);
+        Real linearTermT = -2.0 * vB.dot(w0) - 2.0 * drB * (r0Sum);
+        Real constantTerm = w0.dot(w0) - r0Sum * r0Sum;
+
+        auto evaluateH = [&](Real s, Real t) -> Real { return s * s * squaredTermS + s * t * crossTermST + t * t * squaredTermT + s * linearTermS + t * linearTermT + constantTerm; };
+
+        Real min_H = constantTerm;
+
+        Real s_unc = 0, t_unc = 0;
+
+        if(solveLinearSystem22(2.0f * squaredTermS, crossTermST, crossTermST, 2.0f * squaredTermT, -linearTermS, -linearTermT, s_unc, t_unc))
+        {
+            if (s_unc > EPSILON && s_unc < 1.0 - EPSILON && t_unc > EPSILON && t_unc < 1.0 - EPSILON)
+            {
+                if (min_H > evaluateH(s_unc, t_unc))
+                {
+                    min_H = evaluateH(s_unc, t_unc);
+                }
+            }
+        }
+
+        Real s_bound, t_bound;
+        Real h_bound;
+        
+        // H(0, t)
+        h_bound = minimizeQuardratic1D(squaredTermT, linearTermT, constantTerm, t_bound);
+        if (min_H > h_bound)
+        {
+            min_H = h_bound;
+            s_unc = 0.0f;
+            t_unc = t_bound;
+        }
+
+        // H(s, 0)
+        h_bound = minimizeQuardratic1D(squaredTermS, linearTermS, constantTerm, s_bound);
+        if (min_H > h_bound)
+        {
+            min_H = h_bound;
+            s_unc = s_bound;
+            t_unc = 0.0f;
+        }
+        
+        // H(s, 1)
+        h_bound = minimizeQuardratic1D(squaredTermS, linearTermS + crossTermST, constantTerm + squaredTermT + linearTermT, s_bound);
+        if (min_H > h_bound)
+        {
+            min_H = h_bound;
+            s_unc = s_bound;
+            t_unc = 1.0f;
+        }
+
+        // H(1, t)
+        h_bound = minimizeQuardratic1D(squaredTermT, linearTermT + crossTermST, constantTerm + squaredTermS + linearTermS, t_bound);
+        if (min_H > h_bound)
+        {
+            min_H = h_bound;
+            s_unc = 1.0f;
+            t_unc = t_bound;
+        }
+
+        if(min_H <= EPSILON)
+        {
+            Vec3f proj1 = cone1.v[0] + vA * s_unc;
+            Vec3f proj2 = cone2.v[0] + vB * t_unc;
+            Real r_proj1 = cone1.radius[0] + drA * s_unc;
+            Real r_proj2 = cone2.radius[0] + drB * t_unc;
+            Vec3f normal = (proj2 - proj1);
+            normal.normalize();
+            m.normal = normal;
+            Vec3f contactPos = proj2 - normal * r_proj2;
+            Real dep = (proj2 - proj1).norm() - r_proj1 - r_proj2;
+            m.pushContact(contactPos, dep);
+        }
+    }
+
+
+    template<typename Real>
+    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const MedialSlab3D& slab, const Sphere3D& sphere, int tag)
+    {
+        m.contactCount = 0;
+
+        Vec3f positionOffset = (slab.v[0] + slab.v[1] + slab.v[2] + sphere.center) / 4.0f;
+
+        Vec3f slab_p1 = slab.v[0] - positionOffset;
+        Vec3f slab_p2 = slab.v[1] - positionOffset;
+        Vec3f slab_p3 = slab.v[2] - positionOffset;
+        Vec3f sphere_p = sphere.center - positionOffset;
+
+        Vec3f v0 = slab_p1 - sphere_p;
+        Vec3f v1 = slab_p2 - slab_p1;
+        Vec3f v2 = slab_p3 - slab_p1;
+
+        Real s0 = slab.radius[0] + sphere.radius;
+        Real s1 = slab.radius[1] - slab.radius[0];
+        Real s2 = slab.radius[2] - slab.radius[0];
+
+        Real squaredTermS = v1.dot(v1) - s1 * s1;
+        Real squaredTermT = v2.dot(v2) - s2 * s2;
+        Real crossTermST = 2.0f * (v1.dot(v2) - s1 * s2);
+        Real linearTermS = 2.0f * (v0.dot(v1) - s0 * s1);
+        Real linearTermT = 2.0f * (v0.dot(v2) - s0 * s2);
+        Real constantTerm = v0.dot(v0) - s0 * s0;
+
+        auto evaluateH = [&](Real s, Real t) -> Real { return s * s * squaredTermS + s * t * crossTermST + t * t * squaredTermT + s * linearTermS + t * linearTermT + constantTerm; };
+
+        Real min_H = constantTerm;
+
+        Real s_unc = 0, t_unc = 0;
+
+        if(solveLinearSystem22(2.0f * squaredTermS, crossTermST, crossTermST, 2.0f * squaredTermT, -linearTermS, -linearTermT, s_unc, t_unc))
+        {
+            if(s_unc > EPSILON && s_unc < 1.0 - EPSILON && t_unc > EPSILON && t_unc < 1.0 - EPSILON)
+            {
+                if(min_H > evaluateH(s_unc, t_unc))
+                {
+                    min_H = evaluateH(s_unc, t_unc);
+                }
+            }
+        }
+
+        Real s_bound, t_bound;
+        Real h_bound;
+
+        // H(0, t)
+        h_bound = minimizeQuardratic1D(squaredTermT, linearTermT, constantTerm, t_bound);
+        if(min_H > h_bound)
+        {
+            min_H = h_bound;
+            s_unc = 0.0f;
+            t_unc = t_bound;
+        }
+
+        // H(s, 0)
+        h_bound = minimizeQuardratic1D(squaredTermS, linearTermS, constantTerm, s_bound);
+        if(min_H > h_bound)
+        {
+            min_H = h_bound;
+            s_unc = s_bound;
+            t_unc = 0.0f;
+        }
+
+        // H(s, 1-s)
+        h_bound = minimizeQuardratic1D(squaredTermS + squaredTermT - crossTermST, -2.0f * squaredTermT + crossTermST + linearTermS - linearTermT, constantTerm + squaredTermT + linearTermT, s_bound);
+        if (min_H > h_bound)
+        {
+            min_H = h_bound;
+            s_unc = s_bound;
+            t_unc = 1.0f - s_bound;
+        }
+
+        if(min_H <= EPSILON)
+        {
+            Vec3f proj1 = slab_p1 * (1.0f - s_unc - t_unc) + slab_p2 * s_unc + slab_p3 * t_unc;
+            Vec3f proj2 = sphere.center;
+            Real r_proj1 = slab.radius[0] * (1.0f - s_unc - t_unc) + slab.radius[1] * s_unc + slab.radius[2] * t_unc;
+            Real r_proj2 = sphere.radius;
+            
+            if(tag == 1)
+            {
+                Vec3f normal = (proj2 - proj1);
+                normal.normalize();
+                Real dep = (proj2 - proj1).norm() - r_proj1 - r_proj2;
+                Vec3f contactPos = proj2 - normal * r_proj2 + positionOffset;
+                m.pushContact(contactPos, dep);
+            }
+            else {
+                Vec3f normal = (proj1 - proj2);
+                normal.normalize();
+                Real dep = (proj1 - proj2).norm() - r_proj1 - r_proj2;
+                Vec3f contactPos = proj1 - normal * r_proj1 + positionOffset;
+                m.pushContact(contactPos, dep);
+            }
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const MedialSlab3D& slab, const MedialCone3D& cone)
+    {
+        Sphere3D sphereOfCone0(cone.v[0], cone.radius[0]);
+        Sphere3D sphereOfCone1(cone.v[1], cone.radius[1]);
+
+        MedialCone3D coneOfSlab0(slab.v[0], slab.v[1], slab.radius[0], slab.radius[1]);
+        MedialCone3D coneOfSlab1(slab.v[1], slab.v[2], slab.radius[1], slab.radius[2]);
+        MedialCone3D coneOfSlab2(slab.v[2], slab.v[0], slab.radius[2], slab.radius[0]);
+
+        request(m, slab, sphereOfCone0, 1);
+        request(m, slab, sphereOfCone1, 1);
+
+        request(m, coneOfSlab0, cone);
+        request(m, coneOfSlab1, cone);
+        request(m, coneOfSlab2, cone);
+    }
+
+    template<typename Real>
+    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const MedialCone3D& cone, const MedialSlab3D& slab)
+    {
+        request(m, slab, cone);
+        swapContactPair(m);
+    }
+
+    template<typename Real>
+    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const MedialSlab3D& slab1, const MedialSlab3D& slab2)
+    {
+        Sphere3D sphereOfSlab0(slab1.v[0], slab1.radius[0]);
+        Sphere3D sphereOfSlab1(slab1.v[1], slab1.radius[1]);
+        Sphere3D sphereOfSlab2(slab1.v[2], slab1.radius[2]);
+
+        Sphere3D sphereOfSlab3(slab2.v[0], slab2.radius[0]);
+        Sphere3D sphereOfSlab4(slab2.v[1], slab2.radius[1]);
+        Sphere3D sphereOfSlab5(slab2.v[2], slab2.radius[2]);
+
+        MedialCone3D coneOfSlab0(slab1.v[0], slab1.v[1], slab1.radius[0], slab1.radius[1]);
+        MedialCone3D coneOfSlab1(slab1.v[1], slab1.v[2], slab1.radius[1], slab1.radius[2]);
+        MedialCone3D coneOfSlab2(slab1.v[2], slab1.v[0], slab1.radius[2], slab1.radius[0]);
+
+        MedialCone3D coneOfSlab3(slab2.v[0], slab2.v[1], slab2.radius[0], slab2.radius[1]);
+        MedialCone3D coneOfSlab4(slab2.v[1], slab2.v[2], slab2.radius[1], slab2.radius[2]);
+        MedialCone3D coneOfSlab5(slab2.v[2], slab2.v[0], slab2.radius[2], slab2.radius[0]);
+
+        // sphere - slab test
+        request(m, slab2, sphereOfSlab0, 0);
+        request(m, slab2, sphereOfSlab1, 0);
+        request(m, slab2, sphereOfSlab2, 0);
+        request(m, slab1, sphereOfSlab3, 1);
+        request(m, slab1, sphereOfSlab4, 1);
+        request(m, slab1, sphereOfSlab5, 1);
+
+        // cone - cone test
+        request(m, coneOfSlab0, coneOfSlab3);
+        request(m, coneOfSlab0, coneOfSlab4);
+        request(m, coneOfSlab0, coneOfSlab5);
+
+        request(m, coneOfSlab1, coneOfSlab3);
+        request(m, coneOfSlab1, coneOfSlab4);
+        request(m, coneOfSlab1, coneOfSlab5);
+
+        request(m, coneOfSlab2, coneOfSlab3);
+        request(m, coneOfSlab2, coneOfSlab4);
+        request(m, coneOfSlab2, coneOfSlab5);
+
+    }
 }

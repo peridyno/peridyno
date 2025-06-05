@@ -1,3 +1,5 @@
+#include "Collision/CollisionData.h"
+#include "Platform.h"
 #include "RigidBodySystem.h"
 
 #include "Primitive/Primitive3D.h"
@@ -14,6 +16,8 @@
 
 //Module headers
 #include "RigidBody/Module/ContactsUnion.h"
+#include "Topology/DiscreteElements.h"
+#include <memory>
 
 namespace dyno
 {
@@ -260,6 +264,75 @@ namespace dyno
 		mHostShape2RigidBodyMapping.insert(mHostShape2RigidBodyMapping.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size() + mHostCapsules.size(), Pair<uint, uint>(mHostCapsules.size(), (uint)actor->idx));
 		mHostCapsules.push_back(capsule);
 	}
+	
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::bindMedialCone(const std::shared_ptr<PdActor> actor, const MedialConeInfo& medialcone, const Real density)
+	{
+		auto& rigidbody = mHostRigidBodyStates[actor->idx];
+
+		MedialCone3D cone(medialcone.v[0], medialcone.v[1], medialcone.radius[0], medialcone.radius[1]);
+
+		Real mass = cone.volume() * density;
+
+		float r = medialcone.radius[0] + medialcone.radius[1];
+
+		float I11 = r * r;
+
+		Coord centroid = (cone.v[0] + cone.v[1]) / 2.0;
+
+		// Calculate the inertia of sphere in the local frame
+		auto localInertia = 0.4f * mass
+			* Mat3f(I11, 0, 0,
+				0, I11, 0,
+				0, 0, I11);
+
+		auto rotShape = Matrix::identityMatrix();
+		auto rotBody = rigidbody.angle.toMatrix3x3();
+
+		auto rigidbodyInertia = rotBody * (rotShape * localInertia * rotShape.transpose() + ParallelAxisTheorem(centroid, mass)) * rotBody.transpose();
+
+		rigidbody.mass += mass;
+		rigidbody.inertia += rigidbodyInertia;
+		rigidbody.shapeType = ET_COMPOUND;
+
+		mHostShape2RigidBodyMapping.insert(mHostShape2RigidBodyMapping.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size() + mHostCapsules.size() + mHostMedialCones.size(), Pair<uint, uint>(mHostMedialCones.size(), (uint)actor->idx));
+		mHostMedialCones.push_back(medialcone);
+	}
+
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::bindMedialSlab(const std::shared_ptr<PdActor> actor, const MedialSlabInfo& medialslab, const Real density)
+	{
+		auto& rigidbody = mHostRigidBodyStates[actor->idx];
+
+		MedialSlab3D slab(medialslab.v[0], medialslab.v[1], medialslab.v[2], medialslab.radius[0], medialslab.radius[1], medialslab.radius[2]);
+
+		Real mass = slab.volume() * density;
+
+		float r = medialslab.radius[0] + medialslab.radius[1] + medialslab.radius[2];
+
+		float I11 = r * r;
+
+		Coord centroid = (slab.v[0] + slab.v[1] + slab.v[2]) / 3.0;
+
+		// Calculate the inertia of sphere in the local frame
+		auto localInertia = 0.4f * mass
+			* Mat3f(I11, 0, 0,
+				0, I11, 0,
+				0, 0, I11);
+
+		auto rotShape = Matrix::identityMatrix();
+		auto rotBody = rigidbody.angle.toMatrix3x3();
+
+		auto rigidbodyInertia = rotBody * (rotShape * localInertia * rotShape.transpose() + ParallelAxisTheorem(centroid, mass)) * rotBody.transpose();
+
+		rigidbody.mass += mass;
+		rigidbody.inertia += rigidbodyInertia;
+		rigidbody.shapeType = ET_COMPOUND;
+
+		mHostShape2RigidBodyMapping.insert(mHostShape2RigidBodyMapping.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size() + mHostCapsules.size() + mHostMedialCones.size() + mHostMedialSlabs.size(), Pair<uint, uint>(mHostMedialSlabs.size(), (uint)actor->idx));
+		mHostMedialSlabs.push_back(medialslab);
+	}
+
 
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::bindTet(const std::shared_ptr<PdActor> actor, const TetInfo& tet, const Real density /*= Real(100)*/)
@@ -299,6 +372,8 @@ namespace dyno
 		mHostShape2RigidBodyMapping.insert(mHostShape2RigidBodyMapping.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size(), Pair<uint, uint>(mHostTets.size(), (uint)actor->idx));
 		mHostTets.push_back(tet);
 	}
+
+
 
 	template<typename TDataType>
 	std::shared_ptr<PdActor> RigidBodySystem<TDataType>::addTet(
@@ -414,6 +489,34 @@ namespace dyno
 		tet3d[tId].v[3] = tetInfo[tId].v[3];
 	}
 
+	__global__ void SetupCones(
+		DArray<MedialCone3D> cone3d,
+		DArray<MedialConeInfo> coneInfo
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= coneInfo.size()) return;
+		cone3d[tId].v[0] = coneInfo[tId].v[0];
+		cone3d[tId].v[1] = coneInfo[tId].v[1];
+		cone3d[tId].radius[0] = coneInfo[tId].radius[0];
+		cone3d[tId].radius[1] = coneInfo[tId].radius[1];
+	}
+
+	__global__ void SetupSlabs(
+		DArray<MedialSlab3D> slab3d,
+		DArray<MedialSlabInfo> slabInfo
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= slabInfo.size()) return;
+		slab3d[tId].v[0] = slabInfo[tId].v[0];
+		slab3d[tId].v[1] = slabInfo[tId].v[1];
+		slab3d[tId].v[2] = slabInfo[tId].v[2];
+		slab3d[tId].radius[0] = slabInfo[tId].radius[0];
+		slab3d[tId].radius[1] = slabInfo[tId].radius[1];
+		slab3d[tId].radius[2] = slabInfo[tId].radius[2];
+	}
+
 	__global__ void SetupCaps(
 		DArray<Capsule3D> cap3d,
 		DArray<CapsuleInfo> capInfo)
@@ -429,6 +532,7 @@ namespace dyno
 		cap3d[tId].radius = capInfo[tId].radius;
 		cap3d[tId].halfLength = capInfo[tId].halfLength;
 	}
+
 
 	template<typename Joint>
 	__global__ void UpdateJointIndices(
@@ -455,16 +559,23 @@ namespace dyno
 		mDeviceSpheres.assign(mHostSpheres);
 		mDeviceTets.assign(mHostTets);
 		mDeviceCapsules.assign(mHostCapsules);
+		mDeviceMedialCones.assign(mHostMedialCones);
+		mDeviceMedialSlabs.assign(mHostMedialSlabs);
 
 		auto& boxes = topo->boxesInLocal();
 		auto& spheres = topo->spheresInLocal();
 		auto& tets = topo->tetsInLocal();
 		auto& caps = topo->capsulesInLocal();
+		auto& cones = topo->medialConesInLocal();
+		auto& slabs = topo->medialSlabsInLocal();
+		
 
 		boxes.resize(mDeviceBoxes.size());
 		spheres.resize(mDeviceSpheres.size());
 		tets.resize(mDeviceTets.size());
 		caps.resize(mDeviceCapsules.size());
+		cones.resize(mDeviceMedialCones.size());
+		slabs.resize(mDeviceMedialSlabs.size());
 
 		//Setup the topology
 		cuExecute(mDeviceBoxes.size(),
@@ -486,6 +597,18 @@ namespace dyno
 			SetupCaps,
 			caps,
 			mDeviceCapsules);
+
+		cuExecute(mDeviceMedialCones.size(),
+			SetupCones,
+			cones,
+			mDeviceMedialCones);
+
+		cuExecute(mDeviceMedialSlabs.size(),
+			SetupSlabs,
+			slabs,
+			mDeviceMedialSlabs);
+
+		
 
 		mDeviceRigidBodyStates.assign(mHostRigidBodyStates);
 
@@ -588,6 +711,8 @@ namespace dyno
 		mHostBoxes.clear();
 		mHostTets.clear();
 		mHostCapsules.clear();
+		mHostMedialCones.clear();
+		mHostMedialSlabs.clear();
 
 		mDeviceRigidBodyStates.clear();
 
@@ -595,6 +720,8 @@ namespace dyno
 		mDeviceBoxes.clear();
 		mDeviceTets.clear();
 		mDeviceCapsules.clear();
+		mDeviceMedialCones.clear();
+		mDeviceMedialSlabs.clear();
 
 		mHostJointsBallAndSocket.clear();
 		mHostJointsSlider.clear();
@@ -647,9 +774,17 @@ namespace dyno
 		{
 			first += offset.capsuleIndex();
 		}
-		else
+		else if(pId < offset.medialConeIndex())
 		{
 			first += offset.triangleIndex();
+		}
+		else if (pId < offset.medialSlabIndex())
+		{
+			first += offset.medialConeIndex();
+		}
+		else
+		{
+			first += offset.medialSlabIndex();
 		}
 
 		mapping[pId] = Pair<uint, uint>(first, pair.second);

@@ -144,7 +144,7 @@ namespace dyno
 		}
 		else if (ext == ".obj")
 		{
-			loadTextureMeshFromObj(texMesh, name);
+			loadTextureMeshFromObj(texMesh, name, this->varDoTransform()->getValue());
 		}
 	}
 

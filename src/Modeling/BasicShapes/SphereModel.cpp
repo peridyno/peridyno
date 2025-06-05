@@ -20,10 +20,10 @@ namespace dyno
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
 		this->statePolygonSet()->setDataPtr(std::make_shared<PolygonSet<TDataType>>());
-		
+
 		this->varLatitude()->setRange(2, 10000);
 		this->varLongitude()->setRange(3, 10000);
-		this->varIcosahedronStep()->setRange(0,6);
+		this->varIcosahedronStep()->setRange(0, 6);
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&SphereModel<TDataType>::varChanged, this));
 
@@ -37,6 +37,7 @@ namespace dyno
 		this->varType()->attach(callback);
 
 		auto tsRender = std::make_shared<GLSurfaceVisualModule>();
+		tsRender->setAlpha(0.2);
 		this->stateTriangleSet()->connect(tsRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(tsRender);
 
@@ -88,7 +89,7 @@ namespace dyno
 		auto AABB = box.aabb();
 		auto& v0 = AABB.v0;
 		auto& v1 = AABB.v1;
-		
+
 
 		NBoundingBox ret;
 		ret.lower = Vec3f(v0.x, v0.y, v0.z);
@@ -215,7 +216,7 @@ namespace dyno
 
 		auto RV = [&](const Coord& v)->Coord {
 			return center + q.rotate(v - center);
-		};
+			};
 
 		int numpt = vertices.size();
 
@@ -241,28 +242,22 @@ namespace dyno
 		std::vector<Vec3f> vts;
 		std::vector<TopologyModule::Triangle> trs;
 
-		generateIcosahedron(vts, trs);
+		generateIcosahedron(vts, trs, this->varRadius()->getValue(), this->varIcosahedronStep()->getValue());
 		float fixScale = this->varIcosahedronStep()->getValue() >= 2 ? 1.08 : 1;
 
 		Quat<Real> q = this->computeQuaternion();
-		auto center = this->varLocation()->getValue();
-		auto scale = this->varScale()->getValue();
+		auto center = this->varLocation()->getData();
+		auto scale = this->varScale()->getData();
 
 		auto RV = [&](const Coord& v)->Coord {
 			return center + q.rotate(v - center);
-		};
+			};
 
 		for (int i = 0; i < vts.size(); i++) {
 			vts[i] = RV(vts[i] * scale * fixScale + RV(center));
 		}
-		
-		if (this->varIcosahedronStep()->getValue() >= 2) 
-		{
-			for (int i = 0; i < (int)this->varIcosahedronStep()->getValue() - 1; i++)
-			{
-				loopSubdivide(vts, trs);
-			}
-		}
+
+
 
 
 		this->stateTriangleSet()->getDataPtr()->setPoints(vts);
@@ -270,7 +265,7 @@ namespace dyno
 		this->stateTriangleSet()->getDataPtr()->update();
 
 		this->statePolygonSet()->getDataPtr()->triangleSetToPolygonSet(this->stateTriangleSet()->getData());
-		
+
 		return;
 	}
 
@@ -283,25 +278,12 @@ namespace dyno
 		auto rot = this->varRotation()->getValue();
 		auto scale = this->varScale()->getValue();
 
-		Real s;
-		if (abs(scale.x - scale.y) < EPSILON) {
-			s = scale.z;
-		}
-		else if (abs(scale.x - scale.z) < EPSILON){
-			s = scale.y;
-		}
-		else
-			s = scale.x;
-
-		//To ensure all three components of varScale() have the same value
-		this->varScale()->setValue(Coord(s), false);
-
 		auto radius = this->varRadius()->getValue();
 
 		//Setup a sphere primitive
 		TSphere3D<Real> ball;
 		ball.center = center;
-		ball.radius = radius * s;
+		ball.radius = radius;
 		this->outSphere()->setValue(ball);
 
 		if (this->varType()->getDataPtr()->currentKey() == SphereType::Icosahedron)
@@ -316,11 +298,11 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void SphereModel<TDataType>::generateIcosahedron(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles) 
+	void SphereModel<TDataType>::generateIcosahedron(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles, Real sphereRadius, uint step, Vec3f offset)
 	{
-		auto radius = this->varRadius()->getValue() * 2;
+		Real radius = sphereRadius * 2;
 
-		if (this->varIcosahedronStep()->getValue() == 0)
+		if (step == 0)
 		{
 			float phi = (1.0 + std::sqrt(5.0)) / 2.0;
 
@@ -477,6 +459,21 @@ namespace dyno
 				triangles[i] = TopologyModule::Triangle(triangles[i][0] - 1, triangles[i][1] - 1, triangles[i][2] - 1);
 			}
 
+			if (offset != Vec3f(0))
+			{
+				for (size_t i = 0; i < vertices.size(); i++)
+				{
+					vertices[i] = offset + vertices[i];
+				}
+			}
+
+			if (step >= 2)
+			{
+				for (int i = 0; i < (int)step - 1; i++)
+				{
+					loopSubdivide(vertices, triangles);
+				}
+			}
 		}
 	}
 

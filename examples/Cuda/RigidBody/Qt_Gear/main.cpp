@@ -29,7 +29,6 @@ std::shared_ptr<SceneGraph> createSceneGraph()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 	scn->setGravity(Vec3f(0.0f, -9.8f, 0.0f));
 
-	auto gear = scn->addNode(std::make_shared<Gear<DataType3f>>());
 
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
 	plane->varLengthX()->setValue(50);
@@ -38,7 +37,23 @@ std::shared_ptr<SceneGraph> createSceneGraph()
 	plane->varSegmentZ()->setValue(10);
 
 	auto convoy = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
-	gear->connect(convoy->importVehicles());
+
+	for (int i = 0; i <5; i++)
+	{
+		auto gear = scn->addNode(std::make_shared<Bug<DataType3f>>());
+		if (i % 5 == 0)
+			gear->setfile(std::string("ma/bug"));
+		else if (i % 5 == 1)
+			gear->setfile(std::string("ma/pig"));
+		else if (i % 5 == 2)
+			gear->setfile(std::string("ma/plane"));
+		else if (i % 5 == 3)
+			gear->setfile(std::string("ma/dolphin"));
+		else if (i % 5 == 4)
+			gear->setfile(std::string("ma/bear"));
+		gear->setposition(Vec3f(0, 1 + 2.0 * i, 0 + 0.4 * i));
+		gear->connect(convoy->importVehicles());
+	}
 
 	plane->stateTriangleSet()->connect(convoy->inTriangleSet());
 

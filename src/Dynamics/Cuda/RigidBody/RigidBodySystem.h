@@ -99,6 +99,17 @@ namespace dyno
 			const TetInfo& tet,
 			const Real density = Real(100));
 
+		void bindMedialCone(
+			const std::shared_ptr<PdActor> actor,
+			const MedialConeInfo& medialcone,
+			const Real density = Real(100));
+
+		void bindMedialSlab(
+			const std::shared_ptr<PdActor> actor,
+			const MedialSlabInfo& medialslab,
+			const Real density = Real(100)
+		);
+
 		BallAndSocketJoint& createBallAndSocketJoint(
 			std::shared_ptr<PdActor> actor1,
 			std::shared_ptr<PdActor> actor2)
@@ -227,6 +238,8 @@ namespace dyno
 		std::vector<BoxInfo> mHostBoxes;
 		std::vector<TetInfo> mHostTets;
 		std::vector<CapsuleInfo> mHostCapsules;
+		std::vector<MedialConeInfo> mHostMedialCones;
+		std::vector<MedialSlabInfo> mHostMedialSlabs;
 
 		DArray<RigidBodyInfo> mDeviceRigidBodyStates;
 
@@ -234,6 +247,8 @@ namespace dyno
 		DArray<BoxInfo> mDeviceBoxes;
 		DArray<TetInfo> mDeviceTets;
 		DArray<CapsuleInfo> mDeviceCapsules;
+		DArray<MedialConeInfo> mDeviceMedialCones;
+		DArray<MedialSlabInfo> mDeviceMedialSlabs;
 
 		std::vector<BallAndSocketJoint> mHostJointsBallAndSocket;
 		std::vector<SliderJoint> mHostJointsSlider;

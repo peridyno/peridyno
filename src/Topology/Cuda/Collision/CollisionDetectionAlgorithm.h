@@ -81,6 +81,8 @@ namespace dyno
         using OBox3D = TOrientedBox3D<Real>;
         using Capsule3D = TCapsule3D<Real>;
         using Triangle3D = TTriangle3D<Real>;
+        using MedialCone3D = TMedialCone3D<Real>;
+        using MedialSlab3D = TMedialSlab3D<Real>;
 
         using Manifold = TManifold<Real>;
         using SeparationData = TSeparationData<Real>;
@@ -211,8 +213,16 @@ namespace dyno
         DYN_FUNC static void request(Manifold& m, const OBox3D& box, const Triangle3D& tri);//unfinished
 
         //=========================================
+        DYN_FUNC static void request(Manifold& m, const MedialCone3D& medialcone1, const MedialCone3D& medialcone2); 
 
+        // contact pos : tag = 0: on slab | tag = 1: on sphere
+        DYN_FUNC static void request(Manifold& m, const MedialSlab3D& medialslab, const Sphere3D& sphere, int tag);
 
+        DYN_FUNC static void request(Manifold& m, const MedialSlab3D& medialslab, const MedialCone3D& medialcone);
+
+        DYN_FUNC static void request(Manifold& m, const MedialCone3D& medialcone, const MedialSlab3D& medialslab);
+
+        DYN_FUNC static void request(Manifold& m, const MedialSlab3D& medialcone, const MedialSlab3D& medialslab);
     private:
         
 

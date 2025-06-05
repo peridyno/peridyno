@@ -57,6 +57,8 @@ namespace dyno
 
 		DEF_ARRAY_STATE(int, BindingTag, DeviceType::GPU, "");
 
+		DEF_VAR(bool, DoTransform, true, "");
+
 	protected:
 		void resetStates() override;
 

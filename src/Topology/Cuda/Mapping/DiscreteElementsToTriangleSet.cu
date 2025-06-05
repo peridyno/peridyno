@@ -129,13 +129,127 @@ namespace dyno
 		vertices[pointOffset + tId] = sphere.center + sphere.radius * sphere.rotation.rotate(v);
 	}
 
+	__global__ void SetupVerticesForMedialConeInstances(
+		DArray<Vec3f> vertices,
+		DArray<Vec3f> sphereVertices,
+		DArray<MedialCone3D> coneInstances,
+		uint pointOffset,
+		uint coneOffset
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= coneInstances.size() * sphereVertices.size() * 2) return; 
+
+		uint instanceId = tId / (sphereVertices.size() * 2); 
+		uint remaining = tId % (sphereVertices.size() * 2);
+		uint sphereId = remaining / sphereVertices.size(); 
+		uint vertexId = remaining % sphereVertices.size();
+
+		if (instanceId >= coneInstances.size()) return;
+
+		MedialCone3D cone = coneInstances[instanceId];
+		Vec3f v = sphereVertices[vertexId];
+
+		vertices[pointOffset + tId] = cone.v[sphereId] + cone.radius[sphereId] * v;
+	}
+
+	template<typename Triangle>
+	__global__ void SetupIndicesForMedialConeInstances(
+		DArray<Triangle> indices,
+		DArray<Triangle> sphereIndices,
+		DArray<MedialCone3D> coneInstances,
+		uint vertexSize,        
+		uint vertexDataStartOffset, 
+		uint indexOutputStartOffset 
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= coneInstances.size() * sphereIndices.size() * 2) return;
+
+		uint instanceId = tId / (sphereIndices.size() * 2);
+		uint remaining = tId % (sphereIndices.size() * 2);
+		uint sphereId = remaining / sphereIndices.size();
+		uint indexId = remaining % sphereIndices.size();
+
+		if (instanceId >= coneInstances.size()) return;
+
+
+		uint baseVertexOffsetForInstance = vertexDataStartOffset + instanceId * vertexSize * 2;
+		uint vertexOffsetForSphere = baseVertexOffsetForInstance + sphereId * vertexSize;
+
+		Triangle tIndex = sphereIndices[indexId];
+		indices[indexOutputStartOffset + tId] = Triangle( 
+			tIndex[0] + vertexOffsetForSphere,
+			tIndex[1] + vertexOffsetForSphere,
+			tIndex[2] + vertexOffsetForSphere
+		);
+	}
+
+	__global__ void SetupVerticesForMedialSlabInstances(
+		DArray<Vec3f> vertices,
+		DArray<Vec3f> sphereVertices,
+		DArray<MedialSlab3D> slabInstances,
+		uint pointOffset,
+		uint slabOffset
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= slabInstances.size() * sphereVertices.size() * 3) return; 
+
+		uint instanceId = tId / (sphereVertices.size() * 3);
+		uint remaining = tId % (sphereVertices.size() * 3);
+		uint sphereId = remaining / sphereVertices.size(); 
+		uint vertexId = remaining % sphereVertices.size();
+
+		if (instanceId >= slabInstances.size()) return;
+
+		MedialSlab3D slab = slabInstances[instanceId];
+		Vec3f v = sphereVertices[vertexId];
+
+		vertices[pointOffset + tId] = slab.v[sphereId] + slab.radius[sphereId] * v;
+	}
+
+
+	template<typename Triangle>
+	__global__ void SetupIndicesForMedialSlabInstances(
+		DArray<Triangle> indices,
+		DArray<Triangle> sphereIndices,
+		DArray<MedialSlab3D> slabInstances,
+		uint vertexSize,       
+		uint vertexDataStartOffset, 
+		uint indexOutputStartOffset
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= slabInstances.size() * sphereIndices.size() * 3) return;
+
+		uint instanceId = tId / (sphereIndices.size() * 3);
+		uint remaining = tId % (sphereIndices.size() * 3);
+		uint sphereId = remaining / sphereIndices.size();
+		uint indexId = remaining % sphereIndices.size();
+
+		if (instanceId >= slabInstances.size()) return;
+
+		
+		uint baseVertexOffsetForInstance = vertexDataStartOffset + instanceId * vertexSize * 3;
+		uint vertexOffsetForSphere = baseVertexOffsetForInstance + sphereId * vertexSize;
+
+		Triangle tIndex = sphereIndices[indexId];
+		indices[indexOutputStartOffset + tId] = Triangle( 
+			tIndex[0] + vertexOffsetForSphere,
+			tIndex[1] + vertexOffsetForSphere,
+			tIndex[2] + vertexOffsetForSphere
+		);
+	}
 	template<typename Triangle>
 	__global__ void SetupIndicesForSphereInstances(
 		DArray<Triangle> indices,
 		DArray<Triangle> sphereIndices,
 		DArray<Sphere3D> sphereInstances,
-		uint vertexSize,						//vertex size of the instance sphere 
-		uint indexOffset)
+		uint vertexSize,						
+		uint vertexDataStartOffset,         
+		uint indexOutputStartOffset         
+	)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= sphereInstances.size() * sphereIndices.size()) return;
@@ -143,10 +257,10 @@ namespace dyno
 		uint instanceId = tId / sphereIndices.size();
 		uint indexId = tId % sphereIndices.size();
 
-		int vertexOffset = indexOffset + instanceId * vertexSize;
-		
+		int calculatedVertexOffsetForInstance = vertexDataStartOffset + instanceId * vertexSize; // 使用正确的顶点数据起始偏移量
+
 		Triangle tIndex = sphereIndices[indexId];
-		indices[indexOffset + tId] = Triangle(tIndex[0] + vertexOffset, tIndex[1] + vertexOffset, tIndex[2] + vertexOffset);
+		indices[indexOutputStartOffset + tId] = Triangle(tIndex[0] + calculatedVertexOffsetForInstance, tIndex[1] + calculatedVertexOffsetForInstance, tIndex[2] + calculatedVertexOffsetForInstance);
 	}
 
 	__global__ void SetupVerticesForCapsuleInstances(
@@ -221,6 +335,9 @@ namespace dyno
 		DArray<Sphere3D>& sphereInGlobal = inTopo->spheresInGlobal();
 		DArray<Tet3D>& tetInGlobal = inTopo->tetsInGlobal();
 		DArray<Capsule3D>& capsuleInGlobal = inTopo->capsulesInGlobal();
+		DArray<MedialCone3D>& medialConeInGlobal = inTopo->medialConesInGlobal();
+		DArray<MedialSlab3D>& medialSlabInGlobal = inTopo->medialSlabsInGlobal();
+
 
 		ElementOffset elementOffset = inTopo->calculateElementOffset();
 
@@ -228,6 +345,8 @@ namespace dyno
 		int numofCaps = capsuleInGlobal.size();
 		int numOfBoxes = boxInGlobal.size();
 		int numOfTets = tetInGlobal.size();
+		int numOfMedialCones = medialConeInGlobal.size();
+		int numOfMedialSlabs = medialSlabInGlobal.size();
 		
 		auto triSet = this->outTriangleSet()->getDataPtr();
 
@@ -240,8 +359,8 @@ namespace dyno
 		auto& capsuleVertices = mStandardCapsule.getPoints();
 		auto& capsuleIndices = mStandardCapsule.getTriangles();
 		
-		int numOfVertices = 8 * numOfBoxes + 4 * numOfTets + sphereVertices.size() * numOfSpheres + capsuleVertices.size() * numofCaps;
-		int numOfTriangles = 12 * numOfBoxes + 4 * numOfTets + sphereIndices.size() * numOfSpheres + capsuleIndices.size() * numofCaps;
+		int numOfVertices = 8 * numOfBoxes + 4 * numOfTets + sphereVertices.size() * numOfSpheres + capsuleVertices.size() * numofCaps + 2 * sphereVertices.size() * numOfMedialCones + 3 * sphereVertices.size() * numOfMedialSlabs;
+		int numOfTriangles = 12 * numOfBoxes + 4 * numOfTets + sphereIndices.size() * numOfSpheres + capsuleIndices.size() * numofCaps + 2 * sphereIndices.size() * numOfMedialCones + 3 * sphereIndices.size() * numOfMedialSlabs;
 
 		vertices.resize(numOfVertices);
 		indices.resize(numOfTriangles);
@@ -264,6 +383,7 @@ namespace dyno
 			sphereIndices,
 			sphereInGlobal,
 			sphereVertices.size(),
+			vertexOffset,
 			indexOffset);
 
 		vertexOffset += numOfSpheres * sphereVertices.size();
@@ -314,6 +434,46 @@ namespace dyno
 
 		vertexOffset += numofCaps * capsuleVertices.size();
 		indexOffset += numofCaps * capsuleIndices.size();
+
+		cuExecute(numOfMedialCones * sphereVertices.size() * 2,
+			SetupVerticesForMedialConeInstances,
+			vertices,
+			sphereVertices,
+			medialConeInGlobal,
+			vertexOffset,
+			elementOffset.medialConeIndex());
+
+		cuExecute(numOfMedialCones* sphereIndices.size()* 2	,
+			SetupIndicesForMedialConeInstances,
+			indices,
+			sphereIndices,
+			medialConeInGlobal,
+			sphereVertices.size(),
+			vertexOffset,
+			indexOffset);
+
+		vertexOffset += numOfMedialCones * sphereVertices.size() * 2;
+		indexOffset += numOfMedialCones * sphereIndices.size() * 2;
+
+		cuExecute(numOfMedialSlabs* sphereVertices.size() * 3,
+			SetupVerticesForMedialSlabInstances,
+			vertices,
+			sphereVertices,
+			medialSlabInGlobal,
+			vertexOffset,
+			elementOffset.medialSlabIndex());
+
+		cuExecute(numOfMedialSlabs* sphereIndices.size() * 3,
+			SetupIndicesForMedialSlabInstances,
+			indices,
+			sphereIndices,
+			medialSlabInGlobal,
+			sphereVertices.size(),
+			vertexOffset,
+			indexOffset);
+
+		vertexOffset += numOfMedialSlabs * sphereVertices.size() * 3;
+		indexOffset += numOfMedialSlabs * sphereIndices.size() * 3;
 
 		this->outTriangleSet()->getDataPtr()->update();
 
