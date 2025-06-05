@@ -72,6 +72,11 @@ public:
 
 	bool isModified();
 
+	/**
+	 * @brief A variable to control the visibility of the field
+	 *
+	 * @return true when the field is active, otherwise return false
+	 */
 	bool isActive();
 	void setActive(bool b);
 

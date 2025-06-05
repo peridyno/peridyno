@@ -307,9 +307,17 @@ namespace dyno
 		if (this->varType()->getDataPtr()->currentKey() == SphereType::Icosahedron)
 		{
 			icosahedronSphere();
+
+			this->varLongitude()->setActive(false);
+			this->varLatitude()->setActive(false);
+			this->varIcosahedronStep()->setActive(true);
 		}
 		else {
 			standardSphere();
+
+			this->varLongitude()->setActive(true);
+			this->varLatitude()->setActive(true);
+			this->varIcosahedronStep()->setActive(false);
 		}
 
 	}
