@@ -50,7 +50,8 @@ namespace dyno
 		MarchingCubesHelper<TDataType>::countVerticeNumber(
 			voxelVertNum,
 			distances,
-			iso);
+			iso,
+			h);
 
 		Reduction<int> reduce;
 		int totalVNum = reduce.accumulate(voxelVertNum.begin(), voxelVertNum.size());
