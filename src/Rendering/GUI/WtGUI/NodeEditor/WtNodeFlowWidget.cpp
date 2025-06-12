@@ -6,6 +6,21 @@
 WtNodeFlowWidget::WtNodeFlowWidget(std::shared_ptr<dyno::SceneGraph> scene)
 	: WtFlowWidget(scene)
 {
+	auto nodeMap = dyno::Object::getClassMap();
+	for (auto it = nodeMap->begin(); it != nodeMap->end(); ++it)
+	{
+		auto node_obj = dyno::Object::createObject(it->second->m_className);
+		std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
+		if (new_node == nullptr)
+		{
+			continue;
+		}
+		else
+		{
+			allNodeMap.insert(std::pair<dyno::ObjectId, std::shared_ptr<dyno::Node>>(new_node->objectId(), new_node));
+		}
+	}
+
 	setPreferredMethod(Wt::RenderMethod::HtmlCanvas);
 
 	this->mouseWentDown().connect(this, &WtNodeFlowWidget::onMouseWentDown);
@@ -198,13 +213,76 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 					if (interaction.tryConnect())
 					{
 						update();
+						isConnect = true;
 					}
 				}
 
 			}
 		}
+
+		if (!isConnect && mOutNode != nullptr)
+		{
+			auto fieldExps = mOutNode->getOutputFields();
+			std::map<std::string, int> promptNode;
+			for (auto nodePair : allNodeMap)
+			{
+				auto node = nodePair.second;
+				if (outPoint.portShape == PortShape::Diamond || outPoint.portShape == PortShape::Bullet)
+				{
+					auto fieldExp = fieldExps[outPoint.portIndex];
+
+					auto nodeInps = node->getImportNodes();
+					int i = 0;
+					for (auto nodeInp : nodeInps)
+					{
+						if (nodeInp->isKindOf(mOutNode.get()))
+						{
+							promptNode.insert(std::pair<std::string, int>(node->caption(), i));
+						}
+						i++;
+					}
+				}
+				else if (outPoint.portShape == PortShape::Point)
+				{
+					auto fieldInps = node->getInputFields();
+					auto fieldExp = fieldExps[outPoint.portIndex - mOutNode->getExportNodes().size() - 1];
+					int i = 0;
+					for (auto fieldInp : fieldInps)
+					{
+						if (fieldInp->getClassName() == fieldExp->getClassName())
+						{
+							std::string className = fieldInp->getClassName();
+							if (className == dyno::InstanceBase::className())
+							{
+								dyno::InstanceBase* instIn = dynamic_cast<dyno::InstanceBase*>(fieldInp);
+								dyno::InstanceBase* instOut = dynamic_cast<dyno::InstanceBase*>(fieldExp);
+
+								if (instIn != nullptr && instOut != nullptr)
+								{
+									if (instIn->canBeConnectedBy(instOut))
+									{
+										promptNode.insert(std::pair<std::string, int>(node->caption(), i));
+									}
+								}
+							}
+							else
+							{
+								if (fieldInp->getTemplateName() == fieldExp->getTemplateName())
+								{
+									promptNode.insert(std::pair<std::string, int>(node->caption(), i));
+								}
+							}
+						}
+						i++;
+					}
+
+				}
+			}
+			_prompt.emit(promptNode);
+		}
 	}
 	drawLineFlag = false;
+	isConnect = false;
 }
 
 void WtNodeFlowWidget::onKeyWentDown()

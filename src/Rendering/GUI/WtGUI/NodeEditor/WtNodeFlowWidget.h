@@ -47,7 +47,9 @@ protected:
 protected:
 	WtNodeFlowScene* mNodeFlowScene = nullptr;
 	std::map<dyno::ObjectId, WtNode*> nodeMap;
+	std::map<dyno::ObjectId, std::shared_ptr<dyno::Node>> allNodeMap;
 	WtNode* connectionOutNode;
+	bool isConnect = false;
 
 	std::shared_ptr<Node> mOutNode;
 };

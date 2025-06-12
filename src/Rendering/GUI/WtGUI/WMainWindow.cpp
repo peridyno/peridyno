@@ -181,6 +181,10 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel, AddNodeType addNodeType)
 
 	auto& pages = dyno::NodeFactory::instance()->nodePages();
 
+
+
+
+	// Recreating everything each time the scene switches affects performance.
 	if (addNodeType == AddNodeType::NodeType)
 	{
 		for (auto iPage = pages.begin(); iPage != pages.end(); iPage++)
@@ -381,18 +385,22 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 			this->updateCanvas();
 		});
 
+	mNodeFlowWidget->prompt().connect([=](std::map<std::string, int> promptNodes)
+		{
+			for (auto promptNode : promptNodes)
+			{
+				std::cout << promptNode.first << std::endl;
+				std::cout << promptNode.second << std::endl;
+				std::cout << "!" << std::endl;
+			}
+		});
+
 	if (mSceneCanvas)
 	{
 		mSceneCanvas->selectNodeSignal().connect([=](std::shared_ptr<dyno::Node> node)
 			{
 				if (node != nullptr)
-				{
-
-					//mParameterDataNode->setNode(node);
-					//mParameterDataNode->createParameterPanel(parameterWidget);
-
 					mNodeFlowWidget->setSelectNode(node);
-				}
 			});
 	}
 

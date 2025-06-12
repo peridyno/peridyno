@@ -58,6 +58,8 @@ public:
 
 	Wt::Signal<>& updateCanvas() { return _updateCanvas; }
 
+	Wt::Signal<std::map<std::string, int>>& prompt() { return _prompt; };
+
 
 protected:
 	double mZoomFactor;
@@ -79,6 +81,8 @@ protected:
 	Wt::Signal<int> _selectNodeSignal;
 	Wt::Signal<std::shared_ptr<dyno::Module>> _selectModuleSignal;
 	Wt::Signal<> _updateCanvas;
+	Wt::Signal<std::map<std::string, int>> _prompt;
+
 
 	int selectType = -1;
 	int selectedNum = 0;
