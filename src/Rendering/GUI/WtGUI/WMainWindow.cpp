@@ -49,6 +49,7 @@ WMainWindow::WMainWindow() : WContainerWidget()
 
 	mParameterDataNode->changeValue().connect(this, &WMainWindow::updateCanvas);
 	mParameterDataNode->changeValue().connect(this, &WMainWindow::updateNodeGraphics);
+
 	//mParameterDataNode->changeValue().connect(this, );
 }
 
@@ -349,6 +350,7 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 {
 	nodeGraphicsWidget = std::make_unique<WNodeGraphics>();
 	initAddNodePanel(nodeGraphicsWidget->addPanel);
+
 	if (mScene)
 	{
 		auto painteContainer = nodeGraphicsWidget->nodePanel->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
@@ -358,7 +360,9 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 	}
 
 	// Parameter list
-	auto parameterWidget = nodeGraphicsWidget->layout->addWidget(std::make_unique<Wt::WContainerWidget>());;
+	auto parameterWidget = nodeGraphicsWidget->layout->addWidget(std::make_unique<Wt::WContainerWidget>());
+
+	auto promptNodeWidget = nodeGraphicsWidget->layout->addWidget(std::make_unique<Wt::WContainerWidget>());
 
 	//action for selection change
 	mNodeFlowWidget->selectNodeSignal().connect([=](int selectNum)
@@ -385,14 +389,9 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 			this->updateCanvas();
 		});
 
-	mNodeFlowWidget->prompt().connect([=](std::map<std::string, int> promptNodes)
+	mNodeFlowWidget->prompt().connect([=](std::map<std::string, std::tuple<std::string, int>> promptNodes)
 		{
-			for (auto promptNode : promptNodes)
-			{
-				std::cout << promptNode.first << std::endl;
-				std::cout << promptNode.second << std::endl;
-				std::cout << "!" << std::endl;
-			}
+			mPromptPanel->createPromptPanel(promptNodeWidget, promptNodes);
 		});
 
 	if (mSceneCanvas)

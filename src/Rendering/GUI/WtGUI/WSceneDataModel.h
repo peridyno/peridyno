@@ -71,3 +71,12 @@ private:
 	std::shared_ptr<dyno::Node> mNode;
 };
 
+
+class WPromptNode : public Wt::WAbstractItemModel
+{
+public:
+	WPromptNode();
+	~WPromptNode();
+
+	void setPromptNode(std::map<std::string, std::tuple<std::string, int>> promptNodes);
+};

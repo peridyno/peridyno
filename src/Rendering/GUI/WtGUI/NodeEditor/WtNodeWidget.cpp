@@ -104,6 +104,8 @@ NodeDataType WtNodeWidget::dataType(PortType portType, PortIndex portIndex) cons
 
 std::shared_ptr<WtNodeData> WtNodeWidget::outData(PortIndex port)
 {
+
+
 	return port == 0 ? std::static_pointer_cast<WtNodeData>(mNodeExport) : std::static_pointer_cast<WtNodeData>(mFieldExport[port - 1]);
 }
 

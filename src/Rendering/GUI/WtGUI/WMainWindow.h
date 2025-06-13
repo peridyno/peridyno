@@ -11,6 +11,7 @@
 #include "WSimulationControl.h"
 #include "WSceneDataModel.h"
 #include "WParameterDataNode.h"
+#include "WPromptPanel.h"
 
 #include "NodeEditor/WtNodeFlowWidget.h"
 #include "NodeEditor/WtModuleFlowWidget.h"
@@ -49,6 +50,8 @@ public:
 public:
 	// data models
 	std::shared_ptr<WParameterDataNode> mParameterDataNode;
+	std::shared_ptr<WPromptPanel> mPromptPanel;
+	
 
 private:
 	void initNavigationBar(Wt::WBorderLayout*);

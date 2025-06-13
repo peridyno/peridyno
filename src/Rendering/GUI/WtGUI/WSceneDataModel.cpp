@@ -194,4 +194,7 @@ std::shared_ptr<dyno::Module> WModuleDataModel::getModule(const Wt::WModelIndex&
 	return std::shared_ptr<dyno::Module>();
 }
 
+void WPromptNode::setPromptNode(std::map<std::string, std::tuple<std::string, int>> promptNodes)
+{
 
+}

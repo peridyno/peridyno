@@ -196,7 +196,7 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 		_selectNodeSignal.emit(-1);
 	}
 
-	if (drawLineFlag = true)
+	if (drawLineFlag == true)
 	{
 		for (auto nodePair : nodeMap)
 		{
@@ -206,7 +206,7 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 			{
 				auto connectionInNode = node;
 
-				if (outPoint.portType == PortType::Out)
+				if (outPoint.portType == PortType::Out && connectionOutNode != connectionInNode)
 				{
 					WtConnection connection(outPoint.portType, *connectionOutNode, outPoint.portIndex);
 					WtInteraction interaction(*connectionInNode, connection, *mNodeFlowScene, inPoint, outPoint, node->getNode(), mOutNode);
@@ -220,10 +220,10 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 			}
 		}
 
-		if (!isConnect && mOutNode != nullptr)
+		if (!isConnect && mOutNode != nullptr && outPoint.portType != PortType::In)
 		{
 			auto fieldExps = mOutNode->getOutputFields();
-			std::map<std::string, int> promptNode;
+			std::map<std::string, std::tuple<std::string, int>> promptNode;
 			for (auto nodePair : allNodeMap)
 			{
 				auto node = nodePair.second;
@@ -237,7 +237,10 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 					{
 						if (nodeInp->isKindOf(mOutNode.get()))
 						{
-							promptNode.insert(std::pair<std::string, int>(node->caption(), i));
+							promptNode.emplace(
+								node->caption(),
+								std::make_tuple(node->getNodeType(), i)
+							);
 						}
 						i++;
 					}
@@ -245,7 +248,7 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 				else if (outPoint.portShape == PortShape::Point)
 				{
 					auto fieldInps = node->getInputFields();
-					auto fieldExp = fieldExps[outPoint.portIndex - mOutNode->getExportNodes().size() - 1];
+					auto fieldExp = fieldExps[outPoint.portIndex - 1];
 					int i = 0;
 					for (auto fieldInp : fieldInps)
 					{
@@ -261,7 +264,10 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 								{
 									if (instIn->canBeConnectedBy(instOut))
 									{
-										promptNode.insert(std::pair<std::string, int>(node->caption(), i));
+										promptNode.emplace(
+											node->caption(),
+											std::make_tuple(node->getNodeType(), i)
+										);
 									}
 								}
 							}
@@ -269,13 +275,15 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 							{
 								if (fieldInp->getTemplateName() == fieldExp->getTemplateName())
 								{
-									promptNode.insert(std::pair<std::string, int>(node->caption(), i));
+									promptNode.emplace(
+										node->caption(),
+										std::make_tuple(node->getNodeType(), i)
+									);
 								}
 							}
 						}
 						i++;
 					}
-
 				}
 			}
 			_prompt.emit(promptNode);
