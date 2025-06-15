@@ -130,10 +130,15 @@ namespace dyno
 
 		m_ioTabWidget->tabBar()->setObjectName("ControlPanelTabBar");
 
+		mContentBrowser = new QContentBrowser;
+		m_ioTabWidget->addTab(mContentBrowser, QString("Browser"));
+		m_ioTabWidget->setTabText(m_ioTabWidget->indexOf(mContentBrowser), QApplication::translate("MainWindow", "Browser", Q_NULLPTR));
+
 		//Create log widget
 		mLogWidget = PLogWidget::instance();
 		m_ioTabWidget->addTab(mLogWidget, QString("Log"));
 		m_ioTabWidget->setTabText(m_ioTabWidget->indexOf(mLogWidget), QApplication::translate("MainWindow", "Log", Q_NULLPTR));
+		
 
 		mConsoleWidget = new PConsoleWidget();
 		m_ioTabWidget->addTab(mConsoleWidget, QString("Console"));
