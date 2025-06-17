@@ -1,6 +1,8 @@
 macro(add_plugin LIB_NAME LIB_DEPENDENCY)
     set(LIB_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
+    append_library(${LIB_NAME})
+
     file(                                                                           
         GLOB_RECURSE LIB_SRC
         LIST_DIRECTORIES false
@@ -77,6 +79,16 @@ endmacro()
 
 macro(add_example EXAMPLE_NAME GROUP_NAME LIB_DEPENDENCY)
     set(PROJECT_NAME ${EXAMPLE_NAME})
+
+    get_property(LIB_NAMES GLOBAL PROPERTY PERIDYNO_LIBRARIES)
+#   message("List ${LIB_NAMES}")
+    foreach(LIB_NAME ${${LIB_DEPENDENCY}})
+        string(FIND "${LIB_NAMES}" "${LIB_NAME}" TARGET_FOUND)
+        if(TARGET_FOUND EQUAL -1)
+            message("${LIB_NAME} not found! \n")
+            return()
+        endif()
+    endforeach()
 
     file(  
         GLOB_RECURSE SRC_LIST 
@@ -172,4 +184,10 @@ macro(peridyno_install LIB_NAME)
             install(FILES ${FILE_DYNAMICS_MODULE}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/${LIB_NAME}/${ITEM})
         endif()
     endforeach()
+endmacro()
+
+macro(append_library LIB_NAME)
+    get_property(LIB_NAMES GLOBAL PROPERTY PERIDYNO_LIBRARIES)
+    list(APPEND LIB_NAMES ${LIB_NAME})
+    set_property(GLOBAL PROPERTY PERIDYNO_LIBRARIES ${LIB_NAMES})
 endmacro()

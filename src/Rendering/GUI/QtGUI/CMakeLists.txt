@@ -6,8 +6,7 @@ add_definitions(-DTT_BUILDING_DLL)
 set(LIB_NAME QtGUI)
 set(LIB_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
-#set(CMAKE_AUTOMOC ON)                                                                   # 弢�启自动moc功能
-#set(CMAKE_AUTOUIC ON) 
+append_library(${LIB_NAME})
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 
