@@ -49,7 +49,6 @@ private:
 	std::vector<NodeItem*> mNodeList;
 };
 
-
 class WModuleDataModel : public Wt::WAbstractTableModel
 {
 public:
@@ -71,12 +70,40 @@ private:
 	std::shared_ptr<dyno::Node> mNode;
 };
 
-
 class WPromptNode : public Wt::WAbstractItemModel
 {
 public:
-	WPromptNode();
+	WPromptNode(std::map<std::string, std::tuple<std::string, int>> promptNodes);
 	~WPromptNode();
 
 	void setPromptNode(std::map<std::string, std::tuple<std::string, int>> promptNodes);
+
+	Wt::WModelIndex parent(const Wt::WModelIndex& index) const override;
+
+	Wt::WModelIndex index(int row, int column, const Wt::WModelIndex& parent = Wt::WModelIndex()) const override;
+
+	int columnCount(const Wt::WModelIndex& parent = Wt::WModelIndex()) const override;
+
+	int rowCount(const Wt::WModelIndex& parent = Wt::WModelIndex()) const override;
+
+	Wt::cpp17::any data(const Wt::WModelIndex& index,
+		Wt::ItemDataRole role = Wt::ItemDataRole::Display) const override;
+
+	Wt::cpp17::any headerData(int section,
+		Wt::Orientation orientation = Wt::Orientation::Horizontal,
+		Wt::ItemDataRole role = Wt::ItemDataRole::Display) const override;
+
+private:
+	std::map<std::string, std::tuple<std::string, int>> mPromptNodes;
+
+	struct NodeItem
+	{
+		int index;
+		int parentIndex;
+		std::string type;
+		std::string name;
+		int connectIndex;
+	};
+
+	std::vector<NodeItem*> mNodeList;
 };

@@ -6,7 +6,6 @@
 #include <Wt/WAbstractItemModel.h>
 #include <Wt/WAbstractTableModel.h>
 
-
 class WPromptPanel
 {
 public:
@@ -19,10 +18,10 @@ public:
 
 	Wt::Signal<std::pair<std::string, int>>& addPromptNode() { return _addPromptNode; };
 
-
 private:
+	Wt::WPanel* mPromptPanel;
+
 	Wt::WTreeView* mPromptTree;
 
 	Wt::Signal<std::pair<std::string, int>> _addPromptNode;
-
 };

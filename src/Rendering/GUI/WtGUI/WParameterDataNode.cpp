@@ -181,6 +181,7 @@ void WParameterDataNode::createParameterPanel(Wt::WContainerWidget* parameterWid
 	controlPanel->setCollapsible(true);
 	controlPanel->setStyleClass("scrollable-content");
 	controlPanel->setMargin(0);
+	controlPanel->collapse();
 	auto controlTable = controlPanel->setCentralWidget(std::make_unique<Wt::WTable>());
 
 	auto statePanel = layout->addWidget(std::make_unique<Wt::WPanel>());
@@ -189,6 +190,7 @@ void WParameterDataNode::createParameterPanel(Wt::WContainerWidget* parameterWid
 	statePanel->setStyleClass("scrollable-content");
 	//statePanel->setHeight(200);
 	statePanel->setMargin(0);
+	statePanel->collapse();
 	auto stateTable = statePanel->setCentralWidget(std::make_unique<Wt::WTable>());
 
 	std::vector<dyno::FBase*>& fields = mNode->getAllFields();
@@ -231,6 +233,7 @@ void WParameterDataNode::createParameterPanelModule(Wt::WContainerWidget* parame
 	controlPanel->setCollapsible(true);
 	controlPanel->setStyleClass("scrollable-content");
 	controlPanel->setMargin(0);
+	controlPanel->collapse();
 	auto controlTable = controlPanel->setCentralWidget(std::make_unique<Wt::WTable>());
 
 	//auto statePanel = layout->addWidget(std::make_unique<Wt::WPanel>());

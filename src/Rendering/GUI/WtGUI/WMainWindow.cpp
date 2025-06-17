@@ -46,6 +46,7 @@ WMainWindow::WMainWindow() : WContainerWidget()
 
 	// create data model
 	mParameterDataNode = std::make_shared<WParameterDataNode>();
+	mPromptPanel = std::make_shared<WPromptPanel>();
 
 	mParameterDataNode->changeValue().connect(this, &WMainWindow::updateCanvas);
 	mParameterDataNode->changeValue().connect(this, &WMainWindow::updateNodeGraphics);
@@ -100,7 +101,6 @@ void WMainWindow::updateNodeGraphics()
 
 void WMainWindow::onKeyWentDown(const Wt::WKeyEvent& event)
 {
-
 	if (event.key() == Wt::Key::Delete || event.key() == Wt::Key::Backspace)
 	{
 		if (tab->currentIndex() == 0)
@@ -182,9 +182,6 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel, AddNodeType addNodeType)
 
 	auto& pages = dyno::NodeFactory::instance()->nodePages();
 
-
-
-
 	// Recreating everything each time the scene switches affects performance.
 	if (addNodeType == AddNodeType::NodeType)
 	{
@@ -235,8 +232,6 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel, AddNodeType addNodeType)
 			}
 		}
 	}
-
-	
 
 	auto name = layout3->addWidget(std::make_unique<Wt::WLineEdit>());
 
@@ -302,10 +297,8 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel, AddNodeType addNodeType)
 				Initial_y += 10;
 				mModuleFlowWidget->updateAll();
 				name->setText("");
-
 			}
 		}
-		
 		});
 
 	auto reorderNodeButton = layout3->addWidget(std::make_unique<Wt::WPushButton>("Reorder"));

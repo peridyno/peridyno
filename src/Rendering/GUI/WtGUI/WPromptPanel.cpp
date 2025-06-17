@@ -2,6 +2,7 @@
 #include <Wt/WVBoxLayout.h>
 #include <Wt/WText.h>
 #include <Wt/WTable.h>
+#include <WSceneDataModel.h>
 
 WPromptPanel::WPromptPanel()
 {
@@ -13,26 +14,27 @@ WPromptPanel::~WPromptPanel()
 
 void WPromptPanel::createPromptPanel(Wt::WContainerWidget* promptNodeWidget, std::map<std::string, std::tuple<std::string, int>> promptNodes)
 {
+	std::shared_ptr<WPromptNode> nodeModel = std::make_shared<WPromptNode>(promptNodes);
+
 	auto layout = promptNodeWidget->setLayout(std::make_unique<Wt::WVBoxLayout>());
 	layout->setContentsMargins(0, 0, 0, 0);
 
-	auto promptPanel = layout->addWidget(std::make_unique<Wt::WPanel>());
-	promptPanel->setTitle("Prompt Node");
-	promptPanel->setCollapsible(true);
-	promptPanel->setStyleClass("scrollable-content");
-	promptPanel->setMargin(0);
-	mPromptTree = promptPanel->setCentralWidget(std::make_unique<Wt::WTreeView>());
+	mPromptPanel = layout->addWidget(std::make_unique<Wt::WPanel>());
+	mPromptPanel->setTitle("Prompt Node");
+	mPromptPanel->setCollapsible(true);
+	mPromptPanel->setStyleClass("scrollable-content");
+	mPromptPanel->setMargin(0);
+	//mPromptPanel->collapse();
 
-	//mPromptTree->setModel();
-
-	//mPromptTable->setMargin(0);
-	//mPromptTable->setSortingEnabled(false);
-	//mPromptTable->setSelectionMode(Wt::SelectionMode::Single);
-	//mPromptTable->setEditTriggers(Wt::EditTrigger::None);
-	//mPromptTable->setColumnResizeEnabled(true);
-	//mPromptTable->setColumnWidth(0, 100);
-	//mPromptTable->setColumnWidth(1, 280);
-	//mPromptTable->setSortingEnabled(false);
+	mPromptTree = mPromptPanel->setCentralWidget(std::make_unique<Wt::WTreeView>());
+	mPromptTree->setModel(nodeModel);
+	mPromptTree->setMargin(0);
+	mPromptTree->setSortingEnabled(true);
+	mPromptTree->setSelectionMode(Wt::SelectionMode::Single);
+	mPromptTree->setEditTriggers(Wt::EditTrigger::None);
+	mPromptTree->setColumnResizeEnabled(true);
+	mPromptTree->setColumnWidth(0, 250);
+	mPromptTree->setColumnWidth(1, 250);
 
 	//auto i = 0;
 	//for (auto promptNode : promptNodes)
@@ -44,5 +46,4 @@ void WPromptPanel::createPromptPanel(Wt::WContainerWidget* promptNodeWidget, std
 
 void WPromptPanel::emitAddNode()
 {
-
 }
