@@ -203,19 +203,35 @@ WPromptNode::~WPromptNode()
 void WPromptNode::setPromptNode(std::map<std::string, std::tuple<std::string, int>> promptNodes)
 {
 	mPromptNodes = promptNodes;
-	NodeItem* item = new NodeItem;
-	item->index = 1;
-	item->parentIndex = 0;
-	item->name = "root";
-	mNodeList.push_back(item);
-	for (int i = 0; i < 10; i++)
-	{
-		NodeItem* item = new NodeItem;
-		item->index = i + 2;
-		item->parentIndex = 1;
-		item->name = "tesst";
-		mNodeList.push_back(item);
-	}
+	NodeItem* item0 = new NodeItem;
+	item0->index = 0;
+	item0->parentIndex = 0;
+	item0->type = "type1";
+	item0->name = "root1";
+	item0->rowCount = 1;
+	mNodeList.push_back(item0);
+
+	NodeItem* item1 = new NodeItem;
+	item1->index = 2;
+	item1->parentIndex = 1;
+	item1->type = "test3";
+	item1->name = "test3";
+	item1->rowCount = 0;
+	mNodeList.push_back(item1);
+
+
+	mPromptNodes = promptNodes;
+	NodeItem* item2 = new NodeItem;
+	item2->index = 1;
+	item2->parentIndex = 1;
+	item2->type = "type1";
+	item2->name = "root2";
+	item2->rowCount = 1;
+	mNodeList.push_back(item2);
+
+	
+
+
 	//if (!mPromptNodes.empty())
 	//{
 	//	std::map<std::string, std::vector<NodeItem*>> promptNodesSort;
@@ -257,37 +273,16 @@ void WPromptNode::setPromptNode(std::map<std::string, std::tuple<std::string, in
 
 Wt::WModelIndex WPromptNode::parent(const Wt::WModelIndex& index) const
 {
-	if (!index.isValid())
-	{
-		std::cout << "0" << std::endl;
-		return Wt::WModelIndex();
-	}
-	else if(index.internalId() == 0)
-	{
-		std::cout << "1" << std::endl;
-		return Wt::WModelIndex();
-	}
-	else
-	{
-		std::cout << "test" << std::endl;
-		auto item = mNodeList[index.internalId()];
-		return createIndex(item->index, 0, item->parentIndex);
-	}
+	return Wt::WModelIndex();
 }
 
 Wt::WModelIndex WPromptNode::index(int row, int column, const Wt::WModelIndex& parent) const
 {
-	int parentId;
-	if (!parent.isValid())
+	if (parent.isValid())
 	{
-		parentId = 0;
+		return Wt::WModelIndex();
 	}
-	else
-	{
-		int grandParentId = parent.internalId();
-		parentId = mNodeList[grandParentId]->parentIndex;
-	}
-	return createIndex(row, column, parentId);
+	return createIndex(row, column, row);
 }
 
 int WPromptNode::columnCount(const Wt::WModelIndex& parent) const
@@ -304,22 +299,23 @@ int WPromptNode::rowCount(const Wt::WModelIndex& parent) const
 
 Wt::cpp17::any WPromptNode::data(const Wt::WModelIndex& index, Wt::ItemDataRole role) const
 {
-	if (index.isValid())
-	{
-		auto data = mNodeList[index.internalId()];
+	if (!index.isValid())
+		return Wt::cpp17::any();
 
-		if (role == Wt::ItemDataRole::Display)
+	auto data = mNodeList[index.internalId()];
+
+	if (role == Wt::ItemDataRole::Display)
+	{
+		if (index.column() == 0)
 		{
-			if (index.column() == 0)
-			{
-				return data->type;
-			}
-			if (index.column() == 1)
-			{
-				return data->name;
-			}
+			return data->type;
+		}
+		if (index.column() == 1)
+		{
+			return data->name;
 		}
 	}
+
 	return Wt::cpp17::any();
 }
 

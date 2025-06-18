@@ -100,6 +100,7 @@ private:
 	{
 		int index;
 		int parentIndex;
+		int rowCount;
 		std::string type;
 		std::string name;
 		int connectIndex;

@@ -3,8 +3,14 @@
 #include <Wt/WContainerWidget.h>
 #include <Wt/WPanel.h>
 #include <Wt/WTreeView.h>
+
 #include <Wt/WAbstractItemModel.h>
 #include <Wt/WAbstractTableModel.h>
+
+#include <Wt/WText.h>
+#include <Wt/WTree.h>
+#include <Wt/WTreeTable.h>
+#include <Wt/WTreeTableNode.h>
 
 class WPromptPanel
 {
@@ -19,7 +25,7 @@ public:
 	Wt::Signal<std::pair<std::string, int>>& addPromptNode() { return _addPromptNode; };
 
 private:
-	Wt::WPanel* mPromptPanel;
+	Wt::WPanel* mPromptPanel = nullptr;
 
 	Wt::WTreeView* mPromptTree;
 
