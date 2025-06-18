@@ -37,11 +37,13 @@ namespace dyno
 	protected:
 		void resetStates() override;
 
+	public:
+
 		DEF_INSTANCE_IN(PointSet<TDataType>, Points, "A set of points");
 
 		DEF_ARRAY_IN(Coord, Vector, DeviceType::GPU, "");
 
-		DEF_VAR(Vec3f, Color, Vec3f(0,0,0.8f), "Color");
+		DEF_VAR(Vec3f, Color, Vec3f(0, 0, 0.8f), "Color");
 
 	public:
 		Real pointSize = 0.001f;

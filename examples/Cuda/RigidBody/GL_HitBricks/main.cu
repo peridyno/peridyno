@@ -68,6 +68,20 @@ protected:
 		}
 
 		boxInGlobal.clear();
+
+		//std::cout << event.actionType << std::endl;
+
+		//if (event.actionType == AT_UNKOWN)
+		//	printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
+		//if (event.actionType == AT_RELEASE)
+		//	printf("111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111");
+
+		//if (event.actionType == AT_PRESS)
+		//	printf("222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222");
+
+		//if (event.actionType == AT_REPEAT)
+		//	printf("333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333");
 	}
 };
 
@@ -85,7 +99,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 		for (int j = 0; j < i + 1; j++)
 		{
 			rigidBody.position = 0.5f * Vec3f(0.5f, 1.1 - 0.13 * i, 0.12f + 0.21 * j + 0.1 * (8 - i));
-			
+
 			rigid->addBox(box, rigidBody);
 		}
 
@@ -110,6 +124,12 @@ std::shared_ptr<SceneGraph> creatBricks()
 	tet.v[1] = Vec3f(0.5f, 1.2f, 0.5f);
 	tet.v[2] = Vec3f(0.6f, 1.1f, 0.5f);
 	tet.v[3] = Vec3f(0.5f, 1.1f, 0.6f);
+
+	rigidTet.position = (tet.v[0] + tet.v[1] + tet.v[2] + tet.v[3]) / 4;
+	tet.v[0] -= rigidTet.position;
+	tet.v[1] -= rigidTet.position;
+	tet.v[2] -= rigidTet.position;
+	tet.v[3] -= rigidTet.position;
 	rigid->addTet(tet, rigidTet);
 
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();

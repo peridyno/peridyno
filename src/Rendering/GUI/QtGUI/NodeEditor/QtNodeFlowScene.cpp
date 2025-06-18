@@ -48,13 +48,13 @@ namespace Qt
 					std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
 					auto dat = std::make_unique<QtNodeWidget>(std::move(new_node));
 					return dat;
-				};
+					};
 
 				QString category = dyno::FormatBlockCaptionName(node->getNodeType());
 				ret->registerModel<QtNodeWidget>(category, creator);
 			}
 		}
-	
+
 		this->setRegistry(ret);
 
 		createNodeGraphView();
@@ -64,8 +64,31 @@ namespace Qt
 		connect(this, &QtFlowScene::nodePlaced, this, &QtNodeFlowScene::addNode);
 		connect(this, &QtFlowScene::nodeDeleted, this, &QtNodeFlowScene::deleteNode);
 
-		connect(this, &QtFlowScene::nodeHotKey0Checked, this, &QtNodeFlowScene::enableRendering);
-		connect(this, &QtFlowScene::nodeHotKey1Checked, this, &QtNodeFlowScene::enablePhysics);
+// 		connect(this, &QtFlowScene::nodeHotKey0Checked, this, &QtNodeFlowScene::enableRendering);
+// 		connect(this, &QtFlowScene::nodeHotKey1Checked, this, &QtNodeFlowScene::enablePhysics);
+		
+		connect(this, &QtFlowScene::nodeHotKeyClicked, [this](QtNode& n, bool checked, int buttonId) {
+
+			switch (buttonId) 
+			{
+				case 0:
+					enableRendering(n, checked);
+					break;
+				case 1:
+					enablePhysics(n, checked);
+					break;
+				case 2:
+					enableAutoSync(n, checked);
+					break;
+				case 3:
+					resetNode(n);
+					break;
+
+				default:
+					break;
+			}
+				
+			});
 		//connect(this, &QtFlowScene::nodeHotKey2Checked, this, &QtNodeFlowScene::Key2_Signal);
 
 		connect(this, &QtFlowScene::nodeContextMenu, this, &QtNodeFlowScene::showContextMenu);
@@ -87,137 +110,137 @@ namespace Qt
 		//SceneGraph::Iterator it_end(nullptr);
 
 		auto addNodeWidget = [&](std::shared_ptr<Node> m) -> void
-		{
-			auto mId = m->objectId();
+			{
+				auto mId = m->objectId();
 
-			auto type = std::make_unique<QtNodeWidget>(m);
+				auto type = std::make_unique<QtNodeWidget>(m);
 
-			auto& node = this->createNode(std::move(type));
+				auto& node = this->createNode(std::move(type));
 
-			nodeMap[mId] = &node;
+				nodeMap[mId] = &node;
 
-			QPointF posView(m->bx(), m->by());
+				QPointF posView(m->bx(), m->by());
 
 			node.nodeGraphicsObject().setPos(posView);
 
-			this->nodePlaced(node);
-		};
+				//this->nodePlaced(node);
+			};
 
 		for (auto it = scn->begin(); it != scn->end(); it++)
 		{
 			addNodeWidget(it.get());
 		}
-		
+
 		auto createNodeConnections = [&](std::shared_ptr<Node> nd) -> void
-		{
-			auto inId = nd->objectId();
-
-			if (nodeMap.find(inId) != nodeMap.end())
 			{
-				auto inBlock = nodeMap[nd->objectId()];
+				auto inId = nd->objectId();
 
-				auto ports = nd->getImportNodes();
-
-				for (int i = 0; i < ports.size(); i++)
+				if (nodeMap.find(inId) != nodeMap.end())
 				{
-					dyno::NodePortType pType = ports[i]->getPortType();
-					if (dyno::Single == pType)
+					auto inBlock = nodeMap[nd->objectId()];
+
+					auto ports = nd->getImportNodes();
+
+					for (int i = 0; i < ports.size(); i++)
 					{
-						auto node = ports[i]->getNodes()[0];
-						if (node != nullptr)
+						dyno::NodePortType pType = ports[i]->getPortType();
+						if (dyno::Single == pType)
 						{
-							auto outId = node->objectId();
-							if (nodeMap.find(outId) != nodeMap.end())
+							auto node = ports[i]->getNodes()[0];
+							if (node != nullptr)
 							{
-								auto outBlock = nodeMap[node->objectId()];
-								createConnection(*inBlock, i, *outBlock, 0);
-							}
-						}
-					}
-					else if (dyno::Multiple == pType)
-					{
-						//TODO: a weird problem exist here, if the expression "auto& nodes = ports[i]->getNodes()" is used,
-						//we still have to call clear to avoid memory leak.
-						auto& nodes = ports[i]->getNodes();
-						//ports[i]->clear();
-						for (int j = 0; j < nodes.size(); j++)
-						{
-							if (nodes[j] != nullptr)
-							{
-								auto outId = nodes[j]->objectId();
+								auto outId = node->objectId();
 								if (nodeMap.find(outId) != nodeMap.end())
 								{
-									auto outBlock = nodeMap[outId];
+									auto outBlock = nodeMap[node->objectId()];
 									createConnection(*inBlock, i, *outBlock, 0);
 								}
 							}
 						}
-						//nodes.clear();
-					}
-				}
-
-				auto fieldInp = nd->getInputFields();
-				for (int i = 0; i < fieldInp.size(); i++)
-				{
-					auto fieldSrc = fieldInp[i]->getSource();
-					if (fieldSrc != nullptr) {
-						auto parSrc = fieldSrc->parent();
-						if (parSrc != nullptr)
+						else if (dyno::Multiple == pType)
 						{
-							//To handle fields from node states or outputs
-							dyno::Node* nodeSrc = dynamic_cast<dyno::Node*>(parSrc);
-
-							//To handle fields that are exported from module outputs
-							if (nodeSrc == nullptr)
+							//TODO: a weird problem exist here, if the expression "auto& nodes = ports[i]->getNodes()" is used,
+							//we still have to call clear to avoid memory leak.
+							auto& nodes = ports[i]->getNodes();
+							//ports[i]->clear();
+							for (int j = 0; j < nodes.size(); j++)
 							{
-								dyno::Module* moduleSrc = dynamic_cast<dyno::Module*>(parSrc);
-								if (moduleSrc != nullptr)
-									nodeSrc = moduleSrc->getParentNode();
-							}
-
-							if (nodeSrc != nullptr)
-							{
-								auto outId = nodeSrc->objectId();
-								auto fieldsOut = nodeSrc->getOutputFields();
-
-								uint outFieldIndex = 0;
-								bool fieldFound = false;
-								for (auto f : fieldsOut)
+								if (nodes[j] != nullptr)
 								{
-									if (f == fieldSrc)
+									auto outId = nodes[j]->objectId();
+									if (nodeMap.find(outId) != nodeMap.end())
 									{
-										fieldFound = true;
-										break;
+										auto outBlock = nodeMap[outId];
+										createConnection(*inBlock, i, *outBlock, 0);
 									}
-									outFieldIndex++;
+								}
+							}
+							//nodes.clear();
+						}
+					}
+
+					auto fieldInp = nd->getInputFields();
+					for (int i = 0; i < fieldInp.size(); i++)
+					{
+						auto fieldSrc = fieldInp[i]->getSource();
+						if (fieldSrc != nullptr) {
+							auto parSrc = fieldSrc->parent();
+							if (parSrc != nullptr)
+							{
+								//To handle fields from node states or outputs
+								dyno::Node* nodeSrc = dynamic_cast<dyno::Node*>(parSrc);
+
+								//To handle fields that are exported from module outputs
+								if (nodeSrc == nullptr)
+								{
+									dyno::Module* moduleSrc = dynamic_cast<dyno::Module*>(parSrc);
+									if (moduleSrc != nullptr)
+										nodeSrc = moduleSrc->getParentNode();
 								}
 
-								if (nodeMap[outId]->nodeDataModel()->allowExported()) outFieldIndex++;
-
-								if (fieldFound && nodeMap.find(outId) != nodeMap.end())
+								if (nodeSrc != nullptr)
 								{
-									auto outBlock = nodeMap[outId];
-									createConnection(*inBlock, i + ports.size(), *outBlock, outFieldIndex);
+									auto outId = nodeSrc->objectId();
+									auto fieldsOut = nodeSrc->getOutputFields();
+
+									uint outFieldIndex = 0;
+									bool fieldFound = false;
+									for (auto f : fieldsOut)
+									{
+										if (f == fieldSrc)
+										{
+											fieldFound = true;
+											break;
+										}
+										outFieldIndex++;
+									}
+
+									if (nodeMap[outId]->nodeDataModel()->allowExported()) outFieldIndex++;
+
+									if (fieldFound && nodeMap.find(outId) != nodeMap.end())
+									{
+										auto outBlock = nodeMap[outId];
+										createConnection(*inBlock, i + ports.size(), *outBlock, outFieldIndex);
+									}
 								}
 							}
 						}
 					}
 				}
-			}
-		};
-	
+			};
+
 		for (auto it = scn->begin(); it != scn->end(); it++)
 		{
 			createNodeConnections(it.get());
 		}
 
-// 		// 	clearScene();
-// 		// 
-// 		for (auto it = scn->begin(); it != scn->end(); it++)
-// 		{
-// 			auto node_ptr = it.get();
-// 			std::cout << node_ptr->getClassInfo()->getClassName() << ": " << node_ptr.use_count() << std::endl;
-// 		}
+		// 		// 	clearScene();
+		// 		// 
+		// 		for (auto it = scn->begin(); it != scn->end(); it++)
+		// 		{
+		// 			auto node_ptr = it.get();
+		// 			std::cout << node_ptr->getClassInfo()->getClassName() << ": " << node_ptr.use_count() << std::endl;
+		// 		}
 
 		nodeMap.clear();
 	}
@@ -272,7 +295,7 @@ namespace Qt
 		auto node_obj = dyno::Object::createObject(NodeName);
 		std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
 		auto dat = std::make_unique<QtNodeWidget>(std::move(new_node));
-	
+
 		if (dat != nullptr) {
 			auto scn = dyno::SceneGraphFactory::instance()->active();
 			scn->addNode(dat->getNode());
@@ -282,24 +305,24 @@ namespace Qt
 		}
 		int mId;
 		auto addNodeWidget = [&](std::shared_ptr<Node> m) -> void
-		{
-			mId = m->objectId();
+			{
+				mId = m->objectId();
 
-			auto type = std::make_unique<QtNodeWidget>(m);
+				auto type = std::make_unique<QtNodeWidget>(m);
 
-			auto& node = this->createNode(std::move(type));
+				auto& node = this->createNode(std::move(type));
 
-			QPointF posView(m->bx(), m->by());
+				QPointF posView(m->bx(), m->by());
 
-			node.nodeGraphicsObject().setPos(posView);
+				node.nodeGraphicsObject().setPos(posView);
 
-			this->nodePlaced(node);
-		};
+				this->nodePlaced(node);
+			};
 		auto scn = dyno::SceneGraphFactory::instance()->active();
 		int x = 0;
 		for (auto it = scn->begin(); it != scn->end(); it++)
 		{
-			if(x== mId){
+			if (x == mId) {
 				addNodeWidget(it.get());
 				break;
 			}
@@ -314,7 +337,7 @@ namespace Qt
 
 		auto allNodes = this->allNodes();
 
-		for  (auto node : allNodes)
+		for (auto node : allNodes)
 		{
 			auto model = dynamic_cast<QtNodeWidget*>(node->nodeDataModel());
 			if (model != nullptr)
@@ -330,7 +353,7 @@ namespace Qt
 
 		auto allNodes = this->allNodes();
 
-		for  (auto node : allNodes)
+		for (auto node : allNodes)
 		{
 			auto model = dynamic_cast<QtNodeWidget*>(node->nodeDataModel());
 			if (model != nullptr)
@@ -388,7 +411,19 @@ namespace Qt
 
 		if (mEditingEnabled && nodeData != nullptr) {
 			auto node = nodeData->getNode();
-			node->setVisible(checked);
+			node->setVisible(!checked);
+			node->graphicsPipeline()->enable();
+			node->graphicsPipeline()->update();
+		}
+	}
+
+	void QtNodeFlowScene::enableAutoSync(QtNode& n, bool checked) 
+	{
+		auto nodeData = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
+
+		if (mEditingEnabled && nodeData != nullptr) {
+			auto node = nodeData->getNode();
+			node->setAutoSync(checked);
 		}
 	}
 
@@ -398,12 +433,24 @@ namespace Qt
 
 		if (mEditingEnabled && nodeData != nullptr) {
 			auto node = nodeData->getNode();
-			node->setActive(checked);
+			node->setActive(!checked);
+			node->animationPipeline()->update();
+		}
+	}
+
+	void QtNodeFlowScene::resetNode(QtNode& n) 
+	{
+		auto nodeData = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
+
+		if (mEditingEnabled && nodeData != nullptr) {
+			auto node = nodeData->getNode();
+			node->reset();
 		}
 	}
 
 	void QtNodeFlowScene::showContextMenu(QtNode& n, const QPointF& pos)
 	{
+		
 		auto qDataModel = dynamic_cast<QtNodeWidget*>(n.nodeDataModel());
 		auto node = qDataModel->getNode();
 		if (node == nullptr) {
@@ -455,7 +502,7 @@ namespace Qt
 		menu->addAction(disableDiscendants);
 		menu->addAction(enableAutoSync);
 		menu->addAction(disableAutoSync);
-		
+
 		menu->addSeparator();
 		menu->addAction(delAct);
 
@@ -467,23 +514,23 @@ namespace Qt
 
 		connect(showAllNodesAct, &QAction::triggered, this, [&]() {
 			showAllNodes();
-		});
+			});
 
 		connect(showThisNodeOnlyAct, &QAction::triggered, this, [&]() {
 			showThisNodeOnly(n);
-		});
+			});
 
-		connect(resetNodeAct, &QAction::triggered, this, [=]() {
-			node->reset();
-		});
+		connect(resetNodeAct, &QAction::triggered, this, [&]() {
+			resetNode(n);
+			});
 
 		connect(activateAllNodesAct, &QAction::triggered, this, [&]() {
 			activateAllNodes();
-		});
+			});
 
 		connect(activateThisNodeOnlyAct, &QAction::triggered, this, [&]() {
 			activateThisNodeOnly(n);
-		});
+			});
 
 		connect(autoSyncAct, &QAction::triggered, this, [=](bool checked) {
 			node->setAutoSync(checked);
@@ -499,13 +546,13 @@ namespace Qt
 
 		connect(enableAutoSync, &QAction::triggered, this, [=]() {
 			autoSyncAllNodes(true);
-		});
+			});
 
 		connect(disableAutoSync, &QAction::triggered, this, [=]() {
 			autoSyncAllNodes(false);
-		});
+			});
 
-		connect(delAct, &QAction::triggered, this, [&](){ this->removeNode(n); });
+		connect(delAct, &QAction::triggered, this, [&]() { this->removeNode(n); });
 		connect(helpAct, &QAction::triggered, this, [&]() { this->showHelper(n); });
 
 		menu->move(QCursor().pos().x() + 4, QCursor().pos().y() + 4);
@@ -519,13 +566,11 @@ namespace Qt
 		{
 			if (node->id() == n.id())
 			{
-				node->nodeGraphicsObject().setHotKey1Hovered(true);
-				this->enableRendering(*node, true);
+				this->enableRendering(*node, false);
 			}
 			else
 			{
-				node->nodeGraphicsObject().setHotKey1Hovered(false);
-				this->enableRendering(*node, false);
+				this->enableRendering(*node, true);
 			}
 		}
 
@@ -539,7 +584,7 @@ namespace Qt
 		auto nodes = this->allNodes();
 		for (auto node : nodes)
 		{
-			this->enableRendering(*node, true);
+			this->enableRendering(*node, false);
 		}
 
 		this->updateNodeGraphView();
@@ -554,13 +599,11 @@ namespace Qt
 		{
 			if (node->id() == n.id())
 			{
-				node->nodeGraphicsObject().setHotKey0Hovered(true);
-				this->enablePhysics(*node, true);
+				this->enablePhysics(*node, false);
 			}
 			else
 			{
-				node->nodeGraphicsObject().setHotKey0Hovered(false);
-				this->enablePhysics(*node, false);
+				this->enablePhysics(*node, true);
 			}
 		}
 
@@ -574,7 +617,7 @@ namespace Qt
 		auto nodes = this->allNodes();
 		for (auto node : nodes)
 		{
-			auto a = node->nodeDataModel();
+			this->enablePhysics(*node, false);
 		}
 
 		this->updateNodeGraphView();
@@ -594,6 +637,8 @@ namespace Qt
 				dNode->setAutoSync(autoSync);
 			}
 		}
+
+		this->updateNodeGraphView();
 
 		nodes.clear();
 	}
@@ -625,6 +670,8 @@ namespace Qt
 
 			scn->traverseForward(dNode, &act);
 		}
+
+		this->updateNodeGraphView();
 	}
 
 	//TODO: show a message on how to use this node
@@ -640,82 +687,82 @@ namespace Qt
 		dyno::DirectedAcyclicGraph graph;
 
 		auto constructDAG = [&](std::shared_ptr<Node> nd) -> void
-		{
-			
-			auto inId = nd->objectId();
-
-			auto ports = nd->getImportNodes();
-
-			graph.addOtherVertices(inId);
-			graph.removeID();
-
-			bool NodeConnection = false;
-			bool FieldConnection = false;
-			for (int i = 0; i < ports.size(); i++)
 			{
-				dyno::NodePortType pType = ports[i]->getPortType();
-				if (dyno::Single == pType)
+
+				auto inId = nd->objectId();
+
+				auto ports = nd->getImportNodes();
+
+				graph.addOtherVertices(inId);
+				graph.removeID();
+
+				bool NodeConnection = false;
+				bool FieldConnection = false;
+				for (int i = 0; i < ports.size(); i++)
 				{
-					auto node = ports[i]->getNodes()[0];
-					if (node != nullptr)
+					dyno::NodePortType pType = ports[i]->getPortType();
+					if (dyno::Single == pType)
 					{
-						auto outId = node->objectId();
-						
-						graph.addEdge(outId, inId);
-
-						graph.removeID(outId, inId);
-					}
-				}
-				else if (dyno::Multiple == pType)
-				{
-					auto& nodes = ports[i]->getNodes();
-					for (int j = 0; j < nodes.size(); j++)
-					{
-						if (nodes[j] != nullptr)
+						auto node = ports[i]->getNodes()[0];
+						if (node != nullptr)
 						{
-							auto outId = nodes[j]->objectId();
-
-							graph.addEdge(outId, inId);
-							graph.removeID(outId, inId);
-
-						}
-					}
-					//nodes.clear();
-				}
-
-			}
-
-
-			auto fieldInp = nd->getInputFields();
-			for (int i = 0; i < fieldInp.size(); i++)//±éÀúÃ¿¸öNodeµÄInputfield
-			{
-				auto fieldSrc = fieldInp[i]->getSource();
-				if (fieldSrc != nullptr) {
-					auto parSrc = fieldSrc->parent();
-					if (parSrc != nullptr)
-					{
-						Node* nodeSrc = dynamic_cast<Node*>(parSrc);
-
-						// Otherwise parSrc is a field of Module
-						if (nodeSrc == nullptr)
-						{
-							dyno::Module* moduleSrc = dynamic_cast<dyno::Module*>(parSrc);
-							if (moduleSrc != nullptr)
-								nodeSrc = moduleSrc->getParentNode();
-						}
-
-						if (nodeSrc != nullptr)
-						{
-							auto outId = nodeSrc->objectId();
+							auto outId = node->objectId();
 
 							graph.addEdge(outId, inId);
 
 							graph.removeID(outId, inId);
 						}
 					}
+					else if (dyno::Multiple == pType)
+					{
+						auto& nodes = ports[i]->getNodes();
+						for (int j = 0; j < nodes.size(); j++)
+						{
+							if (nodes[j] != nullptr)
+							{
+								auto outId = nodes[j]->objectId();
+
+								graph.addEdge(outId, inId);
+								graph.removeID(outId, inId);
+
+							}
+						}
+						//nodes.clear();
+					}
+
 				}
-			}
-		};
+
+
+				auto fieldInp = nd->getInputFields();
+				for (int i = 0; i < fieldInp.size(); i++)//ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½Nodeï¿½ï¿½Inputfield
+				{
+					auto fieldSrc = fieldInp[i]->getSource();
+					if (fieldSrc != nullptr) {
+						auto parSrc = fieldSrc->parent();
+						if (parSrc != nullptr)
+						{
+							Node* nodeSrc = dynamic_cast<Node*>(parSrc);
+
+							// Otherwise parSrc is a field of Module
+							if (nodeSrc == nullptr)
+							{
+								dyno::Module* moduleSrc = dynamic_cast<dyno::Module*>(parSrc);
+								if (moduleSrc != nullptr)
+									nodeSrc = moduleSrc->getParentNode();
+							}
+
+							if (nodeSrc != nullptr)
+							{
+								auto outId = nodeSrc->objectId();
+
+								graph.addEdge(outId, inId);
+
+								graph.removeID(outId, inId);
+							}
+						}
+					}
+				}
+			};
 		for (auto it = scn->begin(); it != scn->end(); it++)
 		{
 			constructDAG(it.get());
@@ -723,7 +770,7 @@ namespace Qt
 
 
 		dyno::AutoLayoutDAG layout(&graph);
- 		layout.update();
+		layout.update();
 
 		//Set up the mapping from ObjectId to QtNode
 		auto& _nodes = this->nodes();
@@ -773,19 +820,19 @@ namespace Qt
 					node->setBlockCoord(offsetX, offsetY);
 
 					offsetY += (h + mDy);
-					
+
 				}
 			}
 
 			offsetX += (xMax + mDx);
 
-			tempOffsetY = std::max(tempOffsetY,offsetY);
-			
+			tempOffsetY = std::max(tempOffsetY, offsetY);
+
 
 
 		}
 
-		//ÀëÉ¢½ÚµãµÄÅÅÐò
+		//ï¿½ï¿½É¢ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		auto otherVertices = layout.getOtherVertices();
 		float width = 0;
 		float heigth = 0;
@@ -805,7 +852,7 @@ namespace Qt
 
 				Node* node = nodeMapper[id];
 
-				
+
 				node->setBlockCoord(ofstX, ofstY);
 				ofstX += width + mDx;
 

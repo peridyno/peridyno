@@ -2,6 +2,7 @@
 
 #include "ToolBar/TabToolbar.h"
 #include "NodeEditor/QtNodeFlowWidget.h"
+#include <QMessageBox>
 
 namespace dyno
 {

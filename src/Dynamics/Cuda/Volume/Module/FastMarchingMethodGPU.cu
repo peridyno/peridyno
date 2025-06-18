@@ -4,6 +4,8 @@
 
 #include "Collision/Distance3D.h"
 
+#include "MarchingCubesHelper.h"
+
 namespace dyno
 {
 	IMPLEMENT_TCLASS(FastMarchingMethodGPU, TDataType)
@@ -28,6 +30,7 @@ namespace dyno
 		a = tmp;
 	}
 
+	//Refer to Algorithm 1.3 in "Improved Fast Iterative Algorithm for Eikonal Equation for GPU Computing", Yuhao Huang 2021
 	__device__ void UpdatePhi(
 		DArray3D<Real>& phi,
 		DArray3D<GridType>& type,
@@ -63,12 +66,14 @@ namespace dyno
 		// Sort
 		if (outside_ijk)
 		{
+			//Ascending
 			if (a[0] > a[1]) FSM_SWAP(a[0], a[1]);
 			if (a[1] > a[2]) FSM_SWAP(a[1], a[2]);
 			if (a[0] > a[1]) FSM_SWAP(a[0], a[1]);
 		}
 		else
 		{
+			//Descending
 			if (a[0] < a[1]) FSM_SWAP(a[0], a[1]);
 			if (a[1] < a[2]) FSM_SWAP(a[1], a[2]);
 			if (a[0] < a[1]) FSM_SWAP(a[0], a[1]);
@@ -226,23 +231,25 @@ namespace dyno
 		Real b;
 		fieldB.getDistance(point, b, normal);
 
+		Real iso = 0;
+
 		Real op = FARWAY_DISTANCE;
 		switch (boolType)
 		{
 		case 0://A intersect B
 			op = a > b ? a : b;
-			type(i, j, k) = (a <= 0 && b <= 0) ? GridType::Accepted : GridType::Infinite;
-			outside(i, j, k) = (a <= 0 && b <= 0) ? true : false;
+			type(i, j, k) = (Inside(a, iso, dx) && Inside(b, iso, dx)) ? GridType::Accepted : GridType::Infinite;
+			outside(i, j, k) = (Inside(a, iso, dx) && Inside(b, iso, dx)) ? false : true;
 			break;
 		case 1://A union B
 			op = a > b ? b : a;
-			type(i, j, k) = (a >= 0 && b >= 0 && op < 3.5 * dx) ? GridType::Accepted : GridType::Infinite;
-			outside(i, j, k) = (a >= 0 && b >= 0) ? true : false;
+			type(i, j, k) = (Outside(a, iso, dx) && Outside(b, iso, dx) && op < 3.5 * dx) ? GridType::Accepted : GridType::Infinite;
+			outside(i, j, k) = (Outside(a, iso, dx) && Outside(b, iso, dx) && op < 3.5 * dx) ? true : false;
 			break;
 		case 2://A minus B
 			op = a > -b ? a : -b;
-			type(i, j, k) = (a <= 0 && -b <= 0) ? GridType::Accepted : GridType::Infinite;
-			outside(i, j, k) = (a <= 0 && -b <= 0) ? true : false;
+			type(i, j, k) = (Inside(a, iso, dx) && Outside(b, iso, dx)) ? GridType::Accepted : GridType::Infinite;
+			outside(i, j, k) = (Inside(a, iso, dx) && Outside(b, iso, dx)) ? false : true;
 			break;
 		default:
 			break;
@@ -280,9 +287,9 @@ namespace dyno
 		int min_j = std::floor(min_box[1] / dx);
 		int min_k = std::floor(min_box[2] / dx);
 
-		int max_i = std::floor(max_box[0] / dx);
-		int max_j = std::floor(max_box[1] / dx);
-		int max_k = std::floor(max_box[2] / dx);
+		int max_i = std::ceil(max_box[0] / dx);
+		int max_j = std::ceil(max_box[1] / dx);
+		int max_k = std::ceil(max_box[2] / dx);
 
 		int ni = max_i - min_i + 1;
 		int nj = max_j - min_j + 1;

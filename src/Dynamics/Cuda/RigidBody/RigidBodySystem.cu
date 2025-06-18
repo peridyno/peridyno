@@ -43,7 +43,7 @@ namespace dyno
 
 		this->animationPipeline()->pushModule(merge);
 
-		auto iterSolver = std::make_shared<TJSoftConstraintSolver<TDataType>>();
+		auto iterSolver = std::make_shared<TJConstraintSolver<TDataType>>();
 		this->stateTimeStep()->connect(iterSolver->inTimeStep());
 		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
 		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
@@ -100,38 +100,8 @@ namespace dyno
 		const RigidBodyInfo& bodyDef, 
 		const Real density)
 	{
-		auto b = box;
-		auto bd = bodyDef;
-
-		float lx = 2.0f * b.halfLength[0];
-		float ly = 2.0f * b.halfLength[1];
-		float lz = 2.0f * b.halfLength[2];
-
-		bd.mass = density * lx * ly * lz;
-		//printf("Box mass : %lf\n", bd.mass);
-
-		// Calculate the inertia of box in the local frame
-		auto localInertia = 1.0f / 12.0f * bd.mass
-			* Mat3f(ly * ly + lz * lz, 0, 0,
-				0, lx * lx + lz * lz, 0,
-				0, 0, lx * lx + ly * ly);
-
-		// Transform into the rigid body frame
-		auto rotShape = box.rot.toMatrix3x3();
-		auto rotBody = bd.angle.toMatrix3x3();
-
-		bd.inertia = rotBody * (rotShape * localInertia * rotShape.transpose() + ParallelAxisTheorem(box.center, bd.mass)) * rotBody.transpose();
-
-		bd.shapeType = ET_BOX;
-
-		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size(), bd);
-		mHostBoxes.push_back(b);
-
-		std::shared_ptr<PdActor> actor = std::make_shared<PdActor>();
-		actor->idx = mHostBoxes.size() - 1;
-		actor->shapeType = ET_BOX;
-		actor->center = bd.position;
-		actor->rot = bd.angle;
+		auto actor = this->createRigidBody(bodyDef);
+		this->bindBox(actor, box, density);
 
 		return actor;
 	}
@@ -142,39 +112,8 @@ namespace dyno
 		const RigidBodyInfo& bodyDef,
 		const Real density /*= Real(1)*/)
 	{
-		auto b = sphere;
-		auto bd = bodyDef;
-
-//		bd.position = b.center + bd.offset;
-
-		float r = b.radius;
-		if (bd.mass <= 0.0f) {
-			bd.mass = 4 / 3.0f*M_PI*r*r*r*density;
-		}
-		//printf("Sphere mass : %lf\n", bd.mass);
-		float I11 = r * r;
-
-		// Calculate the inertia of sphere in the local frame
-		auto localInertia = 0.4f * bd.mass
-			* Mat3f(I11, 0, 0,
-				0, I11, 0,
-				0, 0, I11);
-
-		auto rotShape = sphere.rot.toMatrix3x3();
-		auto rotBody = bd.angle.toMatrix3x3();
-
-		bd.inertia = rotBody * (rotShape * localInertia * rotShape.transpose() + ParallelAxisTheorem(sphere.center, bd.mass)) * rotBody.transpose();
-
-		bd.shapeType = ET_SPHERE;
-
-		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size(), bd);
-		mHostSpheres.push_back(b);
-
-		std::shared_ptr<PdActor> actor = std::make_shared<PdActor>();
-		actor->idx = mHostSpheres.size() - 1;
-		actor->shapeType = ET_SPHERE;
-		actor->center = bd.position;
-		actor->rot = bd.angle;
+		auto actor = this->createRigidBody(bodyDef);
+		this->bindSphere(actor, sphere, density);
 
 		return actor;
 	}
@@ -323,49 +262,52 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	void RigidBodySystem<TDataType>::bindTet(const std::shared_ptr<PdActor> actor, const TetInfo& tet, const Real density /*= Real(100)*/)
+	{
+		auto& rigidbody = mHostRigidBodyStates[actor->idx];
+
+		Coord centroid = (tet.v[0] + tet.v[1] + tet.v[2] + tet.v[3]) / 4;
+
+		Coord v0 = tet.v[0] - centroid;
+		Coord v1 = tet.v[1] - centroid;
+		Coord v2 = tet.v[2] - centroid;
+		Coord v3 = tet.v[3] - centroid;
+
+		auto tmpMat = Mat3f(v1 - v0, v2 - v0, v3 - v0);
+
+		Real detJ = abs(tmpMat.determinant());
+		Real volume = (1.0 / 6.0) * detJ;
+		Real mass = volume * density;
+
+		Real a = density * detJ * (v0.y * v0.y + v0.y * v1.y + v1.y * v1.y + v0.y * v2.y + v1.y * v2.y + v2.y * v2.y + v0.y * v3.y + v1.y * v3.y + v2.y * v3.y + v3.y * v3.y + v0.z * v0.z + v0.z * v1.z + v1.z * v1.z + v0.z * v2.z + v1.z * v2.z + v2.z * v2.z + v0.z * v3.z + v1.z * v3.z + v2.z * v3.z + v3.z * v3.z) / 60;
+		Real b = density * detJ * (v0.x * v0.x + v0.x * v1.x + v1.x * v1.x + v0.x * v2.x + v1.x * v2.x + v2.x * v2.x + v0.x * v3.x + v1.x * v3.x + v2.x * v3.x + v3.x * v3.x + v0.z * v0.z + v0.z * v1.z + v1.z * v1.z + v0.z * v2.z + v1.z * v2.z + v2.z * v2.z + v0.z * v3.z + v1.z * v3.z + v2.z * v3.z + v3.z * v3.z) / 60;
+		Real c = density * detJ * (v0.x * v0.x + v0.x * v1.x + v1.x * v1.x + v0.x * v2.x + v1.x * v2.x + v2.x * v2.x + v0.x * v3.x + v1.x * v3.x + v2.x * v3.x + v3.x * v3.x + v0.y * v0.y + v0.y * v1.y + v1.y * v1.y + v0.y * v2.y + v1.y * v2.y + v2.y * v2.y + v0.y * v3.y + v1.y * v3.y + v2.y * v3.y + v3.y * v3.y) / 60;
+		Real a_ = density * detJ * (2 * v0.y * v0.z + v1.y * v0.z + v2.y * v0.z + v3.y * v0.z + v0.y * v1.z + 2 * v1.y * v1.z + v2.y * v1.z + v3.y * v1.z + v0.y * v2.z + v1.y * v2.z + 2 * v2.y * v2.z + v3.y * v2.z + v0.y * v3.z + v1.y * v3.z + v2.y * v3.z + 2 * v3.y * v3.z) / 120;
+		Real b_ = density * detJ * (2 * v0.x * v0.z + v1.x * v0.z + v2.x * v0.z + v3.x * v0.z + v0.x * v1.z + 2 * v1.x * v1.z + v2.x * v1.z + v3.x * v1.z + v0.x * v2.z + v1.x * v2.z + 2 * v2.x * v2.z + v3.x * v2.z + v0.x * v3.z + v1.x * v3.z + v2.x * v3.z + 2 * v3.x * v3.z) / 120;
+		Real c_ = density * detJ * (2 * v0.x * v0.y + v1.x * v0.y + v2.x * v0.y + v3.x * v0.y + v0.x * v1.y + 2 * v1.x * v1.y + v2.x * v1.y + v3.x * v1.y + v0.x * v2.y + v1.x * v2.y + 2 * v2.x * v2.y + v3.x * v2.y + v0.x * v3.y + tet.v[1].x * v3.y + v2.x * v3.y + 2 * v3.x * v3.y) / 120;
+		Mat3f localInertia(a, -b_, -c_, -b_, b, -a_, -c_, -a_, c);
+
+		auto rotShape = Matrix::identityMatrix();
+		auto rotBody = rigidbody.angle.toMatrix3x3();
+
+		auto rigidbodyInertia = rotBody * (rotShape * localInertia * rotShape.transpose() + ParallelAxisTheorem(centroid, mass)) * rotBody.transpose();
+
+		rigidbody.mass += mass;
+		rigidbody.inertia += rigidbodyInertia;
+		rigidbody.shapeType = ET_COMPOUND;
+
+		mHostShape2RigidBodyMapping.insert(mHostShape2RigidBodyMapping.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size(), Pair<uint, uint>(mHostTets.size(), (uint)actor->idx));
+		mHostTets.push_back(tet);
+	}
+
+	template<typename TDataType>
 	std::shared_ptr<PdActor> RigidBodySystem<TDataType>::addTet(
 		const TetInfo& tetInfo,
 		const RigidBodyInfo& bodyDef,
 		const Real density /*= Real(1)*/)
 	{
-		TetInfo tet = tetInfo;
-		auto bd = bodyDef;
-
-		bd.position = (tet.v[0] + tet.v[1] + tet.v[2] + tet.v[3]) / 4;
-
-		auto centroid = bd.position;
-		tet.v[0] = tet.v[0] - centroid;
-		tet.v[1] = tet.v[1] - centroid;
-		tet.v[2] = tet.v[2] - centroid;
-		tet.v[3] = tet.v[3] - centroid;
-
-		auto tmpMat = Mat3f(tet.v[1] - tet.v[0], tet.v[2] - tet.v[0], tet.v[3] - tet.v[0]);
-
-		Real detJ = abs(tmpMat.determinant());
-		Real volume = (1.0 / 6.0) * detJ;
-		Real mass = volume * density;
-		bd.mass = mass;
-
-		Real a = density * detJ * (tet.v[0].y * tet.v[0].y + tet.v[0].y * tet.v[1].y + tet.v[1].y * tet.v[1].y + tet.v[0].y * tet.v[2].y + tet.v[1].y * tet.v[2].y + tet.v[2].y * tet.v[2].y + tet.v[0].y * tet.v[3].y + tet.v[1].y * tet.v[3].y + tet.v[2].y * tet.v[3].y + tet.v[3].y * tet.v[3].y + tet.v[0].z * tet.v[0].z + tet.v[0].z * tet.v[1].z + tet.v[1].z * tet.v[1].z + tet.v[0].z * tet.v[2].z + tet.v[1].z * tet.v[2].z + tet.v[2].z * tet.v[2].z + tet.v[0].z * tet.v[3].z + tet.v[1].z * tet.v[3].z + tet.v[2].z * tet.v[3].z + tet.v[3].z * tet.v[3].z) / 60;
-		Real b = density * detJ * (tet.v[0].x * tet.v[0].x + tet.v[0].x * tet.v[1].x + tet.v[1].x * tet.v[1].x + tet.v[0].x * tet.v[2].x + tet.v[1].x * tet.v[2].x + tet.v[2].x * tet.v[2].x + tet.v[0].x * tet.v[3].x + tet.v[1].x * tet.v[3].x + tet.v[2].x * tet.v[3].x + tet.v[3].x * tet.v[3].x + tet.v[0].z * tet.v[0].z + tet.v[0].z * tet.v[1].z + tet.v[1].z * tet.v[1].z + tet.v[0].z * tet.v[2].z + tet.v[1].z * tet.v[2].z + tet.v[2].z * tet.v[2].z + tet.v[0].z * tet.v[3].z + tet.v[1].z * tet.v[3].z + tet.v[2].z * tet.v[3].z + tet.v[3].z * tet.v[3].z) / 60;
-		Real c = density * detJ * (tet.v[0].x * tet.v[0].x + tet.v[0].x * tet.v[1].x + tet.v[1].x * tet.v[1].x + tet.v[0].x * tet.v[2].x + tet.v[1].x * tet.v[2].x + tet.v[2].x * tet.v[2].x + tet.v[0].x * tet.v[3].x + tet.v[1].x * tet.v[3].x + tet.v[2].x * tet.v[3].x + tet.v[3].x * tet.v[3].x + tet.v[0].y * tet.v[0].y + tet.v[0].y * tet.v[1].y + tet.v[1].y * tet.v[1].y + tet.v[0].y * tet.v[2].y + tet.v[1].y * tet.v[2].y + tet.v[2].y * tet.v[2].y + tet.v[0].y * tet.v[3].y + tet.v[1].y * tet.v[3].y + tet.v[2].y * tet.v[3].y + tet.v[3].y * tet.v[3].y) / 60;
-		Real a_ = density * detJ * (2 * tet.v[0].y * tet.v[0].z + tet.v[1].y * tet.v[0].z + tet.v[2].y * tet.v[0].z + tet.v[3].y * tet.v[0].z + tet.v[0].y * tet.v[1].z + 2 * tet.v[1].y * tet.v[1].z + tet.v[2].y * tet.v[1].z + tet.v[3].y * tet.v[1].z + tet.v[0].y * tet.v[2].z + tet.v[1].y * tet.v[2].z + 2 * tet.v[2].y * tet.v[2].z + tet.v[3].y * tet.v[2].z + tet.v[0].y * tet.v[3].z + tet.v[1].y * tet.v[3].z + tet.v[2].y * tet.v[3].z + 2 * tet.v[3].y * tet.v[3].z) / 120;
-		Real b_ = density * detJ * (2 * tet.v[0].x * tet.v[0].z + tet.v[1].x * tet.v[0].z + tet.v[2].x * tet.v[0].z + tet.v[3].x * tet.v[0].z + tet.v[0].x * tet.v[1].z + 2 * tet.v[1].x * tet.v[1].z + tet.v[2].x * tet.v[1].z + tet.v[3].x * tet.v[1].z + tet.v[0].x * tet.v[2].z + tet.v[1].x * tet.v[2].z + 2 * tet.v[2].x * tet.v[2].z + tet.v[3].x * tet.v[2].z + tet.v[0].x * tet.v[3].z + tet.v[1].x * tet.v[3].z + tet.v[2].x * tet.v[3].z + 2 * tet.v[3].x * tet.v[3].z) / 120;
-		Real c_ = density * detJ * (2 * tet.v[0].x * tet.v[0].y + tet.v[1].x * tet.v[0].y + tet.v[2].x * tet.v[0].y + tet.v[3].x * tet.v[0].y + tet.v[0].x * tet.v[1].y + 2 * tet.v[1].x * tet.v[1].y + tet.v[2].x * tet.v[1].y + tet.v[3].x * tet.v[1].y + tet.v[0].x * tet.v[2].y + tet.v[1].x * tet.v[2].y + 2 * tet.v[2].x * tet.v[2].y + tet.v[3].x * tet.v[2].y + tet.v[0].x * tet.v[3].y + tet.v[1].x * tet.v[3].y + tet.v[2].x * tet.v[3].y + 2 * tet.v[3].x * tet.v[3].y) / 120;
-		Mat3f inertiaMatrix(a, -b_, -c_, -b_, b, -a_, -c_, -a_, c);
-
-		bd.inertia = inertiaMatrix;
-		bd.shapeType = ET_TET;
-		bd.angle = Quat<Real>();
-
-		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size(), bd);
-		mHostTets.push_back(tet);
-
-		std::shared_ptr<PdActor> actor = std::make_shared<PdActor>();
-		actor->idx = mHostTets.size() - 1;
-		actor->shapeType = ET_TET;
-		actor->center = bd.position;
-		actor->rot = Quat<Real>();
+		auto actor = this->createRigidBody(bodyDef);
+		this->bindTet(actor, tetInfo, density);
 
 		return actor;
 	}
@@ -376,45 +318,8 @@ namespace dyno
 		const RigidBodyInfo& bodyDef, 
 		const Real density /*= Real(100)*/)
 	{
-		auto b = capsule;
-		auto bd = bodyDef;
-
-		Real r = b.radius;
-		Real h = b.halfLength * 2;
-
-
-		Real mass_hemisphere = 2.0 / 3.0 * M_PI * r * r * r * density;
-		Real mass_cylinder = M_PI * r * r * h * density;
-
-		Real I_1_cylinder = 1.0 / 12.0 * mass_cylinder * (3 * r * r + h * h);
-		Real I_2_cylinder = 1.0 / 2.0 * mass_cylinder * r * r;
-
-
-		Real tmp = h / 2 + 3.0 / 8.0 * r;
-		Real I_1_hemisphere = mass_hemisphere * (2.0 / 5.0 * r * r + h * h / 2 + 3 * h * r / 8.0);
-		Real I_2_hemisphere = 2.0 / 5.0 * mass_hemisphere * r * r;
-
-		bd.mass = mass_hemisphere * 2 + mass_cylinder;
-
-		auto localInertia = Mat3f(I_1_cylinder + 2 * I_1_hemisphere, 0, 0,
-			0, I_1_cylinder + 2 * I_1_hemisphere, 0,
-			0, 0, I_2_cylinder + 2 * I_2_hemisphere);
-
-		auto rotShape = capsule.rot.toMatrix3x3();
-		auto rotBody = bd.angle.toMatrix3x3();
-
-		bd.inertia = rotBody * (rotShape * localInertia * rotShape.transpose() + ParallelAxisTheorem(capsule.center, bd.mass)) * rotBody.transpose();
-
-		bd.shapeType = ET_CAPSULE;
-
-		mHostRigidBodyStates.insert(mHostRigidBodyStates.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size() + mHostCapsules.size(), bd);
-		mHostCapsules.push_back(b);
-
-		std::shared_ptr<PdActor> actor = std::make_shared<PdActor>();
-		actor->idx = mHostCapsules.size() - 1;
-		actor->shapeType = ET_CAPSULE;
-		actor->center = bd.position;
-		actor->rot = bd.angle;
+		auto actor = this->createRigidBody(bodyDef);
+		this->bindCapsule(actor, capsule, density);
 
 		return actor;
 	}
@@ -758,25 +663,12 @@ namespace dyno
 
 		uint totalSize = topo->totalSize();
 
-		if (mHostShape2RigidBodyMapping.size() == 0)
-		{
-			mapping.resize(totalSize);
+		mapping.assign(mHostShape2RigidBodyMapping);
 
-			cuExecute(totalSize,
-				RBS_ConstructShape2RigidBodyMapping,
-				mapping);
-		}
-		else
-		{
-			mapping.assign(mHostShape2RigidBodyMapping);
-
-			cuExecute(totalSize,
-				RBS_UpdateShape2RigidBodyMapping,
-				mapping,
-				topo->calculateElementOffset());
-
-			return;
-		}
+		cuExecute(totalSize,
+			RBS_UpdateShape2RigidBodyMapping,
+			mapping,
+			topo->calculateElementOffset());
 	}
 
 	DEFINE_CLASS(RigidBodySystem);

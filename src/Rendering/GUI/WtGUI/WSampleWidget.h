@@ -15,7 +15,7 @@ public:
 class WSampleWidget : public Wt::WContainerWidget
 {
 public:
-	WSampleWidget();
+	WSampleWidget(int maxColumns);
 	Wt::Signal<Sample*>& clicked();
 
 private:

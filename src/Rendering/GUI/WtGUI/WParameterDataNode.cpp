@@ -3,7 +3,8 @@
 
 std::map<std::string, WParameterDataNode::FieldWidgetMeta> WParameterDataNode::sFieldWidgetMeta{};
 
-WParameterDataNode::WParameterDataNode() :table(nullptr)
+WParameterDataNode::WParameterDataNode() 
+	//:table(nullptr)
 {
 	FieldWidgetMeta WRealWidgetMeta
 	{
@@ -162,9 +163,28 @@ Wt::cpp17::any WParameterDataNode::headerData(int section, Wt::Orientation orien
 		return Wt::cpp17::any();
 }
 
-void WParameterDataNode::createParameterPanel(Wt::WPanel* panel)
+void WParameterDataNode::createParameterPanel(Wt::WContainerWidget* parameterWidget)
 {
-	table = panel->setCentralWidget(std::make_unique<Wt::WTable>());
+	parameterWidget->setMargin(0);
+	//parameterWidget->setStyleClass("scrollable-content");
+	auto layout = parameterWidget->setLayout(std::make_unique<Wt::WVBoxLayout>());
+	layout->setContentsMargins(0, 0, 0, 0);
+
+	auto controlPanel = layout->addWidget(std::make_unique<Wt::WPanel>());
+	controlPanel->setTitle("Control Variables");
+	controlPanel->setCollapsible(true);
+	controlPanel->setStyleClass("scrollable-content");
+	controlPanel->setMargin(0);
+	auto controlTable = controlPanel->setCentralWidget(std::make_unique<Wt::WTable>());
+
+	auto statePanel = layout->addWidget(std::make_unique<Wt::WPanel>());
+	statePanel->setTitle("State Variables");
+	statePanel->setCollapsible(true);
+	statePanel->setStyleClass("scrollable-content");
+	//statePanel->setHeight(200);
+	statePanel->setMargin(0);
+	auto stateTable = statePanel->setCentralWidget(std::make_unique<Wt::WTable>());
+
 	std::vector<dyno::FBase*>& fields = mNode->getAllFields();
 	int a = 0;
 	for (dyno::FBase* var : fields)
@@ -176,22 +196,21 @@ void WParameterDataNode::createParameterPanel(Wt::WPanel* panel)
 				if (var->getClassName() == std::string("FVar"))
 				{
 					std::string template_name = var->getTemplateName();
-					addScalarFieldWidget(table, var->getObjectName(), var);
-					Wt::log("info") << var->getTemplateName();
+					addScalarFieldWidget(controlTable, var->getObjectName(), var);
 				}
 			}
 			else if (var->getFieldType() == dyno::FieldTypeEnum::State)
 			{
-				//Wt::log("info") << var->getDescription();
+				addStateFieldWidget(stateTable, var);
 			}
 		}
 	}
-	table->setMargin(10);
+	controlTable->setMargin(10);
 }
 
 void WParameterDataNode::createParameterPanelModule(Wt::WPanel* panel)
 {
-	table = panel->setCentralWidget(std::make_unique<Wt::WTable>());
+	auto table = panel->setCentralWidget(std::make_unique<Wt::WTable>());
 	std::vector<dyno::FBase*>& fields = mModule->getAllFields();
 	int a = 0;
 	for (dyno::FBase* var : fields)
@@ -204,12 +223,11 @@ void WParameterDataNode::createParameterPanelModule(Wt::WPanel* panel)
 				{
 					std::string template_name = var->getTemplateName();
 					addScalarFieldWidget(table, var->getObjectName(), var);
-					Wt::log("info") << var->getTemplateName();
 				}
 			}
 			else if (var->getFieldType() == dyno::FieldTypeEnum::State)
 			{
-				//Wt::log("info") << var->getDescription();
+				Wt::log("info") << var->getDescription();
 			}
 		}
 	}
@@ -310,6 +328,31 @@ void WParameterDataNode::addScalarFieldWidget(Wt::WTable* table, std::string lab
 
 			cell1->setContentAlignment(Wt::AlignmentFlag::Middle);
 			cell1->setWidth(widgetWidth);
+
+			cell1->addWidget(std::unique_ptr<Wt::WContainerWidget>(std::move(mWidget)));
+		}
+	}
+}
+
+void WParameterDataNode::addStateFieldWidget(Wt::WTable* table, dyno::FBase* field)
+{
+	auto fw = new WStateFieldWidget(field);
+	//castToDerived(fw);
+	fw->changeValue().connect(this, &WParameterDataNode::emit);
+	if (fw)
+	{
+		std::unique_ptr<Wt::WContainerWidget> mWidget(fw);
+		if (fw != nullptr) {
+			int row = table->rowCount();
+			auto cell0 = table->elementAt(row, 0);
+			auto cell1 = table->elementAt(row, 1);
+
+			cell0->addNew<Wt::WText>(field->getObjectName());
+			cell0->setContentAlignment(Wt::AlignmentFlag::Middle);
+			cell0->setWidth(150);
+
+			cell1->setContentAlignment(Wt::AlignmentFlag::Middle);
+			cell1->setWidth(300);
 
 			cell1->addWidget(std::unique_ptr<Wt::WContainerWidget>(std::move(mWidget)));
 		}

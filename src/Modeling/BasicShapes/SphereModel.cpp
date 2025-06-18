@@ -245,8 +245,8 @@ namespace dyno
 		float fixScale = this->varIcosahedronStep()->getValue() >= 2 ? 1.08 : 1;
 
 		Quat<Real> q = this->computeQuaternion();
-		auto center = this->varLocation()->getData();
-		auto scale = this->varScale()->getData();
+		auto center = this->varLocation()->getValue();
+		auto scale = this->varScale()->getValue();
 
 		auto RV = [&](const Coord& v)->Coord {
 			return center + q.rotate(v - center);
@@ -283,20 +283,41 @@ namespace dyno
 		auto rot = this->varRotation()->getValue();
 		auto scale = this->varScale()->getValue();
 
+		Real s;
+		if (abs(scale.x - scale.y) < EPSILON) {
+			s = scale.z;
+		}
+		else if (abs(scale.x - scale.z) < EPSILON){
+			s = scale.y;
+		}
+		else
+			s = scale.x;
+
+		//To ensure all three components of varScale() have the same value
+		this->varScale()->setValue(Coord(s), false);
+
 		auto radius = this->varRadius()->getValue();
 
 		//Setup a sphere primitive
 		TSphere3D<Real> ball;
 		ball.center = center;
-		ball.radius = radius;
+		ball.radius = radius * s;
 		this->outSphere()->setValue(ball);
 
 		if (this->varType()->getDataPtr()->currentKey() == SphereType::Icosahedron)
 		{
 			icosahedronSphere();
+
+			this->varLongitude()->setActive(false);
+			this->varLatitude()->setActive(false);
+			this->varIcosahedronStep()->setActive(true);
 		}
 		else {
 			standardSphere();
+
+			this->varLongitude()->setActive(true);
+			this->varLatitude()->setActive(true);
+			this->varIcosahedronStep()->setActive(false);
 		}
 
 	}

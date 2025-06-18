@@ -30,6 +30,7 @@ namespace dyno
 		Steer();
 		~Steer() override {};
 
+		DEF_VAR(Real, Strength, Real(1.f), "Strength");
 		DEF_VAR_IN(Coord, Velocity, "Velocity");
 
 		DEF_VAR_IN(Coord, AngularVelocity, "Angular velocity");

@@ -3,7 +3,6 @@
 
 #include <Wt/WContainerWidget.h>
 
-
 class ImGuiBackendWt
 {
 public:

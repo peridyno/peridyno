@@ -19,7 +19,6 @@ namespace dyno
 		ThreadSystem();
 		~ThreadSystem() override;
 
-		
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, EdgeSet, "");
 
 		/**
@@ -37,13 +36,12 @@ namespace dyno
 		 */
 		DEF_ARRAY_STATE(Coord, Force, DeviceType::GPU, "Vertex force");
 	public:
-		
+
 		/*void loadVertexFromFile(std::string filename);
 
 		void loadVertexFromGmshFile(std::string filename);*/
 
 		void addThread(Coord start, Coord end, int segSize);
-
 
 	protected:
 		void updateTopology() override;
@@ -52,6 +50,6 @@ namespace dyno
 		std::vector<Coord> particles;
 		std::vector<TopologyModule::Edge> edges;
 
-//		virtual void setVisible(bool visible) override;
+		//		virtual void setVisible(bool visible) override;
 	};
 }

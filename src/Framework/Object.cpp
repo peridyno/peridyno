@@ -1,5 +1,6 @@
 #include <map>
 #include "Object.h"
+#include <iostream>
 
 namespace dyno
 {

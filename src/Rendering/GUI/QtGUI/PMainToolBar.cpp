@@ -33,16 +33,16 @@ namespace dyno
 		QString mediaDir = QString::fromLocal8Bit(getAssetPath().c_str()) + "icon/";
 
 		auto convertIcon = [&](QString path) -> QIcon
-		{
-			QSvgRenderer svg_render(path);
-			QPixmap pixmap(48, 48);
-			pixmap.fill(Qt::transparent);
-			QPainter painter(&pixmap);
-			svg_render.render(&painter);
-			QIcon ico(pixmap);
+			{
+				QSvgRenderer svg_render(path);
+				QPixmap pixmap(48, 48);
+				pixmap.fill(Qt::transparent);
+				QPainter painter(&pixmap);
+				svg_render.render(&painter);
+				QIcon ico(pixmap);
 
-			return ico;
-		};
+				return ico;
+			};
 
 		//Add ToolBar page
 		ToolBarPage m_toolBarPage;
@@ -68,7 +68,7 @@ namespace dyno
 
 		//Add dynamic toolbar page
 		auto& pages = NodeFactory::instance()->nodePages();
-		for(auto iPage = pages.begin(); iPage != pages.end(); iPage++)
+		for (auto iPage = pages.begin(); iPage != pages.end(); iPage++)
 		{
 			auto& groups = iPage->second->groups();
 
@@ -112,10 +112,29 @@ namespace dyno
 		mFileName = QFileDialog::getOpenFileName(this, tr("Open New ..."), "", tr("Xml Files (*.xml)"));
 		if (!mFileName.isEmpty()) {
 			auto scnLoader = SceneLoaderFactory::getInstance().getEntryByFileExtension("xml");
-			auto scn = scnLoader->load(mFileName.toStdString());
 
-			if (scn) {
-				PSimulationThread::instance()->createNewScene(scn);
+			auto result = scnLoader->load(mFileName.toStdString());
+
+			if (std::holds_alternative<std::string>(result))
+			{
+				std::string error = std::get<std::string>(result);
+				if (error.compare("Error Load") == 0)
+				{
+
+					QMessageBox::critical(nullptr, "Error", "Error Load!");
+				}
+				else if (error.compare("Error Version") == 0)
+				{
+					QMessageBox::critical(nullptr, "Error", "Version Error detected!");
+				}
+				else
+				{
+					QMessageBox::critical(nullptr, "Error", "Unknown Error!");
+				}
+			}
+			else if (std::holds_alternative<std::shared_ptr<SceneGraph>>(result))
+			{
+				PSimulationThread::instance()->createNewScene(std::get<std::shared_ptr<SceneGraph>>(result));
 				//SceneGraphFactory::instance()->pushScene(scn);
 			}
 			//emit newSceneLoaded();
@@ -203,9 +222,9 @@ namespace dyno
 
 		connect(mLogAct, &QAction::triggered, this, [=]() { emit logActTriggered(); });
 		connect(mSettingAct, &QAction::triggered, this, [=]() { emit settingTriggered(); });
-		
+
 	}
 
-	
+
 }
 

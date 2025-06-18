@@ -139,6 +139,8 @@ namespace dyno
 		auto waveOrigin = heights->getOrigin();
 		auto h = heights->getGridSpacing();
 
+		auto& grid = this->stateHeight()->getData();
+
 		{
 			auto vessel = this->getVessel();
 			auto& triangles = vessel->stateEnvelope()->getData();
@@ -146,7 +148,7 @@ namespace dyno
 			auto vesselCenter = vessel->stateCenter()->getData();
 			auto vesselVelocity = vessel->stateVelocity()->getData();
 			auto avesselAngularVelocity = vessel->stateAngularVelocity()->getData();
-
+			// printf("[Wake center] %f %f %f\n", vesselCenter.x, vesselCenter.y, vesselCenter.z);
 			auto& vertices = triangles.getPoints();
 			auto& indices = triangles.getTriangles();
 
@@ -165,7 +167,7 @@ namespace dyno
 				W_AccumlateTrails,
 				mSource,
 				mWeight,
-				this->mDeviceGrid,
+				grid,
 				vertices,
 				indices,
 				waveOrigin,
@@ -176,24 +178,24 @@ namespace dyno
 
 			Real mag = this->varMagnitude()->getValue();
 
-			cuExecute2D(make_uint2(this->mDeviceGrid.nx(), this->mDeviceGrid.ny()),
+			cuExecute2D(make_uint2(grid.nx(), grid.ny()),
 				W_AddTrails,
 				mSource,
 				mWeight,
-				this->mDeviceGrid,
+				grid,
 				mag);
 
-			this->mDeviceGridNext.assign(this->mDeviceGrid);
+			//mDeviceGridNext.assign(mDeviceGrid);
 		}
 	}
 
 	template<typename TDataType>
 	void Wake<TDataType>::updateStates()
 	{
+		CapillaryWave<TDataType>::updateStates();
+
 		if (this->getVessel() != nullptr)
 			addTrails();
-
-		CapillaryWave<TDataType>::updateStates();
 	}
 
 	DEFINE_CLASS(Wake);

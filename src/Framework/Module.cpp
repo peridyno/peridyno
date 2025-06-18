@@ -2,10 +2,12 @@
 #include "Node.h"
 #include "SceneGraph.h"
 
+//#define PYTHON
+
 namespace dyno
 {
 	Module::Module(std::string name)
-		: OBase()  
+		: OBase()
 		, m_node(nullptr)
 		, m_initialized(false)
 	{
@@ -14,23 +16,23 @@ namespace dyno
 
 	Module::~Module(void)
 	{
-// 		//Before deallocating data, fields should be disconnected first
-// 		for each (auto f in fields_input)
-// 		{
-// 			FBase* src = f->getSource();
-// 			if (src != nullptr) {
-// 				src->disconnectField(f);
-// 			}
-// 		}
-// 
-// 		for each (auto f in fields_output)
-// 		{
-// 			auto& sinks = f->getSinks();
-// 			for each (auto sink in sinks)
-// 			{
-// 				f->disconnectField(sink);
-// 			}
-// 		}
+		// 		//Before deallocating data, fields should be disconnected first
+		// 		for each (auto f in fields_input)
+		// 		{
+		// 			FBase* src = f->getSource();
+		// 			if (src != nullptr) {
+		// 				src->disconnectField(f);
+		// 			}
+		// 		}
+		//
+		// 		for each (auto f in fields_output)
+		// 		{
+		// 			auto& sinks = f->getSinks();
+		// 			for each (auto sink in sinks)
+		// 			{
+		// 				f->disconnectField(sink);
+		// 			}
+		// 		}
 	}
 
 	bool Module::initialize()
@@ -46,6 +48,10 @@ namespace dyno
 
 	void Module::update()
 	{
+#ifdef PYTHON
+		std::cout << "Module::update" << std::endl;
+#endif // PYTHON
+
 		if (!isInitialized())
 		{
 			bool ret = initialize();
@@ -60,7 +66,6 @@ namespace dyno
 		}
 
 		if (this->requireUpdate()) {
-
 			//pre processing
 			this->preprocess();
 
@@ -71,7 +76,7 @@ namespace dyno
 			this->postprocess();
 
 			//reset parameters
-			for(auto param : fields_param)
+			for (auto param : fields_param)
 			{
 				param->tack();
 			}
@@ -83,7 +88,7 @@ namespace dyno
 			}
 
 			//tag all output fields as modifed
-			for(auto f_out : fields_output)
+			for (auto f_out : fields_output)
 			{
 				f_out->tick();
 			}
@@ -104,7 +109,7 @@ namespace dyno
 	bool Module::isInputComplete()
 	{
 		//If any input field is empty, return false;
-		for(auto f_in : fields_input)
+		for (auto f_in : fields_input)
 		{
 			if (!f_in->isOptional() && f_in->isEmpty())
 			{
@@ -127,7 +132,7 @@ namespace dyno
 	bool Module::isOutputCompete()
 	{
 		//If any output field is empty, return false;
-		for(auto f_out : fields_output)
+		for (auto f_out : fields_output)
 		{
 			if (f_out->isEmpty())
 			{
@@ -148,12 +153,10 @@ namespace dyno
 
 	void Module::updateStarted()
 	{
-
 	}
 
 	void Module::updateEnded()
 	{
-
 	}
 
 	bool Module::validateOutputs()
@@ -170,13 +173,13 @@ namespace dyno
 
 		//check input fields
 		bool modified = false;
-		for(auto f_in : fields_input)
+		for (auto f_in : fields_input)
 		{
 			modified |= f_in->isModified();
 		}
 
 		//check control fields
-		for(auto var : fields_param)
+		for (auto var : fields_param)
 		{
 			modified |= var->isModified();
 		}
@@ -244,7 +247,6 @@ namespace dyno
 		field->setDescription(desc);
 		field->setAutoDestroy(autoDestroy);
 
-
 		bool ret = false;
 		auto fType = field->getFieldType();
 		switch (field->getFieldType())
@@ -275,5 +277,4 @@ namespace dyno
 		}
 		return ret;
 	}
-
 }

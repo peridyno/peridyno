@@ -152,12 +152,12 @@ std::shared_ptr<SceneGraph> creatScene()
 	cube->varLocation()->setValue(Vec3f(0,0.15,3.436) );
 	cube->varLength()->setValue(Vec3f(2.1,0.12,18));
 	cube->varScale()->setValue(Vec3f(2, 1, 0.932));
-	cube->graphicsPipeline()->disable();
+	cube->setVisible(false);
 
 	auto cubeSmapler = scn->addNode(std::make_shared<ShapeSampler<DataType3f>>());
 	cubeSmapler->varSamplingDistance()->setValue(0.004f * total_scale);
 	cube->connect(cubeSmapler->importShape());
-	cubeSmapler->graphicsPipeline()->disable();
+	cubeSmapler->setVisible(false);
 
 	//MakeParticleSystem
 	auto particleSystem = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
@@ -166,7 +166,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	//*************************************** Fluid ***************************************//
 	//Particle fluid node
 	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
-	fluid->setDt(0.004f);
+	fluid->setDt(0.002f);
 
 	{
 		fluid->animationPipeline()->clear();
@@ -247,7 +247,7 @@ std::shared_ptr<SceneGraph> creatScene()
 
 int main()
 {
-	UbiApp window;
+	UbiApp window(GUIType::GUI_QT);
 	window.setSceneGraph(creatScene());
 	window.initialize(1366, 768);
 

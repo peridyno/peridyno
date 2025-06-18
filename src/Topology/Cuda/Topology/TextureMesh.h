@@ -18,6 +18,7 @@
 
 #include "Module/TopologyModule.h"
 #include "Primitive/Primitive3D.h"
+#include "TriangleSet.h"
 
 
 namespace dyno
@@ -84,6 +85,19 @@ namespace dyno
 		void merge(const std::shared_ptr<TextureMesh>& texMesh01, const std::shared_ptr<TextureMesh>& texMesh02);
 
 		void clear();
+
+		void safeConvert2TriangleSet(TriangleSet<DataType3f>& triangleSet);
+
+		void convert2TriangleSet(TriangleSet<DataType3f>& triangleSet);
+
+		std::vector<Vec3f> updateTexMeshBoundingBox();
+
+		template<typename Vec3f>
+		void transPoint2Vertices(
+			DArray<Vec3f>& pAttribute,
+			DArray<Vec3f>& vAttribute,
+			DArrayList<int>& contactList
+		);
 
 	private:
 		DArray<Vec3f> mVertices;

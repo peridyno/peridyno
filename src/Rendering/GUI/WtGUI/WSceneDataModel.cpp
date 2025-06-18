@@ -1,7 +1,6 @@
 #include "WSceneDataModel.h"
 #include <SceneGraph.h>
 
-
 WNodeDataModel::WNodeDataModel()
 {
 

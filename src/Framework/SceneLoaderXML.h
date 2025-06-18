@@ -2,6 +2,10 @@
 #include "Node.h"
 #include "SceneLoaderFactory.h"
 #include "tinyxml/tinyxml2.h"
+#include <variant>
+
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
 
 namespace dyno {
 
@@ -13,19 +17,23 @@ namespace dyno {
 			uint dst;
 			uint id0;
 			uint id1;
+			int srcModuleId = -1;
+			int srcModulePipline = -1;
 		};
 
 	public:
-		std::shared_ptr<SceneGraph> load(const std::string filename) override;
+		LoadResult load(const std::string filename) override;
 
 		bool save(std::shared_ptr<SceneGraph> scn, const std::string filename) override;
 
 	private:
 		std::shared_ptr<Node> processNode(tinyxml2::XMLElement* nodeXML);
-		std::shared_ptr<Module> processModule(tinyxml2::XMLElement* moduleXML);
-		bool addModule(std::shared_ptr<Node> node, std::shared_ptr<Module> module);
 
-		std::vector<std::string> split(std::string str, std::string pattern);
+		void processModule(tinyxml2::XMLElement* moduleXml, std::shared_ptr<Pipeline> pipeline, std::vector<Module*>& modules);
+
+		bool ConstructPipeline(std::shared_ptr<Node> node, std::shared_ptr<Pipeline> pipeline, tinyxml2::XMLElement* nodeXML, std::vector<std::shared_ptr<Node>> nodes);
+
+		bool ConstructNodePipeline(std::shared_ptr<Node> node, tinyxml2::XMLElement* nodeXML, std::vector<std::shared_ptr<Node>> nodes);
 
 		std::string encodeVec3f(const Vec3f v);
 		Vec3f decodeVec3f(const std::string str);
@@ -36,5 +44,7 @@ namespace dyno {
 		virtual bool canLoadFileByExtension(const std::string extension);
 
 		std::vector<std::vector<ConnectionInfo>> mConnectionInfo;
+
+
 	};
 }

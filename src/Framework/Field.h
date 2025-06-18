@@ -49,7 +49,12 @@ namespace dyno {
 
 		uint size() override { return 1; }
 
-		void setValue(T val);
+		/**
+		 * @brief set the value
+		 * 
+		 * notify: call the callback function when the value is true 
+		 */
+		void setValue(T val, bool notify = true);
 		T getValue();
 
 		inline std::string serialize() override { return "Unknown"; }
@@ -108,7 +113,7 @@ namespace dyno {
 	};
 
 	template<typename T>
-	void FVar<T>::setValue(T val)
+	void FVar<T>::setValue(T val, bool notify)
 	{
 		std::shared_ptr<T>& data = this->getDataPtr();
 		if (data == nullptr)
@@ -120,7 +125,8 @@ namespace dyno {
 			*data = val;
 		}
 
-		this->update();
+		if(notify && isActive())
+			this->update();
 
 		this->tick();
 	}

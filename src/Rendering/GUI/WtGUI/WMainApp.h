@@ -2,8 +2,6 @@
 
 #include <Wt/WApplication.h>
 
-#include <SceneGraph.h>
-
 class WMainWindow;
 class WMainApp : public Wt::WApplication
 {

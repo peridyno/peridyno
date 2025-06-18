@@ -33,11 +33,20 @@ namespace dyno
 		ParticleFluid();
 		~ParticleFluid() override;
 
+		DEF_VAR(Real, SamplingDistance, 0.005, "Sampling distance");
+
+		DEF_VAR(Real, SmoothingLength, 1.5, "The smoothing length is preferably set to a value between 1.5 and 2.5");
+
 		DEF_VAR(bool, ReshuffleParticles, false, "");
 
+	public:
 		DEF_NODE_PORTS(ParticleEmitter<TDataType>, ParticleEmitter, "Particle Emitters");
 
 		DEF_NODE_PORTS(ParticleSystem<TDataType>, InitialState, "Initial Fluid Particles");
+
+		DEF_VAR_STATE(Real, SamplingDistance, 0.005, "The state of sampling distance");
+
+		DEF_VAR_STATE(Real, SmoothingLength, 0.01, "The state of smoothing length");
 
 	protected:
 		void resetStates() override;

@@ -4,6 +4,8 @@ cmake_minimum_required(VERSION 3.10)
 macro(build_library LIB_NAME LIB_DEPENDENCY)
     set(LIB_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NAME}")
 
+    append_library(${LIB_NAME})
+
     file(                                                                           
         GLOB_RECURSE LIB_SRC
         LIST_DIRECTORIES false

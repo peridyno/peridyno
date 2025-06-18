@@ -25,7 +25,7 @@ namespace dyno {
 		Capsule = 4,
 		Sphere = 8,
 		Tri = 16,
-		OtherShape = 0x80000000
+		OtherShape = 999
 	};
 
 	enum ConfigJointType
@@ -35,7 +35,7 @@ namespace dyno {
 		Hinge = 3,
 		Fixed = 4,
 		Point = 5,
-		OtherJoint = 0x80000000
+		OtherJoint = 999
 	};
 
 	struct Name_Shape 
@@ -61,40 +61,27 @@ namespace dyno {
 	{	
 		VehicleRigidBodyInfo() {};
 
-		VehicleRigidBodyInfo(Name_Shape name, int shapeId, ConfigShapeType type,Real density = 100) //
-		{
-			shapeName = name;
-			meshShapeId = shapeId;
-			shapeType = type;
-			mDensity = density;
-		};
+		VehicleRigidBodyInfo(Name_Shape name, int shapeId, ConfigShapeType type, Real density = 100);
 
-		VehicleRigidBodyInfo(Name_Shape name, int shapeId, ConfigShapeType type, Transform3f trans, Real density = 100) //
-		{
-			shapeName = name;
-			meshShapeId = shapeId;
-			shapeType = type;
-			transform = trans;
-			mDensity = density;
-		};
+		VehicleRigidBodyInfo(Name_Shape name, int shapeId, ConfigShapeType type, Transform3f trans, Real density = 100);
 
 		//Shape:
-		Name_Shape shapeName = Name_Shape("");
+		Name_Shape shapeName = Name_Shape("");//2
 
-		int meshShapeId = -1;
-		ConfigShapeType shapeType = ConfigShapeType::Capsule;
-		Transform3f transform = Transform3f(Vec3f(0), Mat3f::identityMatrix(), Vec3f(1));
-		Vec3f Offset = Vec3f(0);
+		int meshShapeId = -1;//1	//3
+		ConfigShapeType shapeType = ConfigShapeType::Capsule;//1	//4
+		Transform3f transform = Transform3f(Vec3f(0), Mat3f::identityMatrix(), Vec3f(1));//15	//19
+		Vec3f Offset = Vec3f(0);//3		//22
 
-		Vec3f mHalfLength = Vec3f(1);		// if(type == Box);	
-		float radius = 1;					//	if(type == Sphere);  if(type == Capsule);
-		std::vector<Vec3f> tet = {Vec3f(0),Vec3f(0),Vec3f(0),Vec3f(0,1,0) };	//	if(type == Tet);
-		float capsuleLength = 1;			// if(type == Capsule);
-		ConfigMotionType motion = ConfigMotionType::CMT_Dynamic;
+		Vec3f mHalfLength = Vec3f(1);//3	//25		// if(type == Box);	
+		float radius = 1;//1	//26					//	if(type == Sphere);  if(type == Capsule);
+		std::vector<Vec3f> tet = {Vec3f(0),Vec3f(0),Vec3f(0),Vec3f(0,1,0) };//12	//38 	//	if(type == Tet);
+		float capsuleLength = 1;//1		//39			// if(type == Capsule);
+		ConfigMotionType motion = ConfigMotionType::CMT_Dynamic;//1		//40
 
-		Real mDensity = 100;
+		Real mDensity = 100;//1		//41
 
-		uint rigidGroup = 0;
+		uint rigidGroup = 0;//1		//42
 	};
 
 	/**
@@ -103,41 +90,18 @@ namespace dyno {
 	struct VehicleJointInfo
 	{
 		VehicleJointInfo() {};
-		VehicleJointInfo(
-			Name_Shape Name1,
-			Name_Shape Name2,
-			ConfigJointType typeIn,
-			Vector<Real, 3> Axi = Vec3f(1, 0, 0),
-			Vector<Real, 3> Point = Vec3f(0),
-			bool Moter = false,
-			Real moter = 0,
-			bool Range = false,
-			Real min = 0,
-			Real max = 0
-		) 
-		{
-			mRigidBodyName_1 = Name1;
-			mRigidBodyName_2 = Name2;
-			mUseMoter = Moter;
-			mUseRange = Range;
-			mAnchorPoint = Point;
-			mMin = min;
-			mMax = max;
-			mMoter = moter;
-			mAxis = Axi;
-			mJointType = typeIn;
-		}
+		VehicleJointInfo(Name_Shape Name1,Name_Shape Name2,ConfigJointType typeIn,Vector<Real, 3> Axi = Vec3f(1, 0, 0),Vector<Real, 3> Point = Vec3f(0),bool Moter = false,Real moter = 0,bool Range = false,Real min = 0,Real max = 0);
 
-		ConfigJointType mJointType;
-		Name_Shape mRigidBodyName_1;
-		Name_Shape mRigidBodyName_2;
-		bool mUseMoter = false;
-		bool mUseRange = false;
-		Vector<Real, 3> mAnchorPoint = Vec3f(0);
-		Real mMin = 0;
-		Real mMax = 0;
-		Real mMoter = 0;
-		Vector<Real, 3> mAxis = Vector<Real, 3>(1,0,0);
+		ConfigJointType mJointType;	//1
+		Name_Shape mRigidBodyName_1;//2
+		Name_Shape mRigidBodyName_2;//2
+		bool mUseMoter = false;//1
+		bool mUseRange = false;//1
+		Vector<Real, 3> mAnchorPoint = Vec3f(0);//3
+		Real mMin = 0;//1
+		Real mMax = 0;//1
+		Real mMoter = 0;//1
+		Vector<Real, 3> mAxis = Vector<Real, 3>(1,0,0);//3
 	};
 
 
@@ -150,32 +114,43 @@ namespace dyno {
 	{
 	public:
 		VehicleBind() {};
-		VehicleBind(int size) 
-		{
-			mVehicleRigidBodyInfo.resize(size);
-			for (int i = 0; i < mVehicleRigidBodyInfo.size(); i++)
-			{
-				mVehicleRigidBodyInfo[i].shapeName = Name_Shape(std::string("Rigid") + std::to_string(i),i);
-				mVehicleRigidBodyInfo[i].meshShapeId = i;
-			}
-			mVehicleJointInfo.resize(size);
-		}
-		~VehicleBind() 
-		{
-			mVehicleRigidBodyInfo.clear();
-			mVehicleJointInfo.clear();
-		}
+		VehicleBind(int size);
+		~VehicleBind();
 
-		bool isValid() 
-		{
-			return mVehicleRigidBodyInfo.size();
-		}
+		bool isValid() {return mVehicleRigidBodyInfo.size();}
 
 		std::vector<VehicleRigidBodyInfo> mVehicleRigidBodyInfo;
 		std::vector<VehicleJointInfo> mVehicleJointInfo;
 
+
+
+	};
+
+	class Animation2JointConfig
+	{
+	public:
+
+		Animation2JointConfig() {}
+		Animation2JointConfig(std::string name, int id, uint axis)
+		{
+			this->JointName = name;
+			this->JointId = id;
+			this->Axis = axis;
+		}
+		Animation2JointConfig(std::string name, int id, uint axis, float intensity)
+		{
+			this->JointName = name;
+			this->JointId = id;
+			this->Axis = axis;
+			this->Intensity = intensity;
+		}
+		std::string JointName;
+		int JointId = -1;
+		uint Axis = 0;
+		float Intensity = 1;
 	};
 
 
 }
+#include "VehicleInfo.inl"
 

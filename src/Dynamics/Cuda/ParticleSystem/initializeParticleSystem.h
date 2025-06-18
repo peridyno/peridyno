@@ -1,15 +1,15 @@
 #pragma once
 #include <Plugin/PluginEntry.h>
 
-namespace dyno 
+namespace dyno
 {
 	class ParticleSystemInitializer : public PluginEntry
 	{
 	public:
 		static PluginEntry* instance();
 
-		protected:
-			void initializeActions() override;
+	protected:
+		void initializeActions() override;
 
 	private:
 		ParticleSystemInitializer();

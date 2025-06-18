@@ -66,7 +66,7 @@ namespace dyno
 	}
 
 	template <typename T>
-	DYN_FUNC uint List<T>::size()
+	DYN_FUNC const uint List<T>::size() const
 	{
 		return m_size;
 	}

@@ -3,6 +3,7 @@
 namespace dyno
 {
 	UbiApp::UbiApp(GUIType type)
+		: AppBase()
 	{
 		if (type == GUIType::GUI_GLFW)
 		{

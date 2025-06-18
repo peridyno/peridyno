@@ -9,7 +9,7 @@
 #include <Wt/WLogger.h>
 
 #include <FBase.h>
-#include "FilePath.h"
+#include "Field/FilePath.h"
 
 #include "WtGUI/PropertyItem/WRealFieldWidget.h"
 #include "WtGUI/PropertyItem/WVector3FieldWidget.h"
@@ -20,6 +20,7 @@
 #include "WtGUI/PropertyItem/WFileWidget.h"
 #include "WtGUI/PropertyItem/WEnumFieldWidget.h"
 #include "WtGUI/PropertyItem/WColorWidget.h"
+#include "WtGUI/PropertyItem/WStateFieldWidget.h"
 
 namespace dyno
 {
@@ -50,7 +51,7 @@ public:
 		Wt::Orientation orientation = Wt::Orientation::Horizontal,
 		Wt::ItemDataRole role = Wt::ItemDataRole::Display) const;
 
-	void createParameterPanel(Wt::WPanel* panel);
+	void createParameterPanel(Wt::WContainerWidget* parameterWidget);
 	void createParameterPanelModule(Wt::WPanel* panel);
 
 	void updateNode();
@@ -80,12 +81,13 @@ private:
 
 	std::shared_ptr<dyno::Node> mNode;
 	std::shared_ptr<dyno::Module> mModule;
-	Wt::WTable* table;
 	Wt::Signal<int> changeValue_;
 
 	void castToDerived(Wt::WContainerWidget* fw);
 
 	void addScalarFieldWidget(Wt::WTable* table, std::string label, dyno::FBase* field, int labelWidth = 150, int widgetWidth = 300);
+
+	void addStateFieldWidget(Wt::WTable* table, dyno::FBase* field);
 
 	static std::map<std::string, FieldWidgetMeta> sFieldWidgetMeta;
 };

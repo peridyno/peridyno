@@ -33,6 +33,7 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 
 		Merge();
+		inline std::string caption() override { return "Merge Multi TriangleSet"; }
 
 	public:
 

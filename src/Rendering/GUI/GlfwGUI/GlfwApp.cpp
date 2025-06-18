@@ -3,6 +3,7 @@
 namespace dyno 
 {
 	GlfwApp::GlfwApp(int argc /*= 0*/, char **argv /*= NULL*/)
+		: AppBase()
 	{
 		//A hack to address the slow launching problem
 #ifdef CUDA_BACKEND

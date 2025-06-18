@@ -34,7 +34,6 @@ namespace dyno
 
 		this->statePointSet()->promoteOuput();
 		auto curve = this->varCurve()->getValue();
-		curve.setUseSquard(true);
 		this->varCurve()->setValue(curve);
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&PointFromCurve<TDataType>::varChanged, this));
@@ -80,7 +79,7 @@ namespace dyno
 			}
 		}
 
-		if (curve.curveClose && curve.resample == true && vertices.size()>=3)
+		if (curve.getClose() && curve.getResample() == true && vertices.size()>=3)
 		{
 
 			vertices.erase(vertices.end() - 1);
@@ -109,46 +108,33 @@ namespace dyno
 
 		pointSet->setPoints(vertices);
 
-
-	
-
-
 		// create EdgeSet
 		{
 			std::vector<TopologyModule::Edge> edges;
-
 
 			auto edgeSet = this->stateEdgeSet()->getDataPtr();
 
 			int ptnum = vertices.size();
 
-			
-			//printf("vertices.size  %d \n", ptnum);
 			if (ptnum >= 2)
 			{
 				for (int i = 0; i < ptnum - 1; i++)
 				{
 					edges.push_back(TopologyModule::Edge(i, i + 1));
-					//printf(" %d  -- %d  \n", i, i + 1);
 				}
 			}
-			//printf(" set \n");
 
-			if (curve.curveClose == true && vertices.size()>=3) 
+			if (curve.getClose() == true && vertices.size()>=3)
 			{
 				edges.push_back(TopologyModule::Edge(vertices.size()-1,0));
 			}
-
-
 
 			edgeSet->setPoints(vertices);
 			edgeSet->setEdges(edges);
 
 
 			vertices.clear();
-			edges.clear();
-			//printf(" clear  \n");
-		
+			edges.clear();		
 		
 		}
 		

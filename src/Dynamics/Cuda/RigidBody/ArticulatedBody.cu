@@ -54,7 +54,6 @@ namespace dyno
 
 	}
 
-
 	template<typename TDataType>
 	void ArticulatedBody<TDataType>::resetStates()
 	{
@@ -68,7 +67,7 @@ namespace dyno
 
 		uint N = 0;
 		if (texMesh != NULL);
-			N = texMesh->shapes().size();
+		N = texMesh->shapes().size();
 
 		CArrayList<Transform3f> tms;
 		CArray<uint> instanceNum(N);
@@ -100,13 +99,17 @@ namespace dyno
 		std::vector<Pair<uint, uint>> bindingPair(sizeOfRigids);
 		std::vector<int> tags(sizeOfRigids, 0);
 
+
+		CArray<uint> instanceCount(N);
+		instanceCount.reset();
+		//Setup the mapping from shape id to rigid body id
 		for (int i = 0; i < mBindingPair.size(); i++)
 		{
-			auto actor = mActors[i];
-			int idx = actor->idx + offset.checkElementOffset(actor->shapeType);
-
-			bindingPair[idx] = mBindingPair[i];
-			tags[idx] = 1;
+			uint rId = mActors[i]->idx;
+			uint sId = mBindingPair[i].first;
+			bindingPair[rId] = Pair<uint, uint>(sId, instanceCount[sId]);
+			tags[rId] = 1;
+			instanceCount[sId]++;
 		}
 
 		this->stateBindingPair()->assign(bindingPair);
@@ -116,6 +119,7 @@ namespace dyno
 
 		tms.clear();
 		bindingPair.clear();
+		instanceCount.clear();
 		tags.clear();
 
 		this->transform();
@@ -210,7 +214,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void ArticulatedBody<TDataType>::bind(std::shared_ptr<PdActor> actor, Pair<uint, uint> shapeId)
+	void ArticulatedBody<TDataType>::bindShape(std::shared_ptr<PdActor> actor, Pair<uint, uint> shapeId)
 	{
 		mActors.push_back(actor);
 		mBindingPair.push_back(shapeId);

@@ -6,7 +6,7 @@
 #include <QMenuBar>
 
 //Qt Nodes
-#include "nodes/QFlowView"
+#include "QtNodeFlowView.h"
 #include "nodes/QDataModelRegistry"
 
 namespace Qt
@@ -24,7 +24,7 @@ namespace Qt
 
 		//l->addWidget(menuBar);
 		node_scene = new QtNodeFlowScene(this);
-		l->addWidget(new QtFlowView(node_scene));
+		l->addWidget(new QtNodeFlowView(node_scene));
 		l->setContentsMargins(0, 0, 0, 0);
 		l->setSpacing(0);
 

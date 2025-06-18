@@ -53,7 +53,7 @@ using namespace dyno;
 #define PARTICLE_SPACING 0.005f 
 #define SIISPH_MODE
 #define KAPPA 80.0f
-#define SMOOTHINGLEHGTH PARTICLE_SPACING*2.5f
+#define SMOOTHINGLEHGTH 2.5f
 
 std::shared_ptr<SceneGraph> createScene()
 {
@@ -105,11 +105,8 @@ std::shared_ptr<SceneGraph> createScene()
 
 	{
 		fluid->animationPipeline()->clear();
-		auto smoothingLength = fluid->animationPipeline()->createModule<FloatingNumber<DataType3f>>();
-		smoothingLength->varValue()->setValue(Real(SMOOTHINGLEHGTH));
-
-		auto samplingDistance = fluid->animationPipeline()->createModule<FloatingNumber<DataType3f>>();
-		samplingDistance->varValue()->setValue(Real(PARTICLE_SPACING));
+		fluid->varSamplingDistance()->setValue(PARTICLE_SPACING);
+		fluid->varSmoothingLength()->setValue(SMOOTHINGLEHGTH);
 
 		auto integrator = std::make_shared<ParticleIntegrator<DataType3f>>();
 		fluid->stateTimeStep()->connect(integrator->inTimeStep());
@@ -119,7 +116,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 		auto nbrQuery = std::make_shared<NeighborPointQuery<DataType3f>>();
 		//nbrQuery->varSizeLimit()->setValue(30);
-		smoothingLength->outFloating()->connect(nbrQuery->inRadius());
+		fluid->stateSmoothingLength()->connect(nbrQuery->inRadius());
 		fluid->statePosition()->connect(nbrQuery->inPosition());
 		fluid->animationPipeline()->pushModule(nbrQuery);
 
@@ -133,8 +130,8 @@ std::shared_ptr<SceneGraph> createScene()
 #ifdef SIISPH_MODE 
 		auto density = std::make_shared<SemiImplicitDensitySolver<DataType3f>>();
 		density->varKappa()->setValue(KAPPA);
-		smoothingLength->outFloating()->connect(density->inSmoothingLength());
-		samplingDistance->outFloating()->connect(density->inSamplingDistance());
+		fluid->stateSmoothingLength()->connect(density->inSmoothingLength());
+		fluid->stateSamplingDistance()->connect(density->inSamplingDistance());
 		fluid->stateTimeStep()->connect(density->inTimeStep());
 		fluid->statePosition()->connect(density->inPosition());
 		fluid->stateVelocity()->connect(density->inVelocity());
@@ -144,8 +141,8 @@ std::shared_ptr<SceneGraph> createScene()
 
 		auto density = std::make_shared<IterativeDensitySolver<DataType3f>>();
 		density->varKappa()->setValue(KAPPA);
-		smoothingLength->outFloating()->connect(density->inSmoothingLength());
-		samplingDistance->outFloating()->connect(density->inSamplingDistance());
+		fluid->stateSmoothingLength()->connect(density->inSmoothingLength());
+		fluid->stateSamplingDistance()->connect(density->inSamplingDistance());
 		fluid->stateTimeStep()->connect(density->inTimeStep());
 		fluid->statePosition()->connect(density->inPosition());
 		fluid->stateVelocity()->connect(density->inVelocity());
@@ -156,8 +153,8 @@ std::shared_ptr<SceneGraph> createScene()
 		auto viscosity = std::make_shared<ImplicitViscosity<DataType3f>>();
 		viscosity->varViscosity()->setValue(Real(5.0));
 		fluid->stateTimeStep()->connect(viscosity->inTimeStep());
-		smoothingLength->outFloating()->connect(viscosity->inSmoothingLength());
-		samplingDistance->outFloating()->connect(viscosity->inSamplingDistance());
+		fluid->stateSmoothingLength()->connect(viscosity->inSmoothingLength());
+		fluid->stateSamplingDistance()->connect(viscosity->inSamplingDistance());
 		fluid->statePosition()->connect(viscosity->inPosition());
 		fluid->stateVelocity()->connect(viscosity->inVelocity());
 		nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());
@@ -166,8 +163,8 @@ std::shared_ptr<SceneGraph> createScene()
 		//auto viscosity = std::make_shared<ApproximateImplicitViscosity<DataType3f>>();
 		//viscosity->setViscosityValue(Real(5.0));
 		//fluid->stateTimeStep()->connect(viscosity->inTimeStep());
-		//smoothingLength->outFloating()->connect(viscosity->varSmoothingLength());
-		//samplingDistance->outFloating()->connect(viscosity->varSamplingDistance());
+		//fluid->stateSmoothingLength()->connect(viscosity->varSmoothingLength());
+		//fluid->stateSamplingDistance()->connect(viscosity->varSamplingDistance());
 		//fluid->statePosition()->connect(viscosity->inPosition());
 		//fluid->stateVelocity()->connect(viscosity->inVelocity());
 		//nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());
@@ -182,8 +179,6 @@ std::shared_ptr<SceneGraph> createScene()
 	auto pm_collide = scn->addNode(std::make_shared <TriangularMeshBoundary<DataType3f>>());
 	fluid->connect(pm_collide->importParticleSystems());
 	texMeshConverter->outTriangleSet()->connect(pm_collide->inTriangleSet());
-
-
 
 	//Create a boundary
 // 	auto boundary = scn->addNode(std::make_shared<StaticBoundary<DataType3f>>());

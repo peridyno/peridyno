@@ -31,16 +31,17 @@ namespace dyno
 
 		DEF_VAR(bool, CacheEvent, false, "If set false, all previous queued events will be dropped");
 
-	protected:
+	public:
+		//protected:
 		virtual void onEvent(PMouseEvent event) {};
 
-		void updateImpl() final;
+		void updateImpl();
 
 		bool requireUpdate() override;
 
 	private:
 		std::deque<PMouseEvent> mEventQueue;
-	
+
 		std::mutex	mMutex;
 	};
 }

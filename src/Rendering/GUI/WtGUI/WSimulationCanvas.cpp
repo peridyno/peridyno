@@ -1,18 +1,18 @@
 #include "WSimulationCanvas.h"
-#include "ImageEncoder.h"
 
-#include <Wt/WApplication.h>
-#include <Wt/WMemoryResource.h>
-#include <Wt/WImage.h>
+#include "ImageEncoder.h"
+#include "imgui_impl_wt.h"
 
 #include <GLFW/glfw3.h>
-
-#include <SceneGraph.h>
 #include <GLRenderEngine.h>
-#include <OrbitCamera.h>
-#include <TrackballCamera.h>
+#include <ImGuizmo.h>
 
-#include "imgui_impl_wt.h"
+#include "SceneGraph.h"
+
+#include <Wt/WApplication.h>
+#include <Wt/WImage.h>
+#include <Wt/WMemoryResource.h>
+
 
 using namespace dyno;
 
@@ -106,7 +106,7 @@ WSimulationCanvas::WSimulationCanvas()
 {
 	this->setLayoutSizeAware(true);
 	this->setStyleClass("remote-framebuffer");
-	this->resize("100%", "100%");
+	this->resize("100%", "90%");
 
 	this->mouseWentUp().preventDefaultAction(true);
 	this->mouseWentDown().preventDefaultAction(true);
@@ -120,8 +120,8 @@ WSimulationCanvas::WSimulationCanvas()
 	this->mouseDragged().connect(this, &WSimulationCanvas::onMouseDrag);
 	this->mouseWentUp().connect(this, &WSimulationCanvas::onMouseReleased);
 
-	// 	this->keyWentDown().connect(this, &WSimulationCanvas::onKeyWentDown);
-	// 	this->keyWentUp().connect(this, &WSimulationCanvas::onKeyWentUp);
+	//this->keyWentDown().connect(this, &WSimulationCanvas::onKeyWentDown);
+	//this->keyWentUp().connect(this, &WSimulationCanvas::onKeyWentUp);
 
 	this->setAttributeValue("oncontextmenu", "return false;");
 
@@ -286,6 +286,13 @@ void WSimulationCanvas::onMousePressed(const Wt::WMouseEvent& evt)
 		Wt::Coordinates coord = evt.widget();
 		mCamera->registerPoint(coord.x, coord.y);
 	}
+
+	mCursorX = evt.widget().x;
+	mCursorY = evt.widget().y;
+
+	auto camera = this->getCamera();
+	camera->registerPoint(evt.widget().x, evt.widget().y);
+
 	scheduleRender();
 }
 
@@ -321,6 +328,29 @@ void WSimulationCanvas::onMouseReleased(const Wt::WMouseEvent& evt)
 		mMouseButtonDown = false;
 	}
 
+	if (this->getSelectionMode() == RenderWindow::OBJECT_MODE)
+	{
+		if (evt.button() == Wt::MouseButton::Left)
+			//&& !ImGuizmo::IsUsing()
+			//&& !ImGui::GetIO().WantCaptureMouse)
+		{
+			int width = mCamera->viewportWidth();
+			int height = mCamera->viewportHeight();
+			int x = evt.widget().x;
+			int y = std::abs(height - evt.widget().y);
+
+			int w = std::abs(mCursorX - x);
+			int h = std::abs(mCursorY - y);
+
+			makeCurrent();
+			const auto& selection = this->select(x, y, w, h);
+			doneCurrent();
+
+			_selectNodeSignal.emit(this->getCurrentSelectedNode());
+			;
+		}
+	}
+
 	scheduleRender();
 }
 
@@ -332,7 +362,6 @@ void WSimulationCanvas::onMouseWheeled(const Wt::WMouseEvent& evt)
 
 void WSimulationCanvas::onKeyWentDown(const Wt::WKeyEvent& evt)
 {
-	Wt::log("Error") << "´¥·¢ÁË";
 	PKeyboardEvent keyEvent;
 	keyEvent.key = WKeyMap.find(evt.key()) == WKeyMap.end() ? PKEY_UNKNOWN : WKeyMap[evt.key()];
 	keyEvent.action = AT_PRESS;
@@ -354,6 +383,13 @@ void WSimulationCanvas::onKeyWentDown(const Wt::WKeyEvent& evt)
 
 void WSimulationCanvas::onKeyWentUp(const Wt::WKeyEvent& evt)
 {
+}
+
+void WSimulationCanvas::selectNode(std::shared_ptr<dyno::Node> node)
+{
+	makeCurrent();
+	this->select(node);
+	doneCurrent();
 }
 
 void WSimulationCanvas::render(Wt::WFlags<Wt::RenderFlag> flags)

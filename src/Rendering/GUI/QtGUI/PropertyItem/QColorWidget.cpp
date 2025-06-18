@@ -5,7 +5,7 @@
 #include <QColorDialog>
 
 //RenderCore
-#include "Color.h"
+#include "Field/Color.h"
 
 namespace dyno
 {

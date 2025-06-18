@@ -31,7 +31,9 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb/stb_image_write.h>
 
-namespace dyno 
+#define PYTHON
+
+namespace dyno
 {
 	static void RecieveLogMessage(const Log::Message& m)
 	{
@@ -54,7 +56,7 @@ namespace dyno
 		fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 	}
 
-	GlfwRenderWindow::GlfwRenderWindow(int argc /*= 0*/, char **argv /*= NULL*/)
+	GlfwRenderWindow::GlfwRenderWindow(int argc /*= 0*/, char** argv /*= NULL*/)
 		: RenderWindow()
 	{
 		Log::setUserReceiver(&RecieveLogMessage);
@@ -114,9 +116,9 @@ namespace dyno
 			return;
 
 		initCallbacks();
-		
+
 		glfwMakeContextCurrent(mWindow);
-		
+
 		if (!gladLoadGL()) {
 			Log::sendMessage(Log::Error, "Failed to load GLAD!");
 			//SPDLOG_CRITICAL("Failed to load GLAD!");
@@ -188,7 +190,7 @@ namespace dyno
 		style.FrameRounding = 6.0f;
 		style.PopupRounding = 6.0f;
 	}
-	
+
 	void GlfwRenderWindow::mainLoop()
 	{
 		auto activeScene = SceneGraphFactory::instance()->active();
@@ -200,8 +202,7 @@ namespace dyno
 		{
 			glfwPollEvents();
 
-			if (mAnimationToggle){
-
+			if (mAnimationToggle) {
 				if (this->isScreenRecordingOn())
 				{
 					saveScreen(activeScene->getFrameNumber());
@@ -209,7 +210,7 @@ namespace dyno
 
 				activeScene->takeOneFrame();
 			}
-			
+
 			activeScene->updateGraphicsContext();
 
 			// update rendering params
@@ -232,39 +233,37 @@ namespace dyno
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 
-			if(showImGUI())
+			if (showImGUI())
 				mImWindow.draw(this);
 
-// 			// Draw widgets
-// 			// TODO: maybe move into mImWindow...
-// 			for (auto widget : mWidgets)
-// 			{
-// 				widget->update();
-// 				widget->paint();
-// 			}
+			// 			// Draw widgets
+			// 			// TODO: maybe move into mImWindow...
+			// 			for (auto widget : mWidgets)
+			// 			{
+			// 				widget->update();
+			// 				widget->paint();
+			// 			}
 
-
-
-// 			// draw a pick rect
-// 			if (mButtonType == GLFW_MOUSE_BUTTON_LEFT &&
-// 				mButtonAction == GLFW_PRESS &&
-// 				mButtonMode == 0 && 
-// 				!ImGuizmo::IsUsing() &&
-// 				!ImGui::GetIO().WantCaptureMouse) {
-// 				double xpos, ypos;
-// 				glfwGetCursorPos(mWindow, &xpos, &ypos);
-// 
-// 				ImVec2 pMin = { fminf(xpos, mCursorPosX), fminf(ypos, mCursorPosY) };
-// 				ImVec2 pMax = { fmaxf(xpos, mCursorPosX), fmaxf(ypos, mCursorPosY) };			
-// 
-// 				// visible rectangle
-// 				if (pMin.x != pMax.x || pMin.y != pMax.y) {
-// 					// fill
-// 					ImGui::GetBackgroundDrawList()->AddRectFilled(pMin, pMax, ImColor{ 0.2f, 0.2f, 0.2f, 0.5f });
-// 					// border
-// 					ImGui::GetBackgroundDrawList()->AddRect(pMin, pMax, ImColor{ 0.8f, 0.8f, 0.8f, 0.8f }, 0, 0, 1.5f);
-// 				}
-// 			}
+			// 			// draw a pick rect
+			// 			if (mButtonType == GLFW_MOUSE_BUTTON_LEFT &&
+			// 				mButtonAction == GLFW_PRESS &&
+			// 				mButtonMode == 0 &&
+			// 				!ImGuizmo::IsUsing() &&
+			// 				!ImGui::GetIO().WantCaptureMouse) {
+			// 				double xpos, ypos;
+			// 				glfwGetCursorPos(mWindow, &xpos, &ypos);
+			//
+			// 				ImVec2 pMin = { fminf(xpos, mCursorPosX), fminf(ypos, mCursorPosY) };
+			// 				ImVec2 pMax = { fmaxf(xpos, mCursorPosX), fmaxf(ypos, mCursorPosY) };
+			//
+			// 				// visible rectangle
+			// 				if (pMin.x != pMax.x || pMin.y != pMax.y) {
+			// 					// fill
+			// 					ImGui::GetBackgroundDrawList()->AddRectFilled(pMin, pMax, ImColor{ 0.2f, 0.2f, 0.2f, 0.5f });
+			// 					// border
+			// 					ImGui::GetBackgroundDrawList()->AddRect(pMin, pMax, ImColor{ 0.8f, 0.8f, 0.8f, 0.8f }, 0, 0, 1.5f);
+			// 				}
+			// 			}
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -301,15 +300,15 @@ namespace dyno
 		return mCursorPosY;
 	}
 
-	void GlfwRenderWindow::onSaveScreen(const std::string &filename)
+	void GlfwRenderWindow::onSaveScreen(const std::string& filename)
 	{
 		int width;
 		int height;
 		glfwGetFramebufferSize(mWindow, &width, &height);
 
-		unsigned char *data = new unsigned char[width * height * 3];  //RGB
+		unsigned char* data = new unsigned char[width * height * 3];  //RGB
 		assert(data);
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0); 
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, (void*)data);
 
@@ -359,16 +358,17 @@ namespace dyno
 		glfwSetCursorPosCallback(mWindow, mCursorPosFunc);
 		glfwSetCursorEnterCallback(mWindow, mCursorEnterFunc);
 		glfwSetScrollCallback(mWindow, mScrollFunc);
-
 	}
 
 	void GlfwRenderWindow::drawScene(void)
 	{
-		
 	}
 
 	void GlfwRenderWindow::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
+#ifdef PYTHON
+		std::cout << "GlfwRenderWindow::mouseButtonCallback" << std::endl;
+#endif // PYTHON
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 
@@ -382,7 +382,6 @@ namespace dyno
 				activeWindow->getButtonAction() == GLFW_PRESS &&
 				activeWindow->getButtonMode() == 0 &&
 				action == GLFW_RELEASE) {
-
 				// in picking
 				int x = fmin(xpos, activeWindow->getCursorPosX());
 				int y = fmax(ypos, activeWindow->getCursorPosY());
@@ -421,7 +420,6 @@ namespace dyno
 			}
 			else
 				activeScene->onMouseEvent(mouseEvent);
-			
 
 			if (action == GLFW_PRESS)
 			{
@@ -449,18 +447,17 @@ namespace dyno
 		}
 
 		// update cursor position record
-		
-		if (action == GLFW_PRESS) 
+
+		if (action == GLFW_PRESS)
 		{
 			activeWindow->setCursorPos(xpos, ypos);
 			activeWindow->mCursorTempX = xpos;
 		}
-		else 
+		else
 		{
 			activeWindow->setCursorPos(-1, -1);
 			activeWindow->mCursorTempX = -1;
 		}
-
 	}
 
 	void GlfwRenderWindow::cursorPosCallback(GLFWwindow* window, double x, double y)
@@ -483,15 +480,15 @@ namespace dyno
 		if (activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_LEFT &&
 			activeWindow->getButtonState() == GLFW_DOWN &&
 			activeWindow->getButtonMode() == GLFW_MOD_ALT &&
-			!activeWindow->mImWindow.cameraLocked()) 
+			!activeWindow->mImWindow.cameraLocked())
 		{
 			camera->rotateToPoint(x, y);
 		}
 		else if (
 			activeWindow->getButtonType() == GLFW_MOUSE_BUTTON_MIDDLE &&
-			activeWindow->getButtonState() == GLFW_DOWN && 
+			activeWindow->getButtonState() == GLFW_DOWN &&
 			activeWindow->getButtonMode() == GLFW_MOD_ALT &&
-			!activeWindow->mImWindow.cameraLocked()) 
+			!activeWindow->mImWindow.cameraLocked())
 		{
 			camera->translateToPoint(x, y);
 		}
@@ -501,13 +498,13 @@ namespace dyno
 			activeWindow->getButtonMode() == GLFW_MOD_ALT &&
 			!activeWindow->mImWindow.cameraLocked())////
 		{
-			if (activeWindow->mCursorTempX != -1) 
+			if (activeWindow->mCursorTempX != -1)
 			{
 				camera->zoom(-0.005 * (x - activeWindow->mCursorTempX));
 				activeWindow->mCursorTempX = x;
 			}
 		}
-		activeWindow->imWindow()->mouseMoveEvent(mouseEvent); 
+		activeWindow->imWindow()->mouseMoveEvent(mouseEvent);
 	}
 
 	void GlfwRenderWindow::cursorEnterCallback(GLFWwindow* window, int entered)
@@ -531,9 +528,9 @@ namespace dyno
 		{
 			int state = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL);
 			int altState = glfwGetKey(window, GLFW_KEY_LEFT_ALT);
-			//If the left control key is pressed, slow the zoom speed. 
+			//If the left control key is pressed, slow the zoom speed.
 			if (state == GLFW_PRESS && altState == GLFW_PRESS)
-				camera->zoom(-0.1*OffsetY);
+				camera->zoom(-0.1 * OffsetY);
 			else if (altState == GLFW_PRESS)
 				camera->zoom(-OffsetY);
 		}
@@ -591,5 +588,4 @@ namespace dyno
 		GlfwRenderWindow* app = (GlfwRenderWindow*)glfwGetWindowUserPointer(window);
 		app->setWindowSize(w, h);
 	}
-
 }

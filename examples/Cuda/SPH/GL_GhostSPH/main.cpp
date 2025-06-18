@@ -3,20 +3,16 @@
 #include <Log.h>
 
 #include <BasicShapes/CubeModel.h>
-
 #include <Volume/BasicShapeToVolume.h>
-
 #include <Multiphysics/VolumeBoundary.h>
 
 #include <ParticleSystem/ParticleFluid.h>
-#include "ParticleSystem/GhostParticles.h"
+#include <ParticleSystem/GhostParticles.h>
 #include <ParticleSystem/GhostFluid.h>
 
 #include <Module/CalculateNorm.h>
-
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
-
 #include <ColorMapping.h>
 #include <ImColorbar.h>
 
@@ -24,16 +20,14 @@
 
 using namespace std;
 using namespace dyno;
-
-std::shared_ptr<ParticleSystem<DataType3f>> createFluidParticles()
+std::shared_ptr<ParticleSystem<DataType3f>> createFluidParticles(Vec3f lo, Vec3f hi)
 {
 	auto fluid = std::make_shared<ParticleSystem<DataType3f>>();
 
 	std::vector<Vec3f> host_pos;
 	std::vector<Vec3f> host_vel;
 
-	Vec3f lo(-0.1, 0.0, -0.1);
-	Vec3f hi(0.1f, 0.1f, 0.1f);
+
 
 	Real s = 0.005f;
 	int m_iExt = 0;
@@ -65,7 +59,7 @@ std::shared_ptr<ParticleSystem<DataType3f>> createFluidParticles()
 	return fluid;
 }
 
-std::shared_ptr<GhostParticles<DataType3f>> createGhostParticles()
+std::shared_ptr<GhostParticles<DataType3f>> createGhostParticles(Vec3f low, Vec3f high)
 {
 	auto ghost = std::make_shared<GhostParticles<DataType3f>>();
 
@@ -75,8 +69,6 @@ std::shared_ptr<GhostParticles<DataType3f>> createGhostParticles()
 	std::vector<Vec3f> host_normal;
 	std::vector<Attribute> host_attribute;
 
-	Vec3f low(-0.2, -0.015, -0.2);
-	Vec3f high(0.2, -0.005, 0.2);
 
 	Real s = 0.005f;
 	int m_iExt = 0;
@@ -128,11 +120,10 @@ std::shared_ptr<SceneGraph> createScene()
 	scn->setUpperBound(Vec3f(0.5, 1, 0.5));
 	scn->setLowerBound(Vec3f(-0.5, 0, -0.5));
 
-
 	//Create a container
 	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
 	cubeBoundary->varLocation()->setValue(Vec3f(0.0f, 0.5f, 0.0f));
-	cubeBoundary->varLength()->setValue(Vec3f(1.0f));
+	cubeBoundary->varLength()->setValue(Vec3f(0.4f, 1.0f, 0.4f));
 
 	auto cube2vol = scn->addNode(std::make_shared<BasicShapeToVolume<DataType3f>>());
 	cube2vol->varGridSpacing()->setValue(0.02f);
@@ -142,19 +133,16 @@ std::shared_ptr<SceneGraph> createScene()
 	auto boundary = scn->addNode(std::make_shared<VolumeBoundary<DataType3f>>());
 	cube2vol->connect(boundary->importVolumes());
 
-	auto fluid = scn->addNode(createFluidParticles());
-
-	auto ghost = scn->addNode(createGhostParticles());
+	auto fluid = scn->addNode(createFluidParticles(Vec3f(-0.1, 0.2, -0.1),Vec3f(0.1f, 0.25f, 0.1f)));
+	auto ghost1 = scn->addNode(createGhostParticles(Vec3f(-0.2, -0.015, -0.2), Vec3f(0.2, -0.005, 0.2)));
+	auto ghost2 = scn->addNode(createGhostParticles(Vec3f(-0.1, 0.1, -0.1), Vec3f(0.1, 0.125, 0.1)));
 
 	auto incompressibleFluid = scn->addNode(std::make_shared<GhostFluid<DataType3f>>());
 	incompressibleFluid->setDt(0.001f);
+	incompressibleFluid->varSmoothingLength()->setValue(2.5f);
 	fluid->connect(incompressibleFluid->importInitialStates());
-	ghost->connect(incompressibleFluid->importBoundaryParticles());
-// 	incompressibleFluid->setFluidParticles(fluid);
-// 	incompressibleFluid->setBoundaryParticles(ghost);
-
-// 	root->addAncestor(incompressibleFluid.get());
-// 	root->addParticleSystem(fluid);
+	ghost1->connect(incompressibleFluid->importBoundaryParticles());
+	ghost2->connect(incompressibleFluid->importBoundaryParticles());
 	incompressibleFluid->connect(boundary->importParticleSystems());
 
 	return scn;

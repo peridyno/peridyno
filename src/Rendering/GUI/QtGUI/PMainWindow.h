@@ -73,7 +73,7 @@ namespace dyno
 	class POpenGLWidget;
 	class PIODockWidget;
 	//class PVTKOpenGLWidget;
-	class PSceneGraphWidget;
+	//class PSceneGraphWidget;
 	class PPropertyWidget;
 	class PAnimationWidget;
 	class PModuleListWidget;

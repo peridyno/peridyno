@@ -21,7 +21,7 @@
 #include "Topology/TriangleSet.h"
 #include "Topology/TextureMesh.h"
 
-#include "FilePath.h"
+#include "Field/FilePath.h"
 
 namespace dyno 
 {
@@ -37,7 +37,8 @@ namespace dyno
 		ArticulatedBody();
 		~ArticulatedBody() override;
 
-		void bind(std::shared_ptr<PdActor> actor, Pair<uint, uint> shapeId);
+		//Bind rigid body to a shape in TextureMesh
+		void bindShape(std::shared_ptr<PdActor> actor, Pair<uint, uint> shapeId);
 
 	public:
 		DEF_VAR(FilePath, FilePath, "", "");
@@ -85,7 +86,6 @@ namespace dyno
 
 			return instanceQ;
 		}
-
 
 	private:
 		std::vector<Pair<uint, uint>> mBindingPair;

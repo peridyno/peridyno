@@ -54,7 +54,7 @@ namespace dyno
 
 		/**
 		 * @breif Return the Node that contains this Module
-		 * 
+		 *
 		 * @return return nullptr if the Module is not contained in any Node
 		 */
 		Node* getParentNode();
@@ -93,12 +93,12 @@ namespace dyno
 		 */
 		void setUpdateAlways(bool b);
 
-	protected:
-		//TODO: remove this step
+		//protected:
+			//TODO: remove this step
 		virtual bool initializeImpl();
 		virtual void updateImpl();
 
-
+	protected:
 		virtual void preprocess() {};
 
 		virtual void postprocess() {};

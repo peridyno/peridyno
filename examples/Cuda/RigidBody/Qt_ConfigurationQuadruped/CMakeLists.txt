@@ -4,7 +4,7 @@ if(PERIDYNO_QT_GUI AND PERIDYNO_LIBRARY_RIGIDBODY)
         Modeling
         QtGUI
         HeightField
-        SkeletonLoader
+        FBXLoader
         ObjIO)
     add_example(Qt_ConfigurationQuadruped RigidBody LIB_DEPENDENCY)
 endif()

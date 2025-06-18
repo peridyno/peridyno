@@ -1,12 +1,15 @@
 #pragma once
 #include "SceneGraph.h"
+#include <variant>
 
 namespace dyno {
 
 	class SceneLoader
 	{
 	public:
-		virtual std::shared_ptr<SceneGraph> load(const std::string filename) { return nullptr; }
+		using LoadResult = std::variant<std::shared_ptr<SceneGraph>, std::string>;
+
+		virtual LoadResult load(const std::string filename) { return "null"; }
 
 		virtual bool save(std::shared_ptr<SceneGraph> scn, const std::string filename) { return false; }
 
@@ -38,7 +41,7 @@ namespace dyno {
 		SceneLoader* getEntryByFileName(std::string filename);
 
 		/// Add a scene loader
-		SceneLoader* addEntry(SceneLoader *loader);
+		SceneLoader* addEntry(SceneLoader* loader);
 
 		/// Get the list of loaders
 		SceneLoaderList* getEntryList() { return &m_loaders; }

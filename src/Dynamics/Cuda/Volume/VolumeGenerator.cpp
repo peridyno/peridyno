@@ -11,7 +11,7 @@ namespace dyno
 	VolumeGenerator<TDataType>::VolumeGenerator()
 		: Volume<TDataType>()
 	{
-		this->varSpacing()->setRange(0.001, 1.0f);
+		this->varSpacing()->setRange(0.005, 1.0f);
 
 		auto fsm = std::make_shared<FastSweepingMethodGPU<TDataType>>();
 		this->inTriangleSet()->connect(fsm->inTriangleSet());

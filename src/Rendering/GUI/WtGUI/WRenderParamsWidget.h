@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Wt/WContainerWidget.h>
 #include <Wt/WColorPicker.h>
+#include <Wt/WContainerWidget.h>
 #include <Wt/WSignal.h>
 
 namespace dyno

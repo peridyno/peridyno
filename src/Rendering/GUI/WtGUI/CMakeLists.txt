@@ -3,6 +3,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 set(LIB_NAME WtGUI)
 set(LIB_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
+append_library(${LIB_NAME})
+
 #set output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
@@ -12,7 +14,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 include_directories(${PROJECT_SOURCE_DIR}/external)
 
 # add sources
-file(GLOB_RECURSE SOURCES "${LIB_SRC_DIR}/*.cpp" "${LIB_SRC_DIR}/*.h")
+file(GLOB_RECURSE SOURCES "${LIB_SRC_DIR}/*.cpp" "${LIB_SRC_DIR}/*.h" "${LIB_SRC_DIR}/*.hpp", "${LIB_SRC_DIR}/*.ipp")
 add_library(${LIB_NAME} SHARED ${SOURCES})
 
 foreach(SRC IN ITEMS ${SOURCES})

@@ -162,7 +162,7 @@ std::shared_ptr<SceneGraph> creatScene()
 
 	fluid->statePointSet()->promoteOuput()->connect(visualizer->inPoints());
 	fluid->stateVelocity()->promoteOuput()->connect(visualizer->inVector());
-	
+
 	//SemiAnalyticalSFINode
 	auto meshBoundary = scn->addNode(std::make_shared<TriangularMeshBoundary<DataType3f>>());
 	//sfi->varFast()->setValue(true);
@@ -193,7 +193,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	//*************************************** Import Other Models ***************************************//
 
 	//Other Models
-	importOtherModel(scn);
+	//importOtherModel(scn);
 
 	return scn;
 }

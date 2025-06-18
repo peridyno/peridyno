@@ -1,7 +1,6 @@
 #pragma once
-#include <Wt/WContainerWidget.h>
 #include <Wt/WCheckBox.h>
-
+#include <Wt/WContainerWidget.h>
 #include <Field.h>
 #include <WParameterDataNode.h>
 

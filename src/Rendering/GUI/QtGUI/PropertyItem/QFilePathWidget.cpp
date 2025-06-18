@@ -1,7 +1,7 @@
 #include "QFilePathWidget.h"
 
 #include "Field.h"
-#include "FilePath.h"
+#include "Field/FilePath.h"
 
 #include <QHBoxLayout>
 #include <QFileDialog>

@@ -232,7 +232,7 @@ namespace dyno
 			output->setText("Output");
 			layout->addWidget(output, 0, 1, Qt::AlignRight);
 
-			mPropertyLayout[1]->addWidget(title);
+			mPropertyLayout[1]->addWidget(title); 
 		}
 
 		std::vector<FBase*>& fields = node->getAllFields();
@@ -316,6 +316,21 @@ namespace dyno
 	{
 		auto node = std::dynamic_pointer_cast<Node>(mSeleted);
 
+		//Update the visibility of each item
+		for (int i = 0; i < mPropertyLayout[0]->count(); i++)
+		{
+			auto layoutItem = mPropertyLayout[0]->itemAt(i);
+			if (layoutItem)
+			{
+				QFieldWidget* widget = dynamic_cast<QFieldWidget*>(layoutItem->widget());
+				if (widget != nullptr)
+				{
+					auto field = widget->field();
+					widget->setVisible(field->isActive());
+				}
+			}
+		}
+		
 		if (node != nullptr) 
 		{
 			emit nodeUpdated(node);
@@ -342,9 +357,14 @@ namespace dyno
 	void PPropertyWidget::addScalarFieldWidget(FBase* field, QGridLayout* layout,int j)
 	{
 		QWidget* fw = createFieldWidget(field);
+		
 		if(fw != nullptr) {
 			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
 			layout->addWidget(fw, j, 0);
+
+			//Hide the item if the field is not active in default
+			if (!field->isActive())
+				fw->setVisible(false);
 		}
 		else 
 		{
