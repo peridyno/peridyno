@@ -137,12 +137,6 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
 	option(PERIDYNO_LIBRARY_PLUGIN "Enable binding the plugin libraries" ON)
 
-	option(PERIDYNO_TESTS "Enable python binding with pybind11" OFF)
-	if(PERIDYNO_TESTS)
-	    add_subdirectory(external/gtest)
-	    add_subdirectory(tests)
-	endif()
-
 	add_subdirectory(external/glfw-3.3.0)
 	add_subdirectory(external/glad-4.6)
 	add_subdirectory(external/imgui)
@@ -359,6 +353,15 @@ add_subdirectory(src)
 
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	option(PERIDYNO_EXAMPLE "Enable building examples" ON)
+
+	option(PERIDYNO_TESTS "Enable python binding with pybind11" OFF)
+	if(PERIDYNO_TESTS)
+		append_library("gtest")
+	    add_subdirectory(external/gtest)
+	    add_subdirectory(tests)
+	endif()
+
+
 	if(PERIDYNO_EXAMPLE)
 	    add_subdirectory(examples)
 	endif()

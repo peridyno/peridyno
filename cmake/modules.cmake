@@ -129,6 +129,16 @@ endmacro()
 macro(add_peridyno_test TEST_NAME LIB_DEPENDENCY)
     set(PROJECT_NAME ${TEST_NAME})
 
+    get_property(LIB_NAMES GLOBAL PROPERTY PERIDYNO_LIBRARIES)
+#   message("List ${LIB_NAMES}")
+    foreach(LIB_NAME ${${LIB_DEPENDENCY}})
+        string(FIND "${LIB_NAMES}" "${LIB_NAME}" TARGET_FOUND)
+        if(TARGET_FOUND EQUAL -1)
+            message("${LIB_NAME} not found! \n")
+            return()
+        endif()
+    endforeach()
+
     file(  
         GLOB_RECURSE SRC_LIST 
         LIST_DIRECTORIES false
