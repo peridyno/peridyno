@@ -3,6 +3,9 @@
 #include <Wt/WSortFilterProxyModel.h>
 
 #include <WSceneDataModel.h>
+#include <Wt/WAny.h>
+#include <any>
+
 
 WPromptPanel::WPromptPanel()
 {
@@ -45,13 +48,21 @@ void WPromptPanel::createPromptPanel(Wt::WContainerWidget* promptNodeWidget, std
 	mPromptTree->setColumnWidth(0, 250);
 	mPromptTree->setColumnWidth(1, 250);
 
-	mPromptTree->doubleClicked().connect([=]
+	mPromptTree->doubleClicked().connect([=](Wt::WModelIndex index, Wt::WMouseEvent event)
 		{
-			std::cout << "doubleClicked" << std::endl;
+			try {
+				auto type = Wt::asString(proxy->data(index.row(), 0)).toUTF8();
+				auto name = Wt::asString(proxy->data(index.row(), 1)).toUTF8();
+				auto connectIndex = Wt::asNumber(proxy->data(index.row(), 2));
+
+				std::tuple<std::string, int> addNode;
+				std::get<0>(addNode) = name;
+				std::get<1>(addNode) = connectIndex;
+
+				_addPromptNode.emit(addNode);
+			}
+			catch (const std::bad_any_cast& e) {
+				std::cerr << "×ª»»Ê§°Ü: " << e.what() << '\n';
+			}
 		});
 }
-
-void WPromptPanel::emitAddNode()
-{
-}
-

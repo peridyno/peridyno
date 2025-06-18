@@ -20,14 +20,12 @@ public:
 
 	void createPromptPanel(Wt::WContainerWidget* promptNodeWidget, std::map<std::string, std::tuple<std::string, int>> promptNodes);
 
-	void emitAddNode();
-
-	Wt::Signal<std::pair<std::string, int>>& addPromptNode() { return _addPromptNode; };
+	Wt::Signal<std::tuple<std::string, int>>& addPromptNode() { return _addPromptNode; };
 
 private:
-	Wt::WPanel* mPromptPanel = nullptr;
+	Wt::WPanel* mPromptPanel;
 
 	Wt::WTreeView* mPromptTree;
 
-	Wt::Signal<std::pair<std::string, int>> _addPromptNode;
+	Wt::Signal<std::tuple<std::string, int>> _addPromptNode;
 };
