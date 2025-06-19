@@ -38,20 +38,20 @@ std::shared_ptr<SceneGraph> createSceneGraph()
 
 	auto convoy = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
 
-	for (int i = 0; i <5; i++)
+	for (int i = 0; i < 5; i++)
 	{
 		auto gear = scn->addNode(std::make_shared<Bug<DataType3f>>());
-		if (i % 5 == 0)
-			gear->setfile(std::string("ma/bug"));
-		else if (i % 5 == 1)
-			gear->setfile(std::string("ma/pig"));
-		else if (i % 5 == 2)
-			gear->setfile(std::string("ma/plane"));
-		else if (i % 5 == 3)
-			gear->setfile(std::string("ma/dolphin"));
-		else if (i % 5 == 4)
-			gear->setfile(std::string("ma/bear"));
-		gear->setposition(Vec3f(0, 1 + 2.0 * i, 0 + 0.4 * i));
+		gear->setfile(std::string("ma/bigring"));
+		gear->setposition(Vec3f(0, 10 + 10.0 * i, 0 + 0.4 * i));
+		gear->setv(Vec3f(10 * i, 0, 0));
+		gear->connect(convoy->importVehicles());
+	}
+
+	for (int j = 0; j < 5; j++)
+	{
+		auto gear = scn->addNode(std::make_shared<Bug<DataType3f>>());
+		gear->setfile(std::string("ma/bigbug"));
+		gear->setposition(Vec3f(0 +j * 20.0, 3, 0));
 		gear->connect(convoy->importVehicles());
 	}
 
@@ -62,11 +62,17 @@ std::shared_ptr<SceneGraph> createSceneGraph()
 
 int main()
 {
-	UbiApp app(GUIType::GUI_QT);
+	/*UbiApp app(GUIType::GUI_QT);
 	app.setSceneGraph(createSceneGraph());
 
 	app.initialize(1280, 768);
 	app.renderWindow()->getCamera()->setUnitScale(3.0f);
+	app.mainLoop();
+
+	return 0;*/
+	UbiApp app(GUIType::GUI_QT);
+	app.setSceneGraph(createSceneGraph());
+	app.initialize(1280, 768);
 	app.mainLoop();
 
 	return 0;

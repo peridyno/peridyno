@@ -126,7 +126,7 @@ namespace dyno
 		MedialSlabInfo medalslab;
 		info.position = Vec3f(0) + this->position;
 		info.linearVelocity = this->velocity;
-		info.angularVelocity = Vec3f(-2, 0, 0);
+		info.angularVelocity = Vec3f(0, 0, 0);
 		info.motionType = BodyType::Dynamic;
 		info.bodyId = 0;
 		auto actor = this->createRigidBody(info);
