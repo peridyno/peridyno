@@ -39,6 +39,14 @@ namespace dyno
 	{
 		NodeFactory* factory = NodeFactory::instance();
 
+		factory->addContentAction(std::string("obj"),
+			[=](const std::string& path)->std::shared_ptr<Node>
+			{
+				auto node = std::make_shared<ObjLoader<DataType3f>>();
+				node->varFileName()->setValue(path);
+				return node;
+			});
+
 		auto page = factory->addPage(
 			"IO", 
 			"ToolBarIco/Modeling/Modeling.png");
