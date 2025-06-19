@@ -58,7 +58,7 @@ public:
 
 	Wt::Signal<>& updateCanvas() { return _updateCanvas; }
 
-	Wt::Signal<std::map<std::string, std::tuple<std::string, int>>>& prompt() { return _prompt; };
+	Wt::Signal<std::map<std::string, connectionData>>& prompt() { return _prompt; };
 
 
 protected:
@@ -81,7 +81,7 @@ protected:
 	Wt::Signal<int> _selectNodeSignal;
 	Wt::Signal<std::shared_ptr<dyno::Module>> _selectModuleSignal;
 	Wt::Signal<> _updateCanvas;
-	Wt::Signal<std::map<std::string, std::tuple<std::string, int>>> _prompt;
+	Wt::Signal<std::map<std::string, connectionData>> _prompt;
 
 
 	int selectType = -1;

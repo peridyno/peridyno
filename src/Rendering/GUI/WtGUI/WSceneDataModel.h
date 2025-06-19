@@ -1,6 +1,7 @@
 #pragma once
 #include <Wt/WAbstractItemModel.h>
 #include <Wt/WAbstractTableModel.h>
+#include <NodeEditor/WtFlowWidget.h>
 
 //namespace dyno
 //{
@@ -73,10 +74,11 @@
 class WPromptNode : public Wt::WAbstractItemModel
 {
 public:
-	WPromptNode(std::map<std::string, std::tuple<std::string, int>> promptNodes);
+	WPromptNode();
+	WPromptNode(std::map<std::string, connectionData> promptNodes);
 	~WPromptNode();
 
-	void setPromptNode(std::map<std::string, std::tuple<std::string, int>> promptNodes);
+	void setPromptNode(std::map<std::string, connectionData> promptNodes);
 
 	Wt::WModelIndex parent(const Wt::WModelIndex& index) const override;
 
@@ -94,7 +96,7 @@ public:
 		Wt::ItemDataRole role = Wt::ItemDataRole::Display) const override;
 
 private:
-	std::map<std::string, std::tuple<std::string, int>> mPromptNodes;
+	std::map<std::string, connectionData> mPromptNodes;
 
 	struct NodeItem
 	{

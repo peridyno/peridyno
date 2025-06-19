@@ -118,6 +118,46 @@ void WMainWindow::onKeyWentDown(const Wt::WKeyEvent& event)
 	}
 }
 
+void WMainWindow::setInData(connectionData data, std::shared_ptr<dyno::Node> inNode)
+{
+	auto inPoint = data.inPoint;
+	auto outNode = data.exportNode;
+	auto outModule = data.exportModule;
+	auto outPoint = data.outPoint;
+
+	std::cout << outPoint.portIndex << std::endl;
+	std::cout << inPoint.portIndex << std::endl;
+
+	if (inPoint.portShape == PortShape::Diamond || inPoint.portShape == PortShape::Bullet)
+	{
+		outNode->connect(inNode->getImportNodes()[inPoint.portIndex]);
+	}
+	else if (inPoint.portShape == PortShape::Point)
+	{
+		dyno::FBase* field;
+
+		if (outNode == nullptr && outModule != nullptr)
+		{
+			field = outModule->getOutputFields()[outPoint.portIndex - 1];
+		}
+		else
+		{
+			field = outNode->getOutputFields()[outPoint.portIndex - 1];
+		}
+
+
+		if (field != NULL)
+		{
+			dyno::FBase* inField;
+
+			inField = inNode->getInputFields()[inPoint.portIndex];
+
+			if (inField != nullptr)
+				field->connect(inField);
+		}
+	}
+}
+
 void WMainWindow::initNavigationBar(Wt::WBorderLayout* layout)
 {
 	//create a navigation bar
@@ -382,7 +422,7 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 			this->updateCanvas();
 		});
 
-	mNodeFlowWidget->prompt().connect([=](std::map<std::string, std::tuple<std::string, int>> promptNodes)
+	mNodeFlowWidget->prompt().connect([=](std::map<std::string, connectionData> promptNodes)
 		{
 			mPromptPanel->createPromptPanel(promptNodeWidget, promptNodes);
 		});
@@ -395,6 +435,38 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 					mNodeFlowWidget->setSelectNode(node);
 			});
 	}
+
+	mPromptPanel->addPromptNode().connect([=](connectionData addNodeData)
+		{
+			if (addNodeData.inportNode != nullptr)
+			{
+				auto node_obj = dyno::Object::createObject(addNodeData.inportNode->caption());
+				std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
+				mScene->addNode(new_node);
+				//new_node->setBlockCoord(Initial_x, Initial_y);
+
+				setInData(addNodeData, new_node);
+
+
+				Initial_x += 10;
+				Initial_y += 10;
+				mNodeFlowWidget->reorderNode();
+				mNodeFlowWidget->updateAll();
+				
+			}
+			if (addNodeData.inportModule != nullptr)
+			{
+				auto node_obj = dyno::Object::createObject(addNodeData.inportModule->caption());
+				std::shared_ptr<dyno::Module> new_node(dynamic_cast<dyno::Module*>(node_obj));
+				mModuleFlowWidget->addModule(new_node);
+				new_node->setBlockCoord(Initial_x, Initial_y);
+				Initial_x += 10;
+				Initial_y += 10;
+				mModuleFlowWidget->reorderNode();
+				mModuleFlowWidget->updateAll();
+				
+			}
+		});
 
 	return std::move(nodeGraphicsWidget);
 }

@@ -1,4 +1,5 @@
 #include "WSceneDataModel.h"
+
 //#include <SceneGraph.h>
 //
 //WNodeDataModel::WNodeDataModel()
@@ -191,7 +192,11 @@
 //	return std::shared_ptr<dyno::Module>();
 //}
 
-WPromptNode::WPromptNode(std::map<std::string, std::tuple<std::string, int>> promptNodes)
+WPromptNode::WPromptNode()
+{
+}
+
+WPromptNode::WPromptNode(std::map<std::string, connectionData> promptNodes)
 {
 	setPromptNode(promptNodes);
 }
@@ -200,7 +205,7 @@ WPromptNode::~WPromptNode()
 {
 }
 
-void WPromptNode::setPromptNode(std::map<std::string, std::tuple<std::string, int>> promptNodes)
+void WPromptNode::setPromptNode(std::map<std::string, connectionData> promptNodes)
 {
 	mPromptNodes = promptNodes;
 
@@ -209,10 +214,9 @@ void WPromptNode::setPromptNode(std::map<std::string, std::tuple<std::string, in
 		for (auto promptNode : mPromptNodes)
 		{
 			auto item = new NodeItem();
-			auto tup = promptNode.second;
+			auto data = promptNode.second;
 			item->name = promptNode.first;
-			item->type = std::get<0>(tup);
-			item->connectIndex = std::get<1>(tup);
+			item->type = data.inportNode->getNodeType();
 			mNodeList.push_back(item);
 		}
 	}
@@ -234,7 +238,7 @@ Wt::WModelIndex WPromptNode::index(int row, int column, const Wt::WModelIndex& p
 
 int WPromptNode::columnCount(const Wt::WModelIndex& parent) const
 {
-	return 3;
+	return 2;
 }
 
 int WPromptNode::rowCount(const Wt::WModelIndex& parent) const
@@ -261,10 +265,10 @@ Wt::cpp17::any WPromptNode::data(const Wt::WModelIndex& index, Wt::ItemDataRole 
 		{
 			return data->name;
 		}
-		if (index.column() == 2)
-		{
-			return data->connectIndex;
-		}
+		//if (index.column() == 2)
+		//{
+		//	return data->connectIndex;
+		//}
 	}
 
 	return Wt::cpp17::any();
@@ -278,8 +282,8 @@ Wt::cpp17::any WPromptNode::headerData(int section, Wt::Orientation orientation,
 			return std::string("Type");
 		case 1:
 			return std::string("Name");
-		case 2:
-			return std::string("Port");
+		//case 2:
+		//	return std::string("Port");
 		default:
 			return Wt::cpp17::any();
 		}

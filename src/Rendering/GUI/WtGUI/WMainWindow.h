@@ -43,6 +43,8 @@ public:
 
 	void onKeyWentDown(const Wt::WKeyEvent& event);
 
+	void setInData(connectionData data, std::shared_ptr<dyno::Node> inNode);
+
 	WSimulationCanvas* simCanvas() { return mSceneCanvas; }
 
 	WtNodeFlowWidget* getFlowWidget() { return mNodeFlowWidget; }
@@ -85,6 +87,8 @@ private:
 	Wt::WContainerWidget* rightWidget;
 
 	Wt::WTabWidget* tab;
+
+	std::string doubleAddNode;
 
 	int Initial_x = 0;
 	int Initial_y = 0;

@@ -223,12 +223,16 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 		if (!isConnect && mOutNode != nullptr && outPoint.portType != PortType::In)
 		{
 			auto fieldExps = mOutNode->getOutputFields();
-			std::map<std::string, std::tuple<std::string, int>> promptNode;
+
+			std::map<std::string, connectionData> promptNode;
+
 			for (auto nodePair : allNodeMap)
 			{
 				auto node = nodePair.second;
 				if (outPoint.portShape == PortShape::Diamond || outPoint.portShape == PortShape::Bullet)
 				{
+					if (fieldExps.size() == 0)
+						break;
 					auto fieldExp = fieldExps[outPoint.portIndex];
 
 					auto nodeInps = node->getImportNodes();
@@ -237,10 +241,14 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 					{
 						if (nodeInp->isKindOf(mOutNode.get()))
 						{
-							promptNode.emplace(
-								node->caption(),
-								std::make_tuple(node->getNodeType(), i)
-							);
+							connectionData canConnectionData;
+							canConnectionData.exportNode = mOutNode;
+							canConnectionData.outPoint = outPoint;
+							canConnectionData.inportNode = node;
+							canConnectionData.inPoint.portShape = outPoint.portShape;
+							canConnectionData.inPoint.portIndex = i;
+
+							promptNode.emplace(node->caption(), canConnectionData);
 						}
 						i++;
 					}
@@ -248,7 +256,7 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 				else if (outPoint.portShape == PortShape::Point)
 				{
 					auto fieldInps = node->getInputFields();
-					auto fieldExp = fieldExps[outPoint.portIndex - 1];
+					auto fieldExp = fieldExps[outPoint.portIndex - mOutNode->getExportNodes().size() - 1];
 					int i = 0;
 					for (auto fieldInp : fieldInps)
 					{
@@ -264,10 +272,14 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 								{
 									if (instIn->canBeConnectedBy(instOut))
 									{
-										promptNode.emplace(
-											node->caption(),
-											std::make_tuple(node->getNodeType(), i)
-										);
+										connectionData canConnectionData;
+										canConnectionData.exportNode = mOutNode;
+										canConnectionData.outPoint = outPoint;
+										canConnectionData.inportNode = node;
+										canConnectionData.inPoint.portShape = outPoint.portShape;
+										canConnectionData.inPoint.portIndex = i + node->getAllNodePorts().size();
+
+										promptNode.emplace(node->caption(), canConnectionData);
 									}
 								}
 							}
@@ -275,10 +287,14 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 							{
 								if (fieldInp->getTemplateName() == fieldExp->getTemplateName())
 								{
-									promptNode.emplace(
-										node->caption(),
-										std::make_tuple(node->getNodeType(), i)
-									);
+									connectionData canConnectionData;
+									canConnectionData.exportNode = mOutNode;
+									canConnectionData.outPoint = outPoint;
+									canConnectionData.inportNode = node;
+									canConnectionData.inPoint.portShape = outPoint.portShape;
+									canConnectionData.inPoint.portIndex = i;
+
+									promptNode.emplace(node->caption(), canConnectionData);
 								}
 							}
 						}

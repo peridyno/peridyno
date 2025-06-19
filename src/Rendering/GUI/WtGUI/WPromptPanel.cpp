@@ -7,6 +7,7 @@
 #include <any>
 
 
+
 WPromptPanel::WPromptPanel()
 {
 }
@@ -15,9 +16,11 @@ WPromptPanel::~WPromptPanel()
 {
 }
 
-void WPromptPanel::createPromptPanel(Wt::WContainerWidget* promptNodeWidget, std::map<std::string, std::tuple<std::string, int>> promptNodes)
+void WPromptPanel::createPromptPanel(Wt::WContainerWidget* promptNodeWidget, std::map<std::string, connectionData> promptNodes)
 {
 	std::shared_ptr<WPromptNode> nodeModel = std::make_shared<WPromptNode>(promptNodes);
+
+	canConnectionDatas = promptNodes;
 
 	auto layout = promptNodeWidget->setLayout(std::make_unique<Wt::WVBoxLayout>());
 	layout->setContentsMargins(0, 0, 0, 0);
@@ -51,18 +54,21 @@ void WPromptPanel::createPromptPanel(Wt::WContainerWidget* promptNodeWidget, std
 	mPromptTree->doubleClicked().connect([=](Wt::WModelIndex index, Wt::WMouseEvent event)
 		{
 			try {
-				auto type = Wt::asString(proxy->data(index.row(), 0)).toUTF8();
 				auto name = Wt::asString(proxy->data(index.row(), 1)).toUTF8();
-				auto connectIndex = Wt::asNumber(proxy->data(index.row(), 2));
-
-				std::tuple<std::string, int> addNode;
-				std::get<0>(addNode) = name;
-				std::get<1>(addNode) = connectIndex;
-
-				_addPromptNode.emit(addNode);
+				if (canConnectionDatas.find(name) != canConnectionDatas.end())
+				{
+					_addPromptNode.emit(canConnectionDatas.find(name)->second);
+					clear();
+				}
 			}
 			catch (const std::bad_any_cast& e) {
 				std::cerr << "×ª»»Ê§°Ü: " << e.what() << '\n';
 			}
 		});
+}
+
+void WPromptPanel::clear()
+{
+	std::shared_ptr<WPromptNode> emptyModel = std::make_shared<WPromptNode>();
+	mPromptTree->setModel(emptyModel);
 }
