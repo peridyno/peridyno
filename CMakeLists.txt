@@ -38,6 +38,7 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	set(PERIDYNO_LIBRARY_VERSION_PATCH 0 CACHE STRING "patch version of peridyno" FORCE)
 	set(PERIDYNO_LIBRARY_VERSION "${PERIDYNO_LIBRARY_VERSION_MAJOR}.${PERIDYNO_LIBRARY_VERSION_MINOR}.${PERIDYNO_LIBRARY_VERSION_PATCH}" CACHE STRING "Peridyno version" FORCE)
 
+	set_property(GLOBAL PROPERTY PERIDYNO_LIBRARIES "Core;Framework;Topology")
 	set_property(GLOBAL PROPERTY USE_FOLDERS ON)                                                    
 	set(CMAKE_CXX_STANDARD 17 CACHE STRING "CXX STANDARD VERSION 11,14,17")                         
 	set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -129,24 +130,18 @@ else()
     message(FATAL_ERROR "Could not set install folders for this platform!")
 endif()
 
-option(PERIDYNO_LIBRARY_FRAMEWORK "Enable binding the framework library" ON)
+#option(PERIDYNO_LIBRARY_FRAMEWORK "Enable binding the framework library" ON)
 
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
-	option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
-	option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
-	option(PERIDYNO_LIBRARY_PLUGIN "Enable binding the plugin libraries" ON)
-
-	option(PERIDYNO_TESTS "Enable python binding with pybind11" OFF)
-	if(PERIDYNO_TESTS)
-	    add_subdirectory(external/gtest)
-	    add_subdirectory(tests)
-	endif()
+	#option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
+	#option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
+	option(PERIDYNO_PLUGIN_ALL "Enable binding the plugin libraries" ON)
 
 	add_subdirectory(external/glfw-3.3.0)
 	add_subdirectory(external/glad-4.6)
 	add_subdirectory(external/imgui)
 
-	if(PERIDYNO_LIBRARY_PLUGIN)
+	if(PERIDYNO_PLUGIN_ALL)
 		option(PERIDYNO_PLUGIN_ALEMBIC "Enable binding the abc exporter library" OFF)
 		option(PERIDYNO_PLUGIN_GMSH "Enable binding the Gmsh library" OFF)
 		
@@ -169,7 +164,7 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	option(PERIDYNO_WT_GUI "Enable building web applications" OFF)
 
 	# Add Plugin folder
-	if(PERIDYNO_LIBRARY_PLUGIN)
+	if(PERIDYNO_PLUGIN_ALL)
 		add_subdirectory(plugins)
 	endif()
 
@@ -186,11 +181,6 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 		set(WT_GUI_SUPPORTED "WT_GUI_SUPPORTED")
 	endif()
 
-	option(PERIDYNO_EXAMPLE "Enable building examples" ON)
-	if(PERIDYNO_EXAMPLE)
-	    add_subdirectory(examples)
-	endif()
-
 	file(GLOB FILESYSTEM_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/external/filesystem/ghc/*.*")
 	install(FILES ${FILESYSTEM_HEADER}  DESTINATION ${PERIDYNO_INC_INSTALL_DIR}/external/filesystem/ghc)
 
@@ -199,7 +189,7 @@ elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 	set(PERIDYNO_ASSET_PATH "${PERIDYNO_ROOT}/data" CACHE PATH "" FORCE)
 	option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
 	option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
-	option(PERIDYNO_LIBRARY_PLUGIN "Enable binding the plugin libraries" OFF)
+	option(PERIDYNO_PLUGIN_ALL "Enable binding the plugin libraries" OFF)
 	option(PERIDYNO_PYTHON_BINDING "Enable python binding with pybind11" OFF)
 	
 	add_subdirectory(external/glfw-3.3.0)
@@ -336,15 +326,10 @@ elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 	if(PERIDYNO_QT_GUI)
 		add_subdirectory(external/nodeeditor)
 	endif()
-
-	option(PHOENIX_Examples "Enable building examples" ON)
-	if(PHOENIX_Examples)
-	    add_subdirectory(examples)
-	endif()
 else()
 	option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
 	option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
-	option(PERIDYNO_LIBRARY_PLUGIN "Enable binding the plugin libraries" OFF)
+	option(PERIDYNO_PLUGIN_ALL "Enable binding the plugin libraries" OFF)
 
 	option(PERIDYNO_TESTS "Enable python binding with pybind11" OFF)
 	if(PERIDYNO_TESTS)
@@ -362,13 +347,34 @@ else()
 	if(PERIDYNO_QT_GUI)
 		add_subdirectory(external/nodeeditor)
 	endif()
+endif()
 
+add_subdirectory(src)
+
+if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
+	option(PERIDYNO_EXAMPLE "Enable building examples" ON)
+
+	option(PERIDYNO_TESTS "Enable python binding with pybind11" OFF)
+	if(PERIDYNO_TESTS)
+		append_library("gtest")
+	    add_subdirectory(external/gtest)
+	    add_subdirectory(tests)
+	endif()
+
+
+	if(PERIDYNO_EXAMPLE)
+	    add_subdirectory(examples)
+	endif()
+elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
+	option(PHOENIX_Examples "Enable building examples" ON)
+	if(PHOENIX_Examples)
+	    add_subdirectory(examples)
+	endif()
+else()
 	option(PERIDYNO_EXAMPLE "Enable building examples" ON)
 	if(PERIDYNO_EXAMPLE)
 		add_subdirectory(examples)
 	endif()
 endif()
-
-add_subdirectory(src)
 
 

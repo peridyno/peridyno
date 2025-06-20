@@ -1,5 +1,7 @@
 ﻿set(LIB_NAME Modeling)
 
+append_library(${LIB_NAME})
+
 #set(LIB_SRC_DIR "${PROJECT_SOURCE_DIR}/src/${LIB_NAME}")
 file(
     GLOB_RECURSE LIB_SRC 

@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.10)
 set(LIB_NAME GlfwGUI)
 set(LIB_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
+append_library(${LIB_NAME})
+
 file(                                                                           
     GLOB_RECURSE LIB_SRC
     LIST_DIRECTORIES false
