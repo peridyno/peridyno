@@ -10,9 +10,7 @@ namespace dyno
 {
 	template<typename TDataType>
 	Merge<TDataType>::Merge()
-
 	{
-
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
 		auto glModule = std::make_shared<GLSurfaceVisualModule>();
@@ -20,11 +18,6 @@ namespace dyno
 		glModule->setVisible(true);
 		this->stateTriangleSet()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
-
-		this->inTriangleSet01()->tagOptional(true);
-		this->inTriangleSet02()->tagOptional(true);
-		this->inTriangleSet03()->tagOptional(true);
-		this->inTriangleSet04()->tagOptional(true);
 
 		auto ptModule = std::make_shared<GLPointVisualModule>();
 		ptModule->setVisible(false);
@@ -53,34 +46,18 @@ namespace dyno
 	template<typename TDataType>
 	void Merge<TDataType>::MergeGPU()
 	{
-		auto tri01 = this->inTriangleSet01()->getDataPtr();
-		auto tri02 = this->inTriangleSet02()->getDataPtr();
-		auto tri03 = this->inTriangleSet03()->getDataPtr();
-		auto tri04 = this->inTriangleSet04()->getDataPtr();
-
 		std::shared_ptr<TriangleSet<TDataType>> temp = std::make_shared<TriangleSet<DataType3f>>();
 
+		auto num = this->inTriangleSets()->size();
+
+		for (uint i = 0; i < num; i++)
+		{
+			auto ts = this->inTriangleSets()->constDataPtr(i);
+
+			temp->copyFrom(*temp->merge(*ts));
+		}
+
 		auto topo = this->stateTriangleSet()->getDataPtr();
-		if (tri01 != NULL)
-		{
-			temp->copyFrom(*temp->merge(*tri01));
-			printf("Merge TriangleSet01\n");
-		}
-		if (tri02 != NULL)
-		{
-			temp->copyFrom(*temp->merge(*tri02));
-			printf("Merge TriangleSet02\n");
-		}
-		if (tri03 != NULL)
-		{
-			temp->copyFrom(*temp->merge(*tri03));
-			printf("Merge TriangleSet03\n");
-		}
-		if (tri04 != NULL)
-		{
-			temp->copyFrom(*temp->merge(*tri04));
-			printf("Merge TriangleSet04\n");
-		}
 		topo->copyFrom(*temp);
 	}
 

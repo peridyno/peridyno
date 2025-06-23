@@ -43,7 +43,6 @@ namespace dyno
 
 		this->stateTopology()->connect(surfacerender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(surfacerender);
-
 	}
 
 	template<typename TDataType>
@@ -100,7 +99,6 @@ namespace dyno
 	template<typename TDataType>
 	void ObjLoader<TDataType>::updateStates()
 	{
-
 		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTopology()->getDataPtr());
 
 		if (this->varSequence()->getValue() == true)

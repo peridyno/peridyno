@@ -20,7 +20,7 @@ namespace dyno
 	public:
 		DEF_VAR(Real, IsoValue, Real(0), "Iso value");
 
-		DEF_INSTANCE_IO(LevelSet<TDataType>, Volume, "");
+		DEF_INSTANCE_IN(LevelSet<TDataType>, Volume, "");
 
  		DEF_INSTANCE_OUT(TriangleSet<TDataType>, TriangleSet, "");
 

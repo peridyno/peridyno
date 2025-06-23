@@ -169,8 +169,8 @@ namespace Qt
 		auto& fields = node->getAllFields();
 		for (auto field : fields)
 		{
-			if (field->getFieldType() == dyno::FieldTypeEnum::State
-				|| field->getFieldType() == dyno::FieldTypeEnum::In)
+			if ((field->getFieldType() == dyno::FieldTypeEnum::State
+				|| field->getFieldType() == dyno::FieldTypeEnum::In) && field->inputPolicy() == FBase::One)
 			{
 				mStates->addOutputField(field);
 			}

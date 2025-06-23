@@ -79,7 +79,7 @@ namespace dyno
 
 		QStringList filter;
 		filter <<"*.png" << "*.jpg" << "*.bmp" << "*.obj" << "*.gltf" << "*.fbx";
-		listModel = new CustomFileSystemModel(this);
+		auto* listModel = new CustomFileSystemModel(this);
 		listModel->setRootPath(path.c_str());
 		listModel->setFilter(QDir::Files | QDir::NoDotAndDotDot);
 		listModel->setNameFilters(filter);
@@ -106,7 +106,17 @@ namespace dyno
 		QString name = model->fileName(index);
 		QString path = model->fileInfo(index).absolutePath() + "/" + name;
 
-		listModel->setRootPath(path);
-		listView->setRootIndex(listModel->index(path));
+		//A hack
+		QStringList filter;
+		filter << "*.png" << "*.jpg" << "*.bmp" << "*.obj" << "*.gltf" << "*.fbx";
+		auto* newListModel = new CustomFileSystemModel(this);
+		newListModel->setRootPath(path);
+		newListModel->setFilter(QDir::Files | QDir::NoDotAndDotDot);
+		newListModel->setNameFilters(filter);
+		newListModel->setNameFilterDisables(false);
+		newListModel->sort(0, Qt::AscendingOrder);
+
+ 		listView->setModel(newListModel);
+		listView->setRootIndex(newListModel->index(path));
 	}
 }

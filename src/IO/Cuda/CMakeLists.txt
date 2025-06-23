@@ -1,5 +1,7 @@
 ﻿set(LIB_NAME IO)
 
+append_library(${LIB_NAME})
+
 file(
     GLOB_RECURSE LIB_SRC 
     LIST_DIRECTORIES false

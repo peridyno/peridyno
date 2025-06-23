@@ -22,7 +22,7 @@ namespace dyno
 	{
 		Real iso = this->varIsoValue()->getValue();
 
-		auto levelset = this->ioVolume()->constDataPtr();
+		auto levelset = this->inVolume()->constDataPtr();
 
 		auto& sdf = levelset->getSDF();
 

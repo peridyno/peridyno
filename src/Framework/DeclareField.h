@@ -57,11 +57,11 @@ private:									\
 public:									\
 	inline FInstance<T>* out##name() {return &out_##name;}
 
-#define DEF_INSTANCE_IO(T, name, desc) \
-private:									\
-	FInstance<T> io_##name = FInstance<T>(std::string(#name), desc, FieldTypeEnum::IO, this);			\
-public:									\
-	inline FInstance<T>* io##name() {return &io_##name;}
+// #define DEF_INSTANCE_IO(T, name, desc) \
+// private:									\
+// 	FInstance<T> io_##name = FInstance<T>(std::string(#name), desc, FieldTypeEnum::IO, this);			\
+// public:									\
+// 	inline FInstance<T>* io##name() {return &io_##name;}
 
 /**
  * @brief Macro definitions for instance state
@@ -74,26 +74,14 @@ public:									\
 	inline FInstance<T>* state##name() {return &state_##name;}
 
 /**
- * @brief Macro definitions for an array of instance
+ * @brief Macro definitions for an array of instance, can only be used within a node
  */
-#define DEF_INSTANCES_STATE(T, name, desc)		\
-private:									\
-	FArray<std::shared_ptr<T>, DeviceType::CPU> state_##name = FArray<std::shared_ptr<T>, DeviceType::CPU>(std::string(#name)+std::string("(s)"), desc, FieldTypeEnum::State, this);	\
-public:									\
-	inline FArray<std::shared_ptr<T>, DeviceType::CPU>* state##name##s() {return &state_##name;}
 
 #define DEF_INSTANCES_IN(T, name, desc)		\
 private:									\
-	FArray<std::shared_ptr<T>, DeviceType::CPU> in_##name = FArray<std::shared_ptr<T>, DeviceType::CPU>(std::string(#name)+std::string("(s)"), desc, FieldTypeEnum::In, this);	\
+	FInstances<T> in_##name = FInstances<T>(std::string(#name)+std::string("(s)"), desc, FieldTypeEnum::In, this);	\
 public:									\
-	inline FArray<std::shared_ptr<T>, DeviceType::CPU>* in##name##s() {return &in_##name;}
-
-#define DEF_INSTANCES_OUT(T, name, desc)		\
-private:									\
-	FArray<std::shared_ptr<T>, DeviceType::CPU> out_##name = FArray<std::shared_ptr<T>, DeviceType::CPU>(std::string(#name)+std::string("(s)"), desc, FieldTypeEnum::Out, this);	\
-public:									\
-	inline FArray<std::shared_ptr<T>, DeviceType::CPU>* out##namee##s() {return &out_##name;}
-
+	inline FInstances<T>* in##name##s() {return &in_##name;}
 
 /**
 *	Macro definition for input/output of type Array
