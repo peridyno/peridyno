@@ -302,7 +302,9 @@ void WtModuleFlowWidget::setNode(std::shared_ptr<dyno::Node> node)
 void WtModuleFlowWidget::addModule(std::shared_ptr<dyno::Module> new_module)
 {
 	if (mModuleFlowScene != nullptr)
+	{
 		mModuleFlowScene->addModule(new_module);
+	}
 
 	updateAll();
 }

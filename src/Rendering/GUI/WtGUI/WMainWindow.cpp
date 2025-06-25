@@ -118,15 +118,12 @@ void WMainWindow::onKeyWentDown(const Wt::WKeyEvent& event)
 	}
 }
 
-void WMainWindow::setInData(connectionData data, std::shared_ptr<dyno::Node> inNode)
+void WMainWindow::setInData(connectionData data, std::shared_ptr<dyno::Node> inNode, std::shared_ptr<dyno::Module> inModule)
 {
 	auto inPoint = data.inPoint;
 	auto outNode = data.exportNode;
 	auto outModule = data.exportModule;
 	auto outPoint = data.outPoint;
-
-	std::cout << outPoint.portIndex << std::endl;
-	std::cout << inPoint.portIndex << std::endl;
 
 	if (inPoint.portShape == PortShape::Diamond || inPoint.portShape == PortShape::Bullet)
 	{
@@ -138,7 +135,7 @@ void WMainWindow::setInData(connectionData data, std::shared_ptr<dyno::Node> inN
 
 		if (outNode == nullptr && outModule != nullptr)
 		{
-			field = outModule->getOutputFields()[outPoint.portIndex - 1];
+			field = outModule->getOutputFields()[outPoint.portIndex];
 		}
 		else
 		{
@@ -149,7 +146,14 @@ void WMainWindow::setInData(connectionData data, std::shared_ptr<dyno::Node> inN
 		{
 			dyno::FBase* inField;
 
-			inField = inNode->getInputFields()[inPoint.portIndex];
+			if (outModule == nullptr)
+			{
+				inField = inNode->getInputFields()[inPoint.portIndex];
+			}
+			else
+			{
+				inField = inModule->getInputFields()[inPoint.portIndex];
+			}
 
 			if (inField != nullptr)
 				field->connect(inField);
@@ -444,7 +448,7 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 				mScene->addNode(new_node);
 				//new_node->setBlockCoord(Initial_x, Initial_y);
 
-				setInData(addNodeData, new_node);
+				setInData(addNodeData, new_node, nullptr);
 
 				Initial_x += 10;
 				Initial_y += 10;
@@ -457,6 +461,9 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 				std::shared_ptr<dyno::Module> new_node(dynamic_cast<dyno::Module*>(node_obj));
 				mModuleFlowWidget->addModule(new_node);
 				//new_node->setBlockCoord(Initial_x, Initial_y);
+
+				setInData(addNodeData, nullptr, new_node);
+
 				Initial_x += 10;
 				Initial_y += 10;
 				mModuleFlowWidget->reorderNode();

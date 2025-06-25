@@ -53,6 +53,7 @@ bool WtInteraction::canConnect(PortIndex& portIndex, TypeConverter& converter)
 	PortIndex portIndexInp = requiredPort == PortType::In ? portIndex : _connection->getPortIndex(oppositePort(requiredPort));
 
 	std::cout << portIndexExp << std::endl;
+	
 	auto dataOut = nodeExp->nodeDataModel()->outData(portIndexExp);
 
 	if (!nodeInp->nodeDataModel()->tryInData(portIndexInp, dataOut))

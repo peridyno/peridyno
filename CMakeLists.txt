@@ -137,6 +137,10 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	#option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
 	option(PERIDYNO_PLUGIN_ALL "Enable binding the plugin libraries" ON)
 
+	if(PERIDYNO_PYTHON_BINDING)
+	    add_subdirectory(python)
+	endif()
+
 	add_subdirectory(external/glfw-3.3.0)
 	add_subdirectory(external/glad-4.6)
 	add_subdirectory(external/imgui)

@@ -43,7 +43,7 @@ public:
 
 	void onKeyWentDown(const Wt::WKeyEvent& event);
 
-	void setInData(connectionData data, std::shared_ptr<dyno::Node> inNode);
+	void setInData(connectionData data, std::shared_ptr<dyno::Node> inNode, std::shared_ptr<dyno::Module> inModule);
 
 	WSimulationCanvas* simCanvas() { return mSceneCanvas; }
 
@@ -53,7 +53,6 @@ public:
 	// data models
 	std::shared_ptr<WParameterDataNode> mParameterDataNode;
 	std::shared_ptr<WPromptPanel> mPromptPanel;
-	
 
 private:
 	void initNavigationBar(Wt::WBorderLayout*);

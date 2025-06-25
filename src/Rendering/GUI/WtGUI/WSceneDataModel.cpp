@@ -273,10 +273,6 @@ Wt::cpp17::any WPromptNode::data(const Wt::WModelIndex& index, Wt::ItemDataRole 
 		{
 			return data->name;
 		}
-		//if (index.column() == 2)
-		//{
-		//	return data->connectIndex;
-		//}
 	}
 
 	return Wt::cpp17::any();
