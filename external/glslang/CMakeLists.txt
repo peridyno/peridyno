@@ -54,14 +54,14 @@ include(GNUInstallDirs)
 # Needed for CMAKE_DEPENDENT_OPTION macro
 include(CMakeDependentOption)
 
-option(BUILD_SHARED_LIBS "Build Shared Libraries" OFF)
-option(BUILD_EXTERNAL "Build external dependencies in /External" OFF)
+# option(BUILD_SHARED_LIBS "Build Shared Libraries" OFF)
+# option(BUILD_EXTERNAL "Build external dependencies in /External" OFF)
 
 set(LIB_TYPE STATIC)
 
-if(BUILD_SHARED_LIBS)
-    set(LIB_TYPE SHARED)
-endif()
+# if(BUILD_SHARED_LIBS)
+#     set(LIB_TYPE SHARED)
+# endif()
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
     # This logic inside SPIRV-Tools, which can upset build target dependencies
@@ -299,12 +299,12 @@ else()
     endif()
 endif()
 
-if(BUILD_EXTERNAL AND IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/External)
-    find_host_package(PythonInterp 3 REQUIRED)
+# if(BUILD_EXTERNAL AND IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/External)
+#     find_host_package(PythonInterp 3 REQUIRED)
 
-    # We depend on these for later projects, so they should come first.
-    add_subdirectory(External)
-endif()
+#     # We depend on these for later projects, so they should come first.
+#     add_subdirectory(External)
+# endif()
 
 if(NOT TARGET SPIRV-Tools-opt)
     set(ENABLE_OPT OFF)

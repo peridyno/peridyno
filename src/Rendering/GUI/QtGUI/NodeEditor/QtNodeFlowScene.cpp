@@ -182,49 +182,54 @@ namespace Qt
 					auto fieldInp = nd->getInputFields();
 					for (int i = 0; i < fieldInp.size(); i++)
 					{
-						auto fieldSrc = fieldInp[i]->getSource();
-						if (fieldSrc != nullptr) {
-							auto parSrc = fieldSrc->parent();
-							if (parSrc != nullptr)
-							{
-								//To handle fields from node states or outputs
-								dyno::Node* nodeSrc = dynamic_cast<dyno::Node*>(parSrc);
-
-								//To handle fields that are exported from module outputs
-								if (nodeSrc == nullptr)
+						std::vector<FBase*> validFields;
+						fieldInp[i]->requestValidSources(validFields);
+						for (auto fieldSrc : validFields)
+						{
+							if (fieldSrc != nullptr) {
+								auto parSrc = fieldSrc->parent();
+								if (parSrc != nullptr)
 								{
-									dyno::Module* moduleSrc = dynamic_cast<dyno::Module*>(parSrc);
-									if (moduleSrc != nullptr)
-										nodeSrc = moduleSrc->getParentNode();
-								}
+									//To handle fields from node states or outputs
+									dyno::Node* nodeSrc = dynamic_cast<dyno::Node*>(parSrc);
 
-								if (nodeSrc != nullptr)
-								{
-									auto outId = nodeSrc->objectId();
-									auto fieldsOut = nodeSrc->getOutputFields();
-
-									uint outFieldIndex = 0;
-									bool fieldFound = false;
-									for (auto f : fieldsOut)
+									//To handle fields that are exported from module outputs
+									if (nodeSrc == nullptr)
 									{
-										if (f == fieldSrc)
-										{
-											fieldFound = true;
-											break;
-										}
-										outFieldIndex++;
+										dyno::Module* moduleSrc = dynamic_cast<dyno::Module*>(parSrc);
+										if (moduleSrc != nullptr)
+											nodeSrc = moduleSrc->getParentNode();
 									}
 
-									if (nodeMap[outId]->nodeDataModel()->allowExported()) outFieldIndex++;
-
-									if (fieldFound && nodeMap.find(outId) != nodeMap.end())
+									if (nodeSrc != nullptr)
 									{
-										auto outBlock = nodeMap[outId];
-										createConnection(*inBlock, i + ports.size(), *outBlock, outFieldIndex);
+										auto outId = nodeSrc->objectId();
+										auto fieldsOut = nodeSrc->getOutputFields();
+
+										uint outFieldIndex = 0;
+										bool fieldFound = false;
+										for (auto f : fieldsOut)
+										{
+											if (f == fieldSrc)
+											{
+												fieldFound = true;
+												break;
+											}
+											outFieldIndex++;
+										}
+
+										if (nodeMap[outId]->nodeDataModel()->allowExported()) outFieldIndex++;
+
+										if (fieldFound && nodeMap.find(outId) != nodeMap.end())
+										{
+											auto outBlock = nodeMap[outId];
+											createConnection(*inBlock, i + ports.size(), *outBlock, outFieldIndex);
+										}
 									}
 								}
 							}
 						}
+						validFields.clear();
 					}
 				}
 			};
@@ -736,31 +741,36 @@ namespace Qt
 				auto fieldInp = nd->getInputFields();
 				for (int i = 0; i < fieldInp.size(); i++)//����ÿ��Node��Inputfield
 				{
-					auto fieldSrc = fieldInp[i]->getSource();
-					if (fieldSrc != nullptr) {
-						auto parSrc = fieldSrc->parent();
-						if (parSrc != nullptr)
-						{
-							Node* nodeSrc = dynamic_cast<Node*>(parSrc);
-
-							// Otherwise parSrc is a field of Module
-							if (nodeSrc == nullptr)
+					std::vector<FBase*> validFields;
+					fieldInp[i]->requestValidSources(validFields);
+					for (auto fieldSrc : validFields)
+					{
+						if (fieldSrc != nullptr) {
+							auto parSrc = fieldSrc->parent();
+							if (parSrc != nullptr)
 							{
-								dyno::Module* moduleSrc = dynamic_cast<dyno::Module*>(parSrc);
-								if (moduleSrc != nullptr)
-									nodeSrc = moduleSrc->getParentNode();
-							}
+								Node* nodeSrc = dynamic_cast<Node*>(parSrc);
 
-							if (nodeSrc != nullptr)
-							{
-								auto outId = nodeSrc->objectId();
+								// Otherwise parSrc is a field of Module
+								if (nodeSrc == nullptr)
+								{
+									dyno::Module* moduleSrc = dynamic_cast<dyno::Module*>(parSrc);
+									if (moduleSrc != nullptr)
+										nodeSrc = moduleSrc->getParentNode();
+								}
 
-								graph.addEdge(outId, inId);
+								if (nodeSrc != nullptr)
+								{
+									auto outId = nodeSrc->objectId();
 
-								graph.removeID(outId, inId);
+									graph.addEdge(outId, inId);
+
+									graph.removeID(outId, inId);
+								}
 							}
 						}
 					}
+					validFields.clear();
 				}
 			};
 		for (auto it = scn->begin(); it != scn->end(); it++)

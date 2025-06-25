@@ -12,6 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * Revision:
+ *	2025-6-24: implement FInstances
  */
 #pragma once
 #include <iostream>
@@ -37,8 +40,6 @@ namespace dyno {
 		static const std::string className() {
 			return std::string("FInstance");
 		}
-	private:
-
 	};
 
 	/*!
@@ -58,7 +59,7 @@ namespace dyno {
 			: InstanceBase(name, description, fieldType, parent) {}
 
 		const std::string getTemplateName() override { return std::string(typeid(VarType).name()); }
-		const std::string getClassName() final { return InstanceBase::className(); }
+		const std::string getClassName() final { return "FInstance"; }
 
 		std::shared_ptr<T> getDataPtr() {
 			InstanceBase* ins = dynamic_cast<InstanceBase*>(this->getTopField());
@@ -99,17 +100,26 @@ namespace dyno {
 		}
 
 		bool connect(FBase* dst) override {
-			InstanceBase* ins = dynamic_cast<InstanceBase*>(dst);
-			if (ins == nullptr) {
+			InstanceBase* dstIns = dynamic_cast<InstanceBase*>(dst);
+			if (dstIns == nullptr) {
 				return false;
 			}
 
-			if (!ins->canBeConnectedBy(this)) {
+			if (!dstIns->canBeConnectedBy(this)) {
 				return false;
 			}
 
-			this->connectField(dst);
-			return true;
+			return this->connectField(dst);
+		}
+
+		bool disconnect(FBase* dst) override
+		{
+			InstanceBase* dstIns = dynamic_cast<InstanceBase*>(dst);
+			if (dstIns == nullptr) {
+				return false;
+			}
+
+			return this->disconnectField(dst);
 		}
 
 		T& getData() {
@@ -138,13 +148,83 @@ namespace dyno {
 		}
 
 		bool canBeConnectedBy(InstanceBase* ins) final {
-			std::shared_ptr<Object> dataPtr = ins->standardObjectPointer();
-			auto dPtr = std::dynamic_pointer_cast<T>(dataPtr);
+			if (ins->inputPolicy() == FInputPolicy::One)
+			{
+				std::shared_ptr<Object> dataPtr = ins->standardObjectPointer();
+				auto dPtr = std::dynamic_pointer_cast<T>(dataPtr);
 
-			return dPtr == nullptr ? false : true;
+				return dPtr == nullptr ? false : true;
+			}
+			
+			return false;
 		}
 
 	private:
 		std::shared_ptr<T> mData = nullptr;
+	};
+
+	template<typename T>
+	class FInstances : public InstanceBase
+	{
+	public:
+		typedef T					VarType;
+		typedef FInstances<T>		FieldType;
+
+		FInstances() : InstanceBase() {}
+
+		FInstances(std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent)
+			: InstanceBase(name, description, fieldType, parent) {}
+
+		const std::string getTemplateName() override { return std::string(typeid(VarType).name()); }
+		const std::string getClassName() final { return "FInstances"; }
+
+		std::shared_ptr<T> constDataPtr(const uint i) {
+			assert(i < this->getSources().size());
+
+			InstanceBase* ins = dynamic_cast<InstanceBase*>(this->getSources()[i]->getTopField());
+			std::shared_ptr<T> data = std::static_pointer_cast<T>(ins->objectPointer());
+
+			return data;
+		}
+
+		/**
+		 * @brief FInstances cannot be connected to other fields
+		 */
+		bool connect(FBase* dst) override {
+			return false;
+		}
+
+		bool disconnect(FBase* dst) override {
+			return false;
+		}
+
+		bool isEmpty() override {
+			return this->getSources().size() == 0;
+		}
+
+		uint size() override { return this->getSources().size(); }
+
+	public:
+		FInputPolicy inputPolicy() override { return FInputPolicy::Many; }
+
+		void setObjectPointer(std::shared_ptr<Object> op) override {};
+		std::shared_ptr<Object> objectPointer() override { return nullptr; }
+
+		std::shared_ptr<Object> standardObjectPointer() final {
+			return std::make_shared<T>();
+		}
+
+		bool canBeConnectedBy(InstanceBase* ins) final {
+			if (ins->inputPolicy() == FInputPolicy::One)
+			{
+				std::shared_ptr<Object> dataPtr = ins->standardObjectPointer();
+
+				auto dPtr = std::dynamic_pointer_cast<T>(dataPtr);
+
+				return dPtr == nullptr ? false : true;
+			}
+			else
+				return false;
+		}
 	};
 }

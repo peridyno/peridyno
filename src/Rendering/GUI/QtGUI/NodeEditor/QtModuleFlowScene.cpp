@@ -18,12 +18,19 @@ namespace dyno
 {
 	class States : public Module
 	{
-		DECLARE_CLASS(States);
 	public:
 		States() {};
+
+		std::string caption() { return "States"; }
 	};
 
-	IMPLEMENT_CLASS(States);
+	class Outputs : public Module
+	{
+	public:
+		Outputs() {};
+
+		std::string caption() { return "Outputs"; }
+	};
 }
 
 namespace Qt
@@ -162,8 +169,8 @@ namespace Qt
 		auto& fields = node->getAllFields();
 		for (auto field : fields)
 		{
-			if (field->getFieldType() == dyno::FieldTypeEnum::State
-				|| field->getFieldType() == dyno::FieldTypeEnum::In)
+			if ((field->getFieldType() == dyno::FieldTypeEnum::State
+				|| field->getFieldType() == dyno::FieldTypeEnum::In) && field->inputPolicy() == FBase::One)
 			{
 				mStates->addOutputField(field);
 			}
@@ -231,6 +238,58 @@ namespace Qt
 		for  (auto m : modules)
 		{
 			createModuleConnections(m.second);
+		}
+
+		//Create a module for outputs
+		mOutputs = std::make_shared<dyno::Outputs>();
+
+		auto hasModuleConnected = [&](FBase* f) -> bool
+			{
+				bool fieldFound = false;
+				auto fieldSrc = f->getSource();
+				if (fieldSrc != nullptr) {
+					auto parSrc = fieldSrc->parent();
+					if (parSrc != nullptr)
+					{
+						Module* moduleSrc = dynamic_cast<Module*>(parSrc);
+						if (moduleSrc == nullptr)
+						{
+							moduleSrc = mStates.get();
+						}
+
+						auto outId = moduleSrc->objectId();
+						auto fieldsOut = moduleSrc->getOutputFields();
+
+						if (moduleMap.find(outId) != moduleMap.end())
+						{
+							for (auto f : fieldsOut)
+							{
+								if (f == fieldSrc)
+								{
+									fieldFound = true;
+									break;
+								}
+							}
+						}
+					}
+				}
+				return fieldFound;
+			};
+
+		auto& output_fields = node->getOutputFields();
+		for (auto field : output_fields)
+		{
+			if (field->getFieldType() == dyno::FieldTypeEnum::Out && hasModuleConnected(field))
+			{
+				mOutputs->addInputField(field);
+			}
+		}
+
+		if (mOutputs->getInputFields().size() > 0)
+		{
+			mOutputs->setBlockCoord(pos.x() + 500, pos.y());
+			addModuleWidget(mOutputs);
+			createModuleConnections(mOutputs);
 		}
 	}
 

@@ -1,4 +1,7 @@
 set(LIB_NAME GLRenderEngine)
+message("Building ${LIB_NAME}")
+
+append_library(${LIB_NAME})
 
 # shaders
 set(SHADER_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/shader)

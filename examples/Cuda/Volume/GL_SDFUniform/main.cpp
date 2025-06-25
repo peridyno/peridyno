@@ -5,6 +5,7 @@
 #include <Volume/VolumeClipper.h>
 
 #include <BasicShapes/SphereModel.h>
+#include <BasicShapes/CubeModel.h>
 
 using namespace std;
 using namespace dyno;
@@ -22,6 +23,26 @@ std::shared_ptr<SceneGraph> createScene()
 	volume->varSpacing()->setValue(0.05f);
 
 	sphere->stateTriangleSet()->connect(volume->inTriangleSet());
+
+	auto clipper = scn->addNode(std::make_shared<VolumeClipper<DataType3f>>()); ;
+	volume->stateLevelSet()->connect(clipper->inLevelSet());
+
+	return scn;
+}
+
+std::shared_ptr<SceneGraph> createCube()
+{
+	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
+	scn->setUpperBound(Vec3f(2, 2, 2));
+	scn->setLowerBound(Vec3f(-2, -2, -2));
+
+	auto cube = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
+
+	auto volume = scn->addNode(std::make_shared<VolumeGenerator<DataType3f>>());
+	volume->varPadding()->setValue(10);
+	volume->varSpacing()->setValue(0.1f);
+
+	cube->stateTriangleSet()->connect(volume->inTriangleSet());
 
 	auto clipper = scn->addNode(std::make_shared<VolumeClipper<DataType3f>>()); ;
 	volume->stateLevelSet()->connect(clipper->inLevelSet());

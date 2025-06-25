@@ -41,6 +41,8 @@ namespace dyno
 		this->varHeight()->setRange(0, 100);
 		this->varHeightSegment()->setRange(1, 10000);
 
+		this->varScale()->setRange(0.001, 100);
+
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&CapsuleModel<TDataType>::varChanged, this));
 
 
@@ -75,7 +77,6 @@ namespace dyno
 
 		this->stateTriangleSet()->promoteOuput();
 		this->statePolygonSet()->promoteOuput();
-
 	}
 
 	template<typename TDataType>
@@ -87,11 +88,11 @@ namespace dyno
 	template<typename TDataType>
 	NBoundingBox CapsuleModel<TDataType>::boundingBox()
 	{
-		auto center = this->varLocation()->getData();
-		auto rot = this->varRotation()->getData();
-		auto scale = this->varScale()->getData();
+		auto center = this->varLocation()->getValue();
+		auto rot = this->varRotation()->getValue();
+		auto scale = this->varScale()->getValue();
 
-		auto radius = this->varRadius()->getData();
+		auto radius = this->varRadius()->getValue();
 
 		Coord length(radius);
 		length[0] *= scale[0];
@@ -121,9 +122,6 @@ namespace dyno
 		return ret;
 	}
 
-
-
-
 	template<typename TDataType>
 	void CapsuleModel<TDataType>::varChanged()
 	{
@@ -131,10 +129,12 @@ namespace dyno
 		auto rot = this->varRotation()->getValue();
 		auto scale = this->varScale()->getValue();
 
-		auto radius = this->varRadius()->getValue();
+		this->varScale()->setValue(Coord(scale.x, scale.y, scale.x), false);
+
+		auto radius = this->varRadius()->getValue() * scale.x;
 		auto latitude = this->varLatitude()->getValue();
 		auto longitude = this->varLongitude()->getValue();
-		Real halfHeight = this->varHeight()->getValue() / 2;
+		Real halfHeight = this->varHeight()->getValue() / 2 * scale.y;
 		auto row = this->varHeightSegment()->getValue();
 
 		Quat<Real> q = this->computeQuaternion();
@@ -357,7 +357,7 @@ namespace dyno
 			int numpt = vertices.size();
 
 			for (int i = 0; i < numpt; i++) {
-				vertices[i] = RV(vertices[i] * scale + RV(center));
+				vertices[i] = RV(vertices[i] + RV(center));
 			}
 
 			polySet->setPoints(vertices);

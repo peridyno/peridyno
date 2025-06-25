@@ -11,7 +11,7 @@ namespace dyno
 		: Node()
 	{
 		auto mapper = std::make_shared<AdaptiveVolumeToTriangleSet<TDataType>>();
-		this->stateSDFTopology()->connect(mapper->ioVolume());
+		this->stateSDFTopology()->connect(mapper->inVolume());
 		this->graphicsPipeline()->pushModule(mapper);
 
 		auto renderer = std::make_shared<GLSurfaceVisualModule>();

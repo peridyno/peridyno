@@ -19,9 +19,26 @@ using namespace dyno;
 #include "Node.h"
 #include "Vector.h"
 
+#include "Topology/TriangleSet.h"
+#include "Topology/TetrahedronSet.h"
+
 /**
  * @brief This example demonstrates how to define fields for a node.
  */
+
+class SourceNode : public Node
+{
+	DECLARE_CLASS(SourceNode);
+public:
+	SourceNode() {};
+	~SourceNode() override {};
+
+	DEF_INSTANCE_OUT(TetrahedronSet<DataType3f>, TetrahedronSet, "");
+private:
+
+};
+
+IMPLEMENT_CLASS(SourceNode);
 
 class Fields : public Node
 {
@@ -50,6 +67,8 @@ public:
 
 	DEF_ARRAY_IN(float, FloatArray, DeviceType::GPU, "Define a float array as input");
 
+	DEF_INSTANCES_IN(TriangleSet<DataType3f>, TriangleSet, "");
+
 	DEF_ARRAY_OUT(float, FloatArray, DeviceType::GPU, "Define a float array as output");
 
 	DEF_ARRAY_STATE(float, Value, DeviceType::GPU, "Define a float array as state");
@@ -65,7 +84,12 @@ IMPLEMENT_CLASS(Fields);
 int main()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
-	auto source1 = scn->addNode(std::make_shared<Fields>());
+	auto source1 = scn->addNode(std::make_shared<SourceNode>());
+	auto source2 = scn->addNode(std::make_shared<SourceNode>());
+	auto sink = scn->addNode(std::make_shared<Fields>());
+
+// 	source1->outTriangleSet()->connect(sink->inTriangleSets());
+// 	source2->outTriangleSet()->connect(sink->inTriangleSets());
 
 	QtApp app;
 	app.setSceneGraph(scn);

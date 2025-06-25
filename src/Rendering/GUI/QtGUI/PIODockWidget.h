@@ -62,6 +62,7 @@ namespace dyno
 	class PIOTabWidget;
 	class PLogWidget;
 	class PConsoleWidget;
+	class QContentBrowser;
 
 	class PIODockWidget : public QDockWidget
 	{
@@ -99,6 +100,7 @@ namespace dyno
 
 		PLogWidget* mLogWidget;
 		PConsoleWidget* mConsoleWidget;
+		QContentBrowser* mContentBrowser;
 	};
 }
 

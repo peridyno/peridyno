@@ -13,6 +13,7 @@
 
 namespace dyno {
     QtApp::QtApp(int argc, char **argv)
+        : AppBase()
     {
 #ifdef CUDA_BACKEND
         auto status = cudaSetDevice(0);

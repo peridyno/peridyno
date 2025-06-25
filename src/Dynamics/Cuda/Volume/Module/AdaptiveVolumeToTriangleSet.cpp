@@ -22,7 +22,7 @@ namespace dyno
 	{
 		Real iso = this->varIsoValue()->getValue();
 
-		auto vol = this->ioVolume()->constDataPtr();
+		auto vol = this->inVolume()->constDataPtr();
 
 		DArray<Coord> ceilVertices;
 

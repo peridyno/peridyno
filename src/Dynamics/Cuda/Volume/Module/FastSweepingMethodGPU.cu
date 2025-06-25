@@ -215,7 +215,17 @@ namespace dyno
 		{
 			ProjectedPoint3D<Real> p3d;
 
+			TOrientedBox3D<Real> obb(Coord(0), Quat1f(), Coord(0.5));
+			TPoint3D<Real> point(gx);
+			Real exact_dist = point.distance(obb);
+
 			bool valid = calculateSignedDistance2TriangleSetFromNormal(p3d, gx, vertices, edges, indices, t2e, edgeN, vertexN, list);
+			
+// 			if (abs(p3d.signed_distance - exact_dist) >= EPSILON)
+// 			{
+// 				printf("Error: %f %f %f; approximate: %f; exact: %f \n", gx.x, gx.y, gx.z, p3d.signed_distance, exact_dist);
+// 			}
+
 			if (valid) {
 				phi(i, j, k) = p3d.signed_distance;
 				closestId(i, j, k) = p3d.id;
@@ -376,9 +386,17 @@ namespace dyno
 		Real dx = this->varSpacing()->getValue();
 		uint padding = this->varPadding()->getValue();
 
-		Coord unit(1, 1, 1);
-		min_box -= padding * dx * unit;
-		max_box += padding * dx * unit;
+		int min_i = std::floor(min_box[0] / dx) - padding;
+		int min_j = std::floor(min_box[1] / dx) - padding;
+		int min_k = std::floor(min_box[2] / dx) - padding;
+
+		int max_i = std::ceil(max_box[0] / dx) + padding;
+		int max_j = std::ceil(max_box[1] / dx) + padding;
+		int max_k = std::ceil(max_box[2] / dx) + padding;
+
+		// Use a background grid that is aligned with an interval of N times dx
+		min_box = Coord(min_i * dx, min_j * dx, min_k * dx);
+		max_box = Coord(max_i * dx, max_j * dx, max_k * dx);
 
 		origin = min_box;
 		maxPoint = max_box;
@@ -386,9 +404,9 @@ namespace dyno
 		sdf.setSpace(min_box, max_box, dx);
 		auto& phi = sdf.distances();
 
-		ni = phi.nx();
-		nj = phi.ny();
-		nk = phi.nz();
+		int ni = phi.nx();
+		int nj = phi.ny();
+		int nk = phi.nz();
 
 		//initialize distances near the mesh
 		DArray3D<uint> counter3d(ni, nj, nk);

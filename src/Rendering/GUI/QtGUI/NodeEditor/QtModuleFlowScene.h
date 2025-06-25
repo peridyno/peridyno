@@ -63,6 +63,7 @@ namespace Qt
 
 		//A virtual module to store all state variables
 		std::shared_ptr<dyno::Module> mStates = nullptr;
+		std::shared_ptr<dyno::Module> mOutputs = nullptr;
 
 		float mDx = 100.0f;
 		float mDy = 50.0f;
