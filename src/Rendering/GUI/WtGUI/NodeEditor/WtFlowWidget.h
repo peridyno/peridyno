@@ -92,4 +92,6 @@ protected:
 
 	connectionPointData outPoint;
 	connectionPointData inPoint;
+
+	bool isConnect = false;
 };

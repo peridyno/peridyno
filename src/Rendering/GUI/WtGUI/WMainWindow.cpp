@@ -145,7 +145,6 @@ void WMainWindow::setInData(connectionData data, std::shared_ptr<dyno::Node> inN
 			field = outNode->getOutputFields()[outPoint.portIndex - 1];
 		}
 
-
 		if (field != NULL)
 		{
 			dyno::FBase* inField;
@@ -447,24 +446,21 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 
 				setInData(addNodeData, new_node);
 
-
 				Initial_x += 10;
 				Initial_y += 10;
 				mNodeFlowWidget->reorderNode();
 				mNodeFlowWidget->updateAll();
-				
 			}
 			if (addNodeData.inportModule != nullptr)
 			{
 				auto node_obj = dyno::Object::createObject(addNodeData.inportModule->caption());
 				std::shared_ptr<dyno::Module> new_node(dynamic_cast<dyno::Module*>(node_obj));
 				mModuleFlowWidget->addModule(new_node);
-				new_node->setBlockCoord(Initial_x, Initial_y);
+				//new_node->setBlockCoord(Initial_x, Initial_y);
 				Initial_x += 10;
 				Initial_y += 10;
 				mModuleFlowWidget->reorderNode();
 				mModuleFlowWidget->updateAll();
-				
 			}
 		});
 
@@ -488,6 +484,8 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initModuleGraphics()
 	// Parameter list
 	auto parameterWidget = moduleGraphicsWidget->layout->addWidget(std::make_unique<Wt::WContainerWidget>());
 
+	auto promptNodeWidget = moduleGraphicsWidget->layout->addWidget(std::make_unique<Wt::WContainerWidget>());
+
 	//action for selection change
 	mModuleFlowWidget->selectModuleSignal().connect([=](std::shared_ptr<dyno::Module> module)
 		{
@@ -496,6 +494,11 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initModuleGraphics()
 				mParameterDataNode->setModule(module);
 				mParameterDataNode->createParameterPanelModule(parameterWidget);
 			}
+		});
+
+	mModuleFlowWidget->prompt().connect([=](std::map<std::string, connectionData> promptModules)
+		{
+			mPromptPanel->createPromptPanel(promptNodeWidget, promptModules);
 		});
 
 	return std::move(moduleGraphicsWidget);

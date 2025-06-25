@@ -44,6 +44,7 @@ private:
 	WtNode* connectionOutNode;
 
 	std::shared_ptr<dyno::Module> mOutModule;
+	std::map<dyno::ObjectId, std::shared_ptr<dyno::Module>> allModuleMap;
 
 	PipelineType pipelineType = PipelineType::Animation;
 

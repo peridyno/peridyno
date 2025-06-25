@@ -215,8 +215,16 @@ void WPromptNode::setPromptNode(std::map<std::string, connectionData> promptNode
 		{
 			auto item = new NodeItem();
 			auto data = promptNode.second;
-			item->name = promptNode.first;
-			item->type = data.inportNode->getNodeType();
+			if (data.exportModule == nullptr)
+			{
+				item->name = promptNode.first;
+				item->type = data.inportNode->getNodeType();
+			}
+			else if (data.exportNode == nullptr)
+			{
+				item->name = promptNode.first;
+				item->type = "Module";
+			}
 			mNodeList.push_back(item);
 		}
 	}
@@ -282,8 +290,8 @@ Wt::cpp17::any WPromptNode::headerData(int section, Wt::Orientation orientation,
 			return std::string("Type");
 		case 1:
 			return std::string("Name");
-		//case 2:
-		//	return std::string("Port");
+			//case 2:
+			//	return std::string("Port");
 		default:
 			return Wt::cpp17::any();
 		}
