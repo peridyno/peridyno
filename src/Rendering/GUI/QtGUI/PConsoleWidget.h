@@ -40,7 +40,6 @@ namespace dyno
 
 	private:
 		QFileSystemModel* model;
-		QFileSystemModel* listModel;
 		QTreeView* treeView;
 		QListView* listView;
 	};

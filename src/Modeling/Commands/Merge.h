@@ -18,11 +18,8 @@
 #include "Node/ParametricModel.h"
 #include "Topology/TriangleSet.h"
 
-
 namespace dyno
 {
-
-
 	template<typename TDataType>
 	class Merge : public Node
 	{
@@ -33,19 +30,8 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 
 		Merge();
+
 		inline std::string caption() override { return "Merge Multi TriangleSet"; }
-
-	public:
-
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
-
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet01, "");
-
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet02, "");
-
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet03, "");
-
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet04, "");
 
 		DECLARE_ENUM(UpdateMode,
 			Reset = 0,
@@ -53,17 +39,19 @@ namespace dyno
 
 		DEF_ENUM(UpdateMode, UpdateMode, UpdateMode::Reset, "");
 
+	public:
+		DEF_INSTANCES_IN(TriangleSet<TDataType>, TriangleSet, "");
 
-		void preUpdateStates()override;
-
-		void MergeGPU();
+		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
 	protected:
 		void resetStates() override;
 
+		void preUpdateStates()override;
+
+	private:
+		void MergeGPU();
 	};
-
-
 
 	IMPLEMENT_TCLASS(Merge, TDataType);
 }

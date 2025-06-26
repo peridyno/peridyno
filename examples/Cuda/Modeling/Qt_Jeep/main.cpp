@@ -107,16 +107,16 @@ std::shared_ptr<SceneGraph> creatScene()
 	auto mergeWheel = scn->addNode(std::make_shared<Merge<DataType3f>>());
 	mergeWheel->varUpdateMode()->setCurrentKey(1);
 
-	wheelSet[0]->outTriangleSet()->connect(mergeWheel->inTriangleSet01());
-	wheelSet[1]->outTriangleSet()->connect(mergeWheel->inTriangleSet02());
-	wheelSet[2]->outTriangleSet()->connect(mergeWheel->inTriangleSet03());
-	wheelSet[3]->outTriangleSet()->connect(mergeWheel->inTriangleSet04());
+	wheelSet[0]->outTriangleSet()->connect(mergeWheel->inTriangleSets());
+	wheelSet[1]->outTriangleSet()->connect(mergeWheel->inTriangleSets());
+	wheelSet[2]->outTriangleSet()->connect(mergeWheel->inTriangleSets());
+	wheelSet[3]->outTriangleSet()->connect(mergeWheel->inTriangleSets());
 
 	//MergeRoad
 	auto mergeRoad = scn->addNode(std::make_shared<Merge<DataType3f>>());
 	mergeRoad->varUpdateMode()->setCurrentKey(1);
-	mergeWheel->stateTriangleSet()->promoteOuput()->connect(mergeRoad->inTriangleSet01());
-	ObjRoad->outTriangleSet()->connect(mergeRoad->inTriangleSet03());
+	mergeWheel->stateTriangleSet()->promoteOuput()->connect(mergeRoad->inTriangleSets());
+	ObjRoad->outTriangleSet()->connect(mergeRoad->inTriangleSets());
 
 	//Obj boundary
 	auto ObjBoundary = scn->addNode(std::make_shared<ObjLoader<DataType3f>>());
@@ -126,9 +126,9 @@ std::shared_ptr<SceneGraph> creatScene()
 	auto glBoundary = ObjBoundary->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
 	glBoundary->setColor(color);
 
-	ObjBoundary->outTriangleSet()->connect(mergeRoad->inTriangleSet02());
+	ObjBoundary->outTriangleSet()->connect(mergeRoad->inTriangleSets());
 	ObjBoundary->graphicsPipeline()->disable();
-	ObjJeep->outTriangleSet()->connect(mergeRoad->inTriangleSet04());
+	ObjJeep->outTriangleSet()->connect(mergeRoad->inTriangleSets());
 
 	//SetVisible
 	mergeRoad->graphicsPipeline()->disable();

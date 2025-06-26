@@ -36,8 +36,8 @@ int main()
 
 	//创建Merge模型
 	auto MergeModel = scn->addNode(std::make_shared<Merge<DataType3f>>());
-	Cube->stateTriangleSet()->promoteOuput()->connect(MergeModel->inTriangleSet01());
-	Turn->stateTriangleSet()->promoteOuput()->connect(MergeModel->inTriangleSet02());
+	Cube->stateTriangleSet()->promoteOuput()->connect(MergeModel->inTriangleSets());
+	Turn->stateTriangleSet()->promoteOuput()->connect(MergeModel->inTriangleSets());
 
 
 	//创建Copy模型
