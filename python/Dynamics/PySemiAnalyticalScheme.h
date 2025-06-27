@@ -8,17 +8,17 @@
 //	std::string pyclass_name = std::string("SemiAnalyticalSFINode") + typestr;
 //	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 //		.def(py::init<>())
-//		.def("import_particle_systems", &Class::importParticleSystems, py::return_value_policy::reference)
-//		.def("in_triangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
-//		.def("get_particle_systems", &Class::getParticleSystems)
-//		.def("add_particle_system", &Class::addParticleSystem)
-//		.def("remove_particle_system", &Class::removeParticleSystem)
-//		.def("var_fast", &Class::varFast, py::return_value_policy::reference)
-//		.def("var_sync_boundary", &Class::varSyncBoundary, py::return_value_policy::reference)
-//		.def("state_position", &Class::statePosition, py::return_value_policy::reference)
-//		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference)
+//		.def("importParticleSystems", &Class::importParticleSystems, py::return_value_policy::reference)
+//		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
+//		.def("getParticleSystems", &Class::getParticleSystems)
+//		.def("addParticleSystem", &Class::addParticleSystem)
+//		.def("removeParticleSystem", &Class::removeParticleSystem)
+//		.def("varFast", &Class::varFast, py::return_value_policy::reference)
+//		.def("varSyncBoundary", &Class::varSyncBoundary, py::return_value_policy::reference)
+//		.def("statePosition", &Class::statePosition, py::return_value_policy::reference)
+//		.def("stateVelocity", &Class::stateVelocity, py::return_value_policy::reference)
 //		.def("state_force_density". & Class::stateForceDensity, py::return_value_policy::reference)
-//		.def("state_attribute", &Class::stateAttribute, py::return_value_policy::reference);
+//		.def("stateAttribute", &Class::stateAttribute, py::return_value_policy::reference);
 //}
 
 #include "SemiAnalyticalScheme/ComputeParticleAnisotropy.h"
@@ -30,10 +30,10 @@ void declare_compute_particle_anisotropy(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("compute", &Class::compute)
-		.def("var_smoothing_length", &Class::varSmoothingLength, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_neighbor_ids", &Class::inNeighborIds, py::return_value_policy::reference)
-		.def("out_transform", &Class::outTransform, py::return_value_policy::reference);
+		.def("varSmoothingLength", &Class::varSmoothingLength, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inNeighborIds", &Class::inNeighborIds, py::return_value_policy::reference)
+		.def("outTransform", &Class::outTransform, py::return_value_policy::reference);
 }
 
 #include "SemiAnalyticalScheme/ParticleRelaxtionOnMesh.h"
@@ -44,14 +44,14 @@ void declare_particle_relaxtion_on_mesh(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ParticleRelaxtionOnMesh") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_iteration_number", &Class::varIterationNumber, py::return_value_policy::reference)
-		.def("var_normal_force_strength", &Class::varNormalForceStrength, py::return_value_policy::reference)
-		.def("var_mesh_collision_thickness", &Class::varMeshCollisionThickness, py::return_value_policy::reference)
-		.def("var_point_neighbor_length", &Class::varPointNeighborLength, py::return_value_policy::reference)
-		.def("var_mesh_neighbor_length", &Class::varMeshNeighborLength, py::return_value_policy::reference)
-		.def("var_viscosity_strength", &Class::varViscosityStrength, py::return_value_policy::reference)
-		.def("state_delta", &Class::stateDelta, py::return_value_policy::reference)
-		.def("var_density_iteration", &Class::varDensityIteration, py::return_value_policy::reference);
+		.def("varIterationNumber", &Class::varIterationNumber, py::return_value_policy::reference)
+		.def("varNormalForceStrength", &Class::varNormalForceStrength, py::return_value_policy::reference)
+		.def("varMeshCollisionThickness", &Class::varMeshCollisionThickness, py::return_value_policy::reference)
+		.def("varPointNeighborLength", &Class::varPointNeighborLength, py::return_value_policy::reference)
+		.def("varMeshNeighborLength", &Class::varMeshNeighborLength, py::return_value_policy::reference)
+		.def("varViscosityStrength", &Class::varViscosityStrength, py::return_value_policy::reference)
+		.def("stateDelta", &Class::stateDelta, py::return_value_policy::reference)
+		.def("varDensityIteration", &Class::varDensityIteration, py::return_value_policy::reference);
 }
 
 #include "SemiAnalyticalScheme/SemiAnalyticalIncompressibilityModule.h"
@@ -63,8 +63,8 @@ void declare_semi_analytical_incompressibility_module(py::module& m, std::string
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("constrain", &Class::constrain)
-		.def("get_position", &Class::getPosition)
-		.def("in_neighbor_particle_ids", &Class::inNeighborParticleIds, py::return_value_policy::reference)
+		.def("getPosition", &Class::getPosition)
+		.def("inNeighborParticleIds", &Class::inNeighborParticleIds, py::return_value_policy::reference)
 		.def("in_neighbor_triang_ids", &Class::inNeighborTriangleIds, py::return_value_policy::reference)
 		.def_readwrite("m_smoothing_length", &Class::m_smoothing_length)
 		.def_readwrite("m_sampling_distance", &Class::m_sampling_distance)
@@ -87,10 +87,10 @@ void declare_semi_analytical_incompressible_fluid_model(py::module& m, std::stri
 	std::string pyclass_name = std::string("SemiAnalyticalIncompressibleFluidModel") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("update_impl", &Class::updateImpl)
-		.def("set_smoothing_length", &Class::setSmoothingLength)
-		.def("set_rest_density", &Class::setRestDensity)
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("updateImpl", &Class::updateImpl)
+		.def("setSmoothingLength", &Class::setSmoothingLength)
+		.def("setRestDensity", &Class::setRestDensity)
 		.def_readwrite("m_smoothing_length", &Class::m_smoothing_length)
 		.def_readwrite("max_vel", &Class::max_vel)
 		.def_readwrite("var_smoothing_length", &Class::var_smoothing_length)
@@ -118,19 +118,19 @@ void declare_semi_analytical_particle_shifting(py::module& m, std::string typest
 	std::string pyclass_name = std::string("SemiAnalyticalParticleShifting") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_interation_number", &Class::varInterationNumber, py::return_value_policy::reference)
-		.def("var_inertia", &Class::varInertia, py::return_value_policy::reference)
-		.def("var_bulk", &Class::varBulk, py::return_value_policy::reference)
-		.def("var_surface_tension", &Class::varSurfaceTension, py::return_value_policy::reference)
-		.def("var_adhesion_intensity", &Class::varAdhesionIntensity, py::return_value_policy::reference)
-		.def("var_rest_density", &Class::varRestDensity, py::return_value_policy::reference)
+		.def("varInterationNumber", &Class::varInterationNumber, py::return_value_policy::reference)
+		.def("varInertia", &Class::varInertia, py::return_value_policy::reference)
+		.def("varBulk", &Class::varBulk, py::return_value_policy::reference)
+		.def("varSurfaceTension", &Class::varSurfaceTension, py::return_value_policy::reference)
+		.def("varAdhesionIntensity", &Class::varAdhesionIntensity, py::return_value_policy::reference)
+		.def("varRestDensity", &Class::varRestDensity, py::return_value_policy::reference)
 
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_neighbor_ids", &Class::inNeighborIds, py::return_value_policy::reference)
-		.def("in_neighbor_tri_ids", &Class::inNeighborTriIds, py::return_value_policy::reference)
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference);
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inNeighborIds", &Class::inNeighborIds, py::return_value_policy::reference)
+		.def("inNeighborTriIds", &Class::inNeighborTriIds, py::return_value_policy::reference)
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference);
 }
 
 #include "SemiAnalyticalScheme/SemiAnalyticalPBD.h"
@@ -142,14 +142,15 @@ void declare_semi_analytical_pbd(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("constrain", &Class::constrain)
-		.def("var_interation_number", &Class::varInterationNumber, py::return_value_policy::reference)
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_smoothing_length", &Class::inSmoothingLength, py::return_value_policy::reference)
-		.def("in_sampling_distance", &Class::inSamplingDistance, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("in_neighbor_particle_ids", &Class::inNeighborParticleIds, py::return_value_policy::reference)
+
+		.def("varInterationNumber", &Class::varInterationNumber, py::return_value_policy::reference)
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inSmoothingLength", &Class::inSmoothingLength, py::return_value_policy::reference)
+		.def("inSamplingDistance", &Class::inSamplingDistance, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("inNeighborParticleIds", &Class::inNeighborParticleIds, py::return_value_policy::reference)
 		.def("in_neighbor_triang_ids", &Class::inNeighborTriangleIds, py::return_value_policy::reference);
 }
 
@@ -161,11 +162,11 @@ void declare_semi_analytical_position_based_fluid_model(py::module& m, std::stri
 	std::string pyclass_name = std::string("SemiAnalyticalPositionBasedFluidModel") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_smoothing_length", &Class::varSmoothingLength, py::return_value_policy::reference)
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference);
+		.def("varSmoothingLength", &Class::varSmoothingLength, py::return_value_policy::reference)
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference);
 }
 
 #include "SemiAnalyticalScheme/SemiAnalyticalSFINode.h"
@@ -176,9 +177,9 @@ void declare_semi_analytical_sfi_node(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("SemiAnalyticalSFINode") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("var_fast", &Class::varFast, py::return_value_policy::reference)
-		.def("var_sync_boundary", &Class::varSyncBoundary, py::return_value_policy::reference);
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("varFast", &Class::varFast, py::return_value_policy::reference)
+		.def("varSyncBoundary", &Class::varSyncBoundary, py::return_value_policy::reference);
 }
 
 #include "SemiAnalyticalScheme/SemiAnalyticalSummationDensity.h"
@@ -194,12 +195,13 @@ void declare_semi_analytical_summation_density(py::module& m, std::string typest
 		.def(py::init<>())
 		.def("compute", py::overload_cast<void>(&Class::compute))
 		.def("compute", py::overload_cast<dyno::Array<Real, DeviceType::GPU>&, dyno::Array<Coord, DeviceType::GPU>&, dyno::Array<dyno::TopologyModule::Triangle, DeviceType::GPU>&, dyno::Array<Coord, DeviceType::GPU>&, dyno::ArrayList<int, DeviceType::GPU>&, dyno::ArrayList<int, DeviceType::GPU>&, Real, Real, Real>(&Class::compute))
-		.def("var_rest_density", &Class::varRestDensity, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_neighbor_ids", &Class::inNeighborIds, py::return_value_policy::reference)
-		.def("in_neighbor_tri_ids", &Class::inNeighborTriIds, py::return_value_policy::reference)
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("out_density", &Class::outDensity, py::return_value_policy::reference);
+
+		.def("varRestDensity", &Class::varRestDensity, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inNeighborIds", &Class::inNeighborIds, py::return_value_policy::reference)
+		.def("inNeighborTriIds", &Class::inNeighborTriIds, py::return_value_policy::reference)
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("outDensity", &Class::outDensity, py::return_value_policy::reference);
 }
 
 #include "SemiAnalyticalScheme/SemiAnalyticalSurfaceTensionModel.h"
@@ -210,16 +212,19 @@ void declare_semi_analytical_surface_tension_model(py::module& m, std::string ty
 	std::string pyclass_name = std::string("SemiAnalyticalSurfaceTensionModel") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_smoothing_length", &Class::varSmoothingLength, py::return_value_policy::reference)
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_force_density", &Class::inForceDensity, py::return_value_policy::reference)
-		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference)
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("var_surface_tension", &Class::varSurfaceTension, py::return_value_policy::reference)
-		.def("var_adhesion_intensity", &Class::varAdhesionIntensity, py::return_value_policy::reference)
-		.def("var_rest_density", &Class::varRestDensity, py::return_value_policy::reference);
+		.def("varSmoothingLength", &Class::varSmoothingLength, py::return_value_policy::reference)
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inForceDensity", &Class::inForceDensity, py::return_value_policy::reference)
+
+		.def("inAttribute", &Class::inAttribute, py::return_value_policy::reference)
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
+
+		.def("varSurfaceTension", &Class::varSurfaceTension, py::return_value_policy::reference)
+		.def("varAdhesionIntensity", &Class::varAdhesionIntensity, py::return_value_policy::reference)
+		.def("varRestDensity", &Class::varRestDensity, py::return_value_policy::reference);
 }
 
 #include "SemiAnalyticalScheme/TriangularMeshBoundary.h"
@@ -230,16 +235,19 @@ void declare_triangular_mesh_boundary(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TriangularMeshBoundary") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_thickness", &Class::varThickness, py::return_value_policy::reference)
-		.def("var_tangential_friction", &Class::varTangentialFriction, py::return_value_policy::reference)
-		.def("var_normal_friction", &Class::varNormalFriction, py::return_value_policy::reference)
+		.def("varThickness", &Class::varThickness, py::return_value_policy::reference)
+		.def("varTangentialFriction", &Class::varTangentialFriction, py::return_value_policy::reference)
+		.def("varNormalFriction", &Class::varNormalFriction, py::return_value_policy::reference)
+
 		.def("get_particle_system", &Class::getParticleSystems)
-		.def("add_particle_system", &Class::addParticleSystem)
-		.def("remove_particle_system", &Class::removeParticleSystem)
-		.def("import_particle_systems", &Class::importParticleSystems, py::return_value_policy::reference)
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("state_position", &Class::statePosition, py::return_value_policy::reference)
-		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference);
+		.def("addParticleSystem", &Class::addParticleSystem)
+		.def("removeParticleSystem", &Class::removeParticleSystem)
+		.def("importParticleSystems", &Class::importParticleSystems, py::return_value_policy::reference)
+
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
+
+		.def("statePosition", &Class::statePosition, py::return_value_policy::reference)
+		.def("stateVelocity", &Class::stateVelocity, py::return_value_policy::reference);
 }
 
 #include "SemiAnalyticalScheme/TriangularMeshConstraint.h"
@@ -250,14 +258,15 @@ void declare_triangular_mesh_constraint(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TriangularMeshConstraint") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_thickness", &Class::varThickness, py::return_value_policy::reference)
-		.def("var_tangential_friction", &Class::varTangentialFriction, py::return_value_policy::reference)
-		.def("var_normal_friction", &Class::varNormalFriction, py::return_value_policy::reference)
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("in_triangle_neighbor_ids", &Class::inTriangleNeighborIds, py::return_value_policy::reference);
+		.def("varThickness", &Class::varThickness, py::return_value_policy::reference)
+		.def("varTangentialFriction", &Class::varTangentialFriction, py::return_value_policy::reference)
+		.def("varNormalFriction", &Class::varNormalFriction, py::return_value_policy::reference)
+
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("inTriangleNeighborIds", &Class::inTriangleNeighborIds, py::return_value_policy::reference);
 }
 
 void pybind_semi_analytical_scheme(py::module& m);

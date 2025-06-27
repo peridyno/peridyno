@@ -24,13 +24,13 @@ void declare_particle_emitter(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ParticleEmitter") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("size_of_particles", &Class::sizeOfParticles)
-		.def("get_positions", &Class::getPositions)
-		.def("get_velocities", &Class::getVelocities)
-		.def("get_node_type", &Class::getNodeType)
-		.def("var_velocity_magnitude", &Class::varVelocityMagnitude, py::return_value_policy::reference)
-		.def("var_sampling_distance", &Class::varSamplingDistance, py::return_value_policy::reference)
-		.def("var_spacing", &Class::varSpacing, py::return_value_policy::reference);
+		.def("sizeOfParticles", &Class::sizeOfParticles)
+		.def("getPositions", &Class::getPositions)
+		.def("getVelocities", &Class::getVelocities)
+		.def("getNodeType", &Class::getNodeType)
+		.def("varVelocityMagnitude", &Class::varVelocityMagnitude, py::return_value_policy::reference)
+		.def("varSamplingDistance", &Class::varSamplingDistance, py::return_value_policy::reference)
+		.def("varSpacing", &Class::varSpacing, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/Emitters/CircularEmitter.h"
@@ -41,8 +41,8 @@ void declare_circular_emitter(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("CircularEmitter") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_radius", &Class::varRadius, py::return_value_policy::reference)
-		.def("state_outline", &Class::stateOutline, py::return_value_policy::reference);
+		.def("varRadius", &Class::varRadius, py::return_value_policy::reference)
+		.def("stateOutline", &Class::stateOutline, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/Emitters/PoissonEmitter.h"
@@ -53,11 +53,11 @@ void declare_poisson_emitter(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("PoissonEmitter") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>PE(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	PE.def(py::init<>())
-		.def("var_width", &Class::varWidth, py::return_value_policy::reference)
-		.def("var_height", &Class::varHeight, py::return_value_policy::reference)
-		.def("var_delay_start", &Class::varDelayStart, py::return_value_policy::reference)
-		.def("state_outline", &Class::stateOutline, py::return_value_policy::reference)
-		.def("var_emitter_shape", &Class::varEmitterShape, py::return_value_policy::reference);
+		.def("varWidth", &Class::varWidth, py::return_value_policy::reference)
+		.def("varHeight", &Class::varHeight, py::return_value_policy::reference)
+		.def("varDelayStart", &Class::varDelayStart, py::return_value_policy::reference)
+		.def("stateOutline", &Class::stateOutline, py::return_value_policy::reference)
+		.def("varEmitterShape", &Class::varEmitterShape, py::return_value_policy::reference);
 
 	py::enum_<typename Class::EmitterShape>(PE, "EmitterShape")
 		.value("Square", Class::EmitterShape::Square)
@@ -73,9 +73,9 @@ void declare_square_emitter(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("SquareEmitter") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_width", &Class::varWidth, py::return_value_policy::reference)
-		.def("var_height", &Class::varHeight, py::return_value_policy::reference)
-		.def("state_outline", &Class::stateOutline, py::return_value_policy::reference);
+		.def("varWidth", &Class::varWidth, py::return_value_policy::reference)
+		.def("varHeight", &Class::varHeight, py::return_value_policy::reference)
+		.def("stateOutline", &Class::stateOutline, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/Module/ApproximateImplicitViscosity.h"
@@ -87,16 +87,16 @@ void declare_approximate_implicit_viscosity(py::module& m, std::string typestr) 
 	py::class_<Class, Parent, std::shared_ptr<Class>>AIV(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	AIV.def(py::init<>())
 		.def("constrain", &Class::constrain)
-		.def("set_cross", &Class::SetCross)
-		.def("var_viscosity", &Class::varViscosity, py::return_value_policy::reference)
-		.def("in_neighbor_ids", &Class::inNeighborIds, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference)
-		.def("var_lower_bound_viscosity", &Class::varLowerBoundViscosity, py::return_value_policy::reference)
-		.def("var_cross_k", &Class::varCrossK, py::return_value_policy::reference)
-		.def("var_cross_N", &Class::varCrossN, py::return_value_policy::reference)
-		.def("var_fluid_type", &Class::varFluidType, py::return_value_policy::reference);
+		.def("SetCross", &Class::SetCross)
+		.def("varViscosity", &Class::varViscosity, py::return_value_policy::reference)
+		.def("inNeighborIds", &Class::inNeighborIds, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inAttribute", &Class::inAttribute, py::return_value_policy::reference)
+		.def("varLowerBoundViscosity", &Class::varLowerBoundViscosity, py::return_value_policy::reference)
+		.def("varCrossK", &Class::varCrossK, py::return_value_policy::reference)
+		.def("varCrossN", &Class::varCrossN, py::return_value_policy::reference)
+		.def("varFluidType", &Class::varFluidType, py::return_value_policy::reference);
 
 	py::enum_<typename Class::FluidType>(AIV, "FluidType")
 		.value("NewtonianFluid", Class::FluidType::NewtonianFluid)
@@ -118,11 +118,11 @@ void declare_boundary_constraint(py::module& m, std::string typestr) {
 		.def("constrain", py::overload_cast<dyno::Array<Coord, DeviceType::GPU>&, dyno::Array<Coord, DeviceType::GPU>&, Real>(&Class::constrain))
 		//.def("constrain", py::overload_cast<dyno::Array<Coord, DeviceType::GPU>&, dyno::Array<Coord, DeviceType::GPU>&, dyno::DistanceField3D<TDataType>&, Real>(&Class::constrain))
 		.def("load", &Class::load)
-		.def("set_cube", &Class::setCube)
-		.def("set_sphere", &Class::setSphere)
-		.def("set_cylinder", &Class::setCylinder)
-		.def("var_tangential_friction", &Class::varTangentialFriction, py::return_value_policy::reference)
-		.def("var_normal_friction", &Class::varNormalFriction, py::return_value_policy::reference);
+		.def("setCube", &Class::setCube)
+		.def("setSphere", &Class::setSphere)
+		.def("setCylinder", &Class::setCylinder)
+		.def("varTangentialFriction", &Class::varTangentialFriction, py::return_value_policy::reference)
+		.def("varNormalFriction", &Class::varNormalFriction, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/Module/ParticleApproximation.h"
@@ -134,9 +134,9 @@ void declare_particle_approximation(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>PA(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	PA.def(py::init<>())
 		.def("compute", &Class::compute)
-		.def("in_smoothing_length", &Class::inSmoothingLength, py::return_value_policy::reference)
-		.def("in_sampling_distance", &Class::inSamplingDistance, py::return_value_policy::reference)
-		.def("var_kernel_type", &Class::varKernelType, py::return_value_policy::reference);
+		.def("inSmoothingLength", &Class::inSmoothingLength, py::return_value_policy::reference)
+		.def("inSamplingDistance", &Class::inSamplingDistance, py::return_value_policy::reference)
+		.def("varKernelType", &Class::varKernelType, py::return_value_policy::reference);
 
 	py::enum_<typename Class::EKernelType>(PA, "EKernelType")
 		.value("KT_Smooth", Class::EKernelType::KT_Smooth)
@@ -152,21 +152,21 @@ void declare_divergence_free_sph_solver(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("DivergenceFreeSphSolver") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_neighbor_ids", &Class::inNeighborIds, py::return_value_policy::reference)
-		.def("out_density", &Class::outDensity, py::return_value_policy::reference)
-		.def("var_divergence_solver_disabled", &Class::varDivergenceSolverDisabled, py::return_value_policy::reference)
-		.def("var_density_solver_disabled", &Class::varDensitySolverDisabled, py::return_value_policy::reference)
-		.def("var_rest_density", &Class::varRestDensity, py::return_value_policy::reference)
-		.def("var_divergence_error_threshold", &Class::varDivergenceErrorThreshold, py::return_value_policy::reference)
-		.def("var_density_error_threshold", &Class::varDensityErrorThreshold, py::return_value_policy::reference)
-		.def("var_max_iteration_number", &Class::varMaxIterationNumber, py::return_value_policy::reference)
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inNeighborIds", &Class::inNeighborIds, py::return_value_policy::reference)
+		.def("outDensity", &Class::outDensity, py::return_value_policy::reference)
+		.def("varDivergenceSolverDisabled", &Class::varDivergenceSolverDisabled, py::return_value_policy::reference)
+		.def("varDensitySolverDisabled", &Class::varDensitySolverDisabled, py::return_value_policy::reference)
+		.def("varRestDensity", &Class::varRestDensity, py::return_value_policy::reference)
+		.def("varDivergenceErrorThreshold", &Class::varDivergenceErrorThreshold, py::return_value_policy::reference)
+		.def("varDensityErrorThreshold", &Class::varDensityErrorThreshold, py::return_value_policy::reference)
+		.def("varMaxIterationNumber", &Class::varMaxIterationNumber, py::return_value_policy::reference)
 		.def("compute", &Class::compute)
-		.def("compute_alpha", &Class::computeAlpha)
-		.def("take_one_density_iteration", &Class::takeOneDensityIteration)
-		.def("take_one_divergen_iteration", &Class::takeOneDivergenIteration);
+		.def("computeAlpha", &Class::computeAlpha)
+		.def("takeOneDensityIteration", &Class::takeOneDensityIteration)
+		.def("takeOneDivergenIteration", &Class::takeOneDivergenIteration);
 }
 
 #include "ParticleSystem/Module/ImplicitISPH.h"
@@ -177,18 +177,18 @@ void declare_implicit_ISPH(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ImplicitISPH") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_neighbor_ids", &Class::inNeighborIds, py::return_value_policy::reference)
-		.def("out_density", &Class::outDensity, py::return_value_policy::reference)
-		.def("var_iteration_number", &Class::varIterationNumber, py::return_value_policy::reference)
-		.def("var_rest_density", &Class::varRestDensity, py::return_value_policy::reference)
-		.def("var_kappa", &Class::varKappa, py::return_value_policy::reference)
-		.def("var_relaxed_omega", &Class::varRelaxedOmega, py::return_value_policy::reference)
-		.def("take_one_iteration", &Class::takeOneIteration)
-		.def("pre_iteration_compute", &Class::PreIterationCompute)
-		.def("update_velocity", &Class::updateVelocity);
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inNeighborIds", &Class::inNeighborIds, py::return_value_policy::reference)
+		.def("outDensity", &Class::outDensity, py::return_value_policy::reference)
+		.def("varIterationNumber", &Class::varIterationNumber, py::return_value_policy::reference)
+		.def("varRestDensity", &Class::varRestDensity, py::return_value_policy::reference)
+		.def("varKappa", &Class::varKappa, py::return_value_policy::reference)
+		.def("varRelaxedOmega", &Class::varRelaxedOmega, py::return_value_policy::reference)
+		.def("takeOneIteration", &Class::takeOneIteration)
+		.def("PreIterationCompute", &Class::PreIterationCompute)
+		.def("updateVelocity", &Class::updateVelocity);
 }
 
 #include "ParticleSystem/Module/ImplicitViscosity.h"
@@ -199,12 +199,12 @@ void declare_implicit_viscosity(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ImplicitViscosity") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_viscosity", &Class::varViscosity, py::return_value_policy::reference)
-		.def("var_interation_number", &Class::varInterationNumber, py::return_value_policy::reference)
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_neighbor_ids", &Class::inNeighborIds, py::return_value_policy::reference)
+		.def("varViscosity", &Class::varViscosity, py::return_value_policy::reference)
+		.def("varInterationNumber", &Class::varInterationNumber, py::return_value_policy::reference)
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inNeighborIds", &Class::inNeighborIds, py::return_value_policy::reference)
 		.def("compute", &Class::compute);
 }
 
@@ -216,17 +216,17 @@ void declare_iterative_densitySolver(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("IterativeDensitySolver") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference)
-		.def("in_neighbor_ids", &Class::inNeighborIds, py::return_value_policy::reference)
-		.def("out_density", &Class::outDensity, py::return_value_policy::reference)
-		.def("var_iteration_number", &Class::varIterationNumber, py::return_value_policy::reference)
-		.def("var_rest_density", &Class::varRestDensity, py::return_value_policy::reference)
-		.def("var_kappa", &Class::varKappa, py::return_value_policy::reference)
-		.def("take_one_iteration", &Class::takeOneIteration)
-		.def("update_velocity", &Class::updateVelocity);
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inAttribute", &Class::inAttribute, py::return_value_policy::reference)
+		.def("inNeighborIds", &Class::inNeighborIds, py::return_value_policy::reference)
+		.def("outDensity", &Class::outDensity, py::return_value_policy::reference)
+		.def("varIterationNumber", &Class::varIterationNumber, py::return_value_policy::reference)
+		.def("varRestDensity", &Class::varRestDensity, py::return_value_policy::reference)
+		.def("varKappa", &Class::varKappa, py::return_value_policy::reference)
+		.def("takeOneIteration", &Class::takeOneIteration)
+		.def("updateVelocity", &Class::updateVelocity);
 }
 
 #include "ParticleSystem/Module/LinearDamping.h"
@@ -237,8 +237,8 @@ void declare_linear_damping(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("LinearDamping") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_damping_coefficient", &Class::varDampingCoefficient, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference);
+		.def("varDampingCoefficient", &Class::varDampingCoefficient, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/Module/NormalForce.h"
@@ -249,15 +249,15 @@ void declare_normal_force(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("NormalForce") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("out_normal_force", &Class::outNormalForce, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_particle_normal", &Class::inParticleNormal, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("var_strength", &Class::varStrength, py::return_value_policy::reference)
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_triangle_neighbor_ids", &Class::inTriangleNeighborIds, py::return_value_policy::reference)
-		.def("in_particle_mesh_ID", &Class::inParticleMeshID, py::return_value_policy::reference)
+		.def("outNormalForce", &Class::outNormalForce, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inParticleNormal", &Class::inParticleNormal, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("varStrength", &Class::varStrength, py::return_value_policy::reference)
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inTriangleNeighborIds", &Class::inTriangleNeighborIds, py::return_value_policy::reference)
+		.def("inParticleMeshID", &Class::inParticleMeshID, py::return_value_policy::reference)
 		.def("constrain", &Class::constrain);
 }
 
@@ -269,10 +269,10 @@ void declare_particle_integrator(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ParticleIntegrator") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference);
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inAttribute", &Class::inAttribute, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/Module/PositionBasedFluidModel.h"
@@ -283,12 +283,12 @@ void declare_position_based_fluid_model(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("PositionBasedFluidModel") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_sampling_distance", &Class::inSamplingDistance, py::return_value_policy::reference)
-		.def("in_smoothing_length", &Class::inSmoothingLength, py::return_value_policy::reference)
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference);
+		.def("inSamplingDistance", &Class::inSamplingDistance, py::return_value_policy::reference)
+		.def("inSmoothingLength", &Class::inSmoothingLength, py::return_value_policy::reference)
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inAttribute", &Class::inAttribute, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/Module/ProjectionBasedFluidModel.h"
@@ -299,43 +299,67 @@ void declare_projection_based_fluid_model(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ProjectionBasedFluidModel") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_sampling_distance", &Class::inSamplingDistance, py::return_value_policy::reference)
-		.def("in_smoothing_length", &Class::inSmoothingLength, py::return_value_policy::reference)
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference)
-		.def("in_normal", &Class::inNormal, py::return_value_policy::reference);
+		.def("inSamplingDistance", &Class::inSamplingDistance, py::return_value_policy::reference)
+		.def("inSmoothingLength", &Class::inSmoothingLength, py::return_value_policy::reference)
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inAttribute", &Class::inAttribute, py::return_value_policy::reference)
+		.def("inNormal", &Class::inNormal, py::return_value_policy::reference);
+}
+
+#include "ParticleSystem/Module/SemiImplicitDensitySolver.h"
+template <typename TDataType>
+void declare_SemiImplicitDensitySolver(py::module& m, std::string typestr) {
+	using Class = dyno::SemiImplicitDensitySolver<TDataType>;
+	using Parent = dyno::ParticleApproximation<TDataType>;
+	std::string pyclass_name = std::string("SemiImplicitDensitySolver") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inAttribute", &Class::inAttribute, py::return_value_policy::reference)
+		.def("inNeighborIds", &Class::inNeighborIds, py::return_value_policy::reference)
+		.def("outDensity", &Class::outDensity, py::return_value_policy::reference)
+		.def("varIterationNumber", &Class::varIterationNumber, py::return_value_policy::reference)
+		.def("varRestDensity", &Class::varRestDensity, py::return_value_policy::reference)
+		.def("varKappa", &Class::varKappa, py::return_value_policy::reference)
+		.def("updatePosition", &Class::updatePosition)
+		.def("updateVelocity", &Class::updateVelocity);
 }
 
 #include "ParticleSystem/Module/SimpleVelocityConstraint.h"
 template <typename TDataType>
-void declare_simple_velocity_constraint(py::module& m, std::string typestr) {
+void declare_SimpleVelocityConstraint(py::module& m, std::string typestr) {
 	using Class = dyno::SimpleVelocityConstraint<TDataType>;
 	using Parent = dyno::ConstraintModule;
+	typedef typename TDataType::Real Real;
+	typedef typename TDataType::Coord Coord;
+	typedef typename TDataType::Matrix Matrix;
 	std::string pyclass_name = std::string("SimpleVelocityConstraint") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("constrain", &Class::constrain)
 		.def("initialize", &Class::initialize)
-		.def("resize_vector", &Class::resizeVector)
-		.def("initial_attributes", &Class::initialAttributes)
-		.def("vis_value_set", py::overload_cast<void>(&Class::visValueSet))
-		.def("vis_value_set", py::overload_cast<Real>(&Class::visValueSet))
-		.def("vis_vector_set", &Class::visVectorSet)
-		.def("simple_iter_num_set", &Class::SIMPLE_IterNumSet)
-		//.def("set_cross", &Class:SetCross)
-		.def("in_neighbor_ids", &Class::inNeighborIds, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_normal", &Class::inNormal, py::return_value_policy::reference)
-		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference)
-		.def("in_smoothing_length", &Class::inSmoothingLength, py::return_value_policy::reference)
-		.def("var_rest_density", &Class::varRestDensity, py::return_value_policy::reference)
-		.def("in_sampling_distance", &Class::inSamplingDistance, py::return_value_policy::reference)
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("var_viscosity", &Class::varViscosity, py::return_value_policy::reference)
-		.def("var_simple_iteration_enable", &Class::varSimpleIterationEnable, py::return_value_policy::reference);
+		.def("resizeVector", &Class::resizeVector)
+		.def("initialAttributes", &Class::initialAttributes)
+		.def("visValueSet", py::overload_cast<void>(&Class::visValueSet))
+		.def("visValueSet", py::overload_cast<Real>(&Class::visValueSet))
+		.def("visVectorSet", &Class::visVectorSet)
+		.def("SIMPLE_IterNumSet", &Class::SIMPLE_IterNumSet)
+		.def("inNeighborIds", &Class::inNeighborIds, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inNormal", &Class::inNormal, py::return_value_policy::reference)
+		.def("inAttribute", &Class::inAttribute, py::return_value_policy::reference)
+		.def("inSmoothingLength", &Class::inSmoothingLength, py::return_value_policy::reference)
+		.def("varRestDensity", &Class::varRestDensity, py::return_value_policy::reference)
+		.def("inSamplingDistance", &Class::inSamplingDistance, py::return_value_policy::reference)
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("varViscosity", &Class::varViscosity, py::return_value_policy::reference)
+		.def("varSimpleIterationEnable", &Class::varSimpleIterationEnable, py::return_value_policy::reference);
+	//.def("SetCross", &Class:SetCross);
 }
 
 #include "ParticleSystem/Module/SummationDensity.h"
@@ -348,14 +372,16 @@ void declare_summation_density(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("SummationDensity") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
+		.def("compute", py::overload_cast<void>(&Class::compute))
 		.def("compute", py::overload_cast<dyno::Array<Real, DeviceType::GPU>&, dyno::Array<Coord, DeviceType::GPU>&, dyno::ArrayList<int, DeviceType::GPU>&, Real, Real>(&Class::compute))
 		.def("compute", py::overload_cast<dyno::Array<Real, DeviceType::GPU>&, dyno::Array<Coord, DeviceType::GPU>&, dyno::Array<Coord, DeviceType::GPU>&, dyno::ArrayList<int, DeviceType::GPU>&, Real, Real>(&Class::compute))
-		.def("var_rest_density", &Class::varRestDensity, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_other", &Class::inOther, py::return_value_policy::reference)
-		.def("in_neighbor_ids", &Class::inNeighborIds, py::return_value_policy::reference)
-		.def("out_density", &Class::outDensity, py::return_value_policy::reference)
-		.def("get_particle_mass", &Class::getParticleMass);
+
+		.def("varRestDensity", &Class::varRestDensity, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inOther", &Class::inOther, py::return_value_policy::reference)
+		.def("inNeighborIds", &Class::inNeighborIds, py::return_value_policy::reference)
+		.def("outDensity", &Class::outDensity, py::return_value_policy::reference)
+		.def("getParticleMass", &Class::getParticleMass);
 }
 
 #include "ParticleSystem/Module/SurfaceEnergyForce.h"
@@ -366,12 +392,12 @@ void declare_surface_tension(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("SurfaceTension") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_kappa", &Class::varKappa, py::return_value_policy::reference)
-		.def("var_rest_density", &Class::varRestDensity, py::return_value_policy::reference)
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_neighbor_ids", &Class::inNeighborIds, py::return_value_policy::reference)
+		.def("varKappa", &Class::varKappa, py::return_value_policy::reference)
+		.def("varRestDensity", &Class::varRestDensity, py::return_value_policy::reference)
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inNeighborIds", &Class::inNeighborIds, py::return_value_policy::reference)
 		.def("compute", &Class::compute);
 }
 
@@ -383,13 +409,16 @@ void declare_variational_approximate_projection(py::module& m, std::string types
 	std::string pyclass_name = std::string("VariationalApproximateProjection") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_rest_density", &Class::varRestDensity, py::return_value_policy::reference)
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_normal", &Class::inNormal, py::return_value_policy::reference)
-		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference)
-		.def("in_neighbor_ids", &Class::inNeighborIds, py::return_value_policy::reference);
+		.def("varRestDensity", &Class::varRestDensity, py::return_value_policy::reference)
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inNormal", &Class::inNormal, py::return_value_policy::reference)
+		.def("inAttribute", &Class::inAttribute, py::return_value_policy::reference)
+		.def("inNeighborIds", &Class::inNeighborIds, py::return_value_policy::reference)
+		.def("compute", &Class::compute)
+		.def("resizeArray", &Class::resizeArray)
+		.def("varChanged", &Class::varChanged);
 }
 
 template <typename TDataType>
@@ -399,10 +428,10 @@ void declare_particle_system(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ParticleSystem") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("get_node_type", &Class::getNodeType)
-		.def("state_position", &Class::statePosition, py::return_value_policy::reference)
-		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference)
-		.def("state_point_set", &Class::statePointSet, py::return_value_policy::reference);
+		.def("getNodeType", &Class::getNodeType)
+		.def("statePosition", &Class::statePosition, py::return_value_policy::reference)
+		.def("stateVelocity", &Class::stateVelocity, py::return_value_policy::reference)
+		.def("statePointSet", &Class::statePointSet, py::return_value_policy::reference);
 }
 
 template <typename TDataType>
@@ -413,16 +442,22 @@ void declare_particle_fluid(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		//DEF_VAR
-		.def("var_reshuffle_particles", &Class::varReshuffleParticles, py::return_value_policy::reference)
+		.def("varSamplingDistance", &Class::varSamplingDistance, py::return_value_policy::reference)
+		.def("varSmoothingLength", &Class::varSmoothingLength, py::return_value_policy::reference)
+		.def("varReshuffleParticles", &Class::varReshuffleParticles, py::return_value_policy::reference)
 		//DEF_NODE_PORTS
-		.def("import_particle_emitters", &Class::importParticleEmitters, py::return_value_policy::reference)
-		.def("get_particle_emitters", &Class::getParticleEmitters)
-		.def("add_particle_emitter", &Class::addParticleEmitter)
-		.def("remove_particle_emitter", &Class::removeParticleEmitter)
-		.def("import_initial_states", &Class::importInitialStates, py::return_value_policy::reference)
-		.def("get_initial_states", &Class::getInitialStates)
-		.def("add_initial_state", &Class::addInitialState)
-		.def("remove_initial_state", &Class::removeInitialState);
+		.def("importParticleEmitters", &Class::importParticleEmitters, py::return_value_policy::reference)
+		.def("getParticleEmitters", &Class::getParticleEmitters)
+		.def("addParticleEmitter", &Class::addParticleEmitter)
+		.def("removeParticleEmitter", &Class::removeParticleEmitter)
+
+		.def("importInitialStates", &Class::importInitialStates, py::return_value_policy::reference)
+		.def("getInitialStates", &Class::getInitialStates)
+		.def("addInitialState", &Class::addInitialState)
+		.def("removeInitialState", &Class::removeInitialState)
+
+		.def("stateSamplingDistance", &Class::stateSamplingDistance, py::return_value_policy::reference)
+		.def("stateSmoothingLength", &Class::stateSmoothingLength, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/GhostFluid.h"
@@ -433,12 +468,15 @@ void declare_ghost_fluid(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("GhostFluid") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("state_position_merged", &Class::statePositionMerged, py::return_value_policy::reference)
-		.def("state_attribute_merged", &Class::stateAttributeMerged, py::return_value_policy::reference)
-		.def("state_velocity_merged", &Class::stateVelocityMerged, py::return_value_policy::reference)
-		.def("state_normal_merged", &Class::stateNormalMerged, py::return_value_policy::reference)
-		.def("import_boundary_particles", &Class::importBoundaryParticles, py::return_value_policy::reference)
-		.def("get_boundary_particles", &Class::getBoundaryParticles);
+		.def("statePositionMerged", &Class::statePositionMerged, py::return_value_policy::reference)
+		.def("stateVelocityMerged", &Class::stateVelocityMerged, py::return_value_policy::reference)
+		.def("stateAttributeMerged", &Class::stateAttributeMerged, py::return_value_policy::reference)
+		.def("stateNormalMerged", &Class::stateNormalMerged, py::return_value_policy::reference)
+
+		.def("importBoundaryParticles", &Class::importBoundaryParticles, py::return_value_policy::reference)
+		.def("getBoundaryParticles", &Class::getBoundaryParticles)
+		.def("addBoundaryParticle", &Class::addBoundaryParticle)
+		.def("removeBoundaryParticle", &Class::removeBoundaryParticle);
 }
 
 template <typename TDataType>
@@ -448,8 +486,8 @@ void declare_ghost_particles(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("GhostParticles") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("state_normal", &Class::stateNormal, py::return_value_policy::reference)
-		.def("state_attribute", &Class::stateAttribute, py::return_value_policy::reference);
+		.def("stateNormal", &Class::stateNormal, py::return_value_policy::reference)
+		.def("stateAttribute", &Class::stateAttribute, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/MakeGhostParticles.h"
@@ -460,8 +498,8 @@ void declare_make_ghost_particles(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("MakeGhostParticles") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_points", &Class::inPoints, py::return_value_policy::reference)
-		.def("var_reverse_normal", &Class::varReverseNormal, py::return_value_policy::reference);
+		.def("inPoints", &Class::inPoints, py::return_value_policy::reference)
+		.def("varReverseNormal", &Class::varReverseNormal, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/MakeParticleSystem.h"
@@ -472,8 +510,8 @@ void declare_make_particle_system(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("MakeParticleSystem") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_initial_velocity", &Class::varInitialVelocity, py::return_value_policy::reference)
-		.def("in_points", &Class::inPoints, py::return_value_policy::reference);
+		.def("varInitialVelocity", &Class::varInitialVelocity, py::return_value_policy::reference)
+		.def("inPoints", &Class::inPoints, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/ParticleSystemHelper.h"
@@ -483,8 +521,8 @@ void declare_particle_system_helper(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ParticleSystemHelper") + typestr;
 	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("calculate_morton_code", &Class::calculateMortonCode)
-		.def("reorder_particles", &Class::reorderParticles);
+		.def("calculateMortonCode", &Class::calculateMortonCode)
+		.def("reorderParticles", &Class::reorderParticles);
 }
 
 void pybind_particle_system(py::module& m);

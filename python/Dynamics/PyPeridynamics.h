@@ -10,10 +10,10 @@ void declare_calculate_normal_sdf(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("compute", &Class::compute)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_normal_sdf", &Class::inNormalSDF, py::return_value_policy::reference)
-		.def("in_disrance_SDF", &Class::inDisranceSDF, py::return_value_policy::reference)
-		.def("in_tets", &Class::inTets, py::return_value_policy::reference);
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inNormalSDF", &Class::inNormalSDF, py::return_value_policy::reference)
+		.def("inDisranceSDF", &Class::inDisranceSDF, py::return_value_policy::reference)
+		.def("inTets", &Class::inTets, py::return_value_policy::reference);
 }
 
 #include "Peridynamics/Module/ContactRule.h"
@@ -25,18 +25,20 @@ void declare_contact_rule(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("constrain", &Class::constrain)
-		.def("init_ccd_broad_phase", &Class::initCCDBroadPhase)
-		.def("set_contact_max_ite", &Class::setContactMaxIte)
-		.def("in_triangular_mesh", &Class::inTriangularMesh, py::return_value_policy::reference)
-		.def("var_xi", &Class::varXi, py::return_value_policy::reference)
-		.def("var_s", &Class::varS, py::return_value_policy::reference)
-		.def("in_unit", &Class::inUnit, py::return_value_policy::reference)
-		.def("in_old_position", &Class::inOldPosition, py::return_value_policy::reference)
-		.def("in_new_position", &Class::inNewPosition, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("out_contact_force", &Class::outContactForce, py::return_value_policy::reference)
-		.def("out_weight", &Class::outWeight, py::return_value_policy::reference)
+		.def("initCCDBroadPhase", &Class::initCCDBroadPhase)
+		.def("setContactMaxIte", &Class::setContactMaxIte)
+
+		.def("inTriangularMesh", &Class::inTriangularMesh, py::return_value_policy::reference)
+		.def("varXi", &Class::varXi, py::return_value_policy::reference)
+		.def("varS", &Class::varS, py::return_value_policy::reference)
+		.def("inUnit", &Class::inUnit, py::return_value_policy::reference)
+		.def("inOldPosition", &Class::inOldPosition, py::return_value_policy::reference)
+		.def("inNewPosition", &Class::inNewPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+
+		.def("outContactForce", &Class::outContactForce, py::return_value_policy::reference)
+		.def("outWeight", &Class::outWeight, py::return_value_policy::reference)
 		.def_readwrite("weight", &Class::weight);
 }
 
@@ -48,15 +50,15 @@ void declare_linear_elasticity_solver(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("LinearElasticitySolver") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_horizon", &Class::inHorizon, py::return_value_policy::reference)
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_x", &Class::inX, py::return_value_policy::reference)
-		.def("in_y", &Class::inY, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_bonds", &Class::inBonds, py::return_value_policy::reference)
-		.def("var_mu", &Class::varMu, py::return_value_policy::reference)
-		.def("var_lambda", &Class::varLambda, py::return_value_policy::reference)
-		.def("var_iteration_number", &Class::varIterationNumber, py::return_value_policy::reference);
+		.def("inHorizon", &Class::inHorizon, py::return_value_policy::reference)
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inX", &Class::inX, py::return_value_policy::reference)
+		.def("inY", &Class::inY, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inBonds", &Class::inBonds, py::return_value_policy::reference)
+		.def("varMu", &Class::varMu, py::return_value_policy::reference)
+		.def("varLambda", &Class::varLambda, py::return_value_policy::reference)
+		.def("varIterationNumber", &Class::varIterationNumber, py::return_value_policy::reference);
 }
 
 #include "Peridynamics/Module/CoSemiImplicitHyperelasticitySolver.h"
@@ -67,32 +69,32 @@ void declare_co_semi_implicit_hyperelasticity_solver(py::module& m, std::string 
 	std::string pyclass_name = std::string("CoSemiImplicitHyperelasticitySolverr") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("solve_elasticity", &Class::solveElasticity)
-		.def("set_object_volume", &Class::setObjectVolume)
-		.def("set_particle_volume", &Class::setParticleVolume)
-		.def("set_contact_max_ite", &Class::setContactMaxIte)
-		.def("in_energy_type", &Class::inEnergyType, py::return_value_policy::reference)
-		.def("in_energy_models", &Class::inEnergyModels, py::return_value_policy::reference)
-		.def("var_neighbor_searching_adjacent", &Class::varNeighborSearchingAdjacent, py::return_value_policy::reference)
-		.def("in_rest_norm", &Class::inRestNorm, py::return_value_policy::reference)
-		.def("in_norm", &Class::inNorm, py::return_value_policy::reference)
-		.def("in_old_position", &Class::inOldPosition, py::return_value_policy::reference)
-		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference)
-		.def("in_unit", &Class::inUnit, py::return_value_policy::reference)
-		.def("in_triangular_mesh", &Class::inTriangularMesh, py::return_value_policy::reference)
-		.def("set_xi", &Class::setXi)
-		.def("set_k_bend", &Class::setK_bend)
-		.def("set_self_contact", &Class::setSelfContact)
-		.def("get_xi", &Class::getXi)
-		.def("set_e", &Class::setE)
-		.def("get_e", &Class::getE)
-		.def("set_s", &Class::setS)
-		.def("get_s", &Class::getS)
-		.def("get_s0", &Class::getS0)
-		.def("get_s1", &Class::getS1)
+		.def("solveElasticity", &Class::solveElasticity)
+		.def("setObjectVolume", &Class::setObjectVolume)
+		.def("setParticleVolume", &Class::setParticleVolume)
+		.def("setContactMaxIte", &Class::setContactMaxIte)
+		.def("inEnergyType", &Class::inEnergyType, py::return_value_policy::reference)
+		.def("inEnergyModels", &Class::inEnergyModels, py::return_value_policy::reference)
+		.def("varNeighborSearchingAdjacent", &Class::varNeighborSearchingAdjacent, py::return_value_policy::reference)
+		.def("inRestNorm", &Class::inRestNorm, py::return_value_policy::reference)
+		.def("inNorm", &Class::inNorm, py::return_value_policy::reference)
+		.def("inOldPosition", &Class::inOldPosition, py::return_value_policy::reference)
+		.def("inAttribute", &Class::inAttribute, py::return_value_policy::reference)
+		.def("inUnit", &Class::inUnit, py::return_value_policy::reference)
+		.def("inTriangularMesh", &Class::inTriangularMesh, py::return_value_policy::reference)
+		.def("setXi", &Class::setXi)
+		.def("setK_bend", &Class::setK_bend)
+		.def("setSelfContact", &Class::setSelfContact)
+		.def("getXi", &Class::getXi)
+		.def("setE", &Class::setE)
+		.def("getE", &Class::getE)
+		.def("setS", &Class::setS)
+		.def("getS", &Class::getS)
+		.def("getS0", &Class::getS0)
+		.def("getS1", &Class::getS1)
 		.def("get_grad_res_eps", &Class::setGrad_res_eps)
-		.def("set_accelerated", &Class::setAccelerated)
-		.def("get_contact_rule_ptr", &Class::getContactRulePtr);
+		.def("setAccelerated", &Class::setAccelerated)
+		.def("getContactRulePtr", &Class::getContactRulePtr);
 }
 
 #include "Peridynamics/Module/DragSurfaceInteraction.h"
@@ -102,19 +104,20 @@ void declare_drag_surface_interaction(py::module& m, std::string typestr) {
 	using Parent = dyno::MouseInputModule;
 	std::string pyclass_name = std::string("DragSurfaceInteraction") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>()) // ∞Û∂®ƒ¨»œππ‘Ï∫Ø ˝
-		.def("interaction_click", &Class::InteractionClick)
-		.def("interaction_drag", &Class::InteractionDrag)
-		.def("calc_surface_interact_click", &Class::calcSurfaceInteractClick)
-		.def("calc_surface_interact_drag", &Class::calcSurfaceInteractDrag)
-		.def("set_tri_fixed", &Class::setTriFixed)
-		.def("cancel_velocity", &Class::cancelVelocity)
-		.def("in_initial_triangle_set", &Class::inInitialTriangleSet, py::return_value_policy::reference)
-		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("var_interation_radius", &Class::varInterationRadius, py::return_value_policy::reference)
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference);
+		.def(py::init<>()) // ¬∞√≥¬∂¬®√Ñ¬¨√à√è¬π¬π√î√¨¬∫¬Ø√ä√Ω
+		.def("InteractionClick", &Class::InteractionClick)
+		.def("InteractionDrag", &Class::InteractionDrag)
+		.def("calcSurfaceInteractClick", &Class::calcSurfaceInteractClick)
+		.def("calcSurfaceInteractDrag", &Class::calcSurfaceInteractDrag)
+		.def("setTriFixed", &Class::setTriFixed)
+		.def("cancelVelocity", &Class::cancelVelocity)
+
+		.def("inInitialTriangleSet", &Class::inInitialTriangleSet, py::return_value_policy::reference)
+		.def("inAttribute", &Class::inAttribute, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("varInterationRadius", &Class::varInterationRadius, py::return_value_policy::reference)
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference);
 }
 
 #include "Peridynamics/Module/DragVertexInteraction.h"
@@ -124,19 +127,20 @@ void declare_drag_vertex_interaction(py::module& m, std::string typestr) {
 	using Parent = dyno::MouseInputModule;
 	std::string pyclass_name = std::string("DragVertexInteraction") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>()) // ∞Û∂®ƒ¨»œππ‘Ï∫Ø ˝
-		.def("interaction_click", &Class::InteractionClick)
-		.def("interaction_drag", &Class::InteractionDrag)
-		.def("calc_vertex_interact_click", &Class::calcVertexInteractClick)
-		.def("calc_vertex_interact_drag", &Class::calcVertexInteractDrag)
-		.def("set_vertex_fixed", &Class::setVertexFixed)
-		.def("cancel_velocity", &Class::cancelVelocity)
-		.def("in_initial_triangle_set", &Class::inInitialTriangleSet, py::return_value_policy::reference)
-		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("var_interation_radius", &Class::varInterationRadius, py::return_value_policy::reference)
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference);
+		.def(py::init<>()) // ¬∞√≥¬∂¬®√Ñ¬¨√à√è¬π¬π√î√¨¬∫¬Ø√ä√Ω
+		.def("InteractionClick", &Class::InteractionClick)
+		.def("InteractionDrag", &Class::InteractionDrag)
+		.def("calcVertexInteractClick", &Class::calcVertexInteractClick)
+		.def("calcVertexInteractDrag", &Class::calcVertexInteractDrag)
+		.def("setVertexFixed", &Class::setVertexFixed)
+		.def("cancelVelocity", &Class::cancelVelocity)
+
+		.def("inInitialTriangleSet", &Class::inInitialTriangleSet, py::return_value_policy::reference)
+		.def("inAttribute", &Class::inAttribute, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("varInterationRadius", &Class::varInterationRadius, py::return_value_policy::reference)
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference);
 }
 
 #include "Peridynamics/Module/ElastoplasticityModule.h"
@@ -148,11 +152,11 @@ void declare_elastoplasticity_module(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ElastoplasticityModule") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_cohesion", &Class::varCohesion, py::return_value_policy::reference)
-		.def("var_friction_angle", &Class::varFrictionAngle, py::return_value_policy::reference)
-		.def("var_incompressible", &Class::varIncompressible, py::return_value_policy::reference)
-		.def("var_renew_neighborhood", &Class::varRenewNeighborhood, py::return_value_policy::reference)
-		.def("in_neighbor_ids", &Class::inNeighborIds, py::return_value_policy::reference);
+		.def("varCohesion", &Class::varCohesion, py::return_value_policy::reference)
+		.def("varFrictionAngle", &Class::varFrictionAngle, py::return_value_policy::reference)
+		.def("varIncompressible", &Class::varIncompressible, py::return_value_policy::reference)
+		.def("varRenewNeighborhood", &Class::varRenewNeighborhood, py::return_value_policy::reference)
+		.def("inNeighborIds", &Class::inNeighborIds, py::return_value_policy::reference);
 }
 
 #include "Peridynamics/Module/FixedPoints.h"
@@ -163,11 +167,13 @@ void declare_fixed_points(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("FixedPoints") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("add_fixed_point", &Class::addFixedPoint)
-		.def("remove_fixed_point", &Class::removeFixedPoint)
+		.def("addFixedPoint", &Class::addFixedPoint)
+		.def("removeFixedPoint", &Class::removeFixedPoint)
 		.def("clear", &Class::clear)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
+
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+
 		.def_readwrite("FixedIds", &Class::FixedIds)
 		.def_readwrite("FixedPos", &Class::FixedPos);
 }
@@ -180,7 +186,7 @@ void declare_fracture_module(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("FractureModule") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("apply_plasticity", &Class::applyPlasticity);
+		.def("applyPlasticity", &Class::applyPlasticity);
 }
 
 #include "Peridynamics/Module/GranularModule.h"
@@ -201,12 +207,14 @@ void declare_projective_peridynamics(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ProjectivePeridynamics") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_horizon", &Class::inHorizon, py::return_value_policy::reference)
-		.def("in_x", &Class::inX, py::return_value_policy::reference)
-		.def("in_y", &Class::inY, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_bonds", &Class::inBonds, py::return_value_policy::reference);
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inHorizon", &Class::inHorizon, py::return_value_policy::reference)
+
+		.def("inX", &Class::inX, py::return_value_policy::reference)
+		.def("inY", &Class::inY, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+
+		.def("inBonds", &Class::inBonds, py::return_value_policy::reference);
 }
 
 #include "Peridynamics/Module/SemiImplicitHyperelasticitySolver.h"
@@ -217,14 +225,17 @@ void declare_semi_implicit_hyperelasticity_solver(py::module& m, std::string typ
 	std::string pyclass_name = std::string("SemiImplicitHyperelasticitySolver") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("solve_elasticity", &Class::solveElasticity)
-		.def("var_strain_limiting", &Class::varStrainLimiting, py::return_value_policy::reference)
-		.def("in_energy_type", &Class::inEnergyType, py::return_value_policy::reference)
-		.def("in_energy_models", &Class::inEnergyModels, py::return_value_policy::reference)
-		.def("var_is_alpha_computed", &Class::varIsAlphaComputed, py::return_value_policy::reference)
-		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference)
-		.def("in_volume", &Class::inVolume, py::return_value_policy::reference)
-		.def("in_volume_pair", &Class::inVolumePair, py::return_value_policy::reference);
+		.def("solveElasticity", &Class::solveElasticity)
+		.def("varStrainLimiting", &Class::varStrainLimiting, py::return_value_policy::reference)
+
+		.def("inEnergyType", &Class::inEnergyType, py::return_value_policy::reference)
+		.def("inEnergyModels", &Class::inEnergyModels, py::return_value_policy::reference)
+		.def("varIsAlphaComputed", &Class::varIsAlphaComputed, py::return_value_policy::reference)
+
+		.def("inAttribute", &Class::inAttribute, py::return_value_policy::reference)
+		.def("inVolume", &Class::inVolume, py::return_value_policy::reference)
+
+		.def("inVolumePair", &Class::inVolumePair, py::return_value_policy::reference);
 }
 
 #include "Peridynamics/Bond.h"
@@ -250,10 +261,12 @@ void declare_triangular_system(py::module& m, std::string typestr) {
 		.def(py::init<>())
 		.def("translate", &Class::translate)
 		.def("scale", &Class::scale)
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("state_position", &Class::statePosition, py::return_value_policy::reference)
-		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference)
-		.def("load_surface", &Class::loadSurface);
+
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("statePosition", &Class::statePosition, py::return_value_policy::reference)
+		.def("stateVelocity", &Class::stateVelocity, py::return_value_policy::reference)
+
+		.def("loadSurface", &Class::loadSurface);
 }
 
 #include "Peridynamics/Cloth.h"
@@ -264,12 +277,12 @@ void declare_cloth(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("Cloth") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_horizon", &Class::varHorizon, py::return_value_policy::reference)
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("state_horizon", &Class::stateHorizon, py::return_value_policy::reference)
+		.def("varHorizon", &Class::varHorizon, py::return_value_policy::reference)
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("stateHorizon", &Class::stateHorizon, py::return_value_policy::reference)
 		.def("state_rest_rotation", &Class::stateRestPosition, py::return_value_policy::reference)
-		.def("state_old_position", &Class::stateOldPosition, py::return_value_policy::reference)
-		.def("state_bonds", &Class::stateBonds, py::return_value_policy::reference);
+		.def("stateOldPosition", &Class::stateOldPosition, py::return_value_policy::reference)
+		.def("stateBonds", &Class::stateBonds, py::return_value_policy::reference);
 }
 
 #include "Peridynamics/CodimensionalPD.h"
@@ -282,10 +295,11 @@ void declare_codimensionalPD(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("CodimensionalPD") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("translate", &Class::translate) // ∆Ω“∆
+		.def("translate", &Class::translate)
 		.def("scale", py::overload_cast<Real>(&Class::scale))
 		.def("scale", py::overload_cast<Coord>(&Class::scale))
-		.def("load_surface", &Class::loadSurface) // º”‘ÿ±Ì√Ê
+		.def("loadSurface", &Class::loadSurface)
+
 		.def("set_energy_model", py::overload_cast<dyno::StVKModel<Real>>(&Class::setEnergyModel),
 			"Set energy model to StVKModel")
 		.def("set_energy_model", py::overload_cast<dyno::LinearModel<Real>>(&Class::setEnergyModel),
@@ -297,21 +311,21 @@ void declare_codimensionalPD(py::module& m, std::string typestr) {
 		.def("set_energy_model", py::overload_cast<dyno::FiberModel<Real>>(&Class::setEnergyModel),
 			"Set energy model to FiberModel")
 		//DEF_VAR
-		.def("var_horizon", &Class::varHorizon, py::return_value_policy::reference)
-		.def("var_energy_type", &Class::varEnergyType, py::return_value_policy::reference)
-		.def("var_energy_model", &Class::varEnergyModel, py::return_value_policy::reference)
+		.def("varHorizon", &Class::varHorizon, py::return_value_policy::reference)
+		.def("varEnergyType", &Class::varEnergyType, py::return_value_policy::reference)
+		.def("varEnergyModel", &Class::varEnergyModel, py::return_value_policy::reference)
 		//DEF_ARRAY_STATE
-		.def("state_rest_position", &Class::stateRestPosition, py::return_value_policy::reference)
-		.def("state_old_position", &Class::stateOldPosition, py::return_value_policy::reference)
-		.def("state_rest_norm", &Class::stateRestNorm, py::return_value_policy::reference)
-		.def("state_norm", &Class::stateNorm, py::return_value_policy::reference)
-		.def("state_attribute", &Class::stateAttribute, py::return_value_policy::reference)
-		.def("state_volume", &Class::stateVolume, py::return_value_policy::reference)
+		.def("stateRestPosition", &Class::stateRestPosition, py::return_value_policy::reference)
+		.def("stateOldPosition", &Class::stateOldPosition, py::return_value_policy::reference)
+		.def("stateRestNorm", &Class::stateRestNorm, py::return_value_policy::reference)
+		.def("stateNorm", &Class::stateNorm, py::return_value_policy::reference)
+		.def("stateAttribute", &Class::stateAttribute, py::return_value_policy::reference)
+		.def("stateVolume", &Class::stateVolume, py::return_value_policy::reference)
 		//DEF_ARRAYLIST_STATE
-		.def("state_rest_shape", &Class::stateRestShape, py::return_value_policy::reference)
+		.def("stateRestShape", &Class::stateRestShape, py::return_value_policy::reference)
 		//DEF_VAR_STATE
-		.def("state_max_length", &Class::stateMaxLength, py::return_value_policy::reference)
-		.def("state_min_length", &Class::stateMinLength, py::return_value_policy::reference);
+		.def("stateMaxLength", &Class::stateMaxLength, py::return_value_policy::reference)
+		.def("stateMinLength", &Class::stateMinLength, py::return_value_policy::reference);
 }
 
 #include "Peridynamics/Peridynamics.h"
@@ -325,15 +339,17 @@ void declare_peridynamics(py::module& m, std::string typestr) {
 	typedef typename dyno::TBond<TDataType> Bond;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol())
 		.def(py::init<>())
-		.def("get_node_type", &Class::getNodeType)
-		.def("import_solid_particles", &Class::importSolidParticles, py::return_value_policy::reference)
-		.def("get_solid_particles", &Class::getSolidParticles)
-		.def("add_solid_particle", &Class::addSolidParticle)
-		.def("remove_solid_particle", &Class::removeSolidParticle)
-		.def("var_horizon", &Class::varHorizon, py::return_value_policy::reference)
-		.def("state_horizon", &Class::stateHorizon, py::return_value_policy::reference)
-		.def("state_reference_position", &Class::stateReferencePosition, py::return_value_policy::reference)
-		.def("state_bonds", &Class::stateBonds, py::return_value_policy::reference);
+		.def("getNodeType", &Class::getNodeType)
+
+		.def("importSolidParticles", &Class::importSolidParticles, py::return_value_policy::reference)
+		.def("getSolidParticles", &Class::getSolidParticles)
+		.def("addSolidParticle", &Class::addSolidParticle)
+		.def("removeSolidParticle", &Class::removeSolidParticle)
+
+		.def("varHorizon", &Class::varHorizon, py::return_value_policy::reference)
+		.def("stateHorizon", &Class::stateHorizon, py::return_value_policy::reference)
+		.def("stateReferencePosition", &Class::stateReferencePosition, py::return_value_policy::reference)
+		.def("stateBonds", &Class::stateBonds, py::return_value_policy::reference);
 }
 
 #include "Peridynamics/ElasticBody.h"
@@ -374,6 +390,7 @@ void declare_hyperelastic_body(py::module& m, std::string typestr) {
 		.def("scale", py::overload_cast<Coord>(&Class::scale))
 		.def("rotate", py::overload_cast<dyno::Quat<Real>>(&Class::rotate))
 		.def("rotate", py::overload_cast<Coord>(&Class::rotate))
+
 		.def("set_energy_model", py::overload_cast<dyno::StVKModel<Real>>(&Class::setEnergyModel),
 			"Set energy model to StVKModel")
 		.def("set_energy_model", py::overload_cast<dyno::LinearModel<Real>>(&Class::setEnergyModel),
@@ -382,23 +399,26 @@ void declare_hyperelastic_body(py::module& m, std::string typestr) {
 			"Set energy model to NeoHookeanModel")
 		.def("set_energy_model", py::overload_cast<dyno::XuModel<Real>>(&Class::setEnergyModel),
 			"Set energy model to XuModel")
-		.def("load_sdf", &Class::loadSDF)
-		.def("var_location", &Class::varLocation, py::return_value_policy::reference)
-		.def("var_rotation", &Class::varRotation, py::return_value_policy::reference)
-		.def("var_scale", &Class::varScale, py::return_value_policy::reference)
-		.def("var_horizon", &Class::varHorizon, py::return_value_policy::reference)
-		.def("var_alpha_computed", &Class::varAlphaComputed, py::return_value_policy::reference)
-		.def("var_energy_type", &Class::varEnergyType, py::return_value_policy::reference)
-		.def("var_energy_model", &Class::varEnergyModel, py::return_value_policy::reference)
-		.def("state_rest_position", &Class::stateRestPosition, py::return_value_policy::reference)
-		.def("state_bonds", &Class::stateBonds, py::return_value_policy::reference)
-		.def("state_volume_pair", &Class::stateVolumePair, py::return_value_policy::reference)
-		.def("state_vertex_rotation", &Class::stateVertexRotation, py::return_value_policy::reference)
-		.def("state_attribute", &Class::stateAttribute, py::return_value_policy::reference)
-		.def("state_volume", &Class::stateVolume, py::return_value_policy::reference)
-		.def("var_neighbor_searching_adjacent", &Class::varNeighborSearchingAdjacent, py::return_value_policy::reference)
-		.def("var_file_name", &Class::varFileName, py::return_value_policy::reference)
-		.def("state_tets", &Class::stateTets, py::return_value_policy::reference);
+
+		.def("loadSDF", &Class::loadSDF)
+
+		.def("varLocation", &Class::varLocation, py::return_value_policy::reference)
+		.def("varRotation", &Class::varRotation, py::return_value_policy::reference)
+		.def("varScale", &Class::varScale, py::return_value_policy::reference)
+		.def("varHorizon", &Class::varHorizon, py::return_value_policy::reference)
+		.def("varAlphaComputed", &Class::varAlphaComputed, py::return_value_policy::reference)
+		.def("varEnergyType", &Class::varEnergyType, py::return_value_policy::reference)
+		.def("varEnergyModel", &Class::varEnergyModel, py::return_value_policy::reference)
+		.def("stateRestPosition", &Class::stateRestPosition, py::return_value_policy::reference)
+		.def("stateBonds", &Class::stateBonds, py::return_value_policy::reference)
+		.def("stateVolumePair", &Class::stateVolumePair, py::return_value_policy::reference)
+
+		.def("stateVertexRotation", &Class::stateVertexRotation, py::return_value_policy::reference)
+		.def("stateAttribute", &Class::stateAttribute, py::return_value_policy::reference)
+		.def("stateVolume", &Class::stateVolume, py::return_value_policy::reference)
+		.def("varNeighborSearchingAdjacent", &Class::varNeighborSearchingAdjacent, py::return_value_policy::reference)
+		.def("varFileName", &Class::varFileName, py::return_value_policy::reference)
+		.def("stateTets", &Class::stateTets, py::return_value_policy::reference);
 }
 
 #include "Peridynamics/TetrahedralSystem.h"
@@ -409,14 +429,15 @@ void declare_tetrahedral_system(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TetrahedralSystem") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("state_normal_sdf", &Class::stateNormalSDF, py::return_value_policy::reference)
-		.def("var_sdf", &Class::varSDF, py::return_value_policy::reference)
-		.def("state_tetrahedron_set", &Class::stateTetrahedronSet, py::return_value_policy::reference)
-		.def("state_position", &Class::statePosition, py::return_value_policy::reference)
-		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference)
-		.def("state_force", &Class::stateForce, py::return_value_policy::reference)
-		.def("load_vertex_from_file", &Class::loadVertexFromFile)
-		.def("load_vertex_from_gmsh_file", &Class::loadVertexFromGmshFile)
+		.def("stateNormalSDF", &Class::stateNormalSDF, py::return_value_policy::reference)
+		.def("varSDF", &Class::varSDF, py::return_value_policy::reference)
+		.def("stateTetrahedronSet", &Class::stateTetrahedronSet, py::return_value_policy::reference)
+		.def("statePosition", &Class::statePosition, py::return_value_policy::reference)
+		.def("stateVelocity", &Class::stateVelocity, py::return_value_policy::reference)
+		.def("stateForce", &Class::stateForce, py::return_value_policy::reference)
+
+		.def("loadVertexFromFile", &Class::loadVertexFromFile)
+		.def("loadVertexFromGmshFile", &Class::loadVertexFromGmshFile)
 		.def("translate", &Class::translate)
 		.def("scale", &Class::scale)
 		.def("rotate", &Class::rotate);
@@ -430,11 +451,12 @@ void declare_thread_system(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ThreadSystem") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str())
 		.def(py::init<>())
-		.def("state_edge_set", &Class::stateEdgeSet, py::return_value_policy::reference)
-		.def("state_position", &Class::statePosition, py::return_value_policy::reference)
-		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference)
-		.def("state_force", &Class::stateForce, py::return_value_policy::reference)
-		.def("add_thread", &Class::addThread);
+		.def("stateEdgeSet", &Class::stateEdgeSet, py::return_value_policy::reference)
+		.def("statePosition", &Class::statePosition, py::return_value_policy::reference)
+		.def("stateVelocity", &Class::stateVelocity, py::return_value_policy::reference)
+		.def("stateForce", &Class::stateForce, py::return_value_policy::reference)
+
+		.def("addThread", &Class::addThread);
 }
 
 #include "Peridynamics/Thread.h"
@@ -447,8 +469,8 @@ void declare_thread(py::module& m, std::string typestr) {
 		.def(py::init<>())
 		.def("translate", &Class::translate)
 		.def("scale", &Class::scale)
-		.def("var_horizon", &Class::varHorizon, py::return_value_policy::reference)
-		.def("state_rest_shape", &Class::stateRestShape, py::return_value_policy::reference);
+		.def("varHorizon", &Class::varHorizon, py::return_value_policy::reference)
+		.def("stateRestShape", &Class::stateRestShape, py::return_value_policy::reference);
 }
 
 void pybind_peridynamics(py::module& m);

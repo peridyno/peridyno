@@ -13,11 +13,11 @@ void declare_animation_driver(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("AnimationDriver") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_speed", &Class::varSpeed, py::return_value_policy::reference)
-		.def("var_binding_configuration", &Class::varBindingConfiguration, py::return_value_policy::reference)
-		.def("in_topology", &Class::inTopology, py::return_value_policy::reference)
-		.def("in_joint_animation_info", &Class::inJointAnimationInfo, py::return_value_policy::reference)
-		.def("in_delta_time", &Class::inDeltaTime, py::return_value_policy::reference);
+		.def("varSpeed", &Class::varSpeed, py::return_value_policy::reference)
+		.def("varBindingConfiguration", &Class::varBindingConfiguration, py::return_value_policy::reference)
+		.def("inTopology", &Class::inTopology, py::return_value_policy::reference)
+		.def("inJointAnimationInfo", &Class::inJointAnimationInfo, py::return_value_policy::reference)
+		.def("inDeltaTime", &Class::inDeltaTime, py::return_value_policy::reference);
 }
 
 #include "RigidBody/Module/CarDriver.h"
@@ -28,7 +28,7 @@ void declare_car_driver(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("CarDriver") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_topology", &Class::inTopology, py::return_value_policy::reference);
+		.def("inTopology", &Class::inTopology, py::return_value_policy::reference);
 }
 
 #include "RigidBody/Module/ContactsUnion.h"
@@ -39,9 +39,9 @@ void declare_contacts_union(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ContactsUnion") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_contacts_a", &Class::inContactsA, py::return_value_policy::reference)
-		.def("in_contacts_b", &Class::inContactsB, py::return_value_policy::reference)
-		.def("out_contacts", &Class::outContacts, py::return_value_policy::reference);
+		.def("inContactsA", &Class::inContactsA, py::return_value_policy::reference)
+		.def("inContactsB", &Class::inContactsB, py::return_value_policy::reference)
+		.def("outContacts", &Class::outContacts, py::return_value_policy::reference);
 }
 
 #include "RigidBody/Module/InstanceTransform.h"
@@ -52,12 +52,12 @@ void declare_instance_transform(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("InstanceTransform") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_center", &Class::inCenter, py::return_value_policy::reference)
-		.def("in_rotation_matrix", &Class::inRotationMatrix, py::return_value_policy::reference)
-		.def("in_binding_pair", &Class::inBindingPair, py::return_value_policy::reference)
-		.def("in_binding_tag", &Class::inBindingTag, py::return_value_policy::reference)
-		.def("in_instance_transform", &Class::inInstanceTransform, py::return_value_policy::reference)
-		.def("out_instance_transform", &Class::outInstanceTransform, py::return_value_policy::reference);
+		.def("inCenter", &Class::inCenter, py::return_value_policy::reference)
+		.def("inRotationMatrix", &Class::inRotationMatrix, py::return_value_policy::reference)
+		.def("inBindingPair", &Class::inBindingPair, py::return_value_policy::reference)
+		.def("inBindingTag", &Class::inBindingTag, py::return_value_policy::reference)
+		.def("inInstanceTransform", &Class::inInstanceTransform, py::return_value_policy::reference)
+		.def("outInstanceTransform", &Class::outInstanceTransform, py::return_value_policy::reference);
 }
 
 #include "RigidBody/Module/PCGConstraintSolver.h"
@@ -68,31 +68,31 @@ void declare_pcg_constraint_solver(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("PCGConstraintSolver") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_friction_enabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
-		.def("var_gravity_enabled", &Class::varGravityEnabled, py::return_value_policy::reference)
-		.def("var_gravity_value", &Class::varGravityValue, py::return_value_policy::reference)
-		.def("var_friction_coefficient", &Class::varFrictionCoefficient, py::return_value_policy::reference)
-		.def("var_slop", &Class::varSlop, py::return_value_policy::reference)
-		.def("var_frequency", &Class::varFrequency, py::return_value_policy::reference)
-		.def("var_damping_ratio", &Class::varDampingRatio, py::return_value_policy::reference)
-		.def("var_iteration_number_for_velocity_solver_cg", &Class::varIterationNumberForVelocitySolverCG, py::return_value_policy::reference)
-		.def("var_iteration_number_for_velocity_solver_jacobi", &Class::varIterationNumberForVelocitySolverJacobi, py::return_value_policy::reference)
-		.def("var_linear_damping", &Class::varLinearDamping, py::return_value_policy::reference)
-		.def("var_angular_damping", &Class::varAngularDamping, py::return_value_policy::reference)
-		.def("var_tolerance", &Class::varTolerance, py::return_value_policy::reference)
+		.def("varFrictionEnabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
+		.def("varGravityEnabled", &Class::varGravityEnabled, py::return_value_policy::reference)
+		.def("varGravityValue", &Class::varGravityValue, py::return_value_policy::reference)
+		.def("varFrictionCoefficient", &Class::varFrictionCoefficient, py::return_value_policy::reference)
+		.def("varSlop", &Class::varSlop, py::return_value_policy::reference)
+		.def("varFrequency", &Class::varFrequency, py::return_value_policy::reference)
+		.def("varDampingRatio", &Class::varDampingRatio, py::return_value_policy::reference)
+		.def("varIterationNumberForVelocitySolverCG", &Class::varIterationNumberForVelocitySolverCG, py::return_value_policy::reference)
+		.def("varIterationNumberForVelocitySolverJacobi", &Class::varIterationNumberForVelocitySolverJacobi, py::return_value_policy::reference)
+		.def("varLinearDamping", &Class::varLinearDamping, py::return_value_policy::reference)
+		.def("varAngularDamping", &Class::varAngularDamping, py::return_value_policy::reference)
+		.def("varTolerance", &Class::varTolerance, py::return_value_policy::reference)
 
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_mass", &Class::inMass, py::return_value_policy::reference)
-		.def("in_center", &Class::inCenter, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_angular_velocity", &Class::inAngularVelocity, py::return_value_policy::reference)
-		.def("in_rotation_matrix", &Class::inRotationMatrix, py::return_value_policy::reference)
-		.def("in_inertia", &Class::inInertia, py::return_value_policy::reference)
-		.def("in_initial_inertia", &Class::inInitialInertia, py::return_value_policy::reference)
-		.def("in_quaternion", &Class::inQuaternion, py::return_value_policy::reference)
-		.def("in_contacts", &Class::inContacts, py::return_value_policy::reference)
-		.def("in_discrete_elements", &Class::inDiscreteElements, py::return_value_policy::reference)
-		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference);
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inMass", &Class::inMass, py::return_value_policy::reference)
+		.def("inCenter", &Class::inCenter, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inAngularVelocity", &Class::inAngularVelocity, py::return_value_policy::reference)
+		.def("inRotationMatrix", &Class::inRotationMatrix, py::return_value_policy::reference)
+		.def("inInertia", &Class::inInertia, py::return_value_policy::reference)
+		.def("inInitialInertia", &Class::inInitialInertia, py::return_value_policy::reference)
+		.def("inQuaternion", &Class::inQuaternion, py::return_value_policy::reference)
+		.def("inContacts", &Class::inContacts, py::return_value_policy::reference)
+		.def("inDiscreteElements", &Class::inDiscreteElements, py::return_value_policy::reference)
+		.def("inAttribute", &Class::inAttribute, py::return_value_policy::reference);
 }
 
 #include "RigidBody/Module/PJSConstraintSolver.h"
@@ -103,29 +103,29 @@ void declare_pjs_constraint_solver(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("PJSConstraintSolver") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_friction_enabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
-		.def("var_gravity_enabled", &Class::varGravityEnabled, py::return_value_policy::reference)
-		.def("var_gravity_value", &Class::varGravityValue, py::return_value_policy::reference)
-		.def("var_friction_coefficient", &Class::varFrictionCoefficient, py::return_value_policy::reference)
-		.def("var_slop", &Class::varSlop, py::return_value_policy::reference)
+		.def("varFrictionEnabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
+		.def("varGravityEnabled", &Class::varGravityEnabled, py::return_value_policy::reference)
+		.def("varGravityValue", &Class::varGravityValue, py::return_value_policy::reference)
+		.def("varFrictionCoefficient", &Class::varFrictionCoefficient, py::return_value_policy::reference)
+		.def("varSlop", &Class::varSlop, py::return_value_policy::reference)
 		.def("vat_baumgarte_rate", &Class::varBaumgarteRate, py::return_value_policy::reference)
-		.def("var_iteration_number_for_velocity_solver", &Class::varIterationNumberForVelocitySolver, py::return_value_policy::reference)
-		.def("var_linear_damping", &Class::varLinearDamping, py::return_value_policy::reference)
-		.def("var_angular_damping", &Class::varAngularDamping, py::return_value_policy::reference)
+		.def("varIterationNumberForVelocitySolver", &Class::varIterationNumberForVelocitySolver, py::return_value_policy::reference)
+		.def("varLinearDamping", &Class::varLinearDamping, py::return_value_policy::reference)
+		.def("varAngularDamping", &Class::varAngularDamping, py::return_value_policy::reference)
 
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_mass", &Class::inMass, py::return_value_policy::reference)
-		.def("in_center", &Class::inCenter, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_angular_velocity", &Class::inAngularVelocity, py::return_value_policy::reference)
-		.def("in_rotation_matrix", &Class::inRotationMatrix, py::return_value_policy::reference)
-		.def("in_inertia", &Class::inInertia, py::return_value_policy::reference)
-		.def("in_initial_inertia", &Class::inInitialInertia, py::return_value_policy::reference)
-		.def("in_quaternion", &Class::inQuaternion, py::return_value_policy::reference)
-		.def("in_contacts", &Class::inContacts, py::return_value_policy::reference)
-		.def("in_discrete_elements", &Class::inDiscreteElements, py::return_value_policy::reference)
-		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference)
-		.def("in_friction_coefficients", &Class::inFrictionCoefficients, py::return_value_policy::reference);
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inMass", &Class::inMass, py::return_value_policy::reference)
+		.def("inCenter", &Class::inCenter, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inAngularVelocity", &Class::inAngularVelocity, py::return_value_policy::reference)
+		.def("inRotationMatrix", &Class::inRotationMatrix, py::return_value_policy::reference)
+		.def("inInertia", &Class::inInertia, py::return_value_policy::reference)
+		.def("inInitialInertia", &Class::inInitialInertia, py::return_value_policy::reference)
+		.def("inQuaternion", &Class::inQuaternion, py::return_value_policy::reference)
+		.def("inContacts", &Class::inContacts, py::return_value_policy::reference)
+		.def("inDiscreteElements", &Class::inDiscreteElements, py::return_value_policy::reference)
+		.def("inAttribute", &Class::inAttribute, py::return_value_policy::reference)
+		.def("inFrictionCoefficients", &Class::inFrictionCoefficients, py::return_value_policy::reference);
 }
 
 #include "RigidBody/Module/PJSNJSConstraintSolver.h"
@@ -136,29 +136,29 @@ void declare_pjsnj_constraint_solver(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("PJSNJSConstraintSolver") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_friction_enabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
-		.def("var_gravity_enabled", &Class::varGravityEnabled, py::return_value_policy::reference)
-		.def("var_gravity_value", &Class::varGravityValue, py::return_value_policy::reference)
-		.def("var_friction_coefficient", &Class::varFrictionCoefficient, py::return_value_policy::reference)
-		.def("var_slop", &Class::varSlop, py::return_value_policy::reference)
+		.def("varFrictionEnabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
+		.def("varGravityEnabled", &Class::varGravityEnabled, py::return_value_policy::reference)
+		.def("varGravityValue", &Class::varGravityValue, py::return_value_policy::reference)
+		.def("varFrictionCoefficient", &Class::varFrictionCoefficient, py::return_value_policy::reference)
+		.def("varSlop", &Class::varSlop, py::return_value_policy::reference)
 		.def("vat_baumgarte_bias", &Class::varBaumgarteBias, py::return_value_policy::reference)
-		.def("var_iteration_number_for_velocity_solver", &Class::varIterationNumberForVelocitySolver, py::return_value_policy::reference)
-		.def("var_iteration_number_for_position_solver", &Class::varIterationNumberForPositionSolver, py::return_value_policy::reference)
-		.def("var_linear_damping", &Class::varLinearDamping, py::return_value_policy::reference)
-		.def("var_angular_damping", &Class::varAngularDamping, py::return_value_policy::reference)
+		.def("varIterationNumberForVelocitySolver", &Class::varIterationNumberForVelocitySolver, py::return_value_policy::reference)
+		.def("varIterationNumberForPositionSolver", &Class::varIterationNumberForPositionSolver, py::return_value_policy::reference)
+		.def("varLinearDamping", &Class::varLinearDamping, py::return_value_policy::reference)
+		.def("varAngularDamping", &Class::varAngularDamping, py::return_value_policy::reference)
 
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_mass", &Class::inMass, py::return_value_policy::reference)
-		.def("in_center", &Class::inCenter, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_angular_velocity", &Class::inAngularVelocity, py::return_value_policy::reference)
-		.def("in_rotation_matrix", &Class::inRotationMatrix, py::return_value_policy::reference)
-		.def("in_inertia", &Class::inInertia, py::return_value_policy::reference)
-		.def("in_initial_inertia", &Class::inInitialInertia, py::return_value_policy::reference)
-		.def("in_quaternion", &Class::inQuaternion, py::return_value_policy::reference)
-		.def("in_contacts", &Class::inContacts, py::return_value_policy::reference)
-		.def("in_discrete_elements", &Class::inDiscreteElements, py::return_value_policy::reference)
-		.def("in_friction_coefficients", &Class::inFrictionCoefficients, py::return_value_policy::reference);
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inMass", &Class::inMass, py::return_value_policy::reference)
+		.def("inCenter", &Class::inCenter, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inAngularVelocity", &Class::inAngularVelocity, py::return_value_policy::reference)
+		.def("inRotationMatrix", &Class::inRotationMatrix, py::return_value_policy::reference)
+		.def("inInertia", &Class::inInertia, py::return_value_policy::reference)
+		.def("inInitialInertia", &Class::inInitialInertia, py::return_value_policy::reference)
+		.def("inQuaternion", &Class::inQuaternion, py::return_value_policy::reference)
+		.def("inContacts", &Class::inContacts, py::return_value_policy::reference)
+		.def("inDiscreteElements", &Class::inDiscreteElements, py::return_value_policy::reference)
+		.def("inFrictionCoefficients", &Class::inFrictionCoefficients, py::return_value_policy::reference);
 }
 
 #include "RigidBody/Module/PJSoftConstraintSolver.h"
@@ -169,29 +169,29 @@ void declare_pj_soft_constraint_solver(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("PJSoftConstraintSolver") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_friction_enabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
-		.def("var_gravity_enabled", &Class::varGravityEnabled, py::return_value_policy::reference)
-		.def("var_gravity_value", &Class::varGravityValue, py::return_value_policy::reference)
-		.def("var_friction_coefficient", &Class::varFrictionCoefficient, py::return_value_policy::reference)
-		.def("var_slop", &Class::varSlop, py::return_value_policy::reference)
-		.def("var_iteration_number_for_velocity_solver", &Class::varIterationNumberForVelocitySolver, py::return_value_policy::reference)
-		.def("var_linear_damping", &Class::varLinearDamping, py::return_value_policy::reference)
-		.def("var_angular_damping", &Class::varAngularDamping, py::return_value_policy::reference)
-		.def("var_damping_ratio", &Class::varDampingRatio, py::return_value_policy::reference)
-		.def("var_hertz", &Class::varHertz, py::return_value_policy::reference)
+		.def("varFrictionEnabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
+		.def("varGravityEnabled", &Class::varGravityEnabled, py::return_value_policy::reference)
+		.def("varGravityValue", &Class::varGravityValue, py::return_value_policy::reference)
+		.def("varFrictionCoefficient", &Class::varFrictionCoefficient, py::return_value_policy::reference)
+		.def("varSlop", &Class::varSlop, py::return_value_policy::reference)
+		.def("varIterationNumberForVelocitySolver", &Class::varIterationNumberForVelocitySolver, py::return_value_policy::reference)
+		.def("varLinearDamping", &Class::varLinearDamping, py::return_value_policy::reference)
+		.def("varAngularDamping", &Class::varAngularDamping, py::return_value_policy::reference)
+		.def("varDampingRatio", &Class::varDampingRatio, py::return_value_policy::reference)
+		.def("varHertz", &Class::varHertz, py::return_value_policy::reference)
 
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_mass", &Class::inMass, py::return_value_policy::reference)
-		.def("in_center", &Class::inCenter, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_angular_velocity", &Class::inAngularVelocity, py::return_value_policy::reference)
-		.def("in_rotation_matrix", &Class::inRotationMatrix, py::return_value_policy::reference)
-		.def("in_inertia", &Class::inInertia, py::return_value_policy::reference)
-		.def("in_initial_inertia", &Class::inInitialInertia, py::return_value_policy::reference)
-		.def("in_quaternion", &Class::inQuaternion, py::return_value_policy::reference)
-		.def("in_contacts", &Class::inContacts, py::return_value_policy::reference)
-		.def("in_discrete_elements", &Class::inDiscreteElements, py::return_value_policy::reference)
-		.def("in_friction_coefficients", &Class::inFrictionCoefficients, py::return_value_policy::reference);
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inMass", &Class::inMass, py::return_value_policy::reference)
+		.def("inCenter", &Class::inCenter, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inAngularVelocity", &Class::inAngularVelocity, py::return_value_policy::reference)
+		.def("inRotationMatrix", &Class::inRotationMatrix, py::return_value_policy::reference)
+		.def("inInertia", &Class::inInertia, py::return_value_policy::reference)
+		.def("inInitialInertia", &Class::inInitialInertia, py::return_value_policy::reference)
+		.def("inQuaternion", &Class::inQuaternion, py::return_value_policy::reference)
+		.def("inContacts", &Class::inContacts, py::return_value_policy::reference)
+		.def("inDiscreteElements", &Class::inDiscreteElements, py::return_value_policy::reference)
+		.def("inFrictionCoefficients", &Class::inFrictionCoefficients, py::return_value_policy::reference);
 }
 
 #include "RigidBody/Module/TJConstraintSolver.h"
@@ -202,29 +202,29 @@ void declare_tj_constraint_solver(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TJConstraintSolver") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_friction_enabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
-		.def("var_gravity_enabled", &Class::varGravityEnabled, py::return_value_policy::reference)
-		.def("var_gravity_value", &Class::varGravityValue, py::return_value_policy::reference)
-		.def("var_friction_coefficient", &Class::varFrictionCoefficient, py::return_value_policy::reference)
-		.def("var_slop", &Class::varSlop, py::return_value_policy::reference)
+		.def("varFrictionEnabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
+		.def("varGravityEnabled", &Class::varGravityEnabled, py::return_value_policy::reference)
+		.def("varGravityValue", &Class::varGravityValue, py::return_value_policy::reference)
+		.def("varFrictionCoefficient", &Class::varFrictionCoefficient, py::return_value_policy::reference)
+		.def("varSlop", &Class::varSlop, py::return_value_policy::reference)
 		.def("vat_baumgarte_bias", &Class::varBaumgarteBias, py::return_value_policy::reference)
-		.def("var_sub_stepping", &Class::varSubStepping, py::return_value_policy::reference)
-		.def("var_iteration_number_for_velocity_solver", &Class::varIterationNumberForVelocitySolver, py::return_value_policy::reference)
-		.def("var_linear_damping", &Class::varLinearDamping, py::return_value_policy::reference)
-		.def("var_angular_damping", &Class::varAngularDamping, py::return_value_policy::reference)
+		.def("varSubStepping", &Class::varSubStepping, py::return_value_policy::reference)
+		.def("varIterationNumberForVelocitySolver", &Class::varIterationNumberForVelocitySolver, py::return_value_policy::reference)
+		.def("varLinearDamping", &Class::varLinearDamping, py::return_value_policy::reference)
+		.def("varAngularDamping", &Class::varAngularDamping, py::return_value_policy::reference)
 
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_mass", &Class::inMass, py::return_value_policy::reference)
-		.def("in_center", &Class::inCenter, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_angular_velocity", &Class::inAngularVelocity, py::return_value_policy::reference)
-		.def("in_rotation_matrix", &Class::inRotationMatrix, py::return_value_policy::reference)
-		.def("in_inertia", &Class::inInertia, py::return_value_policy::reference)
-		.def("in_initial_inertia", &Class::inInitialInertia, py::return_value_policy::reference)
-		.def("in_quaternion", &Class::inQuaternion, py::return_value_policy::reference)
-		.def("in_contacts", &Class::inContacts, py::return_value_policy::reference)
-		.def("in_discrete_elements", &Class::inDiscreteElements, py::return_value_policy::reference)
-		.def("in_friction_coefficients", &Class::inFrictionCoefficients, py::return_value_policy::reference);
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inMass", &Class::inMass, py::return_value_policy::reference)
+		.def("inCenter", &Class::inCenter, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inAngularVelocity", &Class::inAngularVelocity, py::return_value_policy::reference)
+		.def("inRotationMatrix", &Class::inRotationMatrix, py::return_value_policy::reference)
+		.def("inInertia", &Class::inInertia, py::return_value_policy::reference)
+		.def("inInitialInertia", &Class::inInitialInertia, py::return_value_policy::reference)
+		.def("inQuaternion", &Class::inQuaternion, py::return_value_policy::reference)
+		.def("inContacts", &Class::inContacts, py::return_value_policy::reference)
+		.def("inDiscreteElements", &Class::inDiscreteElements, py::return_value_policy::reference)
+		.def("inFrictionCoefficients", &Class::inFrictionCoefficients, py::return_value_policy::reference);
 }
 
 #include "RigidBody/Module/TJSoftConstraintSolver.h"
@@ -235,30 +235,30 @@ void declare_tj_soft_constraint_solver(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TJSoftConstraintSolver") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_friction_enabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
-		.def("var_gravity_enabled", &Class::varGravityEnabled, py::return_value_policy::reference)
-		.def("var_gravity_value", &Class::varGravityValue, py::return_value_policy::reference)
-		.def("var_friction_coefficient", &Class::varFrictionCoefficient, py::return_value_policy::reference)
-		.def("var_slop", &Class::varSlop, py::return_value_policy::reference)
-		.def("var_iteration_number_for_velocity_solver", &Class::varIterationNumberForVelocitySolver, py::return_value_policy::reference)
-		.def("var_sub_stepping", &Class::varSubStepping, py::return_value_policy::reference)
-		.def("var_linear_damping", &Class::varLinearDamping, py::return_value_policy::reference)
-		.def("var_angular_damping", &Class::varAngularDamping, py::return_value_policy::reference)
-		.def("var_damping_ratio", &Class::varDampingRatio, py::return_value_policy::reference)
-		.def("var_hertz", &Class::varHertz, py::return_value_policy::reference)
+		.def("varFrictionEnabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
+		.def("varGravityEnabled", &Class::varGravityEnabled, py::return_value_policy::reference)
+		.def("varGravityValue", &Class::varGravityValue, py::return_value_policy::reference)
+		.def("varFrictionCoefficient", &Class::varFrictionCoefficient, py::return_value_policy::reference)
+		.def("varSlop", &Class::varSlop, py::return_value_policy::reference)
+		.def("varIterationNumberForVelocitySolver", &Class::varIterationNumberForVelocitySolver, py::return_value_policy::reference)
+		.def("varSubStepping", &Class::varSubStepping, py::return_value_policy::reference)
+		.def("varLinearDamping", &Class::varLinearDamping, py::return_value_policy::reference)
+		.def("varAngularDamping", &Class::varAngularDamping, py::return_value_policy::reference)
+		.def("varDampingRatio", &Class::varDampingRatio, py::return_value_policy::reference)
+		.def("varHertz", &Class::varHertz, py::return_value_policy::reference)
 
-		.def("in_time_step", &Class::inTimeStep, py::return_value_policy::reference)
-		.def("in_mass", &Class::inMass, py::return_value_policy::reference)
-		.def("in_center", &Class::inCenter, py::return_value_policy::reference)
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_angular_velocity", &Class::inAngularVelocity, py::return_value_policy::reference)
-		.def("in_rotation_matrix", &Class::inRotationMatrix, py::return_value_policy::reference)
-		.def("in_inertia", &Class::inInertia, py::return_value_policy::reference)
-		.def("in_initial_inertia", &Class::inInitialInertia, py::return_value_policy::reference)
-		.def("in_quaternion", &Class::inQuaternion, py::return_value_policy::reference)
-		.def("in_contacts", &Class::inContacts, py::return_value_policy::reference)
-		.def("in_discrete_elements", &Class::inDiscreteElements, py::return_value_policy::reference)
-		.def("in_friction_coefficients", &Class::inFrictionCoefficients, py::return_value_policy::reference);
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inMass", &Class::inMass, py::return_value_policy::reference)
+		.def("inCenter", &Class::inCenter, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inAngularVelocity", &Class::inAngularVelocity, py::return_value_policy::reference)
+		.def("inRotationMatrix", &Class::inRotationMatrix, py::return_value_policy::reference)
+		.def("inInertia", &Class::inInertia, py::return_value_policy::reference)
+		.def("inInitialInertia", &Class::inInitialInertia, py::return_value_policy::reference)
+		.def("inQuaternion", &Class::inQuaternion, py::return_value_policy::reference)
+		.def("inContacts", &Class::inContacts, py::return_value_policy::reference)
+		.def("inDiscreteElements", &Class::inDiscreteElements, py::return_value_policy::reference)
+		.def("inFrictionCoefficients", &Class::inFrictionCoefficients, py::return_value_policy::reference);
 }
 
 #include "RigidBody/RigidBodySystem.h"
@@ -272,41 +272,42 @@ void declare_rigid_body_system(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("RigidBodySystem") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("add_box", &Class::addBox, py::arg("box"), py::arg("bodyDef"), py::arg("density") = TDataType::Real(100))
-		.def("add_sphere", &Class::addSphere, py::arg("sphere"), py::arg("bodyDef"), py::arg("density") = TDataType::Real(100))
-		.def("add_tet", &Class::addTet, py::arg("tet"), py::arg("bodyDef"), py::arg("density") = TDataType::Real(100))
-		.def("add_capsule", &Class::addCapsule, py::arg("capsule"), py::arg("bodyDef"), py::arg("density") = TDataType::Real(100))
+		.def("addBox", &Class::addBox, py::arg("box"), py::arg("bodyDef"), py::arg("density") = TDataType::Real(100))
+		.def("addSphere", &Class::addSphere, py::arg("sphere"), py::arg("bodyDef"), py::arg("density") = TDataType::Real(100))
+		.def("addTet", &Class::addTet, py::arg("tet"), py::arg("bodyDef"), py::arg("density") = TDataType::Real(100))
+		.def("addCapsule", &Class::addCapsule, py::arg("capsule"), py::arg("bodyDef"), py::arg("density") = TDataType::Real(100))
 		.def("create_rigid_body", py::overload_cast<const Coord&, const TQuat&>(&Class::createRigidBody))
 		.def("create_rigid_body", py::overload_cast<const dyno::RigidBodyInfo&>(&Class::createRigidBody))
-		.def("bind_box", &Class::bindBox)
-		.def("bind_sphere", &Class::bindSphere)
-		.def("bind_capsule", &Class::bindCapsule)
-		.def("create_ball_and_socket_joint", &Class::createBallAndSocketJoint, py::return_value_policy::reference)
-		.def("create_slider_joint", &Class::createSliderJoint, py::return_value_policy::reference)
-		.def("create_hinge_joint", &Class::createHingeJoint, py::return_value_policy::reference)
-		.def("create_fixed_joint", &Class::createFixedJoint, py::return_value_policy::reference)
-		.def("create_unilateral_fixed_joint", &Class::createUnilateralFixedJoint, py::return_value_policy::reference)
-		.def("create_point_joint", &Class::createPointJoint, py::return_value_policy::reference)
-		.def("point_inertia", &Class::pointInertia)
-		.def("get_node_type", &Class::getNodeType)
+		.def("bindBox", &Class::bindBox)
+		.def("bindSphere", &Class::bindSphere)
+		.def("bindCapsule", &Class::bindCapsule)
+		.def("bindTet", &Class::bindTet)
+		.def("createBallAndSocketJoint", &Class::createBallAndSocketJoint, py::return_value_policy::reference)
+		.def("createSliderJoint", &Class::createSliderJoint, py::return_value_policy::reference)
+		.def("createHingeJoint", &Class::createHingeJoint, py::return_value_policy::reference)
+		.def("createFixedJoint", &Class::createFixedJoint, py::return_value_policy::reference)
+		.def("createUnilateralFixedJoint", &Class::createUnilateralFixedJoint, py::return_value_policy::reference)
+		.def("createPointJoint", &Class::createPointJoint, py::return_value_policy::reference)
+		.def("pointInertia", &Class::pointInertia)
+		.def("getNodeType", &Class::getNodeType)
 
-		.def("var_friction_enabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
-		.def("var_gravity_enabled", &Class::varGravityEnabled, py::return_value_policy::reference)
-		.def("var_gravity_value", &Class::varGravityValue, py::return_value_policy::reference)
-		.def("var_friction_coefficient", &Class::varFrictionCoefficient, py::return_value_policy::reference)
-		.def("var_slop", &Class::varSlop, py::return_value_policy::reference)
-		.def("state_topology", &Class::stateTopology, py::return_value_policy::reference)
+		.def("varFrictionEnabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
+		.def("varGravityEnabled", &Class::varGravityEnabled, py::return_value_policy::reference)
+		.def("varGravityValue", &Class::varGravityValue, py::return_value_policy::reference)
+		.def("varFrictionCoefficient", &Class::varFrictionCoefficient, py::return_value_policy::reference)
+		.def("varSlop", &Class::varSlop, py::return_value_policy::reference)
+		.def("stateTopology", &Class::stateTopology, py::return_value_policy::reference)
 		.def("state_friction_coefficents", &Class::stateFrictionCoefficients, py::return_value_policy::reference)
-		.def("state_mass", &Class::stateMass, py::return_value_policy::reference)
-		.def("state_center", &Class::stateCenter, py::return_value_policy::reference)
-		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference)
-		.def("state_angular_velocity", &Class::stateAngularVelocity, py::return_value_policy::reference)
-		.def("state_rotation_matrix", &Class::stateRotationMatrix, py::return_value_policy::reference)
-		.def("state_inertia", &Class::stateInertia, py::return_value_policy::reference)
-		.def("state_quaternion", &Class::stateQuaternion, py::return_value_policy::reference)
-		.def("state_collision_mask", &Class::stateCollisionMask, py::return_value_policy::reference)
-		.def("state_attribute", &Class::stateAttribute, py::return_value_policy::reference)
-		.def("state_initial_inertia", &Class::stateInitialInertia, py::return_value_policy::reference);
+		.def("stateMass", &Class::stateMass, py::return_value_policy::reference)
+		.def("stateCenter", &Class::stateCenter, py::return_value_policy::reference)
+		.def("stateVelocity", &Class::stateVelocity, py::return_value_policy::reference)
+		.def("stateAngularVelocity", &Class::stateAngularVelocity, py::return_value_policy::reference)
+		.def("stateRotationMatrix", &Class::stateRotationMatrix, py::return_value_policy::reference)
+		.def("stateInertia", &Class::stateInertia, py::return_value_policy::reference)
+		.def("stateQuaternion", &Class::stateQuaternion, py::return_value_policy::reference)
+		.def("stateCollisionMask", &Class::stateCollisionMask, py::return_value_policy::reference)
+		.def("stateAttribute", &Class::stateAttribute, py::return_value_policy::reference)
+		.def("stateInitialInertia", &Class::stateInitialInertia, py::return_value_policy::reference);
 }
 
 #include "RigidBody/ArticulatedBody.h"
@@ -318,13 +319,15 @@ void declare_articulated_body(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ArticulatedBody") + typestr;
 	py::class_<Class, Parent1, Parent2, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		//.def("bind", &Class::bind)
-		.def("var_file_path", &Class::varFilePath, py::return_value_policy::reference)
-		.def("var_vehicles_transform", &Class::varVehiclesTransform, py::return_value_policy::reference)
-		.def("state_texture_mesh", &Class::stateTextureMesh, py::return_value_policy::reference)
-		.def("state_instance_transform", &Class::stateInstanceTransform, py::return_value_policy::reference)
-		.def("state_binding_pair", &Class::stateBindingPair, py::return_value_policy::reference)
-		.def("state_binding_tag", &Class::stateBindingTag, py::return_value_policy::reference);
+		.def("bindSphere", &Class::bindSphere)
+
+		.def("varFilePath", &Class::varFilePath, py::return_value_policy::reference)
+		.def("varVehiclesTransform", &Class::varVehiclesTransform, py::return_value_policy::reference)
+		.def("stateTextureMesh", &Class::stateTextureMesh, py::return_value_policy::reference)
+
+		.def("stateInstanceTransform", &Class::stateInstanceTransform, py::return_value_policy::reference)
+		.def("stateBindingPair", &Class::stateBindingPair, py::return_value_policy::reference)
+		.def("stateBindingTag", &Class::stateBindingTag, py::return_value_policy::reference);
 }
 
 #include "RigidBody/ConfigurableBody.h"
@@ -335,9 +338,10 @@ void declare_configurable_body(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ConfigurableBody") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_vehicle_configuration", &Class::varVehicleConfiguration, py::return_value_policy::reference)
-		.def("in_texture_mesh", &Class::inTextureMesh, py::return_value_policy::reference)
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference);
+		.def("varVehicleConfiguration", &Class::varVehicleConfiguration, py::return_value_policy::reference)
+
+		.def("inTextureMesh", &Class::inTextureMesh, py::return_value_policy::reference)
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference);
 }
 
 #include "RigidBody/Gear.h"
@@ -358,13 +362,15 @@ void declare_multibody_system(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("MultibodySystem") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_vehicles_transform", &Class::varVehiclesTransform, py::return_value_policy::reference)
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("import_vehicles", &Class::importVehicles, py::return_value_policy::reference)
-		.def("get_vehicles", &Class::getVehicles)
-		.def("add_vehicle", &Class::addVehicle)
-		.def("remove_vehicle", &Class::removeVehicle)
-		.def("state_instance_transform", &Class::stateInstanceTransform, py::return_value_policy::reference);
+		.def("varVehiclesTransform", &Class::varVehiclesTransform, py::return_value_policy::reference)
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
+
+		.def("importVehicles", &Class::importVehicles, py::return_value_policy::reference)
+		.def("getVehicles", &Class::getVehicles)
+		.def("addVehicle", &Class::addVehicle)
+		.def("removeVehicle", &Class::removeVehicle)
+
+		.def("stateInstanceTransform", &Class::stateInstanceTransform, py::return_value_policy::reference);
 }
 
 #include "RigidBody/RigidBody.h"
@@ -375,15 +381,17 @@ void declare_rigid_body(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("RigidBody") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_gravity", &Class::varGravity, py::return_value_policy::reference)
-		.def("state_mass", &Class::stateMass, py::return_value_policy::reference)
-		.def("state_center", &Class::stateCenter, py::return_value_policy::reference)
-		.def("state_velocity", &Class::stateVelocity, py::return_value_policy::reference)
-		.def("state_angular_velocity", &Class::stateAngularVelocity, py::return_value_policy::reference)
-		.def("state_rotation_matrix", &Class::stateRotationMatrix, py::return_value_policy::reference)
-		.def("state_inertia", &Class::stateInertia, py::return_value_policy::reference)
-		.def("state_quaternion", &Class::stateQuaternion, py::return_value_policy::reference)
-		.def("state_initial_inertia", &Class::stateInitialInertia, py::return_value_policy::reference);
+		.def("getNodeType", &Class::getNodeType)
+
+		.def("varGravity", &Class::varGravity, py::return_value_policy::reference)
+		.def("stateMass", &Class::stateMass, py::return_value_policy::reference)
+		.def("stateCenter", &Class::stateCenter, py::return_value_policy::reference)
+		.def("stateVelocity", &Class::stateVelocity, py::return_value_policy::reference)
+		.def("stateAngularVelocity", &Class::stateAngularVelocity, py::return_value_policy::reference)
+		.def("stateRotationMatrix", &Class::stateRotationMatrix, py::return_value_policy::reference)
+		.def("stateInertia", &Class::stateInertia, py::return_value_policy::reference)
+		.def("stateQuaternion", &Class::stateQuaternion, py::return_value_policy::reference)
+		.def("stateInitialInertia", &Class::stateInitialInertia, py::return_value_policy::reference);
 }
 
 #include "RigidBody/RigidMesh.h"
@@ -394,13 +402,15 @@ void declare_rigid_mesh(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("RigidMesh") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_envelope_name", &Class::varEnvelopeName, py::return_value_policy::reference)
-		.def("var_mesh_name", &Class::varMeshName, py::return_value_policy::reference)
-		.def("var_density", &Class::varDensity, py::return_value_policy::reference)
-		.def("state_initial_envelope", &Class::stateInitialEnvelope, py::return_value_policy::reference)
-		.def("state_envelope", &Class::stateEnvelope, py::return_value_policy::reference)
-		.def("state_initial_mesh", &Class::stateInitialMesh, py::return_value_policy::reference)
-		.def("state_mesh", &Class::stateMesh, py::return_value_policy::reference);
+		.def("varEnvelopeName", &Class::varEnvelopeName, py::return_value_policy::reference)
+		.def("varMeshName", &Class::varMeshName, py::return_value_policy::reference)
+		.def("varDensity", &Class::varDensity, py::return_value_policy::reference)
+
+		.def("stateInitialEnvelope", &Class::stateInitialEnvelope, py::return_value_policy::reference)
+		.def("stateEnvelope", &Class::stateEnvelope, py::return_value_policy::reference)
+
+		.def("stateInitialMesh", &Class::stateInitialMesh, py::return_value_policy::reference)
+		.def("stateMesh", &Class::stateMesh, py::return_value_policy::reference);
 }
 
 #include "RigidBody/Vehicle.h"
@@ -429,7 +439,7 @@ void declare_tracked_tank(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TrackedTank") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("state_caterpillar_track", &Class::statecaterpillarTrack, py::return_value_policy::reference);
+		.def("statecaterpillarTrack", &Class::statecaterpillarTrack, py::return_value_policy::reference);
 }
 
 template <typename TDataType>

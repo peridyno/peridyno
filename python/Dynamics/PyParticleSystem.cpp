@@ -21,7 +21,8 @@ void pybind_particle_system(py::module& m)
 	declare_particle_integrator<dyno::DataType3f>(m, "3f");
 	declare_position_based_fluid_model<dyno::DataType3f>(m, "3f");
 	declare_projection_based_fluid_model<dyno::DataType3f>(m, "3f");
-	declare_simple_velocity_constraint<dyno::DataType3f>(m, "3f");
+	declare_SemiImplicitDensitySolver<dyno::DataType3f>(m, "3f");
+	declare_SimpleVelocityConstraint<dyno::DataType3f>(m, "3f");
 	declare_summation_density<dyno::DataType3f>(m, "3f");
 	declare_surface_tension<dyno::DataType3f>(m, "3f");
 	declare_variational_approximate_projection<dyno::DataType3f>(m, "3f");

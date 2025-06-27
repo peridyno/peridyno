@@ -1,6 +1,20 @@
 #pragma once
 #include "../PyCommon.h"
 
+#include "HeightField/Module/ApplyBumpMap2TriangleSet.h"
+#include "Module/TopologyMapping.h"
+template <typename TDataType>
+void declare_apply_bump_map_2_triangle_set(py::module& m, std::string typestr) {
+	using Class = dyno::ApplyBumpMap2TriangleSet<TDataType>;
+	using Parent = dyno::TopologyMapping;
+	std::string pyclass_name = std::string("ApplyBumpMap2TriangleSet") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("inHeightField", &Class::inHeightField, py::return_value_policy::reference)
+		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference);
+}
+
 #include "HeightField/Module/Steer.h"
 template <typename TDataType>
 void declare_steer(py::module& m, std::string typestr) {
@@ -9,10 +23,10 @@ void declare_steer(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("Steer") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		//DEV_VAR
-		.def("in_velocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("in_angular_velocity", &Class::inAngularVelocity, py::return_value_policy::reference)
-		.def("in_quaternion", &Class::inQuaternion, py::return_value_policy::reference);
+		.def("varStrength", &Class::varStrength, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inAngularVelocity", &Class::inAngularVelocity, py::return_value_policy::reference)
+		.def("inQuaternion", &Class::inQuaternion, py::return_value_policy::reference);
 }
 
 #include "HeightField/CapillaryWave.h"
@@ -23,19 +37,20 @@ void declare_capillary_wave(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("CapillaryWave") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_water_level", &Class::varWaterLevel, py::return_value_policy::reference)
-		.def("var_resolution", &Class::varResolution, py::return_value_policy::reference)
-		.def("var_length", &Class::varLength, py::return_value_policy::reference)
-		.def("state_height", &Class::stateHeight, py::return_value_policy::reference)
-		.def("state_height_field", &Class::stateHeightField, py::return_value_policy::reference)
+		.def("varWaterLevel", &Class::varWaterLevel, py::return_value_policy::reference)
+		.def("varResolution", &Class::varResolution, py::return_value_policy::reference)
+		.def("varLength", &Class::varLength, py::return_value_policy::reference)
+		.def("varViscosity", &Class::varViscosity, py::return_value_policy::reference)
+		.def("stateHeight", &Class::stateHeight, py::return_value_policy::reference)
+		.def("stateHeightField", &Class::stateHeightField, py::return_value_policy::reference)
 		//public
-		.def("set_originX", &Class::setOriginX)
-		.def("set_originY", &Class::setOriginY)
-		.def("get_originX", &Class::getOriginX)
+		.def("setOriginX", &Class::setOriginX)
+		.def("setOriginY", &Class::setOriginY)
+		.def("getOriginX", &Class::getOriginX)
 		.def("get_originZ", &Class::getOriginZ)
-		.def("get_real_grid_size", &Class::getRealGridSize)
+		.def("getRealGridSize", &Class::getRealGridSize)
 		.def("get_origin", &Class::getOrigin)
-		.def("move_dynamic_region", &Class::moveDynamicRegion);
+		.def("moveDynamicRegion", &Class::moveDynamicRegion);
 }
 
 #include "HeightField/GranularMedia.h"
@@ -46,19 +61,20 @@ void declare_granular_media(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("GranularMedia") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_origin", &Class::varOrigin, py::return_value_policy::reference)
-		.def("var_width", &Class::varWidth, py::return_value_policy::reference)
-		.def("var_height", &Class::varHeight, py::return_value_policy::reference)
-		.def("var_depth", &Class::varDepth, py::return_value_policy::reference)
-		.def("var_depth_of_dilute_layer", &Class::varDepthOfDiluteLayer, py::return_value_policy::reference)
-		.def("var_coefficient_of_drag_force", &Class::varCoefficientOfDragForce, py::return_value_policy::reference)
-		.def("var_coefficient_of_friction", &Class::varCoefficientOfFriction, py::return_value_policy::reference)
-		.def("var_spacing", &Class::varSpacing, py::return_value_policy::reference)
-		.def("var_gravity", &Class::varGravity, py::return_value_policy::reference)
-		.def("state_land_scape", &Class::stateLandScape, py::return_value_policy::reference)
-		.def("state_grid", &Class::stateGrid, py::return_value_policy::reference)
-		.def("state_grid_next", &Class::stateGridNext, py::return_value_policy::reference)
-		.def("state_height_field", &Class::stateHeightField, py::return_value_policy::reference);
+		.def("varOrigin", &Class::varOrigin, py::return_value_policy::reference)
+		.def("varWidth", &Class::varWidth, py::return_value_policy::reference)
+		.def("varHeight", &Class::varHeight, py::return_value_policy::reference)
+		.def("varDepth", &Class::varDepth, py::return_value_policy::reference)
+		.def("varDepthOfDiluteLayer", &Class::varDepthOfDiluteLayer, py::return_value_policy::reference)
+		.def("varCoefficientOfDragForce", &Class::varCoefficientOfDragForce, py::return_value_policy::reference)
+		.def("varCoefficientOfFriction", &Class::varCoefficientOfFriction, py::return_value_policy::reference)
+		.def("varSpacing", &Class::varSpacing, py::return_value_policy::reference)
+		.def("varGravity", &Class::varGravity, py::return_value_policy::reference)
+		.def("stateLandScape", &Class::stateLandScape, py::return_value_policy::reference)
+		.def("stateGrid", &Class::stateGrid, py::return_value_policy::reference)
+		.def("stateGridNext", &Class::stateGridNext, py::return_value_policy::reference)
+		.def("stateHeightField", &Class::stateHeightField, py::return_value_policy::reference)
+		.def("stateInitialHeightField", &Class::stateInitialHeightField, py::return_value_policy::reference);
 }
 
 #include "HeightField/LandScape.h"
@@ -69,10 +85,11 @@ void declare_land_scape(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("LandScape") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
+		.def("getInitialHeights", &Class::getInitialHeights)
 		//DEV_VAR
-		.def("var_patch_size", &Class::varPatchSize, py::return_value_policy::reference)
-		.def("var_file_name", &Class::varFileName, py::return_value_policy::reference)
-		.def("state_height_field", &Class::stateHeightField, py::return_value_policy::reference);
+		.def("varPatchSize", &Class::varPatchSize, py::return_value_policy::reference)
+		.def("varFileName", &Class::varFileName, py::return_value_policy::reference)
+		.def("stateHeightField", &Class::stateHeightField, py::return_value_policy::reference);
 }
 
 #include "HeightField/OceanBase.h"
@@ -83,9 +100,10 @@ void declare_ocean_base(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("OceanBase") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("get_node_type", &Class::getNodeType)
-		.def("get_ocean_patch", &Class::getOceanPatch, py::return_value_policy::reference)
-		.def("import_ocean_patch", &Class::importOceanPatch, py::return_value_policy::reference);
+		.def("getNodeType", &Class::getNodeType)
+		.def("varWaterLevel", &Class::varWaterLevel, py::return_value_policy::reference)
+		.def("getOceanPatch", &Class::getOceanPatch, py::return_value_policy::reference)
+		.def("importOceanPatch", &Class::importOceanPatch, py::return_value_policy::reference);
 }
 
 #include "HeightField/LargeOcean.h"
@@ -96,11 +114,11 @@ void declare_large_ocean(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("LargeOcean") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_file_name", &Class::varFileName)
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("state_tex_coord", &Class::stateTexCoord, py::return_value_policy::reference)
-		.def("state_bump_map", &Class::stateBumpMap, py::return_value_policy::reference)
-		.def("state_height_field", &Class::stateHeightField, py::return_value_policy::reference);
+		.def("varFileName", &Class::varFileName)
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("stateTexCoord", &Class::stateTexCoord, py::return_value_policy::reference)
+		.def("stateBumpMap", &Class::stateBumpMap, py::return_value_policy::reference)
+		.def("stateHeightField", &Class::stateHeightField, py::return_value_policy::reference);
 }
 
 #include "HeightField/Ocean.h"
@@ -111,16 +129,16 @@ void declare_ocean(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("Ocean") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_extentX", &Class::varExtentX, py::return_value_policy::reference)
-		.def("var_extentZ", &Class::varExtentZ, py::return_value_policy::reference)
-		.def("var_water_level", &Class::varWaterLevel, py::return_value_policy::reference)
+		.def("varExtentX", &Class::varExtentX, py::return_value_policy::reference)
+		.def("varExtentZ", &Class::varExtentZ, py::return_value_policy::reference)
+		.def("varWaterLevel", &Class::varWaterLevel, py::return_value_policy::reference)
 		//DEF_NODE_PORTS
-		.def("import_capillary_waves", &Class::importCapillaryWaves, py::return_value_policy::reference)
-		.def("get_capillary_waves", &Class::getCapillaryWaves)
-		.def("add_capillary_wave", &Class::addCapillaryWave)
-		.def("remove_capillary_wave", &Class::removeCapillaryWave)
+		.def("importCapillaryWaves", &Class::importCapillaryWaves, py::return_value_policy::reference)
+		.def("getCapillaryWaves", &Class::getCapillaryWaves)
+		.def("addCapillaryWave", &Class::addCapillaryWave)
+		.def("removeCapillaryWave", &Class::removeCapillaryWave)
 		//DEF_INSTANCE_STATE
-		.def("state_height_field", &Class::stateHeightField, py::return_value_policy::reference);
+		.def("stateHeightField", &Class::stateHeightField, py::return_value_policy::reference);
 }
 
 #include "HeightField/OceanPatch.h"
@@ -131,19 +149,20 @@ void declare_ocean_patch(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("OceanPatch") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("get_node_type", &Class::getNodeType)
-		.def("var_wind_type", &Class::varWindType, py::return_value_policy::reference)
-		.def("var_amplitude", &Class::varAmplitude, py::return_value_policy::reference)
-		.def("var_wind_speed", &Class::varWindSpeed, py::return_value_policy::reference)
-		.def("var_choppiness", &Class::varChoppiness, py::return_value_policy::reference)
-		.def("var_global_shift", &Class::varGlobalShift, py::return_value_policy::reference)
+		.def("getNodeType", &Class::getNodeType)
+		.def("varWindType", &Class::varWindType, py::return_value_policy::reference)
+		.def("varAmplitude", &Class::varAmplitude, py::return_value_policy::reference)
+		.def("varAmplitudeScale", &Class::varAmplitudeScale, py::return_value_policy::reference)
+		.def("varWindSpeed", &Class::varWindSpeed, py::return_value_policy::reference)
+		.def("varChoppiness", &Class::varChoppiness, py::return_value_policy::reference)
+		.def("varGlobalShift", &Class::varGlobalShift, py::return_value_policy::reference)
 
-		.def("var_wind_direction", &Class::varWindDirection, py::return_value_policy::reference)
-		.def("var_resolution", &Class::varResolution, py::return_value_policy::reference)
-		.def("var_patch_size", &Class::varPatchSize, py::return_value_policy::reference)
-		.def("var_time_scale", &Class::varTimeScale, py::return_value_policy::reference)
+		.def("varWindDirection", &Class::varWindDirection, py::return_value_policy::reference)
+		.def("varResolution", &Class::varResolution, py::return_value_policy::reference)
+		.def("varPatchSize", &Class::varPatchSize, py::return_value_policy::reference)
+		.def("varTimeScale", &Class::varTimeScale, py::return_value_policy::reference)
 
-		.def("state_height_field", &Class::stateHeightField, py::return_value_policy::reference);
+		.def("stateHeightField", &Class::stateHeightField, py::return_value_policy::reference);
 }
 
 #include "HeightField/RigidSandCoupling.h"
@@ -156,11 +175,11 @@ void declare_rigid_sand_coupling(py::module& m, std::string typestr) {
 		.def(py::init<>())
 
 		//DEF_NODE_PORT
-		.def("import_granular_media", &Class::importGranularMedia, py::return_value_policy::reference)
-		.def("get_granular_media", &Class::getGranularMedia, py::return_value_policy::reference)
+		.def("importGranularMedia", &Class::importGranularMedia, py::return_value_policy::reference)
+		.def("getGranularMedia", &Class::getGranularMedia, py::return_value_policy::reference)
 		//DEF_NODE_PORT
-		.def("get_rigid_body_system", &Class::getRigidBodySystem, py::return_value_policy::reference)
-		.def("import_rigid_body_system", &Class::importRigidBodySystem, py::return_value_policy::reference);
+		.def("getRigidBodySystem", &Class::getRigidBodySystem, py::return_value_policy::reference)
+		.def("importRigidBodySystem", &Class::importRigidBodySystem, py::return_value_policy::reference);
 }
 
 #include "HeightField/RigidWaterCoupling.h"
@@ -171,16 +190,16 @@ void declare_rigid_water_coupling(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("RigidWaterCoupling") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_damping", &Class::varDamping, py::return_value_policy::reference)
-		.def("var_rotational_damping", &Class::varRotationalDamping, py::return_value_policy::reference)
+		.def("varDamping", &Class::varDamping, py::return_value_policy::reference)
+		.def("varRotationalDamping", &Class::varRotationalDamping, py::return_value_policy::reference)
 		//DEF_NODE_PORTS
 		.def("import_vessels", &Class::importVessels, py::return_value_policy::reference)
-		.def("get_vessels", &Class::getVessels)
-		.def("add_vessel", &Class::addVessel)
-		.def("remove_vessel", &Class::removeVessel)
+		.def("getVessels", &Class::getVessels)
+		.def("addVessel", &Class::addVessel)
+		.def("removeVessel", &Class::removeVessel)
 		//DEF_NODE_PORT
-		.def("get_ocean", &Class::getOcean)
-		.def("import_ocean", &Class::importOcean, py::return_value_policy::reference);
+		.def("getOcean", &Class::getOcean, py::return_value_policy::reference)
+		.def("importOcean", &Class::importOcean, py::return_value_policy::reference);
 }
 
 #include "HeightField/SurfaceParticleTracking.h"
@@ -192,11 +211,11 @@ void declare_surface_particle_tracking(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		//DEV_VAR
-		.def("var_layer", &Class::varLayer, py::return_value_policy::reference)
-		.def("var_spacing", &Class::varSpacing, py::return_value_policy::reference)
-		.def("get_granular_media", &Class::getGranularMedia)
-		.def("import_granular_media", &Class::importGranularMedia, py::return_value_policy::reference)
-		.def("state_point_set", &Class::statePointSet, py::return_value_policy::reference);
+		.def("varLayer", &Class::varLayer, py::return_value_policy::reference)
+		.def("varSpacing", &Class::varSpacing, py::return_value_policy::reference)
+		.def("getGranularMedia", &Class::getGranularMedia, py::return_value_policy::reference)
+		.def("importGranularMedia", &Class::importGranularMedia, py::return_value_policy::reference)
+		.def("statePointSet", &Class::statePointSet, py::return_value_policy::reference);
 }
 
 #include "HeightField/Vessel.h"
@@ -207,17 +226,18 @@ void declare_vessel(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("Vessel") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("bounding_box", &Class::boundingBox)
-		.def("get_node_type", &Class::getNodeType)
+		.def("boundingBox", &Class::boundingBox)
+		.def("getNodeType", &Class::getNodeType)
 		//DEV_VAR
-		.def("var_barycenter_offset", &Class::varBarycenterOffset, py::return_value_policy::reference)
-		.def("var_envelope_name", &Class::varEnvelopeName, py::return_value_policy::reference)
-		.def("var_texture_mesh_name", &Class::varTextureMeshName, py::return_value_policy::reference)
-		.def("var_density", &Class::varDensity, py::return_value_policy::reference)
-		.def("state_barycenter", &Class::stateBarycenter, py::return_value_policy::reference)
-		.def("state_envelope", &Class::stateEnvelope, py::return_value_policy::reference)
-		.def("state_texture_mesh", &Class::stateTextureMesh, py::return_value_policy::reference)
-		.def("state_instance_transform", &Class::stateInstanceTransform, py::return_value_policy::reference);
+		.def("varBarycenterOffset", &Class::varBarycenterOffset, py::return_value_policy::reference)
+		.def("varEnvelopeName", &Class::varEnvelopeName, py::return_value_policy::reference)
+		.def("varTextureMeshName", &Class::varTextureMeshName, py::return_value_policy::reference)
+		.def("varDensity", &Class::varDensity, py::return_value_policy::reference)
+		.def("varInitialMass", &Class::varInitialMass, py::return_value_policy::reference)
+		.def("stateBarycenter", &Class::stateBarycenter, py::return_value_policy::reference)
+		.def("stateEnvelope", &Class::stateEnvelope, py::return_value_policy::reference)
+		.def("stateTextureMesh", &Class::stateTextureMesh, py::return_value_policy::reference)
+		.def("stateInstanceTransform", &Class::stateInstanceTransform, py::return_value_policy::reference);
 }
 
 #include "HeightField/Wake.h"
@@ -229,10 +249,12 @@ void declare_wake(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		//DEV_VAR
-		.def("var_magnitude", &Class::varMagnitude, py::return_value_policy::reference)
+		.def("varMagnitude", &Class::varMagnitude, py::return_value_policy::reference)
 		//DEF_NODE_PORT
-		.def("get_vessel", &Class::getVessel)
-		.def("import_vessel", &Class::importVessel, py::return_value_policy::reference);
+		.def("getVessel", &Class::getVessel, py::return_value_policy::reference)
+		.def("importVessel", &Class::importVessel, py::return_value_policy::reference);
 }
+
+//NumericalScheme
 
 void pybind_height_field(py::module& m);
