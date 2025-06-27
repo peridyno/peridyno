@@ -283,14 +283,10 @@ void declare_merge(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("Merge") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>M(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	M.def(py::init<>())
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("in_triangle_set_01", &Class::inTriangleSet01, py::return_value_policy::reference)
-		.def("in_triangle_set_02", &Class::inTriangleSet02, py::return_value_policy::reference)
-		.def("in_triangle_set_03", &Class::inTriangleSet03, py::return_value_policy::reference)
-		.def("in_triangle_set_04", &Class::inTriangleSet04, py::return_value_policy::reference)
-		.def("var_update_mode", &Class::varUpdateMode, py::return_value_policy::reference)
-		.def("pre_update_states", &Class::preUpdateStates)
-		.def("merge_gpu", &Class::MergeGPU);
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("inTriangleSets", &Class::inTriangleSets, py::return_value_policy::reference)
+		.def("varUpdateMode", &Class::varUpdateMode, py::return_value_policy::reference)
+		.def("caption", &Class::caption);
 
 	py::enum_<typename Class::UpdateMode>(M, "UpdateMode")
 		.value("Reset", Class::UpdateMode::Reset)

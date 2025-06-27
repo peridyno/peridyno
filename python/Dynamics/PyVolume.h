@@ -8,9 +8,9 @@ void declare_adaptive_volume_to_triangle_set(py::module& m, std::string typestr)
 	std::string pyclass_name = std::string("AdaptiveVolumeToTriangleSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_iso_value", &Class::varIsoValue, py::return_value_policy::reference)
-		.def("io_volume", &Class::ioVolume, py::return_value_policy::reference)
-		.def("out_triangle_set", &Class::outTriangleSet, py::return_value_policy::reference);
+		.def("varIsoValue", &Class::varIsoValue, py::return_value_policy::reference)
+		.def("inVolume", &Class::inVolume, py::return_value_policy::reference)
+		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference);
 }
 
 #include "Volume/Module/FastMarchingMethodGPU.h"
@@ -99,9 +99,9 @@ void declare_volume_to_triangle_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("VolumeToTriangleSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_iso_value", &Class::varIsoValue, py::return_value_policy::reference)
-		.def("io_volume", &Class::ioVolume, py::return_value_policy::reference)
-		.def("out_triangle_set", &Class::outTriangleSet, py::return_value_policy::reference);
+		.def("varIsoValue", &Class::varIsoValue, py::return_value_policy::reference)
+		.def("inVolume", &Class::inVolume, py::return_value_policy::reference)
+		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference);
 }
 
 #include "Volume/Volume.h"
