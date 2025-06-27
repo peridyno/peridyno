@@ -7,7 +7,7 @@
 
 namespace dyno
 {
-	bool loadTextureMeshFromObj(std::shared_ptr<TextureMesh> texMesh, const FilePath& fullname)
+	bool loadTextureMeshFromObj(std::shared_ptr<TextureMesh> texMesh, const FilePath& fullname, bool useToCenter)
 	{
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
@@ -32,6 +32,7 @@ namespace dyno
 		std::vector<dyno::Vec3f> vertices;
 		std::vector<dyno::Vec3f> normals;
 		std::vector<dyno::Vec2f> texCoords;
+		std::vector<dyno::uint> shapeIds;
 
 		std::vector<dyno::Vec3i> pIndex;
 		std::vector<dyno::Vec3i> nIndex;
@@ -49,6 +50,8 @@ namespace dyno
 			texCoords.push_back({ attrib.texcoords[i], attrib.texcoords[i + 1] });
 		}
 
+		shapeIds.resize(vertices.size());
+		texMesh->shapeIds().reset();
 		// load texture...
 		dyno::CArray2D<dyno::Vec4f> texture(1, 1);
 		texture[0, 0] = dyno::Vec4f(1);
@@ -96,6 +99,7 @@ namespace dyno
 		tShapes.resize(shapes.size());
 
 		uint sId = 0;
+
 		for (const tinyobj::shape_t& shape : shapes) {
 			// only load triangle mesh...
 			const auto& mesh = shape.mesh;
@@ -127,6 +131,11 @@ namespace dyno
 				hi = hi.maximum(vertices[idx0.vertex_index]);
 				hi = hi.maximum(vertices[idx1.vertex_index]);
 				hi = hi.maximum(vertices[idx2.vertex_index]);
+
+				shapeIds[idx0.vertex_index] = sId;
+				shapeIds[idx1.vertex_index] = sId;
+				shapeIds[idx2.vertex_index] = sId;
+
 			}
 			tShapes[sId]->vertexIndex.assign(vertexIndex);
 			tShapes[sId]->normalIndex.assign(normalIndex);
@@ -136,30 +145,35 @@ namespace dyno
 			tShapes[sId]->boundingBox = TAlignedBox3D<Real>(lo, hi);
 			tShapes[sId]->boundingTransform = Transform3f(shapeCenter, Quat1f().toMatrix3x3());
 
+			
 			//Move to center
-			std::vector<int> indicator(vertices.size(), 0);
-			for (int i = 0; i < mesh.indices.size(); i += 3)
+			if (useToCenter) 
 			{
-				auto idx0 = mesh.indices[i];
-				auto idx1 = mesh.indices[i + 1];
-				auto idx2 = mesh.indices[i + 2];
+				std::vector<int> indicator(vertices.size(), 0);
+				for (int i = 0; i < mesh.indices.size(); i += 3)
+				{
+					auto idx0 = mesh.indices[i];
+					auto idx1 = mesh.indices[i + 1];
+					auto idx2 = mesh.indices[i + 2];
 
-				if (indicator[idx0.vertex_index] == 0)
-				{
-					vertices[idx0.vertex_index] -= shapeCenter;
-					indicator[idx0.vertex_index] = 1;
-				}
-				if (indicator[idx1.vertex_index] == 0)
-				{
-					vertices[idx1.vertex_index] -= shapeCenter;
-					indicator[idx1.vertex_index] = 1;
-				}
-				if (indicator[idx2.vertex_index] == 0)
-				{
-					vertices[idx2.vertex_index] -= shapeCenter;
-					indicator[idx2.vertex_index] = 1;
+					if (indicator[idx0.vertex_index] == 0)
+					{
+						vertices[idx0.vertex_index] -= shapeCenter;
+						indicator[idx0.vertex_index] = 1;
+					}
+					if (indicator[idx1.vertex_index] == 0)
+					{
+						vertices[idx1.vertex_index] -= shapeCenter;
+						indicator[idx1.vertex_index] = 1;
+					}
+					if (indicator[idx2.vertex_index] == 0)
+					{
+						vertices[idx2.vertex_index] -= shapeCenter;
+						indicator[idx2.vertex_index] = 1;
+					}
 				}
 			}
+			
 
 			vertexIndex.clear();
 			normalIndex.clear();
@@ -171,6 +185,14 @@ namespace dyno
 		texMesh->vertices().assign(vertices);
 		texMesh->normals().assign(normals);
 		texMesh->texCoords().assign(texCoords);
+		texMesh->shapeIds().assign(shapeIds);
+
+		//A hack: for an obj file with one shape
+		if (shapes.size() == 1)
+		{
+			texMesh->shapeIds().resize(vertices.size());
+			texMesh->shapeIds().reset();
+		}
 
 		vertices.clear();
 		normals.clear();

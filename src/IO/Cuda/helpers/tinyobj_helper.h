@@ -5,5 +5,5 @@
 
 namespace dyno
 {
-	bool loadTextureMeshFromObj(std::shared_ptr<TextureMesh> texMesh, const FilePath& fullname);
+	bool loadTextureMeshFromObj(std::shared_ptr<TextureMesh> texMesh, const FilePath& fullname,bool useToCenter = true);
 }

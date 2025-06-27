@@ -22,6 +22,8 @@ namespace dyno
 
 		DEF_VAR(FilePath, FileName, "", "The full obj file name");
 
+		DEF_VAR(bool, UseInstanceTransform, true, "");
+
 		DEF_INSTANCE_STATE(TextureMesh, TextureMesh, "");
 
 	protected:
@@ -31,6 +33,7 @@ namespace dyno
 		void callbackLoadFile();
 		void callbackTransform();
 
+		CArray<Vec3f> initialShapeCenter;
 		DArray<Vec3f> mInitialVertex;
 		DArray<Vec3f> mInitialNormal;
 		DArray<Vec2f> mInitialTexCoord;
