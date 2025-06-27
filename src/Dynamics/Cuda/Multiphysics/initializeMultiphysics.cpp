@@ -5,7 +5,7 @@
 #include "VolumeBoundary.h"
 #include "AdaptiveBoundary.h"
 
-#include "PoissonDiskSampling.h"
+#include "PoissonDiskSampler.h"
 
 namespace dyno
 {
@@ -64,7 +64,7 @@ namespace dyno
 			"Poisson Disk Sampler",
 			"ToolBarIco/Modeling/PoissonDiskSampler_v2.png",
 			[=]()->std::shared_ptr<Node> {
-				return std::make_shared<PoissonDiskSampling<DataType3f>>();
+				return std::make_shared<PoissonDiskSampler<DataType3f>>();
 			});
 	}
 }

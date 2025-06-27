@@ -19,7 +19,7 @@
 #include "Topology/HexahedronSet.h"
 #include <cmath>
 #include <Volume/VolumeOctree.h>
-
+#include <Volume/Volume.h >
 #include "Samplers/Sampler.h"
 
 namespace dyno {
@@ -45,7 +45,12 @@ namespace dyno {
 			Real h);
 
 	public:
-		DEF_NODE_PORT(VolumeOctree<TDataType>, Volume, "");
+
+		DEF_NODE_PORT(Volume<TDataType>, Volume, "");
+
+		DEF_NODE_PORT(VolumeOctree<TDataType>, VolumeOctree, "");
+
+
 
 		//DEF_INSTANCE_OUT(PointSet<TDataType>, PointSet, "");
 

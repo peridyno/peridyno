@@ -7,7 +7,7 @@
 #include <SemiAnalyticalScheme/TriangularMeshBoundary.h>
 
 #include "Multiphysics/SdfSampler.h"
-#include "Multiphysics/PoissonDiskSampling.h"
+#include "Multiphysics/PoissonDiskSampler.h"
 
 #include "BasicShapes/CubeModel.h"
 #include "BasicShapes/SphereModel.h"
@@ -19,6 +19,7 @@
 #include "Volume/VolumeOctreeGenerator.h"
 #include "Volume/VolumeOctreeBoolean.h"
 #include "Volume/VolumeGenerator.h"
+#include "Volume/BasicShapeToVolume.h"
 
 #include "GLSurfaceVisualModule.h"
 #include <GLRenderEngine.h>
@@ -33,9 +34,6 @@ std::shared_ptr<SceneGraph> createScene()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 	scn->setUpperBound(Vec3f(15.5, 15.0, 15.5));
 	scn->setLowerBound(Vec3f(-15.5, -15.0, -15.5));
-
-	///*Set up the gravity in the scene.*/
-	//scn->setGravity(Vec3f(0.0f));
 
 	/*
 	*@brief Regular sampling in .sdf
@@ -78,10 +76,11 @@ std::shared_ptr<SceneGraph> createScene()
 	volume1->connect(volume_Sphere_Uniform->importOctreeA()); /*B(.obj)-A(.obj)*/
 	volume2->connect(volume_Sphere_Uniform->importOctreeB());
 	volume_Sphere_Uniform->graphicsPipeline()->disable();
+    volume_Sphere_Uniform->animationPipeline()->disable();
 
 	auto Points = scn->addNode(std::make_shared<SdfSampler<DataType3f>>());
 	Points->varSpacing()->setValue(0.01f);
-	volume_Sphere_Uniform->connect(Points->importVolume());
+	volume_Sphere_Uniform->connect(Points->importVolumeOctree());
 
 	auto pointVisual = std::make_shared<GLPointVisualModule>();
 	Points->statePointSet()->promoteOuput()->connect(pointVisual->inPointSet());
@@ -164,8 +163,29 @@ std::shared_ptr<SceneGraph> createScene()
 	volume4->connect(volume_bool2->importOctreeB());
 	volume_bool2->graphicsPipeline()->disable();
 
-	auto poissonPointSet = scn->addNode(std::make_shared<PoissonDiskSampling<DataType3f>>());
-	volume_bool2->connect(poissonPointSet->importVolume());
+	auto poissonPointSet = scn->addNode(std::make_shared<PoissonDiskSampler<DataType3f>>());
+	volume_bool2->connect(poissonPointSet->importVolumeOctree());
+
+
+	auto obj5 = scn->addNode(std::make_shared<SphereModel<DataType3f>>());
+	obj5->varLocation()->setValue(Vec3f(0.0f, 1.2f, 0.0f));
+	obj5->varRadius()->setValue(0.2f);
+	auto volume5 = scn->addNode(std::make_shared<BasicShapeToVolume<DataType3f>>());
+	obj5->connect(volume5->importShape());
+	auto Points5 = scn->addNode(std::make_shared<SdfSampler<DataType3f>>());
+	Points5->varSpacing()->setValue(0.01f);
+	volume5->connect(Points5->importVolume());
+
+
+	auto obj6 = scn->addNode(std::make_shared<SphereModel<DataType3f>>());
+	obj6->varRadius()->setValue(0.3f);
+	obj6->varLocation()->setValue(Vec3f(0.5f, 1.2f, 0.0f));
+	auto volume6 = scn->addNode(std::make_shared<BasicShapeToVolume<DataType3f>>());
+	obj6->connect(volume6->importShape());
+	auto Points6 = scn->addNode(std::make_shared<PoissonDiskSampler<DataType3f>>());
+	Points6->varSpacing()->setValue(0.01f);
+	volume6->connect(Points6->importVolume());
+
 
 	return scn;
 

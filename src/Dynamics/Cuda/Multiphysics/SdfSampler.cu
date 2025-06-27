@@ -190,8 +190,14 @@ namespace dyno
 		VolumeOctree<TDataType>* volume,
 		Real h)
 	{
-		Coord lo = volume->lowerBound();
-		Coord hi = volume->upperBound();
+
+		auto sdf = volume->stateSDFTopology()->getData();
+
+		//Coord lo = volume->lowerBound();
+		//Coord hi = volume->upperBound();
+
+		Coord lo = sdf.getOrigin();
+		Coord hi = sdf.getTopOrigin();
 
 		int nx = (hi[0] - lo[0]) / h;
 		int ny = (hi[1] - lo[1]) / h;
@@ -231,11 +237,25 @@ namespace dyno
 	template<typename TDataType>
 	void SdfSampler<TDataType>::resetStates()
 	{
-		auto vol = this->getVolume();
+		//auto vol = this->getVolumeOctree();
 		Real dx = this->varSpacing()->getData();
 
-		//Adaptive mesh to uniform mesh
-		auto inputSDF = this->convert2Uniform(vol, dx);
+		std::shared_ptr<dyno::DistanceField3D<TDataType>> inputSDF;
+
+		if (this->getVolumeOctree() != nullptr)
+		{
+			inputSDF = this->convert2Uniform(this->getVolumeOctree(), dx);
+		}
+		else if (this->getVolume() != nullptr)
+		{
+			inputSDF = std::make_shared<dyno::DistanceField3D<TDataType>>();
+			inputSDF->assign(this->getVolume()->stateLevelSet()->getData().getSDF());
+		}
+		else
+		{
+			return;
+		}
+
 
 
 		if (this->statePointSet()->isEmpty()) {
@@ -316,7 +336,7 @@ namespace dyno
 	template<typename TDataType>
 	bool dyno::SdfSampler<TDataType>::validateInputs()
 	{
-		return this->getVolume() != nullptr;
+		return (this->getVolumeOctree() != nullptr)||(this->getVolume() != nullptr);
 	}
 
 	DEFINE_CLASS(SdfSampler);
