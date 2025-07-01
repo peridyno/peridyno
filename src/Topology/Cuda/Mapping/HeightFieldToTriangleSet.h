@@ -9,6 +9,7 @@ namespace dyno
 	template<typename TDataType>
 	class HeightFieldToTriangleSet : public TopologyMapping
 	{
+		DECLARE_TCLASS(HeightFieldToTriangleSet, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

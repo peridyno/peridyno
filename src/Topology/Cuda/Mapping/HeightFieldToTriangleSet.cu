@@ -2,6 +2,7 @@
 
 namespace dyno
 {
+	IMPLEMENT_TCLASS(HeightFieldToTriangleSet, TDataType)
 	template<typename TDataType>
 	HeightFieldToTriangleSet<TDataType>::HeightFieldToTriangleSet()
 		: TopologyMapping()
