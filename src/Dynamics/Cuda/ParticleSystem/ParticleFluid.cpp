@@ -77,6 +77,7 @@ namespace dyno
 		nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());
 		this->animationPipeline()->pushModule(viscosity);
 
+		integrator->connect(density->importModules());
 		density->connect(viscosity->importModules());
 
 		//Setup the default render modules

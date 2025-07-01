@@ -72,7 +72,7 @@ namespace Qt
 		case PortType::In:
 			if (mModule->allowImported() && portIndex < mModuleImports.size())
 			{
-				return NodeDataType{ "port", "port", PortShape::Diamond };
+				return NodeDataType{ "port", "port", PortShape::Arrow };
 			}
 			else
 			{
@@ -88,7 +88,7 @@ namespace Qt
 		case PortType::Out:
 			if (mModule->allowExported() && portIndex == 0)
 			{
-				return NodeDataType{ "port", "port", PortShape::Diamond };
+				return NodeDataType{ "port", "port", PortShape::Arrow };
 			}
 			else
 			{

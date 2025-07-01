@@ -29,7 +29,7 @@ namespace Qt
 		{
 			return NodeDataType{ "nodeport",
 								 "NodePort",
-								 PortShape::Bullet};
+								 PortShape::Diamond};
 		}
 
 		NodePort* getNodePort() { return node_port; }
@@ -59,7 +59,7 @@ namespace Qt
 		{
 			return NodeDataType{ "nodeexport",
 								 "NodeExport",
-								 PortShape::Bullet};
+								 PortShape::Diamond};
 		}
 
 		inline std::shared_ptr<Node> getNode() { return export_node; }
@@ -87,7 +87,7 @@ namespace Qt
 		{
 			return NodeDataType{ "moduleport",
 								 "ModulePort",
-								 PortShape::Bullet };
+								 PortShape::Diamond };
 		}
 
 		ModulePort* getModulePort() { return module_port; }
@@ -116,7 +116,7 @@ namespace Qt
 		{
 			return NodeDataType{ "moduleexport",
 								 "ModuleExport",
-								 PortShape::Bullet };
+								 PortShape::Diamond };
 		}
 
 		inline std::shared_ptr<Module> getModule() { return export_module; }
