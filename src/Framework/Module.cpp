@@ -151,12 +151,67 @@ namespace dyno
 		return true;
 	}
 
+	bool Module::connect(ModulePort* nPort)
+	{
+		if (!this->allowExported() || !nPort->getParent()->allowImported())
+			return false;
+
+		nPort->notify();
+
+		return this->appendExportModule(nPort);
+	}
+
+	bool Module::disconnect(ModulePort* nPort)
+	{
+		return this->removeExportModule(nPort);
+	}
+
 	void Module::updateStarted()
 	{
 	}
 
 	void Module::updateEnded()
 	{
+	}
+
+	bool Module::appendExportModule(ModulePort* nodePort)
+	{
+		auto it = find(mExportModules.begin(), mExportModules.end(), nodePort);
+		if (it != mExportModules.end()) {
+			//Log::sendMessage(Log::Info, FormatConnectionInfo(this, nodePort, true, false));
+			return false;
+		}
+
+		mExportModules.push_back(nodePort);
+
+		//Log::sendMessage(Log::Info, FormatConnectionInfo(this, nodePort, true, true));
+		return nodePort->addModule(this);
+	}
+
+	bool Module::removeExportModule(ModulePort* nodePort)
+	{
+		//TODO: this is a hack, otherwise the app will crash
+		if (mExportModules.size() == 0) {
+			return false;
+		}
+
+		auto it = find(mExportModules.begin(), mExportModules.end(), nodePort);
+		if (it == mExportModules.end()) {
+			//Log::sendMessage(Log::Info, FormatConnectionInfo(this, nodePort, false, false));
+			return false;
+		}
+
+		mExportModules.erase(it);
+
+		//Log::sendMessage(Log::Info, FormatConnectionInfo(this, nodePort, false, true));
+		return nodePort->removeModule(this);
+	}
+
+	bool Module::addModulePort(ModulePort* port)
+	{
+		mImportModules.push_back(port);
+
+		return true;
 	}
 
 	bool Module::validateOutputs()

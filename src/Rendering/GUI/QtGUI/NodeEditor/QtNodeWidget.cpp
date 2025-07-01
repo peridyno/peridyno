@@ -187,6 +187,8 @@ namespace Qt
 		case PortType::None:
 			break;
 		}
+
+		return QString("");
 	}
 
 	QString QtNodeWidget::portTips(PortType portType, PortIndex portIndex) const

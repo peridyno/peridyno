@@ -22,6 +22,8 @@ namespace Qt
 				output_fields[i] = std::make_shared<QtFieldData>(outputs[i]);
 			}
 
+			mModuleExport = std::make_shared<QtExportModule>(base);
+
 			//initialize in ports
 			int input_num = getInputFields().size();
 			input_fields.resize(input_num);
@@ -30,6 +32,15 @@ namespace Qt
 			{
 				input_fields[i] = std::make_shared<QtFieldData>(inputs[i]);;
 				// fprintf(stderr, (input_fields[i].expired()) ? "expired\n" : "nothing!\n");
+			}
+
+			auto imports = mModule->getImportModules();
+			auto imports_num = imports.size();
+
+			mModuleImports.resize(imports_num);
+			for (int i = 0; i < imports.size(); i++)
+			{
+				mModuleImports[i] = std::make_shared<QtImportModule>(imports[i]);
 			}
 		}
 
@@ -43,11 +54,11 @@ namespace Qt
 
 		if (portType == PortType::In)
 		{
-			result = input_fields.size();
+			result = mModule->allowImported() ? mModuleImports.size() + input_fields.size() : input_fields.size();
 		}
 		else
 		{
-			result = output_fields.size();
+			result = mModule->allowExported() ? 1 + output_fields.size() : output_fields.size();
 		}
 
 		return result;
@@ -56,17 +67,56 @@ namespace Qt
 
 	NodeDataType QtModuleWidget::dataType(PortType portType, PortIndex portIndex) const
 	{
-		dyno::FBase* f = this->getField(portType, portIndex);
+		switch (portType)
+		{
+		case PortType::In:
+			if (mModule->allowImported() && portIndex < mModuleImports.size())
+			{
+				return NodeDataType{ "port", "port", PortShape::Diamond };
+			}
+			else
+			{
+				PortIndex recalculatedIndex = mModule->allowImported() ? portIndex - mModuleImports.size() : portIndex;
 
-		std::string name = f->getClassName();
+				dyno::FBase* f = this->getField(portType, recalculatedIndex);
 
-		return NodeDataType{ name.c_str(), name.c_str(), PortShape::Point };
+				std::string name = f->getClassName();
+
+				return NodeDataType{ name.c_str(), name.c_str(), PortShape::Point };
+			}
+			break;
+		case PortType::Out:
+			if (mModule->allowExported() && portIndex == 0)
+			{
+				return NodeDataType{ "port", "port", PortShape::Diamond };
+			}
+			else
+			{
+				PortIndex recalculatedIndex = mModule->allowExported() ? portIndex - 1 : portIndex;
+
+				dyno::FBase* f = this->getField(portType, recalculatedIndex);
+
+				std::string name = f->getClassName();
+
+				return NodeDataType{ name.c_str(), name.c_str(), PortShape::Point };
+			}
+			break;
+		case PortType::None:
+			break;
+		}
+
+		return NodeDataType{ "port", "port", PortShape::Point };
 	}
 
 
 	std::shared_ptr<QtNodeData> QtModuleWidget::outData(PortIndex port)
 	{
-		return std::dynamic_pointer_cast<QtNodeData>(output_fields[port]);
+		if (mModule->allowExported())
+		{
+			return port == 0 ? std::static_pointer_cast<QtNodeData>(mModuleExport) : std::static_pointer_cast<QtNodeData>(output_fields[port - 1]);
+		}
+		else
+			return std::static_pointer_cast<QtNodeData>(output_fields[port]);
 	}
 
 
@@ -102,10 +152,41 @@ namespace Qt
 
 	QString QtModuleWidget::portCaption(PortType portType, PortIndex portIndex) const
 	{
-		dyno::FBase* f = this->getField(portType, portIndex);
-		std::string name = f->getObjectName();
+		switch (portType)
+		{
+		case PortType::In:
+			if (mModule->allowImported() && portIndex < mModuleImports.size())
+			{
+				return QString("");
+			}
+			else
+			{
+				PortIndex recalculatedIndex = mModule->allowImported() ? portIndex - mModuleImports.size() : portIndex;
+				dyno::FBase* f = this->getField(portType, recalculatedIndex);
+				std::string name = f->getObjectName();
 
-		return dyno::FormatBlockPortName(name);
+				return dyno::FormatBlockPortName(name);
+			}
+			break;
+		case PortType::Out:
+			if (mModule->allowExported() && portIndex == 0)
+			{
+				return QString("");
+			}
+			else
+			{
+				PortIndex recalculatedIndex = mModule->allowExported() ? portIndex - 1 : portIndex;
+				dyno::FBase* f = this->getField(portType, recalculatedIndex);
+				std::string name = f->getObjectName();
+
+				return dyno::FormatBlockPortName(name);
+			}
+			break;
+		case PortType::None:
+			break;
+		}
+
+		return QString("");
 	}
 
 	QString QtModuleWidget::nodeTips() const
@@ -115,17 +196,48 @@ namespace Qt
 
 	QString QtModuleWidget::portTips(PortType portType, PortIndex portIndex) const
 	{
-		dyno::FBase* f = this->getField(portType, portIndex);
-		
 		auto fieldTip = [&](FBase* f) -> QString {
 			std::string tip;
 			tip += "Class: " + f->getClassName() + "\n";
 			tip += "Template: " + f->getTemplateName() + "\n";
 
 			return QString::fromStdString(tip);
-		};
+			};
 
-		return fieldTip(f);
+		switch (portType)
+		{
+		case PortType::In:
+			if (mModule->allowImported() && portIndex < mModuleImports.size())
+			{
+				return QString("");
+			}
+			else
+			{
+				PortIndex recalculatedIndex = mModule->allowImported() ? portIndex - mModuleImports.size() : portIndex;
+
+				dyno::FBase* f = this->getField(portType, recalculatedIndex);
+
+				return fieldTip(f);
+			}
+			break;
+		case PortType::Out:
+			if (mModule->allowExported() && portIndex == 0)
+			{
+				return QString("");
+			}
+			else
+			{
+				PortIndex recalculatedIndex = mModule->allowExported() ? portIndex - 1 : portIndex;
+				dyno::FBase* f = this->getField(portType, recalculatedIndex);
+
+				return fieldTip(f);
+			}
+			break;
+		case PortType::None:
+			break;
+		}
+
+		return QString("");
 	}
 
 	void QtModuleWidget::setInData(std::shared_ptr<QtNodeData> data, PortIndex portIndex)
@@ -133,20 +245,46 @@ namespace Qt
 		if (!mEditingEnabled)
 			return;
 
-		auto fieldData = std::dynamic_pointer_cast<QtFieldData>(data);
-
-		if (fieldData != nullptr)
+		if (this->allowImported() && portIndex < mModuleImports.size())
 		{
-			auto field = fieldData->getField();
+			auto module_port = std::dynamic_pointer_cast<QtExportModule>(data);
 
-			if (fieldData->connectionType() == CntType::Break)
+			if (module_port != nullptr)
 			{
-				field->disconnect(input_fields[portIndex]->getField());
-				fieldData->setConnectionType(CntType::Link);
+				auto m = module_port->getModule();
+
+				if (module_port->connectionType() == CntType::Break)
+				{
+					//mNodeInport[portIndex]->getNodePort()->removeNode(nd.get());
+					m->disconnect(mModuleImports[portIndex]->getModulePort());
+
+					//TODO: recover the connection state, use a more elegant way in the future
+					data->setConnectionType(CntType::Link);
+				}
+				else
+				{
+					m->connect(mModuleImports[portIndex]->getModulePort());
+				}
 			}
-			else
+		}
+		else
+		{
+			PortIndex recalcualtedIndex = this->allowImported() ? portIndex - mModuleImports.size() : portIndex;
+			auto fieldData = std::dynamic_pointer_cast<QtFieldData>(data);
+
+			if (fieldData != nullptr)
 			{
-				field->connect(input_fields[portIndex]->getField());
+				auto field = fieldData->getField();
+
+				if (fieldData->connectionType() == CntType::Break)
+				{
+					field->disconnect(input_fields[recalcualtedIndex]->getField());
+					fieldData->setConnectionType(CntType::Link);
+				}
+				else
+				{
+					field->connect(input_fields[recalcualtedIndex]->getField());
+				}
 			}
 		}
 
@@ -160,31 +298,54 @@ namespace Qt
 
 		try
 		{
-			auto fieldExp = std::dynamic_pointer_cast<QtFieldData>(nodeData);
-			if (fieldExp == nullptr)
-				return false;
-
-			auto fieldInp = input_fields[portIndex];
-
-			if (fieldInp->getField()->getClassName() == fieldExp->getField()->getClassName())
+			if (this->allowImported() && portIndex < mModuleImports.size())
 			{
-				std::string className = fieldInp->getField()->getClassName();
-				if (className == dyno::InstanceBase::className())
+				try
 				{
-					dyno::InstanceBase* instIn = dynamic_cast<dyno::InstanceBase*>(fieldInp->getField());
-					dyno::InstanceBase* instOut = dynamic_cast<dyno::InstanceBase*>(fieldExp->getField());
+					auto moduleExp = std::dynamic_pointer_cast<QtExportModule>(nodeData);
 
-					if (instIn != nullptr && instOut != nullptr)
-						return instIn->canBeConnectedBy(instOut);
+					if (moduleExp == nullptr)
+						return false;
 
+					auto moduleImp = mModuleImports[portIndex];
+
+					return moduleImp->getModulePort()->isKindOf(moduleExp->getModule().get());;
+				}
+				catch (std::bad_cast)
+				{
 					return false;
 				}
-				else
-					return fieldInp->getField()->getTemplateName() == fieldExp->getField()->getTemplateName();
 			}
 			else
 			{
-				return false;
+				PortIndex recalcualtedIndex = this->allowImported() ? portIndex - mModuleImports.size() : portIndex;
+
+				auto fieldExp = std::dynamic_pointer_cast<QtFieldData>(nodeData);
+				if (fieldExp == nullptr)
+					return false;
+
+				auto fieldInp = input_fields[recalcualtedIndex];
+
+				if (fieldInp->getField()->getClassName() == fieldExp->getField()->getClassName())
+				{
+					std::string className = fieldInp->getField()->getClassName();
+					if (className == dyno::InstanceBase::className())
+					{
+						dyno::InstanceBase* instIn = dynamic_cast<dyno::InstanceBase*>(fieldInp->getField());
+						dyno::InstanceBase* instOut = dynamic_cast<dyno::InstanceBase*>(fieldExp->getField());
+
+						if (instIn != nullptr && instOut != nullptr)
+							return instIn->canBeConnectedBy(instOut);
+
+						return false;
+					}
+					else
+						return fieldInp->getField()->getTemplateName() == fieldExp->getField()->getTemplateName();
+				}
+				else
+				{
+					return false;
+				}
 			}
 		}
 		catch (std::bad_cast)

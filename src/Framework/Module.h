@@ -24,6 +24,7 @@
 #include "DataTypes.h"
 #include "DeclareEnum.h"
 #include "DeclareField.h"
+#include "ModulePort.h"
 #include "FCallbackFunc.h"
 #include "FieldTypes.h"
 
@@ -81,6 +82,14 @@ namespace dyno
 		bool isInputComplete();
 		bool isOutputCompete();
 
+		bool connect(ModulePort* nPort);
+		bool disconnect(ModulePort* nPort);
+
+		virtual bool allowImported() { return this->captionVisible(); }
+		virtual bool allowExported() { return this->captionVisible(); }
+		
+		std::vector<ModulePort*>& getImportModules() { return mImportModules; }
+		std::vector<ModulePort*>& getExportModules() { return mExportModules; }
 
 	public:
 		DEF_VAR(bool, ForceUpdate, false, "");
@@ -115,9 +124,32 @@ namespace dyno
 		virtual void updateStarted();
 		virtual void updateEnded();
 
+		bool appendExportModule(ModulePort* nodePort);
+		bool removeExportModule(ModulePort* nodePort);
+
+	private:
+		bool addModulePort(ModulePort* port);
+
 	private:
 		Node* m_node;
 		std::string m_module_name;
 		bool m_initialized;
+
+		std::vector<ModulePort*> mImportModules;
+
+		std::vector<ModulePort*> mExportModules;
+
+		/**
+		 * @brief Used to ensure modules can be executed in the correct order
+		 */
+	public:
+		inline MultipleModulePort<Module>* importModules() { return &mAncestors; }
+	private:
+		MultipleModulePort<Module> mAncestors = MultipleModulePort<Module>(
+			std::string("Ancestor") + std::string("(s)"),
+			"Ancestors",
+			this);
+
+		friend class ModulePort;
 	};
 }

@@ -17,6 +17,12 @@
 
 namespace dyno
 {
+#define DEF_VAR_STATE(T, name, value, desc) \
+private:									\
+	FVar<T> state_##name = FVar<T>(T(value), std::string(#name), desc, FieldTypeEnum::State, this);			\
+public:										\
+	inline FVar<T>* state##name() {return &state_##name;}
+
 /**
  * @brief Macro definitions for ArrayField
  * 
@@ -55,6 +61,27 @@ private:									\
 	FInstance<T> state_##name = FInstance<T>(std::string(#name), desc, FieldTypeEnum::State, this);	\
 public:									\
 	inline FInstance<T>* state##name() {return &state_##name;}
+
+  /**
+   * @brief Macro definitions for instance state
+   *
+   */
+#define DEF_INSTANCE_STATE(T, name, desc)		\
+private:									\
+	FInstance<T> state_##name = FInstance<T>(std::string(#name), desc, FieldTypeEnum::State, this);	\
+public:									\
+	inline FInstance<T>* state##name() {return &state_##name;}
+
+   /**
+	* @brief Macro definitions for an array of instance, can only be used within a node
+	*/
+
+#define DEF_INSTANCES_IN(T, name, desc)		\
+private:									\
+	FInstances<T> in_##name = FInstances<T>(std::string(#name)+std::string("(s)"), desc, FieldTypeEnum::In, this);	\
+public:									\
+	inline FInstances<T>* in##name##s() {return &in_##name;}
+
 
 /**
  * @brief Macro definitions for node ports

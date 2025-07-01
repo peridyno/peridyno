@@ -7,6 +7,8 @@
 #include "nodes/QNodeDataModel"
 
 #include "QtFieldData.h"
+#include "QtNodeData.h"
+
 #include "Module.h"
 
 #include <iostream>
@@ -51,7 +53,8 @@ namespace Qt
 
 		bool hotkeyEnabled() const override { return false; }
 
-		bool allowExported() const override { return false; }
+		bool allowImported() const override { return mModule->allowImported(); }
+		bool allowExported() const override { return mModule->allowExported(); }
 
 		bool portCaptionVisible(PortType portType, PortIndex portIndex) const override;
 
@@ -85,6 +88,11 @@ namespace Qt
 		virtual void updateModule();
 
 	protected:
+		using ImportModulePtr = std::vector<std::shared_ptr<QtImportModule>>;
+		using ExportModulePtr = std::shared_ptr<QtExportModule>;
+
+		ImportModulePtr mModuleImports;
+		ExportModulePtr mModuleExport;
 
 		using OutFieldPtr = std::vector<std::shared_ptr<QtFieldData>>;
 		//TODO: why weak_ptr?
