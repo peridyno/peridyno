@@ -43,15 +43,15 @@ std::shared_ptr<SceneGraph> creatScene()
 	// Scene Setting
 	scn->setTotalTime(3.0f);
 	scn->setGravity(Vec3f(0.0f, -9.8f, 0.0f));
-	scn->setLowerBound(Vec3f(-0.5f, 0.0f, -4.0f));
-	scn->setUpperBound(Vec3f(0.5f, 1.0f, 4.0f));
+	scn->setLowerBound(Vec3f(-0.5f, 0.0f, -8.0f));
+	scn->setUpperBound(Vec3f(0.5f, 1.0f, 8.0f));
 
 
 	// Create Var
 	Vec3f velocity = Vec3f(0, 0, 6);
 	Color color = Color(1, 1, 1);
 
-	Vec3f LocationBody = Vec3f(0, 0.01, -1);
+	Vec3f LocationBody = Vec3f(0, 0.00, -1);
 
 	Vec3f anglurVel = Vec3f(100, 0, 0);
 	Vec3f scale = Vec3f(0.4, 0.4, 0.4);
@@ -115,7 +115,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	//MergeRoad
 	auto mergeRoad = scn->addNode(std::make_shared<Merge<DataType3f>>());
 	mergeRoad->varUpdateMode()->setCurrentKey(1);
-	mergeWheel->stateTriangleSet()->promoteOuput()->connect(mergeRoad->inTriangleSets());
+	mergeWheel->stateTriangleSets()->promoteOuput()->connect(mergeRoad->inTriangleSets());
 	ObjRoad->outTriangleSet()->connect(mergeRoad->inTriangleSets());
 
 	//Obj boundary
@@ -168,7 +168,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	//sfi->varFast()->setValue(true);
 	fluid->connect(meshBoundary->importParticleSystems());
 
-	mergeRoad->stateTriangleSet()->promoteOuput()->connect(meshBoundary->inTriangleSet());
+	mergeRoad->stateTriangleSets()->promoteOuput()->connect(meshBoundary->inTriangleSet());
 
 	//Create a boundary
 	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());

@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Yuzhong Guo
+ * Copyright 2025 Xiaowei He
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,44 +15,31 @@
  */
 
 #pragma once
-#include "Node/ParametricModel.h"
-
-#include "Topology/TriangleSets.h"
+#include "TriangleSet.h"
 
 namespace dyno
 {
 	template<typename TDataType>
-	class Merge : public Node
+	class TriangleSets : public TriangleSet<TDataType>
 	{
-		DECLARE_TCLASS(Merge, TDataType);
-
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
+		typedef typename TopologyModule::Triangle Triangle;
 
-		Merge();
+		TriangleSets();
+		~TriangleSets() override;
 
-		inline std::string caption() override { return "Merge Multi TriangleSet"; }
+		const uint shapeSize() { return mShapeSize; }
 
-		DECLARE_ENUM(UpdateMode,
-			Reset = 0,
-			Tick = 1);
+		DArray<uint>& shapeIds() { return mShapeIds; }
 
-		DEF_ENUM(UpdateMode, UpdateMode, UpdateMode::Reset, "");
-
-	public:
-		DEF_INSTANCES_IN(TriangleSet<TDataType>, TriangleSet, "");
-
-		DEF_INSTANCE_STATE(TriangleSets<TDataType>, TriangleSets, "");
-
-	protected:
-		void resetStates() override;
-
-		void preUpdateStates()override;
+		void load(std::vector<std::shared_ptr<TriangleSet<TDataType>>>& tsArray);
 
 	private:
-		void MergeGPU();
-	};
+		uint mShapeSize = 1;
 
-	IMPLEMENT_TCLASS(Merge, TDataType);
+		DArray<uint> mShapeIds;
+	};
 }
+
