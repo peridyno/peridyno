@@ -361,6 +361,22 @@ namespace Qt
 		return modelValidationState;
 	}
 
+	QtNodeDataModel::ConnectionPolicy QtModuleWidget::portInConnectionPolicy(PortIndex portIndex) const
+	{
+		if (portIndex < mModuleImports.size())
+		{
+			auto portType = mModuleImports[portIndex]->getModulePort()->getPortType();
+
+			return portType == dyno::ModulePortType::M_Single ? ConnectionPolicy::One : ConnectionPolicy::Many;
+		}
+		else
+		{
+			auto fieldInp = input_fields[portIndex - mModuleImports.size()];
+
+			return fieldInp->getField()->inputPolicy() == FBase::One ? ConnectionPolicy::One : ConnectionPolicy::Many;
+		}
+	}
+
 	std::shared_ptr<Module> QtModuleWidget::getModule()
 	{
 		return mModule;

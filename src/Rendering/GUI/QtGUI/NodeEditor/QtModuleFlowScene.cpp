@@ -406,6 +406,11 @@ namespace Qt
 		}
 	}
 
+	void QtModuleFlowScene::reconstructActivePipeline()
+	{
+		mActivePipeline->forceUpdate();
+	}
+
 	void QtModuleFlowScene::promoteOutput(QtNode& n, const PortIndex index, const QPointF& pos)
 	{
 		QMenu portMenu;

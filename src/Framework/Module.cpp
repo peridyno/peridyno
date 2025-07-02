@@ -16,23 +16,8 @@ namespace dyno
 
 	Module::~Module(void)
 	{
-		// 		//Before deallocating data, fields should be disconnected first
-		// 		for each (auto f in fields_input)
-		// 		{
-		// 			FBase* src = f->getSource();
-		// 			if (src != nullptr) {
-		// 				src->disconnectField(f);
-		// 			}
-		// 		}
-		//
-		// 		for each (auto f in fields_output)
-		// 		{
-		// 			auto& sinks = f->getSinks();
-		// 			for each (auto sink in sinks)
-		// 			{
-		// 				f->disconnectField(sink);
-		// 			}
-		// 		}
+		mImportModules.clear();
+		mExportModules.clear();
 	}
 
 	bool Module::initialize()
