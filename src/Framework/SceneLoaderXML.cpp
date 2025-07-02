@@ -46,8 +46,6 @@ namespace dyno
 			nodeXML = nodeXML->NextSiblingElement("Node");
 		}
 
-		SceneGraph::Iterator itor = scn->begin();
-
 		std::map<ObjectId, std::shared_ptr<Node>> objID2Node;
 		std::map<uint, ObjectId> index2ObjectId;
 		int radix = 0;
@@ -124,6 +122,8 @@ namespace dyno
 			}
 		}
 
+		scn->markQueueUpdateRequired();
+
 		return scn;
 	}
 
@@ -164,6 +164,12 @@ namespace dyno
 			tinyxml2::XMLElement* nodeXml = doc.NewElement("Node");
 			nodeXml->SetAttribute("Class", node->getClassInfo()->getClassName().c_str());
 			nodeXml->SetAttribute("Coordinate", encodeVec2f(Vec2f(node->bx(), node->by())).c_str());
+			nodeXml->SetAttribute("Dt",node->getDt());
+			nodeXml->SetAttribute("AutoSync", node->isAutoSync());
+			nodeXml->SetAttribute("AutoHidden", node->isAutoHidden());
+			nodeXml->SetAttribute("PhysicsEnabled", node->isActive());
+			nodeXml->SetAttribute("RenderingEnabled", node->isVisible());
+
 			root->InsertEndChild(nodeXml);
 
 			tinyxml2::XMLElement* varsXml = doc.NewElement("Variables");
@@ -643,6 +649,21 @@ namespace dyno
 		Vec2f coord = decodeVec2f(std::string(coordStr));
 
 		node->setBlockCoord(coord.x, coord.y);
+		
+		const char* dtStr = nodeXML->Attribute("Dt");
+		node->setDt(std::stod(dtStr));
+
+		const char* syncStr = nodeXML->Attribute("AutoSync");
+		node->setAutoSync(std::string(syncStr) == "false" ? false : true);
+
+		const char* hiddenStr = nodeXML->Attribute("AutoHidden");
+		node->setAutoHidden(std::string(hiddenStr) == "false" ? false : true);
+
+		const char* activeStr = nodeXML->Attribute("PhysicsEnabled");
+		node->setActive(std::string(activeStr) == "false" ? false : true);
+
+		const char* visibleStr = nodeXML->Attribute("RenderingEnabled");
+		node->setVisible(std::string(visibleStr) == "false" ? false : true);
 
 		const char* nodeName = nodeXML->Attribute("Name");
 		if (nodeName)
