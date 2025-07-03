@@ -6,7 +6,7 @@ void declare_gmsh(py::module& m) {
 	std::string pyclass_name = std::string("Gmsh");
 	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("load_file", &Class::loadFile)
+		.def("loadFile", &Class::loadFile)
 		.def_readwrite("m_points", &Class::m_points)
 		.def_readwrite("m_tets", &Class::m_tets);
 }
@@ -17,11 +17,11 @@ void declare_smesh(py::module& m) {
 	std::string pyclass_name = std::string("Smesh");
 	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("load_file", &Class::loadFile)
-		.def("load_node_file", &Class::loadNodeFile)
-		.def("load_edge_file", &Class::loadEdgeFile)
-		.def("load_triangle_file", &Class::loadTriangleFile)
-		.def("load_tet_file", &Class::loadTetFile)
+		.def("loadFile", &Class::loadFile)
+		.def("loadNodeFile", &Class::loadNodeFile)
+		.def("loadEdgeFile", &Class::loadEdgeFile)
+		.def("loadTriangleFile", &Class::loadTriangleFile)
+		.def("loadTetFile", &Class::loadTetFile)
 		.def_readwrite("m_points", &Class::m_points)
 		.def_readwrite("m_edges", &Class::m_edges)
 		.def_readwrite("m_triangles", &Class::m_triangles)
@@ -37,7 +37,7 @@ void declare_image_loader(py::module& m)
 	std::string pyclass_name = std::string("ImageLoader");
 	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("load_image", &Class::loadImage);
+		.def("loadImage", &Class::loadImage);
 }
 
 void pybind_io(py::module& m)

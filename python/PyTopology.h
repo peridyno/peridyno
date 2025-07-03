@@ -10,8 +10,8 @@ void declare_calculate_bounding_box(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("compute", &Class::compute)
-		.def("in_discrete_elements", &Class::inDiscreteElements, py::return_value_policy::reference)
-		.def("out_aabb", &Class::outAABB, py::return_value_policy::reference);
+		.def("inDiscreteElements", &Class::inDiscreteElements, py::return_value_policy::reference)
+		.def("outAABB", &Class::outAABB, py::return_value_policy::reference);
 }
 
 #include "Collision/CollisionDetectionBroadPhase.h"
@@ -22,12 +22,12 @@ void declare_collision_detection_broad_phase(py::module& m, std::string typestr)
 	std::string pyclass_name = std::string("CollisionDetectionBroadPhase") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>CDBP(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	CDBP.def(py::init<>())
-		.def("var_acceleration_structure", &Class::varAccelerationStructure, py::return_value_policy::reference)
-		.def("var_grid_size_limit", &Class::varGridSizeLimit, py::return_value_policy::reference)
-		.def("var_self_collision", &Class::varSelfCollision, py::return_value_policy::reference)
-		.def("in_source", &Class::inSource, py::return_value_policy::reference)
-		.def("in_target", &Class::inTarget, py::return_value_policy::reference)
-		.def("out_contact_list", &Class::outContactList, py::return_value_policy::reference);
+		.def("varAccelerationStructure", &Class::varAccelerationStructure, py::return_value_policy::reference)
+		.def("varGridSizeLimit", &Class::varGridSizeLimit, py::return_value_policy::reference)
+		.def("varSelfCollision", &Class::varSelfCollision, py::return_value_policy::reference)
+		.def("inSource", &Class::inSource, py::return_value_policy::reference)
+		.def("inTarget", &Class::inTarget, py::return_value_policy::reference)
+		.def("outContactList", &Class::outContactList, py::return_value_policy::reference);
 
 	py::enum_<typename Class::EStructure>(CDBP, "EStructure")
 		.value("BVH", Class::EStructure::BVH)
@@ -43,10 +43,10 @@ void declare_collistion_detection_bounding_box(py::module& m, std::string typest
 	std::string pyclass_name = std::string("CollistionDetectionBoundingBox") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_upper_bound", &Class::varUpperBound, py::return_value_policy::reference)
-		.def("var_lower_bound", &Class::varLowerBound, py::return_value_policy::reference)
-		.def("in_discrete_elements", &Class::inDiscreteElements, py::return_value_policy::reference)
-		.def("out_contacts", &Class::outContacts, py::return_value_policy::reference);
+		.def("varUpperBound", &Class::varUpperBound, py::return_value_policy::reference)
+		.def("varLowerBound", &Class::varLowerBound, py::return_value_policy::reference)
+		.def("inDiscreteElements", &Class::inDiscreteElements, py::return_value_policy::reference)
+		.def("outContacts", &Class::outContacts, py::return_value_policy::reference);
 }
 
 #include "Collision/CollistionDetectionTriangleSet.h"
@@ -57,9 +57,9 @@ void declare_collistion_detection_triangle_set(py::module& m, std::string typest
 	std::string pyclass_name = std::string("CollistionDetectionTriangleSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_discrete_elements", &Class::inDiscreteElements, py::return_value_policy::reference)
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("out_contacts", &Class::outContacts, py::return_value_policy::reference);
+		.def("inDiscreteElements", &Class::inDiscreteElements, py::return_value_policy::reference)
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("outContacts", &Class::outContacts, py::return_value_policy::reference);
 }
 
 #include "Collision/NeighborElementQuery.h"
@@ -70,14 +70,14 @@ void declare_neighbor_element_query(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("NeighborElementQuery") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_self_collision", &Class::varSelfCollision, py::return_value_policy::reference)
-		.def("var_d_head", &Class::varDHead, py::return_value_policy::reference)
+		.def("varSelfCollision", &Class::varSelfCollision, py::return_value_policy::reference)
+		.def("varDHead", &Class::varDHead, py::return_value_policy::reference)
 
-		.def("var_grid_size_limit", &Class::varGridSizeLimit, py::return_value_policy::reference)
-		.def("in_discrete_elements", &Class::inDiscreteElements, py::return_value_policy::reference)
-		.def("in_collision_mask", &Class::inCollisionMask, py::return_value_policy::reference)
-		.def("in_attribute", &Class::inAttribute, py::return_value_policy::reference)
-		.def("out_contacts", &Class::outContacts, py::return_value_policy::reference);
+		.def("varGridSizeLimit", &Class::varGridSizeLimit, py::return_value_policy::reference)
+		.def("inDiscreteElements", &Class::inDiscreteElements, py::return_value_policy::reference)
+		.def("inCollisionMask", &Class::inCollisionMask, py::return_value_policy::reference)
+		.def("inAttribute", &Class::inAttribute, py::return_value_policy::reference)
+		.def("outContacts", &Class::outContacts, py::return_value_policy::reference);
 }
 
 #include "Collision/NeighborPointQuery.h"
@@ -88,12 +88,12 @@ void declare_neighbor_point_query(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("NeighborPointQuery") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>NPQ(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	NPQ.def(py::init<>())
-		.def("var_spatial", &Class::varSpatial, py::return_value_policy::reference)
-		.def("var_size_limit", &Class::varSizeLimit, py::return_value_policy::reference)
-		.def("in_radius", &Class::inRadius, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_other", &Class::inOther, py::return_value_policy::reference)
-		.def("out_neighbor_ids", &Class::outNeighborIds, py::return_value_policy::reference);
+		.def("varSpatial", &Class::varSpatial, py::return_value_policy::reference)
+		.def("varSizeLimit", &Class::varSizeLimit, py::return_value_policy::reference)
+		.def("inRadius", &Class::inRadius, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inOther", &Class::inOther, py::return_value_policy::reference)
+		.def("outNeighborIds", &Class::outNeighborIds, py::return_value_policy::reference);
 
 	py::enum_<typename Class::Spatial>(NPQ, "Spatial")
 		.value("UNIFORM", Class::Spatial::UNIFORM)
@@ -110,11 +110,11 @@ void declare_neighbor_triangle_query(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("NeighborTriangleQuery") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>NTQ(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	NTQ.def(py::init<>())
-		.def("var_spatial", &Class::varSpatial, py::return_value_policy::reference)
-		.def("in_radius", &Class::inRadius, py::return_value_policy::reference)
-		.def("in_position", &Class::inPosition, py::return_value_policy::reference)
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("out_neighbor_ids", &Class::outNeighborIds, py::return_value_policy::reference);
+		.def("varSpatial", &Class::varSpatial, py::return_value_policy::reference)
+		.def("inRadius", &Class::inRadius, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("outNeighborIds", &Class::outNeighborIds, py::return_value_policy::reference);
 
 	py::enum_<typename Class::Spatial>(NTQ, "Spatial")
 		.value("BVH", Class::Spatial::BVH)
@@ -129,10 +129,10 @@ void declare_anchor_point_to_point_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("AnchorPointToPointSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_discrete_elements", &Class::inDiscreteElements, py::return_value_policy::reference)
-		.def("in_center", &Class::inCenter, py::return_value_policy::reference)
-		.def("in_rotation_matrix", &Class::inRotationMatrix, py::return_value_policy::reference)
-		.def("out_point_set", &Class::outPointSet, py::return_value_policy::reference);
+		.def("inDiscreteElements", &Class::inDiscreteElements, py::return_value_policy::reference)
+		.def("inCenter", &Class::inCenter, py::return_value_policy::reference)
+		.def("inRotationMatrix", &Class::inRotationMatrix, py::return_value_policy::reference)
+		.def("outPointSet", &Class::outPointSet, py::return_value_policy::reference);
 }
 
 #include "Mapping/BoundingBoxToEdgeSet.h"
@@ -143,8 +143,8 @@ void declare_bounding_box_to_edge_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("BoundingBoxToEdgeSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_aabb", &Class::inAABB, py::return_value_policy::reference)
-		.def("out_edge_set", &Class::outEdgeSet, py::return_value_policy::reference);
+		.def("inAABB", &Class::inAABB, py::return_value_policy::reference)
+		.def("outEdgeSet", &Class::outEdgeSet, py::return_value_policy::reference);
 }
 
 #include "Mapping/ContactsToEdgeSet.h"
@@ -155,9 +155,9 @@ void declare_contacts_to_edge_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ContactsToEdgeSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_scale", &Class::varScale, py::return_value_policy::reference)
-		.def("in_contacts", &Class::inContacts, py::return_value_policy::reference)
-		.def("out_edge_set", &Class::outEdgeSet, py::return_value_policy::reference);
+		.def("varScale", &Class::varScale, py::return_value_policy::reference)
+		.def("inContacts", &Class::inContacts, py::return_value_policy::reference)
+		.def("outEdgeSet", &Class::outEdgeSet, py::return_value_policy::reference);
 }
 
 #include "Mapping/ContactsToPointSet.h"
@@ -168,8 +168,8 @@ void declare_contacts_to_point_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ContactsToPointSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_contacts", &Class::inContacts, py::return_value_policy::reference)
-		.def("out_point_set", &Class::outPointSet, py::return_value_policy::reference);
+		.def("inContacts", &Class::inContacts, py::return_value_policy::reference)
+		.def("outPointSet", &Class::outPointSet, py::return_value_policy::reference);
 }
 
 #include "Mapping/DiscreteElementsToTriangleSet.h"
@@ -180,8 +180,8 @@ void declare_discrete_elements_to_triangle_set(py::module& m, std::string typest
 	std::string pyclass_name = std::string("DiscreteElementsToTriangleSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_discrete_elements", &Class::inDiscreteElements, py::return_value_policy::reference)
-		.def("out_triangle_set", &Class::outTriangleSet, py::return_value_policy::reference);
+		.def("inDiscreteElements", &Class::inDiscreteElements, py::return_value_policy::reference)
+		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference);
 }
 
 #include "Mapping/Extract.h"
@@ -193,8 +193,8 @@ void declare_extract_edge_set_from_polygon_set(py::module& m, std::string typest
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
-		.def("in_polygon_set", &Class::inPolygonSet, py::return_value_policy::reference)
-		.def("out_edge_set", &Class::outEdgeSet, py::return_value_policy::reference);
+		.def("inPolygonSet", &Class::inPolygonSet, py::return_value_policy::reference)
+		.def("outEdgeSet", &Class::outEdgeSet, py::return_value_policy::reference);
 }
 
 template <typename TDataType>
@@ -205,8 +205,8 @@ void declare_extract_triangle_set_from_polygon_set(py::module& m, std::string ty
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
-		.def("in_polygon_set", &Class::inPolygonSet, py::return_value_policy::reference)
-		.def("out_triangle_set", &Class::outTriangleSet, py::return_value_policy::reference);
+		.def("inPolygonSet", &Class::inPolygonSet, py::return_value_policy::reference)
+		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference);
 }
 
 template <typename TDataType>
@@ -217,8 +217,8 @@ void declare_extract_qaud_set_from_polygon_set(py::module& m, std::string typest
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
-		.def("in_polygon_set", &Class::inPolygonSet, py::return_value_policy::reference)
-		.def("out_quad_set", &Class::outQuadSet, py::return_value_policy::reference);
+		.def("inPolygonSet", &Class::inPolygonSet, py::return_value_policy::reference)
+		.def("outQuadSet", &Class::outQuadSet, py::return_value_policy::reference);
 }
 
 #include "Mapping/FrameToPointSet.h"
@@ -230,7 +230,7 @@ void declare_frame_to_point_set(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("initialize", &Class::initialize)
-		.def("apply_transform", &Class::applyTransform)
+		.def("applyTransform", &Class::applyTransform)
 		.def("apply", &Class::apply);
 }
 
@@ -242,10 +242,10 @@ void declare_height_field_to_triangle_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("HeightFieldToTriangleSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_height_field", &Class::inHeightField, py::return_value_policy::reference)
-		.def("out_triangle_set", &Class::outTriangleSet, py::return_value_policy::reference)
-		.def("var_scale", &Class::varScale, py::return_value_policy::reference)
-		.def("var_translation", &Class::varTranslation, py::return_value_policy::reference);
+		.def("inHeightField", &Class::inHeightField, py::return_value_policy::reference)
+		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference)
+		.def("varScale", &Class::varScale, py::return_value_policy::reference)
+		.def("varTranslation", &Class::varTranslation, py::return_value_policy::reference);
 }
 
 #include "Mapping/MergeSimplexSet.h"
@@ -256,10 +256,10 @@ void declare_merge_simplex_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("MergeSimplexSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_edge_Set", &Class::inEdgeSet, py::return_value_policy::reference)
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("in_tetrahedron_set", &Class::inTetrahedronSet, py::return_value_policy::reference)
-		.def("out_simplex_set", &Class::outSimplexSet, py::return_value_policy::reference);
+		.def("inEdgeSet", &Class::inEdgeSet, py::return_value_policy::reference)
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("inTetrahedronSet", &Class::inTetrahedronSet, py::return_value_policy::reference)
+		.def("outSimplexSet", &Class::outSimplexSet, py::return_value_policy::reference);
 }
 
 #include "Mapping/MergeTriangleSet.h"
@@ -270,9 +270,9 @@ void declare_merge_triangle_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("MergeTriangleSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("in_first", &Class::inFirst, py::return_value_policy::reference)
-		.def("in_second", &Class::inSecond, py::return_value_policy::reference);
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("inFirst", &Class::inFirst, py::return_value_policy::reference)
+		.def("inSecond", &Class::inSecond, py::return_value_policy::reference);
 }
 
 #include "Mapping/PointSetToPointSet.h"
@@ -284,9 +284,9 @@ void declare_point_set_to_point_set(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def(py::init<std::shared_ptr<dyno::PointSet<TDataType>>, std::shared_ptr<dyno::PointSet<TDataType>> >())
-		.def("set_searching_radius", &Class::setSearchingRadius)
-		.def("set_from", &Class::setFrom)
-		.def("set_to", &Class::setTo)
+		.def("setSearchingRadius", &Class::setSearchingRadius)
+		.def("setFrom", &Class::setFrom)
+		.def("setTo", &Class::setTo)
 		.def("apply", &Class::apply)
 		.def("match", &Class::match);
 }
@@ -299,9 +299,9 @@ void declare_point_set_to_triangle_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("PointSetToTriangleSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_point_set", &Class::inPointSet, py::return_value_policy::reference)
-		.def("in_initial_shape", &Class::inInitialShape, py::return_value_policy::reference)
-		.def("out_shape", &Class::outShape, py::return_value_policy::reference);
+		.def("inPointSet", &Class::inPointSet, py::return_value_policy::reference)
+		.def("inInitialShape", &Class::inInitialShape, py::return_value_policy::reference)
+		.def("outShape", &Class::outShape, py::return_value_policy::reference);
 }
 
 #include "Mapping/QuadSetToTriangleSet.h"
@@ -312,8 +312,8 @@ void declare_quad_set_to_triangle_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("QuadSetToTriangleSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_quad_set", &Class::inQuadSet, py::return_value_policy::reference)
-		.def("out_triangle_set", &Class::outTriangleSet, py::return_value_policy::reference);
+		.def("inQuadSet", &Class::inQuadSet, py::return_value_policy::reference)
+		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference);
 }
 
 #include "Mapping/SplitSimplexSet.h"
@@ -324,10 +324,10 @@ void declare_split_simplex_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("SplitSimplexSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_simplex_set", &Class::inSimplexSet, py::return_value_policy::reference)
-		.def("out_edge_set", &Class::outEdgeSet, py::return_value_policy::reference)
-		.def("out_triangle_set", &Class::outTriangleSet, py::return_value_policy::reference)
-		.def("out_tetrahedron_set", &Class::outTetrahedronSet, py::return_value_policy::reference);
+		.def("inSimplexSet", &Class::inSimplexSet, py::return_value_policy::reference)
+		.def("outEdgeSet", &Class::outEdgeSet, py::return_value_policy::reference)
+		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference)
+		.def("outTetrahedronSet", &Class::outTetrahedronSet, py::return_value_policy::reference);
 }
 
 #include "Mapping/TetrahedronSetToPointSet.h"
@@ -338,9 +338,9 @@ void declare_tetrahedron_set_to_point_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TetrahedronSetToPointSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("set_searching_radius", &Class::setSearchingRadius)
-		.def("set_from", &Class::setFrom)
-		.def("set_to", &Class::setTo)
+		.def("setSearchingRadius", &Class::setSearchingRadius)
+		.def("setFrom", &Class::setFrom)
+		.def("setTo", &Class::setTo)
 		.def("match", &Class::match);
 }
 
@@ -352,9 +352,9 @@ void declare_texture_mesh_to_triangle_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TextureMeshToTriangleSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_texture_mesh", &Class::inTextureMesh, py::return_value_policy::reference)
-		.def("in_transform", &Class::inTransform, py::return_value_policy::reference)
-		.def("out_triangle_set", &Class::outTriangleSet, py::return_value_policy::reference);
+		.def("inTextureMesh", &Class::inTextureMesh, py::return_value_policy::reference)
+		.def("inTransform", &Class::inTransform, py::return_value_policy::reference)
+		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference);
 }
 
 template <typename TDataType>
@@ -365,8 +365,8 @@ void declare_texture_mesh_to_triangle_set_node(py::module& m, std::string typest
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
-		.def("in_texture_mesh", &Class::inTextureMesh, py::return_value_policy::reference)
-		.def("out_triangle_set", &Class::outTriangleSet, py::return_value_policy::reference);
+		.def("inTextureMesh", &Class::inTextureMesh, py::return_value_policy::reference)
+		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference);
 }
 
 #include "Module/CalculateMaximum.h"
@@ -378,8 +378,8 @@ void declare_calculate_maximum(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("compute", &Class::compute)
-		.def("in_scalar_array", &Class::inScalarArray, py::return_value_policy::reference)
-		.def("out_scalar", &Class::outScalar, py::return_value_policy::reference);
+		.def("inScalarArray", &Class::inScalarArray, py::return_value_policy::reference)
+		.def("outScalar", &Class::outScalar, py::return_value_policy::reference);
 }
 
 #include "Module/CalculateMinimum.h"
@@ -391,8 +391,8 @@ void declare_calculate_minimum(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("compute", &Class::compute)
-		.def("in_scalar_array", &Class::inScalarArray, py::return_value_policy::reference)
-		.def("out_scalar", &Class::outScalar, py::return_value_policy::reference);
+		.def("inScalarArray", &Class::inScalarArray, py::return_value_policy::reference)
+		.def("outScalar", &Class::outScalar, py::return_value_policy::reference);
 }
 
 #include "Module/CalculateNorm.h"
@@ -404,8 +404,8 @@ void declare_calculate_norm(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("compute", &Class::compute)
-		.def("in_vec", &Class::inVec, py::return_value_policy::reference)
-		.def("out_norm", &Class::outNorm, py::return_value_policy::reference);
+		.def("inVec", &Class::inVec, py::return_value_policy::reference)
+		.def("outNorm", &Class::outNorm, py::return_value_policy::reference);
 }
 
 #include "Topology/AnimationCurve.h"
@@ -420,12 +420,12 @@ void declare_animation_curve(py::module& m, std::string typestr) {
 		.def(py::init<>())
 		.def(py::init<int, Real, Real, Real>())
 		.def("set", &Class::set)
-		.def("fbx_time_to_seconds", &Class::fbxTimeToSeconds)
-		.def("seconds_to_fbx_time", &Class::secondsToFbxTime)
-		.def("set_init_val", &Class::setInitVal)
-		.def("get_curve_value_along", &Class::getCurveValueAlong)
-		.def("get_curve_value_all", &Class::getCurveValueAll)
-		.def("get_curve_value_cycle", &Class::getCurveValueCycle)
+		.def("fbxTimeToSeconds", &Class::fbxTimeToSeconds)
+		.def("secondsToFbxTime", &Class::secondsToFbxTime)
+		.def("setInitVal", &Class::setInitVal)
+		.def("getCurveValueAlong", &Class::getCurveValueAlong)
+		.def("getCurveValueAll", &Class::getCurveValueAll)
+		.def("getCurveValueCycle", &Class::getCurveValueCycle)
 
 		.def_readwrite("m_maxSize", &Class::m_maxSize);
 }
@@ -454,7 +454,7 @@ void declare_ball_and_socket_joint(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def(py::init<dyno::PdActor*, dyno::PdActor*>())
-		.def("set_anchor_point", &Class::setAnchorPoint)
+		.def("setAnchorPoint", &Class::setAnchorPoint)
 		.def_readwrite("r1", &Class::r1)
 		.def_readwrite("r2", &Class::r2);
 }
@@ -467,10 +467,10 @@ void declare_slider_joint(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def(py::init<dyno::PdActor*, dyno::PdActor*>())
-		.def("set_anchor_point", &Class::setAnchorPoint)
-		.def("set_axis", &Class::setAxis)
-		.def("set_moter", &Class::setMoter)
-		.def("set_range", &Class::setRange)
+		.def("setAnchorPoint", &Class::setAnchorPoint)
+		.def("setAxis", &Class::setAxis)
+		.def("setMoter", &Class::setMoter)
+		.def("setRange", &Class::setRange)
 
 		.def_readwrite("useRange", &Class::useRange)
 		.def_readwrite("useMoter", &Class::useMoter)
@@ -491,10 +491,10 @@ void declare_hinge_joint(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def(py::init<dyno::PdActor*, dyno::PdActor*>())
-		.def("set_anchor_point", &Class::setAnchorPoint)
-		.def("set_axis", &Class::setAxis)
-		.def("set_moter", &Class::setMoter)
-		.def("set_range", &Class::setRange)
+		.def("setAnchorPoint", &Class::setAnchorPoint)
+		.def("setAxis", &Class::setAxis)
+		.def("setMoter", &Class::setMoter)
+		.def("setRange", &Class::setRange)
 
 		.def_readwrite("d_min", &Class::d_min)
 		.def_readwrite("d_max", &Class::d_max)
@@ -516,8 +516,8 @@ void declare_fixed_joint(py::module& m, std::string typestr) {
 		.def(py::init<>())
 		.def(py::init<dyno::PdActor*, dyno::PdActor*>())
 		.def(py::init<dyno::PdActor*>())
-		.def("set_anchor_point", &Class::setAnchorPoint)
-		.def("set_anchor_angle", &Class::setAnchorAngle)
+		.def("setAnchorPoint", &Class::setAnchorPoint)
+		.def("setAnchorAngle", &Class::setAnchorAngle)
 
 		.def_readwrite("r1", &Class::r1)
 		.def_readwrite("r2", &Class::r2)
@@ -534,7 +534,7 @@ void declare_point_joint(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def(py::init<dyno::PdActor*>())
-		.def("set_anchor_point", &Class::setAnchorPoint)
+		.def("setAnchorPoint", &Class::setAnchorPoint)
 
 		.def_readwrite("anchorPoint", &Class::anchorPoint);
 }
@@ -547,7 +547,7 @@ void declare_distance_joint(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def(py::init<dyno::PdActor*, dyno::PdActor*>())
-		.def("set_distance_joint", &Class::setDistanceJoint)
+		.def("setDistanceJoint", &Class::setDistanceJoint)
 
 		.def_readwrite("r1", &Class::r1)
 		.def_readwrite("r2", &Class::r2)
@@ -563,68 +563,68 @@ void declare_discrete_elements(py::module& m, std::string typestr) {
 		.def(py::init<>())
 		.def("scale", &Class::scale)
 
-		.def("total_size", &Class::totalSize)
+		.def("totalSize", &Class::totalSize)
 
-		.def("total_joint_size", &Class::totalJointSize)
+		.def("totalJointSize", &Class::totalJointSize)
 
-		.def("sphere_index", &Class::sphereIndex)
-		.def("box_index", &Class::boxIndex)
-		.def("capsule_index", &Class::capsuleIndex)
-		.def("tet_index", &Class::tetIndex)
-		.def("triangle_index", &Class::triangleIndex)
+		.def("sphereIndex", &Class::sphereIndex)
+		.def("boxIndex", &Class::boxIndex)
+		.def("capsuleIndex", &Class::capsuleIndex)
+		.def("tetIndex", &Class::tetIndex)
+		.def("triangleIndex", &Class::triangleIndex)
 
-		.def("calculate_element_offset", &Class::calculateElementOffset)
+		.def("calculateElementOffset", &Class::calculateElementOffset)
 
-		.def("set_spheres", &Class::setSpheres)
-		.def("set_boxes", &Class::setBoxes)
-		.def("set_tets", &Class::setTets)
-		.def("set_capsules", &Class::setCapsules)
-		.def("set_triangles", &Class::setTriangles)
-		.def("set_tet_sdf", &Class::setTetSDF)
+		.def("setSpheres", &Class::setSpheres)
+		.def("setBoxes", &Class::setBoxes)
+		.def("setTets", &Class::setTets)
+		.def("setCapsules", &Class::setCapsules)
+		.def("setTriangles", &Class::setTriangles)
+		.def("setTetSDF", &Class::setTetSDF)
 
-		.def("spheres_in_local", &Class::spheresInLocal, py::return_value_policy::reference)
-		.def("boxes_in_local", &Class::boxesInLocal, py::return_value_policy::reference)
-		.def("tets_in_local", &Class::tetsInLocal, py::return_value_policy::reference)
-		.def("capsules_in_local", &Class::capsulesInLocal, py::return_value_policy::reference)
-		.def("triangles_in_local", &Class::trianglesInLocal, py::return_value_policy::reference)
+		.def("spheresInLocal", &Class::spheresInLocal, py::return_value_policy::reference)
+		.def("boxesInLocal", &Class::boxesInLocal, py::return_value_policy::reference)
+		.def("tetsInLocal", &Class::tetsInLocal, py::return_value_policy::reference)
+		.def("capsulesInLocal", &Class::capsulesInLocal, py::return_value_policy::reference)
+		.def("trianglesInLocal", &Class::trianglesInLocal, py::return_value_policy::reference)
 
-		.def("spheres_in_global", &Class::spheresInGlobal, py::return_value_policy::reference)
-		.def("boxes_in_global", &Class::boxesInGlobal, py::return_value_policy::reference)
-		.def("tets_in_global", &Class::tetsInGlobal, py::return_value_policy::reference)
-		.def("capsules_in_global", &Class::capsulesInGlobal, py::return_value_policy::reference)
-		.def("triangles_in_global", &Class::trianglesInGlobal, py::return_value_policy::reference)
+		.def("spheresInGlobal", &Class::spheresInGlobal, py::return_value_policy::reference)
+		.def("boxesInGlobal", &Class::boxesInGlobal, py::return_value_policy::reference)
+		.def("tetsInGlobal", &Class::tetsInGlobal, py::return_value_policy::reference)
+		.def("capsulesInGlobal", &Class::capsulesInGlobal, py::return_value_policy::reference)
+		.def("trianglesInGlobal", &Class::trianglesInGlobal, py::return_value_policy::reference)
 
-		.def("shape_2_rigid_body_mapping", &Class::shape2RigidBodyMapping, py::return_value_policy::reference)
+		.def("shape2RigidBodyMapping", &Class::shape2RigidBodyMapping, py::return_value_policy::reference)
 
 		.def("position", &Class::position, py::return_value_policy::reference)
 		.def("rotation", &Class::rotation, py::return_value_policy::reference)
 
-		.def("set_position", &Class::setPosition)
-		.def("set_rotation", &Class::setRotation)
+		.def("setPosition", &Class::setPosition)
+		.def("setRotation", &Class::setRotation)
 
-		.def("ball_and_socket_joints", &Class::ballAndSocketJoints, py::return_value_policy::reference)
-		.def("slider_joints", &Class::sliderJoints, py::return_value_policy::reference)
-		.def("hinge_joints", &Class::hingeJoints, py::return_value_policy::reference)
-		.def("fixed_joints", &Class::fixedJoints, py::return_value_policy::reference)
-		.def("point_joints", &Class::pointJoints, py::return_value_policy::reference)
-		.def("distance_joints", &Class::distanceJoints, py::return_value_policy::reference)
+		.def("ballAndSocketJoints", &Class::ballAndSocketJoints, py::return_value_policy::reference)
+		.def("sliderJoints", &Class::sliderJoints, py::return_value_policy::reference)
+		.def("hingeJoints", &Class::hingeJoints, py::return_value_policy::reference)
+		.def("fixedJoints", &Class::fixedJoints, py::return_value_policy::reference)
+		.def("pointJoints", &Class::pointJoints, py::return_value_policy::reference)
+		.def("distanceJoints", &Class::distanceJoints, py::return_value_policy::reference)
 
-		.def("set_tet_body_id", &Class::setTetBodyId)
-		.def("set_tet_element_id", &Class::setTetElementId)
+		.def("setTetBodyId", &Class::setTetBodyId)
+		.def("setTetElementId", &Class::setTetElementId)
 
-		.def("get_tet_sdf", &Class::getTetSDF, py::return_value_policy::reference)
-		.def("get_tet_body_mapping", &Class::getTetBodyMapping, py::return_value_policy::reference)
-		.def("get_tet_element_mapping", &Class::getTetElementMapping, py::return_value_policy::reference)
+		.def("getTetSDF", &Class::getTetSDF, py::return_value_policy::reference)
+		.def("getTetBodyMapping", &Class::getTetBodyMapping, py::return_value_policy::reference)
+		.def("getTetElementMapping", &Class::getTetElementMapping, py::return_value_policy::reference)
 
-		.def("copy_from", &Class::copyFrom)
+		.def("copyFrom", &Class::copyFrom)
 		.def("merge", &Class::merge)
-		.def("request_discrete_elements_in_global", &Class::requestDiscreteElementsInGlobal)
+		.def("requestDiscreteElementsInGlobal", &Class::requestDiscreteElementsInGlobal)
 
-		.def("request_box_in_global", &Class::requestBoxInGlobal, py::return_value_policy::reference)
-		.def("request_sphere_in_global", &Class::requestSphereInGlobal, py::return_value_policy::reference)
-		.def("request_tet_in_global", &Class::requestTetInGlobal, py::return_value_policy::reference)
-		.def("request_capsule_in_global", &Class::requestCapsuleInGlobal, py::return_value_policy::reference)
-		.def("request_triangle_in_global", &Class::requestTriangleInGlobal, py::return_value_policy::reference);
+		.def("requestBoxInGlobal", &Class::requestBoxInGlobal, py::return_value_policy::reference)
+		.def("requestSphereInGlobal", &Class::requestSphereInGlobal, py::return_value_policy::reference)
+		.def("requestTetInGlobal", &Class::requestTetInGlobal, py::return_value_policy::reference)
+		.def("requestCapsuleInGlobal", &Class::requestCapsuleInGlobal, py::return_value_policy::reference)
+		.def("requestTriangleInGlobal", &Class::requestTriangleInGlobal, py::return_value_policy::reference);
 }
 
 #include "Topology/DistanceField3D.h"
@@ -637,22 +637,22 @@ void declare_distance_field3D(py::module& m, std::string typestr) {
 		.def("release", &Class::release)
 		.def("translate", &Class::translate)
 		.def("scale", &Class::scale)
-		.def("get_distance", &Class::getDistance)
+		.def("getDistance", &Class::getDistance)
 		.def("nx", &Class::nx)
 		.def("ny", &Class::ny)
 		.def("nz", &Class::nz)
-		.def("load_sdf", &Class::loadSDF)
-		.def("load_box", &Class::loadBox)
-		.def("load_cylinder", &Class::loadCylinder)
-		.def("load_sphere", &Class::loadSphere)
-		.def("set_space", &Class::setSpace)
-		.def("lower_bound", &Class::lowerBound)
-		.def("upper_bound", &Class::upperBound)
+		.def("loadSDF", &Class::loadSDF)
+		.def("loadBox", &Class::loadBox)
+		.def("loadCylinder", &Class::loadCylinder)
+		.def("loadSphere", &Class::loadSphere)
+		.def("setSpace", &Class::setSpace)
+		.def("lowerBound", &Class::lowerBound)
+		.def("upperBound", &Class::upperBound)
 		.def("assign", &Class::assign)
 		.def("get_m_distance", &Class::distances, py::return_value_policy::reference)
-		.def("set_distance", &Class::setDistance)
+		.def("setDistance", &Class::setDistance)
 		.def("get_h", &Class::getGridSpacing)
-		.def("invert_sdf", &Class::invertSDF);
+		.def("invertSDF", &Class::invertSDF);
 }
 
 #include "Topology/PointSet.h"
@@ -665,14 +665,14 @@ void declare_point_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("PointSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("copy_from", &Class::copyFrom)
+		.def("copyFrom", &Class::copyFrom)
 		.def("set_points", py::overload_cast<const std::vector<Coord>&>(&Class::setPoints))
 		.def("set_points", py::overload_cast<const dyno::Array<Coord, DeviceType::GPU>&>(&Class::setPoints))
-		.def("set_size", &Class::setSize)
+		.def("setSize", &Class::setSize)
 
-		.def("get_point_size", &Class::getPointSize)
+		.def("getPointSize", &Class::getPointSize)
 
-		.def("request_bounding_box", &Class::requestBoundingBox)
+		.def("requestBoundingBox", &Class::requestBoundingBox)
 		.def("scale", py::overload_cast<const Real>(&Class::scale))
 		.def("scale", py::overload_cast<const Coord>(&Class::scale))
 		.def("translate", &Class::translate)
@@ -680,10 +680,10 @@ void declare_point_set(py::module& m, std::string typestr) {
 		.def("rotate", py::overload_cast<const Coord>(&Class::rotate))
 		.def("rotate", py::overload_cast<const dyno::Quat<Real>>(&Class::rotate))
 
-		.def("load_obj_file", &Class::loadObjFile)
-		.def("is_empty", &Class::isEmpty)
+		.def("loadObjFile", &Class::loadObjFile)
+		.def("isEmpty", &Class::isEmpty)
 		.def("clear", &Class::clear)
-		.def("get_points", &Class::getPoints);
+		.def("getPoints", &Class::getPoints);
 }
 
 #include "Topology/EdgeSet.h"
@@ -697,13 +697,13 @@ void declare_edge_set(py::module& m, std::string typestr) {
 		.def(py::init<>())
 		.def("set_edges", py::overload_cast<std::vector<Edge>&>(&Class::setEdges))
 		.def("set_edges", py::overload_cast<dyno::Array<Edge, DeviceType::GPU>&>(&Class::setEdges))
-		.def("request_point_neighbors", &Class::requestPointNeighbors)
-		.def("get_edges", &Class::getEdges)
-		.def("vertex_2_edge", &Class::vertex2Edge)
-		.def("copy_from", &Class::copyFrom)
-		.def("is_empty", &Class::isEmpty)
+		.def("requestPointNeighbors", &Class::requestPointNeighbors)
+		.def("getEdges", &Class::getEdges)
+		.def("vertex2Edge", &Class::vertex2Edge)
+		.def("copyFrom", &Class::copyFrom)
+		.def("isEmpty", &Class::isEmpty)
 		.def("clear", &Class::clear)
-		.def("load_smesh_file", &Class::loadSmeshFile);
+		.def("loadSmeshFile", &Class::loadSmeshFile);
 }
 
 #include "Topology/Frame.h"
@@ -714,11 +714,11 @@ void declare_frame(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("Frame") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("copy_from", &Class::copyFrom)
-		.def("set_center", &Class::setCenter)
-		.def("get_center", &Class::getCenter)
-		.def("set_orientation", &Class::setOrientation)
-		.def("get_orientation", &Class::getOrientation);
+		.def("copyFrom", &Class::copyFrom)
+		.def("setCenter", &Class::setCenter)
+		.def("getCenter", &Class::getCenter)
+		.def("setOrientation", &Class::setOrientation)
+		.def("getOrientation", &Class::getOrientation);
 }
 
 #include "Topology/GridHash.h"
@@ -730,15 +730,15 @@ void declare_grid_hash(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("GridHash") + typestr;
 	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("set_space", &Class::setSpace)
+		.def("setSpace", &Class::setSpace)
 		.def("construct", &Class::construct)
 		.def("clear", &Class::clear)
 		.def("release", &Class::release)
 		.def("get_index", py::overload_cast<int, int, int>(&Class::getIndex))
 		.def("get_index", py::overload_cast<Coord>(&Class::getIndex))
-		.def("get_index3", &Class::getIndex3)
-		.def("get_counter", &Class::getCounter)
-		.def("get_particle_id", &Class::getParticleId)
+		.def("getIndex3", &Class::getIndex3)
+		.def("getCounter", &Class::getCounter)
+		.def("getParticleId", &Class::getParticleId)
 
 		.def_readwrite("num", &Class::num)
 		.def_readwrite("nx", &Class::nx)
@@ -763,16 +763,16 @@ void declare_grid_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("GridSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("set_uni_grid", &Class::setUniGrid)
-		.def("set_nijk", &Class::setNijk)
-		.def("set_origin", &Class::setOrigin)
-		.def("set_dx", &Class::setDx)
+		.def("setUniGrid", &Class::setUniGrid)
+		.def("setNijk", &Class::setNijk)
+		.def("setOrigin", &Class::setOrigin)
+		.def("setDx", &Class::setDx)
 
-		.def("get_ni", &Class::getNi)
-		.def("get_nj", &Class::getNj)
-		.def("get_nk", &Class::getNk)
-		.def("get_origin", &Class::getOrigin)
-		.def("get_dx", &Class::getDx);
+		.def("getNi", &Class::getNi)
+		.def("getNj", &Class::getNj)
+		.def("getNk", &Class::getNk)
+		.def("getOrigin", &Class::getOrigin)
+		.def("getDx", &Class::getDx);
 }
 
 #include "Topology/HeightField.h"
@@ -785,24 +785,24 @@ void declare_height_field(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("HeightField") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("copy_from", &Class::copyFrom)
+		.def("copyFrom", &Class::copyFrom)
 
 		.def("scale", py::overload_cast<Real>(&Class::scale))
 		.def("scale", py::overload_cast<Coord>(&Class::scale))
 		.def("translate", &Class::translate)
 
-		.def("set_extents", &Class::setExtents)
+		.def("setExtents", &Class::setExtents)
 
-		.def("get_grid_spacing", &Class::getGridSpacing)
-		.def("set_grid_spacing", &Class::setGridSpacing)
+		.def("getGridSpacing", &Class::getGridSpacing)
+		.def("setGridSpacing", &Class::setGridSpacing)
 
-		.def("get_origin", &Class::getOrigin)
-		.def("set_origin", &Class::setOrigin)
+		.def("getOrigin", &Class::getOrigin)
+		.def("setOrigin", &Class::setOrigin)
 		.def("width", &Class::width)
 		.def("height", &Class::height)
 
-		.def("get_displacement", &Class::getDisplacement, py::return_value_policy::reference)
-		.def("calculate_height_field", &Class::calculateHeightField, py::return_value_policy::reference);
+		.def("getDisplacement", &Class::getDisplacement, py::return_value_policy::reference)
+		.def("calculateHeightField", &Class::calculateHeightField, py::return_value_policy::reference);
 }
 
 #include "Topology/QuadSet.h"
@@ -814,15 +814,15 @@ void declare_quad_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("QuadSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("get_quads", &Class::getQuads, py::return_value_policy::reference)
+		.def("getQuads", &Class::getQuads, py::return_value_policy::reference)
 
 		.def("set_quads", py::overload_cast<std::vector<Quad>&>(&Class::setQuads))
 		.def("set_quads", py::overload_cast<dyno::Array<Quad, DeviceType::GPU>&>(&Class::setQuads))
 
-		.def("get_vertex2quads", &Class::getVertex2Quads, py::return_value_policy::reference)
-		.def("copy_from", &Class::copyFrom)
-		.def("is_empty", &Class::isEmpty)
-		.def("out_vertex_normal", &Class::outVertexNormal, py::return_value_policy::reference);
+		.def("getVertex2Quads", &Class::getVertex2Quads, py::return_value_policy::reference)
+		.def("copyFrom", &Class::copyFrom)
+		.def("isEmpty", &Class::isEmpty)
+		.def("outVertexNormal", &Class::outVertexNormal, py::return_value_policy::reference);
 }
 
 #include "Topology/HexahedronSet.h"
@@ -837,71 +837,86 @@ void declare_hexahedron_set(py::module& m, std::string typestr) {
 		.def("set_hexahedrons", py::overload_cast<std::vector<Hexahedron>&>(&Class::setHexahedrons))
 		.def("set_hexahedrons", py::overload_cast<dyno::Array<Hexahedron, DeviceType::GPU>&>(&Class::setHexahedrons))
 
-		.def("get_hexahedrons", &Class::getHexahedrons, py::return_value_policy::reference)
-		.def("get_qua_2_hex", &Class::getQua2Hex, py::return_value_policy::reference)
-		.def("get_ver_2_hex", &Class::getVer2Hex, py::return_value_policy::reference)
-		.def("get_volume", &Class::getVolume)
-		.def("copy_from", &Class::copyFrom);
+		.def("getHexahedrons", &Class::getHexahedrons, py::return_value_policy::reference)
+		.def("getQua2Hex", &Class::getQua2Hex, py::return_value_policy::reference)
+		.def("getVer2Hex", &Class::getVer2Hex, py::return_value_policy::reference)
+		.def("getVolume", &Class::getVolume)
+		.def("copyFrom", &Class::copyFrom);
 }
 
-//#include "Topology/JointTree.h"
-//template <typename TDataType>
-//void declare_joint_tree(py::module& m, std::string typestr) {
-//	using Class = dyno::JointTree<TDataType>;
-//	using Parent = dyno::TopologyModule;
-//	std::string pyclass_name = std::string("JointTree") + typestr;
-//	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-//		.def(py::init<>())
-//		.def("copy_from", &Class::copyFrom)
-//
-//		.def("scale", &Class::scale)
-//		.def("translate", &Class::translate)
-//		.def("get_global_transform", &Class::getGlobalTransform)
-//		.def("get_transform", &Class::getTransform)
-//		.def("get_quat", &Class::getQuat)
-//		.def("get_global_quat", &Class::getGlobalQuat)
-//		.def("get_coord_by_matrix", &Class::getCoordByMatrix)
-//		.def("get_coord_by_quat", &Class::getCoordByQuat)
-//
-//		.def("get_global_coord", &Class::getGlobalCoord)
-//
-//		.def("set_anim_translation", &Class::setAnimTranslation)
-//		.def("set_anim_rotation", &Class::setAnimRotation)
-//		.def("set_anim_scaling", &Class::setAnimScaling)
-//
-//		.def("apply_animation_by_one", &Class::applyAnimationByOne)
-//		.def("apply_animation_all", &Class::applyAnimationAll)
-//
-//		.def_readwrite("id", &Class::id)
-//
-//		.def_readwrite("PreRotation", &Class::PreRotation)
-//		.def_readwrite("PreScaling", &Class::PreScaling)
-//		.def_readwrite("PreTranslation", &Class::PreTranslation)
-//
-//		.def_readwrite("tmp", &Class::tmp)
-//
-//		.def_readwrite("LclTranslation", &Class::LclTranslation)
-//		.def_readwrite("LclRotation", &Class::LclRotation)
-//		.def_readwrite("LclScaling", &Class::LclScaling)
-//
-//		.def_readwrite("AnimTranslation", &Class::AnimTranslation)
-//		.def_readwrite("AnimRotation", &Class::AnimRotation)
-//		.def_readwrite("AnimScaling", &Class::AnimScaling)
-//
-//		.def_readwrite("CurTranslation", &Class::CurTranslation)
-//		.def_readwrite("CurRotation", &Class::CurRotation)
-//		.def_readwrite("CurScaling", &Class::CurScaling)
-//
-//		.def_readwrite("GlCoord", &Class::GlCoord)
-//		.def_readwrite("LastCoord", &Class::LastCoord)
-//		.def_readwrite("GlobalTransform", &Class::GlobalTransform)
-//
-//		.def_readwrite("GlT", &Class::GlT)
-//		.def_readwrite("GlR", &Class::GlR)
-//		.def_readwrite("GlS", &Class::GlS)
-//		.def_readwrite("children", &Class::children)
-//		.def_readwrite("parent", &Class::parent);
-//}
+#include "Topology/JointInfo.h"
+void declare_joint_info(py::module& m) {
+	using Class = dyno::JointInfo;
+	using Parent = dyno::OBase;
+	typedef int joint;
+	std::string pyclass_name = std::string("JointInfo");
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		//.def(py::init<dyno::Array<dyno::Mat4f, DeviceType::GPU>&, dyno::Array<dyno::Mat4f, DeviceType::GPU>&, dyno::Array<dyno::Mat4f, DeviceType::GPU>&, std::vector<int>&, std::map<joint, std::vector<joint>>&, std::map<joint, dyno::Vec3f>&, std::map<joint, dyno::Vec3f>&, std::map<joint, dyno::Quat1f>&>())
+		.def("setGltfJointInfo", &Class::setGltfJointInfo)
+		.def("clear", &Class::clear)
+		.def("SetJointInfo", &Class::SetJointInfo)
+		.def("setJoint", &Class::setJoint)
+		.def("isEmpty", &Class::isEmpty)
+		.def("updateWorldMatrixByTransform", &Class::updateWorldMatrixByTransform)
+		.def("setJointName", &Class::setJointName)
+		.def("setLeftHandedCoordSystem", &Class::setLeftHandedCoordSystem)
+		.def("setPose", &Class::setPose)
+		.def("findJointIndexByName", &Class::findJointIndexByName)
+		.def("getLocalMatrix", &Class::getLocalMatrix)
+		.def_readwrite("mJointName", &Class::mJointName)
+
+		.def_readwrite("mJointInverseBindMatrix", &Class::mJointInverseBindMatrix)
+		.def_readwrite("mJointLocalMatrix", &Class::mJointLocalMatrix)
+		.def_readwrite("mJointWorldMatrix", &Class::mJointWorldMatrix)
+
+		.def_readwrite("currentPose", &Class::currentPose)
+
+		.def_readwrite("mBindPoseTranslation", &Class::mBindPoseTranslation)
+		.def_readwrite("mBindPoseScale", &Class::mBindPoseScale)
+		.def_readwrite("mBindPoseRotation", &Class::mBindPoseRotation)
+		.def_readwrite("mBindPoseRotator", &Class::mBindPoseRotator)
+
+		.def_readwrite("mBindPosePreRotator", &Class::mBindPosePreRotator)
+
+		.def_readwrite("mAllJoints", &Class::mAllJoints)
+		.def_readwrite("mJointDir", &Class::mJointDir)
+
+		.def_readwrite("mMaxJointID", &Class::mMaxJointID);
+}
+
+void declare_joint_animation_info(py::module& m) {
+	using Class = dyno::JointAnimationInfo;
+	using Parent = dyno::OBase;
+	typedef int joint;
+	std::string pyclass_name = std::string("JointAnimationInfo");
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("setGLTFAnimationData", &Class::setGLTFAnimationData)
+		.def("clear", &Class::clear)
+		.def("isGltfAnimation", &Class::isGltfAnimation)
+		.def("resizeJointsData", &Class::resizeJointsData)
+		.def("getJointsTranslation", &Class::getJointsTranslation)
+		.def("getJointsRotation", &Class::getJointsRotation)
+		.def("getJointsScale", &Class::getJointsScale)
+		.def("getTotalTime", &Class::getTotalTime)
+		.def("findMaxSmallerIndex", &Class::findMaxSmallerIndex)
+
+		//.def("lerp", py::overload_cast<std::vector<Coord>, std::vector<dyno::TopologyModule::Triangle>&>(&Class::lerp))
+		//override
+		.def("normalize", &Class::normalize)
+		.def("slerp", &Class::slerp)
+		.def("nlerp", &Class::nlerp)
+		.def("getJointDir", &Class::getJointDir)
+		.def("setLoop", &Class::setLoop)
+		.def("getPose", &Class::getPose)
+		.def("getCurrentAnimationTime", &Class::getCurrentAnimationTime)
+		.def("getBlendInTime", &Class::getBlendInTime)
+		.def("getBlendOutTime", &Class::getBlendOutTime)
+		.def("getPlayRate", &Class::getPlayRate)
+
+		.def_readwrite("mSkeleton", &Class::mSkeleton);
+}
 
 #include "Topology/LevelSet.h"
 template <typename TDataType>
@@ -911,10 +926,9 @@ void declare_level_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("SignedDistanceField") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("get_sdf", &Class::getSDF, py::return_value_policy::reference)
-		.def("set_sdf", &Class::setSDF);
+		.def("getSDF", &Class::getSDF, py::return_value_policy::reference)
+		.def("setSDF", &Class::setSDF);
 }
-
 
 #include "Topology/LinearBVH.h"
 template <typename TDataType>
@@ -925,15 +939,15 @@ void declare_linear_bvh(py::module& m, std::string typestr) {
 		.def(py::init<>())
 		.def("construct", &Class::construct)
 
-		.def("request_intersection_number", &Class::requestIntersectionNumber)
-		.def("request_intersection_ids", &Class::requestIntersectionIds)
+		.def("requestIntersectionNumber", &Class::requestIntersectionNumber)
+		.def("requestIntersectionIds", &Class::requestIntersectionIds)
 
-		.def("get_root", &Class::getRoot)
+		.def("getRoot", &Class::getRoot)
 
-		.def("get_AABB", &Class::getAABB)
-		.def("get_object_idx", &Class::getObjectIdx)
+		.def("getAABB", &Class::getAABB)
+		.def("getObjectIdx", &Class::getObjectIdx)
 
-		.def("get_sorted_AABBs", &Class::getSortedAABBs, py::return_value_policy::reference)
+		.def("getSortedAABBs", &Class::getSortedAABBs, py::return_value_policy::reference)
 		.def("release", &Class::release);
 }
 
@@ -945,20 +959,20 @@ void declare_polygon_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("PolygonSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("set_polygons", py::overload_cast<const dyno::ArrayList<dyno::uint, DeviceType::CPU>&>(&Class::setPolygons))
-		.def("set_polygons", py::overload_cast<const dyno::ArrayList<dyno::uint, DeviceType::GPU>&>(&Class::setPolygons))
+		.def("setPolygons", py::overload_cast<const dyno::ArrayList<dyno::uint, DeviceType::CPU>&>(&Class::setPolygons))
+		.def("setPolygons", py::overload_cast<const dyno::ArrayList<dyno::uint, DeviceType::GPU>&>(&Class::setPolygons))
 
-		.def("scale_polygon_indices", &Class::polygonIndices, py::return_value_policy::reference)
-		.def("scale_vertex_2_polygon", &Class::vertex2Polygon, py::return_value_policy::reference)
-		.def("scale_polygon_2_edge", &Class::polygon2Edge, py::return_value_policy::reference)
-		.def("scale_edge_2_polygon", &Class::edge2Polygon, py::return_value_policy::reference)
-		.def("scale_copy_from", &Class::copyFrom)
-		.def("scale_is_empty", &Class::isEmpty)
-		.def("scale_extract_edge_set", &Class::extractEdgeSet)
-		.def("scale_extract_triangle_set", &Class::extractTriangleSet)
-		.def("scale_extract_quad_set", &Class::extractQuadSet)
-		.def("scale_turn_into_triangle_set", &Class::turnIntoTriangleSet)
-		.def("triangle_set_to_polygon_set", &Class::triangleSetToPolygonSet);
+		.def("polygonIndices", &Class::polygonIndices, py::return_value_policy::reference)
+		.def("vertex2Polygon", &Class::vertex2Polygon, py::return_value_policy::reference)
+		.def("polygon2Edge", &Class::polygon2Edge, py::return_value_policy::reference)
+		.def("edge2Polygon", &Class::edge2Polygon, py::return_value_policy::reference)
+		.def("copyFrom", &Class::copyFrom)
+		.def("isEmpty", &Class::isEmpty)
+		.def("extractEdgeSet", &Class::extractEdgeSet)
+		.def("extractTriangleSet", &Class::extractTriangleSet)
+		.def("extractQuadSet", &Class::extractQuadSet)
+		.def("turnIntoTriangleSet", &Class::turnIntoTriangleSet)
+		.def("triangleSetToPolygonSet", &Class::triangleSetToPolygonSet);
 }
 
 #include "Topology/SimplexSet.h"
@@ -972,20 +986,20 @@ void declare_simplex_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("SimplexSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("copy_from", &Class::copyFrom)
-		.def("is_empty", &Class::isEmpty)
-		.def("set_edge_index", py::overload_cast<const dyno::Array<Edge, DeviceType::GPU>&>(&Class::setEdgeIndex))
-		.def("set_edge_index", py::overload_cast<const dyno::Array<Edge, DeviceType::CPU>&>(&Class::setEdgeIndex))
-		.def("set_triangle_index", py::overload_cast<const dyno::Array<Triangle, DeviceType::GPU>&>(&Class::setTriangleIndex))
-		.def("set_triangle_index", py::overload_cast<const dyno::Array<Triangle, DeviceType::CPU>&>(&Class::setTriangleIndex))
-		.def("set_tetrahedron_index", py::overload_cast<const dyno::Array<Tetrahedron, DeviceType::GPU>&>(&Class::setTetrahedronIndex))
-		.def("set_tetrahedron_index", py::overload_cast<const dyno::Array<Tetrahedron, DeviceType::CPU>&>(&Class::setTetrahedronIndex))
-		.def("extract_simplex_1d", &Class::extractSimplex1D)
-		.def("extract_simplex_2d", &Class::extractSimplex2D)
-		.def("extract_simplex_3d", &Class::extractSimplex3D)
-		.def("extract_point_set", &Class::extractPointSet)
-		.def("extract_edge_set", &Class::extractEdgeSet)
-		.def("extract_triangle_set", &Class::extractTriangleSet);
+		.def("copyFrom", &Class::copyFrom)
+		.def("isEmpty", &Class::isEmpty)
+		.def("setEdgeIndex", py::overload_cast<const dyno::Array<Edge, DeviceType::GPU>&>(&Class::setEdgeIndex))
+		.def("setEdgeIndex", py::overload_cast<const dyno::Array<Edge, DeviceType::CPU>&>(&Class::setEdgeIndex))
+		.def("setTriangleIndex", py::overload_cast<const dyno::Array<Triangle, DeviceType::GPU>&>(&Class::setTriangleIndex))
+		.def("setTriangleIndex", py::overload_cast<const dyno::Array<Triangle, DeviceType::CPU>&>(&Class::setTriangleIndex))
+		.def("setTetrahedronIndex", py::overload_cast<const dyno::Array<Tetrahedron, DeviceType::GPU>&>(&Class::setTetrahedronIndex))
+		.def("setTetrahedronIndex", py::overload_cast<const dyno::Array<Tetrahedron, DeviceType::CPU>&>(&Class::setTetrahedronIndex))
+		.def("extractSimplex1D", &Class::extractSimplex1D)
+		.def("extractSimplex2D", &Class::extractSimplex2D)
+		.def("extractSimplex3D", &Class::extractSimplex3D)
+		.def("extractPointSet", &Class::extractPointSet)
+		.def("extractEdgeSet", &Class::extractEdgeSet)
+		.def("extractTriangleSet", &Class::extractTriangleSet);
 }
 
 #include "Topology/SparseGridHash.h"
@@ -995,7 +1009,7 @@ void declare_sparse_grid_hash(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("SparseGridHash") + typestr;
 	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("set_space", &Class::setSpace)
+		.def("setSpace", &Class::setSpace)
 		.def("construct", &Class::construct);
 }
 
@@ -1009,35 +1023,35 @@ void declare_sparse_octree(py::module& m, std::string typestr) {
 	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("release", &Class::release)
-		.def("set_space", &Class::setSpace)
+		.def("setSpace", &Class::setSpace)
 
 		.def("construct", py::overload_cast<const dyno::Array<Coord, DeviceType::GPU>&, Real>(&Class::construct))
 		.def("construct", py::overload_cast<const dyno::Array<dyno::AABB, DeviceType::GPU>&>(&Class::construct))
 		.def("construct", py::overload_cast<const dyno::Array<dyno::OctreeNode, DeviceType::GPU>&>(&Class::construct))
 
-		.def("get_level_max", &Class::getLevelMax)
+		.def("getLevelMax", &Class::getLevelMax)
 
-		.def("query_node", &Class::queryNode)
+		.def("queryNode", &Class::queryNode)
 
-		.def("request_level_number", &Class::requestLevelNumber)
+		.def("requestLevelNumber", &Class::requestLevelNumber)
 
-		//.def("request_intersection_number", &Class::requestIntersectionNumber)
-		//.def("reqeust_intersection_ids", &Class::reqeustIntersectionIds)
+		//.def("requestIntersectionNumber", &Class::requestIntersectionNumber)
+		//.def("reqeustIntersectionIds", &Class::reqeustIntersectionIds)
 
-		.def("request_intersection_number_from_level", py::overload_cast<const dyno::AABB, int>(&Class::requestIntersectionNumberFromLevel))
-		.def("request_intersection_number_from_level", py::overload_cast<const dyno::AABB, dyno::AABB*, int>(&Class::requestIntersectionNumberFromLevel))
+		.def("requestIntersectionNumberFromLevel", py::overload_cast<const dyno::AABB, int>(&Class::requestIntersectionNumberFromLevel))
+		.def("requestIntersectionNumberFromLevel", py::overload_cast<const dyno::AABB, dyno::AABB*, int>(&Class::requestIntersectionNumberFromLevel))
 
-		.def("request_intersection_ids_from_level", py::overload_cast<int*, const dyno::AABB, int>(&Class::reqeustIntersectionIdsFromLevel))
-		.def("request_intersection_ids_from_level", py::overload_cast<int*, const dyno::AABB, dyno::AABB*, int>(&Class::reqeustIntersectionIdsFromLevel))
+		.def("reqeustIntersectionIdsFromLevel", py::overload_cast<int*, const dyno::AABB, int>(&Class::reqeustIntersectionIdsFromLevel))
+		.def("reqeustIntersectionIdsFromLevel", py::overload_cast<int*, const dyno::AABB, dyno::AABB*, int>(&Class::reqeustIntersectionIdsFromLevel))
 
-		.def("request_intersection_number_from_bottom", py::overload_cast<const dyno::AABB>(&Class::requestIntersectionNumberFromBottom))
-		.def("request_intersection_number_from_bottom", py::overload_cast<const dyno::AABB, dyno::AABB*>(&Class::requestIntersectionNumberFromBottom))
+		.def("requestIntersectionNumberFromBottom", py::overload_cast<const dyno::AABB>(&Class::requestIntersectionNumberFromBottom))
+		.def("requestIntersectionNumberFromBottom", py::overload_cast<const dyno::AABB, dyno::AABB*>(&Class::requestIntersectionNumberFromBottom))
 
-		.def("request_intersection_ids_from_bottom", py::overload_cast<int*, const dyno::AABB>(&Class::reqeustIntersectionIdsFromBottom))
-		.def("request_intersection_ids_from_bottom", py::overload_cast<int*, const dyno::AABB, dyno::AABB*>(&Class::reqeustIntersectionIdsFromBottom))
+		.def("reqeustIntersectionIdsFromBottom", py::overload_cast<int*, const dyno::AABB>(&Class::reqeustIntersectionIdsFromBottom))
+		.def("reqeustIntersectionIdsFromBottom", py::overload_cast<int*, const dyno::AABB, dyno::AABB*>(&Class::reqeustIntersectionIdsFromBottom))
 
-		.def("print_all_nodes", &Class::printAllNodes)
-		.def("print_post_ordered_tree", &Class::printPostOrderedTree);
+		.def("printAllNodes", &Class::printAllNodes)
+		.def("printPostOrderedTree", &Class::printPostOrderedTree);
 }
 
 #include "Topology/StructuredPointSet.h"
@@ -1062,22 +1076,22 @@ void declare_triangle_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TriangleSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("set_triangles", py::overload_cast<std::vector<Triangle>&>(&Class::setTriangles))
-		.def("set_triangles", py::overload_cast<dyno::Array<Triangle, DeviceType::GPU>&>(&Class::setTriangles))
-		.def("get_triangle_2_edge", &Class::getTriangle2Edge)
-		.def("get_edge_2_triangle", &Class::getEdge2Triangle)
+		.def("setTriangles", py::overload_cast<std::vector<Triangle>&>(&Class::setTriangles))
+		.def("setTriangles", py::overload_cast<dyno::Array<Triangle, DeviceType::GPU>&>(&Class::setTriangles))
+		.def("getTriangle2Edge", &Class::getTriangle2Edge)
+		.def("getEdge2Triangle", &Class::getEdge2Triangle)
 
-		.def("set_normals", &Class::setNormals)
-		.def("get_vertex_normals", &Class::getVertexNormals)
-		.def("update_triangle_2_edge", &Class::updateTriangle2Edge)
-		.def("update_edge_normal", &Class::updateEdgeNormal)
-		.def("update_angle_weighted_vertex_normal", &Class::updateAngleWeightedVertexNormal)
-		.def("load_obj_file", &Class::loadObjFile)
-		.def("copy_from", &Class::copyFrom)
+		.def("setNormals", &Class::setNormals)
+		.def("getVertexNormals", &Class::getVertexNormals)
+		.def("updateTriangle2Edge", &Class::updateTriangle2Edge)
+		.def("updateEdgeNormal", &Class::updateEdgeNormal)
+		.def("updateAngleWeightedVertexNormal", &Class::updateAngleWeightedVertexNormal)
+		.def("loadObjFile", &Class::loadObjFile)
+		.def("copyFrom", &Class::copyFrom)
 		.def("merge", &Class::merge)
-		.def("is_empty", &Class::isEmpty)
+		.def("isEmpty", &Class::isEmpty)
 		.def("clear", &Class::clear)
-		.def("set_auto_update_normals", &Class::setAutoUpdateNormals)
+		.def("setAutoUpdateNormals", &Class::setAutoUpdateNormals)
 		.def("rotate", py::overload_cast<const Coord>(&Class::rotate))
 		.def("rotate", py::overload_cast<const dyno::Quat<Real>>(&Class::rotate));
 }
@@ -1094,15 +1108,15 @@ void declare_tetrahedron_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TetrahedronSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("load_tet_file", &Class::loadTetFile)
-		.def("set_tetrahedrons", py::overload_cast<std::vector<Tetrahedron>&>(&Class::setTetrahedrons))
-		.def("set_tetrahedrons", py::overload_cast<dyno::Array<Tetrahedron, DeviceType::GPU>&>(&Class::setTetrahedrons))
-		.def("get_tetrahedrons", &Class::getTetrahedrons, py::return_value_policy::reference)
-		.def("get_tri_2_tet", &Class::getTri2Tet, py::return_value_policy::reference)
-		.def("get_ver_2_tet", &Class::getVer2Tet, py::return_value_policy::reference)
-		.def("get_volume", &Class::getVolume)
-		.def("copy_from", &Class::copyFrom)
-		.def("is_empty", &Class::isEmpty);
+		.def("loadTetFile", &Class::loadTetFile)
+		.def("setTetrahedrons", py::overload_cast<std::vector<Tetrahedron>&>(&Class::setTetrahedrons))
+		.def("setTetrahedrons", py::overload_cast<dyno::Array<Tetrahedron, DeviceType::GPU>&>(&Class::setTetrahedrons))
+		.def("getTetrahedrons", &Class::getTetrahedrons, py::return_value_policy::reference)
+		.def("getTri2Tet", &Class::getTri2Tet, py::return_value_policy::reference)
+		.def("getVer2Tet", &Class::getVer2Tet, py::return_value_policy::reference)
+		.def("getVolume", &Class::getVolume)
+		.def("copyFrom", &Class::copyFrom)
+		.def("isEmpty", &Class::isEmpty);
 }
 
 #include "Topology/UniformGrid.h"
@@ -1122,8 +1136,8 @@ void declare_unstructured_point_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("UnstructuredPointSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("copy_from", &Class::copyFrom)
-		.def("get_point_neighbors", &Class::getPointNeighbors, py::return_value_policy::reference)
+		.def("copyFrom", &Class::copyFrom)
+		.def("getPointNeighbors", &Class::getPointNeighbors, py::return_value_policy::reference)
 		.def("clear", &Class::clear);
 }
 

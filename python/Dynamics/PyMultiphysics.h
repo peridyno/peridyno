@@ -57,8 +57,8 @@ void declare_particle_skinning(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 
-		.def("import_particle_systems", &Class::importParticleSystem, py::return_value_policy::reference)
-		.def("get_particle_systems", &Class::getParticleSystem)
+		.def("importParticleSystem", &Class::importParticleSystem, py::return_value_policy::reference)
+		.def("getParticleSystem", &Class::getParticleSystem)
 
 		.def("statePoints", &Class::statePoints, py::return_value_policy::reference)
 		.def("stateLevelSet", &Class::stateLevelSet, py::return_value_policy::reference)

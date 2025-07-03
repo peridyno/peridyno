@@ -11,22 +11,22 @@ void declare_orbit_camera(py::module& m) {
 	std::string pyclass_name = std::string("OrbitCamera");
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init())
-		.def("rotate_to_point", &Class::rotateToPoint)
-		.def("translate_to_point", &Class::translateToPoint)
-		.def("zoom", &Class::zoom) // 绑定 zoom 方法
+		.def("rotateToPoint", &Class::rotateToPoint)
+		.def("translateToPoint", &Class::translateToPoint)
+		.def("zoom", &Class::zoom) // 掳贸露篓 zoom 路陆路篓
 
-		.def("register_point", &Class::registerPoint) // 绑定 registerPoint 方法
+		.def("registerPoint", &Class::registerPoint) // 掳贸露篓 registerPoint 路陆路篓
 
-		.def("get_view_dir", &Class::getViewDir)
-		.def("get_eye_pos", &Class::getEyePos) // 绑定 getEyePos 方法
-		.def("get_target_pos", &Class::getTargetPos) // 绑定 getTargetPos 方法
+		.def("getViewDir", &Class::getViewDir)
+		.def("getEyePos", &Class::getEyePos) // 掳贸露篓 getEyePos 路陆路篓
+		.def("getTargetPos", &Class::getTargetPos) // 掳贸露篓 getTargetPos 路陆路篓
 
-		.def("set_eye_pos", &Class::setEyePos) // 绑定 setEyePos 方法
-		.def("set_target_pos", &Class::setTargetPos) // 绑定 setTargetPos 方法
+		.def("setEyePos", &Class::setEyePos) // 掳贸露篓 setEyePos 路陆路篓
+		.def("setTargetPos", &Class::setTargetPos) // 掳贸露篓 setTargetPos 路陆路篓
 
-		.def("get_coord_system", &Class::getCoordSystem)
-		.def("get_view_mat", &Class::getViewMat)
-		.def("get_proj_mat", &Class::getProjMat);
+		.def("getCoordSystem", &Class::getCoordSystem)
+		.def("getViewMat", &Class::getViewMat)
+		.def("getProjMat", &Class::getProjMat);
 }
 
 #include "RenderEngine.h"
@@ -39,10 +39,10 @@ void declare_render_engine(py::module& m) {
 		.def("draw", &Class::draw)
 		.def("select", &Class::select)
 		.def("name", &Class::name)
-		.def("set_default_envmap", &Class::setDefaultEnvmap)
-		.def("set_use_envmap_background", &Class::setUseEnvmapBackground)
-		.def("set_envmap_scale", &Class::setEnvmapScale)
-		.def("set_env_style", &Class::setEnvStyle)
+		.def("setDefaultEnvmap", &Class::setDefaultEnvmap)
+		.def("setUseEnvmapBackground", &Class::setUseEnvmapBackground)
+		.def("setEnvmapScale", &Class::setEnvmapScale)
+		.def("setEnvStyle", &Class::setEnvStyle)
 
 		.def_readwrite("bgColor0", &Class::bgColor0)
 		.def_readwrite("bgColor1", &Class::bgColor1)

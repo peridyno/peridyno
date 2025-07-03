@@ -47,9 +47,9 @@ void declare_capillary_wave(py::module& m, std::string typestr) {
 		.def("setOriginX", &Class::setOriginX)
 		.def("setOriginY", &Class::setOriginY)
 		.def("getOriginX", &Class::getOriginX)
-		.def("get_originZ", &Class::getOriginZ)
+		.def("getOriginZ", &Class::getOriginZ)
 		.def("getRealGridSize", &Class::getRealGridSize)
-		.def("get_origin", &Class::getOrigin)
+		.def("getOrigin", &Class::getOrigin)
 		.def("moveDynamicRegion", &Class::moveDynamicRegion);
 }
 
@@ -193,7 +193,7 @@ void declare_rigid_water_coupling(py::module& m, std::string typestr) {
 		.def("varDamping", &Class::varDamping, py::return_value_policy::reference)
 		.def("varRotationalDamping", &Class::varRotationalDamping, py::return_value_policy::reference)
 		//DEF_NODE_PORTS
-		.def("import_vessels", &Class::importVessels, py::return_value_policy::reference)
+		.def("importVessels", &Class::importVessels, py::return_value_policy::reference)
 		.def("getVessels", &Class::getVessels)
 		.def("addVessel", &Class::addVessel)
 		.def("removeVessel", &Class::removeVessel)

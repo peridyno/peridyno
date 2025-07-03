@@ -6,6 +6,7 @@
 #include "PyTopology.h"
 #include "PyIO.h"
 #include "PyObjIO.h"
+#include "PyInteraction.h"
 
 #include "Rendering/PyRenderCore.h"
 #include "Rendering/PyGlfwGUI.h"

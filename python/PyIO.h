@@ -10,7 +10,7 @@ void declare_eigen_value_writer(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("output", &Class::output)
-		.def("in_transform", &Class::inTransform, py::return_value_policy::reference);
+		.def("inTransform", &Class::inTransform, py::return_value_policy::reference);
 }
 
 #include "GeometryLoader.h"
@@ -21,7 +21,7 @@ void declare_geometry_loader(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("GeometryLoader") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_file_name", &Class::varFileName, py::return_value_policy::reference);
+		.def("varFileName", &Class::varFileName, py::return_value_policy::reference);
 }
 
 #include "ParticleWriter.h"
@@ -32,11 +32,11 @@ void declare_particle_writer(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ParticleWriter") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>PW(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	PW.def(py::init<>())
-		.def("output_ascii", &Class::OutputASCII)
-		.def("output_binary", &Class::OutputBinary)
+		.def("OutputASCII", &Class::OutputASCII)
+		.def("OutputBinary", &Class::OutputBinary)
 		.def("output", &Class::output)
-		.def("in_point_set", &Class::inPointSet, py::return_value_policy::reference)
-		.def("var_file_type", &Class::varFileType, py::return_value_policy::reference);
+		.def("inPointSet", &Class::inPointSet, py::return_value_policy::reference)
+		.def("varFileType", &Class::varFileType, py::return_value_policy::reference);
 
 	py::enum_<typename Class::OpenType>(PW, "OpenType")
 		.value("ASCII", Class::OpenType::ASCII)
@@ -52,7 +52,7 @@ void declare_points_loader(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("PointsLoader") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("out_point_set", &Class::outPointSet, py::return_value_policy::reference);
+		.def("outPointSet", &Class::outPointSet, py::return_value_policy::reference);
 }
 
 #include "StaticMeshLoader.h"
@@ -63,10 +63,10 @@ void declare_static_mesh_loader(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("StaticMeshLoader") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("get_node_type", &Class::getNodeType)
-		.def("var_file_name", &Class::varFileName, py::return_value_policy::reference)
-		.def("state_initial_triangle_set", &Class::stateInitialTriangleSet, py::return_value_policy::reference)
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference);
+		.def("getNodeType", &Class::getNodeType)
+		.def("varFileName", &Class::varFileName, py::return_value_policy::reference)
+		.def("stateInitialTriangleSet", &Class::stateInitialTriangleSet, py::return_value_policy::reference)
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference);
 }
 
 #include "TetraMeshWriter.h"
@@ -77,11 +77,11 @@ void declare_tetra_mesh_writer(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TetraMeshWriter") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		//.def("set_name_prefix", &Class::setNamePrefix)
-		//.def("set_output_path", &Class::setOutputPath)
-		.def("set_tetrahedron_set_ptr", &Class::setTetrahedronSetPtr)
-		.def("update_ptr", &Class::updatePtr)
-		//.def("output_surface_mesh", &Class::outputSurfaceMesh)
+		//.def("setNamePrefix", &Class::setNamePrefix)
+		//.def("setOutputPath", &Class::setOutputPath)
+		.def("setTetrahedronSetPtr", &Class::setTetrahedronSetPtr)
+		.def("updatePtr", &Class::updatePtr)
+		//.def("outputSurfaceMesh", &Class::outputSurfaceMesh)
 		.def("output", &Class::output);
 }
 
@@ -93,10 +93,10 @@ void declare_tetra_mesh_writer_fracture(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TetraMeshWriterFracture") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("load_uvs", &Class::loadUVs)
-		.def("set_tetrahedron_set_ptr", &Class::setTetrahedronSetPtr)
-		.def("update_ptr", &Class::updatePtr)
-		.def("output_surface_mesh", &Class::outputSurfaceMesh)
+		.def("loadUVs", &Class::loadUVs)
+		.def("setTetrahedronSetPtr", &Class::setTetrahedronSetPtr)
+		.def("updatePtr", &Class::updatePtr)
+		.def("outputSurfaceMesh", &Class::outputSurfaceMesh)
 		.def_readwrite("OringalID", &Class::OringalID);
 }
 
@@ -108,9 +108,9 @@ void declare_texture_mesh_loader(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TextureMeshLoader") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("get_node_type", &Class::getNodeType)
-		.def("var_file_name", &Class::varFileName, py::return_value_policy::reference)
-		.def("state_texture_mesh", &Class::stateTextureMesh, py::return_value_policy::reference);
+		.def("getNodeType", &Class::getNodeType)
+		.def("varFileName", &Class::varFileName, py::return_value_policy::reference)
+		.def("stateTextureMesh", &Class::stateTextureMesh, py::return_value_policy::reference);
 }
 
 #include "TriangleMeshWriter.h"
@@ -121,11 +121,11 @@ void declare_triangle_mesh_writer(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TriangleMeshWriter") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>TMW(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	TMW.def(py::init<>())
-		.def("output_surface_mesh", &Class::outputSurfaceMesh)
-		.def("output_point_cloud", &Class::outputPointCloud)
+		.def("outputSurfaceMesh", &Class::outputSurfaceMesh)
+		.def("outputPointCloud", &Class::outputPointCloud)
 		.def("output", &Class::output)
-		.def("in_topology", &Class::inTopology, py::return_value_policy::reference)
-		.def("var_output_type", &Class::varOutputType, py::return_value_policy::reference);
+		.def("inTopology", &Class::inTopology, py::return_value_policy::reference)
+		.def("varOutputType", &Class::varOutputType, py::return_value_policy::reference);
 
 	py::enum_<typename Class::OutputType>(TMW, "OutputType")
 		.value("TriangleMesh", Class::OutputType::TriangleMesh)

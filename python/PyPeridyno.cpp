@@ -1,5 +1,6 @@
 #include "PyPeridyno.h"
 
+
 PYBIND11_MODULE(PyPeridyno, m) {
 	m.doc() = "Python binding of Peridyno";
 	pybind_core(m);
@@ -8,6 +9,7 @@ PYBIND11_MODULE(PyPeridyno, m) {
 	pybind_modeling(m);
 	pybind_topology(m);
 	pybind_objIO(m);
+	pybind_Interaction(m);
 
 	pybind_particle_system(m);
 	pybind_rigid_body(m);

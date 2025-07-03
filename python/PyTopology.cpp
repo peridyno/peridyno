@@ -12,8 +12,8 @@ void declare_texture_mesh(py::module& m) {
 		.def(py::init<>())
 		.def("vertices", &Class::vertices)
 		.def("normals", &Class::normals)
-		.def("tex_coords", &Class::texCoords)
-		.def("shape_ids", &Class::shapeIds)
+		.def("texCoords", &Class::texCoords)
+		.def("shapeIds", &Class::shapeIds)
 
 		.def("shapes", &Class::shapes)
 		.def("materials", &Class::materials)
@@ -26,32 +26,32 @@ void declare_attribute(py::module& m) {
 	std::string pyclass_name = std::string("Attribute");
 	py::class_<Class, std::shared_ptr<Class>>Attribute(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	Attribute.def(py::init<>())
-		.def("set_material_type", &Class::setMaterialType)
-		.def("set_kinematic_type", &Class::setKinematicType)
-		.def("set_object_id", &Class::setObjectId)
+		.def("setMaterialType", &Class::setMaterialType)
+		.def("setKinematicType", &Class::setKinematicType)
+		.def("setObjectId", &Class::setObjectId)
 
-		.def("material_type", &Class::materialType)
-		.def("kinematic_type", &Class::kinematicType)
+		.def("materialType", &Class::materialType)
+		.def("kinematicType", &Class::kinematicType)
 
-		.def("is_fluid", &Class::isFluid)
-		.def("is_rigid", &Class::isRigid)
-		.def("is_elastic", &Class::isElastic)
-		.def("is_plastic", &Class::isPlastic)
+		.def("isFluid", &Class::isFluid)
+		.def("isRigid", &Class::isRigid)
+		.def("isElastic", &Class::isElastic)
+		.def("isPlastic", &Class::isPlastic)
 
-		.def("set_fluid", &Class::setFluid)
-		.def("set_rigid", &Class::setRigid)
-		.def("set_elastic", &Class::setElastic)
-		.def("set_plastic", &Class::setPlastic)
+		.def("setFluid", &Class::setFluid)
+		.def("setRigid", &Class::setRigid)
+		.def("setElastic", &Class::setElastic)
+		.def("setPlastic", &Class::setPlastic)
 
-		.def("is_fixed", &Class::isFixed)
-		.def("is_passive", &Class::isPassive)
-		.def("is_dynamic", &Class::isDynamic)
+		.def("isFixed", &Class::isFixed)
+		.def("isPassive", &Class::isPassive)
+		.def("isDynamic", &Class::isDynamic)
 
-		.def("set_fixed", &Class::setFixed)
-		.def("set_passive", &Class::setPassive)
-		.def("set_dynamic", &Class::setDynamic)
+		.def("setFixed", &Class::setFixed)
+		.def("setPassive", &Class::setPassive)
+		.def("setDynamic", &Class::setDynamic)
 
-		.def("object_id", &Class::objectId);
+		.def("objectId", &Class::objectId);
 
 	py::enum_<typename Class::KinematicType>(Attribute, "KinematicType")
 		.value("KINEMATIC_MASK", Class::KinematicType::KINEMATIC_MASK)
@@ -140,6 +140,8 @@ void pybind_topology(py::module& m)
 	declare_height_field<dyno::DataType3f>(m, "3f");
 	declare_quad_set<dyno::DataType3f>(m, "3f");
 	declare_hexahedron_set<dyno::DataType3f>(m, "3f");
+	declare_joint_info(m);
+	declare_joint_animation_info(m);
 	//declare_joint_tree<dyno::DataType3f>(m, "3f");
 	declare_level_set<dyno::DataType3f>(m, "3f");
 	declare_linear_bvh<dyno::DataType3f>(m, "3f");

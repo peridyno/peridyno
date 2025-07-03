@@ -44,7 +44,7 @@ void declare_vector(py::module& m, std::string typestr) {
 				.def(py::self != py::self)
 				.def(-py::self)
 				//.def("norm", &Class::norm)
-				//.def("norm_squared", &Class::normSquared)
+				//.def("normSquared", &Class::normSquared)
 				//.def("normalize", &Class::normalize)
 				//.def("dot", &Class::dot)
 				.def("minimum", &Class::minimum)
@@ -82,19 +82,19 @@ void declare_matrix(py::module& m, std::string typestr) {
 		//		.def("__truediv__",		(Matrix		(Matrix::*)(const T&) const)		&Matrix::operator/)
 		.def("__itruediv__", (Matrix & (Matrix::*)(const T&)) & Matrix::operator/=)
 		//		.def("__mul__",			(Vector		(Matrix::*)(const Vector&) const)	&Matrix::operator*)
-		.def("set_row", &Matrix::setRow)
-		.def("set_col", &Matrix::setCol)
+		.def("setRow", &Matrix::setRow)
+		.def("setCol", &Matrix::setCol)
 		.def("determinant", &Matrix::determinant)
 		.def("trace", &Matrix::trace)
-		.def("double_contraction", &Matrix::doubleContraction)
-		.def("frobenius_norm", &Matrix::frobeniusNorm)
-		.def("one_norm", &Matrix::oneNorm)
-		.def("inf_norm", &Matrix::infNorm)
+		.def("doubleContraction", &Matrix::doubleContraction)
+		.def("frobeniusNorm", &Matrix::frobeniusNorm)
+		.def("oneNorm", &Matrix::oneNorm)
+		.def("infNorm", &Matrix::infNorm)
 		.def("transpose", &Matrix::transpose)
 		.def("inverse", &Matrix::inverse)
 		.def_static("rows", &Matrix::rows)
 		.def_static("cols", &Matrix::cols)
-		.def_static("identity_matrix", &Matrix::identityMatrix);
+		.def_static("identityMatrix", &Matrix::identityMatrix);
 }
 
 #include "Quat.h"
@@ -123,9 +123,9 @@ void declare_array(py::module& m, std::string typestr, std::string type)
 		.def("clear", &Class::clear)
 		.def("deviceType", &Class::deviceType)
 		.def("size", &Class::size)
-		.def("is_CPU", &Class::isCPU)
-		.def("is_GPU", &Class::isGPU)
-		.def("is_empty", &Class::isEmpty);
+		.def("isCPU", &Class::isCPU)
+		.def("isGPU", &Class::isGPU)
+		.def("isEmpty", &Class::isEmpty);
 }
 
 #include "Primitive/Primitive3D.h"

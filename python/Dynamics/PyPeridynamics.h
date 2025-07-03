@@ -92,7 +92,7 @@ void declare_co_semi_implicit_hyperelasticity_solver(py::module& m, std::string 
 		.def("getS", &Class::getS)
 		.def("getS0", &Class::getS0)
 		.def("getS1", &Class::getS1)
-		.def("get_grad_res_eps", &Class::setGrad_res_eps)
+		.def("setGrad_res_eps", &Class::setGrad_res_eps)
 		.def("setAccelerated", &Class::setAccelerated)
 		.def("getContactRulePtr", &Class::getContactRulePtr);
 }
@@ -300,15 +300,15 @@ void declare_codimensionalPD(py::module& m, std::string typestr) {
 		.def("scale", py::overload_cast<Coord>(&Class::scale))
 		.def("loadSurface", &Class::loadSurface)
 
-		.def("set_energy_model", py::overload_cast<dyno::StVKModel<Real>>(&Class::setEnergyModel),
+		.def("setEnergyModel", py::overload_cast<dyno::StVKModel<Real>>(&Class::setEnergyModel),
 			"Set energy model to StVKModel")
-		.def("set_energy_model", py::overload_cast<dyno::LinearModel<Real>>(&Class::setEnergyModel),
+		.def("setEnergyModel", py::overload_cast<dyno::LinearModel<Real>>(&Class::setEnergyModel),
 			"Set energy model to LinearModel")
-		.def("set_energy_model", py::overload_cast<dyno::NeoHookeanModel<Real>>(&Class::setEnergyModel),
+		.def("setEnergyModel", py::overload_cast<dyno::NeoHookeanModel<Real>>(&Class::setEnergyModel),
 			"Set energy model to NeoHookeanModel")
-		.def("set_energy_model", py::overload_cast<dyno::XuModel<Real>>(&Class::setEnergyModel),
+		.def("setEnergyModel", py::overload_cast<dyno::XuModel<Real>>(&Class::setEnergyModel),
 			"Set energy model to XuModel")
-		.def("set_energy_model", py::overload_cast<dyno::FiberModel<Real>>(&Class::setEnergyModel),
+		.def("setEnergyModel", py::overload_cast<dyno::FiberModel<Real>>(&Class::setEnergyModel),
 			"Set energy model to FiberModel")
 		//DEF_VAR
 		.def("varHorizon", &Class::varHorizon, py::return_value_policy::reference)
@@ -391,13 +391,13 @@ void declare_hyperelastic_body(py::module& m, std::string typestr) {
 		.def("rotate", py::overload_cast<dyno::Quat<Real>>(&Class::rotate))
 		.def("rotate", py::overload_cast<Coord>(&Class::rotate))
 
-		.def("set_energy_model", py::overload_cast<dyno::StVKModel<Real>>(&Class::setEnergyModel),
+		.def("setEnergyModel", py::overload_cast<dyno::StVKModel<Real>>(&Class::setEnergyModel),
 			"Set energy model to StVKModel")
-		.def("set_energy_model", py::overload_cast<dyno::LinearModel<Real>>(&Class::setEnergyModel),
+		.def("setEnergyModel", py::overload_cast<dyno::LinearModel<Real>>(&Class::setEnergyModel),
 			"Set energy model to LinearModel")
-		.def("set_energy_model", py::overload_cast<dyno::NeoHookeanModel<Real>>(&Class::setEnergyModel),
+		.def("setEnergyModel", py::overload_cast<dyno::NeoHookeanModel<Real>>(&Class::setEnergyModel),
 			"Set energy model to NeoHookeanModel")
-		.def("set_energy_model", py::overload_cast<dyno::XuModel<Real>>(&Class::setEnergyModel),
+		.def("setEnergyModel", py::overload_cast<dyno::XuModel<Real>>(&Class::setEnergyModel),
 			"Set energy model to XuModel")
 
 		.def("loadSDF", &Class::loadSDF)

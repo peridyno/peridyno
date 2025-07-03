@@ -10,11 +10,11 @@ void declare_dual_particle_fluid_system(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>DPFS(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	DPFS.def(py::init<>())
 		.def(py::init<int>())
-		.def("state_particle_attribute", &Class::stateParticleAttribute, py::return_value_policy::reference)
-		.def("state_boundary_norm", &Class::stateBoundaryNorm, py::return_value_policy::reference)
-		.def("state_virtual_position", &Class::stateVirtualPosition, py::return_value_policy::reference)
-		.def("state_virtual_pointSet", &Class::stateVirtualPointSet, py::return_value_policy::reference)
-		.def("var_virtual_particle_sampling_strategy", &Class::varVirtualParticleSamplingStrategy, py::return_value_policy::reference);
+		.def("stateParticleAttribute", &Class::stateParticleAttribute, py::return_value_policy::reference)
+		.def("stateBoundaryNorm", &Class::stateBoundaryNorm, py::return_value_policy::reference)
+		.def("stateVirtualPosition", &Class::stateVirtualPosition, py::return_value_policy::reference)
+		.def("stateVirtualPointSet", &Class::stateVirtualPointSet, py::return_value_policy::reference)
+		.def("varVirtualParticleSamplingStrategy", &Class::varVirtualParticleSamplingStrategy, py::return_value_policy::reference);
 
 	py::enum_<typename Class::EVirtualParticleSamplingStrategy>(DPFS, "EVirtualParticleSamplingStrategy")
 		.value("ColocationStrategy", Class::EVirtualParticleSamplingStrategy::ColocationStrategy)
@@ -31,10 +31,10 @@ void declare_dual_particle_isph_module(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("constrain", &Class::constrain)
-		.def("var_rest_density", &Class::varRestDensity, py::return_value_policy::reference)
-		.def("var_sampling_distance", &Class::varSamplingDistance, py::return_value_policy::reference)
-		.def("var_smoothing_length", &Class::varSmoothingLength, py::return_value_policy::reference)
-		.def("var_ppe_smoothing_length", &Class::varPpeSmoothingLength, py::return_value_policy::reference)
+		.def("varRestDensity", &Class::varRestDensity, py::return_value_policy::reference)
+		.def("varSamplingDistance", &Class::varSamplingDistance, py::return_value_policy::reference)
+		.def("varSmoothingLength", &Class::varSmoothingLength, py::return_value_policy::reference)
+		.def("varPpeSmoothingLength", &Class::varPpeSmoothingLength, py::return_value_policy::reference)
 		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
 		.def("inRPosition", &Class::inRPosition, py::return_value_policy::reference)
 		.def("inVPosition", &Class::inVPosition, py::return_value_policy::reference)
@@ -64,7 +64,7 @@ void declare_energy_analyish(py::module& m, std::string typestr)
 		.def("inNeighborIds", &Class::inNeighborIds, py::return_value_policy::reference)
 		.def("constrain", &Class::constrain)
 		.def("initializeImpl", &Class::initializeImpl)
-		.def("set_name_prefix", &Class::setNamePrefix)
+		.def("setNamePrefix", &Class::setNamePrefix)
 		.def("setOutputPath", &Class::setOutputPath);
 }
 

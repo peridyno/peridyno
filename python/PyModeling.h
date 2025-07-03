@@ -9,8 +9,8 @@ void declare_basic_shape(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("BasicShape") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>BS(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	BS.def(py::init<>())
-		.def("get_node_type", &Class::getNodeType)
-		.def("get_shape_type", &Class::getShapeType);
+		.def("getNodeType", &Class::getNodeType)
+		.def("getShapeType", &Class::getShapeType);
 }
 
 #include "BasicShapes/CapsuleModel.h"
@@ -22,17 +22,17 @@ void declare_capsule_model(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
-		.def("get_shape_type", &Class::getShapeType)
+		.def("getShapeType", &Class::getShapeType)
 		.def("boundingBox", &Class::boundingBox)
-		.def("var_center", &Class::varCenter, py::return_value_policy::reference)
-		.def("var_radius", &Class::varRadius, py::return_value_policy::reference)
-		.def("var_latitude", &Class::varLatitude, py::return_value_policy::reference)
-		.def("var_longitude", &Class::varLongitude, py::return_value_policy::reference)
-		.def("var_height", &Class::varHeight, py::return_value_policy::reference)
-		.def("var_height_segment", &Class::varHeightSegment, py::return_value_policy::reference)
-		.def("state_polygon_set", &Class::statePolygonSet, py::return_value_policy::reference)
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("out_capsule", &Class::outCapsule, py::return_value_policy::reference);
+		.def("varCenter", &Class::varCenter, py::return_value_policy::reference)
+		.def("varRadius", &Class::varRadius, py::return_value_policy::reference)
+		.def("varLatitude", &Class::varLatitude, py::return_value_policy::reference)
+		.def("varLongitude", &Class::varLongitude, py::return_value_policy::reference)
+		.def("varHeight", &Class::varHeight, py::return_value_policy::reference)
+		.def("varHeightSegment", &Class::varHeightSegment, py::return_value_policy::reference)
+		.def("statePolygonSet", &Class::statePolygonSet, py::return_value_policy::reference)
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("outCapsule", &Class::outCapsule, py::return_value_policy::reference);
 }
 
 #include "BasicShapes/ConeModel.h"
@@ -44,16 +44,15 @@ void declare_cone_model(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
-		.def("get_shape_type", &Class::getShapeType)
-		.def("var_columns", &Class::varColumns, py::return_value_policy::reference)
-		.def("var_row", &Class::varRow, py::return_value_policy::reference)
-		.def("var_end_segment", &Class::varEndSegment, py::return_value_policy::reference)
-		.def("var_radius", &Class::varRadius, py::return_value_policy::reference)
-		.def("var_height", &Class::varHeight, py::return_value_policy::reference)
-		.def("state_polygon_set", &Class::statePolygonSet, py::return_value_policy::reference)
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("out_cone", &Class::outCone, py::return_value_policy::reference)
-
+		.def("getShapeType", &Class::getShapeType)
+		.def("varColumns", &Class::varColumns, py::return_value_policy::reference)
+		.def("varRow", &Class::varRow, py::return_value_policy::reference)
+		.def("varEndSegment", &Class::varEndSegment, py::return_value_policy::reference)
+		.def("varRadius", &Class::varRadius, py::return_value_policy::reference)
+		.def("varHeight", &Class::varHeight, py::return_value_policy::reference)
+		.def("statePolygonSet", &Class::statePolygonSet, py::return_value_policy::reference)
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("outCone", &Class::outCone, py::return_value_policy::reference)
 		.def("boundingBox", &Class::boundingBox);
 }
 
@@ -66,14 +65,14 @@ void declare_cube_model(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
-		.def("get_shape_type", &Class::getShapeType)
+		.def("getShapeType", &Class::getShapeType)
 		.def("boundingBox", &Class::boundingBox)
-		.def("var_length", &Class::varLength, py::return_value_policy::reference)
-		.def("var_segments", &Class::varSegments, py::return_value_policy::reference)
-		.def("state_polygon_set", &Class::statePolygonSet, py::return_value_policy::reference)
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("state_quad_set", &Class::stateQuadSet, py::return_value_policy::reference)
-		.def("out_cube", &Class::outCube, py::return_value_policy::reference);
+		.def("varLength", &Class::varLength, py::return_value_policy::reference)
+		.def("varSegments", &Class::varSegments, py::return_value_policy::reference)
+		.def("statePolygonSet", &Class::statePolygonSet, py::return_value_policy::reference)
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("stateQuadSet", &Class::stateQuadSet, py::return_value_policy::reference)
+		.def("outCube", &Class::outCube, py::return_value_policy::reference);
 }
 
 #include "BasicShapes/CylinderModel.h"
@@ -85,16 +84,16 @@ void declare_cylinder_model(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
-		.def("get_shape_type", &Class::getShapeType)
+		.def("getShapeType", &Class::getShapeType)
 
-		.def("var_columns", &Class::varColumns, py::return_value_policy::reference)
-		.def("var_row", &Class::varRow, py::return_value_policy::reference)
-		.def("var_end_segment", &Class::varEndSegment, py::return_value_policy::reference)
-		.def("var_radius", &Class::varRadius, py::return_value_policy::reference)
-		.def("var_height", &Class::varHeight, py::return_value_policy::reference)
-		.def("state_polygon_set", &Class::statePolygonSet, py::return_value_policy::reference)
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("out_cylinder", &Class::outCylinder, py::return_value_policy::reference)
+		.def("varColumns", &Class::varColumns, py::return_value_policy::reference)
+		.def("varRow", &Class::varRow, py::return_value_policy::reference)
+		.def("varEndSegment", &Class::varEndSegment, py::return_value_policy::reference)
+		.def("varRadius", &Class::varRadius, py::return_value_policy::reference)
+		.def("varHeight", &Class::varHeight, py::return_value_policy::reference)
+		.def("statePolygonSet", &Class::statePolygonSet, py::return_value_policy::reference)
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("outCylinder", &Class::outCylinder, py::return_value_policy::reference)
 
 		.def("boundingBox", &Class::boundingBox);
 }
@@ -108,16 +107,17 @@ void declare_plane_model(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
-		.def("get_shape_type", &Class::getShapeType)
-		.def("bounding_box", &Class::boundingBox)
+		.def("getShapeType", &Class::getShapeType)
+		.def("boundingBox", &Class::boundingBox)
 
-		.def("var_length_x", &Class::varLengthX, py::return_value_policy::reference)
-		.def("var_length_z", &Class::varLengthZ, py::return_value_policy::reference)
-		.def("var_segment_x", &Class::varSegmentX, py::return_value_policy::reference)
-		.def("var_segment_z", &Class::varSegmentZ, py::return_value_policy::reference)
-		.def("state_polygon_set", &Class::statePolygonSet, py::return_value_policy::reference)
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("state_quad_set", &Class::stateQuadSet, py::return_value_policy::reference);
+		.def("varLengthX", &Class::varLengthX, py::return_value_policy::reference)
+		.def("varLengthZ", &Class::varLengthZ, py::return_value_policy::reference)
+
+		.def("varSegmentX", &Class::varSegmentX, py::return_value_policy::reference)
+		.def("varSegmentZ", &Class::varSegmentZ, py::return_value_policy::reference)
+		.def("statePolygonSet", &Class::statePolygonSet, py::return_value_policy::reference)
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("stateQuadSet", &Class::stateQuadSet, py::return_value_policy::reference);
 }
 
 #include "BasicShapes/SphereModel.h"
@@ -129,19 +129,19 @@ void declare_sphere_model(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>SM(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	SM.def(py::init<>())
 		.def("caption", &Class::caption)
-		.def("get_shape_type", &Class::getShapeType)
+		.def("getShapeType", &Class::getShapeType)
 		.def("boundingBox", &Class::boundingBox)
 
-		.def("var_center", &Class::varCenter, py::return_value_policy::reference)
-		.def("var_radius", &Class::varRadius, py::return_value_policy::reference)
-		.def("var_latitude", &Class::varLatitude, py::return_value_policy::reference)
-		.def("var_longitude", &Class::varLongitude, py::return_value_policy::reference)
-		.def("var_icosahedron_step", &Class::varIcosahedronStep, py::return_value_policy::reference)
-		.def("state_polygon_set", &Class::statePolygonSet, py::return_value_policy::reference)
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("varCenter", &Class::varCenter, py::return_value_policy::reference)
+		.def("varRadius", &Class::varRadius, py::return_value_policy::reference)
+		.def("varLatitude", &Class::varLatitude, py::return_value_policy::reference)
+		.def("varLongitude", &Class::varLongitude, py::return_value_policy::reference)
+		.def("varIcosahedronStep", &Class::varIcosahedronStep, py::return_value_policy::reference)
+		.def("statePolygonSet", &Class::statePolygonSet, py::return_value_policy::reference)
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
 
-		.def("out_Sphere", &Class::outSphere, py::return_value_policy::reference)
-		.def("var_type", &Class::varType, py::return_value_policy::reference);
+		.def("outSphere", &Class::outSphere, py::return_value_policy::reference)
+		.def("varType", &Class::varType, py::return_value_policy::reference);
 
 	py::enum_<typename Class::SphereType>(SM, "SphereType")
 		.value("Standard", Class::SphereType::Standard)
@@ -157,13 +157,13 @@ void declare_convert_to_texture_mesh(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ConvertToTextureMesh") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_diffuse_texture", &Class::varDiffuseTexture, py::return_value_policy::reference)
-		.def("var_normal_texture", &Class::varNormalTexture, py::return_value_policy::reference)
-		.def("var_uv_scale_U", &Class::varUvScaleU, py::return_value_policy::reference)
-		.def("var_uv_scale_v", &Class::varUvScaleV, py::return_value_policy::reference)
-		.def("var_use_bounding_transform", &Class::varUseBoundingTransform, py::return_value_policy::reference)
+		.def("varDiffuseTexture", &Class::varDiffuseTexture, py::return_value_policy::reference)
+		.def("varNormalTexture", &Class::varNormalTexture, py::return_value_policy::reference)
+		.def("varUvScaleU", &Class::varUvScaleU, py::return_value_policy::reference)
+		.def("varUvScaleV", &Class::varUvScaleV, py::return_value_policy::reference)
+		.def("varUseBoundingTransform", &Class::varUseBoundingTransform, py::return_value_policy::reference)
 		.def("in_topolopy", &Class::inTopology, py::return_value_policy::reference)
-		.def("state_texture_mesh", &Class::stateTextureMesh, py::return_value_policy::reference);
+		.def("stateTextureMesh", &Class::stateTextureMesh, py::return_value_policy::reference);
 }
 
 #include "Commands/CopyModel.h"
@@ -174,13 +174,13 @@ void declare_copy_model(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("CopyModel") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>CM(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	CM.def(py::init<>())
-		.def("var_total_number", &Class::varTotalNumber, py::return_value_policy::reference)
-		.def("var_copy_transform", &Class::varCopyTransform, py::return_value_policy::reference)
-		.def("var_copy_rotation", &Class::varCopyRotation, py::return_value_policy::reference)
-		.def("var_copy_scale", &Class::varCopyScale, py::return_value_policy::reference)
-		.def("var_scale_mode", &Class::varScaleMode, py::return_value_policy::reference)
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("in_triangle_set_in", &Class::inTriangleSetIn, py::return_value_policy::reference);
+		.def("varTotalNumber", &Class::varTotalNumber, py::return_value_policy::reference)
+		.def("varCopyTransform", &Class::varCopyTransform, py::return_value_policy::reference)
+		.def("varCopyRotation", &Class::varCopyRotation, py::return_value_policy::reference)
+		.def("varCopyScale", &Class::varCopyScale, py::return_value_policy::reference)
+		.def("varScaleMode", &Class::varScaleMode, py::return_value_policy::reference)
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("inTriangleSetIn", &Class::inTriangleSetIn, py::return_value_policy::reference);
 
 	py::enum_<typename Class::ScaleMode>(CM, "ScaleMode")
 		.value("Power", Class::ScaleMode::Power)
@@ -196,10 +196,10 @@ void declare_copy_to_point(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("CopyToPoint") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>CTP(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	CTP.def(py::init<>())
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("in_triangle_set_in", &Class::inTriangleSetIn, py::return_value_policy::reference)
-		.def("in_target_point_set", &Class::inTargetPointSet, py::return_value_policy::reference)
-		.def("disable_render", &Class::disableRender);
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("inTriangleSetIn", &Class::inTriangleSetIn, py::return_value_policy::reference)
+		.def("inTargetPointSet", &Class::inTargetPointSet, py::return_value_policy::reference)
+		.def("disableRender", &Class::disableRender);
 
 	py::enum_<typename Class::ScaleMode>(CTP, "ScaleMode")
 		.value("Power", Class::ScaleMode::Power)
@@ -218,14 +218,14 @@ void declare_ear_clipper(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def(py::init<std::vector<Coord>, std::vector<dyno::TopologyModule::Triangle>&>())
-		.def("var_changed", &Class::varChanged)
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("in_point_set", &Class::inPointSet, py::return_value_policy::reference)
-		.def("var_reverse_normal", &Class::varReverseNormal, py::return_value_policy::reference)
+		.def("varChanged", &Class::varChanged)
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("inPointSet", &Class::inPointSet, py::return_value_policy::reference)
+		.def("varReverseNormal", &Class::varReverseNormal, py::return_value_policy::reference)
 
-		.def("poly_clip", py::overload_cast<std::vector<Coord>, std::vector<dyno::TopologyModule::Triangle>&>(&Class::polyClip))
-		.def("poly_clip", py::overload_cast<dyno::Array<Coord, DeviceType::GPU>, std::vector<dyno::TopologyModule::Triangle>&>(&Class::polyClip))
-		.def("poly_clip", py::overload_cast<dyno::Array<Coord, DeviceType::CPU>, std::vector<dyno::TopologyModule::Triangle>&>(&Class::polyClip));
+		.def("polyClip", py::overload_cast<std::vector<Coord>, std::vector<dyno::TopologyModule::Triangle>&>(&Class::polyClip))
+		.def("polyClip", py::overload_cast<dyno::Array<Coord, DeviceType::GPU>, std::vector<dyno::TopologyModule::Triangle>&>(&Class::polyClip))
+		.def("polyClip", py::overload_cast<dyno::Array<Coord, DeviceType::CPU>, std::vector<dyno::TopologyModule::Triangle>&>(&Class::polyClip));
 }
 
 #include "Commands/EditableMesh.h"
@@ -237,11 +237,11 @@ void declare_editable_mesh(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
-		.def("in_polygon_set", &Class::inPolygonSet, py::return_value_policy::reference)
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("state_vertex_normal", &Class::stateVertexNormal, py::return_value_policy::reference)
-		.def("state_triangle_normal", &Class::stateTriangleNormal, py::return_value_policy::reference)
-		.def("state_polygon_normal", &Class::statePolygonNormal, py::return_value_policy::reference);
+		.def("inPolygonSet", &Class::inPolygonSet, py::return_value_policy::reference)
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("stateVertexNormal", &Class::stateVertexNormal, py::return_value_policy::reference)
+		.def("stateTriangleNormal", &Class::stateTriangleNormal, py::return_value_policy::reference)
+		.def("statePolygonNormal", &Class::statePolygonNormal, py::return_value_policy::reference);
 }
 
 #include "Commands/ExtractShape.h"
@@ -252,11 +252,11 @@ void declare_extract_shape(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ExtractShape") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_shape_id", &Class::varShapeId, py::return_value_policy::reference)
-		.def("var_shape_transform", &Class::varShapeTransform, py::return_value_policy::reference)
-		.def("var_offset", &Class::varOffset, py::return_value_policy::reference)
-		.def("in_in_texture_mesh", &Class::inInTextureMesh, py::return_value_policy::reference)
-		.def("state_result", &Class::stateResult, py::return_value_policy::reference);
+		.def("varShapeId", &Class::varShapeId, py::return_value_policy::reference)
+		.def("varShapeTransform", &Class::varShapeTransform, py::return_value_policy::reference)
+		.def("varOffset", &Class::varOffset, py::return_value_policy::reference)
+		.def("inInTextureMesh", &Class::inInTextureMesh, py::return_value_policy::reference)
+		.def("stateResult", &Class::stateResult, py::return_value_policy::reference);
 }
 
 #include "Commands/Extrude.h"
@@ -267,12 +267,12 @@ void declare_extrude_model(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ExtrudeModel") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_row", &Class::varRow, py::return_value_policy::reference)
-		.def("var_height", &Class::varHeight, py::return_value_policy::reference)
-		.def("var_reverse_normal", &Class::varReverseNormal, py::return_value_policy::reference)
-		.def("var_curve", &Class::varCurve, py::return_value_policy::reference)
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("in_point_set", &Class::inPointSet, py::return_value_policy::reference);
+		.def("varRow", &Class::varRow, py::return_value_policy::reference)
+		.def("varHeight", &Class::varHeight, py::return_value_policy::reference)
+		.def("varReverseNormal", &Class::varReverseNormal, py::return_value_policy::reference)
+		.def("varCurve", &Class::varCurve, py::return_value_policy::reference)
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("inPointSet", &Class::inPointSet, py::return_value_policy::reference);
 }
 
 #include "Commands/Merge.h"
@@ -302,14 +302,14 @@ void declare_point_clip(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("PointClip") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_point_set", &Class::inPointSet, py::return_value_policy::reference)
-		.def("var_plane_size", &Class::varPlaneSize, py::return_value_policy::reference)
-		.def("var_reverse", &Class::varReverse, py::return_value_policy::reference)
-		.def("var_point_size", &Class::varPointSize, py::return_value_policy::reference)
-		.def("var_point_color", &Class::varPointColor, py::return_value_policy::reference)
-		.def("var_show_plane", &Class::varShowPlane, py::return_value_policy::reference)
-		.def("state_clip_plane", &Class::stateClipPlane, py::return_value_policy::reference)
-		.def("state_point_set", &Class::statePointSet, py::return_value_policy::reference);
+		.def("inPointSet", &Class::inPointSet, py::return_value_policy::reference)
+		.def("varPlaneSize", &Class::varPlaneSize, py::return_value_policy::reference)
+		.def("varReverse", &Class::varReverse, py::return_value_policy::reference)
+		.def("varPointSize", &Class::varPointSize, py::return_value_policy::reference)
+		.def("varPointColor", &Class::varPointColor, py::return_value_policy::reference)
+		.def("varShowPlane", &Class::varShowPlane, py::return_value_policy::reference)
+		.def("stateClipPlane", &Class::stateClipPlane, py::return_value_policy::reference)
+		.def("statePointSet", &Class::statePointSet, py::return_value_policy::reference);
 }
 
 #include "Commands/PolyExtrude.h"
@@ -320,12 +320,12 @@ void declare_poly_extrude(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("PolyExtrude") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_divisions", &Class::varDivisions, py::return_value_policy::reference)
-		.def("var_distance", &Class::varDistance, py::return_value_policy::reference)
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("state_normal_set", &Class::stateNormalSet, py::return_value_policy::reference)
-		.def("var_reverse_normal", &Class::varReverseNormal, py::return_value_policy::reference);
+		.def("varDivisions", &Class::varDivisions, py::return_value_policy::reference)
+		.def("varDistance", &Class::varDistance, py::return_value_policy::reference)
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("stateNormalSet", &Class::stateNormalSet, py::return_value_policy::reference)
+		.def("varReverseNormal", &Class::varReverseNormal, py::return_value_policy::reference);
 }
 
 #include "Commands/PolygonSetToTriangleSet.h"
@@ -337,9 +337,9 @@ void declare_polygon_set_to_triangle_set_module(py::module& m, std::string types
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
-		.def("in_polygon_set", &Class::inPolygonSet, py::return_value_policy::reference)
-		.def("out_triangle_set", &Class::outTriangleSet, py::return_value_policy::reference)
-		.def("out_polygon2_triangles", &Class::outPolygon2Triangles, py::return_value_policy::reference)
+		.def("inPolygonSet", &Class::inPolygonSet, py::return_value_policy::reference)
+		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference)
+		.def("outPolygon2Triangles", &Class::outPolygon2Triangles, py::return_value_policy::reference)
 
 		.def("convert", &Class::convert);
 }
@@ -352,9 +352,9 @@ void declare_polygon_set_to_triangle_set_node(py::module& m, std::string typestr
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
-		.def("in_polygon_set", &Class::inPolygonSet, py::return_value_policy::reference)
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("state_polygon2_triangles", &Class::statePolygon2Triangles, py::return_value_policy::reference);
+		.def("inPolygonSet", &Class::inPolygonSet, py::return_value_policy::reference)
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("statePolygon2Triangles", &Class::statePolygon2Triangles, py::return_value_policy::reference);
 }
 
 #include "Commands/Sweep.h"
@@ -365,15 +365,15 @@ void declare_sweep_model(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("SweepModel") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_radius", &Class::varRadius, py::return_value_policy::reference)
-		.def("var_curve_ramp", &Class::varCurveRamp, py::return_value_policy::reference)
-		.def("var_reverse_normal", &Class::varReverseNormal, py::return_value_policy::reference)
-		.def("var_display_points", &Class::varDisplayPoints, py::return_value_policy::reference)
-		.def("var_display_wireframe", &Class::varDisplayWireframe, py::return_value_policy::reference)
-		.def("var_display_surface", &Class::varDisplaySurface, py::return_value_policy::reference)
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("in_spline", &Class::inSpline, py::return_value_policy::reference)
-		.def("in_curve", &Class::inCurve, py::return_value_policy::reference);
+		.def("varRadius", &Class::varRadius, py::return_value_policy::reference)
+		.def("varCurveRamp", &Class::varCurveRamp, py::return_value_policy::reference)
+		.def("varReverseNormal", &Class::varReverseNormal, py::return_value_policy::reference)
+		.def("varDisplayPoints", &Class::varDisplayPoints, py::return_value_policy::reference)
+		.def("varDisplayWireframe", &Class::varDisplayWireframe, py::return_value_policy::reference)
+		.def("varDisplaySurface", &Class::varDisplaySurface, py::return_value_policy::reference)
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("inSpline", &Class::inSpline, py::return_value_policy::reference)
+		.def("inCurve", &Class::inCurve, py::return_value_policy::reference);
 }
 
 #include "Commands/TextureMeshMerge.h"
@@ -384,9 +384,9 @@ void declare_texture_mesh_merge(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TextureMeshMerge") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_first", &Class::inFirst, py::return_value_policy::reference)
-		.def("in_second", &Class::inSecond, py::return_value_policy::reference)
-		.def("state_texture_mesh", &Class::stateTextureMesh, py::return_value_policy::reference);
+		.def("inFirst", &Class::inFirst, py::return_value_policy::reference)
+		.def("inSecond", &Class::inSecond, py::return_value_policy::reference)
+		.def("stateTextureMesh", &Class::stateTextureMesh, py::return_value_policy::reference);
 }
 
 #include "Commands/Transform.h"
@@ -397,12 +397,12 @@ void declare_transform_model(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TransformModel") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>TM(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	TM.def(py::init<>())
-		.def("in_topology", &Class::inTopology, py::return_value_policy::reference)
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("state_point_set", &Class::statePointSet, py::return_value_policy::reference)
-		.def("state_edge_set", &Class::stateEdgeSet, py::return_value_policy::reference)
-		.def("disable_render", &Class::disableRender)
-		.def("transform", &Class::Transform)
+		.def("inTopology", &Class::inTopology, py::return_value_policy::reference)
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("statePointSet", &Class::statePointSet, py::return_value_policy::reference)
+		.def("stateEdgeSet", &Class::stateEdgeSet, py::return_value_policy::reference)
+		.def("disableRender", &Class::disableRender)
+		.def("Transform", &Class::Transform)
 		.def_readwrite("inType", &Class::inType);
 
 	py::enum_<typename Class::inputType>(TM, "inputType")
@@ -421,15 +421,15 @@ void declare_turning_model(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TurningModel") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_columns", &Class::varColumns, py::return_value_policy::reference)
-		.def("var_end_segment", &Class::varEndSegment, py::return_value_policy::reference)
-		.def("var_radius", &Class::varRadius, py::return_value_policy::reference)
-		.def("state_polygon_set", &Class::statePolygonSet, py::return_value_policy::reference)
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("in_point_set", &Class::inPointSet, py::return_value_policy::reference)
-		.def("var_reverse_normal", &Class::varReverseNormal, py::return_value_policy::reference)
-		.def("var_use_ramp", &Class::varUseRamp, py::return_value_policy::reference)
-		.def("var_curve", &Class::varCurve, py::return_value_policy::reference);
+		.def("varColumns", &Class::varColumns, py::return_value_policy::reference)
+		.def("varEndSegment", &Class::varEndSegment, py::return_value_policy::reference)
+		.def("varRadius", &Class::varRadius, py::return_value_policy::reference)
+		.def("statePolygonSet", &Class::statePolygonSet, py::return_value_policy::reference)
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("inPointSet", &Class::inPointSet, py::return_value_policy::reference)
+		.def("varReverseNormal", &Class::varReverseNormal, py::return_value_policy::reference)
+		.def("varUseRamp", &Class::varUseRamp, py::return_value_policy::reference)
+		.def("varCurve", &Class::varCurve, py::return_value_policy::reference);
 }
 
 #include "Samplers/PointFromCurve.h"
@@ -440,10 +440,10 @@ void declare_point_from_curve(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("PointFromCurve") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_uniform_scale", &Class::varUniformScale, py::return_value_policy::reference)
-		.def("var_curve", &Class::varCurve, py::return_value_policy::reference)
-		.def("state_point_set", &Class::statePointSet, py::return_value_policy::reference)
-		.def("state_edge_set", &Class::stateEdgeSet, py::return_value_policy::reference);
+		.def("varUniformScale", &Class::varUniformScale, py::return_value_policy::reference)
+		.def("varCurve", &Class::varCurve, py::return_value_policy::reference)
+		.def("statePointSet", &Class::statePointSet, py::return_value_policy::reference)
+		.def("stateEdgeSet", &Class::stateEdgeSet, py::return_value_policy::reference);
 }
 
 #include "Samplers/Sampler.h"
@@ -454,8 +454,8 @@ void declare_sampler(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("Sampler") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("get_node_type", &Class::getNodeType)
-		.def("state_point_set", &Class::statePointSet, py::return_value_policy::reference);
+		.def("getNodeType", &Class::getNodeType)
+		.def("statePointSet", &Class::statePointSet, py::return_value_policy::reference);
 }
 
 #include "Samplers/PointsBehindMesh.h"
@@ -466,16 +466,16 @@ void declare_points_behind_mesh(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("PointsBehindMesh") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_thickness", &Class::varThickness, py::return_value_policy::reference)
-		.def("var_sampling_distance", &Class::varSamplingDistance, py::return_value_policy::reference)
-		.def("var_generating_direction", &Class::varGeneratingDirection, py::return_value_policy::reference)
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("state_position", &Class::statePosition, py::return_value_policy::reference)
-		.def("state_plane", &Class::statePlane, py::return_value_policy::reference)
-		.def("state_point_normal", &Class::statePointNormal, py::return_value_policy::reference)
-		.def("out_point_growth_direction", &Class::outPointGrowthDirection, py::return_value_policy::reference)
-		.def("state_point_belong_triangle_index", &Class::statePointBelongTriangleIndex, py::return_value_policy::reference)
-		.def("out_sampling_distance", &Class::outSamplingDistance, py::return_value_policy::reference);
+		.def("varThickness", &Class::varThickness, py::return_value_policy::reference)
+		.def("varSamplingDistance", &Class::varSamplingDistance, py::return_value_policy::reference)
+		.def("varGeneratingDirection", &Class::varGeneratingDirection, py::return_value_policy::reference)
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("statePosition", &Class::statePosition, py::return_value_policy::reference)
+		.def("statePlane", &Class::statePlane, py::return_value_policy::reference)
+		.def("statePointNormal", &Class::statePointNormal, py::return_value_policy::reference)
+		.def("outPointGrowthDirection", &Class::outPointGrowthDirection, py::return_value_policy::reference)
+		.def("statePointBelongTriangleIndex", &Class::statePointBelongTriangleIndex, py::return_value_policy::reference)
+		.def("outSamplingDistance", &Class::outSamplingDistance, py::return_value_policy::reference);
 }
 
 #include "Samplers/PoissonPlane.h"
@@ -486,13 +486,13 @@ void declare_poisson_plane(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("PoissonPlane") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("construct_grid", &Class::ConstructGrid)
-		.def("collision_judge", &Class::collisionJudge)
-		.def("var_sampling_distance", &Class::varSamplingDistance, py::return_value_policy::reference)
-		.def("var_upper", &Class::varUpper, py::return_value_policy::reference)
-		.def("var_lower", &Class::varLower, py::return_value_policy::reference)
+		.def("ConstructGrid", &Class::ConstructGrid)
+		.def("collisionJudge", &Class::collisionJudge)
+		.def("varSamplingDistance", &Class::varSamplingDistance, py::return_value_policy::reference)
+		.def("varUpper", &Class::varUpper, py::return_value_policy::reference)
+		.def("varLower", &Class::varLower, py::return_value_policy::reference)
 		.def("compute", &Class::compute)
-		.def("get_points", &Class::getPoints);
+		.def("getPoints", &Class::getPoints);
 }
 
 #include "Samplers/ShapeSampler.h"
@@ -504,10 +504,10 @@ void declare_shape_sampler(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		//DEF_VAR
-		.def("var_sampling_distance", &Class::varSamplingDistance, py::return_value_policy::reference)
+		.def("varSamplingDistance", &Class::varSamplingDistance, py::return_value_policy::reference)
 		//DEF_VAR_IN
-		.def("import_shape", &Class::importShape, py::return_value_policy::reference)
-		.def("get_shape", &Class::getShape);
+		.def("importShape", &Class::importShape, py::return_value_policy::reference)
+		.def("getShape", &Class::getShape);
 }
 
 #include "CollisionDetector.h"
@@ -518,14 +518,14 @@ void declare_collision_detector(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("CollisionDetector") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("get_node_type", &Class::getNodeType)
+		.def("getNodeType", &Class::getNodeType)
 
-		.def("import_shape_a", &Class::importShapeA, py::return_value_policy::reference)
-		.def("get_shape_a", &Class::getShapeA)
-		.def("import_shape_b", &Class::importShapeB, py::return_value_policy::reference)
-		.def("get_shape_b", &Class::getShapeB)
-		.def("state_contacts", &Class::stateContacts, py::return_value_policy::reference)
-		.def("state_normals", &Class::stateNormals, py::return_value_policy::reference);
+		.def("importShapeA", &Class::importShapeA, py::return_value_policy::reference)
+		.def("getShapeA", &Class::getShapeA)
+		.def("importShapeB", &Class::importShapeB, py::return_value_policy::reference)
+		.def("getShapeB", &Class::getShapeB)
+		.def("stateContacts", &Class::stateContacts, py::return_value_policy::reference)
+		.def("stateNormals", &Class::stateNormals, py::return_value_policy::reference);
 }
 
 #include "GltfLoader.h"
@@ -535,12 +535,12 @@ void declare_bounding_box_of_texture_mesh(py::module& m) {
 	std::string pyclass_name = std::string("BoundingBoxOfTextureMesh");
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_shape_id", &Class::varShapeId, py::return_value_policy::reference)
-		.def("var_center", &Class::varCenter, py::return_value_policy::reference)
-		.def("var_lower_bound", &Class::varLowerBound, py::return_value_policy::reference)
-		.def("var_upper_bound", &Class::varUpperBound, py::return_value_policy::reference)
-		.def("in_texture_mesh", &Class::inTextureMesh, py::return_value_policy::reference)
-		.def("out_bounding_box", &Class::outBoundingBox, py::return_value_policy::reference);
+		.def("varShapeId", &Class::varShapeId, py::return_value_policy::reference)
+		.def("varCenter", &Class::varCenter, py::return_value_policy::reference)
+		.def("varLowerBound", &Class::varLowerBound, py::return_value_policy::reference)
+		.def("varUpperBound", &Class::varUpperBound, py::return_value_policy::reference)
+		.def("inTextureMesh", &Class::inTextureMesh, py::return_value_policy::reference)
+		.def("outBoundingBox", &Class::outBoundingBox, py::return_value_policy::reference);
 }
 
 template <typename TDataType>
@@ -550,27 +550,27 @@ void declare_gltf_loader(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("GltfLoader") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("get_node_type", &Class::getNodeType)
-		.def("var_file_name", &Class::varFileName, py::return_value_policy::reference)
-		.def("var_import_animation", &Class::varImportAnimation, py::return_value_policy::reference)
-		.def("var_joint_radius", &Class::varJointRadius, py::return_value_policy::reference)
-		.def("state_tex_coord_0", &Class::stateTexCoord_0, py::return_value_policy::reference)
-		.def("state_tex_coord_1", &Class::stateTexCoord_1, py::return_value_policy::reference)
-		.def("state_initial_matrix", &Class::stateInitialMatrix, py::return_value_policy::reference)
+		.def("getNodeType", &Class::getNodeType)
+		.def("varFileName", &Class::varFileName, py::return_value_policy::reference)
+		.def("varImportAnimation", &Class::varImportAnimation, py::return_value_policy::reference)
+		.def("varJointRadius", &Class::varJointRadius, py::return_value_policy::reference)
+		.def("stateTexCoord_0", &Class::stateTexCoord_0, py::return_value_policy::reference)
+		.def("stateTexCoord_1", &Class::stateTexCoord_1, py::return_value_policy::reference)
+		.def("stateInitialMatrix", &Class::stateInitialMatrix, py::return_value_policy::reference)
 
-		.def("state_transform", &Class::stateTransform, py::return_value_policy::reference)
-		.def("state_skin", &Class::stateSkin, py::return_value_policy::reference)
+		.def("stateTransform", &Class::stateTransform, py::return_value_policy::reference)
+		.def("stateSkin", &Class::stateSkin, py::return_value_policy::reference)
 
-		.def("state_joint_inverse_bind_matrix", &Class::stateJointInverseBindMatrix, py::return_value_policy::reference)
-		.def("state_joint_local_matrix", &Class::stateJointLocalMatrix, py::return_value_policy::reference)
+		.def("stateJointInverseBindMatrix", &Class::stateJointInverseBindMatrix, py::return_value_policy::reference)
+		.def("stateJointLocalMatrix", &Class::stateJointLocalMatrix, py::return_value_policy::reference)
 		.def("state_jont_world_matrix", &Class::stateJointWorldMatrix, py::return_value_policy::reference)
 
-		.def("state_joints_data", &Class::stateJointsData, py::return_value_policy::reference)
-		.def("state_texture_mesh", &Class::stateTextureMesh, py::return_value_policy::reference)
+		.def("stateJointsData", &Class::stateJointsData, py::return_value_policy::reference)
+		.def("stateTextureMesh", &Class::stateTextureMesh, py::return_value_policy::reference)
 
-		.def("state_texture_mesh", &Class::stateTextureMesh, py::return_value_policy::reference)
-		.def("state_joint_set", &Class::stateJointSet, py::return_value_policy::reference)
-		.def("state_animation", &Class::stateAnimation, py::return_value_policy::reference);
+		.def("stateTextureMesh", &Class::stateTextureMesh, py::return_value_policy::reference)
+		.def("stateJointSet", &Class::stateJointSet, py::return_value_policy::reference)
+		.def("stateAnimation", &Class::stateAnimation, py::return_value_policy::reference);
 }
 
 #include "Group.h"
@@ -581,16 +581,16 @@ void declare_group(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("Group") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_point_id", &Class::varPointId, py::return_value_policy::reference)
-		.def("var_edge_id", &Class::varEdgeId, py::return_value_policy::reference)
-		.def("var_primitive_id", &Class::varPrimitiveId, py::return_value_policy::reference)
-		.def("in_point_id", &Class::inPointId, py::return_value_policy::reference)
-		.def("in_edge_id", &Class::inEdgeId, py::return_value_policy::reference)
-		.def("in_primitive_id", &Class::inPrimitiveId, py::return_value_policy::reference)
+		.def("varPointId", &Class::varPointId, py::return_value_policy::reference)
+		.def("varEdgeId", &Class::varEdgeId, py::return_value_policy::reference)
+		.def("varPrimitiveId", &Class::varPrimitiveId, py::return_value_policy::reference)
+		.def("inPointId", &Class::inPointId, py::return_value_policy::reference)
+		.def("inEdgeId", &Class::inEdgeId, py::return_value_policy::reference)
+		.def("inPrimitiveId", &Class::inPrimitiveId, py::return_value_policy::reference)
 
-		.def("get_select_primitives", &Class::getSelectPrimitives)
-		.def("get_select_edges", &Class::getSelectEdges)
-		.def("get_select_points", &Class::getSelectPoints)
+		.def("getSelectPrimitives", &Class::getSelectPrimitives)
+		.def("getSelectEdges", &Class::getSelectEdges)
+		.def("getSelectPoints", &Class::getSelectPoints)
 		.def_readwrite("selectedPointID", &Class::selectedPointID)
 		.def_readwrite("selectedEdgeID", &Class::selectedEdgeID)
 		.def_readwrite("selectedPrimitiveID", &Class::selectedPrimitiveID);
@@ -604,84 +604,11 @@ void declare_joint_deform(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("JointDeform") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_joint", &Class::inJoint, py::return_value_policy::reference)
-		.def("in_skin", &Class::inSkin, py::return_value_policy::reference)
-		.def("in_instance_transform", &Class::inInstanceTransform, py::return_value_policy::reference)
-		.def("in_texture_mesh", &Class::inTextureMesh, py::return_value_policy::reference);
-}
-
-#include "Topology/JointInfo.h"
-void declare_joint_info(py::module& m) {
-	using Class = dyno::JointInfo;
-	using Parent = dyno::OBase;
-	typedef int joint;
-	std::string pyclass_name = std::string("JointInfo");
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		//.def(py::init<dyno::Array<dyno::Mat4f, DeviceType::GPU>&, dyno::Array<dyno::Mat4f, DeviceType::GPU>&, dyno::Array<dyno::Mat4f, DeviceType::GPU>&, std::vector<int>&, std::map<joint, std::vector<joint>>&, std::map<joint, dyno::Vec3f>&, std::map<joint, dyno::Vec3f>&, std::map<joint, dyno::Quat1f>&>())
-		.def("set_gltf_joint_info", &Class::setGltfJointInfo)
-		.def("clear", &Class::clear)
-		.def("set_joint_info", &Class::SetJointInfo)
-		.def("set_joint", &Class::setJoint)
-		.def("is_empty", &Class::isEmpty)
-		.def("update_world_matrix_by_transform", &Class::updateWorldMatrixByTransform)
-		.def("set_joint_name", &Class::setJointName)
-		.def("set_left_handed_coord_system", &Class::setLeftHandedCoordSystem)
-		.def("set_pose", &Class::setPose)
-		.def("find_joint_index_by_name", &Class::findJointIndexByName)
-		.def("get_local_matrix", &Class::getLocalMatrix)
-		.def_readwrite("mJointName", &Class::mJointName)
-
-		.def_readwrite("mJointInverseBindMatrix", &Class::mJointInverseBindMatrix)
-		.def_readwrite("mJointLocalMatrix", &Class::mJointLocalMatrix)
-		.def_readwrite("mJointWorldMatrix", &Class::mJointWorldMatrix)
-
-		.def_readwrite("currentPose", &Class::currentPose)
-
-		.def_readwrite("mBindPoseTranslation", &Class::mBindPoseTranslation)
-		.def_readwrite("mBindPoseScale", &Class::mBindPoseScale)
-		.def_readwrite("mBindPoseRotation", &Class::mBindPoseRotation)
-		.def_readwrite("mBindPoseRotator", &Class::mBindPoseRotator)
-
-		.def_readwrite("mBindPosePreRotator", &Class::mBindPosePreRotator)
-
-		.def_readwrite("mAllJoints", &Class::mAllJoints)
-		.def_readwrite("mJointDir", &Class::mJointDir)
-
-		.def_readwrite("mMaxJointID", &Class::mMaxJointID);
-}
-
-void declare_joint_animation_info(py::module& m) {
-	using Class = dyno::JointAnimationInfo;
-	using Parent = dyno::OBase;
-	typedef int joint;
-	std::string pyclass_name = std::string("JointAnimationInfo");
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("set_gltf_animation_data", &Class::setGLTFAnimationData)
-		.def("clear", &Class::clear)
-		.def("is_gltf_animation", &Class::isGltfAnimation)
-		.def("resize_joints_data", &Class::resizeJointsData)
-		.def("get_joints_translation", &Class::getJointsTranslation)
-		.def("get_joints_rotation", &Class::getJointsRotation)
-		.def("get_joints_scale", &Class::getJointsScale)
-		.def("get_total_time", &Class::getTotalTime)
-		.def("find_max_smaller_index", &Class::findMaxSmallerIndex)
-
-		//.def("lerp", py::overload_cast<std::vector<Coord>, std::vector<dyno::TopologyModule::Triangle>&>(&Class::lerp))
-		//override
-		.def("normalize", &Class::normalize)
-		.def("slerp", &Class::slerp)
-		.def("nlerp", &Class::nlerp)
-		.def("get_joint_dir", &Class::getJointDir)
-		.def("set_loop", &Class::setLoop)
-		.def("get_pose", &Class::getPose)
-		.def("get_current_animation_time", &Class::getCurrentAnimationTime)
-		.def("get_blend_in_time", &Class::getBlendInTime)
-		.def("get_blend_out_time", &Class::getBlendOutTime)
-		.def("get_play_rate", &Class::getPlayRate)
-
-		.def_readwrite("mSkeleton", &Class::mSkeleton);
+		.def("inJoint", &Class::inJoint, py::return_value_policy::reference)
+		.def("inSkin", &Class::inSkin, py::return_value_policy::reference)
+		.def("inAnimation", &Class::inAnimation, py::return_value_policy::reference)
+		.def("inInstanceTransform", &Class::inInstanceTransform, py::return_value_policy::reference)
+		.def("inTextureMesh", &Class::inTextureMesh, py::return_value_policy::reference);
 }
 
 #include "ModelEditing.h"
@@ -692,7 +619,7 @@ void declare_model_editing(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ModelEditing") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("get_node_type", &Class::getNodeType);
+		.def("getNodeType", &Class::getNodeType);
 }
 
 #include "NormalVisualization.h"
@@ -703,27 +630,27 @@ void declare_normal_visualization(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("Normal") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("get_node_type", &Class::getNodeType)
+		.def("getNodeType", &Class::getNodeType)
 
-		.def("var_length", &Class::varLength, py::return_value_policy::reference)
-		.def("var_normalize", &Class::varNormalize, py::return_value_policy::reference)
+		.def("varLength", &Class::varLength, py::return_value_policy::reference)
+		.def("varNormalize", &Class::varNormalize, py::return_value_policy::reference)
 
-		.def("var_line_width", &Class::varLineWidth, py::return_value_policy::reference)
-		.def("var_show_wireframe", &Class::varShowWireframe, py::return_value_policy::reference)
-		.def("var_arrow_resolution", &Class::varArrowResolution, py::return_value_policy::reference)
+		.def("varLineWidth", &Class::varLineWidth, py::return_value_policy::reference)
+		.def("varShowWireframe", &Class::varShowWireframe, py::return_value_policy::reference)
+		.def("varArrowResolution", &Class::varArrowResolution, py::return_value_policy::reference)
 
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("in_in_normal", &Class::inInNormal, py::return_value_policy::reference)
-		.def("in_scalar", &Class::inScalar, py::return_value_policy::reference)
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("inInNormal", &Class::inInNormal, py::return_value_policy::reference)
+		.def("inScalar", &Class::inScalar, py::return_value_policy::reference)
 
-		.def("state_normal_set", &Class::stateNormalSet, py::return_value_policy::reference)
-		.def("state_normal", &Class::stateNormal, py::return_value_policy::reference)
-		.def("state_tiangle_center", &Class::stateTriangleCenter, py::return_value_policy::reference)
+		.def("stateNormalSet", &Class::stateNormalSet, py::return_value_policy::reference)
+		.def("stateNormal", &Class::stateNormal, py::return_value_policy::reference)
+		.def("stateTriangleCenter", &Class::stateTriangleCenter, py::return_value_policy::reference)
 
-		.def("state_arrow_cylinder", &Class::stateArrowCylinder, py::return_value_policy::reference)
-		.def("state_arrow_cone", &Class::stateArrowCone, py::return_value_policy::reference)
-		.def("state_transforms_cylinder", &Class::stateTransformsCylinder, py::return_value_policy::reference)
-		.def("state_transforms_cone", &Class::stateTransformsCone, py::return_value_policy::reference);
+		.def("stateArrowCylinder", &Class::stateArrowCylinder, py::return_value_policy::reference)
+		.def("stateArrowCone", &Class::stateArrowCone, py::return_value_policy::reference)
+		.def("stateTransformsCylinder", &Class::stateTransformsCylinder, py::return_value_policy::reference)
+		.def("stateTransformsCone", &Class::stateTransformsCone, py::return_value_policy::reference);
 }
 
 #include "SplineConstraint.h"
@@ -734,13 +661,13 @@ void declare_spline_constraint(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("SplineConstraint") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_spline", &Class::inSpline, py::return_value_policy::reference)
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("var_velocity", &Class::varVelocity, py::return_value_policy::reference)
-		.def("var_offest", &Class::varOffest, py::return_value_policy::reference)
-		.def("var_accelerate", &Class::varAccelerate, py::return_value_policy::reference)
-		.def("var_accelerated_speed", &Class::varAcceleratedSpeed, py::return_value_policy::reference)
-		.def("state_topology", &Class::stateTopology, py::return_value_policy::reference);
+		.def("inSpline", &Class::inSpline, py::return_value_policy::reference)
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("varVelocity", &Class::varVelocity, py::return_value_policy::reference)
+		.def("varOffest", &Class::varOffest, py::return_value_policy::reference)
+		.def("varAccelerate", &Class::varAccelerate, py::return_value_policy::reference)
+		.def("varAcceleratedSpeed", &Class::varAcceleratedSpeed, py::return_value_policy::reference)
+		.def("stateTopology", &Class::stateTopology, py::return_value_policy::reference);
 }
 
 #include "Subdivide.h"
@@ -752,9 +679,9 @@ void declare_subdivide(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
-		.def("var_step", &Class::varStep, py::return_value_policy::reference)
-		.def("in_triangle_set", &Class::inInTriangleSet, py::return_value_policy::reference)
-		.def("state_triangle_set", &Class::stateTriangleSet, py::return_value_policy::reference);
+		.def("varStep", &Class::varStep, py::return_value_policy::reference)
+		.def("inInTriangleSet", &Class::inInTriangleSet, py::return_value_policy::reference)
+		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference);
 }
 
 #include "VectorVisualNode.h"
@@ -765,27 +692,27 @@ void declare_vector_visual_node(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("VectorVisualNode") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>VVN(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	VVN.def(py::init<>())
-		.def("get_node_type", &Class::getNodeType)
+		.def("getNodeType", &Class::getNodeType)
 
-		.def("var_length", &Class::varLength, py::return_value_policy::reference)
-		.def("var_normalize", &Class::varNormalize, py::return_value_policy::reference)
+		.def("varLength", &Class::varLength, py::return_value_policy::reference)
+		.def("varNormalize", &Class::varNormalize, py::return_value_policy::reference)
 
-		.def("var_line_mode", &Class::varLineMode, py::return_value_policy::reference)
-		.def("var_line_width", &Class::varLineWidth, py::return_value_policy::reference)
-		.def("var_arrow_resolution", &Class::varArrowResolution, py::return_value_policy::reference)
-		.def("var_debug", &Class::varDebug, py::return_value_policy::reference)
+		.def("varLineMode", &Class::varLineMode, py::return_value_policy::reference)
+		.def("varLineWidth", &Class::varLineWidth, py::return_value_policy::reference)
+		.def("varArrowResolution", &Class::varArrowResolution, py::return_value_policy::reference)
+		.def("varDebug", &Class::varDebug, py::return_value_policy::reference)
 
-		.def("in_point_set", &Class::inPointSet, py::return_value_policy::reference)
+		.def("inPointSet", &Class::inPointSet, py::return_value_policy::reference)
 		.def("in_vector", &Class::inInVector, py::return_value_policy::reference)
-		.def("in_scalar", &Class::inScalar, py::return_value_policy::reference)
+		.def("inScalar", &Class::inScalar, py::return_value_policy::reference)
 
-		.def("state_normal_set", &Class::stateNormalSet, py::return_value_policy::reference)
-		.def("state_normal", &Class::stateNormal, py::return_value_policy::reference)
+		.def("stateNormalSet", &Class::stateNormalSet, py::return_value_policy::reference)
+		.def("stateNormal", &Class::stateNormal, py::return_value_policy::reference)
 
-		.def("state_arrow_cylinder", &Class::stateArrowCylinder, py::return_value_policy::reference)
-		.def("state_arrow_cone", &Class::stateArrowCone, py::return_value_policy::reference)
-		.def("state_transforms_cylinder", &Class::stateTransformsCylinder, py::return_value_policy::reference)
-		.def("state_transforms_cone", &Class::stateTransformsCone, py::return_value_policy::reference);
+		.def("stateArrowCylinder", &Class::stateArrowCylinder, py::return_value_policy::reference)
+		.def("stateArrowCone", &Class::stateArrowCone, py::return_value_policy::reference)
+		.def("stateTransformsCylinder", &Class::stateTransformsCylinder, py::return_value_policy::reference)
+		.def("stateTransformsCone", &Class::stateTransformsCone, py::return_value_policy::reference);
 
 	py::enum_<typename Class::LineMode>(VVN, "LineMode")
 		.value("Line", Class::LineMode::Line)

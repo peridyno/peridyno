@@ -7,17 +7,17 @@ void declare_im_colorbar(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ImColorbar") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>> ImColorBar(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	ImColorBar.def(py::init<>())
-		.def("set_coord", &Class::setCoord)
-		.def("get_coord", &Class::getCoord)
+		.def("setCoord", &Class::setCoord)
+		.def("getCoord", &Class::getCoord)
 		//DEF_VAR
-		.def("var_is_fix", &Class::varIsfix, py::return_value_policy::reference)
-		.def("var_min", &Class::varMin, py::return_value_policy::reference)
-		.def("var_max", &Class::varMax, py::return_value_policy::reference)
-		.def("var_field_name", &Class::varFieldName, py::return_value_policy::reference)
-		.def("in_scalar", &Class::inScalar, py::return_value_policy::reference)
+		.def("varIsfix", &Class::varIsfix, py::return_value_policy::reference)
+		.def("varMin", &Class::varMin, py::return_value_policy::reference)
+		.def("varMax", &Class::varMax, py::return_value_policy::reference)
+		.def("varFieldName", &Class::varFieldName, py::return_value_policy::reference)
+		.def("inScalar", &Class::inScalar, py::return_value_policy::reference)
 		//DEF_ENUM
-		.def("var_type", &Class::varType, py::return_value_policy::reference)
-		.def("var_number_type", &Class::varNumberType, py::return_value_policy::reference);
+		.def("varType", &Class::varType, py::return_value_policy::reference)
+		.def("varNumberType", &Class::varNumberType, py::return_value_policy::reference);
 
 	//DECLARE_ENUM
 	py::enum_<Class::ColorTable>(ImColorBar, "ColorTable")

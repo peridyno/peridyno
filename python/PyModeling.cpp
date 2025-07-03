@@ -46,8 +46,6 @@ void pybind_modeling(py::module& m)
 	declare_bounding_box_of_texture_mesh(m);
 	declare_gltf_loader<dyno::DataType3f>(m, "3f");
 	declare_joint_deform<dyno::DataType3f>(m, "3f");
-	declare_joint_info(m);
-	declare_joint_animation_info(m);
 	declare_normal_visualization<dyno::DataType3f>(m, "3f");
 	declare_spline_constraint<dyno::DataType3f>(m, "3f");
 	declare_subdivide<dyno::DataType3f>(m, "3f");

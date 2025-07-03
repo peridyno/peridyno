@@ -8,10 +8,10 @@ void declare_gl_point_visual_node(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("GLPointVisualNode") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("get_node_type", &Class::getNodeType)
-		.def("in_points", &Class::inPoints, py::return_value_policy::reference)
-		.def("in_vector", &Class::inVector, py::return_value_policy::reference)
-		.def("var_color", &Class::varColor, py::return_value_policy::reference)
+		.def("getNodeType", &Class::getNodeType)
+		.def("inPoints", &Class::inPoints, py::return_value_policy::reference)
+		.def("inVector", &Class::inVector, py::return_value_policy::reference)
+		.def("varColor", &Class::varColor, py::return_value_policy::reference)
 		.def_readwrite("pointSize", &Class::pointSize);
 }
 
@@ -21,13 +21,13 @@ void declare_point_visual_module(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("GLPointVisualModule") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>> GLPV(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	GLPV.def(py::init<>())
-		.def("in_point_set", &Class::inPointSet, py::return_value_policy::reference)
-		.def("set_color_map_mode", &Class::setColorMapMode)
-		.def("in_color", &Class::inColor, py::return_value_policy::reference)
+		.def("inPointSet", &Class::inPointSet, py::return_value_policy::reference)
+		.def("setColorMapMode", &Class::setColorMapMode)
+		.def("inColor", &Class::inColor, py::return_value_policy::reference)
 		//DEF_VAR
-		.def("var_point_size", &Class::varPointSize, py::return_value_policy::reference)
+		.def("varPointSize", &Class::varPointSize, py::return_value_policy::reference)
 		//DEF_ENUM
-		.def("var_color_mode", &Class::varColorMode, py::return_value_policy::reference);
+		.def("varColorMode", &Class::varColorMode, py::return_value_policy::reference);
 
 	//DECLARE_ENUM
 	py::enum_<Class::ColorMapMode>(GLPV, "ColorMapMode")
@@ -42,17 +42,17 @@ void declare_surface_visual_module(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>GLSVM(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	GLSVM.def(py::init<>())
 		.def("caption", &Class::caption)
-		.def("var_color_mode", &Class::varColorMode, py::return_value_policy::reference)
-		.def("var_use_vertex_normal", &Class::varUseVertexNormal, py::return_value_policy::reference)
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("varColorMode", &Class::varColorMode, py::return_value_policy::reference)
+		.def("varUseVertexNormal", &Class::varUseVertexNormal, py::return_value_policy::reference)
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
 		//DEF_ARRAY_IN
-		.def("in_color", &Class::inColor, py::return_value_policy::reference)
-		.def("in_normal", &Class::inNormal, py::return_value_policy::reference)
-		.def("in_tex_coord", &Class::inTexCoord, py::return_value_policy::reference)
-		.def("in_normal_index", &Class::inNormalIndex, py::return_value_policy::reference)
-		.def("in_tex_coord_index", &Class::inTexCoordIndex, py::return_value_policy::reference)
-		.def("in_color_texture", &Class::inColorTexture, py::return_value_policy::reference)
-		.def("in_bump_map", &Class::inBumpMap, py::return_value_policy::reference);
+		.def("inColor", &Class::inColor, py::return_value_policy::reference)
+		.def("inNormal", &Class::inNormal, py::return_value_policy::reference)
+		.def("inTexCoord", &Class::inTexCoord, py::return_value_policy::reference)
+		.def("inNormalIndex", &Class::inNormalIndex, py::return_value_policy::reference)
+		.def("inTexCoordIndex", &Class::inTexCoordIndex, py::return_value_policy::reference)
+		.def("inColorTexture", &Class::inColorTexture, py::return_value_policy::reference)
+		.def("inBumpMap", &Class::inBumpMap, py::return_value_policy::reference);
 
 	py::enum_<Class::EColorMode>(GLSVM, "EColorMode")
 		.value("CM_Object", Class::CM_Object)
@@ -68,10 +68,10 @@ void declare_gl_wireframe_visual_module(py::module& m) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>GLWVM(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	GLWVM.def(py::init<>())
 		.def("caption", &Class::caption)
-		.def("var_radius", &Class::varRadius, py::return_value_policy::reference)
-		.def("var_line_width", &Class::varLineWidth, py::return_value_policy::reference)
-		.def("var_render_mode", &Class::varRenderMode, py::return_value_policy::reference)
-		.def("in_edge_set", &Class::inEdgeSet, py::return_value_policy::reference);
+		.def("varRadius", &Class::varRadius, py::return_value_policy::reference)
+		.def("varLineWidth", &Class::varLineWidth, py::return_value_policy::reference)
+		.def("varRenderMode", &Class::varRenderMode, py::return_value_policy::reference)
+		.def("inEdgeSet", &Class::inEdgeSet, py::return_value_policy::reference);
 
 	py::enum_<typename Class::EEdgeMode>(GLWVM, "EEdgeMode")
 		.value("LINE", Class::EEdgeMode::LINE)
@@ -121,10 +121,10 @@ void declare_construct_tangent_space(py::module& m) {
 	std::string pyclass_name = std::string("ConstructTangentSpace");
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_texture_mesh", &Class::inTextureMesh, py::return_value_policy::reference)
-		.def("out_normal", &Class::outNormal, py::return_value_policy::reference)
-		.def("out_tangent", &Class::outTangent, py::return_value_policy::reference)
-		.def("out_bitangent", &Class::outBitangent, py::return_value_policy::reference);
+		.def("inTextureMesh", &Class::inTextureMesh, py::return_value_policy::reference)
+		.def("outNormal", &Class::outNormal, py::return_value_policy::reference)
+		.def("outTangent", &Class::outTangent, py::return_value_policy::reference)
+		.def("outBitangent", &Class::outBitangent, py::return_value_policy::reference);
 }
 
 #include "Backend/Cuda/Module/GLInstanceVisualModule.h"
@@ -135,8 +135,8 @@ void declare_gl_instance_visual_module(py::module& m) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
-		.def("in_instance_transform", &Class::inInstanceTransform, py::return_value_policy::reference)
-		.def("in_instance_color", &Class::inInstanceColor, py::return_value_policy::reference);
+		.def("inInstanceTransform", &Class::inInstanceTransform, py::return_value_policy::reference)
+		.def("inInstanceColor", &Class::inInstanceColor, py::return_value_policy::reference);
 }
 
 #include "Backend/Cuda/Module/GLPhotorealisticRender.h"
@@ -147,7 +147,7 @@ void declare_gl_photorealistic_render(py::module& m) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
-		.def("in_texture_mesh", &Class::inTextureMesh, py::return_value_policy::reference);
+		.def("inTextureMesh", &Class::inTextureMesh, py::return_value_policy::reference);
 }
 
 #include "Backend/Cuda/Module/GLPhotorealisticInstanceRender.h"
@@ -158,23 +158,23 @@ void declare_gl_photorealistic_instance_render(py::module& m) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
-		.def("in_transform", &Class::inTransform, py::return_value_policy::reference);
+		.def("inTransform", &Class::inTransform, py::return_value_policy::reference);
 }
 
 void pybind_rendering(py::module& m)
 {
 	py::class_<GLVisualModule, VisualModule, std::shared_ptr<GLVisualModule>>GLVM(m, "GLVisualModule");
-	GLVM.def("set_color", &GLVisualModule::setColor)
-		.def("set_metallic", &GLVisualModule::setMetallic)
-		.def("set_roughness", &GLVisualModule::setRoughness)
-		.def("set_alpha", &GLVisualModule::setAlpha)
-		.def("is_transparent", &GLVisualModule::isTransparent)
+	GLVM.def("setColor", &GLVisualModule::setColor)
+		.def("setMetallic", &GLVisualModule::setMetallic)
+		.def("setRoughness", &GLVisualModule::setRoughness)
+		.def("setAlpha", &GLVisualModule::setAlpha)
+		.def("isTransparent", &GLVisualModule::isTransparent)
 		.def("draw", &GLVisualModule::draw)
 		.def("release", &GLVisualModule::release)
-		.def("var_base_color", &GLVisualModule::varBaseColor, py::return_value_policy::reference)
-		.def("var_metallic", &GLVisualModule::varMetallic, py::return_value_policy::reference)
-		.def("var_roughness", &GLVisualModule::varRoughness, py::return_value_policy::reference)
-		.def("var_alpha", &GLVisualModule::varAlpha, py::return_value_policy::reference);
+		.def("varBaseColor", &GLVisualModule::varBaseColor, py::return_value_policy::reference)
+		.def("varMetallic", &GLVisualModule::varMetallic, py::return_value_policy::reference)
+		.def("varRoughness", &GLVisualModule::varRoughness, py::return_value_policy::reference)
+		.def("varAlpha", &GLVisualModule::varAlpha, py::return_value_policy::reference);
 
 	declare_color_mapping<dyno::DataType3f>(m, "3f");
 
@@ -198,7 +198,7 @@ void pybind_rendering(py::module& m)
 
 	py::class_<RenderTools, std::shared_ptr<RenderTools>>(m, "RenderTools")
 		.def(py::init<>())
-		.def("setup_color", &RenderTools::setupColor);
+		.def("setupColor", &RenderTools::setupColor);
 
 	declare_gl_surface_visual_node<dyno::DataType3f>(m, "3f");
 }

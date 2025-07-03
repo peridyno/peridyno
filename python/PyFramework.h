@@ -138,18 +138,18 @@ void declare_var(py::module& m, std::string typestr) {
 		.def(py::init<>())
 		.def(py::init<std::string, std::string, dyno::FieldTypeEnum, OBase*>())
 		.def(py::init<T, std::string, std::string, dyno::FieldTypeEnum, OBase*>())
-		.def("get_template_name", &Class::getTemplateName)
-		.def("get_class_name", &Class::getClassName)
+		.def("getTemplateName", &Class::getTemplateName)
+		.def("getClassName", &Class::getClassName)
 		.def("size", &Class::size)
-		.def("set_value", &Class::setValue)
-		.def("get_value", &Class::getValue)
+		.def("setValue", &Class::setValue)
+		.def("getValue", &Class::getValue)
 		.def("serialize", &Class::serialize)
 		//.def("deserialize", &Class::deserialize)
-		.def("is_empty", &Class::isEmpty)
+		.def("isEmpty", &Class::isEmpty)
 		//.def("connect", &Class::connect)
-		.def("get_data", &Class::getData);
-	//.def("const_data_ptr", &Class::constDataPtr, py::return_value_policy::reference)
-	//.def("get_data_ptr", &Class::getDataPtr, py::return_value_policy::reference);
+		.def("getData", &Class::getData);
+	//.def("constDataPtr", &Class::constDataPtr, py::return_value_policy::reference)
+	//.def("getDataPtr", &Class::getDataPtr, py::return_value_policy::reference);
 }
 
 template<typename T, DeviceType deviceType>
@@ -169,7 +169,7 @@ void declare_farray(py::module& m, std::string typestr) {
 		//.def("assign", py::overload_cast<const std::vector<T>&>(&Class::assign))
 		//.def("assign", py::overload_cast<const dyno::Array<T, DeviceType::GPU>&>(&Class::assign))
 		//.def("assign", py::overload_cast<const dyno::Array<T, DeviceType::CPU>&>(&Class::assign))
-		.def("is_empty", &Class::isEmpty);
+		.def("isEmpty", &Class::isEmpty);
 }
 
 template<typename T, DeviceType deviceType>
@@ -179,17 +179,17 @@ void declare_array_list(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("FArrayList") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("get_template_name", &Class::getTemplateName)
-		.def("get_class_name", &Class::getClassName)
-		.def("get_data_ptr", &Class::getDataPtr, py::return_value_policy::reference)
-		.def("const_data_ptr", &Class::constDataPtr, py::return_value_policy::reference)
+		.def("getTemplateName", &Class::getTemplateName)
+		.def("getClassName", &Class::getClassName)
+		.def("getDataPtr", &Class::getDataPtr, py::return_value_policy::reference)
+		.def("constDataPtr", &Class::constDataPtr, py::return_value_policy::reference)
 		.def("allocate", &Class::allocate)
 		//.def("connect", &Class::connect)
-		.def("get_data", &Class::getData, py::return_value_policy::reference)
-		.def("const_data", &Class::constData, py::return_value_policy::reference)
+		.def("getData", &Class::getData, py::return_value_policy::reference)
+		.def("constData", &Class::constData, py::return_value_policy::reference)
 		.def("size", &Class::size)
-		.def("is_empty", &Class::isEmpty);
-	//��ȫ
+		.def("isEmpty", &Class::isEmpty);
+	//²»È«
 }
 
 template<typename T>
@@ -200,20 +200,20 @@ void declare_instance(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def(py::init<std::string, std::string, dyno::FieldTypeEnum, dyno::OBase*>())
-		.def("get_template_name", &Class::getTemplateName)
-		.def("get_class_name", &Class::getClassName)
-		.def("get_data_ptr", &Class::getDataPtr)
-		.def("const_data_ptr", &Class::constDataPtr)
-		.def("set_data_ptr", &Class::setDataPtr)
+		.def("getTemplateName", &Class::getTemplateName)
+		.def("getClassName", &Class::getClassName)
+		.def("getDataPtr", &Class::getDataPtr)
+		.def("constDataPtr", &Class::constDataPtr)
+		.def("setDataPtr", &Class::setDataPtr)
 		.def("allocate", &Class::allocate)
-		.def("is_empty", &Class::isEmpty)
+		.def("isEmpty", &Class::isEmpty)
 		.def("connect", &Class::connect)
-		.def("get_data", &Class::getData, py::return_value_policy::reference)
+		.def("getData", &Class::getData, py::return_value_policy::reference)
 		.def("size", &Class::size)
-		.def("object_pointer", &Class::objectPointer)
-		.def("standard_object_pointer", &Class::standardObjectPointer)
-		.def("set_object_pointer", &Class::setObjectPointer)
-		.def("can_be_connected_by", &Class::canBeConnectedBy);
+		.def("objectPointer", &Class::objectPointer)
+		.def("standardObjectPointer", &Class::standardObjectPointer)
+		.def("setObjectPointer", &Class::setObjectPointer)
+		.def("canBeConnectedBy", &Class::canBeConnectedBy);
 }
 
 //------------------------- New ------------------------------
@@ -225,12 +225,12 @@ void declare_multi_node_port(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("MultipleNodePort") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def("clear", &Class::clear)
-		.def("add_derive_node", &Class::addDerivedNode)
-		.def("remove_derive_node", &Class::removeDerivedNode)
-		.def("is_kind_of", &Class::isKindOf)
-		.def("has_node", &Class::hasNode)
-		.def("get_nodes", &Class::getNodes, py::return_value_policy::reference)
-		.def("get_derived_node", &Class::getDerivedNodes, py::return_value_policy::reference);
+		.def("addDerivedNode", &Class::addDerivedNode)
+		.def("removeDerivedNode", &Class::removeDerivedNode)
+		.def("isKindOf", &Class::isKindOf)
+		.def("hasNode", &Class::hasNode)
+		.def("getNodes", &Class::getNodes, py::return_value_policy::reference)
+		.def("getDerivedNodes", &Class::getDerivedNodes, py::return_value_policy::reference);
 }
 
 template <typename TDataType>
@@ -239,11 +239,11 @@ void declare_single_node_port(py::module& m, std::string typestr) {
 	using Parent = dyno::NodePort;
 	std::string pyclass_name = std::string("SingleNodePorParametricModelt_") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def("is_kind_of", &Class::isKindOf)
-		.def("has_node", &Class::hasNode)
-		.def("get_nodes", &Class::getNodes, py::return_value_policy::reference)
-		.def("get_derived_node", &Class::getDerivedNode, py::return_value_policy::reference)
-		.def("set_derived_node", &Class::setDerivedNode);
+		.def("isKindOf", &Class::isKindOf)
+		.def("hasNode", &Class::hasNode)
+		.def("getNodes", &Class::getNodes, py::return_value_policy::reference)
+		.def("getDerivedNode", &Class::getDerivedNode, py::return_value_policy::reference)
+		.def("setDerivedNode", &Class::setDerivedNode);
 }
 
 template <typename TDataType>
@@ -253,10 +253,10 @@ void declare_parametric_model(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ParametricModel") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr(), py::multiple_inheritance())
 		.def(py::init<>())
-		.def("compute_quaternion", &Class::computeQuaternion)
-		.def("var_location", &Class::varLocation, py::return_value_policy::reference)
-		.def("var_rotation", &Class::varRotation, py::return_value_policy::reference)
-		.def("var_scale", &Class::varScale, py::return_value_policy::reference);
+		.def("computeQuaternion", &Class::computeQuaternion)
+		.def("varLocation", &Class::varLocation, py::return_value_policy::reference)
+		.def("varRotation", &Class::varRotation, py::return_value_policy::reference)
+		.def("varScale", &Class::varScale, py::return_value_policy::reference);
 }
 
 template <typename TDataType>
@@ -266,8 +266,8 @@ void declare_floating_number(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("FloatingNumber") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_value", &Class::varValue, py::return_value_policy::reference)
-		.def("out_floating", &Class::outFloating, py::return_value_policy::reference);
+		.def("varValue", &Class::varValue, py::return_value_policy::reference)
+		.def("outFloating", &Class::outFloating, py::return_value_policy::reference);
 }
 
 template <typename TDataType>
@@ -277,8 +277,8 @@ void declare_vector_3_source(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("Vector3Source") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("var_value", &Class::varValue, py::return_value_policy::reference)
-		.def("out_coord", &Class::outCoord, py::return_value_policy::reference);
+		.def("varValue", &Class::varValue, py::return_value_policy::reference)
+		.def("outCoord", &Class::outCoord, py::return_value_policy::reference);
 }
 
 template <typename TDataType>
@@ -288,9 +288,9 @@ void declare_add_real_and_real(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("AddRealAndReal") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_a", &Class::inA, py::return_value_policy::reference)
-		.def("in_b", &Class::inB, py::return_value_policy::reference)
-		.def("out_o", &Class::outO, py::return_value_policy::reference);
+		.def("inA", &Class::inA, py::return_value_policy::reference)
+		.def("inB", &Class::inB, py::return_value_policy::reference)
+		.def("outO", &Class::outO, py::return_value_policy::reference);
 }
 
 template <typename TDataType>
@@ -300,9 +300,9 @@ void declare_divide_real_and_real(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("DivideRealAndReal") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_a", &Class::inA, py::return_value_policy::reference)
-		.def("in_b", &Class::inB, py::return_value_policy::reference)
-		.def("out_o", &Class::outO, py::return_value_policy::reference);
+		.def("inA", &Class::inA, py::return_value_policy::reference)
+		.def("inB", &Class::inB, py::return_value_policy::reference)
+		.def("outO", &Class::outO, py::return_value_policy::reference);
 }
 
 template <typename TDataType>
@@ -312,9 +312,9 @@ void declare_multiply_real_and_real(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("MultiplyRealAndReal") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_a", &Class::inA, py::return_value_policy::reference)
-		.def("in_b", &Class::inB, py::return_value_policy::reference)
-		.def("out_o", &Class::outO, py::return_value_policy::reference);
+		.def("inA", &Class::inA, py::return_value_policy::reference)
+		.def("inB", &Class::inB, py::return_value_policy::reference)
+		.def("outO", &Class::outO, py::return_value_policy::reference);
 }
 
 template <typename TDataType>
@@ -324,9 +324,9 @@ void declare_subtract_real_and_real(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("SubtractRealAndReal") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_a", &Class::inA, py::return_value_policy::reference)
-		.def("in_b", &Class::inB, py::return_value_policy::reference)
-		.def("out_o", &Class::outO, py::return_value_policy::reference);
+		.def("inA", &Class::inA, py::return_value_policy::reference)
+		.def("inB", &Class::inB, py::return_value_policy::reference)
+		.def("outO", &Class::outO, py::return_value_policy::reference);
 }
 
 //Init_static_plugin  - for example_3 WaterPouring

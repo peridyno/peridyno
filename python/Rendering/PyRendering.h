@@ -34,9 +34,9 @@ void declare_color_mapping(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ColorMapping") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("in_scalar", &Class::inScalar, py::return_value_policy::reference)
-		.def("out_color", &Class::outColor, py::return_value_policy::reference)
-		.def("var_max", &Class::varMax, py::return_value_policy::reference);
+		.def("inScalar", &Class::inScalar, py::return_value_policy::reference)
+		.def("outColor", &Class::outColor, py::return_value_policy::reference)
+		.def("varMax", &Class::varMax, py::return_value_policy::reference);
 }
 
 
@@ -49,9 +49,9 @@ void declare_gl_surface_visual_node(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
-		.def("get_node_type", &Class::getNodeType)
-		.def("in_triangle_set", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("var_color", &Class::varColor, py::return_value_policy::reference);
+		.def("getNodeType", &Class::getNodeType)
+		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
+		.def("varColor", &Class::varColor, py::return_value_policy::reference);
 }
 void declare_gl_point_visual_node(py::module& m, std::string typestr);
 

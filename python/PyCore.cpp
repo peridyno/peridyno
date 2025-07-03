@@ -6,7 +6,7 @@ void pybind_core(py::module& m)
 		.def(py::init())
 		.def("start", &dyno::CTimer::start)
 		.def("stop", &dyno::CTimer::stop)
-		.def("get_elapsed_time", &dyno::CTimer::getElapsedTime);
+		.def("getElapsedTime", &dyno::CTimer::getElapsedTime);
 
 	declare_vector<float, 2>(m, "2f");
 	declare_vector<float, 3>(m, "3f");

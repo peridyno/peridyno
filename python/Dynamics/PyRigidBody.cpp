@@ -8,15 +8,15 @@ void declare_rigid_body_info(py::module& m, std::string typestr) {
 	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def(py::init < dyno::Vector<float, 3>, dyno::Quat<Real>>())
-		.def_readwrite("linear_velocity", &Class::linearVelocity)
-		.def_readwrite("angular_velocity", &Class::angularVelocity)
+		.def_readwrite("linearVelocity", &Class::linearVelocity)
+		.def_readwrite("angularVelocity", &Class::angularVelocity)
 		.def_readwrite("position", &Class::position)
 		.def_readwrite("inertia", &Class::inertia)
 		.def_readwrite("mass", &Class::mass)
 		.def_readwrite("friction", &Class::friction)
 		.def_readwrite("restitution", &Class::restitution)
-		.def_readwrite("motion_type", &Class::motionType)
-		.def_readwrite("shape_type", &Class::shapeType)
+		.def_readwrite("motionType", &Class::motionType)
+		.def_readwrite("shapeType", &Class::shapeType)
 		.def_readwrite("collision_mask", &Class::collisionMask)
 		.def_readwrite("angle", &Class::angle);
 }
@@ -28,7 +28,7 @@ void declare_box_info(py::module& m, std::string typestr) {
 	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def_readwrite("center", &Class::center)
-		.def_readwrite("half_length", &Class::halfLength)
+		.def_readwrite("halfLength", &Class::halfLength)
 		.def_readwrite("rot", &Class::rot);
 }
 
@@ -62,7 +62,7 @@ void declare_capsule_info(py::module& m, std::string typestr) {
 		.def_readwrite("center", &Class::center)
 		.def_readwrite("radius", &Class::radius)
 		.def_readwrite("rot", &Class::rot)
-		.def_readwrite("half_length", &Class::halfLength);
+		.def_readwrite("halfLength", &Class::halfLength);
 }
 
 #include "RigidBody/Module/SimpleVechicleDriver.h"
@@ -71,8 +71,8 @@ void declare_simple_vechicle_driver(py::module& m) {
 	using Parent = dyno::ComputeModule;
 	std::string pyclass_name = std::string("SimpleVechicleDriver");
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def("in_frame_number", &Class::inFrameNumber, py::return_value_policy::reference)
-		.def("in_instance_transform", &Class::inInstanceTransform, py::return_value_policy::reference);
+		.def("inFrameNumber", &Class::inFrameNumber, py::return_value_policy::reference)
+		.def("inInstanceTransform", &Class::inInstanceTransform, py::return_value_policy::reference);
 }
 
 void pybind_rigid_body(py::module& m) {
