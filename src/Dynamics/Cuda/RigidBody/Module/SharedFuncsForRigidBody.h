@@ -45,6 +45,19 @@ namespace dyno
 		float dt
 	);
 
+	void updateGestureNoSelf(
+		DArray<Attribute> attribute,
+		DArray<Vec3f> initPos,
+		DArray<Vec3f> pos,
+		DArray<Quat1f> initRotQuat,
+		DArray<Quat1f> rotQuat,
+		DArray<Mat3f> initRotMat,
+		DArray<Mat3f> rotMat,
+		DArray<Vec3f> velocity,
+		DArray<Vec3f> angular_velocity,
+		float dt
+	);
+
 	void updatePositionAndRotation(
 		DArray<Vec3f> pos,
 		DArray<Quat1f> rotQuat,

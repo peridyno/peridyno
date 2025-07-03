@@ -71,8 +71,8 @@ namespace dyno
 			velocity[tId] += impulse[2 * tId];
 			angular_velocity[tId] += impulse[2 * tId + 1];
 			//Damping
-			/*velocity[tId] *= 1.0f / (1.0f + dt * linearDamping);
-			angular_velocity[tId] *= 1.0f / (1.0f + dt * angularDamping);*/
+			velocity[tId] *= 1.0f / (1.0f + dt * linearDamping);
+			angular_velocity[tId] *= 1.0f / (1.0f + dt * angularDamping);
 		}
 	}
 
@@ -111,6 +111,39 @@ namespace dyno
 	* @param dt					time step
 	* This function update the gesture of rigids based on velocity and timeStep
 	*/
+	__global__ void SF_updateGestureNoSelf(
+		DArray<Attribute> attribute,
+		DArray<Vec3f> initPos,
+		DArray<Vec3f> pos,
+		DArray<Quat1f> rotQuat,
+		DArray<Quat1f> initRotQuat,
+		DArray<Mat3f> rotMat,
+		DArray<Mat3f> initRotMat,
+		DArray<Vec3f> velocity,
+		DArray<Vec3f> angular_velocity,
+		float dt
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= pos.size())
+			return;
+
+		if (!attribute[tId].isFixed())
+		{
+			pos[tId] = initPos[tId] + velocity[tId] * dt;
+
+			initRotQuat[tId].normalize();
+			rotQuat[tId] = initRotQuat[tId] + dt * 0.5f *
+				Quat1f(angular_velocity[tId][0], angular_velocity[tId][1], angular_velocity[tId][2], 0.0)
+				* (initRotQuat[tId]);
+			rotQuat[tId].normalize();
+
+			rotMat[tId] = rotQuat[tId].toMatrix3x3();
+		}
+	}
+
+
+
 	__global__ void SF_updateGesture(
 		DArray<Attribute> attribute,
 		DArray<Vec3f> pos,
@@ -167,6 +200,33 @@ namespace dyno
 			velocity,
 			angular_velocity,
 			inertia_init,
+			dt);
+	}
+
+	void updateGestureNoSelf(
+		DArray<Attribute> attribute,
+		DArray<Vec3f> initPos,
+		DArray<Vec3f> pos,
+		DArray<Quat1f> initRotQuat,
+		DArray<Quat1f> rotQuat,
+		DArray<Mat3f> initRotMat,
+		DArray<Mat3f> rotMat,
+		DArray<Vec3f> velocity,
+		DArray<Vec3f> angular_velocity,
+		float dt
+	)
+	{
+		cuExecute(pos.size(),
+			SF_updateGestureNoSelf,
+			attribute,
+			initPos,
+			pos,
+			initRotQuat,
+			rotQuat,
+			initRotMat,
+			rotMat,
+			velocity,
+			angular_velocity,
 			dt);
 	}
 

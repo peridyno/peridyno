@@ -38,22 +38,10 @@ std::shared_ptr<SceneGraph> createSceneGraph()
 
 	auto convoy = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
 
-	for (int i = 0; i < 5; i++)
-	{
-		auto gear = scn->addNode(std::make_shared<Bug<DataType3f>>());
-		gear->setfile(std::string("ma/bigring"));
-		gear->setposition(Vec3f(0, 10 + 10.0 * i, 0 + 0.4 * i));
-		gear->setv(Vec3f(10 * i, 0, 0));
-		gear->connect(convoy->importVehicles());
-	}
 
-	for (int j = 0; j < 5; j++)
-	{
-		auto gear = scn->addNode(std::make_shared<Bug<DataType3f>>());
-		gear->setfile(std::string("ma/bigbug"));
-		gear->setposition(Vec3f(0 +j * 20.0, 3, 0));
-		gear->connect(convoy->importVehicles());
-	}
+	auto gear = scn->addNode(std::make_shared<MatBody<DataType3f>>());
+	gear->setXMLPath("ma/scene3.xml");
+	gear->connect(convoy->importVehicles());
 
 	plane->stateTriangleSet()->connect(convoy->inTriangleSet());
 

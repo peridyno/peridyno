@@ -1,6 +1,7 @@
 #include "MultibodySystem.h"
 
 #include "Module/TJConstraintSolver.h"
+#include "Module/PJSConstraintSolver.h"
 #include "Module/ContactsUnion.h"
 
 #include "Collision/NeighborElementQuery.h"

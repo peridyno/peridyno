@@ -140,10 +140,14 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	std::shared_ptr<PdActor> RigidBodySystem<TDataType>::createRigidBody(const RigidBodyInfo& bodyDef)
+	std::shared_ptr<PdActor> RigidBodySystem<TDataType>::createRigidBody(const RigidBodyInfo& bodyDef, bool isIntial)
 	{
 		auto bd = bodyDef;
-		bd.mass = 0.0f;
+		if (isIntial)
+		{
+			bd.mass = 0.0f;
+			bd.inertia = Mat3f(0.0);
+		}
 		bd.shapeType = ET_COMPOUND;
 
 		mHostRigidBodyStates.push_back(bd);
@@ -291,8 +295,8 @@ namespace dyno
 
 		auto rigidbodyInertia = rotBody * (rotShape * localInertia * rotShape.transpose() + ParallelAxisTheorem(centroid, mass)) * rotBody.transpose();
 
-		rigidbody.mass += mass;
-		rigidbody.inertia += rigidbodyInertia;
+		//rigidbody.mass += mass;
+		//rigidbody.inertia += rigidbodyInertia;
 		rigidbody.shapeType = ET_COMPOUND;
 
 		mHostShape2RigidBodyMapping.insert(mHostShape2RigidBodyMapping.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size() + mHostCapsules.size() + mHostMedialCones.size(), Pair<uint, uint>(mHostMedialCones.size(), (uint)actor->idx));
@@ -325,8 +329,8 @@ namespace dyno
 
 		auto rigidbodyInertia = rotBody * (rotShape * localInertia * rotShape.transpose() + ParallelAxisTheorem(centroid, mass)) * rotBody.transpose();
 
-		rigidbody.mass += mass;
-		rigidbody.inertia += rigidbodyInertia;
+		//rigidbody.mass += mass;
+		//rigidbody.inertia += rigidbodyInertia;
 		rigidbody.shapeType = ET_COMPOUND;
 
 		mHostShape2RigidBodyMapping.insert(mHostShape2RigidBodyMapping.begin() + mHostSpheres.size() + mHostBoxes.size() + mHostTets.size() + mHostCapsules.size() + mHostMedialCones.size() + mHostMedialSlabs.size(), Pair<uint, uint>(mHostMedialSlabs.size(), (uint)actor->idx));

@@ -4,6 +4,7 @@
 #include "GLSurfaceVisualModule.h"
 #include <cstddef>
 #include <string>
+#include "helpers/tinyobj_helper.h"
 
 namespace dyno
 {
@@ -78,14 +79,14 @@ namespace dyno
 	DEFINE_CLASS(Gear);
 
 
-	IMPLEMENT_TCLASS(Bug, TDataType)
+	IMPLEMENT_TCLASS(MatBody, TDataType)
 
 	template<typename TDataType>
-	Bug<TDataType>::Bug() :
+	MatBody<TDataType>::MatBody() :
 		ArticulatedBody<TDataType>()
 	{	
-		/*
-		auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
+		
+		/*auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
 		this->stateTopology()->connect(mapper->inDiscreteElements());
 		this->graphicsPipeline()->pushModule(mapper);
 
@@ -94,86 +95,111 @@ namespace dyno
 		sRender->setAlpha(0.5f);
 		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(sRender);*/
-		this->varDoTransform()->setValue(false);
-		
 	}
 
 	template<typename TDataType>
-	Bug<TDataType>::~Bug()
+	MatBody<TDataType>::~MatBody()
 	{
 
 	}
 
 	template<typename TDataType>
-	void Bug<TDataType>::resetStates()
+	void MatBody<TDataType>::resetStates()
 	{
 		this->clearRigidBodySystem();
 		this->clearVechicle();
-		this->vertices.clear();
-		this->edges.clear();
-		this->faces.clear();
-		std::string model(this->file_name);
-		this->loadMa(model);
-		std::string filename = getAssetPath() + model + std::string(".obj");
+		this->Vertices.clear();
+		this->Edges.clear();
+		this->Faces.clear();
+
+		std::string filename = getAssetPath() + this->mXmlPath;
 		if (this->varFilePath()->getValue() != filename)
 		{
 			this->varFilePath()->setValue(FilePath(filename));
 		}
 
-		RigidBodyInfo info;
-		//info.angle = Quat1f(M_PI / 2, Vec3f(1, 0, 0));
-		MedialConeInfo medalcone;
-		MedialSlabInfo medalslab;
-		info.position = Vec3f(0) + this->position;
-		info.linearVelocity = this->velocity;
-		info.angularVelocity = Vec3f(0, 0, 0);
-		info.motionType = BodyType::Dynamic;
-		info.bodyId = 0;
-		auto actor = this->createRigidBody(info);
-
-
-		for(size_t i = 0;i < edges.size();i++)
+		for (int i = 0; i < this->mAssets.size(); i++)
 		{
-			Vec2i edge = edges[i];
-			if(edge[0] >= vertices.size() || edge[1] >= vertices.size())
+			loadMa(mAssets[i].matPath, i);
+		}
+		
+
+		for (int i = 0; i < this->mObjects.size(); i++)
+		{
+			auto currentAsset = mAssets[mObjects[i].asset_id];
+
+			auto& object = this->mObjects[i];
+			RigidBodyInfo info;
+			MedialConeInfo medalcone;
+			MedialSlabInfo medalslab;
+			info.position = object.position;
+			info.angle = Quat1f(object.orientation.z, object.orientation.y, object.orientation.x);
+			info.linearVelocity = object.linearVelocity;
+			info.angularVelocity = object.angularVelocity;
+			info.motionType = BodyType::Dynamic;
+			info.bodyId = i;
+			info.mass = currentAsset.volume * object.density;
+			std::cout << currentAsset.volume << std::endl;
+			info.inertia = currentAsset.inertialMatrix * object.density;
+			//std::cout << info.inertia << std::endl;
+			
+			auto actor = this->createRigidBody(info, false);
+
+			auto& vertices = this->Vertices[mObjects[i].asset_id];
+			auto& edges = this->Edges[mObjects[i].asset_id];
+			auto& faces = this->Faces[mObjects[i].asset_id];
+			for (size_t j = 0; j < edges.size(); j++)
 			{
-				std::cerr << "ERROR load edge" << std::endl;
-				continue;
+				Vec2i edge = edges[j];
+				if (edge[0] >= vertices.size() || edge[1] >= vertices.size())
+				{
+					std::cerr << "ERROR load edge" << std::endl;
+					continue;
+				}
+				medalcone.v[0] = Vec3f(vertices[edge[0]][0], vertices[edge[0]][1], vertices[edge[0]][2]) - currentAsset.baryCenter;
+				medalcone.v[1] = Vec3f(vertices[edge[1]][0], vertices[edge[1]][1], vertices[edge[1]][2]) - currentAsset.baryCenter;
+				medalcone.radius[0] = vertices[edge[0]][3];
+				medalcone.radius[1] = vertices[edge[1]][3];
+				this->bindMedialCone(actor, medalcone);
 			}
-			medalcone.v[0] = Vec3f(vertices[edge[0]][0], vertices[edge[0]][1], vertices[edge[0]][2]);
-			medalcone.v[1] = Vec3f(vertices[edge[1]][0], vertices[edge[1]][1], vertices[edge[1]][2]);
-			medalcone.radius[0] = vertices[edge[0]][3];
-			medalcone.radius[1] = vertices[edge[1]][3];
-			this->bindMedialCone(actor, medalcone, 1000);
+
+			for (size_t j = 0; j < faces.size(); j++)
+			{
+				Vec3i face = faces[j];
+				if (face[0] >= vertices.size() || face[1] >= vertices.size() || face[2] >= vertices.size())
+				{
+					std::cerr << "ERROR load face" << std::endl;
+					continue;
+				}
+				medalslab.v[0] = Vec3f(vertices[face[0]][0], vertices[face[0]][1], vertices[face[0]][2]) - currentAsset.baryCenter;
+				medalslab.v[1] = Vec3f(vertices[face[1]][0], vertices[face[1]][1], vertices[face[1]][2]) - currentAsset.baryCenter;
+				medalslab.v[2] = Vec3f(vertices[face[2]][0], vertices[face[2]][1], vertices[face[2]][2]) - currentAsset.baryCenter;
+				medalslab.radius[0] = vertices[face[0]][3];
+				medalslab.radius[1] = vertices[face[1]][3];
+				medalslab.radius[2] = vertices[face[2]][3];
+				this->bindMedialSlab(actor, medalslab);
+			}
+
+			std::cout << mObjects[i].asset_id << std::endl;
+
+
+			this->bindShape(actor, Pair<uint, uint>(mObjects[i].asset_id, i));
 		}
 
-		for(size_t i = 0;i < faces.size();i++)
-		{
-			Vec3i face = faces[i];
-			if(face[0] >= vertices.size() || face[1] >= vertices.size() || face[2] >= vertices.size())
-			{
-				std::cerr << "ERROR load face" << std::endl;
-				continue;
-			}
-			medalslab.v[0] = Vec3f(vertices[face[0]][0], vertices[face[0]][1], vertices[face[0]][2]);
-			medalslab.v[1] = Vec3f(vertices[face[1]][0], vertices[face[1]][1], vertices[face[1]][2]);
-			medalslab.v[2] = Vec3f(vertices[face[2]][0], vertices[face[2]][1], vertices[face[2]][2]);
-			medalslab.radius[0] = vertices[face[0]][3];
-			medalslab.radius[1] = vertices[face[1]][3];
-			medalslab.radius[2] = vertices[face[2]][3];
-			this->bindMedialSlab(actor, medalslab, 1000);
-		}
-
-		this->bindShape(actor, Pair<uint, uint>(0, 0));
+		std::cout << std::endl;
+		std::cout << this->stateTextureMesh()->getData().shapes().size() << std::endl;
 
 		//**************************************************//
 		ArticulatedBody<TDataType>::resetStates();
 	}
 
 	template<typename TDataType>
-	void Bug<TDataType>::loadMa(std::string file_path)
+	void MatBody<TDataType>::loadMa(std::string file_path, int objectId)
 	{
-		std::string filename = getAssetPath() + file_path + std::string(".ma");
+		std::vector<Vec4f> vertices;
+		std::vector<Vec2i> edges;
+		std::vector<Vec3i>	faces;
+		std::string filename = getAssetPath() + file_path;
 		std::ifstream inputFile(filename);
 		std::string line;
 		int num_vertices = 0, num_edges = 0, num_faces = 0;
@@ -262,7 +288,10 @@ namespace dyno
 		}
 		inputFile.close();
 		
+		this->Vertices.push_back(vertices);
+		this->Edges.push_back(edges);
+		this->Faces.push_back(faces);
 	}
 
-	DEFINE_CLASS(Bug);
+	DEFINE_CLASS(MatBody);
 }

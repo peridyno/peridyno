@@ -77,7 +77,8 @@ namespace dyno
 			const TQuat& q);
 
 		std::shared_ptr<PdActor> createRigidBody(
-			const RigidBodyInfo& bodyDef);
+			const RigidBodyInfo& bodyDef,
+			bool isInitial=true);
 
 		void bindBox(
 			const std::shared_ptr<PdActor> actor,

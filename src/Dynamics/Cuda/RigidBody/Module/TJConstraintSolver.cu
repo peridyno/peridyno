@@ -248,6 +248,16 @@ namespace dyno
 	void TJConstraintSolver<TDataType>::constrain()
 	{
 		uint bodyNum = this->inCenter()->size();
+		std::string filename = getAssetPath() + std::string("numbers2.txt");
+		std::ofstream outFile(filename, std::ios::out | std::ios::app);
+
+		// 检查文件是否成功打开
+		if (!outFile.is_open()) {
+			std::cerr << "错误：无法打开文件进行写入！" << std::endl;
+		}
+		outFile << this->inContacts()->size() << std::endl;
+
+		outFile.close();
 
 		auto topo = this->inDiscreteElements()->constDataPtr();
 

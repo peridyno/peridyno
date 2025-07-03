@@ -18,29 +18,54 @@
 using namespace std;
 using namespace dyno;
 
-std::shared_ptr<SceneGraph> creatBricks()
+std::shared_ptr<SceneGraph> createBricks()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
-
+	scn->setLowerBound(Vec3f(-200.0f, 0.0f, -200.0f));
+	scn->setUpperBound(Vec3f(200.0f, 400.0f, 200.0f));
+	//	scn->setGravity(Vec3f(0.0f, -9.8f, 0.0f));
+	Real dHat = 0.001f;
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
-	uint dim = 5;
-	float h = 0.1f;
+	rigid->setDt(0.016f);
+	bool hasBall = true;
+	uint x = 10;
+	uint y = 10;
+	uint z = 10;
+	float hl_x = 1.0f;
+	float hl_z = 1.0f;
+	float hl_y = 1.0f;
+	float interval_x = 0.001f;
+	float interval_y = 0.001f;
+	float offset_x = 0.0f;
+	float offset_y = 0.0f;
 
 	RigidBodyInfo rigidBody;
 	rigidBody.linearVelocity = Vec3f(0.0, 0, 0);
 	BoxInfo box;
-	box.halfLength = Vec3f(h, h, h);
-	for (int i = 0; i < dim; i++)
+	box.halfLength = Vec3f(hl_x, hl_z, hl_y);
+	int id = 0;
+	for (int i = 0; i < x; i++)
 	{
-		for (int j = 0; j < dim; j++)
+		for (int j = 0; j < z; j++)
 		{
-			for (int k = 0; k < dim; k++)
+			for (int k = 0; k < y; k++)
 			{
-				rigidBody.position = Vec3f(2 * i * h - h * dim, h + (2.01f) * j * h, 2 * k * h - h * dim);
-				
-				auto boxAt = rigid->addBox(box, rigidBody);
+				rigidBody.position = Vec3f(2 * i * (hl_x + dHat + interval_x) - (hl_x + dHat + interval_x) * x + (j % 2 ? offset_x : 0.0f), \
+					2 * j * hl_z + hl_z, \
+					2 * k * (hl_y + dHat + interval_y) - (hl_y + dHat + interval_y) * y + (j % 2 ? offset_y : 0.0f));
+				rigidBody.bodyId = id++;
+				auto boxAt = rigid->addBox(box, rigidBody, 100.0f);
 			}
 		}
+	}
+
+	if (hasBall)
+	{
+		rigidBody.position = Vec3f(0.0f, 15.0f, 40.0f);
+		rigidBody.linearVelocity = Vec3f(0.0f, 0.0f, -100.0f);
+		SphereInfo sphere;
+		sphere.radius = 3.0f;
+		auto sphereAt = rigid->addSphere(sphere, rigidBody, 100.0f);
 	}
 
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
@@ -50,6 +75,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
 	sRender->setColor(Color::SteelBlue2());
 	sRender->setAlpha(1.0f);
+	//sRender->setMetallic(1.0f);
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
 
@@ -87,7 +113,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 int main()
 {
 	GlfwApp app;
-	app.setSceneGraph(creatBricks());
+	app.setSceneGraph(createBricks());
 	app.initialize(1280, 768);
 	app.mainLoop();
 

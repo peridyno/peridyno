@@ -34,28 +34,30 @@ namespace dyno
 	};
 
 	template<typename TDataType>
-	class Bug : virtual public ArticulatedBody<TDataType>
+	class MatBody : virtual public ArticulatedBody<TDataType>
 	{
-		DECLARE_TCLASS(Bug, TDataType)
+		DECLARE_TCLASS(MatBody, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		Bug();
-		~Bug() override;
-		void loadMa(std::string file_path);
-		std::vector<Vec4f> vertices;
-		std::vector<Vec2i> edges;
-		std::vector<Vec3i>	faces;
-		Vec3f position;
-		Vec3f velocity;
-		std::string file_name;
-		void setposition(Vec3f position) { this->position = position; }
-		void setv(Vec3f velocity) { this->velocity = velocity; }
-		void setfile(std::string file_name) { this->file_name = file_name; }
+		MatBody();
+		~MatBody() override;
+		void loadMa(std::string file_path, int objectId);
+		void setXMLPath(std::string file_path)
+		{
+			this->mXmlPath = file_path;
+		}
+
+		std::vector<std::vector<Vec4f>> Vertices;
+		std::vector<std::vector<Vec2i>> Edges;
+		std::vector<std::vector<Vec3i>>	Faces;
 
 	protected:
 		void resetStates() override;
+
+	private:
+		std::string mXmlPath;
 	};
 
 
