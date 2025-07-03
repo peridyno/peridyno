@@ -39,7 +39,11 @@ namespace dyno
 	void TriangleSets<TDataType>::load(std::vector<std::shared_ptr<TriangleSet<TDataType>>>& tsArray)
 	{
 		mShapeSize = tsArray.size();
-
+		for (auto ts : tsArray)
+		{
+			if (!ts)
+				return;
+		}
 		uint vNum = 0;
 		uint tNum = 0;
 		for (auto ts : tsArray)
