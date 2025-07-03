@@ -496,4 +496,14 @@ namespace dyno
 		image.save(filename.c_str());
 	}
 
+	void POpenGLWidget::setDefaultAnimationOption(bool op)
+	{
+		if (op)
+		{
+			PSimulationThread::instance()->start();
+		}
+		else
+			PSimulationThread::instance()->stop();
+	}
+
 }
