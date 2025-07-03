@@ -8,6 +8,7 @@ set(LIB_DEPENDENCY
     SemiAnalyticalScheme
     Multiphysics
     ObjIO
+    UbiGUI
     WtGUI
 )
-add_example(Wt_Barricade WtGUI LIB_DEPENDENCY)
+add_example(Wt_Preset WtGUI LIB_DEPENDENCY)

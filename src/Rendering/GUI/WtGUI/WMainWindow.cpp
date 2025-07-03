@@ -156,7 +156,10 @@ void WMainWindow::setInData(connectionData data, std::shared_ptr<dyno::Node> inN
 			}
 
 			if (inField != nullptr)
+			{
 				field->connect(inField);
+			}
+				
 		}
 	}
 }

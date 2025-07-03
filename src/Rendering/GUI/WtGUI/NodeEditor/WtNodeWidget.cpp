@@ -40,7 +40,7 @@ WtNodeWidget::WtNodeWidget(std::shared_ptr<Node> base)
 		auto fInputs = getInputFields();
 		for (int i = 0; i < fInputs.size(); i++)
 		{
-			mFieldInport[i] = std::make_shared<WtFieldData>(fInputs[i]);;
+			mFieldInport[i] = std::make_shared<WtFieldData>(fInputs[i]);
 		}
 	}
 }
@@ -75,8 +75,16 @@ NodeDataType WtNodeWidget::dataType(PortType portType, PortIndex portIndex) cons
 		else {
 			auto& inputFields = this->getInputFields();
 			std::string str = inputFields[portIndex - mNodeInport.size()]->getClassName();
-
-			return NodeDataType{ str.c_str(), str.c_str(), PortShape::Point };
+			
+			if (str == "FInstance" || str == "FInstances")
+			{
+				std::string insName = dyno::InstanceBase::className();
+				return NodeDataType{ insName.c_str(), insName.c_str(), PortShape::Point };
+			}
+			else
+			{
+				return NodeDataType{ str.c_str(), str.c_str(), PortShape::Point };
+			}
 		}
 		break;
 
@@ -90,7 +98,16 @@ NodeDataType WtNodeWidget::dataType(PortType portType, PortIndex portIndex) cons
 
 			std::string str = outputFields[portIndex - 1]->getClassName();
 
-			return NodeDataType{ str.c_str(), str.c_str(), PortShape::Point };
+			if (str == "FInstance" || str == "FInstances")
+			{
+				std::string insName = dyno::InstanceBase::className();
+				return NodeDataType{ insName.c_str(), insName.c_str(), PortShape::Point };
+			}
+			else
+			{
+				return NodeDataType{ str.c_str(), str.c_str(), PortShape::Point };
+			}
+				
 		}
 
 		break;
@@ -290,21 +307,19 @@ bool WtNodeWidget::tryInData(PortIndex portIndex, std::shared_ptr<WtNodeData> no
 
 			auto fieldInp = mFieldInport[portIndex - mNodeInport.size()];
 
-			if (fieldInp->getField()->getClassName() == fieldExp->getField()->getClassName())
+			auto fIn = fieldInp->getField();
+			auto fExp = fieldExp->getField();
+
+			dyno::InstanceBase* instIn = dynamic_cast<dyno::InstanceBase*>(fIn);
+			dyno::InstanceBase* instOut = dynamic_cast<dyno::InstanceBase*>(fExp);
+
+			if (instIn != nullptr && instOut != nullptr)
 			{
-				std::string className = fieldInp->getField()->getClassName();
-				if (className == dyno::InstanceBase::className())
-				{
-					dyno::InstanceBase* instIn = dynamic_cast<dyno::InstanceBase*>(fieldInp->getField());
-					dyno::InstanceBase* instOut = dynamic_cast<dyno::InstanceBase*>(fieldExp->getField());
-
-					if (instIn != nullptr && instOut != nullptr)
-						return instIn->canBeConnectedBy(instOut);
-
-					return false;
-				}
-				else
-					return fieldInp->getField()->getTemplateName() == fieldExp->getField()->getTemplateName();
+				return instIn->canBeConnectedBy(instOut);
+			}
+			else if(instIn == nullptr && instOut == nullptr)
+			{
+				return fIn->getClassName() == fExp->getClassName() && fIn->getTemplateName() == fExp->getTemplateName();
 			}
 			else
 			{
@@ -333,7 +348,9 @@ WtNodeDataModel::ConnectionPolicy WtNodeWidget::portInConnectionPolicy(PortIndex
 	}
 	else
 	{
-		return ConnectionPolicy::One;
+		auto fieldInp = mFieldInport[portIndex - mNodeInport.size()];
+
+		return fieldInp->getField()->inputPolicy() == FBase::One ? ConnectionPolicy::One : ConnectionPolicy::Many;
 	}
 }
 
