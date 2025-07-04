@@ -30,7 +30,7 @@ namespace dyno
 							std::string iconPath = getAssetPath() + "/icon/ContentBrowser/image.png";
 							return QPixmap(iconPath.c_str());
 						}
-						else if (info.suffix() == "obj" || info.suffix() == "gltf" || info.suffix() == "fbx")
+						else if (info.suffix() == "obj" || info.suffix() == "gltf" || info.suffix() == "glb" || info.suffix() == "fbx" || info.suffix() == "STL" || info.suffix() == "stl")
 						{
 							std::string iconPath = getAssetPath() + "/icon/ContentBrowser/3dModel.png";
 							return QPixmap(iconPath.c_str());
@@ -81,7 +81,7 @@ namespace dyno
 
 
 		QStringList filter;
-		filter <<"*.png" << "*.jpg" << "*.bmp" << "*.obj" << "*.gltf" << "*.fbx";
+		filter <<"*.png" << "*.jpg" << "*.bmp" << "*.obj" << "*.gltf" << "*.glb" << "*.fbx" << "*.STL" << "*.stl" << "*.xml";
 		auto* listModel = new CustomFileSystemModel(this);
 		listModel->setRootPath(path.c_str());
 		listModel->setFilter(QDir::Files | QDir::NoDotAndDotDot);
@@ -117,7 +117,7 @@ namespace dyno
 
 		//A hack
 		QStringList filter;
-		filter << "*.png" << "*.jpg" << "*.bmp" << "*.obj" << "*.gltf" << "*.fbx";
+		filter << "*.png" << "*.jpg" << "*.bmp" << "*.obj" << "*.gltf" << "*.glb" << "*.fbx" << "*.STL" << "*.stl" << "*.xml";
 		auto* newListModel = new CustomFileSystemModel(this);
 		newListModel->setRootPath(path);
 		newListModel->setFilter(QDir::Files | QDir::NoDotAndDotDot);
@@ -152,11 +152,8 @@ namespace dyno
 			if (func != nullptr) {
 				auto node = func(path.toStdString());
 
-
-
 				emit nodeCreated(node);
 			}
 		}
-
 	}
 }

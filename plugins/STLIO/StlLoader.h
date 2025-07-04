@@ -10,7 +10,7 @@ namespace dyno
 {
 	template <typename TDataType> class TriangleSet;
 	/*!
-	*	\class	ObjLoader
+	*	\class	StlLoader
 	*	\brief	A node containing a TriangleSet object
 	*
 	*	This class is typically used as a representation for a static boundary mesh or base class to other classes
