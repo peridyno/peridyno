@@ -198,6 +198,13 @@ namespace dyno
 		std::shared_ptr<XMLClass> childClass;
 	};
 
+	struct XMLCompiler
+	{
+		std::string angle = "radian";
+		std::string meshdir = "assets";
+		bool autolimits = true;
+	};
+
 	struct Mesh
 	{
 		Mesh() {}
@@ -244,6 +251,8 @@ namespace dyno
 
 	protected:
 		void resetStates() override;
+
+		void createRigidBodySystem();
 
 
 	public:
@@ -325,17 +334,11 @@ namespace dyno
 			temp.normalize();
 			Mat3f R_mujoco = temp.toMatrix3x3();
 
-			//Mat3f M = Mat3f(1, 0, 0,
-			//		0, 0, -1,
-			//		0, 1, 0);//?
-
 			Mat3f M = Mat3f(1, 0, 0,
 				0, 0, 1,
-				0, -1, 0);//?
-
+				0, -1, 0);
 
 			Mat3f R = M * R_mujoco * M.transpose();
-
 
 			return Quat<Real>(R);
 
@@ -344,14 +347,13 @@ namespace dyno
 		}
 
 		int countFields(const char* attrValue) {
-			if (!attrValue) return 0;  // 属性不存在
+			if (!attrValue) return 0;  
 
-			// 复制字符串，因为 strtok 会修改字符串
 			char* temp = new char[strlen(attrValue) + 1];
 			strcpy(temp, attrValue);
 
 			int count = 0;
-			const char* delim = " \t\n\r";  // 空格和常见空白字符
+			const char* delim = " \t\n\r";  
 			char* token = strtok(temp, delim);
 			while (token != nullptr) {
 				++count;
@@ -389,6 +391,7 @@ namespace dyno
 		void parseSiteElemet(tinyxml2::XMLElement* geomElement, std::shared_ptr<XMLSite> site);
 		void parseJointElemet(tinyxml2::XMLElement* jointElement, std::shared_ptr<XMLJoint> joint);
 		void parseDefaultElement(tinyxml2::XMLElement* element, int depth = 0, std::shared_ptr<XMLClass> parent = nullptr);
+		void parseCompilerElement(tinyxml2::XMLElement* element);
 
 		void parseWorldBodyElement(tinyxml2::XMLElement* element);
 
@@ -436,13 +439,17 @@ namespace dyno
 				return nullptr;		
 			
 		}
+
+		bool isCollision(const XMLGeom& geom);
+
+
 	private:
 
 		std::vector<XMLMesh> mXMLAssetMeshes;
 		std::vector<std::shared_ptr<XMLClass>> mXMLDefaultClass;
 		std::vector<std::shared_ptr<XMLBody>> mXMLBody;
 		std::vector<Vec3f> initialShapeCenter;
-
+		XMLCompiler complier;
 
 	};
 

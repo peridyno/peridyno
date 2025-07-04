@@ -12,6 +12,7 @@
 #include "Collision/NeighborElementQuery.h"
 #include "Collision/CollistionDetectionBoundingBox.h"
 #include "GLPointVisualModule.h"
+#include "helpers/stlreader_helper.h"
 
 namespace dyno
 {
@@ -100,10 +101,7 @@ namespace dyno
 		auto path = filepath.path().string();
 		auto parentPath = filepath.path().parent_path().string();
 		printf("\n\n***************************************\n");
-		std::string assetPath = parentPath + std::string("\\assets\\");
 
-		std::cout << "parentPath : "<< parentPath << "\n";
-		std::cout << "assetPath : "<< assetPath << "\n";
 		auto result = doc.LoadFile(file.c_str());
 
 		auto triSet = this->stateTriangleSet()->getDataPtr();
@@ -122,16 +120,30 @@ namespace dyno
 
 		}
 		
+		// <compiler>
+		tinyxml2::XMLElement* compilerElement = mujocoElement->FirstChildElement("compiler");
+		if (!compilerElement)
+		{
+			std::cerr << "No <compiler> element found\n";
+		}
+		else
+		{
+			parseCompilerElement(compilerElement);
+		}
+
+
+		std::string assetPath = parentPath + "\\" + this->complier.meshdir + "\\";
+		std::cout << "parentPath : " << parentPath << "\n";
+		std::cout << "assetPath : " << assetPath << "\n";
+
 		// <default> 
 		tinyxml2::XMLElement* defaultElement = mujocoElement->FirstChildElement("default");
 		if (!defaultElement)
 		{
 			std::cerr << "No <default> element found\n";
-
 		}
 		else 
-		{
-		
+		{	
 			parseDefaultElement(defaultElement);
 		}
 
@@ -287,7 +299,7 @@ namespace dyno
 		{
 			parseSiteElemet(siteElement, xmlSite);
 		}
-		// 遍历当前元素的子元素，并递归解析
+
 		tinyxml2::XMLElement* childElement = element->FirstChildElement("default");
 		while (childElement) {
 			parseDefaultElement(childElement, depth + 1, xmlClass);
@@ -296,7 +308,33 @@ namespace dyno
 		}
 
 		mXMLDefaultClass.push_back(xmlClass);
-	};
+	}
+	template<typename TDataType>
+	void MujocoXMLLoader<TDataType>::parseCompilerElement(tinyxml2::XMLElement* element)
+	{
+		const char* angleAttr = element->Attribute("angle");
+		if (angleAttr)
+		{
+			this->complier.angle = angleAttr;
+		}
+
+		const char* meshDirAttr = element->Attribute("meshdir");
+		if (meshDirAttr)
+		{
+			this->complier.meshdir = meshDirAttr;
+		}
+
+		const char* autolimitsAttr = element->Attribute("autolimits");
+		if (autolimitsAttr)
+		{
+			if(autolimitsAttr == "true")
+				this->complier.autolimits = true;
+			else
+				this->complier.autolimits = false;
+
+		}
+	}
+	
 
 
 	template<typename TDataType>
@@ -345,6 +383,12 @@ namespace dyno
 						auto load = loadObj(mesh.vertices, mesh.triangles, currentFile);
 						convertVertices(mesh.vertices);
 					}
+					if (ext == std::string(".STL")|| ext == std::string(".stl"))
+					{
+						std::string currentFile = assetPath + mesh.file.value();
+						auto load = loadStl(mesh.vertices, mesh.triangles, currentFile);
+						convertVertices(mesh.vertices);
+					}
 
 					if (name)
 						mesh.name = name;
@@ -386,17 +430,18 @@ namespace dyno
 
 		const char* posAttr = element->Attribute("pos");
 		if (posAttr) {
-			
 			xmlBody->pos = convertCoord(ParseVec3f(posAttr));
-			if (xmlBody->parentBody != nullptr)
-				xmlBody->realPos = xmlBody->parentBody->realPos.value() + xmlBody->pos.value();
-			else
-				xmlBody->realPos = xmlBody->pos;
+		}
+		else
+		{
+			xmlBody->pos = Vec3f(0);
+		}
 
-			std::cout << std::string(depth * 2, ' ') << "pos: " << posAttr << std::endl;
-			std::cout << std::string(depth * 2, ' ') << "realPos: " << xmlBody->realPos.value() << std::endl;
+		if (xmlBody->parentBody != nullptr)
+			xmlBody->realPos = xmlBody->parentBody->realPos.value() + xmlBody->pos.value();
+		else
+			xmlBody->realPos = xmlBody->pos;
 
-		};
 
 		const char* childClassAttr = element->Attribute("childclass");
 		if (childClassAttr) {
@@ -418,20 +463,17 @@ namespace dyno
 		{
 			const char* posAttr = inertialElement->Attribute("pos");
 			if (posAttr) {
-				//std::cout << std::string(depth * 2, ' ') << "pos: " << posAttr << std::endl;
 				xmlBody->inertialPos = convertCoord(ParseVec3f(posAttr));
 			};
 
 			const char* quatAttr = inertialElement->Attribute("quat");
 			if (quatAttr) {
-				//std::cout << std::string(depth * 2, ' ') << "pos: " << quatAttr << std::endl;
 				auto q = decodeVec4f(quatAttr);
 				xmlBody->quat = convertQuat(Quat<Real>(q.x,q.y,q.z,q.w));
 			};
 			
 			const char* massAttr = inertialElement->Attribute("mass");
 			if (massAttr) {
-				//std::cout << std::string(depth * 2, ' ') << "pos: " << massAttr << std::endl;
 				xmlBody->mass = std::stod(massAttr);
 			};
 		}
@@ -446,26 +488,7 @@ namespace dyno
 			parseGeomElemet(geomElement, geom);
 
 			xmlBody->bodyGeoms.push_back(geom);
-			////visual
-			//if (geom->XmlClass) 
-			//{
-			//	if (geom->XmlClass->name == std::string("visual"))
-			//	{
-			//		if (geom->meshName.has_value())
-			//			std::cout << "      " << geom->meshName.value() << "\n";
-			//	}
-			//}
-			//else 
-			//{
-			//	if (geom->meshName.has_value())
-			//		std::cout << "      " << geom->meshName.value() << "\n";
-			//}
-
-			////collision
-			//if (geom->XmlClass->name == std::string("collision")) 
-			//{
-			//	
-			//}
+			
 
 		}
 
@@ -481,7 +504,6 @@ namespace dyno
 		//const char* nameAttr = element->Attribute("name");
 		//xmlBody->meshName.push_back();
 
-		// 遍历当前元素的子元素，并递归解析
 		tinyxml2::XMLElement* childElement = element->FirstChildElement("body");
 		while (childElement) {
 			parseBodyElement(childElement, depth + 1, xmlBody);
@@ -555,9 +577,6 @@ namespace dyno
 			default:
 				break;
 			}
-
-
-
 		}
 
 
@@ -593,8 +612,6 @@ namespace dyno
 		if (rgba)
 		{
 			geom->rgba = ParseVec4f(rgba);
-
-			//std::cout << "rgba :" << geom->rgba.value()[0] << ", " << geom->rgba.value()[1] << ", " << geom->rgba.value()[2] << ", " << geom->rgba.value()[3] << "\n";
 		}
 
 		const char* mass = geomElement->Attribute("mass");
@@ -606,8 +623,11 @@ namespace dyno
 			geom->friction = convertCoord(ParseVec3f(friction));
 
 		const char* mesh = geomElement->Attribute("mesh");
-		if (mesh)
+		if (mesh) 
+		{
 			geom->meshName = std::string(mesh);
+			geom->type = XMLGeomType::mesh;
+		}
 
 		const char* classAttr = geomElement->Attribute("class");
 		if (classAttr)
@@ -652,10 +672,7 @@ namespace dyno
 				joint->type = XMLJointType::slide;
 			}
 		}
-		//std::string name;
-		//Vec3f axis = Vec3f(0, 0, 0);
-		//Vec2f range = Vec2f(-1, -1);
-		//bool useRange = false;
+
 
 		const char* damping = jointElement->Attribute("damping");
 		if (damping)
@@ -743,8 +760,6 @@ namespace dyno
 		if (size) 
 		{
 			int count = countFields(size);
-			//site->size = ParseVec3f(size);
-
 		}
 
 		const char* rgba = geomElement->Attribute("rgba");
@@ -880,10 +895,21 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void MujocoXMLLoader<TDataType>::resetStates() 
+	bool MujocoXMLLoader<TDataType>::isCollision(const XMLGeom& geom)
 	{
-		printf("reset\n");
+		
+		bool collision = true;
+		if (geom.contype.has_value())
+			if (geom.contype == 0)
+				collision = false;
 
+		return collision;
+		
+
+	}
+	template<typename TDataType>
+	void MujocoXMLLoader<TDataType>::createRigidBodySystem()
+	{
 		this->clearRigidBodySystem();
 		this->clearVechicle();
 
@@ -912,7 +938,7 @@ namespace dyno
 
 				Vec3f offset = Vec3f(0);
 
-				if (body->inertialPos.has_value()) 
+				if (body->inertialPos.has_value())
 					offset = body->inertialPos.value();
 
 				rigidbody.offset = offset;
@@ -921,113 +947,126 @@ namespace dyno
 
 				for (auto geom : body->bodyGeoms)
 				{
-					if (geom->XmlClass)
+					if (isCollision(*geom))
 					{
-						
-						if (findClass(geom->XmlClass, std::string("collision")))
+
+						if (body->realPos.has_value())
 						{
-
-							if (body->realPos.has_value())
+							if (body->shapeId != -1)
 							{
-								if (body->shapeId != -1)
-								{
-									rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[body->shapeId]->boundingTransform.translation()) + instances[i].translation();
-								}
-								else
-									rigidbody.position = body->massCenter.value();
+								rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[body->shapeId]->boundingTransform.translation()) + instances[i].translation();
 							}
-
-							Vec3f geomOffset = Vec3f(0);
-							if (geom->pos.has_value())
-							{
-								if (body->shapeId != -1)
-								{
-									geomOffset = geom->pos.value() + (body->realPos.value() - texMesh->shapes()[body->shapeId]->boundingTransform.translation());
-								}
-								else
-								{
-									geomOffset = geom->pos.value();
-
-								}
-							}
-							else 
-							{
-								geomOffset = (body->realPos.value() - texMesh->shapes()[body->shapeId]->boundingTransform.translation());
-							}
-
-							Quat<Real> bodyRot;
-							if (body->quat.has_value())
-								bodyRot = body->quat.value();
-							XMLGeomType a = XMLGeomType::box;
-							switch (geom->type.value())//
-							{
-							case dyno::plane:
-								break;
-							case dyno::hfield:
-								break;
-							case dyno::sphere:
-							{
-								if (body->actor == nullptr)
-									body->actor = this->createRigidBody(rigidbody);
-								SphereInfo sphere;
-								sphere.center = geomOffset;
-								if (geom->size.has_value())
-									sphere.radius = geom->size.value()[0];
-								else
-									sphere.radius = 0.01;
-								this->bindSphere(body->actor, sphere);
-								break;
-							}
-							case dyno::capsule:
-								break;
-							case dyno::ellipsoid:
-								break;
-							case dyno::cylinder:
-							{
-								if (body->actor == nullptr)
-									body->actor = this->createRigidBody(rigidbody);
-
-								CapsuleInfo capsule;
-								capsule.radius = geom->size.value()[0];
-								capsule.halfLength = geom->size.value()[1];
-
-								capsule.center = geomOffset;
-
-								if (geom->quat.has_value())
-								{
-									capsule.rot = geom->quat.value();
-									std::cout << body->name.value();
-								}
-								this->bindCapsule(body->actor, capsule);
-								break;
-							}
-							case dyno::box:
-							{
-								if (body->actor == nullptr)
-									body->actor = this->createRigidBody(rigidbody);
-
-								BoxInfo box;
-
-								box.center = geomOffset;
-								Vec3f tempSize = geom->size.value();
-								box.halfLength = Vec3f(abs(tempSize.x), abs(tempSize.y), abs(tempSize.z));//* 0.7
-								if (geom->quat.has_value())
-								{
-									box.rot = geom->quat.value();
-
-								}
-								this->bindBox(body->actor, box);
-								break;
-							}
-							case dyno::mesh:
-								break;
-							case dyno::sdf:
-								break;
-							default:
-								break;
-							}
-
+							else
+								rigidbody.position = body->massCenter.value();
 						}
+
+						Vec3f geomOffset = Vec3f(0);
+						if (geom->pos.has_value())
+						{
+							if (body->shapeId != -1)
+							{
+								geomOffset = geom->pos.value() + (body->realPos.value() - texMesh->shapes()[body->shapeId]->boundingTransform.translation());
+							}
+							else
+							{
+								geomOffset = geom->pos.value();
+
+							}
+						}
+						else
+						{
+							geomOffset = (body->realPos.value() - texMesh->shapes()[body->shapeId]->boundingTransform.translation());
+						}
+
+						Quat<Real> bodyRot;
+						if (body->quat.has_value())
+							bodyRot = body->quat.value();
+						XMLGeomType a = XMLGeomType::box;
+						switch (geom->type.value())//
+						{
+						case dyno::plane:
+							break;
+						case dyno::hfield:
+							break;
+						case dyno::sphere:
+						{
+							if (body->actor == nullptr)
+								body->actor = this->createRigidBody(rigidbody);
+							SphereInfo sphere;
+							sphere.center = geomOffset;
+							if (geom->size.has_value())
+								sphere.radius = geom->size.value()[0];
+							else
+							{
+								sphere.radius = 0.1;
+
+							}
+							this->bindSphere(body->actor, sphere);
+							break;
+						}
+						case dyno::capsule:
+							break;
+						case dyno::ellipsoid:
+							break;
+						case dyno::cylinder:
+						{
+							if (body->actor == nullptr)
+								body->actor = this->createRigidBody(rigidbody);
+
+							CapsuleInfo capsule;
+							capsule.radius = geom->size.value()[0];
+							capsule.halfLength = geom->size.value()[1];
+
+							capsule.center = geomOffset;
+
+							if (geom->quat.has_value())
+							{
+								capsule.rot = geom->quat.value();
+								std::cout << body->name.value();
+							}
+							this->bindCapsule(body->actor, capsule);
+							break;
+						}
+						case dyno::box:
+						{
+							if (body->actor == nullptr)
+								body->actor = this->createRigidBody(rigidbody);
+
+							BoxInfo box;
+
+							box.center = geomOffset;
+							Vec3f tempSize = geom->size.value();
+							box.halfLength = Vec3f(abs(tempSize.x), abs(tempSize.y), abs(tempSize.z));//* 0.7
+							if (geom->quat.has_value())
+							{
+								box.rot = geom->quat.value();
+
+							}
+							this->bindBox(body->actor, box);
+							break;
+						}
+						case dyno::mesh:
+						{
+							if (body->actor == nullptr)
+								body->actor = this->createRigidBody(rigidbody);
+							SphereInfo sphere;
+							sphere.center = geomOffset;
+							if (geom->size.has_value())
+								sphere.radius = geom->size.value()[0];
+							else
+							{
+								sphere.radius = 0.05;
+
+							}
+							this->bindSphere(body->actor, sphere);
+							break;
+						}
+						case dyno::sdf:
+							break;
+						default:
+							break;
+						}
+
 					}
 
 				}
@@ -1066,69 +1105,15 @@ namespace dyno
 
 			}
 		}
-
-		
-
-
-		//auto actor2 = this->createRigidBody(Vec3f(-0.1f, 0.6f, 0.0f), Quat<float>());
-		//SphereInfo sphere2;
-		//sphere2.center = Vec3f(0.0f, 0.0f, 0.0f);
-		//sphere2.radius = 0.01f;
-		//this->bindSphere(actor2, sphere2);
+	}
 
 
-		{
+	template<typename TDataType>
+	void MujocoXMLLoader<TDataType>::resetStates() 
+	{
 
-			//RigidBodyInfo rigidInfo;
-			//rigidInfo.bodyId = 1;
+		this->createRigidBodySystem();
 
-			//Vec3f temp = Vec3f(0, 0, 0.445);
-
-			//rigidInfo.position = temp;
-			//auto actor = this->createRigidBody(rigidInfo);
-
-			//BoxInfo box;
-			//box.center = Vec3f(0.1881f, 0.0f, 0.0f);
-			//box.halfLength = Vec3f(0.05f);
-			//this->bindBox(actor, box);
-
-			/*rigidInfo.position = Vec3f(1.0f, 1.0f, 0.0f);
-			auto actor = this->createRigidBody(rigidInfo);
-
-			BoxInfo box;
-			box.center = Vec3f(0.15f, 0.0f, 0.0f);
-			box.halfLength = Vec3f(0.05f);
-			this->bindBox(actor, box);
-
-			SphereInfo sphere;
-			sphere.center = Vec3f(0.0f, 0.0f, 0.1f);
-			sphere.radius = 0.1f;
-			this->bindSphere(actor, sphere);
-
-			CapsuleInfo capsule;
-			capsule.center = Vec3f(-0.15f, 0.0f, 0.0f);
-			capsule.radius = 0.1f;
-			capsule.halfLength = 0.1f;
-			this->bindCapsule(actor, capsule);
-
-			rigidInfo.position = Vec3f(1.0f, 1.4f, 0.0f);
-			auto actor2 = this->createRigidBody(rigidInfo);
-
-			SphereInfo sphere2;
-			sphere2.center = Vec3f(0.0f, 0.0f, 0.0f);
-			sphere2.radius = 0.3f;
-			this->bindSphere(actor2, sphere2);
-
-			BoxInfo box2;
-			box2.center = Vec3f(0.15f, 0.0f, 0.0f) * 0.4;
-			box2.halfLength = Vec3f(0.25f);
-			this->bindBox(actor2, box2);
-
-
-			auto& joint = this->createHingeJoint(actor, actor2);
-			joint.setAnchorPoint((actor->center + actor2->center) / 2);
-			joint.setAxis(Vec3f(0, 0, 1));*/
-		}
 
 		ArticulatedBody<TDataType>::resetStates();
 
