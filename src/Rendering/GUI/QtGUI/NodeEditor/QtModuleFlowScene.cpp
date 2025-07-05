@@ -413,6 +413,10 @@ namespace Qt
 
 	void QtModuleFlowScene::promoteOutput(QtNode& n, const PortIndex index, const QPointF& pos)
 	{
+		//Index 0 is used for module connection
+		if (index == 0)
+			return;
+
 		QMenu portMenu;
 
 		portMenu.setObjectName("PortMenu");
@@ -431,7 +435,7 @@ namespace Qt
 					{
 						auto fieldOut = m->getOutputFields();
 
-						mActivePipeline->promoteOutputToNode(fieldOut[index]);
+						mActivePipeline->promoteOutputToNode(fieldOut[index - 1]);
 					}
 
 					emit nodeExportChanged();
