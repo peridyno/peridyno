@@ -80,6 +80,6 @@ def process_def_statements(directory):
 
 
 if __name__ == "__main__":
-    #target_dir = "H:/program/Simulation/unibeam/wt-test/peridyno-web/python/Testing"
-    target_dir = "E:/Program/Simulation/Wt-test/peridyno-web/python/Testing"
+    target_dir = "H:/program/Simulation/unibeam/wt-test/peridyno-web/python/Testing"
+    #target_dir = "E:/Program/Simulation/Wt-test/peridyno-web/python/Testing"
     process_def_statements(target_dir)

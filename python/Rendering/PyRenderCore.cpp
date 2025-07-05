@@ -60,7 +60,6 @@ void declare_render_engine(py::module& m) {
 
 void pybind_render_core(py::module& m)
 {
-
 	declare_orbit_camera(m);
 	declare_render_engine(m);
 
@@ -99,24 +98,22 @@ void pybind_render_core(py::module& m)
 		.def(py::init<>())
 		.def("elapse", &TimeElapse::elapse);
 
-
 	py::class_<dyno::TrackballCamera, dyno::Camera, std::shared_ptr<dyno::TrackballCamera>>(m, "TrackballCamera")
 		.def(py::init<>())
 		.def("reset", &dyno::TrackballCamera::reset)
-		.def("registre_point", &dyno::TrackballCamera::registerPoint)
-		.def("rotate_to_point", &dyno::TrackballCamera::rotateToPoint)
-		.def("translate_to_point", &dyno::TrackballCamera::translateToPoint)
+		.def("registerPoint", &dyno::TrackballCamera::registerPoint)
+		.def("rotateToPoint", &dyno::TrackballCamera::rotateToPoint)
+		.def("translateToPoint", &dyno::TrackballCamera::translateToPoint)
 		.def("zoom", &dyno::TrackballCamera::zoom)
-		.def("set_eye_pos", &dyno::TrackballCamera::setEyePos)
-		.def("set_target_pos", &dyno::TrackballCamera::setTargetPos)
-		.def("get_target_pos", &dyno::TrackballCamera::getTargetPos)
-		.def("get_view_mat", &dyno::TrackballCamera::getViewMat)
-		.def("get_proj_mat", &dyno::TrackballCamera::getProjMat)
+		.def("setEyePos", &dyno::TrackballCamera::setEyePos)
+		.def("setTargetPos", &dyno::TrackballCamera::setTargetPos)
+		.def("getTargetPos", &dyno::TrackballCamera::getTargetPos)
+		.def("getViewMat", &dyno::TrackballCamera::getViewMat)
+		.def("getProjMat", &dyno::TrackballCamera::getProjMat)
 
 		.def_readwrite("mRegX", &dyno::TrackballCamera::mRegX)
 		.def_readwrite("mRegY", &dyno::TrackballCamera::mRegY)
 		.def_readwrite("mCameraPos", &dyno::TrackballCamera::mCameraPos)
 		.def_readwrite("mCameraTarget", &dyno::TrackballCamera::mCameraTarget)
 		.def_readwrite("mCameraUp", &dyno::TrackballCamera::mCameraUp);
-
 }

@@ -1,36 +1,56 @@
 import PyPeridyno as dyno
 
-class VolumeTest(dyno.Node):
+# class ParametricModel(dyno.Node):
+#     def __init__(self):
+#         super().__init__()
+#         self.setForceUpdate(False)
+#         self.setAutoHidden(True)
+#         self.varScale().setRange(0.0001,1000)
+#
+# class BasicShape(ParametricModel):
+#     def __init__(self):
+#         super().__init__()
+#
+#     def getNodeType(self):
+#         return "Basic Shapes"
+
+class PlaneModel(dyno.BasicShape3f):
     def __init__(self):
-        super().__init__()
+        dyno.BasicShape3f.__init__(self)
+        self.var_LengthX = dyno.FVarf(1, "LengthX", "length X", dyno.FieldTypeEnum.Param, self)
+        self.varLengthX().setRange(0.01,100)
 
-        self.state_LevelSet = dyno.FInstanceLevelSet3f("LevelSet", "", dyno.FieldTypeEnum.State, self)
 
-        self.set_auto_hidden(True)
-        mapper = dyno.VolumeToTriangleSet3f()
-        self.state_level_set().connect(mapper.io_volume())
-        self.graphics_pipeline().push_module(mapper)
+    def caption(self):
+        return "Plane"
 
-        renderer = dyno.GLSurfaceVisualModule()
-        mapper.out_triangle_set().connect(renderer.in_triangle_set())
-        self.graphics_pipeline().push_module(renderer)
+    def getShapeType(self):
+        return 0
 
-    def get_node_type(self):
-        return "Volume"
+    @property
+    def varLengthX(self):
+        return self.var_LengthX
 
-    def state_level_set(self):
-        return self.state_LevelSet
+    def boundingBox(self):
+        center = self.varLocation().getValue()
+        rot = self.varRotation().getValue()
+        scale = self.varScale().getValue()
+
+        print(center)
+
+        q = self.computeQuaternion()
 
 
 scn = dyno.SceneGraph()
-scn.set_upper_bound(dyno.Vector3f([2,2,2]))
-scn.set_lower_bound(dyno.Vector3f([-2,-2,-2]))
-test = VolumeTest()
-scn.add_node(test)
+scn.setUpperBound(dyno.Vector3f([2,2,2]))
+scn.setLowerBound(dyno.Vector3f([-2,-2,-2]))
+plane = PlaneModel()
+plane.boundingBox()
+scn.addNode(plane)
 
 app = dyno.GlfwApp()
-app.set_scenegraph(scn)
+app.setSceneGraph(scn)
 app.initialize(1920, 1080, True)
-app.set_window_title("Empty GUI")
-app.main_loop()
+app.setWindowTitle("Empty GUI")
+app.mainLoop()
 
