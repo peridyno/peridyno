@@ -1,5 +1,6 @@
 #include "ImageEncoder.h"
-
+#include <cstdio>   // 提供 fprintf 和 stderr
+#include <cstdlib>  // 提供 exit
 #include <nvjpeg.h>
 
 template <typename T>
@@ -16,9 +17,9 @@ void check(T result, char const* const func, const char* const file,
 
 ImageEncoderNV::ImageEncoderNV()
 {
-	checkCudaErrors(nvjpegCreateSimple(&nvjpegHandle));
-	checkCudaErrors(nvjpegEncoderStateCreate(nvjpegHandle, &encoderState, NULL));
-	checkCudaErrors(nvjpegEncoderParamsCreate(nvjpegHandle, &encodeParams, NULL));
+	checkCudaErrors(nvjpegCreateSimple(&m_nvjpegHandle));
+	checkCudaErrors(nvjpegEncoderStateCreate(m_nvjpegHandle, &encoderState, NULL));
+	checkCudaErrors(nvjpegEncoderParamsCreate(m_nvjpegHandle, &encodeParams, NULL));
 	// default parameters
 	checkCudaErrors(nvjpegEncoderParamsSetQuality(encodeParams, 70, NULL));
 	//checkCudaErrors(nvjpegEncoderParamsSetOptimizedHuffman(encodeParams, 0, NULL));
@@ -33,7 +34,7 @@ ImageEncoderNV::~ImageEncoderNV()
 {
 	checkCudaErrors(nvjpegEncoderParamsDestroy(encodeParams));
 	checkCudaErrors(nvjpegEncoderStateDestroy(encoderState));
-	checkCudaErrors(nvjpegDestroy(nvjpegHandle));
+	checkCudaErrors(nvjpegDestroy(m_nvjpegHandle));
 
 	checkCudaErrors(cudaFree(cudaBuffer.ptr));
 }
@@ -62,18 +63,18 @@ unsigned long ImageEncoderNV::Encode(const unsigned char* data,
 	nv_image.channel[0] = (unsigned char*)cudaBuffer.ptr;
 	nv_image.pitch[0] = width * 3;
 
-	checkCudaErrors(nvjpegEncodeImage(nvjpegHandle, encoderState, encodeParams,
+	checkCudaErrors(nvjpegEncodeImage(m_nvjpegHandle, encoderState, encodeParams,
 		&nv_image, NVJPEG_INPUT_RGBI, width, height, NULL));
 
 	size_t length;
-	checkCudaErrors(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, NULL, &length, NULL));
+	checkCudaErrors(nvjpegEncodeRetrieveBitstream(m_nvjpegHandle, encoderState, NULL, &length, NULL));
 
 	// get stream itself
 	//checkCudaErrors(cudaStreamSynchronize(stream));
 
 	if (buffer.size() < length) buffer.resize(length);
 
-	checkCudaErrors(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, buffer.data(), &length, NULL));
+	checkCudaErrors(nvjpegEncodeRetrieveBitstream(m_nvjpegHandle, encoderState, buffer.data(), &length, NULL));
 
 	// write stream to file
 	//checkCudaErrors(cudaStreamSynchronize(stream));

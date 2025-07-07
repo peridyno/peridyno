@@ -13,7 +13,6 @@
 #include <Wt/WImage.h>
 #include <Wt/WMemoryResource.h>
 
-
 using namespace dyno;
 
 std::map<Wt::Key, PKeyboardType> WKeyMap =
@@ -237,9 +236,9 @@ void WSimulationCanvas::initializeGL()
 
 	mFramebuffer.create();
 	mFramebuffer.bind();
-	const unsigned int GL_COLOR_ATTACHMENT0 = 0x8CE0;
-	mFramebuffer.setTexture(GL_COLOR_ATTACHMENT0, &mFrameColor);	//
-	unsigned int buffers[]{ GL_COLOR_ATTACHMENT0 };
+	const unsigned int MY_GL_COLOR_ATTACHMENT0 = 0x8CE0;
+	mFramebuffer.setTexture(MY_GL_COLOR_ATTACHMENT0, &mFrameColor);	//
+	unsigned int buffers[]{ MY_GL_COLOR_ATTACHMENT0 };
 	mFramebuffer.drawBuffers(1, buffers);
 	mFramebuffer.unbind();
 

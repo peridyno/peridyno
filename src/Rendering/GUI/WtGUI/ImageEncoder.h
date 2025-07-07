@@ -27,7 +27,7 @@ public:
 		std::vector<unsigned char>& buffer) override;
 
 private:
-	nvjpegHandle*			nvjpegHandle;
+	nvjpegHandle*			m_nvjpegHandle;
 	nvjpegEncoderState*		encoderState;
 	nvjpegEncoderParams*	encodeParams;
 	//cudaStream_t stream = NULL;

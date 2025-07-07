@@ -74,6 +74,10 @@ if(WIN32)
     set_target_properties(${LIB_NAME} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 elseif(UNIX)
+    find_package(PkgConfig REQUIRED)
+    pkg_search_module(UUID REQUIRED uuid)
+    target_link_libraries(${LIB_NAME} PRIVATE ${UUID_LIBRARIES})
+    target_include_directories(${LIB_NAME} PRIVATE ${UUID_INCLUDE_DIRS})
     if (CMAKE_BUILD_TYPE MATCHES Debug)
         set_target_properties(${LIB_NAME} PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Debug")
