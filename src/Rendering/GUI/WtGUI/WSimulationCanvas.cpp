@@ -202,8 +202,12 @@ void WSimulationCanvas::initializeGL()
 	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
 	mContext = glfwCreateWindow(width, height, "", NULL, NULL);
+	const char* description;
+	glfwGetError(&description);
+
 	if (!mContext)
 	{
+		Wt::log("info") << "GLFW Error: " << description;
 		Wt::log("error") << "Failed to create OpenGL context!";
 		exit(-1);
 	}
