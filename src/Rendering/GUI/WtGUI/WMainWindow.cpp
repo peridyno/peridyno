@@ -159,7 +159,6 @@ void WMainWindow::setInData(connectionData data, std::shared_ptr<dyno::Node> inN
 			{
 				field->connect(inField);
 			}
-				
 		}
 	}
 }
@@ -226,58 +225,7 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel, AddNodeType addNodeType)
 		Wt::WSuggestionPopup::generateReplacerJS(nodeOptions)
 	));
 
-	auto& pages = dyno::NodeFactory::instance()->nodePages();
-
-	// Recreating everything each time the scene switches affects performance.
-	if (addNodeType == AddNodeType::NodeType)
-	{
-		for (auto iPage = pages.begin(); iPage != pages.end(); iPage++)
-		{
-			auto& groups = iPage->second->groups();
-			{
-				for (auto iGroup = groups.begin(); iGroup != groups.end(); iGroup++)
-				{
-					auto& actions = iGroup->second->actions();
-					for (auto action : actions)
-					{
-						sp->addSuggestion(action->caption());
-					}
-				}
-			}
-		}
-
-		auto nodeMap = dyno::Object::getClassMap();
-		for (auto it = nodeMap->begin(); it != nodeMap->end(); ++it)
-		{
-			auto node_obj = dyno::Object::createObject(it->second->m_className);
-			std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
-			if (new_node == nullptr)
-			{
-				continue;
-			}
-			else
-			{
-				sp->addSuggestion(it->second->m_className);
-			}
-		}
-	}
-	else if (addNodeType == AddNodeType::ModuleType)
-	{
-		auto nodeMap = dyno::Object::getClassMap();
-		for (auto it = nodeMap->begin(); it != nodeMap->end(); ++it)
-		{
-			auto node_obj = dyno::Object::createObject(it->second->m_className);
-			std::shared_ptr<dyno::Module> new_node(dynamic_cast<dyno::Module*>(node_obj));
-			if (new_node == nullptr)
-			{
-				continue;
-			}
-			else
-			{
-				sp->addSuggestion(it->second->m_className);
-			}
-		}
-	}
+	suggestFile(sp, addNodeType);
 
 	auto name = layout3->addWidget(std::make_unique<Wt::WLineEdit>());
 
@@ -291,6 +239,8 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel, AddNodeType addNodeType)
 		if (addNodeType == AddNodeType::NodeType)
 		{
 			bool flag = true;
+
+			auto& pages = dyno::NodeFactory::instance()->nodePages();
 
 			for (auto iPage = pages.begin(); iPage != pages.end(); iPage++)
 			{
@@ -512,6 +462,124 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initModuleGraphics()
 		});
 
 	return std::move(moduleGraphicsWidget);
+}
+
+void WMainWindow::suggestFile(Wt::WSuggestionPopup* sp, AddNodeType addNodeType)
+{
+	bool fileExistsAndNotEmpty;
+	// Recreating everything each time the scene switches affects performance.
+	if (addNodeType == AddNodeType::NodeType)
+	{
+		std::string fileName = getAssetPath() + "docroot/NodeMap";
+#ifdef _WIN32
+		replace(fileName.begin(), fileName.end(), '/', '\\');
+#endif // _WIN32
+		fileExistsAndNotEmpty = std::filesystem::exists(fileName) && std::filesystem::file_size(fileName) > 0;
+		if (fileExistsAndNotEmpty)
+		{
+			std::ifstream inFile(fileName);
+			if (!inFile.is_open())
+			{
+				std::cout << "Error: Could not open file for reading: " << fileName << std::endl;
+				return;
+			}
+			std::string line;
+			while (std::getline(inFile, line)) {
+				sp->addSuggestion(line);
+			}
+			inFile.close();
+		}
+		else
+		{
+			std::ofstream outFile(fileName);
+			if (!outFile.is_open())
+			{
+				std::cout << "Error: Could not open file for writing: " << fileName << std::endl;
+				return;
+			}
+			auto& pages = dyno::NodeFactory::instance()->nodePages();
+			for (auto iPage = pages.begin(); iPage != pages.end(); iPage++)
+			{
+				auto& groups = iPage->second->groups();
+				{
+					for (auto iGroup = groups.begin(); iGroup != groups.end(); iGroup++)
+					{
+						auto& actions = iGroup->second->actions();
+						for (auto action : actions)
+						{
+							sp->addSuggestion(action->caption());
+							outFile << action->caption() << std::endl;
+						}
+					}
+				}
+			}
+
+			auto nodeMap = dyno::Object::getClassMap();
+			for (auto it = nodeMap->begin(); it != nodeMap->end(); ++it)
+			{
+				auto node_obj = dyno::Object::createObject(it->second->m_className);
+				std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
+				if (new_node == nullptr)
+				{
+					continue;
+				}
+				else
+				{
+					sp->addSuggestion(it->second->m_className);
+					outFile << it->second->m_className << std::endl;
+				}
+			}
+			outFile.close();
+		}
+	}
+	else if (addNodeType == AddNodeType::ModuleType)
+	{
+		std::string fileName = getAssetPath() + "docroot/ModuleMap";
+#ifdef _WIN32
+		replace(fileName.begin(), fileName.end(), '/', '\\');
+#endif // _WIN32
+		fileExistsAndNotEmpty = std::filesystem::exists(fileName) && std::filesystem::file_size(fileName) > 0;
+		if (fileExistsAndNotEmpty)
+		{
+			std::ifstream inFile(fileName);
+			if (!inFile.is_open())
+			{
+				std::cout << "Error: Could not open file for reading: " << fileName << std::endl;
+				return;
+			}
+			std::string line;
+			while (std::getline(inFile, line)) {
+				sp->addSuggestion(line);
+			}
+			inFile.close();
+		}
+		else
+		{
+			std::ofstream outFile(fileName);
+			if (!outFile.is_open())
+			{
+				std::cout << "Error: Could not open file for writing: " << fileName << std::endl;
+				return;
+			}
+			auto nodeMap = dyno::Object::getClassMap();
+			for (auto it = nodeMap->begin(); it != nodeMap->end(); ++it)
+			{
+				auto node_obj = dyno::Object::createObject(it->second->m_className);
+				std::shared_ptr<dyno::Module> new_node(dynamic_cast<dyno::Module*>(node_obj));
+				if (new_node == nullptr)
+				{
+					continue;
+				}
+				else
+				{
+					sp->addSuggestion(it->second->m_className);
+					outFile << it->second->m_className << std::endl;
+				}
+			}
+
+			outFile.close();
+		}
+	}
 }
 
 std::unique_ptr<Wt::WWidget> WMainWindow::initPython()

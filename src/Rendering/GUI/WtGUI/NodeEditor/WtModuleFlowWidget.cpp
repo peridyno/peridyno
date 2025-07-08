@@ -17,21 +17,6 @@ namespace dyno
 WtModuleFlowWidget::WtModuleFlowWidget(std::shared_ptr<dyno::SceneGraph> scene)
 	: WtFlowWidget(scene)
 {
-	auto moduleMap = dyno::Object::getClassMap();
-	for (auto it = moduleMap->begin(); it != moduleMap->end(); ++it)
-	{
-		auto node_obj = dyno::Object::createObject(it->second->m_className);
-		std::shared_ptr<dyno::Module> new_module(dynamic_cast<dyno::Module*>(node_obj));
-		if (new_module == nullptr)
-		{
-			continue;
-		}
-		else
-		{
-			allModuleMap.insert(std::pair<dyno::ObjectId, std::shared_ptr<dyno::Module>>(new_module->objectId(), new_module));
-		}
-	}
-
 	this->mouseWentDown().connect(this, &WtModuleFlowWidget::onMouseWentDown);
 	this->mouseMoved().connect(this, &WtModuleFlowWidget::onMouseMove);
 	this->mouseWentUp().connect(this, &WtModuleFlowWidget::onMouseWentUp);
@@ -205,6 +190,23 @@ void WtModuleFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 			auto fieldExps = mOutModule->getOutputFields();
 
 			std::map<std::string, connectionData> promptModule;
+			if (allModuleMap.empty())
+			{
+				auto moduleMap = dyno::Object::getClassMap();
+				for (auto it = moduleMap->begin(); it != moduleMap->end(); ++it)
+				{
+					auto node_obj = dyno::Object::createObject(it->second->m_className);
+					std::shared_ptr<dyno::Module> new_module(dynamic_cast<dyno::Module*>(node_obj));
+					if (new_module == nullptr)
+					{
+						continue;
+					}
+					else
+					{
+						allModuleMap.insert(std::pair<dyno::ObjectId, std::shared_ptr<dyno::Module>>(new_module->objectId(), new_module));
+					}
+				}
+			}
 
 			for (auto modulePair : allModuleMap)
 			{

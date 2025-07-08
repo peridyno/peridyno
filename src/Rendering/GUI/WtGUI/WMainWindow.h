@@ -5,6 +5,9 @@
 #include <Wt/WPanel.h>
 #include <Wt/WTabWidget.h>
 
+#include <fstream>
+#include <filesystem>
+
 #include "WModuleGraphics.h"
 #include "WNodeGraphics.h"
 #include "WPythonWidget.h"
@@ -67,6 +70,8 @@ private:
 	std::unique_ptr<Wt::WWidget> initSave();
 	std::unique_ptr<Wt::WWidget> initLog();
 	std::unique_ptr<Wt::WWidget> initModuleGraphics();
+
+	void suggestFile(Wt::WSuggestionPopup* sp, AddNodeType addNodeType);
 
 private:
 	int viewportHeight;

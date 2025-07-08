@@ -6,21 +6,6 @@
 WtNodeFlowWidget::WtNodeFlowWidget(std::shared_ptr<dyno::SceneGraph> scene)
 	: WtFlowWidget(scene)
 {
-	auto nodeMap = dyno::Object::getClassMap();
-	for (auto it = nodeMap->begin(); it != nodeMap->end(); ++it)
-	{
-		auto node_obj = dyno::Object::createObject(it->second->m_className);
-		std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
-		if (new_node == nullptr)
-		{
-			continue;
-		}
-		else
-		{
-			allNodeMap.insert(std::pair<dyno::ObjectId, std::shared_ptr<dyno::Node>>(new_node->objectId(), new_node));
-		}
-	}
-
 	setPreferredMethod(Wt::RenderMethod::HtmlCanvas);
 
 	this->mouseWentDown().connect(this, &WtNodeFlowWidget::onMouseWentDown);
@@ -41,7 +26,6 @@ void WtNodeFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 		selectedNum = 0;
 		canMoveNode = false;
 		update();
-
 	}
 	if (selectType > 0)
 	{
@@ -83,7 +67,6 @@ void WtNodeFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 						{
 							disconnect(nodePtr, mOutNode, outPoint, exportPointData, nodeMap[selectedNum], outNode);
 							sourcePoint = getPortPosition(outNode->flowNodeData().getNodeOrigin(), exportPointData);
-
 						}
 					}
 				}
@@ -97,7 +80,6 @@ void WtNodeFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 			selectType = 2;
 		}
 	}
-
 }
 
 void WtNodeFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
@@ -216,7 +198,6 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 						isConnect = true;
 					}
 				}
-
 			}
 		}
 
@@ -225,6 +206,24 @@ void WtNodeFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 			auto fieldExps = mOutNode->getOutputFields();
 
 			std::map<std::string, connectionData> promptNode;
+
+			if (allNodeMap.empty())
+			{
+				auto nodeMap = dyno::Object::getClassMap();
+				for (auto it = nodeMap->begin(); it != nodeMap->end(); ++it)
+				{
+					auto node_obj = dyno::Object::createObject(it->second->m_className);
+					std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
+					if (new_node == nullptr)
+					{
+						continue;
+					}
+					else
+					{
+						allNodeMap.insert(std::pair<dyno::ObjectId, std::shared_ptr<dyno::Node>>(new_node->objectId(), new_node));
+					}
+				}
+			}
 
 			for (auto nodePair : allNodeMap)
 			{
@@ -442,7 +441,7 @@ void WtNodeFlowWidget::enableRendering(WtNode& n, bool checked)
 {
 	auto node = n.getNode();
 
-	if (mEditingEnabled && node != nullptr) 
+	if (mEditingEnabled && node != nullptr)
 	{
 		node->setVisible(checked);
 	}
@@ -452,7 +451,7 @@ void WtNodeFlowWidget::enablePhysics(WtNode& n, bool checked)
 {
 	auto node = n.getNode();
 
-	if (mEditingEnabled && node != nullptr) 
+	if (mEditingEnabled && node != nullptr)
 	{
 		node->setActive(checked);
 	}
