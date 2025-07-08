@@ -68,7 +68,8 @@ namespace dyno
 			return this->lineEdit();
 		}
 		
-		QValueDialog* ValueModify = nullptr;
+		QValueDialog* mValueDialog = nullptr;
+
 
 
 	private:
@@ -83,14 +84,61 @@ namespace dyno
 
 		void contextMenuEvent(QContextMenuEvent* event) override;
 
-		double setRealValue(double val)
-		{
-			realValue = val;
-			return realValue;
-		}
+
 
 	protected:
-		
+
+		void stepBy(int steps) override
+		{
+			double val = realValue;
+			double step = singleStep();
+
+			double newVal = val + steps * step;
+
+			if (newVal > maximum())
+				newVal = maximum();
+			else if (newVal < minimum())
+				newVal = minimum();
+
+			triggerEditingFinished(newVal);
+		}
+
+		QValidator::State validate(QString& input, int& pos) const override
+		{
+			Q_UNUSED(pos);
+
+			if (input.isEmpty() || input == "-" || input == "+" || input == "." || input == "-." || input == "+.")
+			{
+				return QValidator::Intermediate;
+			}
+
+			bool ok = false;
+			double val = input.toDouble(&ok);
+			if (!ok)
+			{
+				return QValidator::Invalid;
+			}
+
+			if (val < minimum() || val > maximum())
+			{
+				return QValidator::Intermediate;
+			}
+
+			return QValidator::Acceptable;
+		}
+
+		void fixup(QString& input) const override
+		{
+			bool ok = false;
+			double val = input.toDouble(&ok);
+			if (!ok)
+				return;
+
+			if (val < minimum())
+				input = QString::number(minimum(), 'g', decimalsMax);
+			else if (val > maximum())
+				input = QString::number(maximum(), 'g', decimalsMax);
+		}
 
 		virtual QString textFromValue(double val) const override
 		{
@@ -99,6 +147,13 @@ namespace dyno
 			return qstr;
 		}
 		
+		void focusOutEvent(QFocusEvent* event) override
+		{
+			interpretText();  
+			onEditingFinished();
+			QDoubleSpinBox::focusOutEvent(event);
+		}
+
 		virtual double valueFromText(const QString& text) const override 
 		{
 			if (istoggle)
@@ -111,17 +166,34 @@ namespace dyno
 			}
 		}
 
+
+		bool eventFilter(QObject* obj, QEvent* event) override;
+
+		void createValueDialog();
+
 	public:
 
 	signals:
 
-
+		void editingFinishedWithValue(double value);
 	public slots:
-		void ModifyValue(double);
-		void ModifyValueAndUpdate(double);
-		void LineEditFinished(double);
-		void LineEditStart(const QString& qStr);
-		
+
+		double setRealValue(double val);
+
+		void onEditingFinished()
+		{
+			this->setRealValue(this->value());
+			emit editingFinishedWithValue(this->realValue);
+		}
+
+		void triggerEditingFinished(double value)
+		{
+			this->setValue(value);
+			this->interpretText(); 
+			this->setRealValue(value);
+			emit editingFinished();
+		}
+
 		void toggleDecimals(bool v) 
 		{
 			if (v)
@@ -137,6 +209,8 @@ namespace dyno
 			istoggle = false;
 		}
 		
+
+
 	private:
 		int decimalsMin = 3;
 		int decimalsMax = 8;
@@ -171,6 +245,7 @@ namespace dyno
 			current = !current;
 			emit toggle(current);
 		}
+
 
 
 	private:

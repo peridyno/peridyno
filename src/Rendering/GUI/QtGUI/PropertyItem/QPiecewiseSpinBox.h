@@ -57,13 +57,46 @@ namespace dyno
 	public:
 		explicit QPiecewiseSpinBox(QWidget* parent = nullptr);
 
+	public:
+
+	protected:
+		bool eventFilter(QObject* obj, QEvent* event) override;
+
+		void createValueDialog();
+
+		QValidator::State validate(QString& input, int& pos) const override
+		{
+			return QValidator::Intermediate;
+			if (input.isEmpty())
+				return QValidator::Intermediate;
+
+			bool ok = false;
+			int val = input.toInt(&ok);
+
+			if (!ok)
+				return QValidator::Invalid;
+
+			if (val < minimum())
+			{
+				input = this->minimum();
+			}
+			else if (val > maximum())
+			{
+				input = this->maximum();
+			}
+
+			return QValidator::Acceptable;
+		}
+
 	private:
 		
 		void wheelEvent(QWheelEvent* event);
 
 		void contextMenuEvent(QContextMenuEvent* event) override;
 
+		void mousePressEvent(QMouseEvent* event) override;
+
 	private:
-		QValueDialog* mValueModify = nullptr;
+		QValueDialog* mValueDialog = nullptr;
 	};
 }

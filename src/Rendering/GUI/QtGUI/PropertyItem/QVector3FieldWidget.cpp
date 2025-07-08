@@ -69,13 +69,13 @@ namespace dyno
 			v2 = v[1];
 			v3 = v[2];
 		}
-		spinner1->ModifyValueAndUpdate(v1);
-		spinner2->ModifyValueAndUpdate(v2);
-		spinner3->ModifyValueAndUpdate(v3);
+		spinner1->setRealValue(v1);
+		spinner2->setRealValue(v2);
+		spinner3->setRealValue(v3);
 
-		QObject::connect(spinner1, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
-		QObject::connect(spinner2, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
-		QObject::connect(spinner3, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
+		QObject::connect(spinner1, SIGNAL(editingFinishedWithValue(double)), this, SLOT(updateField(double)));
+		QObject::connect(spinner2, SIGNAL(editingFinishedWithValue(double)), this, SLOT(updateField(double)));
+		QObject::connect(spinner3, SIGNAL(editingFinishedWithValue(double)), this, SLOT(updateField(double)));
 		
 		QObject::connect(name, SIGNAL(toggle(bool)), spinner1, SLOT(toggleDecimals(bool)));
 		QObject::connect(name, SIGNAL(toggle(bool)), spinner2, SLOT(toggleDecimals(bool)));
@@ -193,9 +193,9 @@ namespace dyno
 		spinner2->blockSignals(true);
 		spinner3->blockSignals(true);
 
-		spinner1->ModifyValueAndUpdate(v1);
-		spinner2->ModifyValueAndUpdate(v2);
-		spinner3->ModifyValueAndUpdate(v3);
+		spinner1->setRealValue(v1);
+		spinner2->setRealValue(v2);
+		spinner3->setRealValue(v3);
 
 		spinner1->blockSignals(false);
 		spinner2->blockSignals(false);

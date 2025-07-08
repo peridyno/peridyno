@@ -36,14 +36,14 @@ namespace dyno
 		{
 			FVar<float>* f = TypeInfo::cast<FVar<float>>(field);
 
-			spinner->setValue((double)f->getValue());
+			spinner->setRealValue((double)f->getValue());
 			slider->setValue((double)f->getValue());
 		}
 		else if (template_name == std::string(typeid(double).name()))
 		{
 			FVar<double>* f = TypeInfo::cast<FVar<double>>(field);
 
-			spinner->setValue((double)f->getValue());
+			spinner->setRealValue((double)f->getValue());
 			slider->setValue(f->getValue());
 		}
 
@@ -55,9 +55,9 @@ namespace dyno
 
 		FormatFieldWidgetName(field->getObjectName());
 
-		QObject::connect(slider, SIGNAL(valueChanged(double)), spinner, SLOT(ModifyValueAndUpdate(double)));
-		QObject::connect(spinner, SIGNAL(valueChanged(double)), slider, SLOT(setValue(double)));
-		QObject::connect(spinner, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
+		QObject::connect(slider, SIGNAL(valueChanged(double)), this, SLOT(onSliderValueChanged(double)));
+		QObject::connect(spinner, SIGNAL(editingFinishedWithValue(double)), this, SLOT(onSpinnerEditingFinished(double)));
+		QObject::connect(spinner, SIGNAL(editingFinishedWithValue(double)), this, SLOT(updateField(double)));
 
 		QObject::connect(name, SIGNAL(toggle(bool)), spinner, SLOT(toggleDecimals(bool)));
 
@@ -108,6 +108,27 @@ namespace dyno
 			slider->setValue(f->getValue());
 			slider->blockSignals(false);
 		}
+	}
+
+
+	void QRealFieldWidget::onSpinnerEditingFinished(double val)
+	{
+		if (m_updating)
+			return;
+
+		m_updating = true;
+		slider->setValue(val);
+		m_updating = false;
+	}
+
+	void QRealFieldWidget::onSliderValueChanged(double val)
+	{
+		if (m_updating)
+			return;
+
+		m_updating = true;
+		spinner->triggerEditingFinished(val);
+		m_updating = false;
 	}
 }
 
