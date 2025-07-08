@@ -61,7 +61,7 @@ void pybind_glfw_gui(py::module& m)
 		.def("setSceneGraph", &dyno::AppBase::setSceneGraph)
 		.def("setSceneGraphCreator", &dyno::AppBase::setSceneGraphCreator);
 
-	declare_rednder_window(m);
+	declare_render_window(m);
 	declare_gltf_app(m);
 	declare_gltf_render_window(m);
 }

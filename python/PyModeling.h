@@ -529,7 +529,7 @@ void declare_collision_detector(py::module& m, std::string typestr) {
 }
 
 #include "GltfLoader.h"
-void declare_bounding_box_of_texture_mesh(py::module& m) {
+inline void declare_bounding_box_of_texture_mesh(py::module& m) {
 	using Class = dyno::BoundingBoxOfTextureMesh;
 	using Parent = dyno::ComputeModule;
 	std::string pyclass_name = std::string("BoundingBoxOfTextureMesh");

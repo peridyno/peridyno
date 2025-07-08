@@ -8,7 +8,7 @@
 
 #include "RenderWindow.h"
 #include "Camera.h"
-void declare_rednder_window(py::module& m) {
+inline void declare_render_window(py::module& m) {
 	using Class = dyno::RenderWindow;
 	std::string pyclass_name = std::string("RenderWindow");
 	py::class_<Class, std::shared_ptr<Class>>RW(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());

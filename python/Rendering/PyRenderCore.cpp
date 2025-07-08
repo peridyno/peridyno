@@ -1,7 +1,7 @@
 #include "PyRenderCore.h"
 
 #include "RenderWindow.h"
-#include "utility.h"
+//#include "utility.h"
 #include "TrackballCamera.h"
 
 #include "OrbitCamera.h"
@@ -94,9 +94,9 @@ void pybind_render_core(py::module& m)
 	//	.value("OBJECT_MODE", dyno::RenderWindow::SelectionMode::OBJECT_MODE)
 	//	.value("PRIMITIVE_MODE", dyno::RenderWindow::SelectionMode::PRIMITIVE_MODE);
 
-	py::class_<TimeElapse, std::shared_ptr<TimeElapse>>(m, "TimeElapse")
-		.def(py::init<>())
-		.def("elapse", &TimeElapse::elapse);
+	//py::class_<TimeElapse, std::shared_ptr<TimeElapse>>(m, "TimeElapse")
+	//	.def(py::init<>())
+	//	.def("elapse", &TimeElapse::elapse);
 
 	py::class_<dyno::TrackballCamera, dyno::Camera, std::shared_ptr<dyno::TrackballCamera>>(m, "TrackballCamera")
 		.def(py::init<>())

@@ -382,7 +382,6 @@ void pybind_framework(py::module& m)
 		}
 	};
 
-
 	//module
 	py::class_<Module, PyModule, OBase, std::shared_ptr<Module>>(m, "Module")
 		.def(py::init<>())
@@ -403,26 +402,26 @@ void pybind_framework(py::module& m)
 		.def("initializeImpl", &Module::initializeImpl)
 		.def("updateImpl", &Module::updateImpl);
 
-	py::class_<DebugInfo, Module, std::shared_ptr<DebugInfo>>(m, "DebugInfo")
-		.def("print", &DebugInfo::print)
-		.def("varPrefix", &DebugInfo::varPrefix)
-		.def("getModuleType", &DebugInfo::getModuleType);
+	//py::class_<DebugInfo, Module, std::shared_ptr<DebugInfo>>(m, "DebugInfo")
+	//	.def("print", &DebugInfo::print)
+	//	.def("varPrefix", &DebugInfo::varPrefix)
+	//	.def("getModuleType", &DebugInfo::getModuleType);
 
-	py::class_<PrintInt, Module, std::shared_ptr<PrintInt>>(m, "PrintInt")
-		.def("print", &PrintInt::print)
-		.def("inInt", &PrintInt::inInt);
+	//py::class_<PrintInt, Module, std::shared_ptr<PrintInt>>(m, "PrintInt")
+	//	.def("print", &PrintInt::print)
+	//	.def("inInt", &PrintInt::inInt);
 
-	py::class_<PrintUnsigned, Module, std::shared_ptr<PrintUnsigned>>(m, "PrintUnsigned")
-		.def("print", &PrintUnsigned::print)
-		.def("inUnsigned", &PrintUnsigned::inUnsigned);
+	//py::class_<PrintUnsigned, Module, std::shared_ptr<PrintUnsigned>>(m, "PrintUnsigned")
+	//	.def("print", &PrintUnsigned::print)
+	//	.def("inUnsigned", &PrintUnsigned::inUnsigned);
 
-	py::class_<PrintFloat, Module, std::shared_ptr<PrintFloat>>(m, "PrintFloat")
-		.def("print", &PrintFloat::print)
-		.def("inFloat", &PrintFloat::inFloat);
+	//py::class_<PrintFloat, Module, std::shared_ptr<PrintFloat>>(m, "PrintFloat")
+	//	.def("print", &PrintFloat::print)
+	//	.def("inFloat", &PrintFloat::inFloat);
 
-	py::class_<PrintVector, Module, std::shared_ptr<PrintVector>>(m, "PrintVector")
-		.def("print", &PrintVector::print)
-		.def("inVector", &PrintVector::inVector);
+	//py::class_<PrintVector, Module, std::shared_ptr<PrintVector>>(m, "PrintVector")
+	//	.def("print", &PrintVector::print)
+	//	.def("inVector", &PrintVector::inVector);
 
 	py::class_<VisualModule, Module, std::shared_ptr<VisualModule>>(m, "VisualModule")
 		.def(py::init<>())
@@ -658,7 +657,6 @@ void pybind_framework(py::module& m)
 		.def("__eq__", [](dyno::PMouseEvent& self, const dyno::PMouseEvent& other) {
 				return self == other;
 			});
-
 
 			py::class_<InputModule, Module, std::shared_ptr<InputModule>>(m, "InputModule")
 				.def(py::init<>())

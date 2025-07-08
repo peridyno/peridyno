@@ -845,7 +845,7 @@ void declare_hexahedron_set(py::module& m, std::string typestr) {
 }
 
 #include "Topology/JointInfo.h"
-void declare_joint_info(py::module& m) {
+inline void declare_joint_info(py::module& m) {
 	using Class = dyno::JointInfo;
 	using Parent = dyno::OBase;
 	typedef int joint;
@@ -885,7 +885,7 @@ void declare_joint_info(py::module& m) {
 		.def_readwrite("mMaxJointID", &Class::mMaxJointID);
 }
 
-void declare_joint_animation_info(py::module& m) {
+inline void declare_joint_animation_info(py::module& m) {
 	using Class = dyno::JointAnimationInfo;
 	using Parent = dyno::OBase;
 	typedef int joint;
@@ -1064,7 +1064,6 @@ void declare_structured_point_set(py::module& m, std::string typestr) {
 		.def(py::init<>());
 }
 
-
 #include "Topology/TriangleSet.h"
 template <typename TDataType>
 void declare_triangle_set(py::module& m, std::string typestr) {
@@ -1140,11 +1139,6 @@ void declare_unstructured_point_set(py::module& m, std::string typestr) {
 		.def("getPointNeighbors", &Class::getPointNeighbors, py::return_value_policy::reference)
 		.def("clear", &Class::clear);
 }
-
-
-
-
-
 
 void declare_texture_mesh(py::module& m);
 
