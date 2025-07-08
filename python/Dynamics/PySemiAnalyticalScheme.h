@@ -193,7 +193,7 @@ void declare_semi_analytical_summation_density(py::module& m, std::string typest
 	std::string pyclass_name = std::string("SemiAnalyticalSummationDensity") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("compute", py::overload_cast<void>(&Class::compute))
+		//.def("compute", py::overload_cast<void>(&Class::compute))
 		.def("compute", py::overload_cast<dyno::Array<Real, DeviceType::GPU>&, dyno::Array<Coord, DeviceType::GPU>&, dyno::Array<dyno::TopologyModule::Triangle, DeviceType::GPU>&, dyno::Array<Coord, DeviceType::GPU>&, dyno::ArrayList<int, DeviceType::GPU>&, dyno::ArrayList<int, DeviceType::GPU>&, Real, Real, Real>(&Class::compute))
 
 		.def("varRestDensity", &Class::varRestDensity, py::return_value_policy::reference)

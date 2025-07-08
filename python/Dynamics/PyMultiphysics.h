@@ -34,19 +34,19 @@ void declare_adaptive_boundary(py::module& m, std::string typestr) {
 		.def("removeBoundary", &Class::removeBoundary);
 }
 
-#include "Multiphysics/ComputeSurfaceLevelset.h"
-template <typename TDataType>
-void declare_compute_surface_level_set(py::module& m, std::string typestr) {
-	using Class = dyno::ComputeSurfaceLevelset<TDataType>;
-	using Parent = dyno::ConstraintModule;
-	std::string pyclass_name = std::string("ComputeSurfaceLevelset") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("constrain", &Class::constrain)
-		.def("inPoints", &Class::inPoints, py::return_value_policy::reference)
-		.def("inLevelSet", &Class::inLevelSet, py::return_value_policy::reference)
-		.def("inGridSpacing", &Class::inGridSpacing, py::return_value_policy::reference);
-}
+//#include "Multiphysics/ComputeSurfaceLevelset.h"
+//template <typename TDataType>
+//void declare_compute_surface_level_set(py::module& m, std::string typestr) {
+//	using Class = dyno::ComputeSurfaceLevelset<TDataType>;
+//	using Parent = dyno::ConstraintModule;
+//	std::string pyclass_name = std::string("ComputeSurfaceLevelset") + typestr;
+//	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+//		.def(py::init<>())
+//		.def("constrain", &Class::constrain)
+//		.def("inPoints", &Class::inPoints, py::return_value_policy::reference)
+//		.def("inLevelSet", &Class::inLevelSet, py::return_value_policy::reference)
+//		.def("inGridSpacing", &Class::inGridSpacing, py::return_value_policy::reference);
+//}
 
 #include "Multiphysics/ParticleSkinning.h"
 template <typename TDataType>

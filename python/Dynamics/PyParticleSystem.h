@@ -114,7 +114,7 @@ void declare_boundary_constraint(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("BoundaryConstraint") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("constrain", py::overload_cast<void>(&Class::constrain))
+		//.def("constrain", py::overload_cast<void>(&Class::constrain))
 		.def("constrain", py::overload_cast<dyno::Array<Coord, DeviceType::GPU>&, dyno::Array<Coord, DeviceType::GPU>&, Real>(&Class::constrain))
 		//.def("constrain", py::overload_cast<dyno::Array<Coord, DeviceType::GPU>&, dyno::Array<Coord, DeviceType::GPU>&, dyno::DistanceField3D<TDataType>&, Real>(&Class::constrain))
 		.def("load", &Class::load)
@@ -344,7 +344,7 @@ void declare_SimpleVelocityConstraint(py::module& m, std::string typestr) {
 		.def("initialize", &Class::initialize)
 		.def("resizeVector", &Class::resizeVector)
 		.def("initialAttributes", &Class::initialAttributes)
-		.def("visValueSet", py::overload_cast<void>(&Class::visValueSet))
+		//.def("visValueSet", py::overload_cast<void>(&Class::visValueSet))
 		.def("visValueSet", py::overload_cast<Real>(&Class::visValueSet))
 		.def("visVectorSet", &Class::visVectorSet)
 		.def("SIMPLE_IterNumSet", &Class::SIMPLE_IterNumSet)
@@ -372,7 +372,7 @@ void declare_summation_density(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("SummationDensity") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("compute", py::overload_cast<void>(&Class::compute))
+		//.def("compute", py::overload_cast<void>(&Class::compute))
 		.def("compute", py::overload_cast<dyno::Array<Real, DeviceType::GPU>&, dyno::Array<Coord, DeviceType::GPU>&, dyno::ArrayList<int, DeviceType::GPU>&, Real, Real>(&Class::compute))
 		.def("compute", py::overload_cast<dyno::Array<Real, DeviceType::GPU>&, dyno::Array<Coord, DeviceType::GPU>&, dyno::Array<Coord, DeviceType::GPU>&, dyno::ArrayList<int, DeviceType::GPU>&, Real, Real>(&Class::compute))
 

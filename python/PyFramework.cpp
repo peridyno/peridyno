@@ -100,11 +100,11 @@ void pybind_framework(py::module& m)
 {
 	pybind_log(m);
 
-	py::class_<dyno::ClassInfo, std::shared_ptr<dyno::ClassInfo>>(m, "ClassInfo")
-		.def("create_object", &dyno::ClassInfo::createObject, py::return_value_policy::reference)
-		.def("isDynamic", &dyno::ClassInfo::isDynamic)
-		.def("getClassName", &dyno::ClassInfo::getClassName)
-		.def("getConstructor", &dyno::ClassInfo::getConstructor);
+	//py::class_<dyno::ClassInfo, std::shared_ptr<dyno::ClassInfo>>(m, "ClassInfo")
+	//	.def("create_object", &dyno::ClassInfo::createObject, py::return_value_policy::reference)
+	//	.def("isDynamic", &dyno::ClassInfo::isDynamic)
+	//	.def("getClassName", &dyno::ClassInfo::getClassName)
+	//	.def("getConstructor", &dyno::ClassInfo::getConstructor);
 
 	//basic
 	py::class_<Object, std::shared_ptr<Object>>(m, "Object")

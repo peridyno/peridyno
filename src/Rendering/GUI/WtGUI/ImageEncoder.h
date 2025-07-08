@@ -1,7 +1,8 @@
 #pragma once
 #include <vector>
+#include <cstddef>
 
-class ImageEncoder 
+class ImageEncoder
 {
 public:
 	virtual void SetQuality(int quality) = 0;
@@ -27,14 +28,14 @@ public:
 		std::vector<unsigned char>& buffer) override;
 
 private:
-	nvjpegHandle*			m_nvjpegHandle;
-	nvjpegEncoderState*		encoderState;
-	nvjpegEncoderParams*	encodeParams;
+	nvjpegHandle* m_nvjpegHandle;
+	nvjpegEncoderState* encoderState;
+	nvjpegEncoderParams* encodeParams;
 	//cudaStream_t stream = NULL;
 
 	// cuda buffer
 	struct {
-		void*	ptr;
+		void* ptr;
 		size_t	size;
 	} cudaBuffer;
 };
