@@ -6,12 +6,12 @@ scn.setUpperBound(dyno.Vector3f([1.5, 3, 1.5]))
 
 object = dyno.StaticMeshLoader3f()
 scn.addNode(object)
-FilePath = dyno.FilePath(dyno.getAssetPath() + "clothShell/table/table.obj")
+FilePath = dyno.FilePath(dyno.getAssetPath() + "cloth_shell/table/table.obj")
 object.varFileName().setValue(FilePath, True)
 
 volLoader = dyno.VolumeLoader3f()
 scn.addNode(volLoader)
-FilePath = dyno.FilePath(dyno.getAssetPath() + "clothShell/table/table.sdf")
+FilePath = dyno.FilePath(dyno.getAssetPath() + "cloth_shell/table/table.sdf")
 volLoader.varFileName().setValue(FilePath, True)
 
 boundary = dyno.VolumeBoundary3f()
@@ -20,7 +20,7 @@ volLoader.connect(boundary.importVolumes())
 
 cloth = dyno.CodimensionalPD3f()
 scn.addNode(cloth)
-cloth.loadSurface(dyno.getAssetPath() + "clothShell/mesh40k1H90.obj")
+cloth.loadSurface(dyno.getAssetPath() + "cloth_shell/mesh40k_1_h90.obj")
 cloth.connect(boundary.importTriangularSystems())
 
 surfaceRendererCloth = dyno.GLSurfaceVisualModule()

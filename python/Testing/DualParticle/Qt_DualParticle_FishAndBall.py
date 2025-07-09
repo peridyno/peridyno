@@ -69,6 +69,6 @@ fluid.graphicsPipeline().pushModule(vpRender)
 
 
 app = dyno.GlfwApp()
-app.setScenegraph(scn)
+app.setSceneGraph(scn)
 app.initialize(1920, 1080, True)
 app.mainLoop()

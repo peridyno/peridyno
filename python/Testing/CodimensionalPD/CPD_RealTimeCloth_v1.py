@@ -7,18 +7,18 @@ scn.setGravity(dyno.Vector3f([0, -0.98, 0]))
 
 object = dyno.StaticMeshLoader3f()
 scn.addNode(object)
-object.varFileName().setValue(dyno.FilePath(dyno.getAssetPath() + "clothShell/v1/womanModel.obj"))
+object.varFileName().setValue(dyno.FilePath(dyno.getAssetPath() + "cloth_shell/v1/woman_model.obj"))
 
 volLoader = dyno.VolumeLoader3f()
 scn.addNode(volLoader)
-volLoader.varFileName().setValue(dyno.FilePath(dyno.getAssetPath() + "clothShell/v1/womanV1.sdf"))
+volLoader.varFileName().setValue(dyno.FilePath(dyno.getAssetPath() + "cloth_shell/v1/woman_v1.sdf"))
 
 boundary = dyno.VolumeBoundary3f()
 scn.addNode(boundary)
 
 cloth = dyno.CodimensionalPD3f()
 scn.addNode(cloth)
-cloth.loadSurface(dyno.getAssetPath() + "clothShell/v1/cloth_highMesh.obj")
+cloth.loadSurface(dyno.getAssetPath() + "cloth_shell/v1/cloth_highMesh.obj")
 cloth.connect(boundary.importTriangularSystems())
 cloth.setDt(5e-4)
 
@@ -46,6 +46,6 @@ object.setVisible(True)
 scn.printNodeInfo(True)
 
 app = dyno.GlfwApp()
-app.setScenegraph(scn)
+app.setSceneGraph(scn)
 app.initialize(1920, 1080, True)
 app.mainLoop()

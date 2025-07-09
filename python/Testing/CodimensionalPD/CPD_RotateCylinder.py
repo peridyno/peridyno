@@ -8,7 +8,7 @@ scn.setGravity(Vector3f([0,0,0]))
 
 cloth = dyno.CodimensionalPD3f()
 scn.addNode(cloth)
-cloth.loadSurface(dyno.getAssetPath() + "clothShell/cylinder400.obj")
+cloth.loadSurface(dyno.getAssetPath() + "cloth_shell/cylinder400.obj")
 cloth.setDt(0.005)
 
 surfaceRendererCloth = dyno.GLSurfaceVisualModule()
@@ -22,6 +22,6 @@ scn.printNodeInfo(True)
 scn.printSimulationInfo(True)
 
 app = dyno.GlfwApp()
-app.setScenegraph(scn)
+app.setSceneGraph(scn)
 app.initialize(1920, 1080, True)
 app.mainLoop()

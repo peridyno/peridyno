@@ -172,15 +172,15 @@ void pybind_framework(py::module& m)
 		.def("setVisible", &Node::setVisible)
 		.def("getDt", &Node::getDt)
 		.def("setDt", &Node::setDt)
-		.def("set_scnen_graph", &Node::setSceneGraph)
+		.def("setSceneGraph", &Node::setSceneGraph)
 		.def("getSceneGraph", &Node::getSceneGraph, py::return_value_policy::reference)
 		.def("getImportNodes", &Node::getImportNodes)
 		.def("getExportNodes", &Node::getExportNodes)
-		.def("add_module", static_cast<bool(Node::*)(std::shared_ptr<Module>)>(&Node::addModule))
-		.def("delete_module", static_cast<bool(Node::*)(std::shared_ptr<Module>)>(&Node::deleteModule))
+		.def("addModule", static_cast<bool(Node::*)(std::shared_ptr<Module>)>(&Node::addModule))
+		.def("deleteModule", static_cast<bool(Node::*)(std::shared_ptr<Module>)>(&Node::deleteModule))
 		.def("getModuleList", &Node::getModuleList)
 		.def("hasModule", &Node::hasModule)
-		.def("get_module", static_cast<std::shared_ptr<Module>(Node::*)(std::string)> (&Node::getModule))
+		.def("getModule", static_cast<std::shared_ptr<Module>(Node::*)(std::string)> (&Node::getModule))
 		.def("resetPipeline", &Node::resetPipeline)
 		.def("graphicsPipeline", &Node::graphicsPipeline)
 		.def("animationPipeline", &Node::animationPipeline)
@@ -241,7 +241,7 @@ void pybind_framework(py::module& m)
 
 	py::class_<dyno::DirectedAcyclicGraph, std::shared_ptr<dyno::DirectedAcyclicGraph>>(m, "DirectedAcyclicGraph")
 		.def(py::init<>())
-		.def("add_edge", &dyno::DirectedAcyclicGraph::addEdge)
+		.def("addEdge", &dyno::DirectedAcyclicGraph::addEdge)
 		//.def("add_edge", &dyno::DirectedAcyclicGraph::topologicalSort)
 		//.def("add_edge", &dyno::DirectedAcyclicGraph::topologicalSortUtil)
 		.def("sizeOfVertex", &dyno::DirectedAcyclicGraph::sizeOfVertex)
@@ -249,10 +249,10 @@ void pybind_framework(py::module& m)
 		.def("getOtherVertices", &dyno::DirectedAcyclicGraph::getOtherVertices)
 		.def("vertices", &dyno::DirectedAcyclicGraph::vertices)
 		.def("edges", &dyno::DirectedAcyclicGraph::edges, py::return_value_policy::reference)
-		.def("reverse_edges", &dyno::DirectedAcyclicGraph::reverseEdges, py::return_value_policy::reference)
+		.def("reverseEdges", &dyno::DirectedAcyclicGraph::reverseEdges, py::return_value_policy::reference)
 		.def("addOtherVertices", &dyno::DirectedAcyclicGraph::addOtherVertices)
 		.def("addtoRemoveList", &dyno::DirectedAcyclicGraph::addtoRemoveList)
-		.def("remove_id", &dyno::DirectedAcyclicGraph::removeID);
+		.def("removeID", &dyno::DirectedAcyclicGraph::removeID);
 
 	py::class_<dyno::Plugin>(m, "Plugin")
 		.def(py::init<>())
@@ -341,7 +341,7 @@ void pybind_framework(py::module& m)
 
 	py::class_<dyno::FCallBackFunc, std::shared_ptr<dyno::FCallBackFunc>>(m, "FCallBackFunc")
 		.def("update", &dyno::FCallBackFunc::update)
-		.def("add_inputA", &dyno::FCallBackFunc::addInput);
+		.def("addInput", &dyno::FCallBackFunc::addInput);
 
 	py::class_<Color>(m, "Color")
 		.def(py::init<float, float, float>());
@@ -431,7 +431,7 @@ void pybind_framework(py::module& m)
 		.def("varVisible", &VisualModule::varVisible, py::return_value_policy::reference);
 
 	py::class_<ComputeModule, Module, std::shared_ptr<ComputeModule>>(m, "ComputeModule")
-		.def("get_module_type", &dyno::ComputeModule::getModuleType);
+		.def("getModuleType", &dyno::ComputeModule::getModuleType);
 
 	py::class_<Add, ComputeModule, std::shared_ptr<Add>>(m, "Add")
 		.def("caption", &Add::caption)
@@ -472,7 +472,7 @@ void pybind_framework(py::module& m)
 
 	py::class_<ConstraintModule, Module, std::shared_ptr<ConstraintModule>>(m, "ConstraintModule")
 		.def("constrain", &dyno::ConstraintModule::constrain)
-		.def("get_module_type", &dyno::ConstraintModule::getModuleType);
+		.def("getModuleType", &dyno::ConstraintModule::getModuleType);
 
 	py::class_<GroupModule, Module, std::shared_ptr<GroupModule>>(m, "GroupModule")
 		.def("pushModule", &GroupModule::pushModule)
@@ -863,6 +863,15 @@ void pybind_framework(py::module& m)
 			declare_instance<dyno::HeightField<dyno::DataType3f>>(m, "HeightField3f");
 			declare_instance<dyno::TextureMesh>(m, "TextureMesh");
 			declare_instance<dyno::LevelSet<dyno::DataType3f>>(m, "LevelSet3f");
+
+			declare_instances<TopologyModule>(m, "");
+			declare_instances<dyno::PointSet<dyno::DataType3f>>(m, "PointSet3f");
+			declare_instances<dyno::EdgeSet<dyno::DataType3f>>(m, "EdgeSet3f");
+			declare_instances<dyno::TriangleSet<dyno::DataType3f>>(m, "TriangleSet3f");
+			declare_instances<dyno::DiscreteElements<dyno::DataType3f>>(m, "DiscreteElements3f");
+			declare_instances<dyno::HeightField<dyno::DataType3f>>(m, "HeightField3f");
+			declare_instances<dyno::TextureMesh>(m, "TextureMesh");
+			declare_instances<dyno::LevelSet<dyno::DataType3f>>(m, "LevelSet3f");
 
 			// New
 			declare_parametric_model<dyno::DataType3f>(m, "3f");

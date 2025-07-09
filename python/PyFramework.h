@@ -208,11 +208,34 @@ void declare_instance(py::module& m, std::string typestr) {
 		.def("allocate", &Class::allocate)
 		.def("isEmpty", &Class::isEmpty)
 		.def("connect", &Class::connect)
+		.def("disconnect", &Class::disconnect)
 		.def("getData", &Class::getData, py::return_value_policy::reference)
 		.def("size", &Class::size)
 		.def("objectPointer", &Class::objectPointer)
 		.def("standardObjectPointer", &Class::standardObjectPointer)
 		.def("setObjectPointer", &Class::setObjectPointer)
+		.def("canBeConnectedBy", &Class::canBeConnectedBy);
+}
+
+template<typename T>
+void declare_instances(py::module& m, std::string typestr) {
+	using Class = dyno::FInstances<T>;
+	using Parent = InstanceBase;
+	std::string pyclass_name = std::string("FInstances") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def(py::init<std::string, std::string, dyno::FieldTypeEnum, dyno::OBase*>())
+		.def("getTemplateName", &Class::getTemplateName)
+		.def("getClassName", &Class::getClassName)
+		.def("constDataPtr", &Class::constDataPtr)
+		.def("connect", &Class::connect)
+		.def("disconnect", &Class::disconnect)
+		.def("isEmpty", &Class::isEmpty)
+		.def("size", &Class::size)
+		.def("inputPolicy", &Class::inputPolicy)
+		.def("setObjectPointer", &Class::setObjectPointer)
+		.def("objectPointer", &Class::objectPointer)
+		.def("standardObjectPointer", &Class::standardObjectPointer)
 		.def("canBeConnectedBy", &Class::canBeConnectedBy);
 }
 

@@ -10,7 +10,7 @@ scn.addNode(boundary)
 cloth = dyno.CodimensionalPD3f()
 scn.addNode(cloth)
 
-cloth.loadSurface(dyno.getAssetPath() + "clothShell/shootingCloth.obj")
+cloth.loadSurface(dyno.getAssetPath() + "cloth_shell/shootingCloth.obj")
 cloth.connect(boundary.importTriangularSystems())
 
 surfaceRendererCloth = dyno.GLSurfaceVisualModule()
@@ -24,6 +24,6 @@ scn.printNodeInfo(True)
 scn.printSimulationInfo(True)
 
 app = dyno.GlfwApp()
-app.setScenegraph(scn)
+app.setSceneGraph(scn)
 app.initialize(1920, 1080, True)
 app.mainLoop()

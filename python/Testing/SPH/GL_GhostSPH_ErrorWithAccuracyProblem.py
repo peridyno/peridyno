@@ -1,7 +1,7 @@
 import PyPeridyno as dyno
 import numpy as np
 
-def float_range(start, stop, step):
+def floatRange(start, stop, step):
     x = start
     while x <= stop:
         yield x
@@ -11,8 +11,8 @@ def createFluidParticles():
 
     fluid = dyno.ParticleFluid3f()
 
-    host_pos = []
-    host_vel = []
+    hostPos = []
+    hostVel = []
 
     lowx = -0.1
     lowy = 0
@@ -26,7 +26,7 @@ def createFluidParticles():
     m_iExt = 0
 
     omega = 1.0
-    half_s = -s / 2.0
+    halfS = -s / 2.0
 
     num = 0
 
@@ -34,28 +34,28 @@ def createFluidParticles():
     y = lowy
     z = lowz
 
-    for x in float_range(lowx, highx, s):
-        for y in float_range(lowy, highy, s):
-            for z in float_range(lowz, highz, s):
+    for x in floatRange(lowx, highx, s):
+        for y in floatRange(lowy, highy, s):
+            for z in floatRange(lowz, highz, s):
                 p = dyno.Vector3f([x,y,z])
-                host_pos.append(p)
-                host_vel.append(dyno.Vector3f([0,0,0]))
+                hostPos.append(p)
+                hostVel.append(dyno.Vector3f([0,0,0]))
 
-    fluid.state_position().assign(host_pos)
-    fluid.state_velocity().assign(host_vel)
+    fluid.statePosition().assign(hostPos)
+    fluid.stateVelocity().assign(hostVel)
 
-    host_pos.clear()
-    host_vel.clear()
+    hostPos.clear()
+    hostVel.clear()
     return fluid
 
 def createGhostParticles():
     ghost = dyno.GhostParticles3f()
 
-    host_pos = dyno.VectorVec3f()
-    host_vel = dyno.VectorVec3f()
-    host_force = dyno.VectorVec3f()
-    host_normal = dyno.VectorVec3f()
-    host_attribute = dyno.VectorAttribute()
+    hostPos = dyno.VectorVec3f()
+    hostVel = dyno.VectorVec3f()
+    hostForce = dyno.VectorVec3f()
+    hostNormal = dyno.VectorVec3f()
+    hostAttribute = dyno.VectorAttribute()
 
     low = dyno.Vector3f([-0.2, -0.015, -0.2])
     high = dyno.Vector3f([0.2, -0.005, 0.2])
@@ -72,7 +72,7 @@ def createGhostParticles():
     m_iExt = 0
 
     omega = 1.0
-    half_s = -s / 2.0
+    halfS = -s / 2.0
 
     num = 0
     for x in np.arange(lowx - m_iExt * s, highx + m_iExt * s + s, s):
@@ -80,68 +80,68 @@ def createGhostParticles():
             for z in np.arange(lowz - m_iExt * s, highz + m_iExt * s, s):
                 print(x, y, z)
                 attri = dyno.Attribute()
-                attri.set_fluid()
-                attri.set_dynamic()
+                attri.setFluid()
+                attri.setDynamic()
 
-                host_pos.append(dyno.Vector3f([x, y, z]))
-                host_vel.append(dyno.Vector3f([0, 0, 0]))
-                host_force.append(dyno.Vector3f([0, 0, 0]))
-                host_normal.append(dyno.Vector3f([0, 1, 0]))
-                host_attribute.append(attri)
+                hostPos.append(dyno.Vector3f([x, y, z]))
+                hostVel.append(dyno.Vector3f([0, 0, 0]))
+                hostForce.append(dyno.Vector3f([0, 0, 0]))
+                hostNormal.append(dyno.Vector3f([0, 1, 0]))
+                hostAttribute.append(attri)
 
-    ghost.state_position().resize(num)
-    ghost.state_velocity().resize(num)
+    ghost.statePosition().resize(num)
+    ghost.stateVelocity().resize(num)
 
-    ghost.state_normal().resize(num)
-    ghost.state_attribute().resize(num)
+    ghost.stateNormal().resize(num)
+    ghost.stateAttribute().resize(num)
 
-    ghost.state_position().assign(host_pos)
-    ghost.state_velocity().assign(host_vel)
-    ghost.state_force().assign(host_force)
-    ghost.state_normal().assign(host_normal)
-    ghost.state_attribute().assgin(host_attribute)
+    ghost.statePosition().assign(hostPos)
+    ghost.stateVelocity().assign(hostVel)
+    ghost.stateForce().assign(hostForce)
+    ghost.stateNormal().assign(hostNormal)
+    ghost.stateAttribute().assgin(hostAttribute)
 
-    host_pos.clear()
-    host_vel.clear()
-    host_force.clear()
-    host_normal.clear()
-    host_attribute.clear()
+    hostPos.clear()
+    hostVel.clear()
+    hostForce.clear()
+    hostNormal.clear()
+    hostAttribute.clear()
     return ghost
 
 
 scn = dyno.SceneGraph()
-scn.set_upper_bound(dyno.Vector3f([0.5,1,0.5]))
-scn.set_lower_bound(dyno.Vector3f([-0.5,0,-0.5]))
+scn.setUpperBound(dyno.Vector3f([0.5,1,0.5]))
+scn.setLowerBound(dyno.Vector3f([-0.5,0,-0.5]))
 
 cubeBoundary = dyno.CubeModel3f()
-scn.add_node(cubeBoundary)
-cubeBoundary.var_location().set_value(dyno.Vector3f([0,0.5,0]))
-cubeBoundary.var_length().set_value(dyno.Vector3f([1,1,1]))
+scn.addNode(cubeBoundary)
+cubeBoundary.varLocation().setValue(dyno.Vector3f([0,0.5,0]))
+cubeBoundary.varLength().setValue(dyno.Vector3f([1,1,1]))
 
 cube2vol = dyno.BasicShapeToVolume3f()
-scn.add_node(cube2vol)
-cube2vol.var_grid_spacing().set_value(0.02)
-cube2vol.var_inerted().set_value(True)
-cubeBoundary.connect(cube2vol.import_shape())
+scn.addNode(cube2vol)
+cube2vol.varGridSpacing().setValue(0.02)
+cube2vol.varInerted().setValue(True)
+cubeBoundary.connect(cube2vol.importShape())
 
 boundary = dyno.VolumeBoundary3f()
-scn.add_node(boundary)
-cube2vol.connect(boundary.import_volumes())
+scn.addNode(boundary)
+cube2vol.connect(boundary.importVolumes())
 
 fluid = createFluidParticles()
-scn.add_node(fluid)
+scn.addNode(fluid)
 ghost = createGhostParticles()
-scn.add_node(ghost)
+scn.addNode(ghost)
 
 incompressibleFluid = dyno.GhostFluid3f()
-scn.add_node(incompressibleFluid)
-incompressibleFluid.set_dt(0.001)
-fluid.connect(incompressibleFluid.import_initial_states())
-ghost.connect(incompressibleFluid.import_boundary_particles())
+scn.addNode(incompressibleFluid)
+incompressibleFluid.setDt(0.001)
+fluid.connect(incompressibleFluid.importInitialStates())
+ghost.connect(incompressibleFluid.importBoundaryParticles())
 
-incompressibleFluid.connect(boundary.import_particle_systems())
+incompressibleFluid.connect(boundary.importParticleSystems())
 
 app = dyno.GlfwApp()
-app.set_scenegraph(scn)
+app.setSceneGraph(scn)
 app.initialize(1920, 1080, True)
-app.main_loop()
+app.mainLoop()

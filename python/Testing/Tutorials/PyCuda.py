@@ -4,7 +4,7 @@ from pycuda.compiler import SourceModule
 
 # 编写一个简单的 CUDA 核函数
 mod = SourceModule("""
-__global__ void multiply_them(float *dest, float *a, float *b)
+Global void multiplyThem(float *dest, float *a, float *b)
 {
     const int i = threadIdx.x;
     dest[i] = a[i] * b[i];
@@ -12,16 +12,16 @@ __global__ void multiply_them(float *dest, float *a, float *b)
 """)
 
 # 获取核函数
-multiply_them = mod.get_function("multiply_them")
+multiplyThem = mod.getFunction("multiplyThem")
 
 # 定义输入数据
 import numpy as np
 a = np.random.randn(4).astype(np.float32)
 b = np.random.randn(4).astype(np.float32)
-dest = np.zeros_like(a)
+dest = np.zerosLike(a)
 
 # 调用核函数
-multiply_them(cuda.Out(dest), cuda.In(a), cuda.In(b), block=(4, 1, 1))
+multiplyThem(cuda.Out(dest), cuda.In(a), cuda.In(b), block=(4, 1, 1))
 
 print("a:", a)
 print("b:", b)

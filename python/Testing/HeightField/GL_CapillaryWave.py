@@ -3,10 +3,10 @@ import PyPeridyno as dyno
 scn = dyno.SceneGraph()
 
 root = dyno.CapillaryWave3f()
-scn.add_node(root)
+scn.addNode(root)
 
 app = dyno.GlfwApp()
-app.set_scenegraph(scn)
+app.setSceneGraph(scn)
 app.initialize(1920, 1080, True)
-#app.render_window().get_camera().set_unit_scale(20)
-app.main_loop()
+#app.renderWindow().getCamera().setUnitScale(20)
+app.mainLoop()

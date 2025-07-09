@@ -7,18 +7,18 @@ scn.setGravity(dyno.Vector3f([0, -0.98, 0]))
 
 object = dyno.StaticMeshLoader3f()
 scn.addNode(object)
-object.varFileName().setValue(dyno.FilePath(dyno.getAssetPath() + "clothShell/v1/womanModel.obj"), True)
+object.varFileName().setValue(dyno.FilePath(dyno.getAssetPath() + "cloth_shell/v2/woman_model_smaller.obj"))
 
 volLoader = dyno.VolumeLoader3f()
 scn.addNode(volLoader)
-volLoader.varFileName().setValue(dyno.FilePath(dyno.getAssetPath() + "clothShell/v1/womanV2.sdf"), True)
+volLoader.varFileName().setValue(dyno.FilePath(dyno.getAssetPath() + "cloth_shell/v2/woman_v2.sdf"))
 
 boundary = dyno.VolumeBoundary3f()
 scn.addNode(boundary)
 
 cloth = dyno.CodimensionalPD3f()
 scn.addNode(cloth)
-cloth.loadSurface(dyno.getAssetPath() + "clothShell/v1/cloth_highMesh.obj")
+cloth.loadSurface(dyno.getAssetPath() + "cloth_shell/v2/cloth_v2.obj")
 cloth.connect(boundary.importTriangularSystems())
 cloth.setDt(5e-4)
 

@@ -4,7 +4,7 @@ import pycuda.autoinit
 from pycuda.compiler import SourceModule
 
 # mod = SourceModule("""
-# __global__ void HitBoxes(
+# Global void HitBoxes(
 # 	DArray<TOrientedBox3D<float>> box,
 # 	DArray<Vec3f> velocites,
 # 	TRay3D<float> ray,
@@ -23,22 +23,22 @@ from pycuda.compiler import SourceModule
 # """)
 
 class Hit(dyno.MouseInputModule):
-    def __init__(self):
-        super().__init__()
+    def Init(self):
+        super().Init()
         self.in_Topology = dyno.FInstanceDiscreteElements3f("Topology", "", dyno.FieldTypeEnum.In, self)
         self.in_Velocity = dyno.FArray3fD("Velocity", "Rigid body velocities", dyno.FieldTypeEnum.In, self)
 
-    def in_topology(self):
+    def inTopology(self):
         return self.in_Topology
 
-    def in_velocity(self):
+    def inVelocity(self):
         return self.in_Velocity
 
     def onEvent(self, event):
-        # elements = self.in_topology().get_data_ptr()
-        # velocities = self.in_velocity().get_data()
+        # elements = self.inTopology().getDataPtr()
+        # velocities = self.inVelocity().getData()
         #
-        # offset = elements.calculate_element_offset()
+        # offset = elements.calculateElementOffset()
         # boxInGlobal = dyno.DArrayTOrientedBox3D()
         #
         # elements.requestBoxInGlobal(boxInGlobal)
@@ -62,31 +62,31 @@ class Hit(dyno.MouseInputModule):
 scn = dyno.SceneGraph()
 
 rigid = dyno.RigidBodySystem3f()
-scn.add_node(rigid)
+scn.addNode(rigid)
 rigidBody = dyno.RigidBodyInfo()
-rigidBody.linear_velocity = dyno.Vector3f([0.5, 0, 0])
+rigidBody.linearVelocity = dyno.Vector3f([0.5, 0, 0])
 
 box = dyno.BoxInfo()
-box.half_length = dyno.Vector3f([0.5 * 0.065, 0.5 * 0.065, 0.5 * 0.1])
+box.halfLength = dyno.Vector3f([0.5 * 0.065, 0.5 * 0.065, 0.5 * 0.1])
 for i in range(8, 1, -1):
     for j in range(i + 1):
         rigidBody.position = dyno.Vector3f([0.5, 0.5, 0.5]) * dyno.Vector3f(
             [0.5, 1.1 - 0.13 * i, 0.12 + 0.2 * j + 0.1 * (8 - i)])
-        boxAt = rigid.add_box(box, rigidBody)
+        boxAt = rigid.addBox(box, rigidBody)
 
 sphere = dyno.SphereInfo()
 sphere.radius = 0.025
 
 rigidSphere = dyno.RigidBodyInfo()
 rigidSphere.position = dyno.Vector3f([0.5, 0.75, 0.5])
-sphereAt1 = rigid.add_sphere(sphere, rigidSphere)
+sphereAt1 = rigid.addSphere(sphere, rigidSphere)
 
 rigidSphere.position = dyno.Vector3f([0.5, 0.95, 0.5])
-sphereAt2 = rigid.add_sphere(sphere, rigidSphere)
+sphereAt2 = rigid.addSphere(sphere, rigidSphere)
 
 rigidSphere.position = dyno.Vector3f([0.5, 0.65, 0.5])
 sphere.radius = 0.05
-sphereAt3 = rigid.add_sphere(sphere, rigidSphere)
+sphereAt3 = rigid.addSphere(sphere, rigidSphere)
 
 tet = dyno.TetInfo()
 tet.v = [
@@ -95,25 +95,25 @@ tet.v = [
     dyno.Vector3f([0.6, 1.1, 0.5]),
     dyno.Vector3f([0.5, 1.1, 0.6]),
 ]
-TetAt = rigid.add_tet(tet, rigidSphere)
+TetAt = rigid.addTet(tet, rigidSphere)
 
 mapper = dyno.DiscreteElementsToTriangleSet3f()
-rigid.state_topology().connect(mapper.in_discrete_elements())
-rigid.graphics_pipeline().push_module(mapper)
+rigid.stateTopology().connect(mapper.inDiscreteElements())
+rigid.graphicsPipeline().pushModule(mapper)
 
 sRender = dyno.GLSurfaceVisualModule()
-sRender.set_color(dyno.Color(1, 1, 0))
-sRender.set_alpha(0.5)
-mapper.out_triangle_set().connect(sRender.in_triangle_set())
-rigid.graphics_pipeline().push_module(sRender)
+sRender.setColor(dyno.Color(1, 1, 0))
+sRender.setAlpha(0.5)
+mapper.outTriangleSet().connect(sRender.inTriangleSet())
+rigid.graphicsPipeline().pushModule(sRender)
 
 hit = Hit()
-rigid.state_topology().connect(hit.in_topology())
-rigid.state_velocity().connect(hit.in_velocity())
-rigid.animation_pipeline().push_module(hit)
+rigid.stateTopology().connect(hit.inTopology())
+rigid.stateVelocity().connect(hit.inVelocity())
+rigid.animationPipeline().pushModule(hit)
 
 app = dyno.GlfwApp()
-app.set_scenegraph(scn)
+app.setSceneGraph(scn)
 app.initialize(1920, 1080, True)
-app.set_window_title("Empty GUI")
-app.main_loop()
+app.setWindowTitle("Empty GUI")
+app.mainLoop()

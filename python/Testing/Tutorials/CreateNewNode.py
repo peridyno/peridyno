@@ -1,22 +1,22 @@
 import PyPeridyno as dyno
 
 # class ParametricModel(dyno.Node):
-#     def __init__(self):
-#         super().__init__()
+#     def Init(self):
+#         super().Init()
 #         self.setForceUpdate(False)
 #         self.setAutoHidden(True)
 #         self.varScale().setRange(0.0001,1000)
 #
 # class BasicShape(ParametricModel):
-#     def __init__(self):
-#         super().__init__()
+#     def Init(self):
+#         super().Init()
 #
 #     def getNodeType(self):
 #         return "Basic Shapes"
 
 class PlaneModel(dyno.BasicShape3f):
-    def __init__(self):
-        dyno.BasicShape3f.__init__(self)
+    def Init(self):
+        dyno.BasicShape3f.Init(self)
         self.var_LengthX = dyno.FVarf(1, "LengthX", "length X", dyno.FieldTypeEnum.Param, self)
         self.varLengthX().setRange(0.01,100)
 

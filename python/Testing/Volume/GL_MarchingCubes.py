@@ -5,15 +5,15 @@ import PyPeridyno as dyno
 scn = dyno.SceneGraph()
 
 loader = dyno.VolumeLoader3f()
-scn.add_node(loader)
-loader.var_file_name().set_value(dyno.FilePath(dyno.get_asset_path() + "bowl/bowl.sdf"))
+scn.addNode(loader)
+loader.varFileName().setValue(dyno.FilePath(dyno.getAssetPath() + "bowl/bowl.sdf"))
 
 clipper = dyno.VolumeClipper3f()
-scn.add_node(clipper)
-loader.state_level_set().connect(clipper.in_level_set())
+scn.addNode(clipper)
+loader.stateLevelSet().connect(clipper.inLevelSet())
 
 app = dyno.GlfwApp()
-app.set_scenegraph(scn)
+app.setSceneGraph(scn)
 app.initialize(1920, 1080, True)
-# app.render_window().get_camera().set_unit_scale(512)
-app.main_loop()
+# app.renderWindow().getCamera().setUnitScale(512)
+app.mainLoop()

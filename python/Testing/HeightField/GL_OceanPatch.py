@@ -3,22 +3,22 @@ import PyPeridyno as dyno
 scn = dyno.SceneGraph()
 
 root = dyno.OceanPatch3f()
-scn.add_node(root)
-root.var_wind_type().set_value(8)
+scn.addNode(root)
+root.varWindType().setValue(8)
 
 mapper = dyno.HeightFieldToTriangleSet3f()
-root.state_height_field().connect(mapper.in_height_field())
-root.graphics_pipeline().push_module(mapper)
+root.stateHeightField().connect(mapper.inHeightField())
+root.graphicsPipeline().pushModule(mapper)
 
 sRender = dyno.GLSurfaceVisualModule()
-sRender.set_color(dyno.Color(0, 0.2, 1.0))
-sRender.var_use_vertex_normal().connect(sRender.in_triangle_set())
-mapper.out_triangle_set().connect(sRender.in_triangle_set())
-root.graphics_pipeline().push_module(sRender)
+sRender.setColor(dyno.Color(0, 0.2, 1.0))
+sRender.varUseVertexNormal().connect(sRender.inTriangleSet())
+mapper.outTriangleSet().connect(sRender.inTriangleSet())
+root.graphicsPipeline().pushModule(sRender)
 
 
 
 app = dyno.GlfwApp()
-app.set_scenegraph(scn)
+app.setSceneGraph(scn)
 app.initialize(1920, 1080, True)
-app.main_loop()
+app.mainLoop()
