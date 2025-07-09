@@ -129,25 +129,25 @@ namespace dyno
 		mT1 = new QPiecewiseDoubleSpinBox;
 		mT2 = new QPiecewiseDoubleSpinBox;
 
-		mT0->setValue(0);
-		mT0->setValue(0);
-		mT0->setValue(0);
+		mT0->setRealValue(0);
+		mT0->setRealValue(0);
+		mT0->setRealValue(0);
 
 		mR0 = new QPiecewiseDoubleSpinBox;
 		mR1 = new QPiecewiseDoubleSpinBox;
 		mR2 = new QPiecewiseDoubleSpinBox;
 
-		mR0->setValue(0);
-		mR0->setValue(0);
-		mR0->setValue(0);
+		mR0->setRealValue(0);
+		mR0->setRealValue(0);
+		mR0->setRealValue(0);
 
 		mS0 = new QPiecewiseDoubleSpinBox;
 		mS1 = new QPiecewiseDoubleSpinBox;
 		mS2 = new QPiecewiseDoubleSpinBox;
 
-		mS0->setValue(1);
-		mS1->setValue(1);
-		mS2->setValue(1);
+		mS0->setRealValue(1);
+		mS1->setRealValue(1);
+		mS2->setRealValue(1);
 
 		QHBoxLayout* layout_T = new QHBoxLayout();
 		QHBoxLayout* layout_R = new QHBoxLayout();
@@ -262,21 +262,21 @@ namespace dyno
 
 	void mVectorTransformItemLayout::setValue(Transform3f v)
 	{
-		mT0->setValue(v.translation()[0]);
-		mT1->setValue(v.translation()[1]);
-		mT2->setValue(v.translation()[2]);
+		mT0->setRealValue(v.translation()[0]);
+		mT1->setRealValue(v.translation()[1]);
+		mT2->setRealValue(v.translation()[2]);
 
 		Vec3f rot = Vec3f(0);
 
 		Quat<Real>(v.rotation()).toEulerAngle(rot[0], rot[1], rot[2]);
 		
-		mR0->setValue(rot[0] * 180 / M_PI);
-		mR1->setValue(rot[1] * 180 / M_PI);
-		mR2->setValue(rot[2] * 180 / M_PI);
+		mR0->setRealValue(rot[2] * 180 / M_PI);
+		mR1->setRealValue(rot[1] * 180 / M_PI);
+		mR2->setRealValue(rot[0] * 180 / M_PI);
 
-		mS0->setValue(v.scale()[0]);
-		mS1->setValue(v.scale()[1]);
-		mS2->setValue(v.scale()[2]);
+		mS0->setRealValue(v.scale()[0]);
+		mS1->setRealValue(v.scale()[1]);
+		mS2->setRealValue(v.scale()[2]);
 
 	}
 
