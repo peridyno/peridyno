@@ -23,6 +23,7 @@
 #include "Collision/Attribute.h"
 #include "Collision/CollisionData.h"
 
+
 namespace dyno
 {
 	template<typename TDataType>
@@ -126,6 +127,8 @@ namespace dyno
 
 		DArray<Real> mErrors;
 		DArray<Real> mA;
+
+		//DynamicGraphColoring mGraphColoring;
 
 	};
 }

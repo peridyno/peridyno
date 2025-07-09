@@ -5353,4 +5353,309 @@ namespace dyno
 			constraints);
 	}
 
+
+	std::vector<int> DynamicGraphColoring:: orderedGreedyColoring(const std::vector<std::vector<int>>& graph) {
+		const int num_vertices = graph.size();
+		if(num_vertices == 0) {
+			return {};
+		}
+
+		std::vector<int> colors(num_vertices, -1); // -1 means uncolored
+		std::vector<int> degree(num_vertices);
+		std::vector<std::list<int>::iterator> vertex_iterators(num_vertices);
+		std::vector<std::list<int>> color_buckets(num_vertices);
+
+		int max_degree = 0;
+
+		for (int i = 0; i < num_vertices; ++i) {
+			degree[i] = graph[i].size();
+			color_buckets[degree[i]].push_front(i);
+			vertex_iterators[i] = color_buckets[degree[i]].begin();
+			if(degree[i] > max_degree) {
+				max_degree = degree[i];
+			}
+		}
+
+		std::vector<int> processing_order;
+		processing_order.reserve(num_vertices);
+		int min_degree_idx = 0;
+
+		for (int i = 0; i < num_vertices; ++i) {
+			while(min_degree_idx <= max_degree && color_buckets[min_degree_idx].empty()) {
+				++min_degree_idx;
+			}
+
+			if(min_degree_idx > max_degree) {
+				break; // No more vertices to process
+			}
+
+			int current_vertex = color_buckets[min_degree_idx].front();
+			color_buckets[min_degree_idx].pop_front();
+			processing_order.push_back(current_vertex);
+			degree[current_vertex] = -1; // Mark as processed
+
+			for (int neighbor : graph[current_vertex]) {
+				if(degree[neighbor] != -1) {
+					int old_degree = degree[neighbor];
+					color_buckets[old_degree].erase(vertex_iterators[neighbor]);
+					degree[neighbor]--;
+					int new_degree = degree[neighbor];
+					color_buckets[new_degree].push_front(neighbor);
+					vertex_iterators[neighbor] = color_buckets[new_degree].begin();
+					if(new_degree < min_degree_idx) {
+						min_degree_idx = new_degree;
+					}
+				}
+			}
+		}
+
+		int max_color_used = 0;
+		std::reverse(processing_order.begin(), processing_order.end());
+		for (int node_to_color : processing_order) {
+			std::vector<bool> used_colors(max_color_used + 2, false);
+			for (int neighbor : graph[node_to_color]) {
+				if (colors[neighbor] != -1) used_colors[colors[neighbor]] = true;
+			}
+			int node_color = 0;
+			while (node_color < used_colors.size() && used_colors[node_color]) node_color++;
+			colors[node_to_color] = node_color;
+			max_color_used = std::max(max_color_used, node_color);
+		}
+
+		return colors;
+	}
+
+
+	void DynamicGraphColoring::balanceColoring(const std::vector<std::vector<int>>& graph, std::vector<int>& colors, float goal_ratio, int maxAttempts) {
+		if(colors.empty()) {
+			return; // No colors to balance
+		}
+		int num_colors = *std::max_element(colors.begin(), colors.end()) + 1;
+		if(num_colors <= 1) {
+			return; // No need to balance if there's only one color
+		}
+
+		std::vector<std::vector<int>> categories(num_colors);
+
+		for (int i = 0; i < colors.size(); ++i) {
+			if(colors[i] >= 0)
+				categories[colors[i]].push_back(i);
+		}
+
+		std::mt19937 gen(std::random_device{}());
+		for (int attempt = 0; attempt < maxAttempts; ++attempt) {
+			int biggest_idx = -1, smallest_idx = -1;
+			size_t max_size = 0, min_size = colors.size() + 1;
+			for (int i = 0; i < num_colors; ++i) {
+				if (categories[i].size() > max_size) {
+					max_size = categories[i].size();
+					biggest_idx = i;
+				}
+				if(!categories[i].empty() && categories[i].size() < min_size) {
+					min_size = categories[i].size();
+					smallest_idx = i;
+				}
+			}
+
+			if(biggest_idx == -1 || smallest_idx == -1 || biggest_idx == smallest_idx) {
+				break; // No more balancing needed
+			}
+
+			if(min_size > 0 && (static_cast<float>(max_size) / min_size) <= goal_ratio) {
+				break; // Already balanced
+			}
+
+			auto& biggestCatNodes = categories[biggest_idx];
+			if (biggestCatNodes.empty()) continue;
+
+			std::uniform_int_distribution<> dis(0, biggestCatNodes.size() - 1);
+			int node_index_in_category = dis(gen);
+			int node_to_move = biggestCatNodes[node_index_in_category];
+
+			bool is_changeable = true;
+			for (int n : graph[node_to_move]) {
+				if (colors[n] == smallest_idx) {
+					is_changeable = false;
+					break;
+				}
+			}
+
+			if (is_changeable) {
+				colors[node_to_move] = smallest_idx;
+				categories[smallest_idx].push_back(node_to_move);
+				std::swap(biggestCatNodes[node_index_in_category], biggestCatNodes.back());
+				biggestCatNodes.pop_back();
+			}
+		}
+	}
+
+
+
+	DynamicGraphColoring::DynamicGraphColoring() : num_vertices(0), num_colors(0) {}
+
+	void DynamicGraphColoring::initializeGraph(int num_v, const std::vector<std::pair<int, int>>& initial_edges) {
+		this->num_vertices = num_v;
+		graph.assign(num_vertices, std::vector<int>());
+
+		for (const auto& edge : initial_edges) {
+			if (edge.first < num_vertices && edge.second < num_vertices && edge.first >= 0 && edge.second >= 0) {
+				graph[edge.first].push_back(edge.second);
+				graph[edge.second].push_back(edge.first);
+			}
+		}
+		this->graph_initialized_ = true;
+	}
+
+	void DynamicGraphColoring::performInitialColoring() {
+		if (num_vertices == 0) return;
+
+		// Perform initial coloring
+		colors = orderedGreedyColoring(graph);
+		this->num_colors = colors.empty() ? 0 : *std::max_element(colors.begin(), colors.end()) + 1;
+
+		// Balance the coloring
+		balanceColoring(graph, colors);
+		this->num_colors = colors.empty() ? 0 : *std::max_element(colors.begin(), colors.end()) + 1;
+
+		// Rebuild internal data structures based on the new coloring
+		rebuildCategories();
+	}
+
+	void DynamicGraphColoring::applyBatchUpdate(const std::vector<std::pair<int, int>>& add_edges, const std::vector<std::pair<int, int>>& delete_edges) {
+		// Step 1: Update graph structure
+		for (const auto& edge : add_edges) {
+			int u = edge.first;
+			int v = edge.second;
+
+			if (u >= num_vertices || v >= num_vertices || u < 0 || v < 0 || u == v) continue;
+
+			if (std::find(graph[u].begin(), graph[u].end(), v) == graph[u].end()) {
+				graph[u].push_back(v);
+				graph[v].push_back(u);
+			}
+		}
+
+		for (const auto& edge : delete_edges) {
+			int u = edge.first;
+			int v = edge.second;
+
+			if (u >= num_vertices || v >= num_vertices || u < 0 || v < 0 || u == v) continue;
+
+			graph[u].erase(std::remove(graph[u].begin(), graph[u].end(), v), graph[u].end());
+			graph[v].erase(std::remove(graph[v].begin(), graph[v].end(), u), graph[v].end());
+		}
+
+		// Step 2: Conflict Detection
+		std::set<int> conflict_vertices;
+		for (const auto& edge : add_edges) {
+			if (colors[edge.first] == colors[edge.second]) {
+				// Add the vertex with the smaller degree to the conflict set for potential recoloring
+				if (graph[edge.first].size() < graph[edge.second].size()) {
+					conflict_vertices.insert(edge.first);
+				}
+				else {
+					conflict_vertices.insert(edge.second);
+				}
+			}
+		}
+
+		// Step 3: Conflict Resolution
+		for (int vertex : conflict_vertices) {
+			if (isConflictNode(vertex)) {
+				int old_color = colors[vertex];
+				std::optional<int> new_color_opt = findNewColorFor(vertex);
+				if (new_color_opt.has_value()) {
+					updateNodeColor(vertex, old_color, new_color_opt.value());
+				}
+			}
+		}
+
+		// Optionally, re-balance the coloring after updates
+		balanceColoring(graph, colors);
+		this->num_colors = colors.empty() ? 0 : *std::max_element(colors.begin(), colors.end()) + 1;
+		rebuildCategories(); // Rebuild categories after potential color changes
+	}
+
+	void DynamicGraphColoring::rebuildCategories() {
+		if (num_colors == 0) {
+			categories.clear();
+			return;
+		}
+		categories.assign(num_colors, std::vector<int>());
+		for (int i = 0; i < num_vertices; ++i) {
+			if (colors[i] >= 0) {
+				if (colors[i] >= categories.size()) {
+					categories.resize(colors[i] + 1);
+				}
+				categories[colors[i]].push_back(i);
+			}
+		}
+	}
+
+	std::optional<int> DynamicGraphColoring::findNewColorFor(int node) {
+		std::vector<bool> used_colors(num_colors, false);
+		for (int neighbor : graph[node]) {
+			if (colors[neighbor] != -1) {
+				used_colors[colors[neighbor]] = true;
+			}
+		}
+		for (int c = 0; c < num_colors; ++c) {
+			if (!used_colors[c]) {
+				return c;
+			}
+		}
+		// If no existing color is available, create a new one.
+		num_colors++;
+		return num_colors - 1;
+	}
+
+	bool DynamicGraphColoring::isConflictNode(int node) {
+		for (int neighbor : graph[node]) {
+			if (colors[node] == colors[neighbor]) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void DynamicGraphColoring::updateNodeColor(int node, int old_color, int new_color) {
+		colors[node] = new_color;
+
+		if (new_color >= categories.size()) {
+			categories.resize(new_color + 1);
+		}
+
+		// Remove node from its old color category
+		if (old_color != -1 && old_color < categories.size()) {
+			auto& old_cat_nodes = categories[old_color];
+			old_cat_nodes.erase(std::remove(old_cat_nodes.begin(), old_cat_nodes.end(), node), old_cat_nodes.end());
+		}
+
+		// Add node to its new color category
+		categories[new_color].push_back(node);
+	}
+
+
+	void constraintsMappingToEdges(DArray<TConstraintPair<float>> constraints, std::vector<std::pair<int, int>>& edges) {
+		CArray<TConstraintPair<float>> c_constraints;
+		c_constraints.assign(constraints);
+
+		std::set<std::pair<int, int>> unique_edges;
+
+		for (int i = 0; i < c_constraints.size(); ++i) {
+			auto constraint = c_constraints[i];
+			if (constraint.bodyId2 == INVALID || constraint.bodyId1 == constraint.bodyId2) {
+				continue;
+			}
+
+			int u = std::min(constraint.bodyId1, constraint.bodyId2);
+			int v = std::max(constraint.bodyId1, constraint.bodyId2);
+
+			unique_edges.insert({ u, v });
+		}
+		edges.assign(unique_edges.begin(), unique_edges.end());
+
+		c_constraints.clear();
+	}
+
 }

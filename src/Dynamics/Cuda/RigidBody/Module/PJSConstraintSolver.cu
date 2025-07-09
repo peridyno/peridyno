@@ -507,7 +507,18 @@ namespace dyno
 			errors.push_back(checkOutErrors(mErrors));
 			int constraint_size = mVelocityConstraints.size();
 
+			std::vector<std::pair<int, int>> edges;
+			
+			constraintsMappingToEdges(mVelocityConstraints, edges);
 
+			/*if (!mGraphColoring.isGraphInitialized()) {
+				mGraphColoring.initializeGraph(
+					bodyNum,
+					edges
+				);
+				mGraphColoring.performInitialColoring();
+				std::cout << "Graph Coloring Initialized with " << mGraphColoring.getNumColors() << " colors." << std::endl;
+			}*/
 
 			for (int i = 0; i < this->varIterationNumberForVelocitySolver()->getValue(); i++)
 			{

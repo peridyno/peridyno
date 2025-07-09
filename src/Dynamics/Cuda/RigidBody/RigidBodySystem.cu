@@ -9,7 +9,7 @@
 #include "RigidBody/Module/TJConstraintSolver.h"
 #include "RigidBody/Module/TJSoftConstraintSolver.h"
 #include "RigidBody/Module/PJSNJSConstraintSolver.h"
-#include "RigidBody/Module/PJSConstraintSolver.h"
+//#include "RigidBody/Module/PJSConstraintSolver.h"
 #include "RigidBody/Module/PJSoftConstraintSolver.h"
 #include "RigidBody/Module/PCGConstraintSolver.h"
 #include "RigidBody/Module/CarDriver.h"
