@@ -78,11 +78,11 @@ namespace dyno
 
 			if (val < minimum())
 			{
-				input = this->minimum();
+				input = QString::number(this->minimum());
 			}
 			else if (val > maximum())
 			{
-				input = this->maximum();
+				input = QString::number(this->maximum());
 			}
 
 			return QValidator::Acceptable;
