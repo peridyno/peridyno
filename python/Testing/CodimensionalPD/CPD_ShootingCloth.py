@@ -2,28 +2,28 @@ import PyPeridyno as dyno
 from PyPeridyno import Vector3f
 
 scn = dyno.SceneGraph()
-scn.set_lower_bound(Vector3f([-5,0,-5]))
-scn.set_upper_bound(Vector3f([5,3,5]))
+scn.setLowerBound(Vector3f([-5,0,-5]))
+scn.setUpperBound(Vector3f([5,3,5]))
 
 boundary = dyno.VolumeBoundary3f()
-scn.add_node(boundary)
+scn.addNode(boundary)
 cloth = dyno.CodimensionalPD3f()
-scn.add_node(cloth)
+scn.addNode(cloth)
 
-cloth.load_surface(dyno.get_asset_path() + "cloth_shell/shootingCloth.obj")
-cloth.connect(boundary.import_triangular_systems())
+cloth.loadSurface(dyno.getAssetPath() + "clothShell/shootingCloth.obj")
+cloth.connect(boundary.importTriangularSystems())
 
 surfaceRendererCloth = dyno.GLSurfaceVisualModule()
-surfaceRendererCloth.set_color(dyno.Color(1,1,1))
+surfaceRendererCloth.setColor(dyno.Color(1,1,1))
 
-cloth.state_triangle_set().connect(surfaceRendererCloth.in_triangle_set())
-cloth.graphics_pipeline().push_module(surfaceRendererCloth)
-cloth.set_visible(True)
+cloth.stateTriangleSet().connect(surfaceRendererCloth.inTriangleSet())
+cloth.graphicsPipeline().pushModule(surfaceRendererCloth)
+cloth.setVisible(True)
 
-scn.print_node_info(True)
-scn.print_simulation_info(True)
+scn.printNodeInfo(True)
+scn.printSimulationInfo(True)
 
 app = dyno.GlfwApp()
-app.set_scenegraph(scn)
+app.setScenegraph(scn)
 app.initialize(1920, 1080, True)
-app.main_loop()
+app.mainLoop()

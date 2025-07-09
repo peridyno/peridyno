@@ -26,6 +26,6 @@ PYBIND11_MODULE(PyPeridyno, m) {
 	pybind_glfw_gui(m);
 
 
-	m.def("get_asset_path", &getAssetPath, "Get the asset path");
-	m.def("get_plugin_path", &getPluginPath, "Get the plugin path");
+	m.def("getAssetPath", &getAssetPath, "Get the asset path");
+	m.def("getPluginPath", &getPluginPath, "Get the plugin path");
 }

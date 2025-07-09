@@ -89,7 +89,7 @@ void pybind_rigid_body(py::module& m) {
 	declare_tj_constraint_solver<dyno::DataType3f>(m, "3f");
 	declare_tj_soft_constraint_solver<dyno::DataType3f>(m, "3f");
 	declare_rigid_body_system<dyno::DataType3f>(m, "3f");
-	//declare_articulated_body<dyno::DataType3f>(m, "3f");
+	declare_articulated_body<dyno::DataType3f>(m, "3f");
 	declare_configurable_body<dyno::DataType3f>(m, "3f");
 	declare_gear<dyno::DataType3f>(m, "3f");
 	declare_multibody_system<dyno::DataType3f>(m, "3f");
