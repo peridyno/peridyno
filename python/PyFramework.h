@@ -141,7 +141,7 @@ void declare_var(py::module& m, std::string typestr) {
 		.def("getTemplateName", &Class::getTemplateName)
 		.def("getClassName", &Class::getClassName)
 		.def("size", &Class::size)
-		.def("setValue", &Class::setValue)
+		.def("setValue", &Class::setValue, py::arg("val"), py::arg("notify") = true)
 		.def("getValue", &Class::getValue)
 		.def("serialize", &Class::serialize)
 		//.def("deserialize", &Class::deserialize)
