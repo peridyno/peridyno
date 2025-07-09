@@ -115,8 +115,6 @@ namespace dyno
 			atomicExch(&distance(i, j, k), 1);
 		}
 
-
-
 		point = minPoint + Coord(i * dx + (j * dx) / tan(theta),
 			j * dx + (i * dx) / tan(phi), k * dx + (j * dx) / tan(psi));
 		vertices[i + j * nx + k * nx * ny] = Rotation * cubeRotation * point;
@@ -127,14 +125,6 @@ namespace dyno
 		: Sampler<TDataType>()
 	{
 		this->varSpacing()->setRange(0.02, 1);
-		this->varCubeTilt()->setRange(0, 80);
-		this->varX()->setRange(0.001, 5);
-		this->varY()->setRange(0.001, 5);
-		this->varZ()->setRange(0.001, 5);
-
-		this->varAlpha()->setRange(0, 360);
-		this->varBeta()->setRange(0, 360);
-		this->varGamma()->setRange(0, 360);
 
 		this->statePointSet()->promoteOuput();
 	}
@@ -240,36 +230,32 @@ namespace dyno
 		//auto vol = this->getVolumeOctree();
 		Real dx = this->varSpacing()->getData();
 
-		std::shared_ptr<dyno::DistanceField3D<TDataType>> inputSDF;
-
 		if (this->getVolumeOctree() != nullptr)
 		{
-			inputSDF = this->convert2Uniform(this->getVolumeOctree(), dx);
+			m_inputSDF = this->convert2Uniform(this->getVolumeOctree(), dx);
 		}
 		else if (this->getVolume() != nullptr)
 		{
-			inputSDF = std::make_shared<dyno::DistanceField3D<TDataType>>();
-			inputSDF->assign(this->getVolume()->stateLevelSet()->getData().getSDF());
+			m_inputSDF = std::make_shared<dyno::DistanceField3D<TDataType>>();
+			m_inputSDF->assign(this->getVolume()->stateLevelSet()->getData().getSDF());
 		}
 		else
 		{
 			return;
 		}
 
-
-
 		if (this->statePointSet()->isEmpty()) {
 			auto pts = std::make_shared<PointSet<TDataType>>();
 			this->statePointSet()->setDataPtr(pts);
 		}
 
-		Coord minPoint = inputSDF->lowerBound();
-		Coord maxPoint = inputSDF->upperBound();
+		Coord minPoint = m_inputSDF->lowerBound();
+		Coord maxPoint = m_inputSDF->upperBound();
 
-		Vec3f cubeTilt = this->varCubeTilt()->getData();
-		Vec3f Xax = this->varX()->getData();
-		Vec3f Yax = this->varY()->getData();
-		Vec3f Zax = this->varZ()->getData();
+		Vec3f& cubeTilt = mCubeTilt; //this->varCubeTilt()->getData();
+		Vec3f& Xax = mX; //this->varX()->getData();
+		Vec3f& Yax = mY; //this->varY()->getData();
+		Vec3f& Zax = mZ; // this->varZ()->getData();
 		Mat3f cubeRotation(Xax, Yax, Zax);
 		cubeRotation = cubeRotation.transpose();
 
@@ -281,16 +267,16 @@ namespace dyno
 		DArray<Coord> allVertices((ni + 1) * (nj + 1) * (nk + 1));
 		DArray<int> VerticesFlag((ni + 1) * (nj + 1) * (nk + 1));
 
-		float Alpha = this->varAlpha()->getData() / 180.0f * M_PI;
-		float Beta = this->varBeta()->getData() / 180.0f * M_PI;
-		float Gamma = this->varGamma()->getData() / 180.0f * M_PI;
+		float Alpha =  mAlpha/ 180.0f * M_PI; //this->varAlpha()->getData()
+		float Beta = mBeta / 180.0f * M_PI; //this->varBeta()->getData() 
+		float Gamma = mGamma / 180.0f * M_PI; //this->varGamma()->getData()
 		Mat3f Rotation(cos(Alpha) * cos(Beta), cos(Alpha) * sin(Beta) * sin(Gamma) - sin(Alpha) * cos(Gamma), cos(Alpha) * sin(Beta) * cos(Gamma) + sin(Alpha) * sin(Gamma),
 			sin(Alpha) * cos(Beta), sin(Alpha) * sin(Beta) * sin(Gamma) + cos(Alpha) * cos(Gamma), sin(Alpha) * sin(Beta) * cos(Gamma) - cos(Alpha) * sin(Gamma),
 			-sin(Beta), cos(Beta) * sin(Gamma), cos(Beta) * cos(Gamma));
 
 		cuExecute3D(make_uint3(distance.nx(), distance.ny(), distance.nz()),
 			C_reconstructSDF,
-			*inputSDF,
+			*m_inputSDF,
 			distance,
 			minPoint,
 			allVertices,
@@ -331,6 +317,14 @@ namespace dyno
 			topo->setPoints(vertices);
 			topo->update();
 		}
+
+		distance.clear();
+		allVertices.clear();
+		VerticesFlag.clear();
+		CVerticesFlag.clear();
+		Cdistance.clear();
+		vertices.clear();
+		VerticesFlagScan.clear();
 	}
 
 	template<typename TDataType>
