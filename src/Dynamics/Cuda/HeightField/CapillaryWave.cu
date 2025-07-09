@@ -6,6 +6,8 @@
 
 #include "Mapping/HeightFieldToTriangleSet.h"
 #include "GLSurfaceVisualModule.h"
+#include <cuda_runtime.h>
+#include "ColorMapping.h"
 
 namespace dyno
 {
@@ -23,10 +25,7 @@ namespace dyno
 		auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
 		this->stateHeightField()->connect(mapper->inHeightField());
 		this->graphicsPipeline()->pushModule(mapper);
-
-		// 	mapper->varScale()->setValue(0.1);
-		// 	mapper->varTranslation()->setValue(Vec3f(-2, 0.2, -2));
-
+		
 		auto sRender = std::make_shared<GLSurfaceVisualModule>();
 		sRender->setColor(Color(0, 0.2, 1.0));
 		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
@@ -158,16 +157,19 @@ namespace dyno
 		cuExecute2D(extent,
 			CW_InitHeightDisp,
 			disp,
-			this->stateHeight()->getData());
+			this->stateHeight()->getData(),
+			level);
 	}
 
 	template<typename TDataType>
 	void CapillaryWave<TDataType>::updateStates()
 	{
+		uint frame = this->stateFrameNumber()->getValue();
+
 		Real dt = this->stateTimeStep()->getValue();
 
 		Real level = this->varWaterLevel()->getValue();
-
+		
 		auto grid = this->stateHeight()->getData();
 
 		uint res = grid.nx();
@@ -254,7 +256,8 @@ namespace dyno
 		cuExecute2D(extent,
 			CW_InitHeightDisp,
 			disp,
-			this->stateHeight()->getData());
+			this->stateHeight()->getData(),
+			level);
 
 		Node::updateStates();
 	}
@@ -458,23 +461,25 @@ namespace dyno
 
 			Real H = max(center.x, 0.0f);
 
-// 			CW_FixHorizontalShore(west, center, east);
-// 			CW_FixVerticalShore(north, center, south);
+ 			//CW_FixHorizontalShore(west, center, east);
+ 			//CW_FixVerticalShore(north, center, south);
 
-// 			Coord4D u_south = 0.5f * (south + center) - timestep * (CW_VerticalPotential(south, H, GRAVITY) - CW_VerticalPotential(center, H, GRAVITY));
-// 			Coord4D u_north = 0.5f * (north + center) - timestep * (CW_VerticalPotential(center, H, GRAVITY) - CW_VerticalPotential(north, H, GRAVITY));
-// 			Coord4D u_west = 0.5f * (west + center) - timestep * (CW_HorizontalPotential(center, H, GRAVITY) - CW_HorizontalPotential(west, H, GRAVITY));
-// 			Coord4D u_east = 0.5f * (east + center) - timestep * (CW_HorizontalPotential(east, H, GRAVITY) - CW_HorizontalPotential(center, H, GRAVITY));
-// 
-// 			Coord4D u_center = center - timestep * (CW_HorizontalPotential(u_east, H, GRAVITY) - CW_HorizontalPotential(u_west, H, GRAVITY)) - timestep * (CW_VerticalPotential(u_south, H, GRAVITY) - CW_VerticalPotential(u_north, H, GRAVITY));
+ 			//Coord4D u_south = 0.5f * (south + center) - timestep * (CW_VerticalPotential(south, H, GRAVITY) - CW_VerticalPotential(center, H, GRAVITY));
+ 			//Coord4D u_north = 0.5f * (north + center) - timestep * (CW_VerticalPotential(center, H, GRAVITY) - CW_VerticalPotential(north, H, GRAVITY));
+ 			//Coord4D u_west = 0.5f * (west + center) - timestep * (CW_HorizontalPotential(center, H, GRAVITY) - CW_HorizontalPotential(west, H, GRAVITY));
+ 			//Coord4D u_east = 0.5f * (east + center) - timestep * (CW_HorizontalPotential(east, H, GRAVITY) - CW_HorizontalPotential(center, H, GRAVITY));
+ 
+ 			//Coord4D u_center = center - timestep * (CW_HorizontalPotential(u_east, H, GRAVITY) - CW_HorizontalPotential(u_west, H, GRAVITY)) - timestep * (CW_VerticalPotential(u_south, H, GRAVITY) - CW_VerticalPotential(u_north, H, GRAVITY));
 
-// 			Coord4D eastflux = CentralUpwindX(center, east, GRAVITY);
-// 			Coord4D westflux = CentralUpwindX(west, center, GRAVITY);
-// 			Coord4D southflux = CentralUpwindY(center, south, GRAVITY);
-// 			Coord4D northflux = CentralUpwindY(north, center, GRAVITY);
-// 			Coord4D flux = eastflux - westflux + southflux - northflux;
-// 
-// 			Coord4D u_center = center - timestep * flux - timestep * (CW_HorizontalSlope(east, H, GRAVITY) - CW_HorizontalSlope(west, H, GRAVITY)) - timestep * (CW_VerticalSlope(south, H, GRAVITY) - CW_VerticalSlope(north, H, GRAVITY));
+
+ 			//Coord4D eastflux = CentralUpwindX(center, east, GRAVITY);
+ 			//Coord4D westflux = CentralUpwindX(west, center, GRAVITY);
+ 			//Coord4D southflux = CentralUpwindY(center, south, GRAVITY);
+ 			//Coord4D northflux = CentralUpwindY(north, center, GRAVITY);
+ 			//Coord4D flux = eastflux - westflux + southflux - northflux;
+ 
+ 			//Coord4D u_center = center - timestep * flux - timestep * (CW_HorizontalSlope(east, H, GRAVITY) - CW_HorizontalSlope(west, H, GRAVITY)) - timestep * (CW_VerticalSlope(south, H, GRAVITY) - CW_VerticalSlope(north, H, GRAVITY));
+
 
 			Coord4D eastflux = FirstOrderUpwindX(center, east, GRAVITY, timestep);
 			Coord4D westflux = FirstOrderUpwindX(west, center, GRAVITY, timestep);
@@ -485,30 +490,6 @@ namespace dyno
 			Coord4D u_center = center - timestep * flux;
 			u_center.y += 0.5 * (FirstOrderUpwindPotential(center, east, GRAVITY, timestep) + FirstOrderUpwindPotential(west, center, GRAVITY, timestep));
 			u_center.z += 0.5 * (FirstOrderUpwindPotential(center, south, GRAVITY, timestep) + FirstOrderUpwindPotential(north, center, GRAVITY, timestep));
-
-// 			//if (gridx == 796 && gridy == 793)
-// 			if (gridx == 100 && gridy == 100)
-// 			{
-// 				//printf("height: %d %d: south %f; north %f \n", gridx, gridy, south.x + south.w, north.x + north.w);
-// 
-// 				// 				printf("%d %d: %f %f %f %f \n", gridx, gridy, flux.x, flux.y, flux.z, flux.w);
-// 				// 				printf("east: %d %d: %f %f %f %f \n", gridx, gridy, eastflux.x, eastflux.y, eastflux.z, eastflux.w);
-// 				// 				printf("west: %d %d: %f %f %f %f \n", gridx, gridy, westflux.x, westflux.y, westflux.z, westflux.w);
-// 				// 				printf("south: %d %d: %f %f %f %f \n", gridx, gridy, southflux.x, southflux.y, southflux.z, southflux.w);
-// 
-// // 				printf("north: %d %d: %f %f %f %f; s: %f \n", gridx, gridy, north.x, north.y, north.z, north.w, north.x + north.w);
-// // 
-// // 				printf("center: %d %d: %f %f %f %f; s: %f \n", gridx, gridy, center.x, center.y, center.z, center.w, center.x + center.w);
-// 
-// 				printf("northflux: %d %d: %f %f %f %f \n", gridx, gridy, northflux.x, northflux.y, northflux.z, northflux.w);
-// 
-// 				printf("center: %d %d: %f %f %f %f \n", gridx, gridy, u_center.x, u_center.y, u_center.z, u_center.w);
-// 			}
-
-// 			if (glm::abs(u_center.x) > EPSILON && glm::abs(u_center.y / u_center.x) > 100)
-// 			{
-// 				printf("%f %f %f %f \n", u_center.x, u_center.y, u_center.z, center.w);
-// 			}
 
 			//Hack: Clamp small value to ensure stability
 			Real hc = maximum(u_center.x, 0.0f);
@@ -610,10 +591,11 @@ namespace dyno
 		}
 	}
 
-	template <typename Coord3D, typename Coord4D>
+	template <typename Real, typename Coord3D, typename Coord4D>
 	__global__ void CW_InitHeightDisp(
 		DArray2D<Coord3D> displacement,
-		DArray2D<Coord4D> grid)
+		DArray2D<Coord4D> grid,
+		Real level)
 	{
 		unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
 		unsigned int j = blockIdx.y * blockDim.y + threadIdx.y;
@@ -627,6 +609,8 @@ namespace dyno
 			displacement(i, j).x = 0;
 			displacement(i, j).y = gij.x + gij.w;
 			displacement(i, j).z = 0;
+
+			if (gij.x <= 0.0f) displacement(i, j).y = level;
 		}
 	}
 

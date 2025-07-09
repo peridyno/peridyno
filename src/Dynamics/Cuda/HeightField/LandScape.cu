@@ -16,6 +16,7 @@ namespace dyno
     {
         auto heights = std::make_shared<HeightField<TDataType>>();
         this->stateHeightField()->setDataPtr(heights);
+        this->stateInitialHeights()->allocate();
 
         auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
         //mapper->varTranslation()->setValue(Vec3f(-128.0f, -5.0f, -128.0f));
@@ -78,21 +79,22 @@ namespace dyno
         auto loc = this->varLocation()->getValue();
 
         auto topo = this->stateHeightField()->getDataPtr();
+        auto initialHeights = this->stateInitialHeights()->constDataPtr();
 
-        uint nx = mInitialHeights.nx();
-        uint nz = mInitialHeights.ny();
+        uint nx = initialHeights->nx();
+        uint nz = initialHeights->ny();
         // printf("nx: %d, nz: %d\n", nx, nz);
 
-        topo->setExtents(mInitialHeights.nx(), mInitialHeights.ny());
+        topo->setExtents(nx, nz);
         topo->setGridSpacing(scale.x);
         topo->setOrigin(Coord(-0.5 * nx * scale.x + loc.x, loc.y, -0.5 * nz * scale.z + loc.z));
 
         auto& disp = topo->getDisplacement();
 
-        cuExecute2D(make_uint2(mInitialHeights.nx(), mInitialHeights.ny()),
+        cuExecute2D(make_uint2(nx, nz),
             LS_Transform,
             disp,
-            mInitialHeights,
+            *initialHeights,
             scale);
     }
 
@@ -120,7 +122,7 @@ namespace dyno
 				}
 			}
 
-            mInitialHeights.assign(hLand);
+            this->stateInitialHeights()->assign(hLand);
 
 			delete data;
 		}
