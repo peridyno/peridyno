@@ -66,7 +66,6 @@ namespace dyno
 
 		QValidator::State validate(QString& input, int& pos) const override
 		{
-			//return QValidator::Intermediate;
 			if (input.isEmpty())
 				return QValidator::Intermediate;
 

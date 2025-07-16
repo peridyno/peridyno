@@ -1,5 +1,5 @@
 /**
- * Copyright 2025 Xiaowei He
+ * Copyright 2022 Yuzhong Guo
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,33 +15,45 @@
  */
 
 #pragma once
-#include "TriangleSet.h"
+#include "Node/ParametricModel.h"
+#include "GLSurfaceVisualModule.h"
+#include "GLWireframeVisualModule.h"
+#include "Topology/TriangleSets.h"
+
 
 namespace dyno
 {
+
+
 	template<typename TDataType>
-	class TriangleSets : public TriangleSet<TDataType>
+	class TriangleSetToTriangleSets : public ParametricModel<TDataType>
 	{
+		DECLARE_TCLASS(TriangleSetToTriangleSets, TDataType);
+
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TopologyModule::Triangle Triangle;
 
-		TriangleSets();
-		~TriangleSets() override;
+		TriangleSetToTriangleSets();
 
-		const uint shapeSize() { return mShapeSize; }
 
-		uint setShapeSize(uint size) { mShapeSize = size; return mShapeSize; }
 
-		DArray<uint>& shapeIds() { return mShapeIds; }
+	public:
 
-		void load(std::vector<std::shared_ptr<TriangleSet<TDataType>>>& tsArray);
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
+
+		DEF_INSTANCE_STATE(TriangleSets<TDataType>, TriangleSets, "");
+
+
+	protected:
+		void resetStates() override;
+
 
 	private:
-		uint mShapeSize = 1;
 
-		DArray<uint> mShapeIds;
+		std::vector<std::vector<int>> groupTrianglesByConnectivity(std::shared_ptr<TriangleSet<TDataType>> triSet);
+
+
 	};
+	IMPLEMENT_TCLASS(TriangleSetToTriangleSets, TDataType);
 }
-

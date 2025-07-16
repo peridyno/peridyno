@@ -206,15 +206,15 @@ namespace dyno
 		removeButton->setFixedSize(100, 40);
 
 		QObject::connect(removeButton, SIGNAL(pressed()), this, SLOT(emitSignal()));
-		QObject::connect(mT0, SIGNAL(valueChanged(double)), this, SLOT(emitChange(double)));
-		QObject::connect(mT1, SIGNAL(valueChanged(double)), this, SLOT(emitChange(double)));
-		QObject::connect(mT2, SIGNAL(valueChanged(double)), this, SLOT(emitChange(double)));
-		QObject::connect(mR0, SIGNAL(valueChanged(double)), this, SLOT(emitChange(double)));
-		QObject::connect(mR1, SIGNAL(valueChanged(double)), this, SLOT(emitChange(double)));
-		QObject::connect(mR2, SIGNAL(valueChanged(double)), this, SLOT(emitChange(double)));
-		QObject::connect(mS0, SIGNAL(valueChanged(double)), this, SLOT(emitChange(double)));
-		QObject::connect(mS1, SIGNAL(valueChanged(double)), this, SLOT(emitChange(double)));
-		QObject::connect(mS2, SIGNAL(valueChanged(double)), this, SLOT(emitChange(double)));
+		QObject::connect(mT0, SIGNAL(editingFinishedWithValue(double)), this, SLOT(emitChange(double)));
+		QObject::connect(mT1, SIGNAL(editingFinishedWithValue(double)), this, SLOT(emitChange(double)));
+		QObject::connect(mT2, SIGNAL(editingFinishedWithValue(double)), this, SLOT(emitChange(double)));
+		QObject::connect(mR0, SIGNAL(editingFinishedWithValue(double)), this, SLOT(emitChange(double)));
+		QObject::connect(mR1, SIGNAL(editingFinishedWithValue(double)), this, SLOT(emitChange(double)));
+		QObject::connect(mR2, SIGNAL(editingFinishedWithValue(double)), this, SLOT(emitChange(double)));
+		QObject::connect(mS0, SIGNAL(editingFinishedWithValue(double)), this, SLOT(emitChange(double)));
+		QObject::connect(mS1, SIGNAL(editingFinishedWithValue(double)), this, SLOT(emitChange(double)));
+		QObject::connect(mS2, SIGNAL(editingFinishedWithValue(double)), this, SLOT(emitChange(double)));
 
 	};
 
