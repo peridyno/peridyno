@@ -157,7 +157,7 @@ void pybind_framework(py::module& m)
 		.def("removeParameter", &OBase::removeParameter)
 		.def("getParameters", &OBase::getParameters, py::return_value_policy::reference);
 
-	py::class_<Node, OBase, std::shared_ptr<Node>>(m, "Node", py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Node, OBase, NodeTrampoline, std::shared_ptr<Node>>(m, "Node", py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("setName", &Node::setName)
 		.def("getName", &Node::getName)
@@ -197,7 +197,9 @@ void pybind_framework(py::module& m)
 		.def("sizeOfExportNodes", &Node::sizeOfExportNodes)
 		.def("stateElapsedTime", &Node::stateElapsedTime, py::return_value_policy::reference)
 		.def("stateTimeStep", &Node::stateTimeStep, py::return_value_policy::reference)
-		.def("stateFrameNumber", &Node::stateFrameNumber, py::return_value_policy::reference);
+		.def("stateFrameNumber", &Node::stateFrameNumber, py::return_value_policy::reference)
+		.def("setForceUpdate", &Node::setForceUpdate, py::return_value_policy::reference)
+		.def("resetStates", &NodePublicist::resetStates);
 
 	py::class_<dyno::NBoundingBox>(m, "NBoundingBox")
 		.def(py::init<>())
@@ -863,6 +865,8 @@ void pybind_framework(py::module& m)
 			declare_instance<dyno::HeightField<dyno::DataType3f>>(m, "HeightField3f");
 			declare_instance<dyno::TextureMesh>(m, "TextureMesh");
 			declare_instance<dyno::LevelSet<dyno::DataType3f>>(m, "LevelSet3f");
+			declare_instance<dyno::QuadSet<dyno::DataType3f>>(m, "QuadSet3f");
+			declare_instance<dyno::PolygonSet<dyno::DataType3f>>(m, "PolygonSet3f");
 
 			declare_instances<TopologyModule>(m, "");
 			declare_instances<dyno::PointSet<dyno::DataType3f>>(m, "PointSet3f");
@@ -872,6 +876,8 @@ void pybind_framework(py::module& m)
 			declare_instances<dyno::HeightField<dyno::DataType3f>>(m, "HeightField3f");
 			declare_instances<dyno::TextureMesh>(m, "TextureMesh");
 			declare_instances<dyno::LevelSet<dyno::DataType3f>>(m, "LevelSet3f");
+			declare_instances<dyno::QuadSet<dyno::DataType3f>>(m, "QuadSet3f");
+			declare_instances<dyno::PolygonSet<dyno::DataType3f>>(m, "PolygonSet3f");
 
 			// New
 			declare_parametric_model<dyno::DataType3f>(m, "3f");

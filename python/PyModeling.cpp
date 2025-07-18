@@ -148,4 +148,14 @@ void pybind_modeling(py::module& m)
 		.def("resamplePointFromLine", &dyno::Curve::resamplePointFromLine)
 
 		.def("convertCoordToStr", &dyno::Curve::convertCoordToStr);
+
+	py::enum_<dyno::BasicShapeType>(m, "BasicShapeType", py::arithmetic())
+		.value("PLANE", dyno::BasicShapeType::PLANE)
+		.value("CUBE", dyno::BasicShapeType::CUBE)
+		.value("SPHERE", dyno::BasicShapeType::SPHERE)
+		.value("CONE", dyno::BasicShapeType::CONE)
+		.value("CAPSULE", dyno::BasicShapeType::CAPSULE)
+		.value("CYLINDER", dyno::BasicShapeType::CYLINDER)
+		.value("UNKNOWN", dyno::BasicShapeType::UNKNOWN)
+		.export_values();
 }

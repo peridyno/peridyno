@@ -125,6 +125,20 @@ using uchar = unsigned char;
 using uint64 = unsigned long long;
 using int64 = signed long long;
 
+
+class NodeTrampoline : public dyno::Node
+{
+public:
+	void resetStates() override { PYBIND11_OVERRIDE(void, dyno::Node, resetStates); }
+};
+
+class NodePublicist : public dyno::Node
+{
+public:
+	using dyno::Node::resetStates;
+};
+
+
 template<class TNode, class ...Args>
 std::shared_ptr<TNode> create_root(SceneGraph& scene, Args&& ... args) {
 	return scene.createNewScene<TNode>(std::forward<Args>(args)...);
