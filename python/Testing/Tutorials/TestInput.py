@@ -1,23 +1,5 @@
 import PyPeridyno as dyno
 
-# class ParametricModel(dyno.Node):
-#     def __init__(self):
-#         super().__init__()
-#         self.setForceUpdate(False)
-#         self.setAutoHidden(True)
-#         # self.varScale().setRange(0.0001, 1000)
-#
-# class BasicShape(ParametricModel):
-#     def __init__(self):
-#         super().__init__()
-#
-#     def getNodeType(self):
-#         return "Basic Shapes"
-#
-#     def getShapeType(self):
-#         return dyno.BasicShapeType.UNKNOWN
-
-
 class PlaneModel(dyno.BasicShape3f):
     def __init__(self):
         super().__init__()
@@ -98,86 +80,86 @@ class PlaneModel(dyno.BasicShape3f):
 
     def resetStates(self):
         print("python resetStates")
-        # self.varChange()
+        self.varChange()
 
 
     def varChange(self):
-        print("update")
-        center = self.varLocation().getData()
-        rot = self.varRotation().getData()
-        scale = self.varScale().getData()
-
-        segmentX = self.varSegmentX.getData()
-        segmentZ = self.varSegmentZ.getData()
-
-        lengthX = self.varLengthX.getData()
-        lengthZ = self.varLengthZ.getData()
-
-        length = dyno.Vector3f(lengthX, 1, lengthZ)
-        segments = dyno.Vector3i(segmentX, 1, segmentZ)
-
-        lengthX *= scale[0]
-        lengthZ *= scale[2]
-
-        q = self.computeQuaternion()
-        q.normalize()
-
-        vertices = []
-        quads = []
-        triangles = []
-
-        dx = lengthX / segmentX
-        dz = lengthZ / segmentZ
-
-        # Lambda function to rotate a vertex
-        def RV(v):
-            return center + q.rotate(v)
-
-        numOfPolygon = segments[0] * segments[2]
-        counter2 = [4] * numOfPolygon  # Equivalent to CArray<uint>
-
-        incre = 0
-        for j in range(numOfPolygon):
-            counter2[incre] = 4
-            incre += 1
-
-        polygonIndices = []  # Equivalent to CArrayList<uint>
-        incre = 0
-        for nz in range(segmentZ + 1):
-            for nx in range(segmentX + 1):
-                x = nx * dx - lengthX / 2
-                z = nz * dz - lengthZ / 2
-                vertices.append(RV([x, 0.0, z]))
-
-        for nz in range(segmentZ):
-            for nx in range(segmentX):
-                v0 = nx + nz * (segmentX + 1)
-                v1 = nx + 1 + nz * (segmentX + 1)
-                v2 = nx + 1 + (nz + 1) * (segmentX + 1)
-                v3 = nx + (nz + 1) * (segmentX + 1)
-
-                if (nx + nz) % 2 == 0:
-                    polygonIndices[incre] = [v3, v2, v1, v0]
-                else:
-                    polygonIndices[incre] = [v2, v1, v0, v3]
-
-                incre += 1
-
-        polySet = self.statePolygonSet.getDataPtr()
-
-        polySet.setPoints(vertices)
-        polySet.setPolygons(polygonIndices)
-        polySet.update()
-
-        polygonIndices.clear()
-
-        ts = self.stateTriangleSet.getData()
-        polySet.turnIntoTriangleSet(ts)
-
-        qs = self.stateQuadSet.getData()
-        polySet.turnIntoQuadSet(qs)
-
-        vertices.clear()
+        print("varChange")
+        # center = self.varLocation().getData()
+        # rot = self.varRotation().getData()
+        # scale = self.varScale().getData()
+        #
+        # segmentX = self.varSegmentX.getData()
+        # segmentZ = self.varSegmentZ.getData()
+        #
+        # lengthX = self.varLengthX.getData()
+        # lengthZ = self.varLengthZ.getData()
+        #
+        # length = dyno.Vector3f(lengthX, 1, lengthZ)
+        # segments = dyno.Vector3i(segmentX, 1, segmentZ)
+        #
+        # lengthX *= scale[0]
+        # lengthZ *= scale[2]
+        #
+        # q = self.computeQuaternion()
+        # q.normalize()
+        #
+        # vertices = []
+        # quads = []
+        # triangles = []
+        #
+        # dx = lengthX / segmentX
+        # dz = lengthZ / segmentZ
+        #
+        # # Lambda function to rotate a vertex
+        # def RV(v):
+        #     return center + q.rotate(v)
+        #
+        # numOfPolygon = segments[0] * segments[2]
+        # counter2 = [4] * numOfPolygon  # Equivalent to CArray<uint>
+        #
+        # incre = 0
+        # for j in range(numOfPolygon):
+        #     counter2[incre] = 4
+        #     incre += 1
+        #
+        # polygonIndices = []  # Equivalent to CArrayList<uint>
+        # incre = 0
+        # for nz in range(segmentZ + 1):
+        #     for nx in range(segmentX + 1):
+        #         x = nx * dx - lengthX / 2
+        #         z = nz * dz - lengthZ / 2
+        #         vertices.append(RV([x, 0.0, z]))
+        #
+        # for nz in range(segmentZ):
+        #     for nx in range(segmentX):
+        #         v0 = nx + nz * (segmentX + 1)
+        #         v1 = nx + 1 + nz * (segmentX + 1)
+        #         v2 = nx + 1 + (nz + 1) * (segmentX + 1)
+        #         v3 = nx + (nz + 1) * (segmentX + 1)
+        #
+        #         if (nx + nz) % 2 == 0:
+        #             polygonIndices[incre] = [v3, v2, v1, v0]
+        #         else:
+        #             polygonIndices[incre] = [v2, v1, v0, v3]
+        #
+        #         incre += 1
+        #
+        # polySet = self.statePolygonSet.getDataPtr()
+        #
+        # polySet.setPoints(vertices)
+        # polySet.setPolygons(polygonIndices)
+        # polySet.update()
+        #
+        # polygonIndices.clear()
+        #
+        # ts = self.stateTriangleSet.getData()
+        # polySet.turnIntoTriangleSet(ts)
+        #
+        # qs = self.stateQuadSet.getData()
+        # polySet.turnIntoQuadSet(qs)
+        #
+        # vertices.clear()
 
 
     def boundingBox(self):

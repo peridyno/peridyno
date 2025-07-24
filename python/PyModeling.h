@@ -3,15 +3,28 @@
 
 #include "PyFramework.h"
 #include "BasicShapes/BasicShape.h"
+class BasicShapeTrampoline : public dyno::BasicShape<dyno::DataType3f>
+{
+public:
+	void resetStates() override { PYBIND11_OVERRIDE(void, dyno::BasicShape<dyno::DataType3f>, resetStates); }
+};
+
+class BasicShapePublicist : public dyno::BasicShape<dyno::DataType3f>
+{
+public:
+	using dyno::BasicShape<dyno::DataType3f>::resetStates;
+};
+
 template <typename TDataType>
 void declare_basic_shape(py::module& m, std::string typestr) {
 	using Class = dyno::BasicShape<TDataType>;
 	using Parent = dyno::ParametricModel<TDataType>;
 	std::string pyclass_name = std::string("BasicShape") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>BS(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
+	py::class_<Class, Parent, BasicShapeTrampoline, std::shared_ptr<Class>>BS(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	BS.def(py::init<>())
 		.def("getNodeType", &Class::getNodeType)
-		.def("getShapeType", &Class::getShapeType);
+		.def("getShapeType", &Class::getShapeType)
+		.def("resetStates", &BasicShapePublicist::resetStates);
 }
 
 #include "BasicShapes/CapsuleModel.h"

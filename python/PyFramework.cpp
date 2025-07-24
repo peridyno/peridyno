@@ -157,7 +157,7 @@ void pybind_framework(py::module& m)
 		.def("removeParameter", &OBase::removeParameter)
 		.def("getParameters", &OBase::getParameters, py::return_value_policy::reference);
 
-	py::class_<Node, OBase, NodeTrampoline, std::shared_ptr<Node>>(m, "Node", py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Node, OBase, std::shared_ptr<Node>>(m, "Node", py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("setName", &Node::setName)
 		.def("getName", &Node::getName)
@@ -198,8 +198,8 @@ void pybind_framework(py::module& m)
 		.def("stateElapsedTime", &Node::stateElapsedTime, py::return_value_policy::reference)
 		.def("stateTimeStep", &Node::stateTimeStep, py::return_value_policy::reference)
 		.def("stateFrameNumber", &Node::stateFrameNumber, py::return_value_policy::reference)
-		.def("setForceUpdate", &Node::setForceUpdate, py::return_value_policy::reference)
-		.def("resetStates", &NodePublicist::resetStates);
+		.def("setForceUpdate", &Node::setForceUpdate, py::return_value_policy::reference);
+		//.def("resetStates", &NodePublicist::resetStates);
 
 	py::class_<dyno::NBoundingBox>(m, "NBoundingBox")
 		.def(py::init<>())
