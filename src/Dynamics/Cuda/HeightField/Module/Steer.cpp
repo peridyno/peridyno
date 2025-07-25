@@ -14,6 +14,7 @@ namespace dyno
 	template<typename TDataType>
 	void Steer<TDataType>::onEvent(PKeyboardEvent event)
 	{
+		std::cout << "C++ onEvent" << std::endl;
 		auto quat = this->inQuaternion()->getData();
 
 		Coord vel = this->inVelocity()->getData();

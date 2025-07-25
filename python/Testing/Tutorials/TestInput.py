@@ -1,184 +1,116 @@
 import PyPeridyno as dyno
 
-class PlaneModel(dyno.BasicShape3f):
+class PythonSteer(dyno.KeyboardInputModule):
     def __init__(self):
         super().__init__()
-        self.var_LengthX = dyno.FVarf(1.0, "LengthX", "length X", dyno.FieldTypeEnum.Param, self)
-        self.var_LengthZ = dyno.FVarf(1,"LengthZ", "LengthZ", dyno.FieldTypeEnum.Param, self)
-        self.var_SegmentX = dyno.FVarf(1, "SegmentX", "SegmentX",dyno.FieldTypeEnum.Param, self)
-        self.var_SegmentZ = dyno.FVarf(1, "SegmentZ", "SegmentZ", dyno.FieldTypeEnum.Param, self)
-
-        self.state_PolygonSet = dyno.FInstance("PolygonSet", "", dyno.FieldTypeEnum.State, self)
-        self.state_TriangleSet = dyno.FInstance("TriangleSet", "", dyno.FieldTypeEnum.State, self)
-        self.state_QuadSet = dyno.FInstance("QuadSet", "", dyno.FieldTypeEnum.State, self)
-
-        self.varLengthX.setRange(0.01, 100)
-        self.varLengthZ.setRange(1, 100)
-        self.varSegmentX.setRange(1, 100)
-        self.varSegmentZ.setRange(1, 100)
-
-        # Initialize data structures
-        self.statePolygonSet.setDataPtr(dyno.PolygonSet3f())
-        self.stateTriangleSet.setDataPtr(dyno.TriangleSet3f())
-        self.stateQuadSet.setDataPtr(dyno.QuadSet3f())
-
-        # Rending
-        tsRender = dyno.GLSurfaceVisualModule()
-        self.stateTriangleSet.connect(tsRender.inTriangleSet())
-        self.graphicsPipeline().pushModule(tsRender)
-
-        exES = dyno.ExtractTriangleSetFromPolygonSet3f()
-        self.statePolygonSet.connect(exES.inPolygonSet())
-        self.graphicsPipeline().pushModule(exES)
-
-        esRender = dyno.GLWireframeVisualModule()
-        esRender.varBaseColor().setValue(dyno.Color(0,0,0))
-        self.stateTriangleSet.connect(esRender.inEdgeSet())
-        self.graphicsPipeline().pushModule(esRender)
-
-        self.stateTriangleSet.promoteOuput()
-        self.stateQuadSet.promoteOuput()
-        self.statePolygonSet.promoteOuput()
-
-    def caption(self):
-        return "Plane"
-
-    def getShapeType(self):
-        return dyno.BasicShapeType.PLANE
+        self.var_Strength = dyno.FVarf(1.0, "Strength", "Strength", dyno.FieldTypeEnum.Param, self)
+        self.in_Velocity = dyno.FVarf("Velocity", "Velocity", dyno.FieldTypeEnum.In, self)
+        self.in_AngularVelocity = dyno.FVarf("AngularVelocity", "Angular velocity", dyno.FieldTypeEnum.In, self)
+        self.in_Quaternion = dyno.FVarf("Quaternion", "Rotation", dyno.FieldTypeEnum.In, self)
 
     @property
-    def varLengthX(self):
-        return self.var_LengthX
+    def varStrength(self):
+        return self.var_Strength
 
     @property
-    def varLengthZ(self):
-        return self.var_LengthZ
+    def inVelocity(self):
+        return self.in_Velocity
 
     @property
-    def varSegmentX(self):
-        return self.var_SegmentX
+    def inAngularVelocity(self):
+        return self.in_AngularVelocity
 
     @property
-    def varSegmentZ(self):
-        return self.var_SegmentZ
+    def inQuaternion(self):
+        return self.in_Quaternion
 
-    @property
-    def statePolygonSet(self):
-        return self.state_PolygonSet
+    def onEvent(self, event):
+        print("python onEvent")
 
-    @property
-    def stateTriangleSet(self):
-        return self.state_TriangleSet
+        # quat = self.inQuaternion.getData()
+        # vel = self.inVelocity.getData()
+        # omega = self.inAngularVelocity.getData()
+        # rot = quat.toMatrix3x3()
+        #
+        # vel_prime = rot.transpose() * vel
+        # omega_prime = rot.transpose() * omega
+        #
+        # strength = self.varStrength.getValue()
+        #
+        # if event.key == dyno.PKeyboardType.PKEY_A:
+        #     print("python botton A")
+        #     omega_prime.y += strength
+        # elif event.key == dyno.PKeyboardType.PKEY_S:
+        #     vel_prime[2] *= 0.95
+        # elif event.key == dyno.PKeyboardType.PKEY_D:
+        #     omega_prime.y -= strength
+        # elif event.key == dyno.PKeyboardType.PKEY_W:
+        #     vel_prime[2] += strength
+        #     vel_prime[2] = 5 if vel_prime[2] > 5 else vel_prime[2]
+        #     vel_prime[2] = -5 if vel_prime[2] < -5 else vel_prime[2]
+        #
+        # self.inVelocity.setValue(rot * vel_prime)
+        # self.inAngularVelocity.setValue(rot * omega_prime)
 
-    @property
-    def stateQuadSet(self):
-        return self.state_QuadSet
-
-    def reset(self):
-        print("python reset")
-        # self.resetStates()
-
-    def resetStates(self):
-        print("python resetStates")
-        self.varChange()
-
-
-    def varChange(self):
-        print("varChange")
-        # center = self.varLocation().getData()
-        # rot = self.varRotation().getData()
-        # scale = self.varScale().getData()
-        #
-        # segmentX = self.varSegmentX.getData()
-        # segmentZ = self.varSegmentZ.getData()
-        #
-        # lengthX = self.varLengthX.getData()
-        # lengthZ = self.varLengthZ.getData()
-        #
-        # length = dyno.Vector3f(lengthX, 1, lengthZ)
-        # segments = dyno.Vector3i(segmentX, 1, segmentZ)
-        #
-        # lengthX *= scale[0]
-        # lengthZ *= scale[2]
-        #
-        # q = self.computeQuaternion()
-        # q.normalize()
-        #
-        # vertices = []
-        # quads = []
-        # triangles = []
-        #
-        # dx = lengthX / segmentX
-        # dz = lengthZ / segmentZ
-        #
-        # # Lambda function to rotate a vertex
-        # def RV(v):
-        #     return center + q.rotate(v)
-        #
-        # numOfPolygon = segments[0] * segments[2]
-        # counter2 = [4] * numOfPolygon  # Equivalent to CArray<uint>
-        #
-        # incre = 0
-        # for j in range(numOfPolygon):
-        #     counter2[incre] = 4
-        #     incre += 1
-        #
-        # polygonIndices = []  # Equivalent to CArrayList<uint>
-        # incre = 0
-        # for nz in range(segmentZ + 1):
-        #     for nx in range(segmentX + 1):
-        #         x = nx * dx - lengthX / 2
-        #         z = nz * dz - lengthZ / 2
-        #         vertices.append(RV([x, 0.0, z]))
-        #
-        # for nz in range(segmentZ):
-        #     for nx in range(segmentX):
-        #         v0 = nx + nz * (segmentX + 1)
-        #         v1 = nx + 1 + nz * (segmentX + 1)
-        #         v2 = nx + 1 + (nz + 1) * (segmentX + 1)
-        #         v3 = nx + (nz + 1) * (segmentX + 1)
-        #
-        #         if (nx + nz) % 2 == 0:
-        #             polygonIndices[incre] = [v3, v2, v1, v0]
-        #         else:
-        #             polygonIndices[incre] = [v2, v1, v0, v3]
-        #
-        #         incre += 1
-        #
-        # polySet = self.statePolygonSet.getDataPtr()
-        #
-        # polySet.setPoints(vertices)
-        # polySet.setPolygons(polygonIndices)
-        # polySet.update()
-        #
-        # polygonIndices.clear()
-        #
-        # ts = self.stateTriangleSet.getData()
-        # polySet.turnIntoTriangleSet(ts)
-        #
-        # qs = self.stateQuadSet.getData()
-        # polySet.turnIntoQuadSet(qs)
-        #
-        # vertices.clear()
-
-
-    def boundingBox(self):
-        center = self.varLocation().getValue()
-        rot = self.varRotation().getValue()
-        scale = self.varScale().getValue()
-
-
-
-        q = self.computeQuaternion()
-
-print(isinstance(PlaneModel,dyno.Node ))
 scn = dyno.SceneGraph()
-scn.setUpperBound(dyno.Vector3f([2,2,2]))
-scn.setLowerBound(dyno.Vector3f([-2,-2,-2]))
 
+ocean = dyno.Ocean3f()
+ocean.varExtentX().setValue(2)
+ocean.varExtentZ().setValue(2)
+scn.addNode(ocean)
 
-plane = PlaneModel()
-scn.addNode(plane)
+patch = dyno.OceanPatch3f()
+scn.addNode(patch)
+patch.varWindType().setValue(5)
+patch.varPatchSize().setValue(128)
+patch.connect(ocean.importOceanPatch())
+patch.varResolution().setValue(512)
+
+wake = dyno.Wake3f()
+scn.addNode(wake)
+wake.varWaterLevel().setValue(4)
+wake.varLength().setValue(128)
+wake.varMagnitude().setValue(0.2)
+wake.connect(ocean.importCapillaryWaves())
+
+mapper = dyno.HeightFieldToTriangleSet3f()
+
+ocean.stateHeightField().connect(mapper.inHeightField())
+ocean.graphicsPipeline().pushModule(mapper)
+
+sRender = dyno.GLSurfaceVisualModule()
+sRender.setColor(dyno.Color(0,0.2,1))
+sRender.varUseVertexNormal().setValue(False)
+sRender.varAlpha().setValue(0.6)
+mapper.outTriangleSet().connect(sRender.inTriangleSet())
+ocean.graphicsPipeline().pushModule(sRender)
+
+boat = dyno.Vessel3f()
+scn.addNode(boat)
+boat.varDensity().setValue(150)
+boat.varBarycenterOffset().setValue(dyno.Vector3f([0,0,-0.5]))
+boat.stateVelocity().setValue(dyno.Vector3f([0,0,0]))
+boat.varEnvelopeName().setValue(dyno.FilePath(dyno.getAssetPath() + "obj/boat_boundary.obj"))
+boat.varTextureMeshName().setValue(dyno.FilePath(dyno.getAssetPath() + "gltf/SailBoat/SailBoat.gltf"))
+
+# steer = dyno.Steer3f()
+# boat.stateVelocity().connect(steer.inVelocity())
+# boat.stateAngularVelocity().connect(steer.inAngularVelocity())
+# boat.stateQuaternion().connect(steer.inQuaternion())
+# boat.animationPipeline().pushModule(steer)
+
+pySteer = PythonSteer()
+boat.stateVelocity().connect(pySteer.inVelocity)
+boat.stateAngularVelocity().connect(pySteer.inAngularVelocity)
+boat.stateQuaternion().connect(pySteer.inQuaternion)
+boat.animationPipeline().pushModule(pySteer)
+
+coupling = dyno.RigidWaterCoupling3f()
+scn.addNode(coupling)
+boat.connect(wake.importVessel())
+boat.connect(coupling.importVessels())
+ocean.connect(coupling.importOcean())
+
 
 app = dyno.GlfwApp()
 app.setSceneGraph(scn)

@@ -368,24 +368,24 @@ void pybind_framework(py::module& m)
 		.def("standardObjectPointer", &InstanceBase::standardObjectPointer)
 		.def("className", &InstanceBase::className);
 
-	class PyModule : public Module
-	{
-	public:
-		using Module::Module;
+	//class PyModule : public Module
+	//{
+	//public:
+	//	using Module::Module;
 
-		void updateImpl() override
-		{
-			PYBIND11_OVERRIDE(void, Module, updateImpl);
-		}
+	//	void updateImpl() override
+	//	{
+	//		PYBIND11_OVERRIDE(void, Module, updateImpl);
+	//	}
 
-		bool initializeImpl() override
-		{
-			PYBIND11_OVERRIDE(bool, Module, initializeImpl);
-		}
-	};
+	//	bool initializeImpl() override
+	//	{
+	//		PYBIND11_OVERRIDE(bool, Module, initializeImpl);
+	//	}
+	//};
 
 	//module
-	py::class_<Module, PyModule, OBase, std::shared_ptr<Module>>(m, "Module")
+	py::class_<Module, OBase, std::shared_ptr<Module>>(m, "Module")
 		.def(py::init<>())
 		.def("initialize", &Module::initialize)
 		.def("update", &Module::update)
@@ -660,37 +660,53 @@ void pybind_framework(py::module& m)
 				return self == other;
 			});
 
-			py::class_<InputModule, Module, std::shared_ptr<InputModule>>(m, "InputModule")
+	py::class_<InputModule, Module, std::shared_ptr<InputModule>>(m, "InputModule")
+		.def(py::init<>())
+		.def("getModuleType", &InputModule::getModuleType);
+
+
+	class KeyboardInputModuleTrampoline : public KeyboardInputModule
+	{
+	public:
+		using KeyboardInputModule::KeyboardInputModule;
+
+		void onEvent(dyno::PKeyboardEvent event) override
+		{
+			PYBIND11_OVERRIDE_PURE(
+				void,
+				KeyboardInputModule,
+				onEvent,
+				event
+			);
+
+			//PYBIND11_OVERRIDE(
+			//	void,
+			//	KeyboardInputModule,
+			//	updateImpl
+			//);
+		}
+	};
+
+	class KeyboardInputModulePublicist : public KeyboardInputModule
+	{
+	public:
+		using KeyboardInputModule::onEvent;
+		//using KeyboardInputModule::updateImpl;
+		//using KeyboardInputModule::requireUpdate;
+	};
+
+			py::class_<KeyboardInputModule, InputModule, KeyboardInputModuleTrampoline, std::shared_ptr<KeyboardInputModule>>(m, "KeyboardInputModule")
 				.def(py::init<>())
-				.def("getModuleType", &InputModule::getModuleType);
-
-			py::class_<KeyboardInputModule, InputModule, std::shared_ptr<KeyboardInputModule>>(m, "KeyboardInputModule")
 				.def("enqueueEvent", &KeyboardInputModule::enqueueEvent)
-				.def("varCacheEvent", &KeyboardInputModule::varCacheEvent);
+				.def("varCacheEvent", &KeyboardInputModule::varCacheEvent)
+				.def("onEvent", &KeyboardInputModulePublicist::onEvent);
+				//.def("onEvent", &KeyboardInputModule::updateImpl);
 
-			class PyMouseInputModule : public MouseInputModule
-			{
-			public:
-				using MouseInputModule::MouseInputModule;
 
-				void onEvent(dyno::PMouseEvent event) override
-				{
-					PYBIND11_OVERRIDE(void, MouseInputModule, onEvent, event);
-				}
-
-				void updateImpl()
-				{
-					PYBIND11_OVERRIDE(void, MouseInputModule, updateImpl);
-				}
-			};
-
-			py::class_<MouseInputModule, PyMouseInputModule, InputModule, std::shared_ptr<MouseInputModule>>(m, "MouseInputModule")
+			py::class_<MouseInputModule, InputModule, std::shared_ptr<MouseInputModule>>(m, "MouseInputModule")
 				.def(py::init<>())
 				.def("enqueueEvent", &MouseInputModule::enqueueEvent)
-				.def("varCacheEvent", &MouseInputModule::varCacheEvent)
-				.def("onEvent", &MouseInputModule::onEvent)
-				.def("updateImpl", &MouseInputModule::updateImpl)
-				.def("requireUpdate", &MouseInputModule::requireUpdate);
+				.def("varCacheEvent", &MouseInputModule::varCacheEvent);
 
 			py::class_<OutputModule, Module, std::shared_ptr<OutputModule>>(m, "OutputModule")
 				.def(py::init<>())

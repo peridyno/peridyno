@@ -222,6 +222,7 @@ namespace dyno
 	public:
 		InputModule();
 		virtual ~InputModule();
+		//void updateImpl() { std::cout << "InputModule updateImpl" << std::endl; };
 
 		std::string getModuleType() final { return "InputModule"; }
 	};

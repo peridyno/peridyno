@@ -27,6 +27,8 @@ namespace dyno
 
 	void KeyboardInputModule::updateImpl()
 	{
+
+		std::cout << "updateImpl" << std::endl;
 		mMutex.lock();
 		if (!mEventQueue.empty())
 		{

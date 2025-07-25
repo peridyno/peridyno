@@ -184,9 +184,6 @@ class PlaneModel(dyno.BasicShape3f):
         center = self.varLocation().getValue()
         rot = self.varRotation().getValue()
         scale = self.varScale().getValue()
-
-
-
         q = self.computeQuaternion()
 
 print(isinstance(PlaneModel,dyno.Node ))

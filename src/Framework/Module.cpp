@@ -70,6 +70,7 @@ namespace dyno
 			this->preprocess();
 
 			//do execution if any field is modified
+			std::cout << "module update" << std::endl;
 			this->updateImpl();
 
 			//post processing
@@ -238,6 +239,7 @@ namespace dyno
 
 	void Module::updateImpl()
 	{
+		std::cout << "module updateImpl" << std::endl;
 	}
 
 	bool Module::attachField(FBase* field, std::string name, std::string desc, bool autoDestroy)
