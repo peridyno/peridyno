@@ -182,8 +182,12 @@ namespace dyno
 
 		void onEditingFinished()
 		{
-			this->setRealValue(this->value());
-			emit editingFinishedWithValue(this->realValue);
+			if (this->value() != this->realValue) 
+			{
+				this->setRealValue(this->value());
+				emit editingFinishedWithValue(this->realValue);
+
+			}
 		}
 
 		void triggerEditingFinished(double value)

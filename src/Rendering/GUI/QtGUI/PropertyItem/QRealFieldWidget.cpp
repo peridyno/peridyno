@@ -77,16 +77,13 @@ namespace dyno
 		{
 			FVar<float>* f = TypeInfo::cast<FVar<float>>(field());
 			f->setValue((float)v);
-			f->update();
 		}
 		else if (template_name == std::string(typeid(double).name()))
 		{
 			FVar<double>* f = TypeInfo::cast<FVar<double>>(field());
 			f->setValue(v);
-			f->update();
 		}
 
-		emit fieldChanged();
 	}
 
 	void QRealFieldWidget::updateWidget()
@@ -117,7 +114,9 @@ namespace dyno
 			return;
 
 		m_updating = true;
+		slider->blockSignals(true);
 		slider->setValue(val);
+		slider->blockSignals(false);
 		m_updating = false;
 	}
 
