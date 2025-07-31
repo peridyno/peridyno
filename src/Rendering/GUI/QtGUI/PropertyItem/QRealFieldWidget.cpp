@@ -76,14 +76,15 @@ namespace dyno
 		if (template_name == std::string(typeid(float).name()))
 		{
 			FVar<float>* f = TypeInfo::cast<FVar<float>>(field());
-			f->setValue((float)v);
+			f->setValue((float)v,false);
 		}
 		else if (template_name == std::string(typeid(double).name()))
 		{
 			FVar<double>* f = TypeInfo::cast<FVar<double>>(field());
-			f->setValue(v);
+			f->setValue(v, false);
 		}
 
+		emit fieldChanged();
 	}
 
 	void QRealFieldWidget::updateWidget()

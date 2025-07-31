@@ -153,13 +153,14 @@ namespace dyno
 		if (template_name == std::string(typeid(Vec3f).name()))
 		{
 			FVar<Vec3f>* f = TypeInfo::cast<FVar<Vec3f>>(field());
-			f->setValue(Vec3f((float)v1, (float)v2, (float)v3));
+			f->setValue(Vec3f((float)v1, (float)v2, (float)v3),false);
 		}
 		else if (template_name == std::string(typeid(Vec3d).name()))
 		{
 			FVar<Vec3d>* f = TypeInfo::cast<FVar<Vec3d>>(field());
-			f->setValue(Vec3d(v1, v2, v3));
+			f->setValue(Vec3d(v1, v2, v3), false);
 		}
+		emit fieldChanged();
 	}
 
 
