@@ -160,6 +160,7 @@ namespace dyno
 			FVar<Vec3d>* f = TypeInfo::cast<FVar<Vec3d>>(field());
 			f->setValue(Vec3d(v1, v2, v3), false);
 		}
+
 		emit fieldChanged();
 	}
 

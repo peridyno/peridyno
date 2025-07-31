@@ -127,7 +127,9 @@ namespace dyno
 			return;
 
 		m_updating = true;
+		spinner->blockSignals(true);
 		spinner->triggerEditingFinished(val);
+		spinner->blockSignals(false);
 		m_updating = false;
 	}
 }
