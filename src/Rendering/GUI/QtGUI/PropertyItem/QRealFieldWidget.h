@@ -39,15 +39,11 @@ namespace dyno
 		//Called when the widget is updated
 		void updateField(double);
 
+	private slots:
 		void onSliderValueChanged(double val);
-
-		void onSpinnerEditingFinished(double val);
 
 	private:
 		QDoubleSlider* slider = nullptr;
 		QPiecewiseDoubleSpinBox* spinner = nullptr;
-
-		bool m_updating = false;
-
 	};
 }
