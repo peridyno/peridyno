@@ -100,7 +100,8 @@ namespace dyno
 			else if (newVal < minimum())
 				newVal = minimum();
 
-			triggerEditingFinished(newVal);
+			this->setValue(newVal);
+			emit editingFinished();
 		}
 
 		QValidator::State validate(QString& input, int& pos) const override
@@ -149,7 +150,7 @@ namespace dyno
 		
 		void focusOutEvent(QFocusEvent* event) override
 		{
-			interpretText();  
+			interpretText(); 
 			onEditingFinished();
 			QDoubleSpinBox::focusOutEvent(event);
 		}
@@ -176,13 +177,17 @@ namespace dyno
 	signals:
 
 		void editingFinishedWithValue(double value);
+
+	public:
+		double setRealValue(double val);
+		void setDouble(bool v) { isDouble = v; }
 	public slots:
 
-		double setRealValue(double val);
 
 		void onEditingFinished()
 		{
-			if (this->value() != this->realValue) 
+			
+			if (fabs(this->value() - this->realValue) > (isDouble ? DBL_EPSILON : FLT_EPSILON))
 			{
 				this->setRealValue(this->value());
 				emit editingFinishedWithValue(this->realValue);
@@ -196,6 +201,7 @@ namespace dyno
 			this->interpretText(); 
 			this->setRealValue(value);
 			emit editingFinished();
+
 		}
 
 		void toggleDecimals(bool v) 
@@ -216,6 +222,8 @@ namespace dyno
 
 
 	private:
+
+		bool isDouble = false;
 		int decimalsMin = 3;
 		int decimalsMax = 8;
 		int displayDecimals = 3;
