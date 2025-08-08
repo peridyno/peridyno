@@ -27,6 +27,7 @@ namespace dyno
 		CONE,
 		CAPSULE,
 		CYLINDER,
+		TET,
 		UNKNOWN
 	};
 

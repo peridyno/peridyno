@@ -1,3 +1,5 @@
+#include "Topology/EdgeSet.h"
+#include "Topology/TopologyConstants.h"
 #include "TriangleSet.h"
 #include <fstream>
 #include <iostream>
@@ -19,7 +21,7 @@ namespace dyno
 	TriangleSet<TDataType>::~TriangleSet()
 	{
 		mTriangleIndex.clear();
-		mVertexNormal.clear();
+
 		mVer2Tri.clear();
 		mEdg2Tri.clear();
 		mTri2Edg.clear();
@@ -55,29 +57,6 @@ namespace dyno
 		triIds[t[2]].atomicInsert(tId);
 	}
 
-	template<typename TDataType>
-	DArrayList<int>& TriangleSet<TDataType>::getVertex2Triangles()
-	{
-		DArray<uint> counter(this->mCoords.size());
-		counter.reset();
-
-		cuExecute(mTriangleIndex.size(),
-			TS_CountTriangles,
-			counter,
-			mTriangleIndex);
-
-		mVer2Tri.resize(counter);
-
-		counter.reset();
-		cuExecute(mTriangleIndex.size(),
-			TS_SetupTriIds,
-			mVer2Tri,
-			mTriangleIndex);
-
-		counter.clear();
-
-		return mVer2Tri;
-	}
 
 	template<typename Edg2Tri>
 	__global__ void TS_setupIds(
@@ -85,18 +64,19 @@ namespace dyno
 		DArray<int> triIds,
 		DArray<Edg2Tri> edg2Tri)
 	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= edg2Tri.size()) return;
+		int eId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (eId >= edg2Tri.size()) return;
 
-		Edg2Tri e = edg2Tri[tId];
+		Edg2Tri tri = edg2Tri[eId];
 
-		triIds[2 * tId] = e[0];
-		triIds[2 * tId + 1] = e[1];
+		triIds[2 * eId] = tri[0];
+		triIds[2 * eId + 1] = tri[1]; // May be EMPTY
 
-		edgIds[2 * tId] = tId;
-		edgIds[2 * tId + 1] = tId;
+		edgIds[2 * eId] = eId;
+		edgIds[2 * eId + 1] = eId;
 	}
 
+	// 2D
 	template<typename Tri2Edg, typename Edge, typename Triangle>
 	__global__ void TS_SetupTri2Edg(
 		DArray<Tri2Edg> tri2Edg,
@@ -108,7 +88,7 @@ namespace dyno
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= triIds.size()) return;
 
-		if (tId == 0 || triIds[tId] != triIds[tId - 1])
+		if ((tId == 0 || triIds[tId] != triIds[tId - 1]) && (triIds[tId] != EMPTY))
 		{
 			Tri2Edg t2E(EMPTY, EMPTY, EMPTY);
 
@@ -141,46 +121,41 @@ namespace dyno
 			else if (te2 == e2)
 				t2E[2] = edgIds[tId + 2];
 
-			int shift = tId / 3;
+			int shift = triIds[tId];
 			tri2Edg[shift] = t2E;
 
-			//printf("tri2Edg: %d, %d %d %d, %d %d %d \n", shift, triangles[triIds[tId]][0], triangles[triIds[tId]][1], triangles[triIds[tId]][2],tri2Edg[shift][0], tri2Edg[shift][1], tri2Edg[shift][2]);
+			// printf("tri2Edg: %d, %d, %d %d %d \n", shift, triIds[tId], tri2Edg[shift][0], tri2Edg[shift][1], tri2Edg[shift][2]);
 		}
 	}
 
-	template<typename TDataType>
-	void TriangleSet<TDataType>::updateTriangle2Edge()
+	// Find near triangles in 2D
+	template<typename Tri2Edg, typename Edg2Tri, typename Tri2Tri>
+	__global__ void TS_SetupTri2Tri(
+		DArray<Tri2Tri> tri2Tri,
+		DArray<Tri2Edg> tri2Edg,
+		DArray<Edg2Tri> edg2Tri)
 	{
-		if (mEdg2Tri.size() == 0)
-			this->updateEdges();
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= tri2Edg.size()) return;
+		
+		Tri2Edg& t2e = tri2Edg[tId];
+		Tri2Tri& t2t = tri2Tri[tId];
 
-		uint edgSize = mEdg2Tri.size();
-
-		DArray<int> triIds, edgIds;
-		triIds.resize(2 * edgSize);
-		edgIds.resize(2 * edgSize);
-
-		cuExecute(edgSize,
-			TS_setupIds,
-			edgIds,
-			triIds,
-			mEdg2Tri);
-
-		thrust::sort_by_key(thrust::device, triIds.begin(), triIds.begin() + triIds.size(), edgIds.begin());
-
-		auto& pEdges = this->getEdges();
-
-		mTri2Edg.resize(mTriangleIndex.size());
-		cuExecute(triIds.size(),
-			TS_SetupTri2Edg,
-			mTri2Edg,
-			triIds,
-			edgIds,
-			pEdges,
-			mTriangleIndex);
-
-		triIds.clear();
-		edgIds.clear();
+		for(int i = 0; i < 3; i++)
+		{
+			auto e = t2e[i];
+			if(e == EMPTY)
+			{
+				t2t[i] = EMPTY;
+				continue;
+			}
+			else
+			{
+				auto t = edg2Tri[e];
+				t2t[i] = (t[0] == tId) ? t[1] : t[0];
+			}
+		}
+		// printf("Tri2Tri [%d]: (%d)%d (%d)%d (%d)%d\n", tId, t2e[0], t2t[0], t2e[1], t2t[1], t2e[2], t2t[2]);
 	}
 
 	template<typename EKey, typename Triangle>
@@ -214,12 +189,16 @@ namespace dyno
 			counter[tId] = 1;
 		else
 			counter[tId] = 0;
+
+		// printf("count[%d] = %d\n", tId, counter[tId]);
 	}
 
-	template<typename Edge, typename Edg2Tri, typename EKey>
+	template<typename Edge, typename Edg2Tri, typename Tri2Edg, typename EKey>
 	__global__ void TS_SetupEdges(
 		DArray<Edge> edges,
 		DArray<Edg2Tri> edg2Tri,
+		DArray<Tri2Edg> tri2Edg,
+		DArray<int> edgeCount,
 		DArray<EKey> keys,
 		DArray<int> counter,
 		DArray<int> triIds)
@@ -228,6 +207,7 @@ namespace dyno
 		if (tId >= keys.size()) return;
 
 		int shift = counter[tId];
+		// For Surface TriSet
 		if (tId == 0 || keys[tId] != keys[tId - 1])
 		{
 			EKey key = keys[tId];
@@ -240,19 +220,286 @@ namespace dyno
 				e2T[1] = triIds[tId + 1];
 
 			edg2Tri[shift] = e2T;
+			// printf("Edge2Tri [%d] %d %d\n", shift, e2T[0], e2T[1]);
+		}
+		if (tId == 0 || keys[tId] != keys[tId - 1]) shift += 1;
+		shift -= 1;
+		// For 2D/3D TriSet
+		int eId = atomicAdd(&edgeCount[triIds[tId]], 1);
+		tri2Edg[triIds[tId]][eId] = shift;
+	}
+
+
+	template <typename Real, typename Coord>
+	__global__ void PS_RotateNormal(
+		DArray<Coord> normals,
+		Quat<Real> q)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= normals.size()) return;
+		SquareMatrix<Real, 3> rot = q.toMatrix3x3();
+
+		normals[pId] = rot * normals[pId];
+	}
+
+	template<typename Triangle>
+	__global__ void TS_UpdateIndex(
+		DArray<Triangle> indices,
+		uint vertexOffset,
+		uint indexOffset)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= indices.size() - indexOffset) return;
+
+		Triangle t = indices[indexOffset + tId];
+		t[0] += vertexOffset;
+		t[1] += vertexOffset;
+		t[2] += vertexOffset;
+
+		indices[indexOffset + tId] = t;
+	}
+
+
+	template<typename Coord, typename Triangle>
+	__global__ void TS_SetupVertexNormals(
+		DArray<Coord> normals,
+		DArray<Coord> vertices,
+		DArray<Triangle> triangles,
+		DArrayList<int> triIds)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= normals.size()) return;
+
+		List<int>& list_i = triIds[tId];
+		int triSize = list_i.size();
+
+		Coord N = Coord(0);
+		for (int ne = 0; ne < triSize; ne++)
+		{
+			int j = list_i[ne];
+			Triangle t = triangles[j];
+
+			Coord v0 = vertices[t[0]];
+			Coord v1 = vertices[t[1]];
+			Coord v2 = vertices[t[2]];
+
+			N += (v1 - v0).cross(v2 - v0);
+		}
+
+		N.normalize();
+
+		normals[tId] = N;
+	}
+
+
+	
+	template<typename Coord, typename Triangle>
+	__global__ void TS_SetupAngleWeightedVertexNormals(
+		DArray<Coord> normals,
+		DArray<Coord> vertices,
+		DArray<Triangle> triangles,
+		DArrayList<int> triIds)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= normals.size()) return;
+
+		List<int>& list_i = triIds[tId];
+		int triSize = list_i.size();
+
+		Coord N = Coord(0);
+		for (int ne = 0; ne < triSize; ne++)
+		{
+			int j = list_i[ne];
+			Triangle t = triangles[j];
+
+			Coord v0 = vertices[t[0]];
+			Coord v1 = vertices[t[1]];
+			Coord v2 = vertices[t[2]];
+
+			Real e0 = (v1 - v2).norm();
+			Real e1 = (v2 - v0).norm();
+			Real e2 = (v1 - v0).norm();
+
+			Real cosangle = 0;
+			if (t[0] == tId)
+				cosangle = (e1 * e1 + e2 * e2 - e0 * e0) / (2.0 * e1 * e2);
+			else if (t[1] == tId)
+				cosangle = (e0 * e0 + e2 * e2 - e1 * e1) / (2.0 * e0 * e2);
+			else if (t[2] == tId)
+				cosangle = (e1 * e1 + e0 * e0 - e2 * e2) / (2.0 * e1 * e0);
+
+			Real angle = acos(cosangle);
+			Coord norm = (v1 - v0).cross(v2 - v0);
+			norm.normalize();
+			N += angle * norm;
+		}
+
+		N.normalize();
+
+		normals[tId] = N;
+	}
+	template<typename Coord, typename Triangle, typename Edg2Tri>
+	__global__ void TS_SetupEdgeNormals(
+		DArray<Coord> normals,
+		DArray<Coord> vertices,
+		DArray<Triangle> triangles,
+		DArray<Edg2Tri> triIds)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= normals.size()) return;
+
+		Edg2Tri& edge = triIds[tId];
+
+		Coord N = Coord(0);
+		for (int ne = 0; ne < 2; ne++)
+		{
+			int j = edge[ne];
+			if (j != EMPTY)
+			{
+				Triangle t = triangles[j];
+
+				Coord v0 = vertices[t[0]];
+				Coord v1 = vertices[t[1]];
+				Coord v2 = vertices[t[2]];
+
+				Coord norm = (v1 - v0).cross(v2 - v0);
+				norm.normalize();
+				N += norm;
+			}
+		}
+
+		N.normalize();
+
+		normals[tId] = N;
+	}
+
+	template<typename TDataType>
+	void TriangleSet<TDataType>::updateVertex2Triangle()
+	{
+		int verNum = this->mCoords.size();
+		int triNum = mTriangleIndex.size();
+		DArray<uint> counter;
+		counter.resize(verNum);
+		counter.reset();
+
+		cuExecute(triNum, TS_CountTriangles,
+			counter,
+			mTriangleIndex);
+
+		mVer2Tri.resize(counter);
+
+		counter.reset();
+		cuExecute(triNum, TS_SetupTriIds,
+			mVer2Tri,
+			mTriangleIndex);
+
+		counter.clear();
+
+	}
+
+	template<typename TDataType>
+	std::shared_ptr<TriangleSet<TDataType>> TriangleSet<TDataType>::merge(TriangleSet<TDataType>& ts)
+	{
+		auto ret = std::make_shared<TriangleSet<TDataType>>();
+
+		auto& vertices = ret->getPoints();
+		auto& indices = ret->triangleIndices();
+
+		uint vNum0 = PointSet<TDataType>::mCoords.size();
+		uint vNum1 = ts.getPoints().size();
+
+		uint tNum0 = mTriangleIndex.size();
+		uint tNum1 = ts.triangleIndices().size();
+
+		vertices.resize(vNum0 + vNum1);
+		indices.resize(tNum0 + tNum1);
+
+		vertices.assign(PointSet<TDataType>::mCoords, vNum0, 0, 0);
+		vertices.assign(ts.getPoints(), vNum1, vNum0, 0);
+
+		indices.assign(mTriangleIndex, tNum0, 0, 0);
+		indices.assign(ts.triangleIndices(), tNum1, tNum0, 0);
+
+		cuExecute(tNum1,
+			TS_UpdateIndex,
+			indices,
+			vNum0,
+			tNum0);
+
+		return ret;
+	}
+
+	template<typename TDataType>
+	bool TriangleSet<TDataType>::isEmpty()
+	{
+		return mTriangleIndex.size() == 0 && EdgeSet<TDataType>::isEmpty();
+	}
+
+	template<typename TDataType>
+	void TriangleSet<TDataType>::clear()
+	{
+		mTriangleIndex.clear();
+		mVer2Tri.clear();
+		mEdg2Tri.clear();
+		mTri2Edg.clear();
+
+		EdgeSet<TDataType>::clear();
+	}
+
+	template<typename TDataType>
+	void TriangleSet<TDataType>::requestVertexNormals(DArray<Coord>& normals, VertexNormalWeightingOption op)
+	{
+		uint vertSize = this->mCoords.size();
+
+		if (vertSize <= 0)
+			return;
+		
+		if (normals.size() != vertSize) {
+			normals.resize(vertSize);
+		}
+
+		switch (op)
+		{
+			//TODO: 
+		case VertexNormalWeightingOption::AREA_WEIGHTED:
+			break;
+
+		case VertexNormalWeightingOption::ANGLE_WEIGHTED:
+			cuExecute(vertSize,
+				TS_SetupAngleWeightedVertexNormals,
+				normals,
+				this->mCoords,
+				mTriangleIndex,
+				mVer2Tri);
+			break;
+
+		default:
+			cuExecute(vertSize,
+				TS_SetupVertexNormals,
+				normals,
+				this->mCoords,
+				mTriangleIndex,
+				mVer2Tri);
+			break;
 		}
 	}
+
 
 	template<typename TDataType>
 	void TriangleSet<TDataType>::updateEdges()
 	{
+		// Update Edge from Triangle Mesh
+		// Light Map {Tri2Edge, Edge2Tri}
 		uint triSize = mTriangleIndex.size();
-
+		// Tri <-> Edge
 		DArray<EKey> keys;
 		DArray<int> triIds;
+		DArray<int> edgeCount;
 
 		keys.resize(3 * triSize);
 		triIds.resize(3 * triSize);
+		edgeCount.resize(triSize);
+		edgeCount.reset();
 
 		cuExecute(triSize,
 			TS_SetupKeys,
@@ -274,17 +521,21 @@ namespace dyno
 		thrust::exclusive_scan(thrust::device, counter.begin(), counter.begin() + counter.size(), counter.begin());
 
 		mEdg2Tri.resize(edgeNum);
+		mTri2Edg.resize(triSize);
 
-		auto& pEdges = this->getEdges();
+		auto& pEdges = this->edgeIndices();
 		pEdges.resize(edgeNum);
 		cuExecute(keys.size(),
 			TS_SetupEdges,
 			pEdges,
 			mEdg2Tri,
+			mTri2Edg,
+			edgeCount,
 			keys,
 			counter,
 			triIds);
 
+		edgeCount.clear();
 		counter.clear();
 		triIds.clear();
 		keys.clear();
@@ -360,241 +611,16 @@ namespace dyno
 		EdgeSet<TDataType>::copyFrom(triangleSet);
 	}
 
-	template<typename Triangle>
-	__global__ void TS_UpdateIndex(
-		DArray<Triangle> indices,
-		uint vertexOffset,
-		uint indexOffset)
-	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= indices.size() - indexOffset) return;
-
-		Triangle t = indices[indexOffset + tId];
-		t[0] += vertexOffset;
-		t[1] += vertexOffset;
-		t[2] += vertexOffset;
-
-		indices[indexOffset + tId] = t;
-	}
-
 	template<typename TDataType>
-	std::shared_ptr<TriangleSet<TDataType>> TriangleSet<TDataType>::merge(TriangleSet<TDataType>& ts)
+	void TriangleSet<TDataType>::requestEdgeNormals(DArray<Coord>& normals)
 	{
-		auto ret = std::make_shared<TriangleSet<TDataType>>();
+		if (mEdg2Tri.size() == 0) TriangleSet<TDataType>::updateEdges();
 
-		auto& vertices = ret->getPoints();
-		auto& indices = ret->getTriangles();
-
-		uint vNum0 = PointSet<TDataType>::mCoords.size();
-		uint vNum1 = ts.getPoints().size();
-
-		uint tNum0 = mTriangleIndex.size();
-		uint tNum1 = ts.getTriangles().size();
-
-		vertices.resize(vNum0 + vNum1);
-		indices.resize(tNum0 + tNum1);
-
-		vertices.assign(PointSet<TDataType>::mCoords, vNum0, 0, 0);
-		vertices.assign(ts.getPoints(), vNum1, vNum0, 0);
-
-		indices.assign(mTriangleIndex, tNum0, 0, 0);
-		indices.assign(ts.getTriangles(), tNum1, tNum0, 0);
-
-		cuExecute(tNum1,
-			TS_UpdateIndex,
-			indices,
-			vNum0,
-			tNum0);
-
-		return ret;
-	}
-
-	template<typename TDataType>
-	bool TriangleSet<TDataType>::isEmpty()
-	{
-		return mTriangleIndex.size() == 0 && EdgeSet<TDataType>::isEmpty();
-	}
-
-	template<typename TDataType>
-	void TriangleSet<TDataType>::clear()
-	{
-		mTriangleIndex.clear();
-		mVer2Tri.clear();
-		mEdg2Tri.clear();
-		mTri2Edg.clear();
-
-		mVertexNormal.clear();
-
-		EdgeSet<TDataType>::clear();
-	}
-
-	template<typename Coord, typename Triangle>
-	__global__ void TS_SetupVertexNormals(
-		DArray<Coord> normals,
-		DArray<Coord> vertices,
-		DArray<Triangle> triangles,
-		DArrayList<int> triIds)
-	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= normals.size()) return;
-
-		List<int>& list_i = triIds[tId];
-		int triSize = list_i.size();
-
-		Coord N = Coord(0);
-		for (int ne = 0; ne < triSize; ne++)
-		{
-			int j = list_i[ne];
-			Triangle t = triangles[j];
-
-			Coord v0 = vertices[t[0]];
-			Coord v1 = vertices[t[1]];
-			Coord v2 = vertices[t[2]];
-
-			N += (v1 - v0).cross(v2 - v0);
-		}
-
-		N.normalize();
-
-		normals[tId] = N;
-	}
-
-	template<typename TDataType>
-	void TriangleSet<TDataType>::setNormals(DArray<Coord>& normals)
-	{
-		mVertexNormal.assign(normals);
-	}
-
-	template<typename TDataType>
-	void TriangleSet<TDataType>::updateVertexNormal()
-	{
-		uint vertSize = this->mCoords.size();
-
-		if (vertSize <= 0)
-			return;
-
-		if (mVertexNormal.size() != vertSize) {
-			mVertexNormal.resize(vertSize);
-		}
-
-		auto& vert2Tri = getVertex2Triangles();
-		cuExecute(vertSize,
-			TS_SetupVertexNormals,
-			mVertexNormal,
-			this->mCoords,
-			mTriangleIndex,
-			vert2Tri);
-	}
-	
-	template<typename Coord, typename Triangle>
-	__global__ void TS_SetupAngleWeightedVertexNormals(
-		DArray<Coord> normals,
-		DArray<Coord> vertices,
-		DArray<Triangle> triangles,
-		DArrayList<int> triIds)
-	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= normals.size()) return;
-
-		List<int>& list_i = triIds[tId];
-		int triSize = list_i.size();
-
-		Coord N = Coord(0);
-		for (int ne = 0; ne < triSize; ne++)
-		{
-			int j = list_i[ne];
-			Triangle t = triangles[j];
-
-			Coord v0 = vertices[t[0]];
-			Coord v1 = vertices[t[1]];
-			Coord v2 = vertices[t[2]];
-
-			Real e0 = (v1 - v2).norm();
-			Real e1 = (v2 - v0).norm();
-			Real e2 = (v1 - v0).norm();
-
-			Real cosangle = 0;
-			if (t[0] == tId)
-				cosangle = (e1 * e1 + e2 * e2 - e0 * e0) / (2.0 * e1 * e2);
-			else if (t[1] == tId)
-				cosangle = (e0 * e0 + e2 * e2 - e1 * e1) / (2.0 * e0 * e2);
-			else if (t[2] == tId)
-				cosangle = (e1 * e1 + e0 * e0 - e2 * e2) / (2.0 * e1 * e0);
-
-			Real angle = acos(cosangle);
-			Coord norm = (v1 - v0).cross(v2 - v0);
-			norm.normalize();
-			N += angle * norm;
-
-			//printf("vertex normal: %d, %f %f %f, %d %f, %f %f %f, %f %f %f \n", tId, vertices[tId][0], vertices[tId][1], vertices[tId][2],
-			//	j, angle, norm[0], norm[1], norm[2], N[0], N[1], N[2]);
-		}
-
-		N.normalize();
-
-		normals[tId] = N;
-	}
-
-	template<typename TDataType>
-	void TriangleSet<TDataType>::updateAngleWeightedVertexNormal(DArray<Coord>& vertexNormal)
-	{
-		uint vertSize = this->mCoords.size();
-
-		vertexNormal.resize(vertSize);
-
-		auto& vert2Tri = getVertex2Triangles();
-
-		cuExecute(vertSize,
-			TS_SetupAngleWeightedVertexNormals,
-			vertexNormal,
-			this->mCoords,
-			mTriangleIndex,
-			vert2Tri);
-	}
-
-	template<typename Coord, typename Triangle, typename Edg2Tri>
-	__global__ void TS_SetupEdgeNormals(
-		DArray<Coord> normals,
-		DArray<Coord> vertices,
-		DArray<Triangle> triangles,
-		DArray<Edg2Tri> triIds)
-	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= normals.size()) return;
-
-		Edg2Tri& edge = triIds[tId];
-
-		Coord N = Coord(0);
-		for (int ne = 0; ne < 2; ne++)
-		{
-			int j = edge[ne];
-			Triangle t = triangles[j];
-
-			Coord v0 = vertices[t[0]];
-			Coord v1 = vertices[t[1]];
-			Coord v2 = vertices[t[2]];
-
-			Coord norm = (v1 - v0).cross(v2 - v0);
-			norm.normalize();
-			N += norm;			
-		}
-
-		N.normalize();
-
-		normals[tId] = N;
-	}
-
-	template<typename TDataType>
-	void TriangleSet<TDataType>::updateEdgeNormal(DArray<Coord>& edgeNormal)
-	{
-		if (mEdg2Tri.size() == 0)
-			updateEdges();
-
-		edgeNormal.resize(mEdg2Tri.size());
+		normals.resize(mEdg2Tri.size());
 
 		cuExecute(mEdg2Tri.size(),
 			TS_SetupEdgeNormals,
-			edgeNormal,
+			normals,
 			this->mCoords,
 			mTriangleIndex,
 			mEdg2Tri);
@@ -605,36 +631,22 @@ namespace dyno
 	{
 		this->updateTriangles();
 
-		if(bAutoUpdateNormal)
-			this->updateVertexNormal();
+		this->updateVertex2Triangle();
 
 		this->EdgeSet<TDataType>::updateTopology();
 	}
 
-	template <typename Real, typename Coord>
-	__global__ void PS_RotateNormal(
-		DArray<Coord> normals,
-		Quat<Real> q)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= normals.size()) return;
-		SquareMatrix<Real, 3> rot = q.toMatrix3x3();
-
-		normals[pId] = rot * normals[pId];
-	}
-
 	template<typename TDataType>
-	void TriangleSet<TDataType>::rotate(const Coord angle)
+	void TriangleSet<TDataType>::requestTriangle2Triangle(DArray<::dyno::TopologyModule::Tri2Tri>& t2t)
 	{
-		EdgeSet<TDataType>::rotate(angle);
-	}
+		uint triSize = mTriangleIndex.size();
 
-	template<typename TDataType>
-	void TriangleSet<TDataType>::rotate(const Quat<Real> q)
-	{
-		EdgeSet<TDataType>::rotate(q);
-
-		cuExecute(mVertexNormal.size(), PS_RotateNormal, mVertexNormal, q);
+		t2t.resize(triSize);
+		cuExecute(triSize,
+			TS_SetupTri2Tri,
+			t2t,
+			mTri2Edg,
+			mEdg2Tri);
 	}
 
 	DEFINE_CLASS(TriangleSet);

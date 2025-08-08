@@ -22,7 +22,6 @@
 #include "Samplers/Sampler.h"
 #include "Field/FilePath.h"
 #include "Topology/DistanceField3D.h"
-#include <Volume/VolumeOctree.h>
 #include "SdfSampler.h"
 namespace dyno
 {
@@ -47,13 +46,6 @@ namespace dyno
 
 	private:
 
-		//std::shared_ptr<DistanceField3D<TDataType>> loadSdf();
-
-		//.SDF file
-		//DEF_VAR(FilePath, SdfFileName, "", "");
-
-		std::shared_ptr<DistanceField3D<TDataType>>  getSDF() {	return m_inputSDF;	}
-
 		void ConstructGrid();
 
 		bool collisionJudge2D(Coord point);
@@ -76,8 +68,6 @@ namespace dyno
 
 		std::vector<Coord> m_points;
 
-		std::shared_ptr<DistanceField3D<TDataType>> m_inputSDF;
-
 		CArray3D<Real> host_dist;
 
 		int nx, ny, nz;		//grid number 
@@ -87,6 +77,8 @@ namespace dyno
 		Real m_grid_dx;		//resolution of grid 
 
 		Coord area_a, area_b;	//box 
+
+		std::shared_ptr<DistanceField3D<TDataType>> m_inputSDF;
 
 	};
 

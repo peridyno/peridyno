@@ -88,15 +88,15 @@ namespace dyno
 		case Edge_:
 			printf("*********   Edge   ********\n");
 			c_point.assign(EdgeSetIn->getPoints());
-			c_edge.assign(EdgeSetIn->getEdges());
+			c_edge.assign(EdgeSetIn->edgeIndices());
 
 			break;
 
 		case Triangle_:
 			printf("*********   Triangle   ********\n");
 			c_point.assign(TriangleSetIn->getPoints());
-			c_edge.assign(TriangleSetIn->getEdges());
-			c_triangle.assign(TriangleSetIn->getTriangles());
+			c_edge.assign(TriangleSetIn->edgeIndices());
+			c_triangle.assign(TriangleSetIn->triangleIndices());
 
 			break;
 

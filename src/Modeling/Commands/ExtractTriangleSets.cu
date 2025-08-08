@@ -186,7 +186,7 @@ namespace dyno
 
 			auto shapeIds = triSets->shapeIds();
 
-			auto oldTriangles = triSets->getTriangles();
+			auto oldTriangles = triSets->triangleIndices();
 			auto oldPoints = triSets->getPoints();
 			DArray<int> markPt(oldPoints.size());
 

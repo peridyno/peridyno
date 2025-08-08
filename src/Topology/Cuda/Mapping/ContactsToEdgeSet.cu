@@ -41,7 +41,7 @@ namespace dyno
 		auto outSet = this->outEdgeSet()->getDataPtr();
 
 		auto& vertices = outSet->getPoints();
-		auto& indices = outSet->getEdges();
+		auto& indices = outSet->edgeIndices();
 
 		uint contactNum = inContacts.size();
 		vertices.resize(2 * contactNum);

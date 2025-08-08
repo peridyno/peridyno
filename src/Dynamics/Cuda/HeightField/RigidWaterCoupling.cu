@@ -91,7 +91,7 @@ namespace dyno
 			Coord gravity = mesh->varGravity()->getData();
 
 			auto& vertices = triangles.getPoints();
-			auto& indices = triangles.getTriangles();
+			auto& indices = triangles.triangleIndices();
 
 			uint num = indices.size();
 

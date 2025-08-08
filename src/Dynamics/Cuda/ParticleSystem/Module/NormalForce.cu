@@ -133,9 +133,9 @@ namespace dyno
 
 		auto ts = this->inTriangleSet()->constDataPtr();
 		auto& vertices = ts->getPoints();
-		auto& triangles = ts->getTriangles();
-		auto& edge2tri = ts->getEdge2Triangle();
-		auto& tri2edge = ts->getTriangle2Edge();
+		auto& triangles = ts->triangleIndices();
+		auto& edge2tri = ts->edge2Triangle();
+		auto& tri2edge = ts->triangle2Edge();
 
 		cuExecute(num, NormalForce_EmptyEdge,
 			mNormalForceFlag,

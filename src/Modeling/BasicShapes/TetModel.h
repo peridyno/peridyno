@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Shusen Liu
+ * Copyright 2025 Xukun Luo
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,61 +12,50 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Revision history:
- *
- * 2024-02-03: replace TriangleSet with PolygonSet as the major state;
  */
 
 #pragma once
-#include "Node/ParametricModel.h"
+#include "BasicShape.h"
 
-#include "Topology/TriangleSet.h"
-#include "Topology/PolygonSet.h"
-#include "STL/Map.h"
+#include "Topology/TetrahedronSet.h"
 
 namespace dyno
 {
-
-
-
+	// Right Angle Tetrahedron
 	template<typename TDataType>
-	class Subdivide : public ParametricModel<TDataType>
+	class TetModel : public BasicShape<TDataType>
 	{
-		DECLARE_TCLASS(Subdivide, TDataType);
+		DECLARE_TCLASS(TetModel, TDataType);
 
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
+		TetModel();
 
+		std::string caption() override { return "Tet"; }
 
-		Subdivide();
+		BasicShapeType getShapeType() override { return BasicShapeType::TET; }
 
-		std::string caption() override { return "Subdivide"; }
-
+		NBoundingBox boundingBox() override;
+	
 	public:
+		DEF_VAR(Coord, V0, Coord(0, 0, 0), "First vertex");
+		DEF_VAR(Coord, V1, Coord(1, 0, 0), "Second vertex");
+		DEF_VAR(Coord, V2, Coord(0, 1, 0), "Third vertex");
+		DEF_VAR(Coord, V3, Coord(0, 0, 1), "Fourth vertex");
 
-		DEF_VAR(uint, Step, 1, "Step");
+		DEF_INSTANCE_STATE(TetrahedronSet<TDataType>, TetSet, "");
 
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, InTriangleSet, "");
+		DEF_VAR_OUT(TTet3D<Real>, Tet,  "");
 
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
-
-	public:
-
-		static void loopSubdivide(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles);
-
-	protected:
+	protected: 
 		void resetStates() override;
 
 	private:
 		void varChanged();
 
-
 	};
 
-
-	IMPLEMENT_TCLASS(Subdivide, TDataType);
-	
+	IMPLEMENT_TCLASS(TetModel, TDataType);
 }

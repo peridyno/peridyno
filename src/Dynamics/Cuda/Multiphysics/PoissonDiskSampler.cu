@@ -285,11 +285,7 @@ namespace dyno
 
 		Real r = this->varSpacing()->getData();
 
-		if (this->getVolumeOctree() != nullptr)
-		{
-			m_inputSDF = this->convert2Uniform(this->getVolumeOctree(), r);
-		}
-		else if (this->getVolume() != nullptr)
+		if (this->getVolume() != nullptr)
 		{
 			m_inputSDF = std::make_shared<dyno::DistanceField3D<TDataType>>();
 			m_inputSDF->assign(this->getVolume()->stateLevelSet()->getData().getSDF());

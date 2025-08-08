@@ -99,7 +99,7 @@ namespace dyno
 	template<typename TDataType>
 	void HyperelasticBody<TDataType>::setEnergyModel(NeoHookeanModel<Real> model)
 	{
-		this->varEnergyType()->setValue(NeoHooekean);
+		this->varEnergyType()->setValue(NeoHookean);
 		auto models = this->varEnergyModel()->getValue();
 		models.neohookeanModel = model;
 
@@ -222,14 +222,14 @@ namespace dyno
 		tetPoints.resize(tetSet->getPoints().size());
 		tetPoints.assign(tetSet->getPoints());
 
-		tetIds.resize(tetSet->getTetrahedrons().size());
-		tetIds.assign(tetSet->getTetrahedrons());
+		tetIds.resize(tetSet->tetrahedronIndices().size());
+		tetIds.assign(tetSet->tetrahedronIndices());
 
 
-		this->stateTets()->resize(tetSet->getTetrahedrons().size());
-		this->stateTets()->getData().assign(tetSet->getTetrahedrons());
+		this->stateTets()->resize(tetSet->tetrahedronIndices().size());
+		this->stateTets()->getData().assign(tetSet->tetrahedronIndices());
 
-		this->stateNormalSDF()->resize(tetSet->getTetrahedrons().size());
+		this->stateNormalSDF()->resize(tetSet->tetrahedronIndices().size());
 
 		float global_min = 1000000;
 		float global_max = 0.0f;
@@ -355,7 +355,7 @@ namespace dyno
 		DArrayList<int> neighbors;
 		tetSet->requestPointNeighbors(neighbors);
 
-		auto ver2tet = tetSet->getVer2Tet();
+		auto ver2tet = tetSet->vertex2Tetrahedron();
 		printf("+++++++");
 		auto& restPos = this->stateRestPosition()->getData();
 		//printf("------");
@@ -395,7 +395,7 @@ namespace dyno
 			ver2tet,
 			neighbors,
 			restPos,
-			tetSet->getTetrahedrons());
+			tetSet->tetrahedronIndices());
 
 		neighbors.clear();
 	}
@@ -437,7 +437,7 @@ namespace dyno
 		auto tetSet = TypeInfo::cast<TetrahedronSet<TDataType>>(this->stateTetrahedronSet()->getDataPtr());
 		if (tetSet == nullptr) return;
 
-		auto& ver2Tet = tetSet->getVer2Tet();
+		auto& ver2Tet = tetSet->vertex2Tetrahedron();
 
 		auto& restPos = this->stateRestPosition()->getData();
 
@@ -447,7 +447,7 @@ namespace dyno
 			HB_CalculateVolume,
 			this->stateVolume()->getData(),
 			restPos,
-			tetSet->getTetrahedrons(),
+			tetSet->tetrahedronIndices(),
 			ver2Tet);
 
 		auto& volume = this->stateVolume()->getData();

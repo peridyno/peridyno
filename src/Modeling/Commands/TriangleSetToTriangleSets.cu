@@ -49,10 +49,10 @@ namespace dyno
 		auto triSets = this->stateTriangleSets()->getDataPtr();
 
 		triSets->setPoints(triSet->getPoints());
-		triSets->setTriangles(triSet->getTriangles());
+		triSets->setTriangles(triSet->triangleIndices());
 		triSets->setShapeSize(ConnectivityResult.size());
 
-		CArray<uint> c_ShapeIds(triSet->getTriangles().size());
+		CArray<uint> c_ShapeIds(triSet->triangleIndices().size());
 
 		for (size_t i = 0; i < ConnectivityResult.size(); i++)
 		{
@@ -70,12 +70,12 @@ namespace dyno
 		std::unordered_map<int, std::vector<int>> vertex_to_triangles;
 
 		CArray<TopologyModule::Triangle> triangles;
-		triangles.assign(triSet->getTriangles());
+		triangles.assign(triSet->triangleIndices());
 
 		int n = triangles.size();
 
 		CArrayList<int>ver2TriList;
-		ver2TriList.assign(triSet->getVertex2Triangles());
+		ver2TriList.assign(triSet->vertex2Triangle());
 
 		std::vector<std::vector<int>> adjacency(n);		// TirId-{Neighbors: TriId}
 
