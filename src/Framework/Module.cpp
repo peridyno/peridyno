@@ -48,10 +48,6 @@ namespace dyno
 
 	void Module::update()
 	{
-#ifdef PYTHON
-		std::cout << "Module::update" << std::endl;
-#endif // PYTHON
-
 		if (!isInitialized())
 		{
 			bool ret = initialize();
@@ -70,7 +66,6 @@ namespace dyno
 			this->preprocess();
 
 			//do execution if any field is modified
-			std::cout << "module update" << std::endl;
 			this->updateImpl();
 
 			//post processing

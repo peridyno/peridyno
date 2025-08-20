@@ -27,6 +27,9 @@ class PythonSteer(dyno.KeyboardInputModule):
     def onEvent(self, event):
         print("python onEvent")
 
+    def updateImpl(self):
+        print("python updateImpl")
+
         # quat = self.inQuaternion.getData()
         # vel = self.inVelocity.getData()
         # omega = self.inAngularVelocity.getData()

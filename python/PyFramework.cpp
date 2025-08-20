@@ -695,12 +695,20 @@ void pybind_framework(py::module& m)
 		//using KeyboardInputModule::requireUpdate;
 	};
 
+	class KeyboardInputModulePublicist1 : public KeyboardInputModule
+	{
+	public:
+		//using KeyboardInputModule::onEvent;
+		using KeyboardInputModule::updateImpl;
+		//using KeyboardInputModule::requireUpdate;
+	};
+
 			py::class_<KeyboardInputModule, InputModule, KeyboardInputModuleTrampoline, std::shared_ptr<KeyboardInputModule>>(m, "KeyboardInputModule")
 				.def(py::init<>())
 				.def("enqueueEvent", &KeyboardInputModule::enqueueEvent)
 				.def("varCacheEvent", &KeyboardInputModule::varCacheEvent)
-				.def("onEvent", &KeyboardInputModulePublicist::onEvent);
-				//.def("onEvent", &KeyboardInputModule::updateImpl);
+				.def("onEvent", &KeyboardInputModulePublicist::onEvent)
+				.def("updateImpl", &KeyboardInputModulePublicist1::updateImpl);
 
 
 			py::class_<MouseInputModule, InputModule, std::shared_ptr<MouseInputModule>>(m, "MouseInputModule")
