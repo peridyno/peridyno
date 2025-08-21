@@ -44,6 +44,7 @@ namespace dyno
 		CArray<List<Transform3f>> mLists;
 
 		XBuffer<Transform3f> mXTransformBuffer;
+		bool mNeedUpdateInstanceTransform = false;
 
 	};
 
