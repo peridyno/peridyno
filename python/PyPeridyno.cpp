@@ -1,6 +1,5 @@
 #include "PyPeridyno.h"
 
-
 PYBIND11_MODULE(PyPeridyno, m) {
 	m.doc() = "Python binding of Peridyno";
 	pybind_core(m);
@@ -24,7 +23,7 @@ PYBIND11_MODULE(PyPeridyno, m) {
 	pybind_rendering(m);
 	pybind_im_widgets(m);
 	pybind_glfw_gui(m);
-
+	pybind_qt_gui(m);
 
 	m.def("getAssetPath", &getAssetPath, "Get the asset path");
 	m.def("getPluginPath", &getPluginPath, "Get the plugin path");

@@ -6,7 +6,7 @@ print(sys.path)
 
 scn = dyno.SceneGraph()
 
-app = dyno.GlfwApp()
+app = dyno.QtApp()
 app.setSceneGraph(scn)
 app.initialize(1920, 1080, True)
 app.setWindowTitle("Empty GUI")
