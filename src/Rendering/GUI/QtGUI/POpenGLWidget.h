@@ -92,6 +92,7 @@ namespace dyno
 
 		void onNodeUpdated(std::shared_ptr<Node> node);
 		void onModuleUpdated(std::shared_ptr<Module> node);
+		void nodeNodeRenderingKeyUpdated(std::shared_ptr<Node> node);
 
 		void updateOneFrame(int frame);
 

@@ -516,6 +516,11 @@ namespace dyno
 			updateGrpahicsContext();
 	}
 
+	void POpenGLWidget::nodeNodeRenderingKeyUpdated(std::shared_ptr<Node> node)
+	{
+		updateGraphicsContext(node.get());
+	}
+
 
 	void POpenGLWidget::updateOneFrame(int frame)
 	{

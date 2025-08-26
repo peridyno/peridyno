@@ -381,6 +381,8 @@ namespace dyno
 				}
 			});
 
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeRenderingKeyChanged,mOpenGLWidget, &POpenGLWidget::nodeNodeRenderingKeyUpdated);
+
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeDeselected, [=]()
 			{
 				mOpenGLWidget->select(nullptr);
