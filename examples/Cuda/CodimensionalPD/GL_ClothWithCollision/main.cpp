@@ -2,6 +2,7 @@
 #include "Peridynamics/Cloth.h"
 #include <SceneGraph.h>
 #include <Volume/VolumeLoader.h>
+#include <Volume/VolumeGenerator.h>
 #include <Multiphysics/VolumeBoundary.h>
 
 #include <GLRenderEngine.h>
@@ -21,11 +22,15 @@ std::shared_ptr<SceneGraph> createScene()
 	auto object = scn->addNode(std::make_shared<StaticMeshLoader<DataType3f>>());
 	object->varFileName()->setValue(getAssetPath() + "cloth_shell/model_ball.obj");
 	
-	auto volLoader = scn->addNode(std::make_shared<VolumeLoader<DataType3f>>());
-	volLoader->varFileName()->setValue(getAssetPath() + "cloth_shell/model_sdf.sdf");
+	auto volGenerator = scn->addNode(std::make_shared<VolumeGenerator<DataType3f>>());
+	volGenerator->varSpacing()->setValue(0.01f);
+	object->stateTriangleSet()->connect(volGenerator->inTriangleSet());
+
+// 	auto volLoader = scn->addNode(std::make_shared<VolumeLoader<DataType3f>>());
+// 	volLoader->varFileName()->setValue(getAssetPath() + "cloth_shell/model_sdf.sdf");
 
 	auto boundary = scn->addNode(std::make_shared<VolumeBoundary<DataType3f>>());
-	volLoader->connect(boundary->importVolumes());
+	volGenerator->connect(boundary->importVolumes());
 
 	auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>());
 	cloth->loadSurface(getAssetPath() + "cloth_shell/mesh_120.obj");
