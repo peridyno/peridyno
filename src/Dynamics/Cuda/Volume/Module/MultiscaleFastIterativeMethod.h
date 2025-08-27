@@ -1,5 +1,5 @@
 /**
- * Copyright 2017-2021 Xiaowei He
+ * Copyright 2024-2025 Jingqi Zhang & Zihao Zhou
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,37 +13,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
-#include "Volume.h"
-#include "Array/Array3D.h"
 
+#pragma once
+#include "Topology/LevelSet.h"
 #include "Topology/TriangleSet.h"
 
+#include "Module/ComputeModule.h"
+
 namespace dyno {
+	typedef Vector<unsigned int, 3> Vec3ui;
+	typedef Vector<int, 3> Vec3i;
+
+	typedef CArray3D<unsigned int> CArray3ui;
+	typedef CArray3D<float> CArray3f;
+	typedef CArray3D<int> CArray3i;
+
+	/**
+	 * @brief Generation of a level set. Implementation of Zhang et al. "A Parallel Multiscale FIM Approach in Solving the Eikonal Equation on GPU", Computer Aided Design, 2025
+	 */
 	template<typename TDataType>
-	class VolumeGenerator : public Volume<TDataType>
+	class MultiscaleFastIterativeMethod : public ComputeModule
 	{
-		DECLARE_TCLASS(VolumeGenerator, TDataType)
+		DECLARE_TCLASS(MultiscaleFastIterativeMethod, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TopologyModule::Triangle Triangle;
 
-		VolumeGenerator();
-		~VolumeGenerator() override;
+		MultiscaleFastIterativeMethod();
+		~MultiscaleFastIterativeMethod() override;
 
-		DEF_VAR(Real, Spacing, 0.05f, "");
+		DEF_VAR(Real, Spacing, 0.01f, "");
 
-		DEF_VAR(uint, Padding, 10, "");
+		DEF_VAR(uint, Padding, 30, "");
+
+		DEF_VAR(uint, VCircle, 1, "");
 
 	public:
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
-		//DEF_INSTANCE_IN(LevelSet<TDataType>, LevelSet_exact0, "");
 
 		DEF_INSTANCE_OUT(LevelSet<TDataType>, LevelSet, "");
 
 	protected:
-		void resetStates() override;
-		void updateStates() override;
+		void compute() override;
+
+	private:
+		void makeLevelSet();
 	};
 }
+

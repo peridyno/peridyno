@@ -2,6 +2,7 @@
 
 #include "Module/FastSweepingMethod.h"
 #include "Module/FastSweepingMethodGPU.h"
+#include "Module/MultiscaleFastIterativeMethod.h"
 
 namespace dyno
 {
@@ -13,9 +14,14 @@ namespace dyno
 	{
 		this->varSpacing()->setRange(0.005, 1.0f);
 
-		auto fsm = std::make_shared<FastSweepingMethodGPU<TDataType>>();
+		//auto fsm = std::make_shared<FastSweepingMethodGPU<TDataType>>();
+		//auto fsm = std::make_shared<FastIterativeMethodGPU<TDataType>>();
+		auto fsm = std::make_shared<MultiscaleFastIterativeMethod<TDataType>>();
+
 		this->inTriangleSet()->connect(fsm->inTriangleSet());
 		fsm->outLevelSet()->connect(this->outLevelSet());
+		this->varSpacing()->connect(fsm->varSpacing());
+		this->varPadding()->connect(fsm->varPadding());
 
 		this->resetPipeline()->pushModule(fsm);
 
@@ -41,6 +47,11 @@ namespace dyno
 		Volume<TDataType>::resetStates();
 
 		this->stateLevelSet()->setDataPtr(this->outLevelSet()->constDataPtr());
+	}
+	template<typename TDataType>
+	void VolumeGenerator<TDataType>::updateStates()
+	{
+		Volume<TDataType>::updateStates();
 	}
 
 	DEFINE_CLASS(VolumeGenerator);
