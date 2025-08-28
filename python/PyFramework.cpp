@@ -199,7 +199,7 @@ void pybind_framework(py::module& m)
 		.def("stateTimeStep", &Node::stateTimeStep, py::return_value_policy::reference)
 		.def("stateFrameNumber", &Node::stateFrameNumber, py::return_value_policy::reference)
 		.def("setForceUpdate", &Node::setForceUpdate, py::return_value_policy::reference);
-		//.def("resetStates", &NodePublicist::resetStates);
+	//.def("resetStates", &NodePublicist::resetStates);
 
 	py::class_<dyno::NBoundingBox>(m, "NBoundingBox")
 		.def(py::init<>())
@@ -660,56 +660,41 @@ void pybind_framework(py::module& m)
 				return self == other;
 			});
 
-	py::class_<InputModule, Module, std::shared_ptr<InputModule>>(m, "InputModule")
-		.def(py::init<>())
-		.def("getModuleType", &InputModule::getModuleType);
+			py::class_<InputModule, Module, std::shared_ptr<InputModule>>(m, "InputModule")
+				.def(py::init<>())
+				.def("getModuleType", &InputModule::getModuleType);
 
+			class KeyboardInputModuleTrampoline : public KeyboardInputModule
+			{
+			public:
+				using KeyboardInputModule::KeyboardInputModule;
 
-	class KeyboardInputModuleTrampoline : public KeyboardInputModule
-	{
-	public:
-		using KeyboardInputModule::KeyboardInputModule;
+				void onEvent(dyno::PKeyboardEvent event) override
+				{
+					PYBIND11_OVERRIDE_PURE(
+						void,
+						KeyboardInputModule,
+						onEvent,
+						event
+					);
+				}
+			};
 
-		void onEvent(dyno::PKeyboardEvent event) override
-		{
-			PYBIND11_OVERRIDE_PURE(
-				void,
-				KeyboardInputModule,
-				onEvent,
-				event
-			);
-
-			//PYBIND11_OVERRIDE(
-			//	void,
-			//	KeyboardInputModule,
-			//	updateImpl
-			//);
-		}
-	};
-
-	class KeyboardInputModulePublicist : public KeyboardInputModule
-	{
-	public:
-		using KeyboardInputModule::onEvent;
-		//using KeyboardInputModule::updateImpl;
-		//using KeyboardInputModule::requireUpdate;
-	};
-
-	class KeyboardInputModulePublicist1 : public KeyboardInputModule
-	{
-	public:
-		//using KeyboardInputModule::onEvent;
-		using KeyboardInputModule::updateImpl;
-		//using KeyboardInputModule::requireUpdate;
-	};
+			class KeyboardInputModulePublicist : public KeyboardInputModule
+			{
+			public:
+				using KeyboardInputModule::onEvent;
+				using KeyboardInputModule::updateImpl;
+				using KeyboardInputModule::requireUpdate;
+			};
 
 			py::class_<KeyboardInputModule, InputModule, KeyboardInputModuleTrampoline, std::shared_ptr<KeyboardInputModule>>(m, "KeyboardInputModule")
 				.def(py::init<>())
 				.def("enqueueEvent", &KeyboardInputModule::enqueueEvent)
 				.def("varCacheEvent", &KeyboardInputModule::varCacheEvent)
 				.def("onEvent", &KeyboardInputModulePublicist::onEvent)
-				.def("updateImpl", &KeyboardInputModulePublicist1::updateImpl);
-
+				.def("updateImpl", &KeyboardInputModulePublicist::updateImpl)
+				.def("requireUpdate", &KeyboardInputModulePublicist::requireUpdate);
 
 			py::class_<MouseInputModule, InputModule, std::shared_ptr<MouseInputModule>>(m, "MouseInputModule")
 				.def(py::init<>())
@@ -838,10 +823,12 @@ void pybind_framework(py::module& m)
 
 			declare_p_enum(m);
 
-			declare_var<float>(m, "f");
+			//declare_var<float>(m, "f");
 			declare_var<bool>(m, "b");
 			declare_var<uint>(m, "uint");
 			declare_var<int>(m, "int");
+			declare_var<Real>(m, "Real");
+			//declare_var<Coord>(m, "Coord");
 			declare_var<std::string>(m, "s");
 			declare_var<dyno::Vec3f>(m, "3f");
 			declare_var<dyno::Vec3d>(m, "3d");

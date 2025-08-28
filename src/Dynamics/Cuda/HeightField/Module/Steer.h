@@ -16,7 +16,7 @@
 #pragma once
 #include "Module/KeyboardInputModule.h"
 
-namespace dyno 
+namespace dyno
 {
 	template<typename TDataType>
 	class Steer : public KeyboardInputModule
@@ -31,6 +31,7 @@ namespace dyno
 		~Steer() override {};
 
 		DEF_VAR(Real, Strength, Real(1.f), "Strength");
+
 		DEF_VAR_IN(Coord, Velocity, "Velocity");
 
 		DEF_VAR_IN(Coord, AngularVelocity, "Angular velocity");

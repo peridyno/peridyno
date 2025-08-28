@@ -1,12 +1,14 @@
+import os
+os.add_dll_directory("H:\\program\\IDE\\Qt6\\6.6.2\\msvc2019_64\\bin")
 import PyPeridyno as dyno
 
 class PythonSteer(dyno.KeyboardInputModule):
     def __init__(self):
         super().__init__()
-        self.var_Strength = dyno.FVarf(1.0, "Strength", "Strength", dyno.FieldTypeEnum.Param, self)
-        self.in_Velocity = dyno.FVarf("Velocity", "Velocity", dyno.FieldTypeEnum.In, self)
-        self.in_AngularVelocity = dyno.FVarf("AngularVelocity", "Angular velocity", dyno.FieldTypeEnum.In, self)
-        self.in_Quaternion = dyno.FVarf("Quaternion", "Rotation", dyno.FieldTypeEnum.In, self)
+        self.var_Strength = dyno.FVarReal(1.0, "Strength", "Strength", dyno.FieldTypeEnum.Param, self)
+        self.in_Velocity = dyno.FVar3f("Velocity", "Velocity", dyno.FieldTypeEnum.In, self)
+        self.in_AngularVelocity = dyno.FVar3f("AngularVelocity", "Angular velocity", dyno.FieldTypeEnum.In, self)
+        self.in_Quaternion = dyno.FVarQuatFloat("Quaternion", "Rotation", dyno.FieldTypeEnum.In, self)
 
     @property
     def varStrength(self):
@@ -27,33 +29,30 @@ class PythonSteer(dyno.KeyboardInputModule):
     def onEvent(self, event):
         print("python onEvent")
 
-    def updateImpl(self):
-        print("python updateImpl")
+        quat = self.inQuaternion.getData()
+        vel = self.inVelocity.getData()
+        omega = self.inAngularVelocity.getData()
+        rot = quat.toMatrix3x3()
 
-        # quat = self.inQuaternion.getData()
-        # vel = self.inVelocity.getData()
-        # omega = self.inAngularVelocity.getData()
-        # rot = quat.toMatrix3x3()
-        #
-        # vel_prime = rot.transpose() * vel
-        # omega_prime = rot.transpose() * omega
-        #
-        # strength = self.varStrength.getValue()
-        #
-        # if event.key == dyno.PKeyboardType.PKEY_A:
-        #     print("python botton A")
-        #     omega_prime.y += strength
-        # elif event.key == dyno.PKeyboardType.PKEY_S:
-        #     vel_prime[2] *= 0.95
-        # elif event.key == dyno.PKeyboardType.PKEY_D:
-        #     omega_prime.y -= strength
-        # elif event.key == dyno.PKeyboardType.PKEY_W:
-        #     vel_prime[2] += strength
-        #     vel_prime[2] = 5 if vel_prime[2] > 5 else vel_prime[2]
-        #     vel_prime[2] = -5 if vel_prime[2] < -5 else vel_prime[2]
-        #
-        # self.inVelocity.setValue(rot * vel_prime)
-        # self.inAngularVelocity.setValue(rot * omega_prime)
+        vel_prime = rot.transpose() * vel
+        omega_prime = rot.transpose() * omega
+
+        strength = self.varStrength.getValue()
+
+        if event.key == dyno.PKeyboardType.PKEY_A:
+            print("python botton A")
+            omega_prime.y += strength
+        elif event.key == dyno.PKeyboardType.PKEY_S:
+            vel_prime[2] *= 0.95
+        elif event.key == dyno.PKeyboardType.PKEY_D:
+            omega_prime.y -= strength
+        elif event.key == dyno.PKeyboardType.PKEY_W:
+            vel_prime[2] += strength
+            vel_prime[2] = 5 if vel_prime[2] > 5 else vel_prime[2]
+            vel_prime[2] = -5 if vel_prime[2] < -5 else vel_prime[2]
+
+        self.inVelocity.setValue(rot * vel_prime)
+        self.inAngularVelocity.setValue(rot * omega_prime)
 
 scn = dyno.SceneGraph()
 
@@ -114,8 +113,8 @@ boat.connect(wake.importVessel())
 boat.connect(coupling.importVessels())
 ocean.connect(coupling.importOcean())
 
-
-app = dyno.GlfwApp()
+app = dyno.QtApp()
+# app = dyno.GlfwApp()
 app.setSceneGraph(scn)
 app.initialize(1920, 1080, True)
 app.setWindowTitle("Empty GUI")
