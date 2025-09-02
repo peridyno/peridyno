@@ -1,8 +1,11 @@
-if(PERIDYNO_LIBRARY_PARTICLESYSTEM AND PERIDYNO_QT_GUI)
+if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
     set(LIB_DEPENDENCY 
         Modeling
         SemiAnalyticalScheme 
-        QtGUI)
+        ObjIO
+        ParticleSystem
+        Core
+         UbiGUI)
     add_example(Qt_WaterPouring SemiAnalytical LIB_DEPENDENCY)
 endif()
 

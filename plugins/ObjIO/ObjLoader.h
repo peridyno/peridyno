@@ -9,10 +9,10 @@ namespace dyno
 {
 	template <typename TDataType> class TriangleSet;
 	/*!
-	*	\class	ObjLoader
-	*	\brief	A node containing a TriangleSet object
+	*\tclass\tObjLoader
+	*\tbrief\tA node containing a TriangleSet object
 	*
-	*	This class is typically used as a representation for a static boundary mesh or base class to other classes
+	*\tThis class is typically used as a representation for a static boundary mesh or base class to other classes
 	*
 	*/
 	template<typename TDataType>
@@ -40,6 +40,11 @@ namespace dyno
 		DEF_VAR(Coord, Velocity, Coord(0), "");
 		DEF_VAR(Coord, Center, Coord(0), "");
 		DEF_VAR(Coord, AngularVelocity, Coord(0), "");
+
+
+		DEF_VAR(bool, UseManualPose, true, "Use manual 6D pose input instead of velocity integration");
+		DEF_VAR(Coord, ManualPosition, Coord(0), "Manual position (x,y,z)");
+		DEF_VAR(Coord, ManualRotation, Coord(0), "Manual rotation (degrees: yaw, pitch, roll)");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, Topology, "Topology");
 

@@ -27,6 +27,7 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
+		typedef typename TDataType::Matrix Matrix;
 		typedef typename TopologyModule::Triangle Triangle;
 
 		TriangularMeshConstraint();
@@ -39,6 +40,14 @@ namespace dyno
 		DEF_VAR(Real, TangentialFriction, 0, "Tangential friction");
 		DEF_VAR(Real, NormalFriction, 0, "Normal friction");
 
+		// Assumed particle mass for impulse computation
+		DEF_VAR(Real, ParticleMass, Real(0.001), "Assumed particle mass for impulse computation");
+
+		// Fake rigid properties for the triangle mesh to convert impulses into motion increments
+		DEF_VAR(Real, MeshMass, Real(1.0), "Fake mass of the triangular mesh for 6D motion");
+		DEF_VAR(Matrix, MeshInertia, Matrix::identityMatrix(), "Fake inertia matrix of the triangular mesh for 6D motion");
+		DEF_VAR(Coord, MeshCenter, Coord(0), "Reference center of the triangular mesh for torque computation");
+
 	public:
 		DEF_VAR_IN(Real, TimeStep, "Time Step");
 
@@ -49,11 +58,17 @@ namespace dyno
 
 		DEF_ARRAYLIST_IN(int, TriangleNeighborIds, DeviceType::GPU, "triangle neighbors");
 
+
 	protected:
 		void constrain() override;
 
 	private:
 		DArray<Coord> mPosBuffer;
+		DArray<Coord> LinearImpulse;
+		DArray<Coord> AngularImpulse;
+		DArray<Coord> DeltaTranslation;
+		DArray<Coord> DeltaRotation;
+
 
 		DArray<Coord> mPreviousPosition;
 		DArray<Coord> mPrivousVertex;
