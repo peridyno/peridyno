@@ -1,4 +1,4 @@
-#include "PyFramework.h"
+ #include "PyFramework.h"
 
 #include "RigidBody/RigidBodySystem.h"
 #include "HeightField/Vessel.h"
@@ -690,10 +690,10 @@ void pybind_framework(py::module& m)
 
 			py::class_<KeyboardInputModule, InputModule, KeyboardInputModuleTrampoline, std::shared_ptr<KeyboardInputModule>>(m, "KeyboardInputModule")
 				.def(py::init<>())
-				.def("enqueueEvent", &KeyboardInputModule::enqueueEvent)
 				.def("varCacheEvent", &KeyboardInputModule::varCacheEvent)
 				.def("onEvent", &KeyboardInputModulePublicist::onEvent)
 				.def("updateImpl", &KeyboardInputModulePublicist::updateImpl)
+				.def("enqueueEvent", &KeyboardInputModulePublicist::enqueueEvent)
 				.def("requireUpdate", &KeyboardInputModulePublicist::requireUpdate);
 
 			py::class_<MouseInputModule, InputModule, std::shared_ptr<MouseInputModule>>(m, "MouseInputModule")
@@ -840,7 +840,7 @@ void pybind_framework(py::module& m)
 			declare_var<dyno::FilePath>(m, "FilePath");
 			declare_var<dyno::Color>(m, "Color");
 			declare_var<dyno::RigidBody<dyno::DataType3f>>(m, "RigidBody3f");
-			declare_var<dyno::Quat<float>>(m, "QuatFloat");
+			declare_var<dyno::Quat<Real>>(m, "QuatReal");
 			declare_var<dyno::Curve>(m, "Curve");
 			declare_var<dyno::Ramp>(m, "Ramp");
 

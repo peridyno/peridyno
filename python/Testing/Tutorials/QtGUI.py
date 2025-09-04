@@ -1,6 +1,6 @@
 import os
 import sys
-os.add_dll_directory("H:\\program\\IDE\\Qt6\\6.6.2\\msvc2019_64\\bin")
+os.add_dll_directory("E:\\IDE\\qt6\\6.5.3\\msvc2019_64\\bin")
 import PyPeridyno as dyno
 print(sys.path)
 

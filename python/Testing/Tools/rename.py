@@ -1,18 +1,18 @@
 import os
 
-# # 要删除的文件路径
-# file_to_delete = "E:\\Program\\Simulation\\Wt-test\\build\\bin\\Debug\\PyPeridyno.pyd"
-# # 要重命名的文件路径
-# file_to_rename = "E:\\Program\\Simulation\\Wt-test\\build\\bin\\Debug\\PyPeridyno-1.2.0d.cp312-win_amd64.pyd"
-# # 重命名后的文件路径
-# new_file_name = "E:\\Program\\Simulation\\Wt-test\\build\\bin\\Debug\\PyPeridyno.pyd"
-
 # 要删除的文件路径
-file_to_delete = "H:\\program\\Simulation\\unibeam\\wt-test\\build\\bin\\Debug\\PyPeridyno.pyd"
+file_to_delete = "E:\\Program\\Simulation\\Wt-test\\build\\bin\\Debug\\PyPeridyno.pyd"
 # 要重命名的文件路径
-file_to_rename = "H:\\program\\Simulation\\unibeam\\wt-test\\build\\bin\\Debug\\PyPeridyno-1.2.0d.cp312-win_amd64.pyd"
+file_to_rename = "E:\\Program\\Simulation\\Wt-test\\build\\bin\\Debug\\PyPeridyno-1.2.0d.cp312-win_amd64.pyd"
 # 重命名后的文件路径
-new_file_name = "H:\\program\\Simulation\\unibeam\\wt-test\\build\\bin\\Debug\\PyPeridyno.pyd"
+new_file_name = "E:\\Program\\Simulation\\Wt-test\\build\\bin\\Debug\\PyPeridyno.pyd"
+
+# # 要删除的文件路径
+# file_to_delete = "H:\\program\\Simulation\\unibeam\\wt-test\\build\\bin\\Debug\\PyPeridyno.pyd"
+# # 要重命名的文件路径
+# file_to_rename = "H:\\program\\Simulation\\unibeam\\wt-test\\build\\bin\\Debug\\PyPeridyno-1.2.0d.cp312-win_amd64.pyd"
+# # 重命名后的文件路径
+# new_file_name = "H:\\program\\Simulation\\unibeam\\wt-test\\build\\bin\\Debug\\PyPeridyno.pyd"
 
 # 删除文件
 try:

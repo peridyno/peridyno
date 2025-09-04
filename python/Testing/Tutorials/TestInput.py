@@ -1,5 +1,5 @@
 import os
-os.add_dll_directory("H:\\program\\IDE\\Qt6\\6.6.2\\msvc2019_64\\bin")
+os.add_dll_directory("E:\\IDE\\qt6\\6.5.3\\msvc2019_64\\bin")
 import PyPeridyno as dyno
 
 class PythonSteer(dyno.KeyboardInputModule):
@@ -8,7 +8,7 @@ class PythonSteer(dyno.KeyboardInputModule):
         self.var_Strength = dyno.FVarReal(1.0, "Strength", "Strength", dyno.FieldTypeEnum.Param, self)
         self.in_Velocity = dyno.FVar3f("Velocity", "Velocity", dyno.FieldTypeEnum.In, self)
         self.in_AngularVelocity = dyno.FVar3f("AngularVelocity", "Angular velocity", dyno.FieldTypeEnum.In, self)
-        self.in_Quaternion = dyno.FVarQuatFloat("Quaternion", "Rotation", dyno.FieldTypeEnum.In, self)
+        self.in_Quaternion = dyno.FVarQuatReal("Quaternion", "Rotation", dyno.FieldTypeEnum.In, self)
 
     @property
     def varStrength(self):
@@ -27,11 +27,10 @@ class PythonSteer(dyno.KeyboardInputModule):
         return self.in_Quaternion
 
     def onEvent(self, event):
-        print("python onEvent")
-
         quat = self.inQuaternion.getData()
         vel = self.inVelocity.getData()
         omega = self.inAngularVelocity.getData()
+
         rot = quat.toMatrix3x3()
 
         vel_prime = rot.transpose() * vel
@@ -40,12 +39,11 @@ class PythonSteer(dyno.KeyboardInputModule):
         strength = self.varStrength.getValue()
 
         if event.key == dyno.PKeyboardType.PKEY_A:
-            print("python botton A")
-            omega_prime.y += strength
+            omega_prime[1] += strength
         elif event.key == dyno.PKeyboardType.PKEY_S:
             vel_prime[2] *= 0.95
         elif event.key == dyno.PKeyboardType.PKEY_D:
-            omega_prime.y -= strength
+            omega_prime[1] -= strength
         elif event.key == dyno.PKeyboardType.PKEY_W:
             vel_prime[2] += strength
             vel_prime[2] = 5 if vel_prime[2] > 5 else vel_prime[2]
@@ -113,8 +111,8 @@ boat.connect(wake.importVessel())
 boat.connect(coupling.importVessels())
 ocean.connect(coupling.importOcean())
 
-app = dyno.QtApp()
-# app = dyno.GlfwApp()
+#app = dyno.QtApp()
+app = dyno.GlfwApp()
 app.setSceneGraph(scn)
 app.initialize(1920, 1080, True)
 app.setWindowTitle("Empty GUI")
