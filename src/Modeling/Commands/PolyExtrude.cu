@@ -85,7 +85,7 @@ namespace dyno
 
 		trilist.copyFrom(this->inTriangleSet()->getData());
 
-		DArray<TopologyModule::Triangle> d_triangle = trilist.getTriangles();
+		DArray<TopologyModule::Triangle> d_triangle = trilist.triangleIndices();
 		CArray<TopologyModule::Triangle> c_triangle;
 
 		if (d_triangle.size()) 
@@ -95,8 +95,7 @@ namespace dyno
 		else { return; }
 
 		auto& sa = trilist.vertex2Edge();
-
-		auto ss = trilist.getVertex2Triangles();
+		auto& ss = trilist.vertex2Triangle();
 
 		DArray<Coord> d_point = trilist.getPoints();
 		CArray<Coord> c_point;
@@ -105,7 +104,7 @@ namespace dyno
 			c_point.assign(d_point);
 		}
 
-		DArray<TopologyModule::Edge> d_edges = trilist.getEdges();
+		DArray<TopologyModule::Edge> d_edges = trilist.edgeIndices();
 		CArray<TopologyModule::Edge> c_edges;
 		if (d_edges.size()) 
 		{
@@ -113,8 +112,8 @@ namespace dyno
 		}
 
 		int n_point = this->inTriangleSet()->getDataPtr()->getPoints().size();
-		int n_triangle = this->inTriangleSet()->getDataPtr()->getTriangles().size();
-		int n_edges = this->inTriangleSet()->getDataPtr()->getEdges().size();
+		int n_triangle = this->inTriangleSet()->getDataPtr()->triangleIndices().size();
+		int n_edges = this->inTriangleSet()->getDataPtr()->edgeIndices().size();
 
 		CArray<uint> c_selected_primid;
 		if (this->inPrimitiveId()->isEmpty()== false)
@@ -244,8 +243,9 @@ namespace dyno
 
 		}
 
-		 
-		auto d_normal = this->inTriangleSet()->getDataPtr()->getVertexNormals();
+		
+		DArray<Coord> d_normal;
+		this->inTriangleSet()->constDataPtr()->requestVertexNormals(d_normal, VertexNormalWeightingOption::UNIFORM_WEIGHTED);
 
 		std::map<int, Coord> map_vertexID_tNormal;
 
@@ -253,6 +253,8 @@ namespace dyno
 
 		CArray<Coord> c_normal;
 		c_normal.assign(d_normal);
+		d_normal.clear();
+
 		for (size_t i = 0; i < c_normal.size(); i++)
 		{
 			map_vertexID_tNormal[i] = c_normal[i];

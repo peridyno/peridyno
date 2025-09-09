@@ -35,6 +35,7 @@ namespace dyno
 		DEF_VAR(unsigned, FrameStep, 1, "FrameStep");
 
 		DEF_VAR(bool, ReCount, false, "ReCount");
+		DEF_VAR(unsigned, EndFrame, 3, "EndFrame");
 
 		DEF_INSTANCE_IN(TopologyModule, Topology, "TopologyModule");
 
@@ -52,6 +53,8 @@ namespace dyno
 		
 
 	private:
+
+		int m_frame = 0;
 		std::string file_postfix = ".ply";
 
 	};

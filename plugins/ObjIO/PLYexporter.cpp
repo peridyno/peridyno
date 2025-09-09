@@ -1,5 +1,6 @@
 #pragma once
 #include "PLYexporter.h"
+#include "Topology/TetrahedronSet.h"
 #include <fstream>
 #include<iomanip>
 
@@ -25,63 +26,66 @@ namespace dyno
 	template<typename TDataType>
 	void PlyExporter<TDataType>::updateStates()
 	{
+		if(m_frame > this->varEndFrame()->getValue()) return;
+		m_frame ++;
+		
 		if (this->stateFrameNumber()->getData() % this->varFrameStep()->getData() != 0)
 		{
 			return;
 		}
 
-		TriangleSet<TDataType>trilist;
+		TetrahedronSet<TDataType>tetlist;
 
-		auto inTriSet = TypeInfo::cast<TriangleSet<DataType3f>>(this->inTopology()->getDataPtr());
-		if (inTriSet != nullptr) 
+		auto inTetSet = TypeInfo::cast<TetrahedronSet<DataType3f>>(this->inTopology()->getDataPtr());
+		if (inTetSet != nullptr) 
 		{
-			trilist.copyFrom(*inTriSet);
+			tetlist.copyFrom(*inTetSet);
 		}
 		else 
 		{
 			auto ptSet = TypeInfo::cast<PointSet<DataType3f>>(this->inTopology()->getDataPtr());
 			if (ptSet == nullptr) return;
 
-			trilist.setPoints(ptSet->getPoints());
+			tetlist.setPoints(ptSet->getPoints());
 		}
 
 
-		auto d_triangle = trilist.getTriangles();
-		CArray<TopologyModule::Triangle> c_triangle;
-		if (d_triangle.size()) 
+		auto d_tet = tetlist.tetrahedronIndices();
+		CArray<TopologyModule::Tetrahedron> c_tet;
+		if (d_tet.size()) 
 		{
-			c_triangle.assign(d_triangle);
+			c_tet.assign(d_tet);
 		}
 
-		DArray<Coord> d_point = trilist.getPoints();
+		DArray<Coord> d_point = tetlist.getPoints();
 		CArray<Coord> c_point;
 		c_point.assign(d_point);
 
-		DArray<Coord> d_color;
+		// DArray<Coord> d_color;
 		CArray<Coord> c_color;
-		DArray<Matrix> d_strain;
+		// DArray<Matrix> d_strain;
 		CArray<Matrix> c_strain;
-		DArray<Matrix> d_stress;
+		// DArray<Matrix> d_stress;
 		CArray<Matrix> c_stress;
 
 		if (!this->inVec3f()->isEmpty())
 		{
-			d_color = this->inVec3f()->getData();
+			auto &d_color = this->inVec3f()->getData();
 			c_color.assign(d_color);
 		}
 		if (!this->inMatrix1()->isEmpty())
 		{
-			d_strain = this->inMatrix1()->getData();
+			auto & d_strain = this->inMatrix1()->getData();
 			c_strain.assign(d_strain);
 		}
 		if (!this->inMatrix2()->isEmpty())
 		{
-			d_stress = this->inMatrix2()->getData();
+			auto & d_stress = this->inMatrix2()->getData();
 			c_stress.assign(d_stress);
 		}
 
-		int n_point = trilist.getVertex2Triangles().size();
-		int n_triangle = trilist.getTriangles().size();
+		int n_point = tetlist.vertex2Triangle().size();
+		int n_triangle = tetlist.triangleIndices().size();
 		int stw = 3;
 		int num = 6;
 
@@ -147,6 +151,7 @@ namespace dyno
 
 
 		
+		// for (int i = 0; i < n_point; i++)
 		for (int i = 0; i < n_point; i++)
 		{
 			//Êä³ö¶¥µã×ø±ê
@@ -189,9 +194,9 @@ namespace dyno
 
 		for (int i = 0; i < n_triangle; i++)
 		{
-			out4 << "3  " << std::fixed << std::setw(stw) << std::setprecision(num) << c_triangle[i][2] << "  ";
-			out4 << std::fixed << std::setw(stw) << std::setprecision(num) << c_triangle[i][1] << "  ";
-			out4 << std::fixed << std::setw(stw) << std::setprecision(num) << c_triangle[i][0] 
+			out4 << "3  " << std::fixed << std::setw(stw) << std::setprecision(num) << c_tet[i][2] << "  ";
+			out4 << std::fixed << std::setw(stw) << std::setprecision(num) << c_tet[i][1] << "  ";
+			out4 << std::fixed << std::setw(stw) << std::setprecision(num) << c_tet[i][0] 
 				<<std::endl;
 		}
 		out4.close();

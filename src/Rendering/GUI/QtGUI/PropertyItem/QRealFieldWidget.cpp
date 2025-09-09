@@ -57,12 +57,13 @@ namespace dyno
 		FormatFieldWidgetName(field->getObjectName());
 
 		QObject::connect(slider, SIGNAL(valueChanged(double)), this, SLOT(onSliderValueChanged(double)));
-		QObject::connect(spinner, SIGNAL(editingFinishedWithValue(double)), this, SLOT(onSpinnerEditingFinished(double)));
+
 		QObject::connect(spinner, SIGNAL(editingFinishedWithValue(double)), this, SLOT(updateField(double)));
 
 		QObject::connect(name, SIGNAL(toggle(bool)), spinner, SLOT(toggleDecimals(bool)));
 
-		QObject::connect(this, SIGNAL(fieldChanged()), this, SLOT(updateWidget()));
+//		QObject::connect(spinner, SIGNAL(editingFinishedWithValue(double)), this, SLOT(onSpinnerEditingFinished(double)));
+//		QObject::connect(this, SIGNAL(fieldChanged()), this, SLOT(updateWidget()));
 	}
 
 	QRealFieldWidget::~QRealFieldWidget()
@@ -109,29 +110,9 @@ namespace dyno
 		}
 	}
 
-
-	void QRealFieldWidget::onSpinnerEditingFinished(double val)
-	{
-		if (m_updating)
-			return;
-
-		m_updating = true;
-		slider->blockSignals(true);
-		slider->setValue(val);
-		slider->blockSignals(false);
-		m_updating = false;
-	}
-
 	void QRealFieldWidget::onSliderValueChanged(double val)
 	{
-		if (m_updating)
-			return;
-
-		m_updating = true;
-		spinner->blockSignals(true);
 		spinner->triggerEditingFinished(val);
-		spinner->blockSignals(false);
-		m_updating = false;
 	}
 }
 

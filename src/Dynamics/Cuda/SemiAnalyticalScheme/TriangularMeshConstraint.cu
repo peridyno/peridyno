@@ -133,7 +133,7 @@ namespace dyno
 		auto ts = this->inTriangleSet()->constDataPtr();
 
 		auto& vertices = ts->getPoints();
-		auto& triangles = ts->getTriangles();
+		auto& triangles = ts->triangleIndices();
 		
 		auto& neighborIds = this->inTriangleNeighborIds()->getData();
 

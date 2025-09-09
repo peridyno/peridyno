@@ -69,7 +69,7 @@ namespace dyno
 	{
 		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTriangleSet()->getDataPtr());
 		triSet->getPoints().assign(this->statePosition()->getData());
-		triSet->updateAngleWeightedVertexNormal(this->stateNorm()->getData());
+		triSet->requestVertexNormals(this->stateNorm()->getData());
 	}
 	
 
@@ -96,7 +96,7 @@ namespace dyno
 	template<typename TDataType>
 	void CodimensionalPD<TDataType>::setEnergyModel(NeoHookeanModel<Real> model)
 	{
-		this->varEnergyType()->setValue(NeoHooekean);
+		this->varEnergyType()->setValue(NeoHookean);
 
 		auto models = this->varEnergyModel()->getValue();
 		models.neohookeanModel = model;
@@ -211,8 +211,8 @@ namespace dyno
 		triPoints.resize(triSet->getPoints().size());
 		triPoints.assign(triSet->getPoints());
 
-		triIds.resize(triSet->getTriangles().size());
-		triIds.assign(triSet->getTriangles());
+		triIds.resize(triSet->triangleIndices().size());
+		triIds.assign(triSet->triangleIndices());
 
 
 		float global_min = 1000000;
@@ -247,7 +247,7 @@ namespace dyno
 		
 		
 		this->stateRestNorm()->resize(vNum);
-		triSet->updateAngleWeightedVertexNormal(this->stateRestNorm()->getData());
+		triSet->requestVertexNormals(this->stateRestNorm()->getData());
 
 	
 		this->stateNorm()->assign(this->stateRestNorm()->getData());
@@ -404,7 +404,7 @@ namespace dyno
 		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTriangleSet()->getDataPtr());
 		if (triSet == nullptr) return;
 
-		auto& ver2Tri = triSet->getVertex2Triangles();
+		auto& ver2Tri = triSet->vertex2Triangle();
 
 		auto& restPos = this->stateRestPosition()->getData();
 		
@@ -416,14 +416,14 @@ namespace dyno
 // 		}
 
 		DArray<Real> maxL;
-		maxL.resize(triSet->getTriangles().size());
+		maxL.resize(triSet->triangleIndices().size());
 		DArray<Real> minL;
-		minL.resize(triSet->getTriangles().size());
+		minL.resize(triSet->triangleIndices().size());
 
-		cuExecute(triSet->getTriangles().size(),
+		cuExecute(triSet->triangleIndices().size(),
 			HB_UpdateUnit,
 			restPos,
-			triSet->getTriangles(),
+			triSet->triangleIndices(),
 			minL,
 			maxL
 			);
@@ -434,7 +434,7 @@ namespace dyno
 			HB_CalculateVolume,
 			this->stateVolume()->getData(),
 			restPos,
-			triSet->getTriangles(),
+			triSet->triangleIndices(),
 			ver2Tri);
 
 		auto& volume = this->stateVolume()->getData();

@@ -55,7 +55,7 @@ namespace dyno
 
 		DEF_VAR(bool, AlphaComputed, true, "alphaComputed");
 
-		DEF_VAR(EnergyType, EnergyType, NeoHooekean, "");
+		DEF_VAR(EnergyType, EnergyType, NeoHookean, "");
 
 		DEF_VAR(EnergyModels<Real>, EnergyModel, EnergyModels<Real>(), "");
 

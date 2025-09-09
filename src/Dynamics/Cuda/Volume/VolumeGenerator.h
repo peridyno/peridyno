@@ -38,10 +38,12 @@ namespace dyno {
 
 	public:
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
+		//DEF_INSTANCE_IN(LevelSet<TDataType>, LevelSet_exact0, "");
 
 		DEF_INSTANCE_OUT(LevelSet<TDataType>, LevelSet, "");
 
 	protected:
 		void resetStates() override;
+		void updateStates() override;
 	};
 }

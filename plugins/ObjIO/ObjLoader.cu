@@ -136,7 +136,7 @@ namespace dyno
 
 		center += velocity * dt;
 
-		if (!triSet->getTriangles().isEmpty() && !triSet->getVertex2Triangles().isEmpty())
+		if (!triSet->triangleIndices().isEmpty() && !triSet->vertex2Triangle().isEmpty())
 		{
 			cuExecute(triSet->getPoints().size(),
 				K_InitKernelFunctionMesh,

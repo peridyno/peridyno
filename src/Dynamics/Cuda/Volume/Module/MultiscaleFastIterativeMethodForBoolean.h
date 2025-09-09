@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Xiaowei He
+ * Copyright 2024-2025 Jingqi Zhang
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,42 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 #include "Topology/LevelSet.h"
 #include "Topology/TriangleSet.h"
-
+#include "VolumeMacros.h"
 #include "Module/ComputeModule.h"
 
 namespace dyno {
-	//typedef Vector<unsigned int, 3> Vec3ui;
-	//typedef Vector<int, 3> Vec3i;
-
-	//typedef CArray3D<unsigned int> CArray3ui;
-	//typedef CArray3D<float> CArray3f;
-	//typedef CArray3D<int> CArray3i;
 
 	/**
-	 * @brief This is a GPU-based fast sweeping method to generate signed distance field from a mesh.
+	 * @brief Boolean operation of two level sets. Implementation of Zhang et al. "A Parallel Multiscale FIM Approach in Solving the Eikonal Equation on GPU", Computer Aided Design, 2025
 	 */
 	template<typename TDataType>
-	class FastSweepingMethodGPU : public ComputeModule
+	class MultiscaleFastIterativeMethodForBoolean : public ComputeModule
 	{
-		DECLARE_TCLASS(FastSweepingMethodGPU, TDataType)
+		DECLARE_TCLASS(MultiscaleFastIterativeMethodForBoolean, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		FastSweepingMethodGPU();
-		~FastSweepingMethodGPU() override;
+		MultiscaleFastIterativeMethodForBoolean();
+		~MultiscaleFastIterativeMethodForBoolean() override;
 
-		DEF_VAR(Real, Spacing, 0.05f, "");
+		DEF_ENUM(BoolType, BoolType, BoolType::Union, "Volume Bool Type");
 
-		DEF_VAR(uint, Padding, 10, "");
+		DEF_VAR(Real, Spacing, 0.01, "");  
 
-		DEF_VAR(uint, PassNumber, 2, "");
+		DEF_VAR(uint, Padding, 10, "");  
+
+		DEF_VAR(uint, VCircle, 1, "");
+
 
 	public:
-		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
+		DEF_INSTANCE_IN(LevelSet<TDataType>, LevelSetA, "");
+		DEF_INSTANCE_IN(LevelSet<TDataType>, LevelSetB, "");
 
 		DEF_INSTANCE_OUT(LevelSet<TDataType>, LevelSet, "");
 
@@ -58,10 +57,6 @@ namespace dyno {
 	private:
 		void makeLevelSet();
 
-		uint ni;
-		uint nj;
-		uint nk;
-		Coord origin;
-		//Vec3f maxPoint;
 	};
 }
+

@@ -43,7 +43,7 @@ namespace dyno
 		Vec3f max_box(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
 
 		auto& mPoints = inTriangleSet()->getDataPtr()->getPoints();
-		auto& mTriangles = inTriangleSet()->getDataPtr()->getTriangles();
+		auto& mTriangles = inTriangleSet()->getDataPtr()->triangleIndices();
 		
 		CArray<Coord> cPoints;
 		cPoints.assign(mPoints);

@@ -260,7 +260,7 @@ namespace dyno
 		{
 			for (int i = 0; i < (int)this->varIcosahedronStep()->getValue() - 1; i++)
 			{
-				loopSubdivide(vts, trs);
+				Subdivide<TDataType>::loopSubdivide(vts, trs);
 			}
 		}
 

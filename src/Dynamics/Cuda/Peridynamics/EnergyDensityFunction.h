@@ -23,7 +23,7 @@ namespace dyno
 	{
 		Linear,
 		StVK,
-		NeoHooekean,
+		NeoHookean,
 		Xuetal,
 		MooneyRivlin,
 		Fung,

@@ -1,6 +1,7 @@
 #include "VolumeBoolean.h"
 
 #include "Module/FastMarchingMethodGPU.h"
+#include "Module/MultiscaleFastIterativeMethodForBoolean.h"
 
 namespace dyno
 {
@@ -10,7 +11,8 @@ namespace dyno
 	VolumeBoolean<TDataType>::VolumeBoolean()
 		: Volume<TDataType>()
 	{
-		auto fmm = std::make_shared<FastMarchingMethodGPU<TDataType>>();
+		//auto fmm = std::make_shared<FastMarchingMethodGPU<TDataType>>();
+		auto fmm = std::make_shared<MultiscaleFastIterativeMethodForBoolean<TDataType>>();
 		this->inA()->connect(fmm->inLevelSetA());
 		this->inB()->connect(fmm->inLevelSetB());
 		fmm->outLevelSet()->connect(this->outLevelSet());

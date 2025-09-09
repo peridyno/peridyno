@@ -3,7 +3,6 @@
 #include "NodeFactory.h"
 
 #include "VolumeBoundary.h"
-#include "AdaptiveBoundary.h"
 
 #include "PoissonDiskSampler.h"
 
@@ -45,14 +44,6 @@ namespace dyno
 			"ToolBarIco/Volume/GenerateSparseVolume.png");
 
 		auto group = page->addGroup("Volume");
-
-		group->addAction(
-			"Adaptive Boundary",
-			"ToolBarIco/Volume/AdaptiveBoundary.png",
-			[=]()->std::shared_ptr<Node> {
-				auto node = std::make_shared<AdaptiveBoundary<DataType3f>>();
-				return node;
-			});
 
 		auto psPage = factory->addPage(
 			"Particle System",

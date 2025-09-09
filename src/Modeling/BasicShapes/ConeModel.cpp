@@ -73,6 +73,10 @@ namespace dyno
 		std::vector<Coord> vertices;
 		std::vector<TopologyModule::Triangle> triangle;
 
+		this->varScale()->setValue(Coord(scale.x, scale.y, scale.x), false);
+
+		scale = this->varScale()->getValue();
+
 		Coord Location;
 		Real angle = M_PI / 180 * 360 / columns;
 		Real temp_angle = angle;
@@ -219,15 +223,14 @@ namespace dyno
 		q.normalize();
 
 		auto RV = [&](const Coord& v)->Coord {
-			return center + q.rotate(v - center);
+			return center + q.rotate(v * scale);
 		};
 
 		int numpt = vertices.size();
 
 		for (int i = 0; i < numpt; i++)
 		{
-			vertices[i][1] -= 1 * height / 2;
-			vertices[i] = RV(vertices[i] * scale + RV(center));
+			vertices[i] = RV(vertices[i]);
 		}
 
 		auto polySet = this->statePolygonSet()->getDataPtr();
@@ -248,9 +251,8 @@ namespace dyno
 		//Setup the geometric primitive
 		TCone3D<Real> cone;
 		cone.center = center;
-		cone.height = height;
-		cone.radius = radius;
-		cone.scale = scale;
+		cone.height = height * scale.y;
+		cone.radius = radius * scale.x;
 		cone.rotation = q;
 		this->outCone()->setValue(cone);
 	}
@@ -258,12 +260,12 @@ namespace dyno
 	template<typename TDataType>
 	NBoundingBox ConeModel<TDataType>:: boundingBox() 
 	{
-		auto center = this->varLocation()->getData();
-		auto rot = this->varRotation()->getData();
-		auto scale = this->varScale()->getData();
+		auto center = this->varLocation()->getValue();
+		auto rot = this->varRotation()->getValue();
+		auto scale = this->varScale()->getValue();
 
-		auto radius = this->varRadius()->getData();
-		auto height = this->varHeight()->getData();
+		auto radius = this->varRadius()->getValue();
+		auto height = this->varHeight()->getValue();
 
 		Coord length(Coord(radius, height, radius));
 		length[0] *= scale[0];

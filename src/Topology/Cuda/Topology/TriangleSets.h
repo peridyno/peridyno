@@ -38,8 +38,13 @@ namespace dyno
 
 		void load(std::vector<std::shared_ptr<TriangleSet<TDataType>>>& tsArray);
 
+		void appendShape(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles);
+		void appendShape(std::vector<Vec3f>& vertices, CArray<TopologyModule::Triangle>& triangles);
+		void appendShape(DArray<Vec3f>& vertices, DArray<TopologyModule::Triangle>& triangles);
+
+
 	private:
-		uint mShapeSize = 1;
+		uint mShapeSize = 0;
 
 		DArray<uint> mShapeIds;
 	};

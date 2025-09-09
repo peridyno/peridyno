@@ -448,7 +448,7 @@ namespace dyno
 	{
 		//Normal<TDataType>::resetStates();
 
-		int triangle_num = this->inTriangleSet()->getData().getTriangles().size();
+		int triangle_num = this->inTriangleSet()->getData().triangleIndices().size();
 		//auto& m_triangle_normal = this->stateNormal()->getData();
 
 		if (triangle_num == 0) return;
@@ -485,7 +485,7 @@ namespace dyno
 
 		cuExecute(triangle_num,
 			PtsBehindMesh_UpdateTriangleNormal,
-			this->inTriangleSet()->getData().getTriangles(), //DArray<TopologyModule::Triangle> d_triangles,
+			this->inTriangleSet()->getData().triangleIndices(), //DArray<TopologyModule::Triangle> d_triangles,
 			this->inTriangleSet()->getData().getPoints(),
 			//DArray<TopologyModule::Edge> edges,
 			//DArray<Coord> normal_points,
@@ -503,7 +503,7 @@ namespace dyno
 			msquare_2,
 			msquare_3,
 			msquare_4,
-			this->inTriangleSet()->getData().getTriangles(),
+			this->inTriangleSet()->getData().triangleIndices(),
 			this->inTriangleSet()->getData().getPoints()
 		);
 
@@ -523,7 +523,7 @@ namespace dyno
 
 		cuExecute(triangle_num,
 			CalculateTriangleBasicVector,
-			this->inTriangleSet()->getData().getTriangles(),
+			this->inTriangleSet()->getData().triangleIndices(),
 			this->inTriangleSet()->getData().getPoints(),
 			mBasicVector_x,
 			mBasicVector_y,
@@ -538,7 +538,7 @@ namespace dyno
 		cuExecute(triangle_num,
 			CalculatePointSizeInSquare,
 			mThinPointSize,
-			this->inTriangleSet()->getData().getTriangles(),
+			this->inTriangleSet()->getData().triangleIndices(),
 			this->inTriangleSet()->getData().getPoints(),
 			mBasicVector_x,
 			mBasicVector_y,
@@ -577,7 +577,7 @@ namespace dyno
 			tIndex,
 			mThinPointNormal,
 			mSeedOfTriangleId,
-			this->inTriangleSet()->getData().getTriangles(),
+			this->inTriangleSet()->getData().triangleIndices(),
 			this->inTriangleSet()->getData().getPoints(),
 			mBasicVector_x,
 			mBasicVector_y,

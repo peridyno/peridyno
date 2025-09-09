@@ -96,8 +96,11 @@ namespace dyno
 	DevicePoissonDiskSampler<TDataType>::~DevicePoissonDiskSampler()
 	{
 		mMinimumDistances.clear();
+
 		mPointsInsideSdf.clear();
-		mInsideSdfCounters.clear();
+
+		mPointsInsideSdf.clear();
+
 	};
 
 	template<typename Real, typename Coord>
@@ -259,12 +262,7 @@ namespace dyno
 
 		Real dx = this->varSpacing()->getData();
 
-
-		if (this->getVolumeOctree() != nullptr)
-		{
-			m_inputSDF = this->convert2Uniform(this->getVolumeOctree(), dx);
-		}
-		else if (this->getVolume() != nullptr)
+		if (this->getVolume() != nullptr)
 		{
 			m_inputSDF = std::make_shared<dyno::DistanceField3D<TDataType>>();
 			m_inputSDF->assign(this->getVolume()->stateLevelSet()->getData().getSDF());

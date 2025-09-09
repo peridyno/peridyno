@@ -105,37 +105,40 @@ namespace dyno
 		typedef typename TopologyModule::Quad Quad;
 
 		QuadSet();
-		~QuadSet();
-
-		DArray<Quad>& getQuads() { return mQuads; }
+		~QuadSet() override;
 
 		void setQuads(std::vector<Quad>& quads);
 		void setQuads(DArray<Quad>& quads);
 
-		DArrayList<int>& getVertex2Quads();
+		DArray<Quad>& quadIndices() { return mQuads; }
 
-		//void loadObjFile(std::string filename);
+		const DArrayList<int>& vertex2Quad() { return mVer2Quad; }
 
 		void copyFrom(QuadSet<TDataType>& quadSet);
-		
+
 		bool isEmpty() override;
 
 	public:
-		DEF_ARRAY_OUT(Coord, VertexNormal, DeviceType::GPU, "");
+		void requestVertexNormals(DArray<Coord>& normals);
 
 	protected:
 		void updateTopology() override;
 
 		void updateEdges() override;
 
-		void updateVertexNormal();
-
 		virtual void updateQuads() {};
 
 	private:
 		DArray<Quad> mQuads;
+
+		/**
+		 * mVer2Quad can be automatically updated when calling update()
+		 */
 		DArrayList<int> mVer2Quad;
 
+		/**
+		 * mEdg2Quad can be automatically updated when calling update()
+		 */
 		DArray<::dyno::TopologyModule::Edg2Quad> mEdg2Quad;
 	};
 }
