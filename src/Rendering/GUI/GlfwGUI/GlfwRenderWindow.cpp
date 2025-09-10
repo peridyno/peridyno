@@ -367,7 +367,7 @@ namespace dyno
 	void GlfwRenderWindow::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
 #ifdef PYTHON
-		std::cout << "GlfwRenderWindow::mouseButtonCallback" << std::endl;
+		//std::cout << "GlfwRenderWindow::mouseButtonCallback" << std::endl;
 #endif // PYTHON
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);

@@ -234,7 +234,6 @@ namespace dyno
 
 	void Module::updateImpl()
 	{
-		std::cout << "module updateImpl" << std::endl;
 	}
 
 	bool Module::attachField(FBase* field, std::string name, std::string desc, bool autoDestroy)

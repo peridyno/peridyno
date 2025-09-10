@@ -1,3 +1,4 @@
+import QtPathHelper
 import PyPeridyno as dyno
 from PyPeridyno import ObjLoader3f
 
@@ -63,17 +64,17 @@ mergeWheel = dyno.Merge3f()
 scn.addNode(mergeWheel)
 mergeWheel.varUpdateMode().setCurrentKey(1)
 
-wheelSet[0].outTriangleSet().connect(mergeWheel.inTriangleSet01())
-wheelSet[1].outTriangleSet().connect(mergeWheel.inTriangleSet02())
-wheelSet[2].outTriangleSet().connect(mergeWheel.inTriangleSet03())
-wheelSet[3].outTriangleSet().connect(mergeWheel.inTriangleSet04())
+wheelSet[0].outTriangleSet().connect(mergeWheel.inTriangleSets())
+wheelSet[1].outTriangleSet().connect(mergeWheel.inTriangleSets())
+wheelSet[2].outTriangleSet().connect(mergeWheel.inTriangleSets())
+wheelSet[3].outTriangleSet().connect(mergeWheel.inTriangleSets())
 
 # MergeRoad
 mergeRoad = dyno.Merge3f()
 scn.addNode(mergeRoad)
 mergeRoad.varUpdateMode().setCurrentKey(1)
-mergeWheel.stateTriangleSet().promoteOutput().connect(mergeRoad.inTriangleSet01())
-ObjRoad.outTriangleSet().connect(mergeRoad.inTriangleSet03())
+mergeWheel.stateTriangleSet().promoteOuput().connect(mergeRoad.inTriangleSets())
+ObjRoad.outTriangleSet().connect(mergeRoad.inTriangleSets())
 
 # Obj boundary
 ObjBoundary = dyno.ObjLoader3f()
@@ -84,9 +85,9 @@ ObjBoundary.varLocation().setValue(dyno.Vector3f([0, 0, 0.5]))
 glBoundary = ObjBoundary.graphicsPipeline().findFirstModuleSurface()
 glBoundary.setColor(color)
 
-ObjBoundary.outTriangleSet().connect(mergeRoad.inTriangleSet02())
+ObjBoundary.outTriangleSet().connect(mergeRoad.inTriangleSets())
 ObjBoundary.graphicsPipeline().disable()
-ObjJeep.outTriangleSet().connect(mergeRoad.inTriangleSet04())
+ObjJeep.outTriangleSet().connect(mergeRoad.inTriangleSets())
 
 # SetVisible
 mergeRoad.graphicsPipeline().disable()
@@ -109,7 +110,7 @@ cubeSampler.graphicsPipeline().disable()
 # MakeParticleSystem
 particleSystem = dyno.MakeParticleSystem3f()
 scn.addNode(particleSystem)
-cubeSampler.statePointSet().promoteOutput().connect(particleSystem.inPoints())
+cubeSampler.statePointSet().promoteOuput().connect(particleSystem.inPoints())
 
 # *************************************** Fluid ***************************************//
 # Particle fluid node
@@ -122,15 +123,15 @@ scn.addNode(visualizer)
 ptrender = visualizer.graphicsPipeline().findFirstModulePoint()
 ptrender.varPointSize().setValue(0.001)
 
-fluid.statePointSet().promoteOutput().connect(visualizer.inPoints())
-fluid.stateVelocity().promoteOutput().connect(visualizer.inVector())
+fluid.statePointSet().promoteOuput().connect(visualizer.inPoints())
+fluid.stateVelocity().promoteOuput().connect(visualizer.inVector())
 
 # SemiAnalyticalSFINode
 meshBoundary = dyno.TriangularMeshBoundary3f()
 scn.addNode(meshBoundary)
 fluid.connect(meshBoundary.importParticleSystems())
 
-mergeRoad.stateTriangleSet().promoteOutput().connect(meshBoundary.inTriangleSet())
+mergeRoad.stateTriangleSet().promoteOuput().connect(meshBoundary.inTriangleSet())
 
 # Create a boundary
 cubeBoundary = dyno.CubeModel3f()
@@ -152,7 +153,7 @@ cube2Vol.connect(container.importVolumes())
 fluid.connect(container.importParticleSystems())
 
 # first Module
-colormapping = visualizer.graphicsPipeline().findFirstModuleColorMapping()
+colormapping = visualizer.graphicsPipeline().findFirstModuleMapping()
 colormapping.varMax().setValue(1.5)
 
 LocationRoad = dyno.Vector3f([0,0,0.5])

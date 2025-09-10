@@ -1,5 +1,5 @@
+import QtPathHelper
 import PyPeridyno as dyno
-from PyPeridyno import Vector3f
 
 scn = dyno.SceneGraph()
 scn.setUpperBound(dyno.Vector3f([3, 3, 3]))
@@ -12,7 +12,7 @@ ptsLoader.varRotation().setValue(dyno.Vector3f([0, 3.14 * 2 / 5, 0]))
 ptsLoader.varLocation().setValue(dyno.Vector3f([0, 0.4, 0.3]))
 initialParticles = dyno.MakeParticleSystem3f()
 scn.addNode(initialParticles)
-ptsLoader.outPointSet().promoteOutput().connect(initialParticles.inPoints())
+ptsLoader.outPointSet().promoteOuput().connect(initialParticles.inPoints())
 
 fluid = dyno.DualParticleFluid3f()
 scn.addNode(fluid)
@@ -21,8 +21,8 @@ initialParticles.connect(fluid.importInitialStates())
 
 ball = dyno.SphereModel3f()
 scn.addNode(ball)
-ball.varScale().setValue(Vector3f([0.38, 0.38, 0.38]))
-ball.varLocation().setValue(Vector3f([0, 0, 0.3]))
+ball.varScale().setValue(dyno.Vector3f([0.38, 0.38, 0.38]))
+ball.varLocation().setValue(dyno.Vector3f([0, 0, 0.3]))
 sRenderf = dyno.GLSurfaceVisualModule()
 sRenderf.setColor(dyno.Color(0.8, 0.52, 0.25))
 sRenderf.setVisible(True)
@@ -63,12 +63,12 @@ fluid.graphicsPipeline().pushModule(colorBar)
 vpRender = dyno.GLPointVisualModule()
 vpRender.setColor(dyno.Color(1, 1, 0))
 vpRender.setColorMapMode(vpRender.ColorMapMode.PER_VERTEX_SHADER)
-fluid.state_virtual_pointSet().connect(vpRender.inPointSet())
+fluid.stateVirtualPointSet().connect(vpRender.inPointSet())
 vpRender.varPointSize().setValue(0.0005)
 fluid.graphicsPipeline().pushModule(vpRender)
 
 
-app = dyno.GlfwApp()
+app = dyno.QtApp()
 app.setSceneGraph(scn)
 app.initialize(1920, 1080, True)
 app.mainLoop()

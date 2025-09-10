@@ -1,3 +1,4 @@
+import QtPathHelper
 import PyPeridyno as dyno
 
 scn = dyno.SceneGraph()
