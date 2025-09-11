@@ -1,5 +1,4 @@
-import os
-os.add_dll_directory("E:\\IDE\\qt6\\6.5.3\\msvc2019_64\\bin")
+import QtPathHelper
 import PyPeridyno as dyno
 
 class PythonSteer(dyno.KeyboardInputModule):

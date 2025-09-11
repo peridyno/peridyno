@@ -1,5 +1,7 @@
+import QtPathHelper
 import PyPeridyno as dyno
 from PyPeridyno import Vector3f
+
 
 scn = dyno.SceneGraph()
 scn.setUpperBound(dyno.Vector3f([3, 3, 3]))

@@ -6,6 +6,16 @@ template <typename TDataType>
 void declare_dual_particle_fluid_system(py::module& m, std::string typestr) {
 	using Class = dyno::DualParticleFluid<TDataType>;
 	using Parent = dyno::ParticleFluid<TDataType>;
+
+	class DualParticleFluidPublicist : public Class
+	{
+	public:
+		using Class::resetStates;
+		using Class::preUpdateStates;
+		using Class::postUpdateStates;
+		using Class::vpGen;
+	};
+
 	std::string pyclass_name = std::string("DualParticleFluid") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>DPFS(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	DPFS.def(py::init<>())
@@ -14,7 +24,13 @@ void declare_dual_particle_fluid_system(py::module& m, std::string typestr) {
 		.def("stateBoundaryNorm", &Class::stateBoundaryNorm, py::return_value_policy::reference)
 		.def("stateVirtualPosition", &Class::stateVirtualPosition, py::return_value_policy::reference)
 		.def("stateVirtualPointSet", &Class::stateVirtualPointSet, py::return_value_policy::reference)
-		.def("varVirtualParticleSamplingStrategy", &Class::varVirtualParticleSamplingStrategy, py::return_value_policy::reference);
+		.def("varVirtualParticleSamplingStrategy", &Class::varVirtualParticleSamplingStrategy, py::return_value_policy::reference)
+		// portected
+		.def("resetStates", &DualParticleFluidPublicist::resetStates)
+		.def("preUpdateStates", &DualParticleFluidPublicist::preUpdateStates)
+		.def("postUpdateStates", &DualParticleFluidPublicist::postUpdateStates)
+
+		.def_readwrite("vpGen", &DualParticleFluidPublicist::vpGen);
 
 	py::enum_<typename Class::EVirtualParticleSamplingStrategy>(DPFS, "EVirtualParticleSamplingStrategy")
 		.value("ColocationStrategy", Class::EVirtualParticleSamplingStrategy::ColocationStrategy)
