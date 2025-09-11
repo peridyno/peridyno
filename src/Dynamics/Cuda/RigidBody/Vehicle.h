@@ -111,5 +111,24 @@ namespace dyno
 
 	};
 
+
+
+	template<typename TDataType>
+	class Bicycle : virtual public ArticulatedBody<TDataType>
+	{
+		DECLARE_TCLASS(Bicycle, TDataType)
+	public:
+		typedef typename TDataType::Real Real;
+		typedef typename TDataType::Coord Coord;
+
+		Bicycle();
+		~Bicycle() override;
+
+		DEF_VAR_OUT(bool, Reset, "Reset");
+
+	protected:
+		void resetStates() override;
+
+	};
 }
 
