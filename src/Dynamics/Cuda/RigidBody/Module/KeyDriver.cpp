@@ -18,6 +18,7 @@ namespace dyno
 		{
 			this->hingeAngle.clear();
 			this->inReset()->setValue(false);
+			this->speed = 0;
 		}
 
 
@@ -39,22 +40,56 @@ namespace dyno
 
 		if (currentHingeActions.size())
 		{
-			for (auto action : currentHingeActions)
+			if (event.key == PKeyboardType::PKEY_A || event.key == PKeyboardType::PKEY_D)
 			{
-				int keyJointID = action.joint;
-				float keyValue = action.value;
+				for (auto action : currentHingeActions)
+				{
+					int keyJointID = action.joint;
+					float keyValue = action.value;
 
-				auto angleIterator = hingeAngle.find(keyJointID);
-				if (angleIterator != hingeAngle.end())
-					hingeAngle[keyJointID] = hingeAngle[keyJointID] + keyValue * stepAngle;
-				else
-					hingeAngle[keyJointID] = keyValue * stepAngle;
+					auto angleIterator = hingeAngle.find(keyJointID);
+					if (angleIterator != hingeAngle.end())
+						hingeAngle[keyJointID] = hingeAngle[keyJointID] + keyValue * stepAngle;
+					else
+						hingeAngle[keyJointID] = keyValue * stepAngle;
 
-				c_hinge[keyJointID].setRange(hingeAngle[keyJointID], hingeAngle[keyJointID] + M_PI / 360);
+					c_hinge[keyJointID].setRange(hingeAngle[keyJointID], std::clamp(hingeAngle[keyJointID] + M_PI / 360.0f, -2 * M_PI, 2 * M_PI));
+				}
 			}
-			
-			
+			else if (event.key == PKeyboardType::PKEY_W || event.key == PKeyboardType::PKEY_S)
+			{
+				switch (event.key)
+				{
+				case PKeyboardType::PKEY_W:
+
+					speed += 0.5;
+
+					break;
+				case PKeyboardType::PKEY_S:
+
+					speed -= 0.5;
+				}
+				speed = std::clamp(speed,0.0f,5.0f);
+
+				for (auto action : currentHingeActions)
+				{
+					int keyJointID = action.joint;
+					float keyValue = action.value;
+
+					c_hinge[keyJointID].setMoter(speed * keyValue);
+				}
+				
+
+			}
+
 		}
+
+
+
+		
+
+
+		
 
 		d_hinge.assign(c_hinge);
 

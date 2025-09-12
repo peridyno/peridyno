@@ -828,7 +828,7 @@ namespace dyno
 
 		auto sRender = std::make_shared<GLSurfaceVisualModule>();
 		sRender->setColor(Color(1, 1, 0));
-		sRender->setAlpha(0.5);
+		sRender->setAlpha(0.2);
 		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(sRender);
 
@@ -943,7 +943,7 @@ namespace dyno
 
 			}
 
-			Real wheel_velocity = 5;
+			//Real wheel_velocity = 5;
 
 			int main = 1;
 			int frontwheel = 2;
@@ -954,12 +954,12 @@ namespace dyno
 
 			auto& frontWheelJoint = this->createHingeJoint(actors[frontwheel], actors[handle]);
 			frontWheelJoint.setAnchorPoint(actors[frontwheel]->center);
-			frontWheelJoint.setMoter(wheel_velocity);
+			//frontWheelJoint.setMoter(wheel_velocity);
 			frontWheelJoint.setAxis(Vec3f(0, 0, -1));
 
 			auto& backWheelJoint = this->createHingeJoint(actors[backwheel], actors[main]);
 			backWheelJoint.setAnchorPoint(actors[backwheel]->center);
-			backWheelJoint.setMoter(wheel_velocity);
+			//backWheelJoint.setMoter(wheel_velocity);
 			backWheelJoint.setAxis(Vec3f(0, 0, -1));
 
 			auto& handleJoint = this->createHingeJoint(actors[handle], actors[main]);

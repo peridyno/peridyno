@@ -55,5 +55,6 @@ namespace dyno
 	private:
 
 		std::map<int,float> hingeAngle;
+		float speed = 0;
 	};
 }

@@ -49,11 +49,11 @@ std::shared_ptr<SceneGraph> creatCar()
 	bike->outReset()->connect(driver->inReset());
 
 	Key2HingeConfig keyConfig;
-	//keyConfig.addMap(PKeyboardType::PKEY_W, 0, -1);
-	//keyConfig.addMap(PKeyboardType::PKEY_S, 0, 1);
+	//keyConfig.addMap(PKeyboardType::PKEY_W, 0, 1);
+	//keyConfig.addMap(PKeyboardType::PKEY_S, 0, -1);
 
-	//keyConfig.addMap(PKeyboardType::PKEY_W, 1, -1);
-	//keyConfig.addMap(PKeyboardType::PKEY_S, 1, 1);
+	keyConfig.addMap(PKeyboardType::PKEY_W, 1, 1);
+	keyConfig.addMap(PKeyboardType::PKEY_S, 1, -1);
 
 	keyConfig.addMap(PKeyboardType::PKEY_D, 2, 1);
 	keyConfig.addMap(PKeyboardType::PKEY_A, 2, -1);
