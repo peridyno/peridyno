@@ -199,7 +199,7 @@ namespace dyno
 		if (triSet == NULL)
 			return;
 
-		auto SourceTriangles = triSet->getTriangles();
+		auto SourceTriangles = triSet->triangleIndices();
 		auto SourcePoints = triSet->getPoints();
 
 		texMesh->shapes()[0] = std::make_shared<Shape>();
@@ -306,7 +306,7 @@ namespace dyno
 		if (triSet == NULL)
 			return;
 
-		auto SourceTriangles = triSet->getTriangles();
+		auto SourceTriangles = triSet->triangleIndices();
 		auto SourcePoints = triSet->getPoints();
 
 		auto& TargetTriangles = texMesh->shapes()[0]->vertexIndex;

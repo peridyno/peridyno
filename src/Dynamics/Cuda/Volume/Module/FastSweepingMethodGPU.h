@@ -20,12 +20,12 @@
 #include "Module/ComputeModule.h"
 
 namespace dyno {
-	typedef Vector<unsigned int, 3> Vec3ui;
-	typedef Vector<int, 3> Vec3i;
+	//typedef Vector<unsigned int, 3> Vec3ui;
+	//typedef Vector<int, 3> Vec3i;
 
-	typedef CArray3D<unsigned int> CArray3ui;
-	typedef CArray3D<float> CArray3f;
-	typedef CArray3D<int> CArray3i;
+	//typedef CArray3D<unsigned int> CArray3ui;
+	//typedef CArray3D<float> CArray3f;
+	//typedef CArray3D<int> CArray3i;
 
 	/**
 	 * @brief This is a GPU-based fast sweeping method to generate signed distance field from a mesh.
@@ -58,10 +58,10 @@ namespace dyno {
 	private:
 		void makeLevelSet();
 
-		int ni;
-		int nj;
-		int nk;
-		Vec3f origin;
-		Vec3f maxPoint;
+		uint ni;
+		uint nj;
+		uint nk;
+		Coord origin;
+		//Vec3f maxPoint;
 	};
 }

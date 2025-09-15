@@ -93,6 +93,13 @@ namespace dyno
 		PointType id[3];
 	};
 
+	enum VertexNormalWeightingOption
+	{
+		UNIFORM_WEIGHTED,
+		AREA_WEIGHTED,
+		ANGLE_WEIGHTED
+	};
+
 	template<typename TDataType>
 	class TriangleSet : public EdgeSet<TDataType>
 	{
@@ -110,22 +117,12 @@ namespace dyno
 		/**
 		 * @brief return all triangle indices
 		 */
-		DArray<Triangle>& getTriangles() { return mTriangleIndex; }
-		DArrayList<int>& getVertex2Triangles();
+		DArray<Triangle>& triangleIndices() { return mTriangleIndex; }
 
-		DArray<TopologyModule::Tri2Edg>& getTriangle2Edge() { return mTri2Edg; }
-		DArray<TopologyModule::Edg2Tri>& getEdge2Triangle() { return mEdg2Tri; }
+		const DArrayList<int>& vertex2Triangle() {return mVer2Tri; }
 
-		void setNormals(DArray<Coord>& normals);
-		DArray<Coord>& getVertexNormals() { return mVertexNormal; }
-
-		/**
-		 * @brief update the index from triangle id to edges ids
-		 */
-		void updateTriangle2Edge();
-
-		void updateEdgeNormal(DArray<Coord>& edgeNormal);
-		void updateAngleWeightedVertexNormal(DArray<Coord>& vertexNormal);
+		const DArray<TopologyModule::Tri2Edg>& triangle2Edge() { return mTri2Edg; }
+		const DArray<TopologyModule::Edg2Tri>& edge2Triangle() { return mEdg2Tri; }
 
 
 		bool loadObjFile(std::string filename);
@@ -139,36 +136,34 @@ namespace dyno
 
 		void clear() override;
 
-		//If true, normals will be updated automatically as calling update();
-		void setAutoUpdateNormals(bool b) { bAutoUpdateNormal = b; }
+	public:
+		void requestTriangle2Triangle(DArray<::dyno::TopologyModule::Tri2Tri>& t2t);
 
-		void rotate(const Coord angle) override;
-		void rotate(const Quat<Real> q) override;
+		void requestEdgeNormals(DArray<Coord>& normals);
+
+		// Calculate vertex normals according to the given option op
+		void requestVertexNormals(DArray<Coord>& normals, VertexNormalWeightingOption op = VertexNormalWeightingOption::ANGLE_WEIGHTED);
 
 	protected:
+		// Update mTriangleIndex, mVer2Tri
 		void updateTopology() override;
 
+		// Update {Edges, Tri2Edg, Edg2Tri}
 		void updateEdges() override;
-
-		virtual void updateTriangles() {};
-		virtual void updateVertexNormal();
-
+		
+		virtual void updateTriangles() {}
 	private:
-		//A tag used to identify when the normals should be updated automatically
-		bool bAutoUpdateNormal = true;
+		// Update {Ver2Tri}
+		void updateVertex2Triangle();
 
 		DArray<Triangle> mTriangleIndex;
 
-		//Map vertex id to triangle id
+		// A mapping from vertex ids to triangle ids,  automatically updated when update() is called
 		DArrayList<int> mVer2Tri;
 
-		//Map edge id to triangle id
+		// Mapping between edges and triangles, automatically updated when update() is called
 		DArray<::dyno::TopologyModule::Edg2Tri> mEdg2Tri;
-
-		//Map triangle id to edge id
 		DArray<::dyno::TopologyModule::Tri2Edg> mTri2Edg;
-
-		DArray<Coord> mVertexNormal;
 	};
 }
 

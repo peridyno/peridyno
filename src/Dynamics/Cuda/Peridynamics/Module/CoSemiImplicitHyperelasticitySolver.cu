@@ -3,6 +3,7 @@
 #include "ParticleSystem/Module/Kernel.h"
 #include "curand_kernel.h"
 #include "Algorithm/CudaRand.h"
+#include "Timer.h"
 
 namespace dyno
 {
@@ -66,7 +67,7 @@ namespace dyno
 		if (type == StVK) {
 			energy[pId] = ENERGY_FUNC.stvkModel.getEnergy(eigen_i[0], eigen_i[1], eigen_i[2]);
 		}
-		else if (type == NeoHooekean) {
+		else if (type == NeoHookean) {
 			energy[pId] = ENERGY_FUNC.neohookeanModel.getEnergy(eigen_i[0], eigen_i[1], eigen_i[2]);
 		}
 		else if (type == Linear) {
@@ -110,6 +111,7 @@ namespace dyno
 
 		y_next[pId] = y_current[pId] + alpha[pId] * grad[pId];
 	}
+
 
 	template <typename Real, typename Coord>
 	__global__ void HM_ComputeCurrentPosition(
@@ -177,7 +179,7 @@ namespace dyno
 					deltaEnergy = V_j * ENERGY_FUNC.stvkModel.getEnergy(lambda_ij, lambda_ij, lambda_ij);
 					deltaEnergyGradient = V_j * (ENERGY_FUNC.stvkModel.getStressTensorPositive(lambda_ij, lambda_ij, lambda_ij) - ENERGY_FUNC.stvkModel.getStressTensorNegative(lambda_ij, lambda_ij, lambda_ij)) * dir_ij;
 				}
-				else if (type == NeoHooekean) {
+				else if (type == NeoHookean) {
 					deltaEnergy = V_j * ENERGY_FUNC.neohookeanModel.getEnergy(lambda_ij, lambda_ij, lambda_ij);
 					deltaEnergyGradient = V_j * (ENERGY_FUNC.neohookeanModel.getStressTensorPositive(lambda_ij, lambda_ij, lambda_ij) - ENERGY_FUNC.neohookeanModel.getStressTensorNegative(lambda_ij, lambda_ij, lambda_ij)) * dir_ij;
 				}
@@ -233,6 +235,8 @@ namespace dyno
 		alpha /= Real(1 + bonds[pId].size());
 
 		stepLength[pId] = alpha;
+		//if (!(deltaE_i < EPSILON || deltaE_i < energy_i))
+		//	printf("Alpha %f\n", alpha);
 	}
 
 	template <typename Coord>
@@ -609,7 +613,7 @@ namespace dyno
 			S1_i = ENERGY_FUNC.stvkModel.getStressTensorPositive(lambda_i1, lambda_i2, lambda_i3);
 			S2_i = ENERGY_FUNC.stvkModel.getStressTensorNegative(lambda_i1, lambda_i2, lambda_i3);
 		}
-		else if (type == NeoHooekean) {
+		else if (type == NeoHookean) {
 			S1_i = ENERGY_FUNC.neohookeanModel.getStressTensorPositive(lambda_i1, lambda_i2, lambda_i3);
 			S2_i = ENERGY_FUNC.neohookeanModel.getStressTensorNegative(lambda_i1, lambda_i2, lambda_i3);
 		}
@@ -620,6 +624,12 @@ namespace dyno
 		else if (type == Xuetal) {
 			S1_i = ENERGY_FUNC.xuModel.getStressTensorPositive(lambda_i1, lambda_i2, lambda_i3);
 			S2_i = ENERGY_FUNC.xuModel.getStressTensorNegative(lambda_i1, lambda_i2, lambda_i3);
+			if(pId == -1)
+			printf("[SSBS] xu(%f) l(%f %f %f)\n S1(%f %f %f\n %f %f %f\n %f %f %f\n) S2(%f %f %f\n %f %f %f\n %f %f %f\n)\n",
+				ENERGY_FUNC.xuModel.s0,
+				lambda_i1, lambda_i2, lambda_i3,
+				S1_i(0, 0), S1_i(0, 1), S1_i(0, 2), S1_i(1, 0), S1_i(1, 1), S1_i(1, 2), S1_i(2, 0), S1_i(2, 1), S1_i(2, 2),
+				S2_i(0, 0), S2_i(0, 1), S2_i(0, 2), S2_i(1, 0), S2_i(1, 1), S2_i(1, 2), S2_i(2, 0), S2_i(2, 1), S2_i(2, 2));
 		}
 		else if (type == Fiber)
 		{
@@ -672,7 +682,7 @@ namespace dyno
 					S1_ij = ENERGY_FUNC.stvkModel.getStressTensorPositive(lambda, lambda, lambda);
 					S2_ij = ENERGY_FUNC.stvkModel.getStressTensorNegative(lambda, lambda, lambda);
 				}
-				else if (type == NeoHooekean) {
+				else if (type == NeoHookean) {
 					S1_ij = ENERGY_FUNC.neohookeanModel.getStressTensorPositive(lambda, lambda, lambda);
 					S2_ij = ENERGY_FUNC.neohookeanModel.getStressTensorNegative(lambda, lambda, lambda);
 				}
@@ -785,6 +795,11 @@ namespace dyno
 		Matrix mat_i = A[pId] + mass_i * Matrix::identityMatrix();
 		Coord src_i = source[pId] + mass_i * y_inter[pId];
 		y_next[pId] = mat_i.inverse() * src_i;
+		if (pId == -1)
+		{
+			Coord dx = y_next[pId] - y_inter[pId];
+			printf("[SSBS] dx[%d] (%f %f %f)\n", pId, dx[0], dx[1], dx[2]);
+		}
 	}
 
 
@@ -876,12 +891,14 @@ namespace dyno
 
 		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->inTriangularMesh()->getDataPtr());
 		triSet->getPoints().assign(this->inY()->getData());
-		triSet->updateAngleWeightedVertexNormal(this->inNorm()->getData());
+		triSet->requestVertexNormals(this->inNorm()->getData());
 	}
 
 	template<typename TDataType>
 	void CoSemiImplicitHyperelasticitySolver<TDataType>::enforceHyperelasticity()
 	{
+		// GTimer Totaltimer;
+		// Totaltimer.start();
 		resizeAllFields();
 
 		int numOfParticles = this->inY()->getData().size();
@@ -1158,6 +1175,8 @@ namespace dyno
 			this->inAttribute()->getData(),
 			this->inTimeStep()->getData());
 		
+		// Totaltimer.stop();
+		// printf("CSSBS %fms\n", Totaltimer.getElapsedTime());
 
 		Log::sendMessage(Log::User, "\n==================== solver end!!!====================\n");
 	}

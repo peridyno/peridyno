@@ -88,9 +88,9 @@ namespace dyno
 		{
 			host_vertices.assign(triangleset->getPoints());
 		}
-		if (triangleset->getTriangles().size())
+		if (triangleset->triangleIndices().size())
 		{
-			host_triangles.assign(triangleset->getTriangles());
+			host_triangles.assign(triangleset->triangleIndices());
 		}
 
 		output << "# exported by PeriDyno (www.peridyno.com)" << std::endl;

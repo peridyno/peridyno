@@ -65,6 +65,8 @@ namespace dyno
 		//Set light direction
 		void setMainLightDirection(glm::vec3 dir);
 
+		virtual void setDefaultAnimationOption(bool op) = 0;
+
 	protected:
 		std::shared_ptr<RenderEngine>	mRenderEngine;
 		RenderParams					mRenderParams;

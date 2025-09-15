@@ -356,7 +356,7 @@ namespace dyno
 
 		auto ts = this->inTriangleSet()->constDataPtr();
 		auto& triVertex = ts->getPoints();
-		auto& triIndex = ts->getTriangles();
+		auto& triIndex = ts->triangleIndices();
 
 		mDeltaPos.reset();
 		mCalculateDensity->update();

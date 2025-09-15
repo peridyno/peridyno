@@ -56,7 +56,7 @@ namespace dyno
 		if (type == StVK) {
 			energy[pId] = ENERGY_FUNC.stvkModel.getEnergy(eigen_i[0], eigen_i[1], eigen_i[2]);
 		}
-		else if (type == NeoHooekean) {
+		else if (type == NeoHookean) {
 			energy[pId] = ENERGY_FUNC.neohookeanModel.getEnergy(eigen_i[0], eigen_i[1], eigen_i[2]);
 		}
 		else if (type == Linear) {
@@ -182,7 +182,7 @@ namespace dyno
 					deltaEnergy = V_j * ENERGY_FUNC.stvkModel.getEnergy(lambda_ij, lambda_ij, lambda_ij);
 					deltaEnergyGradient = V_j * (ENERGY_FUNC.stvkModel.getStressTensorPositive(lambda_ij, lambda_ij, lambda_ij) - ENERGY_FUNC.stvkModel.getStressTensorNegative(lambda_ij, lambda_ij, lambda_ij)) * dir_ij;
 				}
-				else if (type == NeoHooekean) {
+				else if (type == NeoHookean) {
 					deltaEnergy = V_j * ENERGY_FUNC.neohookeanModel.getEnergy(lambda_ij, lambda_ij, lambda_ij);
 					deltaEnergyGradient = V_j * (ENERGY_FUNC.neohookeanModel.getStressTensorPositive(lambda_ij, lambda_ij, lambda_ij) - ENERGY_FUNC.neohookeanModel.getStressTensorNegative(lambda_ij, lambda_ij, lambda_ij)) * dir_ij;
 				}
@@ -609,7 +609,7 @@ namespace dyno
 			S1_i = ENERGY_FUNC.stvkModel.getStressTensorPositive(lambda_i1, lambda_i2, lambda_i3);
 			S2_i = ENERGY_FUNC.stvkModel.getStressTensorNegative(lambda_i1, lambda_i2, lambda_i3);
 		}
-		else if (type == NeoHooekean) {
+		else if (type == NeoHookean) {
 			S1_i = ENERGY_FUNC.neohookeanModel.getStressTensorPositive(lambda_i1, lambda_i2, lambda_i3);
 			S2_i = ENERGY_FUNC.neohookeanModel.getStressTensorNegative(lambda_i1, lambda_i2, lambda_i3);
 		}
@@ -686,7 +686,7 @@ namespace dyno
 					S1_ij = ENERGY_FUNC.stvkModel.getStressTensorPositive(lambda, lambda, lambda);
 					S2_ij = ENERGY_FUNC.stvkModel.getStressTensorNegative(lambda, lambda, lambda);
 				}
-				else if (type == NeoHooekean) {
+				else if (type == NeoHookean) {
 					S1_ij = ENERGY_FUNC.neohookeanModel.getStressTensorPositive(lambda, lambda, lambda);
 					S2_ij = ENERGY_FUNC.neohookeanModel.getStressTensorNegative(lambda, lambda, lambda);
 				}

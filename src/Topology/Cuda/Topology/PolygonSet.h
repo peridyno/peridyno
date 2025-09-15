@@ -46,11 +46,11 @@ namespace dyno
 
 		DArrayList<uint>& polygonIndices() { return mPolygonIndex; }
 
-		DArrayList<uint>& vertex2Polygon() { return mVer2Poly; }
+		const DArrayList<uint>& vertex2Polygon() { return mVer2Poly; }
 
-		DArrayList<uint>& polygon2Edge() { return mPoly2Edg; };
+		const DArrayList<uint>& polygon2Edge() { return mPoly2Edg; };
 
-		DArray<::dyno::TopologyModule::Edg2Poly>& edge2Polygon() {
+		const DArray<::dyno::TopologyModule::Edg2Poly>& edge2Polygon() {
 			return mEdg2Poly;
 		}
 

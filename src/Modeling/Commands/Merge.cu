@@ -11,21 +11,21 @@ namespace dyno
 	template<typename TDataType>
 	Merge<TDataType>::Merge()
 	{
-		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
+		this->stateTriangleSets()->setDataPtr(std::make_shared<TriangleSets<TDataType>>());
 
 		auto glModule = std::make_shared<GLSurfaceVisualModule>();
 		glModule->setColor(Color(0.8f, 0.3f, 0.25f));
 		glModule->setVisible(true);
-		this->stateTriangleSet()->connect(glModule->inTriangleSet());
+		this->stateTriangleSets()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
 
 		auto ptModule = std::make_shared<GLPointVisualModule>();
 		ptModule->setVisible(false);
-		this->stateTriangleSet()->connect(ptModule->inPointSet());
+		this->stateTriangleSets()->connect(ptModule->inPointSet());
 		this->graphicsPipeline()->pushModule(ptModule);
 		ptModule->varPointSize()->setValue(0.01);
 
-		this->stateTriangleSet()->promoteOuput();
+		this->stateTriangleSets()->promoteOuput();
 	}
 
 	template<typename TDataType>
@@ -40,25 +40,26 @@ namespace dyno
 		if (this->varUpdateMode()->getData() == UpdateMode::Tick)
 		{
 			MergeGPU();
-		}
+		}	
 	}
 
 	template<typename TDataType>
 	void Merge<TDataType>::MergeGPU()
 	{
-		std::shared_ptr<TriangleSet<TDataType>> temp = std::make_shared<TriangleSet<DataType3f>>();
-
 		auto num = this->inTriangleSets()->size();
 
+		std::vector<std::shared_ptr<TriangleSet<TDataType>>> tsArray;
 		for (uint i = 0; i < num; i++)
 		{
 			auto ts = this->inTriangleSets()->constDataPtr(i);
 
-			temp->copyFrom(*temp->merge(*ts));
+			tsArray.push_back(ts);
 		}
 
-		auto topo = this->stateTriangleSet()->getDataPtr();
-		topo->copyFrom(*temp);
+		auto topo = this->stateTriangleSets()->getDataPtr();
+		topo->load(tsArray);
+
+		tsArray.clear();
 	}
 
 	DEFINE_CLASS(Merge);

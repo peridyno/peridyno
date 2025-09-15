@@ -42,7 +42,7 @@ int main()
 
 	//创建Copy模型
 	auto Copy = scn->addNode(std::make_shared<CopyModel<DataType3f>>());
-	MergeModel->stateTriangleSet()->promoteOuput()->connect(Copy->inTriangleSetIn());
+	MergeModel->stateTriangleSets()->promoteOuput()->connect(Copy->inTriangleSetIn());
 	//修改Copy属性
 	Copy->varTotalNumber()->setValue(4);
 	Copy->varCopyTransform()->setValue(Vec3f(1, 0, 0));
@@ -54,10 +54,10 @@ int main()
 
 	ramp.useBezier();
 
-	ramp.addPointAndHandlePoint(Ramp::Coord2D(0, 0.5), Ramp::Coord2D(0.25, 0.5), Ramp::Coord2D(0.25, 0.5));
-	ramp.addPointAndHandlePoint(Ramp::Coord2D(0.5, 1), Ramp::Coord2D(0.5, 0.75), Ramp::Coord2D(0.5, 0.75));
-	ramp.addPointAndHandlePoint(Ramp::Coord2D(1, 0.5), Ramp::Coord2D(0.75, 0.5), Ramp::Coord2D(0.75, 0.5));
-	ramp.addPointAndHandlePoint(Ramp::Coord2D(0.5, 0), Ramp::Coord2D(0.5, 0.25), Ramp::Coord2D(0.5, 0.25));
+	ramp.addPointAndHandlePoint(Canvas::Coord2D(0, 0.5), Canvas::Coord2D(0.25, 0.5), Canvas::Coord2D(0.25, 0.5));
+	ramp.addPointAndHandlePoint(Canvas::Coord2D(0.5, 1), Canvas::Coord2D(0.5, 0.75), Canvas::Coord2D(0.5, 0.75));
+	ramp.addPointAndHandlePoint(Canvas::Coord2D(1, 0.5), Canvas::Coord2D(0.75, 0.5), Canvas::Coord2D(0.75, 0.5));
+	ramp.addPointAndHandlePoint(Canvas::Coord2D(0.5, 0), Canvas::Coord2D(0.5, 0.25), Canvas::Coord2D(0.5, 0.25));
 
 	ramp.setCurveClose(true);
 	ramp.setResample(true);

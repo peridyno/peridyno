@@ -104,43 +104,49 @@ namespace dyno
 		void setEdges(DArray<Edge>& edges);
 
 		/**
-		 * @brief Request the neighboring ids of each point according to the mesh topology
-		 * 			Be sure update() is called as long as the topology is changed  
-		 * 
-		 * @param lists A neighbor list storing the ids
-		 */
-		void requestPointNeighbors(DArrayList<int>& lists);
-
-		/**
 		 * @brief Get all edges with each one containing the indices of two edge ends
 		 * 
 		 * @return DArray<Edge>& A GPU array
 		 */
-		DArray<Edge>& getEdges() {return mEdges;}
+		DArray<Edge>& edgeIndices() {return mEdges;}
 
 		/**
 		 * @brief Get the Ver2 Edge object
 		 * 
 		 * @return DArrayList<int>& 
 		 */
-		DArrayList<int>& vertex2Edge() { return mVer2Edge; }
+		const DArrayList<int>& vertex2Edge() { return mVer2Edge; }
 
 		void copyFrom(EdgeSet<TDataType>& edgeSet);
 
 		bool isEmpty() override;
 
 		void clear() override;
-
+		
 		//TODO:
 		void loadSmeshFile(std::string filename) {};
 
+	public:
+		/**
+		 * @brief Request the neighboring ids of each point according to the mesh topology
+		 * 			Be sure update() is called as long as the topology is changed
+		 *
+		 * @param lists A neighbor list storing the ids
+		 */
+		void requestPointNeighbors(DArrayList<int>& lists);
+
 	protected:
+		// update topology and light mapping
+		void updateTopology() override;
 		/**
 		 * Override updateEdges to update edges in a customized way, e.g., only the four edges will be created for a quadrangle
 		 */
 		virtual void updateEdges() {};
 
-		void updateTopology() override;
+		/**
+		 * Will be called when update() is called
+		 */
+		virtual void updateVer2Edge();
 
 	protected:
 		DArray<Edge> mEdges;

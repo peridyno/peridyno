@@ -9,6 +9,7 @@
 
 #include "DirectedAcyclicGraph.h"
 #include "AutoLayoutDAG.h"
+#include "ModulePort.h"
 
 #include <QtWidgets/QMenu>
 #include <QLineEdit>
@@ -21,6 +22,9 @@ namespace dyno
 	public:
 		States() {};
 
+		bool allowExported() override { return false; }
+		bool allowImported() override { return false; }
+
 		std::string caption() { return "States"; }
 	};
 
@@ -28,6 +32,9 @@ namespace dyno
 	{
 	public:
 		Outputs() {};
+
+		bool allowExported() override { return false; }
+		bool allowImported() override { return false; }
 
 		std::string caption() { return "Outputs"; }
 	};
@@ -194,6 +201,50 @@ namespace Qt
 			if (moduleMap.find(inId) != moduleMap.end()) {
 				auto inBlock = moduleMap[m->objectId()];
 
+				auto imports = m->getImportModules();
+
+				if (m->allowImported())
+				{
+					for (int i = 0; i < imports.size(); i++)
+					{
+						dyno::ModulePortType pType = imports[i]->getPortType();
+						if (dyno::Single == pType)
+						{
+							auto moduleSrc = imports[i]->getModules()[0];
+							if (moduleSrc != nullptr)
+							{
+								auto outId = moduleSrc->objectId();
+								if (moduleMap.find(outId) != moduleMap.end())
+								{
+									auto outBlock = moduleMap[moduleSrc->objectId()];
+									createConnection(*inBlock, i, *outBlock, 0);
+								}
+							}
+						}
+						else if (dyno::Multiple == pType)
+						{
+							//TODO: a weird problem exist here, if the expression "auto& nodes = ports[i]->getNodes()" is used,
+							//we still have to call clear to avoid memory leak.
+							auto& modules = imports[i]->getModules();
+							//ports[i]->clear();
+							for (int j = 0; j < modules.size(); j++)
+							{
+								if (modules[j] != nullptr)
+								{
+									auto outId = modules[j]->objectId();
+									if (moduleMap.find(outId) != moduleMap.end())
+									{
+										auto outBlock = moduleMap[outId];
+										createConnection(*inBlock, i, *outBlock, 0);
+									}
+								}
+							}
+							//nodes.clear();
+						}
+					}
+				}
+
+
 				auto fieldIn = m->getInputFields();
 
 				for (int i = 0; i < fieldIn.size(); i++)
@@ -203,14 +254,14 @@ namespace Qt
 						auto parSrc = fieldSrc->parent();
 						if (parSrc != nullptr)
 						{
-							Module* nodeSrc = dynamic_cast<Module*>(parSrc);
-							if (nodeSrc == nullptr)
+							Module* moduleSrc = dynamic_cast<Module*>(parSrc);
+							if (moduleSrc == nullptr)
 							{
-								nodeSrc = mStates.get();
+								moduleSrc = mStates.get();
 							}
 
-							auto outId = nodeSrc->objectId();
-							auto fieldsOut = nodeSrc->getOutputFields();
+							auto outId = moduleSrc->objectId();
+							auto fieldsOut = moduleSrc->getOutputFields();
 
 							uint outFieldIndex = 0;
 							bool fieldFound = false;
@@ -224,10 +275,14 @@ namespace Qt
 								outFieldIndex++;
 							}
 
+							if (moduleSrc->allowExported()) outFieldIndex++;
+
+							uint inFieldIndex = m->allowImported() ? i + imports.size() : i;
+
 							if (fieldFound && moduleMap.find(outId) != moduleMap.end())
 							{
 								auto outBlock = moduleMap[outId];
-								createConnection(*inBlock, i, *outBlock, outFieldIndex);
+								createConnection(*inBlock, inFieldIndex, *outBlock, outFieldIndex);
 							}
 						}
 					}
@@ -351,8 +406,17 @@ namespace Qt
 		}
 	}
 
+	void QtModuleFlowScene::reconstructActivePipeline()
+	{
+		mActivePipeline->forceUpdate();
+	}
+
 	void QtModuleFlowScene::promoteOutput(QtNode& n, const PortIndex index, const QPointF& pos)
 	{
+		//Index 0 is used for module connection
+		if (index == 0)
+			return;
+
 		QMenu portMenu;
 
 		portMenu.setObjectName("PortMenu");
@@ -371,7 +435,7 @@ namespace Qt
 					{
 						auto fieldOut = m->getOutputFields();
 
-						mActivePipeline->promoteOutputToNode(fieldOut[index]);
+						mActivePipeline->promoteOutputToNode(fieldOut[index - 1]);
 					}
 
 					emit nodeExportChanged();
@@ -404,8 +468,41 @@ namespace Qt
 
 		auto constructDAG = [&](std::shared_ptr<Module> m) -> void
 		{
-			auto outId = m->objectId();
+			if (m->allowImported())
+			{
+				auto imports = m->getImportModules();
+				for (int i = 0; i < imports.size(); i++)
+				{
+					auto inId = m->objectId();
+					dyno::ModulePortType pType = imports[i]->getPortType();
+					if (dyno::Single == pType)
+					{
+						auto module = imports[i]->getModules()[0];
+						if (module != nullptr)
+						{
+							auto outId = module->objectId();
 
+							graph.addEdge(outId, inId);
+						}
+					}
+					else if (dyno::Multiple == pType)
+					{
+						auto& modules = imports[i]->getModules();
+						for (int j = 0; j < modules.size(); j++)
+						{
+							if (modules[j] != nullptr)
+							{
+								auto outId = modules[j]->objectId();
+
+								graph.addEdge(outId, inId);
+							}
+						}
+						//nodes.clear();
+					}
+				}
+			}
+
+			auto outId = m->objectId();
 			auto fieldOut = m->getOutputFields();
 			for (int i = 0; i < fieldOut.size(); i++)
 			{
@@ -436,7 +533,6 @@ namespace Qt
 		{
 			constructDAG(*it);
 		}
-
 
 		dyno::AutoLayoutDAG layout(&graph);
 		layout.update();

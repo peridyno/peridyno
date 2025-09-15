@@ -243,7 +243,7 @@ namespace dyno
 
 		quad2Hex.resize(quadNum);
 
-		auto& pQuad = this->getQuads();
+		auto& pQuad = this->quadIndices();
 		pQuad.resize(quadNum);
 		cuExecute(keys.size(),
 			HS_SetupQuads,

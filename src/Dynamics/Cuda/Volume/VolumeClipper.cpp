@@ -9,7 +9,7 @@ namespace dyno
 {
 	template<typename TDataType>
 	VolumeClipper<TDataType>::VolumeClipper()
-		: Node()
+		: ParametricModel<TDataType>()
 	{
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
@@ -35,18 +35,14 @@ namespace dyno
 	template<typename TDataType>
 	void VolumeClipper<TDataType>::resetStates()
 	{
-		auto center = this->varTranslation()->getValue();
-		auto eulerAngles = this->varRotation()->getValue();
-
-		eulerAngles /= 180.0f;
-		eulerAngles *= M_PI;
+		auto center = this->varLocation()->getValue();
+		
+		Quat<Real> q = this->computeQuaternion();
 
 		auto levelSet = this->inLevelSet()->getDataPtr()->getSDF();
 
 		Coord lo = levelSet.lowerBound();
 		Coord hi = levelSet.upperBound();
-
-		Quat<Real> q = Quat<Real>::fromEulerAngles(eulerAngles[0], eulerAngles[1], eulerAngles[2]);
 
 		int nx = levelSet.nx() - 1;
 		int ny = levelSet.ny() - 1;
@@ -56,7 +52,10 @@ namespace dyno
 
 		Coord shifted_center = center + 0.5 * (lo + hi);
 
-		MarchingCubesHelper<TDataType>::countVerticeNumberForClipper(voxelVertNum, levelSet, TPlane3D<Real>(shifted_center, q.rotate(Coord(0, 1, 0))));
+		MarchingCubesHelper<TDataType>::countVerticeNumberForClipper(
+			voxelVertNum, 
+			levelSet, 
+			TPlane3D<Real>(shifted_center, q.rotate(Coord(0, 1, 0))));
 
 		Reduction<int> reduce;
 		int totalVNum = reduce.accumulate(voxelVertNum.begin(), voxelVertNum.size());

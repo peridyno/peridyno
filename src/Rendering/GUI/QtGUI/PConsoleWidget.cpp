@@ -6,6 +6,7 @@
 #include <QHBoxLayout>
 #include <QListView>
 #include <QPixmap>
+#include "NodeFactory.h"
 
 namespace dyno
 {
@@ -26,12 +27,12 @@ namespace dyno
 					{
 						if (info.suffix() == "png" || info.suffix() == "jpg" || info.suffix() == "bmp")
 						{
-							std::string iconPath = getAssetPath() + "/icon/NewFile.png";
+							std::string iconPath = getAssetPath() + "/icon/ContentBrowser/image.png";
 							return QPixmap(iconPath.c_str());
 						}
-						else if (info.suffix() == "obj" || info.suffix() == "gltf" || info.suffix() == "fbx")
+						else if (info.suffix() == "obj" || info.suffix() == "gltf" || info.suffix() == "glb" || info.suffix() == "fbx" || info.suffix() == "STL" || info.suffix() == "stl")
 						{
-							std::string iconPath = getAssetPath() + "/icon/NewFile.png";
+							std::string iconPath = getAssetPath() + "/icon/ContentBrowser/3dModel.png";
 							return QPixmap(iconPath.c_str());
 						}
 					}
@@ -77,8 +78,10 @@ namespace dyno
 		treeView->setRootIndex(model->index(path.c_str()));
 		layout->addWidget(treeView);
 
+
+
 		QStringList filter;
-		filter <<"*.png" << "*.jpg" << "*.bmp" << "*.obj" << "*.gltf" << "*.fbx";
+		filter <<"*.png" << "*.jpg" << "*.bmp" << "*.obj" << "*.gltf" << "*.glb" << "*.fbx" << "*.STL" << "*.stl" << "*.xml";
 		auto* listModel = new CustomFileSystemModel(this);
 		listModel->setRootPath(path.c_str());
 		listModel->setFilter(QDir::Files | QDir::NoDotAndDotDot);
@@ -99,6 +102,12 @@ namespace dyno
 
 		connect(treeView, SIGNAL(clicked(const QModelIndex&)),
 			this, SLOT(treeItemSelected(const QModelIndex&)));
+
+		connect(listView, SIGNAL(clicked(const QModelIndex&)),
+			this, SLOT(assetItemSelected(const QModelIndex&)));
+
+		connect(listView, SIGNAL(doubleClicked(const QModelIndex&)),
+			this, SLOT(assetDoubleClicked(const QModelIndex&)));
 	}
 
 	void QContentBrowser::treeItemSelected(const QModelIndex& index)
@@ -108,7 +117,7 @@ namespace dyno
 
 		//A hack
 		QStringList filter;
-		filter << "*.png" << "*.jpg" << "*.bmp" << "*.obj" << "*.gltf" << "*.fbx";
+		filter << "*.png" << "*.jpg" << "*.bmp" << "*.obj" << "*.gltf" << "*.glb" << "*.fbx" << "*.STL" << "*.stl" << "*.xml";
 		auto* newListModel = new CustomFileSystemModel(this);
 		newListModel->setRootPath(path);
 		newListModel->setFilter(QDir::Files | QDir::NoDotAndDotDot);
@@ -118,5 +127,33 @@ namespace dyno
 
  		listView->setModel(newListModel);
 		listView->setRootIndex(newListModel->index(path));
+	}
+
+	void QContentBrowser::assetItemSelected(const QModelIndex& index)
+	{
+		QString name = model->fileName(index);
+		QString path = model->fileInfo(index).absolutePath() + "/" + name;
+
+
+	}
+
+	void QContentBrowser::assetDoubleClicked(const QModelIndex& index)
+	{
+		QString name = model->fileName(index);
+		QString path = model->fileInfo(index).absolutePath() + "/" + name;
+
+		std::cout << path.toStdString() << "\n";
+
+		auto ext = model->fileInfo(index).suffix().toStdString();
+		auto ext2Act = NodeFactory::instance()->nodeContentActions();
+		if (ext2Act.find(ext) != ext2Act.end())
+		{
+			auto func = ext2Act[ext];
+			if (func != nullptr) {
+				auto node = func(path.toStdString());
+
+				emit nodeCreated(node);
+			}
+		}
 	}
 }

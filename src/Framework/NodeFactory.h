@@ -107,6 +107,16 @@ namespace dyno
 			return mPages;
 		}
 
+		std::map<std::string, std::function<std::shared_ptr<Node>(std::string)>>& nodeContentActions()
+		{
+			return mContentActions;
+		}
+
+		void addContentAction(std::string fileType , std::function<std::shared_ptr<Node>(std::string)> act)
+		{
+			mContentActions[fileType] = act;
+		}
+
 	private:
 		NodeFactory() = default;
 		~NodeFactory() = default;
@@ -118,6 +128,7 @@ namespace dyno
 		static std::mutex mMutex;
 
 		std::map<std::string, std::shared_ptr<NodePage>> mPages;
+		std::map<std::string, std::function<std::shared_ptr<Node>(std::string)>> mContentActions;
 	};
 
 }

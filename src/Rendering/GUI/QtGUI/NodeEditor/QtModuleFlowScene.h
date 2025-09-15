@@ -52,6 +52,8 @@ namespace Qt
 
 		void showGraphicsPipeline();
 
+		void reconstructActivePipeline();
+
 		/**
 		 * pos: screen pos
 		 */

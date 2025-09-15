@@ -279,7 +279,7 @@ namespace dyno
 		auto ts = this->inTriangleSet()->constDataPtr();
 
 		auto& vertices = ts->getPoints();
-		auto& indices = ts->getTriangles();
+		auto& indices = ts->triangleIndices();
 
 		//Initialize AABBs of the triangle set
 		if (this->inTriangleSet()->isModified())

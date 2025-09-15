@@ -10,6 +10,7 @@
 #include "TriangleMeshWriter.h"
 
 #include <Volume/VolumeLoader.h>
+#include <Volume/VolumeGenerator.h>
 
 #include "Peridynamics/CodimensionalPD.h"
 #include "Peridynamics/Module/DragSurfaceInteraction.h"
@@ -27,11 +28,15 @@ std::shared_ptr<SceneGraph> createScene()
 	auto object = scn->addNode(std::make_shared<StaticMeshLoader<DataType3f>>());
 	object->varFileName()->setValue(getAssetPath() + "cloth_shell/v2/woman_model_smaller.obj");
 	
-	auto volLoader = scn->addNode(std::make_shared<VolumeLoader<DataType3f>>());
-	volLoader->varFileName()->setValue(getAssetPath() + "cloth_shell/v2/woman_v2.sdf");
+	auto volGenerator = scn->addNode(std::make_shared<VolumeGenerator<DataType3f>>());
+	volGenerator->varSpacing()->setValue(0.01f);
+	object->stateTriangleSet()->connect(volGenerator->inTriangleSet());
+
+// 	auto volLoader = scn->addNode(std::make_shared<VolumeLoader<DataType3f>>());
+// 	volLoader->varFileName()->setValue(getAssetPath() + "cloth_shell/v2/woman_v2.sdf");
 
 	auto boundary = scn->addNode(std::make_shared<VolumeBoundary<DataType3f>>());
-	volLoader->connect(boundary->importVolumes());
+	volGenerator->connect(boundary->importVolumes());
 
 	auto cloth = scn->addNode(std::make_shared<CodimensionalPD<DataType3f>>());
 	cloth->loadSurface(getAssetPath() + "cloth_shell/v2/cloth_v2.obj");

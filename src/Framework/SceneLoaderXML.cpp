@@ -46,8 +46,6 @@ namespace dyno
 			nodeXML = nodeXML->NextSiblingElement("Node");
 		}
 
-		SceneGraph::Iterator itor = scn->begin();
-
 		std::map<ObjectId, std::shared_ptr<Node>> objID2Node;
 		std::map<uint, ObjectId> index2ObjectId;
 		int radix = 0;
@@ -124,6 +122,8 @@ namespace dyno
 			}
 		}
 
+		scn->markQueueUpdateRequired();
+
 		return scn;
 	}
 
@@ -164,6 +164,12 @@ namespace dyno
 			tinyxml2::XMLElement* nodeXml = doc.NewElement("Node");
 			nodeXml->SetAttribute("Class", node->getClassInfo()->getClassName().c_str());
 			nodeXml->SetAttribute("Coordinate", encodeVec2f(Vec2f(node->bx(), node->by())).c_str());
+			nodeXml->SetAttribute("Dt",node->getDt());
+			nodeXml->SetAttribute("AutoSync", node->isAutoSync());
+			nodeXml->SetAttribute("AutoHidden", node->isAutoHidden());
+			nodeXml->SetAttribute("PhysicsEnabled", node->isActive());
+			nodeXml->SetAttribute("RenderingEnabled", node->isVisible());
+
 			root->InsertEndChild(nodeXml);
 
 			tinyxml2::XMLElement* varsXml = doc.NewElement("Variables");
@@ -225,123 +231,36 @@ namespace dyno
 					if (fieldInp[i] == InNodeFields[ToIndex])
 						break;
 				}
-				auto fieldSrc = fieldInp[i]->getSource();
-				if (fieldSrc != nullptr) {
-					auto parSrc = fieldSrc->parent();
-					if (parSrc != nullptr)
+
+				switch (fieldInp[i]->inputPolicy())
+				{
+				case FBase::FInputPolicy::Many:
+				{
+					auto manySrc = fieldInp[i]->getSources();
+					for (size_t j = 0; j < manySrc.size(); j++)
 					{
-						Node* nodeSrc = dynamic_cast<Node*>(parSrc);// [node->field] - [node->field]
-						if (nodeSrc != nullptr)
+						auto fieldSrc = manySrc[j];
+
+						if (fieldSrc != nullptr) 
 						{
-							auto fieldsSrc = nodeSrc->getAllFields();
-
-							bool fieldFound = false;
-
-							uint FromIndex = 0;
-							for (FromIndex = 0; FromIndex < fieldsSrc.size(); FromIndex++)
-							{
-								if (fieldsSrc[FromIndex] == fieldSrc)
-								{
-									fieldFound = true;
-									break;
-								}
-							}
-
-
-							if (fieldFound) {
-								tinyxml2::XMLElement* connection = doc.NewElement("Connection");
-								connection->SetAttribute("SourceId", indices[parSrc->objectId()]);
-
-								connection->SetAttribute("TargetId", indices[node->objectId()]);
-								connection->SetAttribute("To", ToIndex);
-								connection->SetAttribute("From", FromIndex);
-								nodeConnectionsXml->InsertEndChild(connection);
-							}
-						}
-
-
-						Module* moduleSrc = dynamic_cast<Module*>(parSrc);// [node->Module->field] - [node->field]
-						if (moduleSrc != nullptr)
-						{
-							std::map<ObjectId, uint> ModuleIndices;
-							auto getModuleData = [&](Module* module, int& index, int& channel)
-							{
-								{
-									uint radix = 0;
-
-									auto& animModules = module->getParentNode()->animationPipeline()->activeModules();
-									for (auto m : animModules) {
-										if (module == m.get())
-										{
-											channel = 0;
-											index = radix;
-											return;
-										}
-										radix++;
-									}
-
-									radix = 0;
-									auto& renderModules = module->getParentNode()->graphicsPipeline()->activeModules();
-									for (auto m : renderModules) {
-										if (module == m.get())
-										{
-											channel = 1;
-											index = radix;
-											return;
-										}
-										radix++;
-									}
-
-									radix = 0;
-									auto& resetModules = module->getParentNode()->resetPipeline()->activeModules();
-									for (auto m : resetModules) {
-										if (module == m.get())
-										{
-											channel = 2;
-											index = radix;
-											return;
-										}
-										radix++;
-									}
-								}
-							};
-
-
-							auto outId = moduleSrc->objectId();
-							auto moduleFieldsSrc = moduleSrc->getAllFields();
-
-							uint Index = 0;
-							bool fieldFound = false;
-							for (auto f : moduleFieldsSrc)
-							{
-								if (f == fieldSrc)
-								{
-									fieldFound = true;
-									break;
-								}
-								Index++;
-							}
-
-
-
-							if (fieldFound) {
-								tinyxml2::XMLElement* connection = doc.NewElement("Connection");
-
-								connection->SetAttribute("SourceId", indices[moduleSrc->getParentNode()->objectId()]);
-
-								int moduleIndex = -1;
-								int pipline = -1;
-								getModuleData(moduleSrc, moduleIndex, pipline);
-								connection->SetAttribute("SourceModuleId", moduleIndex);
-								connection->SetAttribute("SourceModulePipline", pipline);
-								connection->SetAttribute("TargetId", indices[node->objectId()]);
-								connection->SetAttribute("To", ToIndex);
-								connection->SetAttribute("From", Index);
-								nodeConnectionsXml->InsertEndChild(connection);
-							}
+							NodeFieldInputConnection(fieldSrc, doc, indices, node, ToIndex, nodeConnectionsXml);
 						}
 					}
+					break; 
 				}
+				case FBase::FInputPolicy::One:
+				{
+					auto fieldSrc = fieldInp[i]->getSource();
+					if (fieldSrc != nullptr) 
+					{
+						NodeFieldInputConnection(fieldSrc, doc,indices,node,ToIndex,nodeConnectionsXml);
+					}
+					break;
+				}
+				default:
+					break;
+				};
+				
 			}
 
 			for (auto s : node->getOutputFields())
@@ -391,7 +310,7 @@ namespace dyno
 					}
 
 
-					Module* moduleSrc = dynamic_cast<Module*>(parSrc);// [node->Module->field] - [node->field]
+					Module* moduleSrc = dynamic_cast<Module*>(parSrc);// [ANode->Module->field] - [BNode->field]
 					if (moduleSrc != nullptr)
 					{
 						std::map<ObjectId, uint> ModuleIndices;
@@ -476,7 +395,7 @@ namespace dyno
 				}
 			}
 			/**/
-			//Insert animation pipeline
+			//Save pipeline
 			auto savePipeline = [&](std::shared_ptr<Pipeline> pipeline, const char* tag) {
 				tinyxml2::XMLElement* pipelineXml = doc.NewElement(tag);
 				nodeXml->InsertEndChild(pipelineXml);
@@ -518,6 +437,25 @@ namespace dyno
 
 				for (auto m : activeModules)
 				{
+					{//Try 
+						auto& ports = m->getImportModules();
+
+						for (int i = 0; i < ports.size(); i++)
+						{
+							auto ModuleSrc = ports[i]->getModules();
+							for (auto mSrc : ModuleSrc)
+							{
+
+								tinyxml2::XMLElement* moduleConnectionXml = doc.NewElement("Connection");
+								moduleConnectionXml->SetAttribute("SourceModulePortId", ModuleIndices[mSrc->objectId()]);
+								moduleConnectionXml->SetAttribute("TargetModulePortId", ModuleIndices[m->objectId()]);
+								moduleConnectionsXml->InsertEndChild(moduleConnectionXml);
+													
+							}
+						}
+					}
+
+
 					auto& fieldIn = m->getInputFields();
 					for (int i = 0; i < fieldIn.size(); i++)
 					{
@@ -570,7 +508,7 @@ namespace dyno
 										moduleConnectionsXml->InsertEndChild(moduleConnectionXml);
 									}
 								}
-								else {//每个模块里面第一个
+								else {
 									Node* src = dynamic_cast<Node*>(parSrc);
 
 									if (src != nullptr)
@@ -643,6 +581,21 @@ namespace dyno
 		Vec2f coord = decodeVec2f(std::string(coordStr));
 
 		node->setBlockCoord(coord.x, coord.y);
+		
+		const char* dtStr = nodeXML->Attribute("Dt");
+		node->setDt(std::stod(dtStr));
+
+		const char* syncStr = nodeXML->Attribute("AutoSync");
+		node->setAutoSync(std::string(syncStr) == "false" ? false : true);
+
+		const char* hiddenStr = nodeXML->Attribute("AutoHidden");
+		node->setAutoHidden(std::string(hiddenStr) == "false" ? false : true);
+
+		const char* activeStr = nodeXML->Attribute("PhysicsEnabled");
+		node->setActive(std::string(activeStr) == "false" ? false : true);
+
+		const char* visibleStr = nodeXML->Attribute("RenderingEnabled");
+		node->setVisible(std::string(visibleStr) == "false" ? false : true);
 
 		const char* nodeName = nodeXML->Attribute("Name");
 		if (nodeName)
@@ -765,6 +718,132 @@ namespace dyno
 		return (extension == "xml");
 	}
 
+	void SceneLoaderXML::NodeFieldInputConnection(
+		FBase* fieldSrc, 
+		tinyxml2::XMLDocument& doc, 
+		std::map<ObjectId, uint> indices, 
+		std::shared_ptr<Node> node,
+		uint ToIndex,
+		tinyxml2::XMLElement* nodeConnectionsXml
+	)
+	{
+		auto parSrc = fieldSrc->parent();
+		if (parSrc != nullptr)
+		{
+			Node* nodeSrc = dynamic_cast<Node*>(parSrc);// [node->field] - [node->field]
+			if (nodeSrc != nullptr)
+			{
+				auto fieldsSrc = nodeSrc->getAllFields();
+
+				bool fieldFound = false;
+
+				uint FromIndex = 0;
+				for (FromIndex = 0; FromIndex < fieldsSrc.size(); FromIndex++)
+				{
+					if (fieldsSrc[FromIndex] == fieldSrc)
+					{
+						fieldFound = true;
+						break;
+					}
+				}
+
+
+				if (fieldFound) {
+					tinyxml2::XMLElement* connection = doc.NewElement("Connection");
+					connection->SetAttribute("SourceId", indices[parSrc->objectId()]);
+
+					connection->SetAttribute("TargetId", indices[node->objectId()]);
+					connection->SetAttribute("To", ToIndex);
+					connection->SetAttribute("From", FromIndex);
+					nodeConnectionsXml->InsertEndChild(connection);
+				}
+			}
+
+
+			Module* moduleSrc = dynamic_cast<Module*>(parSrc);// [node->Module->field] - [node->field]
+			if (moduleSrc != nullptr)
+			{
+				std::map<ObjectId, uint> ModuleIndices;
+				auto getModuleData = [&](Module* module, int& index, int& channel)
+				{
+					{
+						uint radix = 0;
+
+						auto& animModules = module->getParentNode()->animationPipeline()->activeModules();
+						for (auto m : animModules) {
+							if (module == m.get())
+							{
+								channel = 0;
+								index = radix;
+								return;
+							}
+							radix++;
+						}
+
+						radix = 0;
+						auto& renderModules = module->getParentNode()->graphicsPipeline()->activeModules();
+						for (auto m : renderModules) {
+							if (module == m.get())
+							{
+								channel = 1;
+								index = radix;
+								return;
+							}
+							radix++;
+						}
+
+						radix = 0;
+						auto& resetModules = module->getParentNode()->resetPipeline()->activeModules();
+						for (auto m : resetModules) {
+							if (module == m.get())
+							{
+								channel = 2;
+								index = radix;
+								return;
+							}
+							radix++;
+						}
+					}
+				};
+
+
+				auto outId = moduleSrc->objectId();
+				auto moduleFieldsSrc = moduleSrc->getAllFields();
+
+				uint Index = 0;
+				bool fieldFound = false;
+				for (auto f : moduleFieldsSrc)
+				{
+					if (f == fieldSrc)
+					{
+						fieldFound = true;
+						break;
+					}
+					Index++;
+				}
+
+
+
+				if (fieldFound) {
+					tinyxml2::XMLElement* connection = doc.NewElement("Connection");
+
+					connection->SetAttribute("SourceId", indices[moduleSrc->getParentNode()->objectId()]);
+
+					int moduleIndex = -1;
+					int pipline = -1;
+					getModuleData(moduleSrc, moduleIndex, pipline);
+					connection->SetAttribute("SourceModuleId", moduleIndex);
+					connection->SetAttribute("SourceModulePipline", pipline);
+					connection->SetAttribute("TargetId", indices[node->objectId()]);
+					connection->SetAttribute("To", ToIndex);
+					connection->SetAttribute("From", Index);
+					nodeConnectionsXml->InsertEndChild(connection);
+				}
+			}
+		}
+
+	}
+
 	bool SceneLoaderXML::ConstructNodePipeline(std::shared_ptr<Node> node, tinyxml2::XMLElement* nodeXML, std::vector<std::shared_ptr<Node>> nodes)
 	{
 		bool anim = ConstructPipeline(node, node->animationPipeline(), nodeXML, nodes);
@@ -802,27 +881,42 @@ namespace dyno
 		tinyxml2::XMLElement* ConnectionsXml = PipelineXml->FirstChildElement("Connections");
 		tinyxml2::XMLElement* ConnectXml = ConnectionsXml->FirstChildElement("Connection");
 		while (ConnectXml)
-		{
-			int src = atoi(ConnectXml->Attribute("SourceId"));
-			int dst = atoi(ConnectXml->Attribute("TargetId"));
+		{ 
+			bool isFlowConnection = ConnectXml->Attribute("SourceModulePortId");
 
-			int id0 = atoi(ConnectXml->Attribute("From"));
-			int id1 = atoi(ConnectXml->Attribute("To"));
-			FBase* fout;
-			if (src < 0) 
+
+			if(isFlowConnection)
 			{
-				auto& fields = nodes[std::abs(src) - 1]->getAllFields();
-				fout = fields[id0];
+				////Port Connection
+				int src = atoi(ConnectXml->Attribute("SourceModulePortId"));
+				int target = atoi(ConnectXml->Attribute("TargetModulePortId"));
+
+				pipelineModules[src]->connect(pipelineModules[target]->importModules());
 			}
-			else 
+			else
 			{
-				fout = pipelineModules[src]->getAllFields()[id0];
+				//Data Connection
+				int src = atoi(ConnectXml->Attribute("SourceId"));
+				int dst = atoi(ConnectXml->Attribute("TargetId"));
+
+				int id0 = atoi(ConnectXml->Attribute("From"));
+				int id1 = atoi(ConnectXml->Attribute("To"));
+				FBase* fout;
+				if (src < 0)
+				{
+					auto& fields = nodes[std::abs(src) - 1]->getAllFields();
+					fout = fields[id0];
+				}
+				else
+				{
+					fout = pipelineModules[src]->getAllFields()[id0];
+				}
+
+				FBase* fin = pipelineModules[dst]->getAllFields()[id1];
+
+				fout->connect(fin);
 			}
 
-
-			FBase* fin = pipelineModules[dst]->getAllFields()[id1];
-
-			fout->connect(fin);
 
 			ConnectXml = ConnectXml->NextSiblingElement("Connection");
 		}

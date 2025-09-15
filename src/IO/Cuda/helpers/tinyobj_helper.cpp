@@ -7,7 +7,7 @@
 
 namespace dyno
 {
-	bool loadTextureMeshFromObj(std::shared_ptr<TextureMesh> texMesh, const FilePath& fullname)
+	bool loadTextureMeshFromObj(std::shared_ptr<TextureMesh> texMesh, const FilePath& fullname, bool useToCenter)
 	{
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
@@ -32,6 +32,7 @@ namespace dyno
 		std::vector<dyno::Vec3f> vertices;
 		std::vector<dyno::Vec3f> normals;
 		std::vector<dyno::Vec2f> texCoords;
+		std::vector<dyno::uint> shapeIds;
 
 		std::vector<dyno::Vec3i> pIndex;
 		std::vector<dyno::Vec3i> nIndex;
@@ -49,6 +50,8 @@ namespace dyno
 			texCoords.push_back({ attrib.texcoords[i], attrib.texcoords[i + 1] });
 		}
 
+		shapeIds.resize(vertices.size());
+		texMesh->shapeIds().reset();
 		// load texture...
 		dyno::CArray2D<dyno::Vec4f> texture(1, 1);
 		texture[0, 0] = dyno::Vec4f(1);
@@ -96,6 +99,7 @@ namespace dyno
 		tShapes.resize(shapes.size());
 
 		uint sId = 0;
+
 		for (const tinyobj::shape_t& shape : shapes) {
 			// only load triangle mesh...
 			const auto& mesh = shape.mesh;
@@ -127,6 +131,11 @@ namespace dyno
 				hi = hi.maximum(vertices[idx0.vertex_index]);
 				hi = hi.maximum(vertices[idx1.vertex_index]);
 				hi = hi.maximum(vertices[idx2.vertex_index]);
+
+				shapeIds[idx0.vertex_index] = sId;
+				shapeIds[idx1.vertex_index] = sId;
+				shapeIds[idx2.vertex_index] = sId;
+
 			}
 			tShapes[sId]->vertexIndex.assign(vertexIndex);
 			tShapes[sId]->normalIndex.assign(normalIndex);
@@ -136,30 +145,35 @@ namespace dyno
 			tShapes[sId]->boundingBox = TAlignedBox3D<Real>(lo, hi);
 			tShapes[sId]->boundingTransform = Transform3f(shapeCenter, Quat1f().toMatrix3x3());
 
+			
 			//Move to center
-			std::vector<int> indicator(vertices.size(), 0);
-			for (int i = 0; i < mesh.indices.size(); i += 3)
+			if (useToCenter) 
 			{
-				auto idx0 = mesh.indices[i];
-				auto idx1 = mesh.indices[i + 1];
-				auto idx2 = mesh.indices[i + 2];
+				std::vector<int> indicator(vertices.size(), 0);
+				for (int i = 0; i < mesh.indices.size(); i += 3)
+				{
+					auto idx0 = mesh.indices[i];
+					auto idx1 = mesh.indices[i + 1];
+					auto idx2 = mesh.indices[i + 2];
 
-				if (indicator[idx0.vertex_index] == 0)
-				{
-					vertices[idx0.vertex_index] -= shapeCenter;
-					indicator[idx0.vertex_index] = 1;
-				}
-				if (indicator[idx1.vertex_index] == 0)
-				{
-					vertices[idx1.vertex_index] -= shapeCenter;
-					indicator[idx1.vertex_index] = 1;
-				}
-				if (indicator[idx2.vertex_index] == 0)
-				{
-					vertices[idx2.vertex_index] -= shapeCenter;
-					indicator[idx2.vertex_index] = 1;
+					if (indicator[idx0.vertex_index] == 0)
+					{
+						vertices[idx0.vertex_index] -= shapeCenter;
+						indicator[idx0.vertex_index] = 1;
+					}
+					if (indicator[idx1.vertex_index] == 0)
+					{
+						vertices[idx1.vertex_index] -= shapeCenter;
+						indicator[idx1.vertex_index] = 1;
+					}
+					if (indicator[idx2.vertex_index] == 0)
+					{
+						vertices[idx2.vertex_index] -= shapeCenter;
+						indicator[idx2.vertex_index] = 1;
+					}
 				}
 			}
+			
 
 			vertexIndex.clear();
 			normalIndex.clear();
@@ -171,6 +185,14 @@ namespace dyno
 		texMesh->vertices().assign(vertices);
 		texMesh->normals().assign(normals);
 		texMesh->texCoords().assign(texCoords);
+		texMesh->shapeIds().assign(shapeIds);
+
+		//A hack: for an obj file with one shape
+		if (shapes.size() == 1)
+		{
+			texMesh->shapeIds().resize(vertices.size());
+			texMesh->shapeIds().reset();
+		}
 
 		vertices.clear();
 		normals.clear();
@@ -178,4 +200,54 @@ namespace dyno
 
 		return true;
 	}
+
+
+	bool loadObj(std::vector<Vec3f>& points, std::vector<TopologyModule::Triangle>& triangles, std::string filename, bool append)
+	{
+		if (!append)
+		{
+			points.clear();
+			triangles.clear();
+		}
+		int offset = append ? points.size() : 0;
+
+		tinyobj::attrib_t myattrib;
+		std::vector <tinyobj::shape_t> myshape;
+		std::vector <tinyobj::material_t> mymat;
+		std::string mywarn;
+		std::string myerr;
+
+		char* fname = (char*)filename.c_str();
+		std::cout << fname << std::endl;
+		tinyobj::LoadObj(&myattrib, &myshape, &mymat, &mywarn, &myerr, fname, nullptr, true, true);
+		std::cout << mywarn << std::endl;
+		std::cout << myerr << std::endl;
+		std::cout << "************************    Loading : shapelod    ************************  " << std::endl << std::endl;
+		std::cout << "                        " << "    shape size =" << myshape.size() << std::endl << std::endl;
+		std::cout << "************************    Loading : v    ************************  " << std::endl << std::endl;
+		std::cout << "                        " << "    point sizelod = " << myattrib.GetVertices().size() / 3 << std::endl << std::endl;
+
+		if (myshape.size() == 0) { return false; }
+
+		for (int i = 0; i < myattrib.GetVertices().size() / 3; i++)
+		{
+			points.push_back(Vec3f(myattrib.GetVertices()[3 * i], myattrib.GetVertices()[3 * i + 1], myattrib.GetVertices()[3 * i + 2]));
+		}
+		std::cout << "************************    Loading : f    ************************  " << std::endl << std::endl;
+		for (int i = 0; i < myshape.size(); i++)
+		{
+			std::cout << "                        " << "    Triangle " << i << " size =" << myshape[i].mesh.indices.size() / 3 << std::endl << std::endl;
+
+			for (int s = 0; s < myshape[i].mesh.indices.size() / 3; s++)
+			{
+				//std::cout << myshape[i].mesh.indices[s].vertex_index <<"  " << std::endl;
+
+				triangles.push_back(TopologyModule::Triangle(myshape[i].mesh.indices[3 * s].vertex_index + offset, myshape[i].mesh.indices[3 * s + 1].vertex_index + offset, myshape[i].mesh.indices[3 * s + 2].vertex_index + offset));
+			}
+		}
+		std::cout << "************************    Loading completed    **********************" << std::endl << std::endl;
+		return true;
+
+	}
+
 }

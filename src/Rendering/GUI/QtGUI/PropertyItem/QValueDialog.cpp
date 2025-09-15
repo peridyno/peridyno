@@ -51,7 +51,7 @@ namespace dyno
 				button[i]->buttonDSpinBox = doubleSpinBox;
 				VLayout->addWidget(button[i]);
 
-				connect(button[i], SIGNAL(valueChange(double)), doubleSpinBox, SLOT(ModifyValueAndUpdate(double)));
+				connect(button[i], SIGNAL(valueChange(double)), doubleSpinBox, SLOT(triggerEditingFinished(double)));
 				connect(button[i], SIGNAL(mouseReleased(double)), this, SLOT(initData(double)));
 			}
 		}

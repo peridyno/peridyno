@@ -17,14 +17,14 @@ namespace dyno
 	QPiecewiseDoubleSpinBox::QPiecewiseDoubleSpinBox(QWidget* parent)
 		: QDoubleSpinBox(parent)
 	{
-		//this->lineEdit()->setMouseTracking(true);
 		this->setRange(-999999, 999999);
 		this->setContentsMargins(0, 0, 0, 0);
 
-		connect(this, SIGNAL(valueChanged(double)), this, SLOT(ModifyValueAndUpdate(double)));
-		connect(this->lineEdit(), SIGNAL(textEdited(const QString&)), this, SLOT(LineEditStart(const QString&)));
+		connect(this, &QDoubleSpinBox::editingFinished, this, &QPiecewiseDoubleSpinBox::onEditingFinished);
 
 		this->setDecimals(decimalsMax);
+
+		lineEdit()->installEventFilter(this);
 		this->setKeyboardTracking(false);
 
 	}
@@ -36,60 +36,29 @@ namespace dyno
 		this->setValue(v);
 		this->setRealValue(v);
 
-		connect(this, SIGNAL(valueChanged(double)), this, SLOT(ModifyValueAndUpdate(double)));
-		connect(this->lineEdit(), SIGNAL(textEdited(const QString&)), this, SLOT(LineEditStart(const QString&)));
-
 		this->setDecimals(decimalsMax);
 		this->setKeyboardTracking(false);
-
-
-	}
-
-	void QPiecewiseDoubleSpinBox::LineEditStart(const QString& qStr)
-	{
-		auto v = this->value();
-		const auto& value = qStr.toDouble();
-		auto min = this->minimum();
-		auto max = this->maximum();
-
-		if (value < this->minimum()) 
-		{
-			this->lineEdit()->setText(QString::number(this->minimum()));
-		}
-		if (value > this->maximum()) 
-		{
-			this->lineEdit()->setText(QString::number(this->maximum()));
-		}
-
-		return;
-	}
-
-	void QPiecewiseDoubleSpinBox::LineEditFinished(double v) 
-	{
-		realValue = v;
-		this->setValue(realValue);
-
-		return;
 	}
 
 	void QPiecewiseDoubleSpinBox::wheelEvent(QWheelEvent* event)
 	{
 
 	}
+
 	void QPiecewiseDoubleSpinBox::contextMenuEvent(QContextMenuEvent* event) 
 	{
-
-		if(ValueModify== nullptr)
-			ValueModify = new QValueDialog(this);
-		ValueModify->updateDialogPosition();
-		ValueModify->show();
+		QDoubleSpinBox::contextMenuEvent(event);
 	}
-
 
 	void QPiecewiseDoubleSpinBox::mousePressEvent(QMouseEvent* event)
 	{
-		QDoubleSpinBox::mousePressEvent(event);
+		if (event->button() == Qt::MiddleButton)
+		{
+			createValueDialog();
+		}
 
+		QDoubleSpinBox::mousePressEvent(event);
+		
 	}
 
 	void QPiecewiseDoubleSpinBox::mouseReleaseEvent(QMouseEvent* event)
@@ -103,21 +72,40 @@ namespace dyno
 
 	}
 
-	void QPiecewiseDoubleSpinBox::ModifyValue(double v)
+	bool QPiecewiseDoubleSpinBox::eventFilter(QObject* obj, QEvent* event)
 	{
-		this->setRealValue(v);
-
+		if (obj == lineEdit())
+		{
+			if (event->type() == QEvent::MouseButtonPress)
+			{
+				QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+				if (mouseEvent->button() == Qt::MiddleButton)
+				{
+					createValueDialog();
+					return true; 
+				}
+			}
+		}
+		return QDoubleSpinBox::eventFilter(obj, event);
 	}
 
-	void QPiecewiseDoubleSpinBox::ModifyValueAndUpdate(double v)
+	void QPiecewiseDoubleSpinBox::createValueDialog()
 	{
+		if (mValueDialog == nullptr)
+			mValueDialog = new QValueDialog(this);
+		mValueDialog->updateDialogPosition();
+		mValueDialog->show();
+	}
 
+	double QPiecewiseDoubleSpinBox::setRealValue(double val)
+	{
 		this->setKeyboardTracking(true);
-		this->setRealValue(v);
+		realValue = val;
 		this->lineEdit()->setText(QString::number(realValue, 10, displayDecimals));
 		this->setKeyboardTracking(false);
-	}
 
+		return realValue;
+	}
 
 }
 

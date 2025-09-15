@@ -13,7 +13,7 @@ namespace dyno
 		: BasicShape<TDataType>()
 	{
 		this->varLengthX()->setRange(0.01, 100.0f);
-		this->varLengthZ()->setRange(1, 100.0f);
+		this->varLengthZ()->setRange(0.01, 100.0f);
 
 		this->varSegmentX()->setRange(1, 100);
 		this->varSegmentZ()->setRange(1, 100);

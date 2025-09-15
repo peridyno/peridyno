@@ -10,6 +10,7 @@ namespace dyno
 	MarchingCubes<TDataType>::MarchingCubes()
 		: Node()
 	{
+		this->varIsoValue()->setRange(-1.0f, 1.0f);
 		this->varGridSpacing()->setRange(0.001, 1.0);
 
 		auto renderer = std::make_shared<GLSurfaceVisualModule>();
@@ -28,21 +29,21 @@ namespace dyno
 	{
 
 		auto sdfTopo = this->inLevelSet()->getDataPtr();
-		auto isoValue = this->varIsoValue()->getData();
+		auto isoValue = this->varIsoValue()->getValue();
 
 		auto& sdf = sdfTopo->getSDF();
 		
 		Coord lowerBound = sdf.lowerBound();
 		Coord upperBound = sdf.upperBound();
 
-		Real h = this->varGridSpacing()->getData();
+		Real h = this->varGridSpacing()->getValue();
 
-		int nx = (upperBound[0] - lowerBound[0]) / h;
-		int ny = (upperBound[1] - lowerBound[1]) / h;
-		int nz = (upperBound[2] - lowerBound[2]) / h;
+		int nx = std::floor((upperBound[0] - lowerBound[0]) / h);
+		int ny = std::floor((upperBound[1] - lowerBound[1]) / h);
+		int nz = std::floor((upperBound[2] - lowerBound[2]) / h);
 
-		DArray3D<Real> distances(nx + 1, ny + 1, nz + 1);
-		DArray<int> voxelVertNum(nx * ny * nz);
+		DArray3D<Real> distances(nx, ny, nz);
+		DArray<int> voxelVertNum((nx - 1) * (ny - 1) * (nz - 1));
 
 		MarchingCubesHelper<TDataType>::reconstructSDF(
 			distances,

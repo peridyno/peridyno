@@ -345,37 +345,38 @@ namespace dyno
 			for (size_t i = 0; i < matCount; i++)
 			{
 				auto mat = currentMesh->getMaterial(i);
-				//std::cout << mat->name << "\n";
-
-				auto diffuseTex = mat->getTexture(ofbx::Texture::DIFFUSE);
-				if (diffuseTex)
-					auto relativeFileName = diffuseTex->getRelativeFileName();
-
-				auto normalTex = mat->getTexture(ofbx::Texture::NORMAL);
-				if (normalTex)
-					auto relativeFileName = normalTex->getRelativeFileName();
 
 				std::shared_ptr<Material> material = std::make_shared<Material>();
 				material->baseColor = Vec3f(mat->getDiffuseColor().r, mat->getDiffuseColor().g, mat->getDiffuseColor().b);
 				material->roughness = 1;
 
+				auto extractFilename = [](std::string textureName) -> std::string {
+					if (!textureName.empty() && textureName.back() == '"') {
+						textureName.pop_back();
+					}
+					size_t found = textureName.find_last_of('\\/');
+					if (found != std::string::npos) {
+						return textureName.substr(found + 1);
+					}
+					else {
+						return textureName;
+					}
+				};
 
 				{
 					auto texture = mat->getTexture(ofbx::Texture::TextureType::DIFFUSE);
 					std::string textureName;
 					if (texture)
 					{
-						auto it = texture->getRelativeFileName();
+						auto it = texture->getFileName();
 						for (const ofbx::u8* ptr = it.begin; ptr <= it.end; ++ptr) {
 							textureName += *ptr;
 						}
 
 					}
 
-					size_t found = textureName.find_last_of("\\");
-
-					if (found != std::string::npos) {
-						std::string filename = textureName.substr(found + 1);
+					if (textureName!=std::string("")) {
+						textureName = extractFilename(textureName);
 
 						auto fbxFile = this->varFileName()->getValue();
 						size_t foundPath = fbxFile.string().find_last_of("/")< fbxFile.string().size()? fbxFile.string().find_last_of("/") : fbxFile.string().find_last_of("\\");
@@ -383,8 +384,8 @@ namespace dyno
 						std::string path = fbxFile.string().substr(0, foundPath);
 
 
-						std::string loadPath = path + std::string("/") + filename;
-						loadPath.pop_back();
+						std::string loadPath = path + std::string("/") + textureName;
+
 						dyno::CArray2D<dyno::Vec4f> textureData(1, 1);
 						textureData[0, 0] = dyno::Vec4f(1);
 
@@ -400,29 +401,27 @@ namespace dyno
 					std::string textureName;
 					if (texture)
 					{
-						auto it = texture->getRelativeFileName();
+						auto it = texture->getFileName();
 						for (const ofbx::u8* ptr = it.begin; ptr <= it.end; ++ptr) {
 							textureName += *ptr;
 						}
-
 					}
 
 					size_t found = textureName.find_last_of("\\");
 
-					if (found != std::string::npos) {
-						std::string filename = textureName.substr(found + 1);
+					if (textureName != std::string("")) {
+						textureName = extractFilename(textureName);
 
 						auto fbxFile = this->varFileName()->getValue();
-						size_t foundPath = fbxFile.string().find_last_of("/");
+						size_t foundPath = fbxFile.string().find_last_of("/") < fbxFile.string().size() ? fbxFile.string().find_last_of("/") : fbxFile.string().find_last_of("\\");
+
 						std::string path = fbxFile.string().substr(0, foundPath);
 
 
-						std::string loadPath = path + std::string("\\\\") + filename;
-						loadPath.pop_back();
+						std::string loadPath = path + std::string("/") + textureName;
 
 						dyno::CArray2D<dyno::Vec4f> textureData(1, 1);
 						textureData[0, 0] = dyno::Vec4f(1);
-
 
 						if (ImageLoader::loadImage(loadPath.c_str(), textureData))//loadTexture
 							material->texBump.assign(textureData);

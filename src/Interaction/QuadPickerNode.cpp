@@ -134,7 +134,7 @@ namespace dyno
 
 		this->surfaceInteractor->outOtherTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 		this->surfaceInteractor->outSelectedTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
-		this->surfaceInteractor->outSelectedTriangleSet()->getDataPtr()->getTriangles().resize(0);
+		this->surfaceInteractor->outSelectedTriangleSet()->getDataPtr()->triangleIndices().resize(0);
 		this->surfaceInteractor->outOtherTriangleSet()->getDataPtr()->copyFrom(this->mapper->outTriangleSet()->getData());
 
 		this->edgeInteractor->outOtherEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());

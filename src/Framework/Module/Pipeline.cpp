@@ -182,13 +182,6 @@ namespace dyno
 		std::queue<Module*> moduleQueue;
 		std::set<ObjectId> moduleSet;
 
-		// 		std::map<ObjectId, bool> visited;
-		//
-		// 		visited[baseId] = false;
-		// 		for (auto& mItor : mModuleMap) {
-		// 			visited[mItor.first] = false;
-		// 		}
-
 		DirectedAcyclicGraph graph;
 
 		auto retrieveModules = [&](ObjectId id, std::vector<FBase*>& fields) {
@@ -215,11 +208,6 @@ namespace dyno
 		auto& fields = this->getParentNode()->getAllFields();
 		retrieveModules(baseId, fields);
 
-		// 		for each (auto m in mPersistentModule)
-		// 		{
-		// 			moduleQueue.push(m.get());
-		// 		}
-
 		auto flushQueue = [&]()
 			{
 				while (!moduleQueue.empty())
@@ -235,34 +223,27 @@ namespace dyno
 
 		flushQueue();
 
-		// 		while (!moduleQueue.empty())
-		// 		{
-		// 			Module* m = moduleQueue.front();
-		//
-		// 			auto& outFields = m->getOutputFields();
-		// 			retrieveModules(m->objectId(), outFields);
-		//
-		// 			moduleQueue.pop();
-		// 		}
-
-		// 		while (!moduleQueue.empty())
-		// 		{
-		// 			Module* m = moduleQueue.front();
-		//
-		// 			auto& outFields = m->getOutputFields();
-		// 			retrieveModules(m->objectId(), outFields);
-		//
-		// 			moduleQueue.pop();
-		// 		}
-
 		for (auto m : mModuleMap) {
 			ObjectId oId = m.second->objectId();
+
+			//Create connection between fields
 			if (moduleSet.find(oId) == moduleSet.end())
 			{
 				moduleSet.insert(oId);
 				moduleQueue.push(m.second.get());
 
 				flushQueue();
+			}
+
+			//Create connection between modules
+			auto exports = m.second->getExportModules();
+			for (auto exp : exports)
+			{
+				auto eId = exp->getParent()->objectId();
+				if (mModuleMap.count(eId) > 0)
+				{
+					graph.addEdge(oId, eId);
+				}
 			}
 		}
 

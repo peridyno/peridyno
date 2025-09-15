@@ -225,7 +225,7 @@ namespace dyno
 		
 		auto& initialTriangleSet = this->inInitialTriangleSet()->getData();
 		auto& points = initialTriangleSet.getPoints();
-		auto& triangles = initialTriangleSet.getTriangles();
+		auto& triangles = initialTriangleSet.triangleIndices();
 
 		DArray<int> intersected;
 		intersected.resize(triangles.size());
@@ -331,7 +331,7 @@ namespace dyno
 		movement.assign(movement_c);
 
 		auto& initialTriangleSet = this->inInitialTriangleSet()->getData();
-		auto& triangles = initialTriangleSet.getTriangles();
+		auto& triangles = initialTriangleSet.triangleIndices();
 
 		cuExecute(this->intersected_triangles.size(),
 			DS_SetupVelocity,
@@ -416,7 +416,7 @@ namespace dyno
 		movement.resize(1);
 		movement.assign(movement_c);
 		auto& initialTriangleSet = this->inInitialTriangleSet()->getData();
-		auto& triangles = initialTriangleSet.getTriangles();
+		auto& triangles = initialTriangleSet.triangleIndices();
 
 		cuExecute(this->intersected_triangles.size(),
 			DS_SetupVelocity,
@@ -465,7 +465,7 @@ namespace dyno
 	template<typename TDataType>
 	void DragSurfaceInteraction<TDataType>::setTriFixed() {
 		auto& TriSet = this->inInitialTriangleSet()->getData();
-		auto& triangles = TriSet.getTriangles();
+		auto& triangles = TriSet.triangleIndices();
 		int tNum = triangles.size();
 		cuExecute(tNum,
 			DS_FixedPoint,

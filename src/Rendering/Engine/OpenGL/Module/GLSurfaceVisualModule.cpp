@@ -144,7 +144,7 @@ namespace dyno
 	{
 		// update data
 		auto triSet = this->inTriangleSet()->constDataPtr();
-		auto indices = triSet->getTriangles();
+		auto indices = triSet->triangleIndices();
 		auto vertices = triSet->getPoints();
 
 		mVertexIndex.load(indices);
@@ -165,8 +165,10 @@ namespace dyno
 			//TODO: optimize the performance
 			if (this->inNormal()->isEmpty()) {
 				//triSet->update();
-				auto normals = triSet->getVertexNormals();
+				DArray<Vec3f> normals;
+				triSet->requestVertexNormals(normals, VertexNormalWeightingOption::ANGLE_WEIGHTED);
 				mNormal.load(normals);
+				normals.clear();
 			}
 			else
 			{

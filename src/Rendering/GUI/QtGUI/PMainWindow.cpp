@@ -141,6 +141,7 @@ namespace dyno
 		setupSettingEditor();
 
 		connect(mToolBar, &PMainToolBar::nodeCreated, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::createQtNode);
+		connect(mIoDockerWidget->contentBrowser(), &QContentBrowser::nodeCreated, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::createQtNode);
 
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodePlaced, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeInputUpdated, PSimulationThread::instance(), &PSimulationThread::resetQtNode);

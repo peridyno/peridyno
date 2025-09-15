@@ -132,7 +132,7 @@ namespace dyno
 
 		auto ts = this->inTriangleSet()->constDataPtr();
 		auto& triVertex = ts->getPoints();
-		auto& triIndex = ts->getTriangles();
+		auto& triIndex = ts->triangleIndices();
 
 		int tNum = triIndex.size();
 		if (tNum == 0) return;

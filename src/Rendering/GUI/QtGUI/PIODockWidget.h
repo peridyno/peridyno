@@ -75,6 +75,7 @@ namespace dyno
 
 		PLogWidget* logWidget() { return mLogWidget; }
 		PConsoleWidget* consoleWidget() { return mConsoleWidget; }
+		QContentBrowser* contentBrowser() { return mContentBrowser; }
 
 	public slots:
 		void toggleLogging();

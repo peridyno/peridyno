@@ -119,7 +119,7 @@ namespace dyno
 		Mat3f R(0), U(0), D(0), V(0);
 		polarDecomposition(mat_i, R, U, D, V);
 
-		Real threshold = 0.0001f*smoothingLength;
+		Real threshold = 0.0001f * smoothingLength;
 		D(0, 0) = D(0, 0) > threshold ? 1.0 / D(0, 0) : 1.0;
 		D(1, 1) = D(1, 1) > threshold ? 1.0 / D(1, 1) : 1.0;
 		D(2, 2) = D(2, 2) > threshold ? 1.0 / D(2, 2) : 1.0;

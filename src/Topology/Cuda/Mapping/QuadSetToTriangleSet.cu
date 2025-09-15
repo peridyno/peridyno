@@ -34,9 +34,9 @@ namespace dyno
 		auto ts = this->outTriangleSet()->getDataPtr();
 
 		auto& verts = qs->getPoints();
-		auto& quads = qs->getQuads();
+		auto& quads = qs->quadIndices();
 
-		auto& tris = ts->getTriangles();
+		auto& tris = ts->triangleIndices();
 		tris.resize(2 * quads.size());
 
 		ts->setPoints(verts);

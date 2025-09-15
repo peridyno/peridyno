@@ -43,11 +43,13 @@ namespace dyno
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, Topology, "Topology");
 
+	public:
+
 	protected:
 		void resetStates() override;
 		void updateStates() override;
 		void loadObj(TriangleSet<TDataType>& Triangleset,std::string filename);
-		
+
 	private:
 		void animationUpdate();
 

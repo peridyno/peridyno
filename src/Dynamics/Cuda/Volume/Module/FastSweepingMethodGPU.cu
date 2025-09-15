@@ -4,6 +4,8 @@
 
 #include "Collision/Distance3D.h"
 
+#include "LevelSetConstructionAndBooleanHelper.h"
+
 namespace dyno
 {
 	IMPLEMENT_TCLASS(FastSweepingMethodGPU, TDataType)
@@ -19,220 +21,13 @@ namespace dyno
 	{
 	}
 
-	enum GridType
-	{
-		Accepted = 0,
-		Tentative = 1,
-		Infinite = 2
-	};
-
 	template<typename TDataType>
 	void FastSweepingMethodGPU<TDataType>::compute()
 	{
 		this->makeLevelSet();
 	}
 
-#define TRI_MIN(x, y, z) glm::min(x, glm::min(y, z))
-#define TRI_MAX(x, y, z) glm::max(x, glm::max(y, z))
 
-	template<typename Real>
-	__global__ void FSM_AssignInifity(
-		DArray3D<Real> phi,
-		DArray3D<int> closest_tri_id,
-		DArray3D<GridType> types)
-	{
-		int i = threadIdx.x + (blockIdx.x * blockDim.x);
-		int j = threadIdx.y + (blockIdx.y * blockDim.y);
-		int k = threadIdx.z + (blockIdx.z * blockDim.z);
-
-		uint nx = phi.nx();
-		uint ny = phi.ny();
-		uint nz = phi.nz();
-
-		if (i >= nx || j >= ny || k >= nz) return;
-
-		phi(i, j, k) = REAL_MAX;
-		closest_tri_id(i, j, k) = -1;
-		types(i, j, k) = GridType::Infinite;
-	}
-
-	template<typename Real, typename Coord>
-	__global__ void FSM_FindNeighboringGrids(
-		DArray3D<uint> counter,
-		DArray<Coord> vertices,
-		DArray<TopologyModule::Triangle> indices,
-		Coord origin,
-		Real dx)
-	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-
-		if (tId >= indices.size()) return;
-
-		int ni = counter.nx();
-		int nj = counter.ny();
-		int nk = counter.nz();
-
-		auto t = indices[tId];
-
-		Coord vp = vertices[t[0]];
-		Coord vq = vertices[t[1]];
-		Coord vr = vertices[t[2]];
-
-		// coordinates in grid to high precision
-		Real fip = (vp[0] - origin[0]) / dx;
-		Real fjp = (vp[1] - origin[1]) / dx;
-		Real fkp = (vp[2] - origin[2]) / dx;
-		Real fiq = (vq[0] - origin[0]) / dx;
-		Real fjq = (vq[1] - origin[1]) / dx;
-		Real fkq = (vq[2] - origin[2]) / dx;
-		Real fir = (vr[0] - origin[0]) / dx;
-		Real fjr = (vr[1] - origin[1]) / dx;
-		Real fkr = (vr[2] - origin[2]) / dx;
-
-		// do distances nearby
-		const int exact_band = 1;
-
-		int i0 = glm::clamp(int(TRI_MIN(fip, fiq, fir)) - exact_band, 0, ni - 1);
-		int i1 = glm::clamp(int(TRI_MAX(fip, fiq, fir)) + exact_band + 1, 0, ni - 1);
-		int j0 = glm::clamp(int(TRI_MIN(fjp, fjq, fjr)) - exact_band, 0, nj - 1);
-		int j1 = glm::clamp(int(TRI_MAX(fjp, fjq, fjr)) + exact_band + 1, 0, nj - 1);
-		int k0 = glm::clamp(int(TRI_MIN(fkp, fkq, fkr)) - exact_band, 0, nk - 1);
-		int k1 = glm::clamp(int(TRI_MAX(fkp, fkq, fkr)) + exact_band + 1, 0, nk - 1);
-
-		TTriangle3D<Real> tri(vp, vq, vr);
-		for (int k = k0; k <= k1; ++k) for (int j = j0; j <= j1; ++j) for (int i = i0; i <= i1; ++i) {
-			TPoint3D<Real> point(origin + Coord(i * dx, j * dx, k * dx));
-			if (glm::abs(point.distance(tri)) < dx * 1.74)	//1.74 is chosen to be slightly larger than sqrt(3)
-			{
-				atomicAdd(&counter(i, j, k), 1);
-			}
-		}
-	}
-
-	template<typename Real, typename Coord>
-	__global__ void FSM_StoreTriangleIds(
-		DArrayList<uint> triIds,
-		DArray3D<uint> counter,
-		DArray<Coord> vertices,
-		DArray<TopologyModule::Triangle> indices,
-		Coord origin,
-		Real dx)
-	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-
-		if (tId >= indices.size()) return;
-
-		int ni = counter.nx();
-		int nj = counter.ny();
-		int nk = counter.nz();
-
-		auto t = indices[tId];
-
-		Coord vp = vertices[t[0]];
-		Coord vq = vertices[t[1]];
-		Coord vr = vertices[t[2]];
-
-		// coordinates in grid to high precision
-		Real fip = (vp[0] - origin[0]) / dx;
-		Real fjp = (vp[1] - origin[1]) / dx;
-		Real fkp = (vp[2] - origin[2]) / dx;
-		Real fiq = (vq[0] - origin[0]) / dx;
-		Real fjq = (vq[1] - origin[1]) / dx;
-		Real fkq = (vq[2] - origin[2]) / dx;
-		Real fir = (vr[0] - origin[0]) / dx;
-		Real fjr = (vr[1] - origin[1]) / dx;
-		Real fkr = (vr[2] - origin[2]) / dx;
-
-		// do distances nearby
-		const int exact_band = 1;
-
-		int i0 = glm::clamp(int(TRI_MIN(fip, fiq, fir)) - exact_band, 0, ni - 1);
-		int i1 = glm::clamp(int(TRI_MAX(fip, fiq, fir)) + exact_band + 1, 0, ni - 1);
-		int j0 = glm::clamp(int(TRI_MIN(fjp, fjq, fjr)) - exact_band, 0, nj - 1);
-		int j1 = glm::clamp(int(TRI_MAX(fjp, fjq, fjr)) + exact_band + 1, 0, nj - 1);
-		int k0 = glm::clamp(int(TRI_MIN(fkp, fkq, fkr)) - exact_band, 0, nk - 1);
-		int k1 = glm::clamp(int(TRI_MAX(fkp, fkq, fkr)) + exact_band + 1, 0, nk - 1);
-
-		TTriangle3D<Real> tri(vp, vq, vr);
-		for (int k = k0; k <= k1; ++k) for (int j = j0; j <= j1; ++j) for (int i = i0; i <= i1; ++i) {
-			TPoint3D<Real> point(origin + Coord(i * dx, j * dx, k * dx));
-			if (glm::abs(point.distance(tri)) < dx * 1.74)	//1.74 is chosen to be slightly larger than sqrt(3)
-			{
-				triIds[counter.index(i, j, k)].atomicInsert(tId);
-			}
-		}
-	}
-
-	__global__ void FSM_Array3D_To_Array1d(
-		DArray<uint> arr1d,
-		DArray3D<uint> arr3d)
-	{
-		int i = threadIdx.x + (blockIdx.x * blockDim.x);
-		int j = threadIdx.y + (blockIdx.y * blockDim.y);
-		int k = threadIdx.z + (blockIdx.z * blockDim.z);
-
-		uint nx = arr3d.nx();
-		uint ny = arr3d.ny();
-		uint nz = arr3d.nz();
-
-		if (i >= nx || j >= ny || k >= nz) return;
-
-		uint index1d = arr3d.index(i, j, k);
-
-		arr1d[index1d] = arr3d(i, j, k);
-	}
-
-	template<typename Real, typename Coord, typename Tri2Edg>
-	__global__ void FSM_InitializeSDFNearMesh(
-		DArray3D<Real> phi,
-		DArray3D<int> closestId,
-		DArray3D<GridType> gridType,
-		DArrayList<uint> triIds,
-		DArray<Coord> vertices,
-		DArray<TopologyModule::Triangle> indices,
-		DArray<TopologyModule::Edge> edges,
-		DArray<Tri2Edg> t2e,
-		DArray<Coord> edgeN,
-		DArray<Coord> vertexN,
-		Coord origin,
-		Real dx)
-	{
-		int i = threadIdx.x + (blockIdx.x * blockDim.x);
-		int j = threadIdx.y + (blockIdx.y * blockDim.y);
-		int k = threadIdx.z + (blockIdx.z * blockDim.z);
-
-		uint nx = phi.nx();
-		uint ny = phi.ny();
-		uint nz = phi.nz();
-
-		if (i >= nx || j >= ny || k >= nz) return;
-
-		Coord gx(i * dx + origin[0], j * dx + origin[1], k * dx + origin[2]);
-
-		auto& list = triIds[phi.index(i, j, k)];
-		
-		if (list.size() > 0)
-		{
-			ProjectedPoint3D<Real> p3d;
-
-			TOrientedBox3D<Real> obb(Coord(0), Quat1f(), Coord(0.5));
-			TPoint3D<Real> point(gx);
-			Real exact_dist = point.distance(obb);
-
-			bool valid = calculateSignedDistance2TriangleSetFromNormal(p3d, gx, vertices, edges, indices, t2e, edgeN, vertexN, list);
-			
-// 			if (abs(p3d.signed_distance - exact_dist) >= EPSILON)
-// 			{
-// 				printf("Error: %f %f %f; approximate: %f; exact: %f \n", gx.x, gx.y, gx.z, p3d.signed_distance, exact_dist);
-// 			}
-
-			if (valid) {
-				phi(i, j, k) = p3d.signed_distance;
-				closestId(i, j, k) = p3d.id;
-				gridType(i, j, k) = GridType::Accepted;
-			}
-		}
-	}
 
 	template<typename Real, typename Coord>
 	GPU_FUNC void FSM_CheckNeighbour(
@@ -365,102 +160,30 @@ namespace dyno
 		}
 
 		DistanceField3D<TDataType>& sdf = this->outLevelSet()->getDataPtr()->getSDF();
-
+		
 		auto ts = this->inTriangleSet()->constDataPtr();
-
-		DArray<Coord> edgeNormal, vertexNormal;
-		ts->updateEdgeNormal(edgeNormal);
-		ts->updateAngleWeightedVertexNormal(vertexNormal);
-
-		ts->updateTriangle2Edge();
-		auto& tri2edg = ts->getTriangle2Edge();
-
-		auto& vertices = ts->getPoints();
-		auto& edges = ts->getEdges();
-		auto& triangles = ts->getTriangles();
-
-		Reduction<Coord> reduce;
-		Coord min_box = reduce.minimum(vertices.begin(), vertices.size());
-		Coord max_box = reduce.maximum(vertices.begin(), vertices.size());
 
 		Real dx = this->varSpacing()->getValue();
 		uint padding = this->varPadding()->getValue();
 
-		int min_i = std::floor(min_box[0] / dx) - padding;
-		int min_j = std::floor(min_box[1] / dx) - padding;
-		int min_k = std::floor(min_box[2] / dx) - padding;
-
-		int max_i = std::ceil(max_box[0] / dx) + padding;
-		int max_j = std::ceil(max_box[1] / dx) + padding;
-		int max_k = std::ceil(max_box[2] / dx) + padding;
-
-		// Use a background grid that is aligned with an interval of N times dx
-		min_box = Coord(min_i * dx, min_j * dx, min_k * dx);
-		max_box = Coord(max_i * dx, max_j * dx, max_k * dx);
-
-		origin = min_box;
-		maxPoint = max_box;
-
-		sdf.setSpace(min_box, max_box, dx);
-		auto& phi = sdf.distances();
-
-		int ni = phi.nx();
-		int nj = phi.ny();
-		int nk = phi.nz();
-
-		//initialize distances near the mesh
-		DArray3D<uint> counter3d(ni, nj, nk);
-		DArray<uint> counter1d(ni * nj * nk);
-		counter3d.reset();
-
-		DArray3D<GridType> gridType(ni, nj, nk);
-		DArray3D<int> closestTriId(ni, nj, nk);
-		
-		cuExecute3D(make_uint3(ni, nj, nk),
-			FSM_AssignInifity,
-			phi,
-			closestTriId,
-			gridType);
-
-		cuExecute(triangles.size(),
-			FSM_FindNeighboringGrids,
-			counter3d,
-			vertices,
-			triangles,
+		DArray3D<GridType> gridType;
+		DArray3D<int> closestTriId;
+		LevelSetConstructionAndBooleanHelper<TDataType>::initialFromTriangle(
+			ts,
+			dx,
+			padding,
+			sdf,
 			origin,
-			dx);
-
-		cuExecute3D(make_uint3(ni, nj, nk),
-			FSM_Array3D_To_Array1d,
-			counter1d,
-			counter3d);
-
-		DArrayList<uint> neighbors;
-		neighbors.resize(counter1d);
-
-		cuExecute(triangles.size(),
-			FSM_StoreTriangleIds,
-			neighbors,
-			counter3d,
-			vertices,
-			triangles,
-			origin,
-			dx);
-
-		cuExecute3D(make_uint3(ni, nj, nk),
-			FSM_InitializeSDFNearMesh,
-			phi,
-			closestTriId,
 			gridType,
-			neighbors,
-			vertices,
-			triangles,
-			edges,
-			tri2edg,
-			edgeNormal,
-			vertexNormal,
-			origin,
-			dx);
+			closestTriId);
+
+		auto& phi = sdf.distances();
+		ni = phi.nx();
+		nj = phi.ny();
+		nk = phi.nz();
+
+		auto& vertices = ts->getPoints();
+		auto& triangles = ts->triangleIndices();
 
 		// fill in the rest of the distances with fast sweeping
 		uint passMax = this->varPassNumber()->getValue();
@@ -539,12 +262,13 @@ namespace dyno
 				-1);
 		}
 
-		counter3d.clear();
-		counter1d.clear();
+		//counter3d.clear();
+		//counter1d.clear();
 		gridType.clear();
-		neighbors.clear();
-		edgeNormal.clear();
-		vertexNormal.clear();
+		closestTriId.clear();
+		//neighbors.clear();
+		//edgeNormal.clear();
+		//vertexNormal.clear();
 	}
 
 	DEFINE_CLASS(FastSweepingMethodGPU);

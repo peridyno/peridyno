@@ -16,7 +16,8 @@
 
 #pragma once
 #include "Node/ParametricModel.h"
-#include "Topology/TriangleSet.h"
+
+#include "Topology/TriangleSets.h"
 
 namespace dyno
 {
@@ -42,7 +43,7 @@ namespace dyno
 	public:
 		DEF_INSTANCES_IN(TriangleSet<TDataType>, TriangleSet, "");
 
-		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
+		DEF_INSTANCE_STATE(TriangleSets<TDataType>, TriangleSets, "");
 
 	protected:
 		void resetStates() override;
