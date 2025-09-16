@@ -226,10 +226,9 @@ void declare_land_scape(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("LandScape") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("getInitialHeights", &Class::getInitialHeights)
-		//DEV_VAR
 		.def("varPatchSize", &Class::varPatchSize, py::return_value_policy::reference)
 		.def("varFileName", &Class::varFileName, py::return_value_policy::reference)
+		.def("stateInitialHeights", &Class::stateInitialHeights, py::return_value_policy::reference)
 		.def("stateHeightField", &Class::stateHeightField, py::return_value_policy::reference)
 		// protected
 		.def("resetStates", &LandScapePublicist::resetStates, py::return_value_policy::reference)

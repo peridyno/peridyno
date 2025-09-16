@@ -908,7 +908,6 @@ void pybind_framework(py::module& m)
 			declare_single_node_port<dyno::BasicShape<dyno::DataType3f>>(m, "BasicShape3f");
 			declare_single_node_port<dyno::RigidBodySystem<dyno::DataType3f>>(m, "RigidBodySystem3f");
 			declare_single_node_port<dyno::Vessel<dyno::DataType3f>>(m, "Vessel3f");
-			declare_single_node_port<dyno::VolumeOctree<dyno::DataType3f>>(m, "VolumeOctree3f");
 			declare_single_node_port<dyno::GhostParticles<dyno::DataType3f>>(m, "GhostParticles3f");
 			declare_single_node_port<dyno::ParticleSystem<dyno::DataType3f>>(m, "ParticleSystem3f");
 			//declare_semi_analytical_sfi_node<dyno::DataType3f>(m, "3f");

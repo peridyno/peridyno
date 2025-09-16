@@ -12,8 +12,8 @@ inline void declare_render_window(py::module& m) {
 	using Class = dyno::RenderWindow;
 	std::string pyclass_name = std::string("RenderWindow");
 	py::class_<Class, std::shared_ptr<Class>>RW(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
-	RW.def(py::init<>())
-		.def("initialize", &dyno::RenderWindow::initialize)
+	
+	RW.def("initialize", &dyno::RenderWindow::initialize)
 		.def("mainLoop", &dyno::RenderWindow::mainLoop)
 		.def("getRenderEngine", &dyno::RenderWindow::getRenderEngine)
 		.def("setRenderEngine", &dyno::RenderWindow::setRenderEngine)

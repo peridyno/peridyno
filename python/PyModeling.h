@@ -297,7 +297,7 @@ void declare_merge(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("Merge") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>M(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	M.def(py::init<>())
-		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
+		.def("stateTriangleSets", &Class::stateTriangleSets, py::return_value_policy::reference)
 		.def("inTriangleSets", &Class::inTriangleSets, py::return_value_policy::reference)
 		.def("varUpdateMode", &Class::varUpdateMode, py::return_value_policy::reference)
 		.def("caption", &Class::caption);

@@ -80,7 +80,6 @@
 #include <GLSurfaceVisualModule.h>
 #include <ColorMapping.h>
 #include <Peridynamics/Bond.h>
-#include <Volume/VolumeOctree.h>
 #include "ParticleSystem/GhostFluid.h"
 
 using FBase = dyno::FBase;

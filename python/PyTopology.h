@@ -697,13 +697,14 @@ void declare_edge_set(py::module& m, std::string typestr) {
 		.def(py::init<>())
 		.def("set_edges", py::overload_cast<std::vector<Edge>&>(&Class::setEdges))
 		.def("set_edges", py::overload_cast<dyno::Array<Edge, DeviceType::GPU>&>(&Class::setEdges))
-		.def("requestPointNeighbors", &Class::requestPointNeighbors)
-		.def("getEdges", &Class::getEdges)
+		.def("edgeIndices", &Class::edgeIndices)
 		.def("vertex2Edge", &Class::vertex2Edge)
 		.def("copyFrom", &Class::copyFrom)
 		.def("isEmpty", &Class::isEmpty)
 		.def("clear", &Class::clear)
-		.def("loadSmeshFile", &Class::loadSmeshFile);
+		.def("loadSmeshFile", &Class::loadSmeshFile)
+
+		.def("requestPointNeighbors", &Class::requestPointNeighbors);
 }
 
 #include "Topology/Frame.h"
@@ -814,15 +815,15 @@ void declare_quad_set(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("QuadSet") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("getQuads", &Class::getQuads, py::return_value_policy::reference)
-
+		
 		.def("set_quads", py::overload_cast<std::vector<Quad>&>(&Class::setQuads))
 		.def("set_quads", py::overload_cast<dyno::Array<Quad, DeviceType::GPU>&>(&Class::setQuads))
 
-		.def("getVertex2Quads", &Class::getVertex2Quads, py::return_value_policy::reference)
+		.def("quadIndices", &Class::quadIndices, py::return_value_policy::reference)
+		.def("vertex2Quad", &Class::vertex2Quad, py::return_value_policy::reference)
 		.def("copyFrom", &Class::copyFrom)
 		.def("isEmpty", &Class::isEmpty)
-		.def("outVertexNormal", &Class::outVertexNormal, py::return_value_policy::reference);
+		.def("requestVertexNormals", &Class::requestVertexNormals, py::return_value_policy::reference);
 }
 
 #include "Topology/HexahedronSet.h"
@@ -1077,22 +1078,22 @@ void declare_triangle_set(py::module& m, std::string typestr) {
 		.def(py::init<>())
 		.def("setTriangles", py::overload_cast<std::vector<Triangle>&>(&Class::setTriangles))
 		.def("setTriangles", py::overload_cast<dyno::Array<Triangle, DeviceType::GPU>&>(&Class::setTriangles))
-		.def("getTriangle2Edge", &Class::getTriangle2Edge)
-		.def("getEdge2Triangle", &Class::getEdge2Triangle)
 
-		.def("setNormals", &Class::setNormals)
-		.def("getVertexNormals", &Class::getVertexNormals)
-		.def("updateTriangle2Edge", &Class::updateTriangle2Edge)
-		.def("updateEdgeNormal", &Class::updateEdgeNormal)
-		.def("updateAngleWeightedVertexNormal", &Class::updateAngleWeightedVertexNormal)
+		.def("triangleIndices", &Class::triangleIndices)
+		.def("vertex2Triangle", &Class::vertex2Triangle)
+
+		.def("triangle2Edge", &Class::triangle2Edge)
+		.def("edge2Triangle", &Class::edge2Triangle)
+
 		.def("loadObjFile", &Class::loadObjFile)
 		.def("copyFrom", &Class::copyFrom)
 		.def("merge", &Class::merge)
 		.def("isEmpty", &Class::isEmpty)
 		.def("clear", &Class::clear)
-		.def("setAutoUpdateNormals", &Class::setAutoUpdateNormals)
-		.def("rotate", py::overload_cast<const Coord>(&Class::rotate))
-		.def("rotate", py::overload_cast<const dyno::Quat<Real>>(&Class::rotate));
+
+		.def("requestTriangle2Triangle", &Class::requestTriangle2Triangle)
+		.def("requestEdgeNormals", &Class::requestEdgeNormals)
+		.def("requestVertexNormals", &Class::requestVertexNormals);
 }
 
 #include "Topology/TetrahedronSet.h"
@@ -1108,14 +1109,21 @@ void declare_tetrahedron_set(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("loadTetFile", &Class::loadTetFile)
+
 		.def("setTetrahedrons", py::overload_cast<std::vector<Tetrahedron>&>(&Class::setTetrahedrons))
 		.def("setTetrahedrons", py::overload_cast<dyno::Array<Tetrahedron, DeviceType::GPU>&>(&Class::setTetrahedrons))
-		.def("getTetrahedrons", &Class::getTetrahedrons, py::return_value_policy::reference)
-		.def("getTri2Tet", &Class::getTri2Tet, py::return_value_policy::reference)
-		.def("getVer2Tet", &Class::getVer2Tet, py::return_value_policy::reference)
-		.def("getVolume", &Class::getVolume)
+
+		.def("tetrahedronIndices", &Class::tetrahedronIndices, py::return_value_policy::reference)
+		.def("vertex2Tetrahedron", &Class::vertex2Tetrahedron, py::return_value_policy::reference)
+		.def("triangle2Tetrahedron", &Class::triangle2Tetrahedron, py::return_value_policy::reference)
+		.def("tetrahedron2Triangle", &Class::tetrahedron2Triangle, py::return_value_policy::reference)
 		.def("copyFrom", &Class::copyFrom)
-		.def("isEmpty", &Class::isEmpty);
+		.def("isEmpty", &Class::isEmpty)
+
+		.def("requestPointNeighbors", &Class::requestPointNeighbors, py::return_value_policy::reference)
+		.def("requestSurfaceMeshIds", &Class::requestSurfaceMeshIds, py::return_value_policy::reference)
+		.def("extractSurfaceMesh", &Class::extractSurfaceMesh, py::return_value_policy::reference)
+		.def("calculateVolume", &Class::calculateVolume, py::return_value_policy::reference);
 }
 
 #include "Topology/UniformGrid.h"

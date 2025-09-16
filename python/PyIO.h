@@ -77,27 +77,7 @@ void declare_tetra_mesh_writer(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("TetraMeshWriter") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		//.def("setNamePrefix", &Class::setNamePrefix)
-		//.def("setOutputPath", &Class::setOutputPath)
-		.def("setTetrahedronSetPtr", &Class::setTetrahedronSetPtr)
-		.def("updatePtr", &Class::updatePtr)
-		//.def("outputSurfaceMesh", &Class::outputSurfaceMesh)
-		.def("output", &Class::output);
-}
-
-#include "TetraMeshWriterFracture.h"
-template <typename TDataType>
-void declare_tetra_mesh_writer_fracture(py::module& m, std::string typestr) {
-	using Class = dyno::TetraMeshWriterFracture<TDataType>;
-	using Parent = dyno::OutputModule;
-	std::string pyclass_name = std::string("TetraMeshWriterFracture") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("loadUVs", &Class::loadUVs)
-		.def("setTetrahedronSetPtr", &Class::setTetrahedronSetPtr)
-		.def("updatePtr", &Class::updatePtr)
-		.def("outputSurfaceMesh", &Class::outputSurfaceMesh)
-		.def_readwrite("OringalID", &Class::OringalID);
+		.def("inTetrahedronSet", &Class::inTetrahedronSet, py::return_value_policy::reference);
 }
 
 #include "TextureMeshLoader.h"
