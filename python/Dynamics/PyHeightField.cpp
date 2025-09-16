@@ -9,6 +9,7 @@ void pybind_height_field(py::module& m)
 	declare_land_scape<dyno::DataType3f>(m, "3f");
 	declare_ocean_base<dyno::DataType3f>(m, "3f");
 	declare_large_ocean<dyno::DataType3f>(m, "3f");
+	declare_mountain_torrents<dyno::DataType3f>(m, "3f");
 	declare_ocean<dyno::DataType3f>(m, "3f");
 	declare_ocean_patch<dyno::DataType3f>(m, "3f");
 	declare_rigid_sand_coupling<dyno::DataType3f>(m, "3f");

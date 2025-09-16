@@ -111,6 +111,10 @@ void declare_capillary_wave(py::module& m, std::string typestr) {
 	public:
 		using Class::resetStates;
 		using Class::updateStates;
+
+		using Class::mDeviceGrid;
+		using Class::mDeviceGridNext;
+		using Class::mDeviceGridOld;
 	};
 
 	std::string pyclass_name = std::string("CapillaryWave") + typestr;
@@ -120,19 +124,26 @@ void declare_capillary_wave(py::module& m, std::string typestr) {
 		.def("varResolution", &Class::varResolution, py::return_value_policy::reference)
 		.def("varLength", &Class::varLength, py::return_value_policy::reference)
 		.def("varViscosity", &Class::varViscosity, py::return_value_policy::reference)
+
 		.def("stateHeight", &Class::stateHeight, py::return_value_policy::reference)
 		.def("stateHeightField", &Class::stateHeightField, py::return_value_policy::reference)
 		// public
 		.def("setOriginX", &Class::setOriginX)
 		.def("setOriginY", &Class::setOriginY)
+
 		.def("getOriginX", &Class::getOriginX)
 		.def("getOriginZ", &Class::getOriginZ)
+
 		.def("getRealGridSize", &Class::getRealGridSize)
 		.def("getOrigin", &Class::getOrigin)
 		.def("moveDynamicRegion", &Class::moveDynamicRegion)
 		// protected
 		.def("resetStates", &CapillaryWavePublicist::resetStates, py::return_value_policy::reference)
-		.def("updateStates", &CapillaryWavePublicist::updateStates, py::return_value_policy::reference);
+		.def("updateStates", &CapillaryWavePublicist::updateStates, py::return_value_policy::reference)
+
+		.def_readwrite("mDeviceGrid", &CapillaryWavePublicist::mDeviceGrid)
+		.def_readwrite("mDeviceGridNext", &CapillaryWavePublicist::mDeviceGridNext)
+		.def_readwrite("mDeviceGridOld", &CapillaryWavePublicist::mDeviceGridOld);
 }
 
 #include "HeightField/GranularMedia.h"
@@ -176,14 +187,19 @@ void declare_granular_media(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varOrigin", &Class::varOrigin, py::return_value_policy::reference)
+
 		.def("varWidth", &Class::varWidth, py::return_value_policy::reference)
 		.def("varHeight", &Class::varHeight, py::return_value_policy::reference)
+
 		.def("varDepth", &Class::varDepth, py::return_value_policy::reference)
+
 		.def("varDepthOfDiluteLayer", &Class::varDepthOfDiluteLayer, py::return_value_policy::reference)
 		.def("varCoefficientOfDragForce", &Class::varCoefficientOfDragForce, py::return_value_policy::reference)
 		.def("varCoefficientOfFriction", &Class::varCoefficientOfFriction, py::return_value_policy::reference)
+
 		.def("varSpacing", &Class::varSpacing, py::return_value_policy::reference)
 		.def("varGravity", &Class::varGravity, py::return_value_policy::reference)
+
 		.def("stateLandScape", &Class::stateLandScape, py::return_value_policy::reference)
 		.def("stateGrid", &Class::stateGrid, py::return_value_policy::reference)
 		.def("stateGridNext", &Class::stateGridNext, py::return_value_policy::reference)
@@ -324,6 +340,55 @@ void declare_large_ocean(py::module& m, std::string typestr) {
 		.def("updateStates", &LargeOceanPublicist::updateStates, py::return_value_policy::reference);
 }
 
+#include "HeightField/MountainTorrents.h"
+template <typename TDataType>
+void declare_mountain_torrents(py::module& m, std::string typestr) {
+	using Class = dyno::MountainTorrents<TDataType>;
+	using Parent = dyno::CapillaryWave<TDataType>;
+
+	class MountainTorrentsTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void resetStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::MountainTorrents<TDataType>,
+				resetStates
+			);
+		}
+
+		void updateStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::MountainTorrents<TDataType>,
+				updateStates
+			);
+		}
+	};
+
+	class MountainTorrentsPublicist : public Class
+	{
+	public:
+		using Class::resetStates;
+		using Class::updateStates;
+	};
+
+	std::string pyclass_name = std::string("MountainTorrents") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("getTerrain", &Class::getTerrain, py::return_value_policy::reference)
+		.def("importTerrain", &Class::importTerrain, py::return_value_policy::reference)
+
+		.def("stateInitialHeights", &Class::stateInitialHeights, py::return_value_policy::reference)
+		// protected
+		.def("resetStates", &MountainTorrentsPublicist::resetStates, py::return_value_policy::reference)
+		.def("updateStates", &MountainTorrentsPublicist::updateStates, py::return_value_policy::reference);
+}
+
 #include "HeightField/Ocean.h"
 template <typename TDataType>
 void declare_ocean(py::module& m, std::string typestr) {
@@ -366,7 +431,7 @@ void declare_ocean(py::module& m, std::string typestr) {
 		.def(py::init<>())
 		.def("varExtentX", &Class::varExtentX, py::return_value_policy::reference)
 		.def("varExtentZ", &Class::varExtentZ, py::return_value_policy::reference)
-		.def("varWaterLevel", &Class::varWaterLevel, py::return_value_policy::reference)
+
 		//DEF_NODE_PORTS
 		.def("importCapillaryWaves", &Class::importCapillaryWaves, py::return_value_policy::reference)
 		.def("getCapillaryWaves", &Class::getCapillaryWaves)
@@ -430,6 +495,7 @@ void declare_ocean_patch(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("getNodeType", &Class::getNodeType)
+
 		.def("varWindType", &Class::varWindType, py::return_value_policy::reference)
 		.def("varAmplitude", &Class::varAmplitude, py::return_value_policy::reference)
 		.def("varAmplitudeScale", &Class::varAmplitudeScale, py::return_value_policy::reference)
@@ -609,8 +675,10 @@ void declare_surface_particle_tracking(py::module& m, std::string typestr) {
 		//DEV_VAR
 		.def("varLayer", &Class::varLayer, py::return_value_policy::reference)
 		.def("varSpacing", &Class::varSpacing, py::return_value_policy::reference)
+
 		.def("getGranularMedia", &Class::getGranularMedia, py::return_value_policy::reference)
 		.def("importGranularMedia", &Class::importGranularMedia, py::return_value_policy::reference)
+
 		.def("statePointSet", &Class::statePointSet, py::return_value_policy::reference)
 		// protected
 		.def("resetStates", &SurfaceParticleTrackingPublicist::resetStates, py::return_value_policy::reference)

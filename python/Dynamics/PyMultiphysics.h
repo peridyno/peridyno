@@ -1,6 +1,50 @@
 #pragma once
 #include "../PyCommon.h"
 
+#include "Multiphysics/Module/PoissionDiskPositionShifting.h"
+template <typename TDataType>
+void declare_poission_disk_position_shifting(py::module& m, std::string typestr) {
+	using Class = dyno::PoissionDiskPositionShifting<TDataType>;
+	using Parent = dyno::ParticleApproximation<TDataType>;
+
+	class PoissionDiskPositionShiftingTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void compute() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::PoissionDiskPositionShifting<TDataType>,
+				compute
+			);
+		}
+	};
+
+	class PoissionDiskPositionShiftingPublicist : public Class
+	{
+	public:
+		using Class::compute;
+	};
+
+	std::string pyclass_name = std::string("PoissionDiskPositionShifting") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("inDelta", &Class::inDelta, py::return_value_policy::reference)
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		.def("inNeighborIds", &Class::inNeighborIds, py::return_value_policy::reference)
+		.def("outDensity", &Class::outDensity, py::return_value_policy::reference)
+
+		.def("varIterationNumber", &Class::varIterationNumber, py::return_value_policy::reference)
+		.def("varRestDensity", &Class::varRestDensity, py::return_value_policy::reference)
+		.def("varKappa", &Class::varKappa, py::return_value_policy::reference)
+
+		.def("updatePosition", &Class::updatePosition)
+		// protected
+		.def("compute", &PoissionDiskPositionShiftingPublicist::compute, py::return_value_policy::reference);
+}
 
 #include "Multiphysics/ComputeSurfaceLevelset.h"
 template <typename TDataType>
@@ -63,7 +107,7 @@ void declare_particle_skinning(py::module& m, std::string typestr) {
 		.def("statePoints", &Class::statePoints, py::return_value_policy::reference)
 		.def("stateLevelSet", &Class::stateLevelSet, py::return_value_policy::reference)
 		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
-		.def("state_grid_position", &Class::stateGridPoistion, py::return_value_policy::reference)
+		.def("stateGridPoistion", &Class::stateGridPoistion, py::return_value_policy::reference)
 		.def("stateGridSpacing", &Class::stateGridSpacing, py::return_value_policy::reference)
 		// protected
 		.def("resetStates", &ParticleSkinningPublicist::resetStates, py::return_value_policy::reference)
@@ -103,8 +147,8 @@ void declare_volume_boundary(py::module& m, std::string typestr) {
 		.def(py::init<>())
 		.def("getNodeType", &Class::getNodeType)
 		//DEF_VAR
-		.def("varTangentialFriction", &Class::varTangentialFriction, py::return_value_policy::reference)
 		.def("varNormalFriction", &Class::varNormalFriction, py::return_value_policy::reference)
+		.def("varTangentialFriction", &Class::varTangentialFriction, py::return_value_policy::reference)
 		//DEF_NODE_PORTS
 		.def("importVolumes", &Class::importVolumes, py::return_value_policy::reference)
 		.def("getVolumes", &Class::getVolumes)
@@ -136,13 +180,71 @@ template <typename TDataType>
 void declare_sdf_sampler(py::module& m, std::string typestr) {
 	using Class = dyno::SdfSampler<TDataType>;
 	using Parent = dyno::Sampler<TDataType>;
+
+	class SdfSamplerTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void resetStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::SdfSampler<TDataType>,
+				resetStates
+			);
+		}
+
+		bool validateInputs() override
+		{
+			PYBIND11_OVERRIDE(
+				bool,
+				dyno::SdfSampler<TDataType>,
+				validateInputs
+			);
+		}
+
+	};
+
+	class SdfSamplerPublicist : public Class
+	{
+	public:
+		using Class::resetStates;
+		using Class::validateInputs;
+	};
+
 	std::string pyclass_name = std::string("SdfSampler") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varSpacing", &Class::varSpacing, py::return_value_policy::reference)
+
 		.def("importVolume", &Class::importVolume, py::return_value_policy::reference)
-		.def("getVolume", &Class::getVolume);
+		.def("getVolume", &Class::getVolume)
+		// protected
+		.def("resetStates", &SdfSamplerPublicist::resetStates, py::return_value_policy::reference)
+		.def("validateInputs", &SdfSamplerPublicist::validateInputs, py::return_value_policy::reference);
 }
+
+#include "Multiphysics/DevicePoissonDiskSampler.h"
+template <typename TDataType>
+void declare_device_poisson_disk_sampler(py::module& m, std::string typestr) {
+	using Class = dyno::DevicePoissonDiskSampler<TDataType>;
+	using Parent = dyno::SdfSampler<TDataType>;
+	std::string pyclass_name = std::string("DevicePoissonDiskSampler") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("resetStates", &Class::resetStates)
+
+		.def("statePosition", &Class::statePosition, py::return_value_policy::reference)
+
+		.def("varDelta", &Class::varDelta, py::return_value_policy::reference)
+		.def("stateNeighborLength", &Class::stateNeighborLength, py::return_value_policy::reference)
+		.def("stateNeighborIds", &Class::stateNeighborIds, py::return_value_policy::reference)
+		.def("outDensity", &Class::outDensity, py::return_value_policy::reference)
+		.def("varConstraintDisable", &Class::varConstraintDisable, py::return_value_policy::reference)
+		.def("varMaxIteration", &Class::varMaxIteration, py::return_value_policy::reference);
+}
+
 
 #include "Multiphysics/PoissonDiskSampler.h"
 template <typename TDataType>

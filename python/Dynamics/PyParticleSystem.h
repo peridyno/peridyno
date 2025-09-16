@@ -21,16 +21,66 @@ template <typename TDataType>
 void declare_particle_emitter(py::module& m, std::string typestr) {
 	using Class = dyno::ParticleEmitter<TDataType>;
 	using Parent = dyno::ParametricModel<TDataType>;
+
+	class ParticleEmitterTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void resetStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::ParticleEmitter<TDataType>,
+				resetStates
+			);
+		}
+
+		void generateParticles() override
+		{
+			PYBIND11_OVERRIDE_PURE(
+				void,
+				dyno::ParticleEmitter<TDataType>,
+				generateParticles
+			);
+		}
+	};
+
+	class ParticleEmitterPublicist : public Class
+	{
+	public:
+		using Class::resetStates;
+		using Class::updateStates;
+		using Class::generateParticles;
+		using Class::rotationMatrix;
+
+		using Class::mPosition;
+		using Class::mVelocity;
+		using Class::mTimeInterval;
+	};
+
 	std::string pyclass_name = std::string("ParticleEmitter") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("sizeOfParticles", &Class::sizeOfParticles)
+
 		.def("getPositions", &Class::getPositions)
 		.def("getVelocities", &Class::getVelocities)
+
 		.def("getNodeType", &Class::getNodeType)
+
 		.def("varVelocityMagnitude", &Class::varVelocityMagnitude, py::return_value_policy::reference)
 		.def("varSamplingDistance", &Class::varSamplingDistance, py::return_value_policy::reference)
-		.def("varSpacing", &Class::varSpacing, py::return_value_policy::reference);
+		.def("varSpacing", &Class::varSpacing, py::return_value_policy::reference)
+		// protected
+		.def("resetStates", &ParticleEmitterPublicist::resetStates, py::return_value_policy::reference)
+		.def("updateStates", &ParticleEmitterPublicist::updateStates, py::return_value_policy::reference)
+		.def("generateParticles", &ParticleEmitterPublicist::generateParticles, py::return_value_policy::reference)
+		.def("rotationMatrix", &ParticleEmitterPublicist::rotationMatrix, py::return_value_policy::reference)
+
+		.def_readwrite("mPosition", &ParticleEmitterPublicist::mPosition)
+		.def_readwrite("mVelocity", &ParticleEmitterPublicist::mVelocity)
+		.def_readwrite("mTimeInterval", &ParticleEmitterPublicist::mTimeInterval);
 }
 
 #include "ParticleSystem/Emitters/CircularEmitter.h"
@@ -50,6 +100,38 @@ template <typename TDataType>
 void declare_poisson_emitter(py::module& m, std::string typestr) {
 	using Class = dyno::PoissonEmitter<TDataType>;
 	using Parent = dyno::ParticleEmitter<TDataType>;
+
+	class PoissonEmitterTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void resetStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::PoissonEmitter<TDataType>,
+				resetStates
+			);
+		}
+
+		void generateParticles() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::PoissonEmitter<TDataType>,
+				generateParticles
+			);
+		}
+	};
+
+	class PoissonEmitterPublicist : public Class
+	{
+	public:
+		using Class::resetStates;
+		using Class::generateParticles;
+	};
+
 	std::string pyclass_name = std::string("PoissonEmitter") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>PE(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	PE.def(py::init<>())
@@ -57,7 +139,10 @@ void declare_poisson_emitter(py::module& m, std::string typestr) {
 		.def("varHeight", &Class::varHeight, py::return_value_policy::reference)
 		.def("varDelayStart", &Class::varDelayStart, py::return_value_policy::reference)
 		.def("stateOutline", &Class::stateOutline, py::return_value_policy::reference)
-		.def("varEmitterShape", &Class::varEmitterShape, py::return_value_policy::reference);
+		.def("varEmitterShape", &Class::varEmitterShape, py::return_value_policy::reference)
+		// protected
+		.def("resetStates", &PoissonEmitterPublicist::resetStates, py::return_value_policy::reference)
+		.def("generateParticles", &PoissonEmitterPublicist::generateParticles, py::return_value_policy::reference);
 
 	py::enum_<typename Class::EmitterShape>(PE, "EmitterShape")
 		.value("Square", Class::EmitterShape::Square)
@@ -70,12 +155,47 @@ template <typename TDataType>
 void declare_square_emitter(py::module& m, std::string typestr) {
 	using Class = dyno::SquareEmitter<TDataType>;
 	using Parent = dyno::ParticleEmitter<TDataType>;
+
+	class SquareEmitterTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void resetStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::SquareEmitter<TDataType>,
+				resetStates
+			);
+		}
+
+		void generateParticles() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::SquareEmitter<TDataType>,
+				generateParticles
+			);
+		}
+	};
+
+	class SquareEmitterPublicist : public Class
+	{
+	public:
+		using Class::resetStates;
+		using Class::generateParticles;
+	};
+
 	std::string pyclass_name = std::string("SquareEmitter") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varWidth", &Class::varWidth, py::return_value_policy::reference)
 		.def("varHeight", &Class::varHeight, py::return_value_policy::reference)
-		.def("stateOutline", &Class::stateOutline, py::return_value_policy::reference);
+		.def("stateOutline", &Class::stateOutline, py::return_value_policy::reference)
+		// protected
+		.def("resetStates", &SquareEmitterPublicist::resetStates, py::return_value_policy::reference)
+		.def("generateParticles", &SquareEmitterPublicist::generateParticles, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/Module/ApproximateImplicitViscosity.h"
@@ -88,6 +208,7 @@ void declare_approximate_implicit_viscosity(py::module& m, std::string typestr) 
 	AIV.def(py::init<>())
 		.def("constrain", &Class::constrain)
 		.def("SetCross", &Class::SetCross)
+
 		.def("varViscosity", &Class::varViscosity, py::return_value_policy::reference)
 		.def("inNeighborIds", &Class::inNeighborIds, py::return_value_policy::reference)
 		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
@@ -122,7 +243,10 @@ void declare_boundary_constraint(py::module& m, std::string typestr) {
 		.def("setSphere", &Class::setSphere)
 		.def("setCylinder", &Class::setCylinder)
 		.def("varTangentialFriction", &Class::varTangentialFriction, py::return_value_policy::reference)
-		.def("varNormalFriction", &Class::varNormalFriction, py::return_value_policy::reference);
+		.def("varNormalFriction", &Class::varNormalFriction, py::return_value_policy::reference)
+
+		.def_readwrite("m_position", &Class::m_position)
+		.def_readwrite("m_velocity", &Class::m_velocity);
 }
 
 #include "ParticleSystem/Module/ParticleApproximation.h"
@@ -130,17 +254,33 @@ template <typename TDataType>
 void declare_particle_approximation(py::module& m, std::string typestr) {
 	using Class = dyno::ParticleApproximation<TDataType>;
 	using Parent = dyno::ComputeModule;
+
+	class ParticleApproximationPublicist : public Class
+	{
+	public:
+		using Class::mScalingFactor;
+	};
+
 	std::string pyclass_name = std::string("ParticleApproximation") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>PA(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	PA.def(py::init<>())
 		.def("compute", &Class::compute)
 		.def("inSmoothingLength", &Class::inSmoothingLength, py::return_value_policy::reference)
 		.def("inSamplingDistance", &Class::inSamplingDistance, py::return_value_policy::reference)
-		.def("varKernelType", &Class::varKernelType, py::return_value_policy::reference);
+		.def("varKernelType", &Class::varKernelType, py::return_value_policy::reference)
+
+		.def_readwrite("mScalingFactor", &ParticleApproximationPublicist::mScalingFactor);
 
 	py::enum_<typename Class::EKernelType>(PA, "EKernelType")
 		.value("KT_Smooth", Class::EKernelType::KT_Smooth)
 		.value("KT_Spiky", Class::EKernelType::KT_Spiky)
+		.value("KT_Cubic", Class::EKernelType::KT_Cubic)
+		.value("KT_Constant", Class::EKernelType::KT_Constant)
+		.value("KT_Quartic", Class::EKernelType::KT_Quartic)
+		.value("KT_Corrected", Class::EKernelType::KT_Corrected)
+		.value("KT_CorrectedQuatic", Class::EKernelType::KT_CorrectedQuatic)
+		.value("KT_WendlandC2", Class::EKernelType::KT_WendlandC2)
+		.value("KT_CorrectedMPSKernel", Class::EKernelType::KT_CorrectedMPSKernel)
 		.export_values();
 }
 
@@ -174,6 +314,28 @@ template <typename TDataType>
 void declare_implicit_ISPH(py::module& m, std::string typestr) {
 	using Class = dyno::ImplicitISPH<TDataType>;
 	using Parent = dyno::ParticleApproximation<TDataType>;
+
+	class ImplicitISPHTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void compute() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::ImplicitISPH<TDataType>,
+				compute
+			);
+		}
+	};
+
+	class ImplicitISPHPublicist : public Class
+	{
+	public:
+		using Class::compute;
+	};
+
 	std::string pyclass_name = std::string("ImplicitISPH") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
@@ -188,7 +350,9 @@ void declare_implicit_ISPH(py::module& m, std::string typestr) {
 		.def("varRelaxedOmega", &Class::varRelaxedOmega, py::return_value_policy::reference)
 		.def("takeOneIteration", &Class::takeOneIteration)
 		.def("PreIterationCompute", &Class::PreIterationCompute)
-		.def("updateVelocity", &Class::updateVelocity);
+		.def("updateVelocity", &Class::updateVelocity)
+		// protected
+		.def("compute", &ImplicitISPHPublicist::compute, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/Module/ImplicitViscosity.h"
@@ -213,6 +377,28 @@ template <typename TDataType>
 void declare_iterative_densitySolver(py::module& m, std::string typestr) {
 	using Class = dyno::IterativeDensitySolver<TDataType>;
 	using Parent = dyno::ParticleApproximation<TDataType>;
+
+	class IterativeDensitySolverTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void compute() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::IterativeDensitySolver<TDataType>,
+				compute
+			);
+		}
+	};
+
+	class IterativeDensitySolverPublicist : public Class
+	{
+	public:
+		using Class::compute;
+	};
+
 	std::string pyclass_name = std::string("IterativeDensitySolver") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
@@ -226,7 +412,9 @@ void declare_iterative_densitySolver(py::module& m, std::string typestr) {
 		.def("varRestDensity", &Class::varRestDensity, py::return_value_policy::reference)
 		.def("varKappa", &Class::varKappa, py::return_value_policy::reference)
 		.def("takeOneIteration", &Class::takeOneIteration)
-		.def("updateVelocity", &Class::updateVelocity);
+		.def("updateVelocity", &Class::updateVelocity)
+		// protected
+		.def("compute", &IterativeDensitySolverPublicist::compute, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/Module/LinearDamping.h"
@@ -234,11 +422,36 @@ template <typename TDataType>
 void declare_linear_damping(py::module& m, std::string typestr) {
 	using Class = dyno::LinearDamping<TDataType>;
 	using Parent = dyno::ConstraintModule;
+
+	class LinearDampingTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void constrain() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::LinearDamping<TDataType>,
+				constrain
+			);
+		}
+	};
+
+	class LinearDampingPublicist : public Class
+	{
+	public:
+		using Class::constrain;
+	};
+
+
 	std::string pyclass_name = std::string("LinearDamping") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varDampingCoefficient", &Class::varDampingCoefficient, py::return_value_policy::reference)
-		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference);
+		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
+		// protected
+		.def("constrain", &LinearDampingPublicist::constrain, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/Module/NormalForce.h"
@@ -266,13 +479,37 @@ template <typename TDataType>
 void declare_particle_integrator(py::module& m, std::string typestr) {
 	using Class = dyno::ParticleIntegrator<TDataType>;
 	using Parent = dyno::ComputeModule;
+
+	class ParticleIntegratorTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void compute() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::ParticleIntegrator<TDataType>,
+				compute
+			);
+		}
+	};
+
+	class ParticleIntegratorPublicist : public Class
+	{
+	public:
+		using Class::compute;
+	};
+
 	std::string pyclass_name = std::string("ParticleIntegrator") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
 		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
 		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
-		.def("inAttribute", &Class::inAttribute, py::return_value_policy::reference);
+		.def("inAttribute", &Class::inAttribute, py::return_value_policy::reference)
+		// protected
+		.def("compute", &ParticleIntegratorPublicist::compute, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/Module/PositionBasedFluidModel.h"
@@ -313,6 +550,28 @@ template <typename TDataType>
 void declare_SemiImplicitDensitySolver(py::module& m, std::string typestr) {
 	using Class = dyno::SemiImplicitDensitySolver<TDataType>;
 	using Parent = dyno::ParticleApproximation<TDataType>;
+
+	class SemiImplicitDensitySolverTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void compute() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::SemiImplicitDensitySolver<TDataType>,
+				compute
+			);
+		}
+	};
+
+	class SemiImplicitDensitySolverPublicist : public Class
+	{
+	public:
+		using Class::compute;
+	};
+
 	std::string pyclass_name = std::string("SemiImplicitDensitySolver") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
@@ -326,7 +585,9 @@ void declare_SemiImplicitDensitySolver(py::module& m, std::string typestr) {
 		.def("varRestDensity", &Class::varRestDensity, py::return_value_policy::reference)
 		.def("varKappa", &Class::varKappa, py::return_value_policy::reference)
 		.def("updatePosition", &Class::updatePosition)
-		.def("updateVelocity", &Class::updateVelocity);
+		.def("updateVelocity", &Class::updateVelocity)
+		// protected
+		.def("compute", &SemiImplicitDensitySolverPublicist::compute, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/Module/SimpleVelocityConstraint.h"
@@ -359,7 +620,6 @@ void declare_SimpleVelocityConstraint(py::module& m, std::string typestr) {
 		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
 		.def("varViscosity", &Class::varViscosity, py::return_value_policy::reference)
 		.def("varSimpleIterationEnable", &Class::varSimpleIterationEnable, py::return_value_policy::reference);
-	//.def("SetCross", &Class:SetCross);
 }
 
 #include "ParticleSystem/Module/SummationDensity.h"
@@ -421,23 +681,92 @@ void declare_variational_approximate_projection(py::module& m, std::string types
 		.def("varChanged", &Class::varChanged);
 }
 
+#include "ParticleSystem/ParticleSystem.h"
 template <typename TDataType>
 void declare_particle_system(py::module& m, std::string typestr) {
 	using Class = dyno::ParticleSystem<TDataType>;
 	using Parent = dyno::Node;
+
+	class ParticleSystemTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void resetStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::ParticleSystem<TDataType>,
+				resetStates
+			);
+		}
+
+		void postUpdateStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::ParticleSystem<TDataType>,
+				postUpdateStates
+			);
+		}
+	};
+
+	class ParticleSystemPublicist : public Class
+	{
+	public:
+		using Class::resetStates;
+		using Class::postUpdateStates;
+	};
+
 	std::string pyclass_name = std::string("ParticleSystem") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("getNodeType", &Class::getNodeType)
 		.def("statePosition", &Class::statePosition, py::return_value_policy::reference)
 		.def("stateVelocity", &Class::stateVelocity, py::return_value_policy::reference)
-		.def("statePointSet", &Class::statePointSet, py::return_value_policy::reference);
+		.def("statePointSet", &Class::statePointSet, py::return_value_policy::reference)
+		// protected
+		.def("resetStates", &ParticleSystemPublicist::resetStates, py::return_value_policy::reference)
+		.def("postUpdateStates", &ParticleSystemPublicist::postUpdateStates, py::return_value_policy::reference);
 }
 
+#include "ParticleSystem/ParticleFluid.h"
 template <typename TDataType>
 void declare_particle_fluid(py::module& m, std::string typestr) {
 	using Class = dyno::ParticleFluid<TDataType>;
 	using Parent = dyno::ParticleSystem<TDataType>;
+
+	class ParticleFluidTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void resetStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::ParticleFluid<TDataType>,
+				resetStates
+			);
+		}
+
+		void postUpdateStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::ParticleFluid<TDataType>,
+				postUpdateStates
+			);
+		}
+	};
+
+	class ParticleFluidPublicist : public Class
+	{
+	public:
+		using Class::resetStates;
+		using Class::postUpdateStates;
+	};
+
 	std::string pyclass_name = std::string("ParticleFluid") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
@@ -457,7 +786,10 @@ void declare_particle_fluid(py::module& m, std::string typestr) {
 		.def("removeInitialState", &Class::removeInitialState)
 
 		.def("stateSamplingDistance", &Class::stateSamplingDistance, py::return_value_policy::reference)
-		.def("stateSmoothingLength", &Class::stateSmoothingLength, py::return_value_policy::reference);
+		.def("stateSmoothingLength", &Class::stateSmoothingLength, py::return_value_policy::reference)
+		// protected
+		.def("resetStates", &ParticleFluidPublicist::resetStates, py::return_value_policy::reference)
+		.def("postUpdateStates", &ParticleFluidPublicist::postUpdateStates, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/GhostFluid.h"
@@ -465,6 +797,48 @@ template <typename TDataType>
 void declare_ghost_fluid(py::module& m, std::string typestr) {
 	using Class = dyno::GhostFluid<TDataType>;
 	using Parent = dyno::ParticleFluid<TDataType>;
+
+	class GhostFluidTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void resetStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::GhostFluid<TDataType>,
+				resetStates
+			);
+		}
+
+		void preUpdateStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::GhostFluid<TDataType>,
+				preUpdateStates
+			);
+		}
+
+		void postUpdateStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::GhostFluid<TDataType>,
+				postUpdateStates
+			);
+		}
+	};
+
+	class GhostFluidPublicist : public Class
+	{
+	public:
+		using Class::resetStates;
+		using Class::preUpdateStates;
+		using Class::postUpdateStates;
+	};
+
 	std::string pyclass_name = std::string("GhostFluid") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
@@ -476,18 +850,48 @@ void declare_ghost_fluid(py::module& m, std::string typestr) {
 		.def("importBoundaryParticles", &Class::importBoundaryParticles, py::return_value_policy::reference)
 		.def("getBoundaryParticles", &Class::getBoundaryParticles)
 		.def("addBoundaryParticle", &Class::addBoundaryParticle)
-		.def("removeBoundaryParticle", &Class::removeBoundaryParticle);
+		.def("removeBoundaryParticle", &Class::removeBoundaryParticle)
+		// protected
+		.def("resetStates", &GhostFluidPublicist::resetStates, py::return_value_policy::reference)
+		.def("preUpdateStates", &GhostFluidPublicist::preUpdateStates, py::return_value_policy::reference)
+		.def("postUpdateStates", &GhostFluidPublicist::postUpdateStates, py::return_value_policy::reference);
 }
 
+#include "ParticleSystem/GhostParticles.h"
 template <typename TDataType>
 void declare_ghost_particles(py::module& m, std::string typestr) {
 	using Class = dyno::GhostParticles<TDataType>;
 	using Parent = dyno::ParticleSystem<TDataType>;
+
+	class GhostParticlesTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void resetStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::GhostParticles<TDataType>,
+				resetStates
+			);
+		}
+
+	};
+
+	class GhostParticlesPublicist : public Class
+	{
+	public:
+		using Class::resetStates;
+	};
+
 	std::string pyclass_name = std::string("GhostParticles") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("stateNormal", &Class::stateNormal, py::return_value_policy::reference)
-		.def("stateAttribute", &Class::stateAttribute, py::return_value_policy::reference);
+		.def("stateAttribute", &Class::stateAttribute, py::return_value_policy::reference)
+		// protected
+		.def("resetStates", &GhostParticlesPublicist::resetStates, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/MakeGhostParticles.h"
@@ -495,11 +899,36 @@ template <typename TDataType>
 void declare_make_ghost_particles(py::module& m, std::string typestr) {
 	using Class = dyno::MakeGhostParticles<TDataType>;
 	using Parent = dyno::GhostParticles<TDataType>;
+
+	class MakeGhostParticlesTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void resetStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::MakeGhostParticles<TDataType>,
+				resetStates
+			);
+		}
+
+	};
+
+	class MakeGhostParticlesPublicist : public Class
+	{
+	public:
+		using Class::resetStates;
+	};
+
 	std::string pyclass_name = std::string("MakeGhostParticles") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inPoints", &Class::inPoints, py::return_value_policy::reference)
-		.def("varReverseNormal", &Class::varReverseNormal, py::return_value_policy::reference);
+		.def("varReverseNormal", &Class::varReverseNormal, py::return_value_policy::reference)
+		// protected
+		.def("resetStates", &MakeGhostParticlesPublicist::resetStates, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/MakeParticleSystem.h"
@@ -507,11 +936,36 @@ template <typename TDataType>
 void declare_make_particle_system(py::module& m, std::string typestr) {
 	using Class = dyno::MakeParticleSystem<TDataType>;
 	using Parent = dyno::ParticleSystem<TDataType>;
+
+	class MakeParticleSystemTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void resetStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::MakeParticleSystem<TDataType>,
+				resetStates
+			);
+		}
+
+	};
+
+	class MakeParticleSystemPublicist : public Class
+	{
+	public:
+		using Class::resetStates;
+	};
+
 	std::string pyclass_name = std::string("MakeParticleSystem") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varInitialVelocity", &Class::varInitialVelocity, py::return_value_policy::reference)
-		.def("inPoints", &Class::inPoints, py::return_value_policy::reference);
+		.def("inPoints", &Class::inPoints, py::return_value_policy::reference)
+		// protected
+		.def("resetStates", &MakeParticleSystemPublicist::resetStates, py::return_value_policy::reference);
 }
 
 #include "ParticleSystem/ParticleSystemHelper.h"

@@ -47,6 +47,7 @@ void declare_dual_particle_isph_module(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("constrain", &Class::constrain)
+
 		.def("varRestDensity", &Class::varRestDensity, py::return_value_policy::reference)
 		.def("varSamplingDistance", &Class::varSamplingDistance, py::return_value_policy::reference)
 		.def("varSmoothingLength", &Class::varSmoothingLength, py::return_value_policy::reference)
@@ -78,8 +79,10 @@ void declare_energy_analyish(py::module& m, std::string typestr)
 		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
 		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
 		.def("inNeighborIds", &Class::inNeighborIds, py::return_value_policy::reference)
+
 		.def("constrain", &Class::constrain)
 		.def("initializeImpl", &Class::initializeImpl)
+
 		.def("setNamePrefix", &Class::setNamePrefix)
 		.def("setOutputPath", &Class::setOutputPath);
 }
@@ -96,10 +99,13 @@ void declare_paticle_uniform_analysis(py::module& m, std::string typestr)
 		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
 		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
 		.def("inNeighborIds", &Class::inNeighborIds, py::return_value_policy::reference)
+
 		.def("constrain", &Class::constrain)
 		.def("initialize_impl", &Class::initializeImpl)
+
 		.def("setNamePrefix", &Class::setNamePrefix)
 		.def("setOutputPath", &Class::setOutputPath)
+
 		.def("inSmoothingLength", &Class::inSmoothingLength, py::return_value_policy::reference)
 		.def("inSamplingDistance", &Class::inSamplingDistance, py::return_value_policy::reference);
 }
@@ -166,6 +172,7 @@ void declare_virtual_spatially_adaptive_strategy(py::module& m, std::string type
 	VSAS.def(py::init<>())
 		.def("constrain", &Class::constrain)
 		.def("setHashGridSize", &Class::setHashGridSize)
+		.def("varCandidatePointCount", &Class::varCandidatePointCount, py::return_value_policy::reference)
 		.def("varRestDensity", &Class::varRestDensity, py::return_value_policy::reference)
 		.def("varSamplingDistance", &Class::varSamplingDistance, py::return_value_policy::reference)
 		.def("inRPosition", &Class::inRPosition, py::return_value_policy::reference);
