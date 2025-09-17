@@ -1113,6 +1113,40 @@ void declare_uuv(py::module& m, std::string typestr) {
 		.def("resetStates", &UUVPublicist::resetStates, py::return_value_policy::reference);
 }
 
+template <typename TDataType>
+void declare_bicycle(py::module& m, std::string typestr) {
+	using Class = dyno::Bicycle<TDataType>;
+	using Parent = dyno::ArticulatedBody<TDataType>;
+
+	class BicycleTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void resetStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::Bicycle<TDataType>,
+				resetStates,
+				);
+		}
+	};
+
+	class BicyclePublicist : public Class
+	{
+	public:
+		using Class::resetStates;
+	};
+
+	std::string pyclass_name = std::string("Bicycle") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("outReset", &Class::outReset, py::return_value_policy::reference)
+		// protected
+		.def("resetStates", &BicyclePublicist::resetStates, py::return_value_policy::reference);
+}
+
 // class: TContactPair      - For Examples_1: QT_Bricks
 template<typename Real>
 void declare_collision_data_t_contact_pair(py::module& m, std::string typestr) {

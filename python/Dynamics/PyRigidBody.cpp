@@ -127,6 +127,7 @@ void pybind_rigid_body(py::module& m) {
 	declare_tracked_tank<dyno::DataType3f>(m, "3f");
 	declare_uav<dyno::DataType3f>(m, "3f");
 	declare_uuv<dyno::DataType3f>(m, "3f");
+	declare_bicycle<dyno::DataType3f>(m, "3f");
 
 	declare_rigid_body_info(m, "");
 	declare_box_info(m, "");

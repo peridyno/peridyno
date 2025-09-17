@@ -1,4 +1,5 @@
 #include <QtApp.h>
+#include <GlfwGUI/GlfwApp.h>
 
 #include <SceneGraph.h>
 
@@ -71,12 +72,13 @@ std::shared_ptr<SceneGraph> creatCar()
 
 int main()
 {
-	QtApp app;
+	//QtApp app;
+	GlfwApp app;
 	app.setSceneGraph(creatCar());
 	app.initialize(1280, 768);
 
 	//Set the distance unit for the camera, the fault unit is meter
-	app.renderWindow()->getCamera()->setUnitScale(3.0f);
+	//app.renderWindow()->getCamera()->setUnitScale(3.0f);
 
 	app.mainLoop();
 

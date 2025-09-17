@@ -843,6 +843,7 @@ void pybind_framework(py::module& m)
 			declare_var<dyno::Quat<Real>>(m, "QuatReal");
 			declare_var<dyno::Curve>(m, "Curve");
 			declare_var<dyno::Ramp>(m, "Ramp");
+			declare_var<dyno::Key2HingeConfig>(m, "Key2HingeConfig");
 
 			py::class_<dyno::FVar<dyno::PEnum>, FBase, std::shared_ptr<dyno::FVar<dyno::PEnum>>>(m, "FVarPEnum")
 				.def(py::init<>())
@@ -922,4 +923,9 @@ void pybind_framework(py::module& m)
 			declare_divide_real_and_real<dyno::DataType3f>(m, "3f");
 			declare_multiply_real_and_real<dyno::DataType3f>(m, "3f");
 			declare_subtract_real_and_real<dyno::DataType3f>(m, "3f");
+
+			declare_vehicle_bind(m);
+			declare_animation_2_joint_config(m);
+			declare_hinge_action(m);
+			declare_key_2_hinge_config(m);
 }
