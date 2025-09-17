@@ -69,10 +69,36 @@ void declare_capsule_info(py::module& m, std::string typestr) {
 void declare_simple_vechicle_driver(py::module& m) {
 	using Class = dyno::SimpleVechicleDriver;
 	using Parent = dyno::ComputeModule;
+
+	class SimpleVechicleDriverTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void compute() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::SimpleVechicleDriver,
+				compute
+			);
+		}
+	};
+
+	class SimpleVechicleDriverPublicist : public Class
+	{
+	public:
+		using Class::compute;
+		using Class::theta;
+	};
+
 	std::string pyclass_name = std::string("SimpleVechicleDriver");
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def("inFrameNumber", &Class::inFrameNumber, py::return_value_policy::reference)
-		.def("inInstanceTransform", &Class::inInstanceTransform, py::return_value_policy::reference);
+		.def("inInstanceTransform", &Class::inInstanceTransform, py::return_value_policy::reference)
+		// Protected
+		.def("compute", &SimpleVechicleDriverPublicist::compute, py::return_value_policy::reference)
+		.def_readwrite("theta", &SimpleVechicleDriverPublicist::theta);
 }
 
 void pybind_rigid_body(py::module& m) {
@@ -81,6 +107,7 @@ void pybind_rigid_body(py::module& m) {
 	declare_car_driver<dyno::DataType3f>(m, "3f");
 	declare_contacts_union<dyno::DataType3f>(m, "3f");
 	declare_instance_transform<dyno::DataType3f>(m, "3f");
+	declare_key_driver<dyno::DataType3f>(m, "3f");
 	declare_pcg_constraint_solver<dyno::DataType3f>(m, "3f");
 	declare_pjs_constraint_solver<dyno::DataType3f>(m, "3f");
 	declare_pjsnj_constraint_solver<dyno::DataType3f>(m, "3f");

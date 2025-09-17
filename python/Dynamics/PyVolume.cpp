@@ -8,6 +8,9 @@ void pybind_volume(py::module& m)
 	declare_fast_sweeping_method_GPU<dyno::DataType3f>(m, "3f");
 	declare_marching_cubes_helper<dyno::DataType3f>(m, "3f");
 	declare_volume_to_triangle_set<dyno::DataType3f>(m, "3f");
+	declare_multiscale_fast_iterative_method<dyno::DataType3f>(m, "3f");
+	declare_multiscale_fast_iterative_for_boolean_method<dyno::DataType3f>(m, "3f");
+	declare_level_set_construction_and_boolean_helper<dyno::DataType3f>(m, "3f");
 
 	// Volume
 	declare_volume<dyno::DataType3f>(m, "3f");
