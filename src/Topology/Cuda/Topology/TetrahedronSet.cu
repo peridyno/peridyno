@@ -688,7 +688,7 @@ namespace dyno
 		cuExecute(edgeNum,
 			TetSet_NeigStoreEdgeIds,
 			list_1hop,
-			mEdges);
+			this->mEdges);
 
 		// 2 - hop
 		uint pDims = cudaGridSize(verNum, threadNum);

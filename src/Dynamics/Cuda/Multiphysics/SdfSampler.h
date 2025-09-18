@@ -18,7 +18,7 @@
 #include "Topology/LevelSet.h"
 #include "Topology/HexahedronSet.h"
 
-#include <Volume/Volume.h >
+#include <Volume/Volume.h>
 #include <Samplers/Sampler.h>
 
 namespace dyno {

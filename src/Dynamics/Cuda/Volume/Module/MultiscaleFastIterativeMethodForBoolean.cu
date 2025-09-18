@@ -5,7 +5,7 @@
 
 #include "Collision/Distance3D.h"
 
-#include "volume/BasicShapeToVolume.h"
+#include "Volume/BasicShapeToVolume.h"
 
 #include "LevelSetConstructionAndBooleanHelper.h"
 

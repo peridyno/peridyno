@@ -185,7 +185,7 @@ namespace dyno
 	}
 
 	template <typename TDataType>
-	TDataType::Real DevicePoissonDiskSampler<TDataType>::minimumDistanceEstimation()
+	typename DevicePoissonDiskSampler<TDataType>::Real DevicePoissonDiskSampler<TDataType>::minimumDistanceEstimation()
 	{
 		Real error(0.0f);
 

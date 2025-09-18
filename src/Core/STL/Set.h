@@ -19,16 +19,21 @@ namespace dyno
 	class Set : public STLBuffer<T>
 	{
 	public:
+
+		using iterator = typename STLBuffer<T>::iterator;
+		using STLBuffer<T>::m_startLoc;
+		using STLBuffer<T>::m_maxSize;
+
 		DYN_FUNC Set();
 		
 		DYN_FUNC T* find(T val);
 
 		DYN_FUNC inline iterator begin() {
-			return m_startLoc;
+			return this->m_startLoc;
 		};
 
 		DYN_FUNC inline iterator end(){
-			return m_startLoc + m_size;
+			return this->m_startLoc + m_size;
 		}
 
 		DYN_FUNC void clear();
