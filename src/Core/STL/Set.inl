@@ -13,9 +13,9 @@ namespace dyno
 	template <typename T>
 	DYN_FUNC T* Set<T>::find(T val)
 	{
-		int ind = leftBound(val, m_startLoc, m_size);
+		int ind = leftBound(val, this->m_startLoc, m_size);
 
-		return ind >= m_size || m_startLoc[ind] != val ? nullptr : m_startLoc + ind;
+		return ind >= m_size || this->m_startLoc[ind] != val ? nullptr : this->m_startLoc + ind;
 	}
 
 
@@ -23,35 +23,35 @@ namespace dyno
 	DYN_FUNC T* Set<T>::insert(T val)
 	{
 		//return nullptr if the data buffer is full
-		if (m_size >= m_maxSize) return nullptr;
+		if (m_size >= this->m_maxSize) return nullptr;
 
 		//return the index of the first element that is equal to or greater than val
-		int ind = leftBound(val, m_startLoc, m_size);
+		int ind = leftBound(val, this->m_startLoc, m_size);
 
 		if (ind == m_size)
 		{
-			m_startLoc[ind] = val;
+			this->m_startLoc[ind] = val;
 			m_size++;
 
-			return m_startLoc + ind;
+			return this->m_startLoc + ind;
 		};
 
 		//return the original address if val is found
-		if (m_startLoc[ind] == val) 
-			return m_startLoc + ind;
+		if (this->m_startLoc[ind] == val) 
+			return this->m_startLoc + ind;
 		else
 		{
 			//if found, move all element backward
 			for (size_t j = m_size; j > ind; j--)
 			{
-				m_startLoc[j] = m_startLoc[j - 1];
+				this->m_startLoc[j] = this->m_startLoc[j - 1];
 			}
 			
 			//insert val into location ind.
-			m_startLoc[ind] = val;
+			this->m_startLoc[ind] = val;
 			m_size++;
 
-			return m_startLoc + ind;
+			return this->m_startLoc + ind;
 		}
 	}
 
@@ -76,7 +76,7 @@ namespace dyno
 	template <typename T>
 	DYN_FUNC bool Set<T>::empty()
 	{
-		return m_startLoc == nullptr;
+		return this->m_startLoc == nullptr;
 	}
 }
 
