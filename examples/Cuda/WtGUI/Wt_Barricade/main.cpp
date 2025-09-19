@@ -115,7 +115,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	//MergeRoad
 	auto mergeRoad = scn->addNode(std::make_shared<Merge<DataType3f>>());
 	mergeRoad->varUpdateMode()->setCurrentKey(1);
-	mergeWheel->stateTriangleSet()->promoteOuput()->connect(mergeRoad->inTriangleSets());
+	mergeWheel->stateTriangleSets()->promoteOuput()->connect(mergeRoad->inTriangleSets());
 	ObjRoad->outTriangleSet()->connect(mergeRoad->inTriangleSets());
 
 	//Obj boundary
@@ -168,7 +168,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	//sfi->varFast()->setValue(true);
 	fluid->connect(meshBoundary->importParticleSystems());
 
-	mergeRoad->stateTriangleSet()->promoteOuput()->connect(meshBoundary->inTriangleSet());
+	mergeRoad->stateTriangleSets()->promoteOuput()->connect(meshBoundary->inTriangleSet());
 
 	//Create a boundary
 	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
