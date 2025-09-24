@@ -5,7 +5,6 @@
 #include "FInstance.h"
 #include "Field.h"
 #include "Module/VisualModule.h"
-#include "Module/VisualModule.h"
 #include "Module/AnimationPipeline.h"
 #include "Module/GraphicsPipeline.h"
 #include "Module/MouseInputModule.h"
@@ -65,7 +64,7 @@
 
 #include "Action/ActNodeInfo.h"
 #include "Auxiliary/Add.h"
-//#include "Auxiliary/DebugInfo.h"
+#include "Auxiliary/DebugInfo.h"
 #include "Auxiliary/Divide.h"
 #include "Auxiliary/Multiply.h"
 #include "Auxiliary/Subtract.h"
@@ -102,7 +101,7 @@ using ConstraintModule = dyno::ConstraintModule;
 using InputModule = dyno::InputModule;
 using MouseInputModule = dyno::MouseInputModule;
 using GroupModule = dyno::GroupModule;
-using TopologyMappingdyno = dyno::TopologyMapping;
+using TopologyMapping = dyno::TopologyMapping;
 using OutputModule = dyno::OutputModule;
 using Object = dyno::Object;
 using DataSource = dyno::DataSource;
@@ -110,11 +109,11 @@ using CollisionMask = dyno::CollisionMask;
 using Vec3f = dyno::Vec3f;
 using KeyboardInputModule = dyno::KeyboardInputModule;
 using Add = dyno::Add;
-//using DebugInfo = dyno::DebugInfo;
-//using PrintInt = dyno::PrintInt;
-//using PrintVector = dyno::PrintVector;
-//using PrintFloat = dyno::PrintFloat;
-//using PrintUnsigned = dyno::PrintUnsigned;
+using DebugInfo = dyno::DebugInfo;
+using PrintInt = dyno::PrintInt;
+using PrintVector = dyno::PrintVector;
+using PrintFloat = dyno::PrintFloat;
+using PrintUnsigned = dyno::PrintUnsigned;
 using Divide = dyno::Divide;
 using Multiply = dyno::Multiply;
 using Subtract = dyno::Subtract;
@@ -157,7 +156,7 @@ void declare_var(py::module& m, std::string typestr) {
 		.def("setValue", &Class::setValue, py::arg("val"), py::arg("notify") = true)
 		.def("getValue", &Class::getValue)
 		.def("serialize", &Class::serialize)
-		//.def("deserialize", &Class::deserialize)
+		.def("deserialize", &Class::deserialize)
 		.def("isEmpty", &Class::isEmpty)
 		//.def("connect", &Class::connect)
 		.def("getData", &Class::getData);
@@ -258,6 +257,14 @@ template <typename TDataType>
 void declare_multi_node_port(py::module& m, std::string typestr) {
 	using Class = dyno::MultipleNodePort<TDataType>;
 	using Parent = dyno::NodePort;
+
+	class MultipleNodePortPublicist : public dyno::MultipleNodePort<TDataType>
+	{
+	public:
+		using MultipleNodePort::addNode;
+		using MultipleNodePort::removeNode;
+	};
+
 	std::string pyclass_name = std::string("MultipleNodePort") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def("clear", &Class::clear)
@@ -266,20 +273,84 @@ void declare_multi_node_port(py::module& m, std::string typestr) {
 		.def("isKindOf", &Class::isKindOf)
 		.def("hasNode", &Class::hasNode)
 		.def("getNodes", &Class::getNodes, py::return_value_policy::reference)
-		.def("getDerivedNodes", &Class::getDerivedNodes, py::return_value_policy::reference);
+		.def("getDerivedNodes", &Class::getDerivedNodes, py::return_value_policy::reference)
+		// proteceted
+		.def("addNode", &MultipleNodePortPublicist::addNode)
+		.def("removeNode", &MultipleNodePortPublicist::removeNode);
 }
 
 template <typename TDataType>
 void declare_single_node_port(py::module& m, std::string typestr) {
 	using Class = dyno::SingleNodePort<TDataType>;
 	using Parent = dyno::NodePort;
-	std::string pyclass_name = std::string("SingleNodePorParametricModelt_") + typestr;
+
+	class SingleNodePortPublicist : public dyno::SingleNodePort<TDataType>
+	{
+	public:
+		using SingleNodePort::addNode;
+		using SingleNodePort::removeNode;
+	};
+
+	std::string pyclass_name = std::string("SingleNodePort") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def("isKindOf", &Class::isKindOf)
 		.def("hasNode", &Class::hasNode)
 		.def("getNodes", &Class::getNodes, py::return_value_policy::reference)
 		.def("getDerivedNode", &Class::getDerivedNode, py::return_value_policy::reference)
-		.def("setDerivedNode", &Class::setDerivedNode);
+		.def("setDerivedNode", &Class::setDerivedNode)
+		// proteceted
+		.def("addNode", &SingleNodePortPublicist::addNode)
+		.def("removeNode", &SingleNodePortPublicist::removeNode);
+}
+
+template <typename TDataType>
+void declare_multi_module_port(py::module& m, std::string typestr) {
+	using Class = dyno::MultipleModulePort<TDataType>;
+	using Parent = dyno::ModulePort;
+
+	class MultipleModulePortPublicist : public dyno::MultipleModulePort<TDataType>
+	{
+	public:
+		using MultipleModulePort::addModule;
+		using MultipleModulePort::removeModule;
+	};
+
+	std::string pyclass_name = std::string("MultipleModulePort") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def("clear", &Class::clear)
+		.def("addDerivedModule", &Class::addDerivedModule)
+		.def("removeDerivedModule", &Class::removeDerivedModule)
+		.def("isKindOf", &Class::isKindOf)
+		.def("hasModule", &Class::hasModule)
+		.def("getModules", &Class::getModules, py::return_value_policy::reference)
+		.def("getDerivedModules", &Class::getDerivedModules, py::return_value_policy::reference)
+		// proteceted
+		.def("addModule", &MultipleModulePortPublicist::addModule)
+		.def("removeModule", &MultipleModulePortPublicist::removeModule);
+}
+
+template <typename TDataType>
+void declare_single_module_port(py::module& m, std::string typestr) {
+	using Class = dyno::SingleModulePort<TDataType>;
+	using Parent = dyno::ModulePort;
+
+	class SingleModulePortPublicist : public dyno::SingleModulePort<TDataType>
+	{
+	public:
+		using SingleModulePort::addModule;
+		using SingleModulePort::removeModule;
+	};
+
+	std::string pyclass_name = std::string("SingleModulePort") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def("isKindOf", &Class::isKindOf)
+		.def("hasModule", &Class::hasModule)
+		.def("getModules", &Class::getModules, py::return_value_policy::reference)
+		.def("getDerivedModule", &Class::getDerivedModule, py::return_value_policy::reference)
+		.def("setDerivedModule", &Class::setDerivedModule)
+		// proteceted
+		.def("addModule", &SingleModulePortPublicist::addModule)
+		.def("removeModule", &SingleModulePortPublicist::removeModule);
 }
 
 template <typename TDataType>
@@ -321,48 +392,189 @@ template <typename TDataType>
 void declare_add_real_and_real(py::module& m, std::string typestr) {
 	using Class = dyno::AddRealAndReal<TDataType>;
 	using Parent = dyno::Add;
+
+	class AddRealAndRealTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void compute() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::AddRealAndReal<TDataType>,
+				compute
+			);
+		}
+	};
+
+	class AddRealAndRealPublicist : public Class
+	{
+	public:
+		using Class::compute;
+	};
+
 	std::string pyclass_name = std::string("AddRealAndReal") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inA", &Class::inA, py::return_value_policy::reference)
 		.def("inB", &Class::inB, py::return_value_policy::reference)
-		.def("outO", &Class::outO, py::return_value_policy::reference);
+		.def("outO", &Class::outO, py::return_value_policy::reference)
+		// protected
+		.def("compute", &AddRealAndRealPublicist::compute, py::return_value_policy::reference);
 }
 
 template <typename TDataType>
 void declare_divide_real_and_real(py::module& m, std::string typestr) {
 	using Class = dyno::DivideRealAndReal<TDataType>;
 	using Parent = dyno::Divide;
+
+	class DivideRealAndRealTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void compute() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::DivideRealAndReal<TDataType>,
+				compute
+			);
+		}
+	};
+
+	class DivideRealAndRealPublicist : public Class
+	{
+	public:
+		using Class::compute;
+	};
+
 	std::string pyclass_name = std::string("DivideRealAndReal") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inA", &Class::inA, py::return_value_policy::reference)
 		.def("inB", &Class::inB, py::return_value_policy::reference)
-		.def("outO", &Class::outO, py::return_value_policy::reference);
+		.def("outO", &Class::outO, py::return_value_policy::reference)
+		// protected
+		.def("compute", &DivideRealAndRealPublicist::compute, py::return_value_policy::reference);
 }
 
 template <typename TDataType>
 void declare_multiply_real_and_real(py::module& m, std::string typestr) {
 	using Class = dyno::MultiplyRealAndReal<TDataType>;
 	using Parent = dyno::Multiply;
+
+	class MultiplyRealAndRealTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void compute() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::MultiplyRealAndReal<TDataType>,
+				compute
+			);
+		}
+	};
+
+	class MultiplyRealAndRealPublicist : public Class
+	{
+	public:
+		using Class::compute;
+	};
+
 	std::string pyclass_name = std::string("MultiplyRealAndReal") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inA", &Class::inA, py::return_value_policy::reference)
 		.def("inB", &Class::inB, py::return_value_policy::reference)
-		.def("outO", &Class::outO, py::return_value_policy::reference);
+		.def("outO", &Class::outO, py::return_value_policy::reference)
+		// protected
+		.def("compute", &MultiplyRealAndRealPublicist::compute, py::return_value_policy::reference);
 }
 
 template <typename TDataType>
 void declare_subtract_real_and_real(py::module& m, std::string typestr) {
 	using Class = dyno::SubtractRealAndReal<TDataType>;
 	using Parent = dyno::Subtract;
+
+	class SubtractRealAndRealTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void compute() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::SubtractRealAndReal<TDataType>,
+				compute
+			);
+		}
+	};
+
+	class SubtractRealAndRealPublicist : public Class
+	{
+	public:
+		using Class::compute;
+	};
+
 	std::string pyclass_name = std::string("SubtractRealAndReal") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inA", &Class::inA, py::return_value_policy::reference)
 		.def("inB", &Class::inB, py::return_value_policy::reference)
-		.def("outO", &Class::outO, py::return_value_policy::reference);
+		.def("outO", &Class::outO, py::return_value_policy::reference)
+		// protected
+		.def("compute", &SubtractRealAndRealPublicist::compute, py::return_value_policy::reference);
+}
+
+#include <Field/FList.h>
+template <typename TDataType>
+void declare_f_list(py::module& m, std::string typestr) {
+	using Class = dyno::FList<TDataType>;
+	using Parent = dyno::FBase;
+
+	class FListTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		bool connect(dyno::FBase* dst) override
+		{
+			PYBIND11_OVERRIDE(
+				bool,
+				dyno::FList<TDataType>,
+				connect,
+				dst
+			);
+		}
+	};
+
+	class FListPublicist : public Class
+	{
+	public:
+		using Class::connect;
+	};
+
+	std::string pyclass_name = std::string("FList") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def(py::init<std::string, std::string, dyno::FieldTypeEnum, dyno::OBase*>())
+		.def("getTemplateName", &Class::getTemplateName, py::return_value_policy::reference)
+		.def("getClassName", &Class::getClassName, py::return_value_policy::reference)
+		.def("size", &Class::size, py::return_value_policy::reference)
+		.def("serialize", &Class::serialize, py::return_value_policy::reference)
+		.def("deserialize", &Class::deserialize, py::return_value_policy::reference)
+		//.def("insert", &Class::insert, py::return_value_policy::reference)
+		.def("isEmpty", &Class::isEmpty, py::return_value_policy::reference)
+		.def("constData", &Class::constData, py::return_value_policy::reference)
+		.def("bind", &Class::bind, py::return_value_policy::reference)
+		// protected
+		.def("connect", &FListPublicist::connect, py::return_value_policy::reference);
 }
 
 //Init_static_plugin  - for example_3 WaterPouring
@@ -372,6 +584,25 @@ void declare_subtract_real_and_real(py::module& m, std::string typestr) {
 
 
 #include "Field/VehicleInfo.h"
+
+void declare_vehicle_rigid_body_info(py::module& m) {
+	using Class = dyno::VehicleRigidBodyInfo;
+	std::string pyclass_name = std::string("VehicleRigidBodyInfo");
+	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def(py::init<dyno::Name_Shape, int, dyno::ConfigShapeType, Real>())
+		.def(py::init<dyno::Name_Shape, int, dyno::ConfigShapeType, dyno::Transform3f, Real>());
+}
+
+void declare_vehicle_joint_info(py::module& m) {
+	using Class = dyno::VehicleJointInfo;
+	std::string pyclass_name = std::string("VehicleJointInfo");
+	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>());
+		//.def(py::init<dyno::Name_Shape, dyno::Name_Shape, dyno::ConfigShapeType, dyno::Vector<Real, 3>, dyno::Vector<Real, 3>, bool, Real, bool, Real, Real>());
+}
+
+
 void declare_vehicle_bind(py::module& m) {
 	using Class = dyno::VehicleBind;
 	std::string pyclass_name = std::string("VehicleBind");
