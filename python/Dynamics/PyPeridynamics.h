@@ -159,7 +159,7 @@ void declare_drag_surface_interaction(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("DragSurfaceInteraction") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, DragSurfaceInteractionTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>()) // °ó¶¨Ä¬ÈÏ¹¹Ôìº¯Êý
 		.def("InteractionClick", &Class::InteractionClick)
 		.def("InteractionDrag", &Class::InteractionDrag)
@@ -209,7 +209,7 @@ void declare_drag_vertex_interaction(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("DragVertexInteraction") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, DragVertexInteractionTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>()) 
 		.def("InteractionClick", &Class::InteractionClick)
 		.def("InteractionDrag", &Class::InteractionDrag)
@@ -283,7 +283,7 @@ void declare_elastoplasticity_module(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("ElastoplasticityModule") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, ElastoplasticityModuleTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varCohesion", &Class::varCohesion, py::return_value_policy::reference)
 		.def("varFrictionAngle", &Class::varFrictionAngle, py::return_value_policy::reference)
@@ -331,7 +331,7 @@ void declare_fixed_points(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("FixedPoints") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, FixedPointsTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("addFixedPoint", &Class::addFixedPoint)
 		.def("removeFixedPoint", &Class::removeFixedPoint)
@@ -388,7 +388,7 @@ void declare_granular_module(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("GranularModule") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, GranularModuleTrampoline,std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 
 		// protected
@@ -497,7 +497,7 @@ void declare_triangular_system(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("TriangularSystem") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, TriangularSystemTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("translate", &Class::translate)
 		.def("scale", &Class::scale)
@@ -551,7 +551,7 @@ void declare_cloth(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("Cloth") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, ClothTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varHorizon", &Class::varHorizon, py::return_value_policy::reference)
 		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
@@ -635,7 +635,7 @@ void declare_codimensionalPD(py::module& m, std::string typestr) {
 
 
 	std::string pyclass_name = std::string("CodimensionalPD") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, CodimensionalPDTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("translate", &Class::translate)
 		.def("scale", py::overload_cast<Real>(&Class::scale))
@@ -708,7 +708,7 @@ void declare_peridynamics(py::module& m, std::string typestr) {
 	typedef typename TDataType::Real Real;
 	typedef typename TDataType::Coord Coord;
 	typedef typename dyno::TBond<TDataType> Bond;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol())
+	py::class_<Class, Parent, PeridynamicsTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol())
 		.def(py::init<>())
 		.def("getNodeType", &Class::getNodeType)
 
@@ -781,7 +781,7 @@ void declare_hyperelastic_body(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("HyperelasticBody") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, HyperelasticBodyTrampoline,std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("translate", &Class::translate)
 		.def("scale", py::overload_cast<Real>(&Class::scale))
@@ -861,7 +861,7 @@ void declare_tetrahedral_system(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("TetrahedralSystem") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, TetrahedralSystemTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("stateNormalSDF", &Class::stateNormalSDF, py::return_value_policy::reference)
 		.def("varSDF", &Class::varSDF, py::return_value_policy::reference)
@@ -918,7 +918,7 @@ void declare_thread_system(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("ThreadSystem") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str())
+	py::class_<Class, Parent, ThreadSystemTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str())
 		.def(py::init<>())
 		.def("stateEdgeSet", &Class::stateEdgeSet, py::return_value_policy::reference)
 		.def("statePosition", &Class::statePosition, py::return_value_policy::reference)
@@ -959,7 +959,7 @@ void declare_thread(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("Thread") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, ThreadTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("translate", &Class::translate)
 		.def("scale", &Class::scale)

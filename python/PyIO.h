@@ -49,10 +49,34 @@ template <typename TDataType>
 void declare_points_loader(py::module& m, std::string typestr) {
 	using Class = dyno::PointsLoader<TDataType>;
 	using Parent = dyno::GeometryLoader<TDataType>;
+
+	class PointsLoaderTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void resetStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::PointsLoader<TDataType>,
+				resetStates
+			);
+		}
+	};
+
+	class PointsLoaderPublicist : public Class
+	{
+	public:
+		using Class::resetStates;
+	};
+
 	std::string pyclass_name = std::string("PointsLoader") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("outPointSet", &Class::outPointSet, py::return_value_policy::reference);
+		.def("outPointSet", &Class::outPointSet, py::return_value_policy::reference)
+		// protected
+		.def("resetStates", &PointsLoaderPublicist::resetStates);
 }
 
 #include "StaticMeshLoader.h"
@@ -74,10 +98,34 @@ template <typename TDataType>
 void declare_tetra_mesh_writer(py::module& m, std::string typestr) {
 	using Class = dyno::TetraMeshWriter<TDataType>;
 	using Parent = dyno::OutputModule;
+
+	class TetraMeshWriterTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void output() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::TetraMeshWriter<TDataType>,
+				output
+			);
+		}
+	};
+
+	class TetraMeshWriterPublicist : public Class
+	{
+	public:
+		using Class::output;
+	};
+
 	std::string pyclass_name = std::string("TetraMeshWriter") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("inTetrahedronSet", &Class::inTetrahedronSet, py::return_value_policy::reference);
+		.def("inTetrahedronSet", &Class::inTetrahedronSet, py::return_value_policy::reference)
+		// protected
+		.def("output", &TetraMeshWriterPublicist::output);
 }
 
 #include "TextureMeshLoader.h"
@@ -85,12 +133,36 @@ template <typename TDataType>
 void declare_texture_mesh_loader(py::module& m, std::string typestr) {
 	using Class = dyno::TextureMeshLoader;
 	using Parent = dyno::ParametricModel<TDataType>;
+
+	class TextureMeshLoaderTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void resetStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::TextureMeshLoader,
+				resetStates
+			);
+		}
+	};
+
+	class TextureMeshLoaderPublicist : public Class
+	{
+	public:
+		using Class::resetStates;
+	};
+
 	std::string pyclass_name = std::string("TextureMeshLoader") + typestr;
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("getNodeType", &Class::getNodeType)
 		.def("varFileName", &Class::varFileName, py::return_value_policy::reference)
-		.def("stateTextureMesh", &Class::stateTextureMesh, py::return_value_policy::reference);
+		.def("stateTextureMesh", &Class::stateTextureMesh, py::return_value_policy::reference)
+		// protected
+		.def("resetStates", &TextureMeshLoaderPublicist::resetStates);
 }
 
 #include "TriangleMeshWriter.h"

@@ -16,6 +16,7 @@ void pybind_modeling(py::module& m)
 	declare_cylinder_model<dyno::DataType3f>(m, "3f");
 	declare_plane_model<dyno::DataType3f>(m, "3f");
 	declare_sphere_model<dyno::DataType3f>(m, "3f");
+	declare_tet_model<dyno::DataType3f>(m, "3f");
 
 	// Commands
 	declare_convert_to_texture_mesh<dyno::DataType3f>(m, "3f");
@@ -33,6 +34,8 @@ void pybind_modeling(py::module& m)
 	declare_texture_mesh_merge<dyno::DataType3f>(m, "3f");
 	declare_transform_model<dyno::DataType3f>(m, "3f");
 	declare_turning_model<dyno::DataType3f>(m, "3f");
+	declare_triangle_set_to_triangle_sets<dyno::DataType3f>(m, "3f");
+	declare_extract_triangle_sets<dyno::DataType3f>(m, "3f");
 
 	// Samples
 	declare_point_from_curve<dyno::DataType3f>(m, "3f");

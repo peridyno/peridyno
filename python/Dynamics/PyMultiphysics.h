@@ -29,7 +29,7 @@ void declare_poission_disk_position_shifting(py::module& m, std::string typestr)
 	};
 
 	std::string pyclass_name = std::string("PoissionDiskPositionShifting") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, PoissionDiskPositionShiftingTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inDelta", &Class::inDelta, py::return_value_policy::reference)
 		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
@@ -98,7 +98,7 @@ void declare_particle_skinning(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("ParticleSkinning") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, ParticleSkinningTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 
 		.def("importParticleSystem", &Class::importParticleSystem, py::return_value_policy::reference)
@@ -143,7 +143,7 @@ void declare_volume_boundary(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("VolumeBoundary") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, VolumeBoundaryTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("getNodeType", &Class::getNodeType)
 		//DEF_VAR
@@ -214,7 +214,7 @@ void declare_sdf_sampler(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("SdfSampler") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, SdfSamplerTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varSpacing", &Class::varSpacing, py::return_value_policy::reference)
 

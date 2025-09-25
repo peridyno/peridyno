@@ -35,7 +35,7 @@ void declare_animation_driver(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("AnimationDriver") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, AnimationDriverTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varSpeed", &Class::varSpeed, py::return_value_policy::reference)
 		.def("varBindingConfiguration", &Class::varBindingConfiguration, py::return_value_policy::reference)
@@ -76,7 +76,7 @@ void declare_car_driver(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("CarDriver") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, CarDriverTrampoline,std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inTopology", &Class::inTopology, py::return_value_policy::reference)
 		// protected
@@ -121,7 +121,7 @@ void declare_contacts_union(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("ContactsUnion") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, ContactsUnionTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inContactsA", &Class::inContactsA, py::return_value_policy::reference)
 		.def("inContactsB", &Class::inContactsB, py::return_value_policy::reference)
@@ -159,7 +159,7 @@ void declare_instance_transform(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("InstanceTransform") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, InstanceTransformTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inCenter", &Class::inCenter, py::return_value_policy::reference)
 		.def("inRotationMatrix", &Class::inRotationMatrix, py::return_value_policy::reference)
@@ -199,7 +199,7 @@ void declare_pcg_constraint_solver(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("PCGConstraintSolver") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, PCGConstraintSolverTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varFrictionEnabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
 		.def("varGravityEnabled", &Class::varGravityEnabled, py::return_value_policy::reference)
@@ -258,7 +258,7 @@ void declare_pjs_constraint_solver(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("PJSConstraintSolver") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, PJSConstraintSolverTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varFrictionEnabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
 		.def("varGravityEnabled", &Class::varGravityEnabled, py::return_value_policy::reference)
@@ -315,7 +315,7 @@ void declare_pjsnj_constraint_solver(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("PJSNJSConstraintSolver") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, PJSNJSConstraintSolverTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varFrictionEnabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
 		.def("varGravityEnabled", &Class::varGravityEnabled, py::return_value_policy::reference)
@@ -372,7 +372,7 @@ void declare_pj_soft_constraint_solver(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("PJSoftConstraintSolver") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, PJSoftConstraintSolverTrampoline,std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varFrictionEnabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
 		.def("varGravityEnabled", &Class::varGravityEnabled, py::return_value_policy::reference)
@@ -429,7 +429,7 @@ void declare_tj_constraint_solver(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("TJConstraintSolver") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, TJConstraintSolverTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varFrictionEnabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
 		.def("varGravityEnabled", &Class::varGravityEnabled, py::return_value_policy::reference)
@@ -487,7 +487,7 @@ void declare_tj_soft_constraint_solver(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("TJSoftConstraintSolver") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, TJSoftConstraintSolverTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varFrictionEnabled", &Class::varFrictionEnabled, py::return_value_policy::reference)
 		.def("varGravityEnabled", &Class::varGravityEnabled, py::return_value_policy::reference)
@@ -547,7 +547,7 @@ void declare_key_driver(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("KeyDriver") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, KeyDriverTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varHingeKeyConfig", &Class::varHingeKeyConfig, py::return_value_policy::reference)
 		.def("inReset", &Class::inReset, py::return_value_policy::reference)
@@ -598,7 +598,7 @@ void declare_rigid_body_system(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("RigidBodySystem") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, RigidBodySystemTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("addBox", &Class::addBox, py::arg("box"), py::arg("bodyDef"), py::arg("density") = TDataType::Real(100))
 		.def("addSphere", &Class::addSphere, py::arg("sphere"), py::arg("bodyDef"), py::arg("density") = TDataType::Real(100))
@@ -696,7 +696,7 @@ void declare_articulated_body(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("ArticulatedBody") + typestr;
-	py::class_<Class, Parent1, Parent2, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent1, Parent2, ArticulatedBodyTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("bindSphere", &Class::bindSphere)
 
@@ -746,7 +746,7 @@ void declare_configurable_body(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("ConfigurableBody") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, ConfigurableBodyTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varVehicleConfiguration", &Class::varVehicleConfiguration, py::return_value_policy::reference)
 
@@ -785,7 +785,7 @@ void declare_gear(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("Gear") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, GearTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		// protected
 		.def("resetStates", &GearPublicist::resetStates, py::return_value_policy::reference);
@@ -830,7 +830,7 @@ void declare_multibody_system(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("MultibodySystem") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, MultibodySystemTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varVehiclesTransform", &Class::varVehiclesTransform, py::return_value_policy::reference)
 		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
@@ -875,7 +875,7 @@ void declare_rigid_body(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("RigidBody") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, RigidBodyTrampoline,std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("getNodeType", &Class::getNodeType)
 
@@ -930,7 +930,7 @@ void declare_rigid_mesh(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("RigidMesh") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, RigidMeshTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varEnvelopeName", &Class::varEnvelopeName, py::return_value_policy::reference)
 		.def("varMeshName", &Class::varMeshName, py::return_value_policy::reference)
@@ -974,7 +974,7 @@ void declare_jeep(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("Jeep") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, JeepTrampoline,std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		// protected
 		.def("resetStates", &JeepPublicist::resetStates, py::return_value_policy::reference);
@@ -1007,7 +1007,7 @@ void declare_tank(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("Tank") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, TankTrampoline,std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		// protected
 		.def("resetStates", &TankPublicist::resetStates, py::return_value_policy::reference);
@@ -1040,7 +1040,7 @@ void declare_tracked_tank(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("TrackedTank") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, TrackedTankTrampoline,std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("statecaterpillarTrack", &Class::statecaterpillarTrack, py::return_value_policy::reference)
 		// protected
@@ -1074,7 +1074,7 @@ void declare_uav(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("UAV") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, UAVTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		// protected
 		.def("resetStates", &UAVPublicist::resetStates, py::return_value_policy::reference);
@@ -1107,7 +1107,7 @@ void declare_uuv(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("UUV") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, UUVTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		// protected
 		.def("resetStates", &UUVPublicist::resetStates, py::return_value_policy::reference);
@@ -1140,7 +1140,7 @@ void declare_bicycle(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("Bicycle") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, BicycleTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("outReset", &Class::outReset, py::return_value_policy::reference)
 		// protected

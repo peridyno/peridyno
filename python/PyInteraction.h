@@ -6,8 +6,31 @@ template <typename TDataType>
 void declare_edge_interaction(py::module& m, std::string typestr) {
 	using Class = dyno::EdgeInteraction<TDataType>;
 	using Parent = dyno::MouseInputModule;
+
+	class EdgeInteractionTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void onEvent(dyno::PMouseEvent event) override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::EdgeInteraction<TDataType>,
+				onEvent,
+				event
+			);
+		}
+	};
+
+	class EdgeInteractionPublicist : public Class
+	{
+	public:
+		using Class::onEvent;
+	};
+
 	std::string pyclass_name = std::string("EdgeInteraction") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>EI(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
+	py::class_<Class, Parent, EdgeInteractionTrampoline, std::shared_ptr<Class>>EI(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	EI.def(py::init<>())
 		.def("calcIntersectClick", &Class::calcIntersectClick)
 		.def("calcIntersectDrag", &Class::calcIntersectDrag)
@@ -33,7 +56,9 @@ void declare_edge_interaction(py::module& m, std::string typestr) {
 		.def("varTogglePicker", &Class::varTogglePicker, py::return_value_policy::reference)
 
 		.def("varToggleMultiSelect", &Class::varToggleMultiSelect, py::return_value_policy::reference)
-		.def("varToggleIndexOutput", &Class::varToggleIndexOutput, py::return_value_policy::reference);
+		.def("varToggleIndexOutput", &Class::varToggleIndexOutput, py::return_value_policy::reference)
+		// protected
+		.def("onEvent", &EdgeInteractionPublicist::onEvent);
 
 	py::enum_<typename Class::PickingTypeSelection>(EI, "PickingTypeSelection")
 		.value("Click", Class::PickingTypeSelection::Click)
@@ -51,8 +76,31 @@ template <typename TDataType>
 void declare_point_interaction(py::module& m, std::string typestr) {
 	using Class = dyno::PointInteraction<TDataType>;
 	using Parent = dyno::MouseInputModule;
+
+	class PointInteractionTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void onEvent(dyno::PMouseEvent event) override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::PointInteraction<TDataType>,
+				onEvent,
+				event
+			);
+		}
+	};
+
+	class PointInteractionPublicist : public Class
+	{
+	public:
+		using Class::onEvent;
+	};
+
 	std::string pyclass_name = std::string("PointInteraction") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>PI(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
+	py::class_<Class, Parent, PointInteractionTrampoline, std::shared_ptr<Class>>PI(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	PI.def(py::init<>())
 		.def("calcIntersectClick", &Class::calcIntersectClick)
 		.def("calcIntersectDrag", &Class::calcIntersectDrag)
@@ -78,7 +126,9 @@ void declare_point_interaction(py::module& m, std::string typestr) {
 		.def("varTogglePicker", &Class::varTogglePicker, py::return_value_policy::reference)
 
 		.def("varToggleMultiSelect", &Class::varToggleMultiSelect, py::return_value_policy::reference)
-		.def("varToggleIndexOutput", &Class::varToggleIndexOutput, py::return_value_policy::reference);
+		.def("varToggleIndexOutput", &Class::varToggleIndexOutput, py::return_value_policy::reference)
+		// protected
+		.def("onEvent", &PointInteractionPublicist::onEvent);
 
 	py::enum_<typename Class::PickingTypeSelection>(PI, "PickingTypeSelection")
 		.value("Click", Class::PickingTypeSelection::Click)
@@ -96,8 +146,31 @@ template <typename TDataType>
 void declare_surface_interaction(py::module& m, std::string typestr) {
 	using Class = dyno::SurfaceInteraction<TDataType>;
 	using Parent = dyno::MouseInputModule;
+
+	class SurfaceInteractionTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void onEvent(dyno::PMouseEvent event) override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::SurfaceInteraction<TDataType>,
+				onEvent,
+				event
+			);
+		}
+	};
+
+	class SurfaceInteractionPublicist : public Class
+	{
+	public:
+		using Class::onEvent;
+	};
+
 	std::string pyclass_name = std::string("SurfaceInteraction") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>SI(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
+	py::class_<Class, Parent, SurfaceInteractionTrampoline, std::shared_ptr<Class>>SI(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	SI.def(py::init<>())
 		.def("calcIntersectClick", &Class::calcIntersectClick)
 		.def("calcIntersectDrag", &Class::calcIntersectDrag)
@@ -128,7 +201,9 @@ void declare_surface_interaction(py::module& m, std::string typestr) {
 		.def("varToggleVisibleFilter", &Class::varToggleVisibleFilter, py::return_value_policy::reference)
 
 		.def("varToggleQuad", &Class::varToggleQuad, py::return_value_policy::reference)
-		.def("varToggleIndexOutput", &Class::varToggleIndexOutput, py::return_value_policy::reference);
+		.def("varToggleIndexOutput", &Class::varToggleIndexOutput, py::return_value_policy::reference)
+		// protected
+		.def("onEvent", &SurfaceInteractionPublicist::onEvent);
 
 	py::enum_<typename Class::PickingTypeSelection>(SI, "PickingTypeSelection")
 		.value("Click", Class::PickingTypeSelection::Click)

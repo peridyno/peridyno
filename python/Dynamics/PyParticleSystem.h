@@ -60,7 +60,7 @@ void declare_particle_emitter(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("ParticleEmitter") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, ParticleEmitterTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("sizeOfParticles", &Class::sizeOfParticles)
 
@@ -133,7 +133,7 @@ void declare_poisson_emitter(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("PoissonEmitter") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>PE(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
+	py::class_<Class, Parent, PoissonEmitterTrampoline, std::shared_ptr<Class>>PE(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	PE.def(py::init<>())
 		.def("varWidth", &Class::varWidth, py::return_value_policy::reference)
 		.def("varHeight", &Class::varHeight, py::return_value_policy::reference)
@@ -188,7 +188,7 @@ void declare_square_emitter(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("SquareEmitter") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, SquareEmitterTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varWidth", &Class::varWidth, py::return_value_policy::reference)
 		.def("varHeight", &Class::varHeight, py::return_value_policy::reference)
@@ -337,7 +337,7 @@ void declare_implicit_ISPH(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("ImplicitISPH") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, ImplicitISPHTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
 		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
@@ -400,7 +400,7 @@ void declare_iterative_densitySolver(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("IterativeDensitySolver") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, IterativeDensitySolverTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
 		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
@@ -446,7 +446,7 @@ void declare_linear_damping(py::module& m, std::string typestr) {
 
 
 	std::string pyclass_name = std::string("LinearDamping") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, LinearDampingTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varDampingCoefficient", &Class::varDampingCoefficient, py::return_value_policy::reference)
 		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
@@ -502,7 +502,7 @@ void declare_particle_integrator(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("ParticleIntegrator") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, ParticleIntegratorTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
 		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
@@ -573,7 +573,7 @@ void declare_SemiImplicitDensitySolver(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("SemiImplicitDensitySolver") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, SemiImplicitDensitySolverTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
 		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
@@ -719,7 +719,7 @@ void declare_particle_system(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("ParticleSystem") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, ParticleSystemTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("getNodeType", &Class::getNodeType)
 		.def("statePosition", &Class::statePosition, py::return_value_policy::reference)
@@ -768,7 +768,7 @@ void declare_particle_fluid(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("ParticleFluid") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, ParticleFluidTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		//DEF_VAR
 		.def("varSamplingDistance", &Class::varSamplingDistance, py::return_value_policy::reference)
@@ -840,7 +840,7 @@ void declare_ghost_fluid(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("GhostFluid") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, GhostFluidTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("statePositionMerged", &Class::statePositionMerged, py::return_value_policy::reference)
 		.def("stateVelocityMerged", &Class::stateVelocityMerged, py::return_value_policy::reference)
@@ -886,7 +886,7 @@ void declare_ghost_particles(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("GhostParticles") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, GhostParticlesTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("stateNormal", &Class::stateNormal, py::return_value_policy::reference)
 		.def("stateAttribute", &Class::stateAttribute, py::return_value_policy::reference)
@@ -923,7 +923,7 @@ void declare_make_ghost_particles(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("MakeGhostParticles") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, MakeGhostParticlesTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inPoints", &Class::inPoints, py::return_value_policy::reference)
 		.def("varReverseNormal", &Class::varReverseNormal, py::return_value_policy::reference)
@@ -960,7 +960,7 @@ void declare_make_particle_system(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("MakeParticleSystem") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, MakeParticleSystemTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varInitialVelocity", &Class::varInitialVelocity, py::return_value_policy::reference)
 		.def("inPoints", &Class::inPoints, py::return_value_policy::reference)

@@ -30,7 +30,7 @@ void declare_apply_bump_map_2_triangle_set(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("ApplyBumpMap2TriangleSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, ApplyBumpMap2TriangleSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
 		.def("inHeightField", &Class::inHeightField, py::return_value_policy::reference)
@@ -67,7 +67,7 @@ void declare_steer(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("Steer") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, SteerTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varStrength", &Class::varStrength, py::return_value_policy::reference)
 		.def("inVelocity", &Class::inVelocity, py::return_value_policy::reference)
@@ -118,7 +118,7 @@ void declare_capillary_wave(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("CapillaryWave") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, CapillaryWaveTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varWaterLevel", &Class::varWaterLevel, py::return_value_policy::reference)
 		.def("varResolution", &Class::varResolution, py::return_value_policy::reference)
@@ -184,7 +184,7 @@ void declare_granular_media(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("GranularMedia") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, GranularMediaTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varOrigin", &Class::varOrigin, py::return_value_policy::reference)
 
@@ -240,7 +240,7 @@ void declare_land_scape(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("LandScape") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, LandScapeTrampoline,  std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varPatchSize", &Class::varPatchSize, py::return_value_policy::reference)
 		.def("varFileName", &Class::varFileName, py::return_value_policy::reference)
@@ -280,7 +280,7 @@ void declare_ocean_base(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("OceanBase") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, OceanBaseTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("getNodeType", &Class::getNodeType)
 		.def("varWaterLevel", &Class::varWaterLevel, py::return_value_policy::reference)
@@ -328,7 +328,7 @@ void declare_large_ocean(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("LargeOcean") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, LargeOceanTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varFileName", &Class::varFileName)
 		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
@@ -378,7 +378,7 @@ void declare_mountain_torrents(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("MountainTorrents") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, MountainTorrentsTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("getTerrain", &Class::getTerrain, py::return_value_policy::reference)
 		.def("importTerrain", &Class::importTerrain, py::return_value_policy::reference)
@@ -427,7 +427,7 @@ void declare_ocean(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("Ocean") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, OceanTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varExtentX", &Class::varExtentX, py::return_value_policy::reference)
 		.def("varExtentZ", &Class::varExtentZ, py::return_value_policy::reference)
@@ -492,7 +492,7 @@ void declare_ocean_patch(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("OceanPatch") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, OceanPatchTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("getNodeType", &Class::getNodeType)
 
@@ -553,7 +553,7 @@ void declare_rigid_sand_coupling(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("RigidSandCoupling") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, RigidSandCouplingTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 
 		//DEF_NODE_PORT
@@ -605,7 +605,7 @@ void declare_rigid_water_coupling(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("RigidWaterCoupling") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, RigidWaterCouplingTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varDamping", &Class::varDamping, py::return_value_policy::reference)
 		.def("varRotationalDamping", &Class::varRotationalDamping, py::return_value_policy::reference)
@@ -670,7 +670,7 @@ void declare_surface_particle_tracking(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("SurfaceParticleTracking") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, SurfaceParticleTrackingTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		//DEV_VAR
 		.def("varLayer", &Class::varLayer, py::return_value_policy::reference)
@@ -724,7 +724,7 @@ void declare_vessel(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("Vessel") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, VesselTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("boundingBox", &Class::boundingBox)
 		.def("getNodeType", &Class::getNodeType)
@@ -771,7 +771,7 @@ void declare_wake(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("Wake") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, WakeTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		//DEV_VAR
 		.def("varMagnitude", &Class::varMagnitude, py::return_value_policy::reference)

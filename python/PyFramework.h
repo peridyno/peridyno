@@ -124,19 +124,6 @@ using uint64 = unsigned long long;
 using int64 = signed long long;
 
 
-//class NodeTrampoline : public dyno::Node
-//{
-//public:
-//	void resetStates() override { PYBIND11_OVERRIDE(void, dyno::Node, resetStates); }
-//};
-//
-//class NodePublicist : public dyno::Node
-//{
-//public:
-//	using dyno::Node::resetStates;
-//};
-
-
 template<class TNode, class ...Args>
 std::shared_ptr<TNode> create_root(SceneGraph& scene, Args&& ... args) {
 	return scene.createNewScene<TNode>(std::forward<Args>(args)...);
@@ -396,7 +383,6 @@ void declare_add_real_and_real(py::module& m, std::string typestr) {
 	class AddRealAndRealTrampoline : public Class
 	{
 	public:
-		using Class::Class;
 
 		void compute() override
 		{
@@ -415,7 +401,7 @@ void declare_add_real_and_real(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("AddRealAndReal") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, AddRealAndRealTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inA", &Class::inA, py::return_value_policy::reference)
 		.def("inB", &Class::inB, py::return_value_policy::reference)
@@ -432,7 +418,6 @@ void declare_divide_real_and_real(py::module& m, std::string typestr) {
 	class DivideRealAndRealTrampoline : public Class
 	{
 	public:
-		using Class::Class;
 
 		void compute() override
 		{
@@ -451,7 +436,7 @@ void declare_divide_real_and_real(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("DivideRealAndReal") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, DivideRealAndRealTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inA", &Class::inA, py::return_value_policy::reference)
 		.def("inB", &Class::inB, py::return_value_policy::reference)
@@ -468,7 +453,6 @@ void declare_multiply_real_and_real(py::module& m, std::string typestr) {
 	class MultiplyRealAndRealTrampoline : public Class
 	{
 	public:
-		using Class::Class;
 
 		void compute() override
 		{
@@ -487,7 +471,7 @@ void declare_multiply_real_and_real(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("MultiplyRealAndReal") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, MultiplyRealAndRealTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inA", &Class::inA, py::return_value_policy::reference)
 		.def("inB", &Class::inB, py::return_value_policy::reference)
@@ -504,7 +488,6 @@ void declare_subtract_real_and_real(py::module& m, std::string typestr) {
 	class SubtractRealAndRealTrampoline : public Class
 	{
 	public:
-		using Class::Class;
 
 		void compute() override
 		{
@@ -523,7 +506,7 @@ void declare_subtract_real_and_real(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("SubtractRealAndReal") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, SubtractRealAndRealTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inA", &Class::inA, py::return_value_policy::reference)
 		.def("inB", &Class::inB, py::return_value_policy::reference)
@@ -542,7 +525,6 @@ void declare_f_list(py::module& m, std::string typestr) {
 	{
 	public:
 		using Class::Class;
-
 		bool connect(dyno::FBase* dst) override
 		{
 			PYBIND11_OVERRIDE(
@@ -561,7 +543,7 @@ void declare_f_list(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("FList") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, FListTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def(py::init<std::string, std::string, dyno::FieldTypeEnum, dyno::OBase*>())
 		.def("getTemplateName", &Class::getTemplateName, py::return_value_policy::reference)

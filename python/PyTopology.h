@@ -19,15 +19,39 @@ template<typename TDataType>
 void declare_collision_detection_broad_phase(py::module& m, std::string typestr) {
 	using Class = dyno::CollisionDetectionBroadPhase<TDataType>;
 	using Parent = dyno::ComputeModule;
+
+	class CollisionDetectionBroadPhaseTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void compute() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::CollisionDetectionBroadPhase<TDataType>,
+				compute
+			);
+		}
+	};
+
+	class CollisionDetectionBroadPhasePublicist : public Class
+	{
+	public:
+		using Class::compute;
+	};
+
 	std::string pyclass_name = std::string("CollisionDetectionBroadPhase") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>CDBP(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
+	py::class_<Class, Parent, CollisionDetectionBroadPhaseTrampoline, std::shared_ptr<Class>>CDBP(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	CDBP.def(py::init<>())
 		.def("varAccelerationStructure", &Class::varAccelerationStructure, py::return_value_policy::reference)
 		.def("varGridSizeLimit", &Class::varGridSizeLimit, py::return_value_policy::reference)
 		.def("varSelfCollision", &Class::varSelfCollision, py::return_value_policy::reference)
 		.def("inSource", &Class::inSource, py::return_value_policy::reference)
 		.def("inTarget", &Class::inTarget, py::return_value_policy::reference)
-		.def("outContactList", &Class::outContactList, py::return_value_policy::reference);
+		.def("outContactList", &Class::outContactList, py::return_value_policy::reference)
+		// protected
+		.def("compute", &CollisionDetectionBroadPhasePublicist::compute);
 
 	py::enum_<typename Class::EStructure>(CDBP, "EStructure")
 		.value("BVH", Class::EStructure::BVH)
@@ -40,13 +64,37 @@ template<typename TDataType>
 void declare_collistion_detection_bounding_box(py::module& m, std::string typestr) {
 	using Class = dyno::CollistionDetectionBoundingBox<TDataType>;
 	using Parent = dyno::ComputeModule;
+
+	class CollistionDetectionBoundingBoxTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void compute() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::CollistionDetectionBoundingBox<TDataType>,
+				compute
+			);
+		}
+	};
+
+	class CollistionDetectionBoundingBoxPublicist : public Class
+	{
+	public:
+		using Class::compute;
+	};
+
 	std::string pyclass_name = std::string("CollistionDetectionBoundingBox") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, CollistionDetectionBoundingBoxTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varUpperBound", &Class::varUpperBound, py::return_value_policy::reference)
 		.def("varLowerBound", &Class::varLowerBound, py::return_value_policy::reference)
 		.def("inDiscreteElements", &Class::inDiscreteElements, py::return_value_policy::reference)
-		.def("outContacts", &Class::outContacts, py::return_value_policy::reference);
+		.def("outContacts", &Class::outContacts, py::return_value_policy::reference)
+		// protected
+		.def("compute", &CollistionDetectionBoundingBoxPublicist::compute);
 }
 
 #include "Collision/CollistionDetectionTriangleSet.h"
@@ -54,12 +102,36 @@ template<typename TDataType>
 void declare_collistion_detection_triangle_set(py::module& m, std::string typestr) {
 	using Class = dyno::CollistionDetectionTriangleSet<TDataType>;
 	using Parent = dyno::ComputeModule;
+
+	class CollistionDetectionTriangleSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void compute() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::CollistionDetectionTriangleSet<TDataType>,
+				compute
+			);
+		}
+	};
+
+	class CollistionDetectionTriangleSetPublicist : public Class
+	{
+	public:
+		using Class::compute;
+	};
+
 	std::string pyclass_name = std::string("CollistionDetectionTriangleSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, CollistionDetectionTriangleSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inDiscreteElements", &Class::inDiscreteElements, py::return_value_policy::reference)
 		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("outContacts", &Class::outContacts, py::return_value_policy::reference);
+		.def("outContacts", &Class::outContacts, py::return_value_policy::reference)
+		// protected
+		.def("compute", &CollistionDetectionTriangleSetPublicist::compute);
 }
 
 #include "Collision/NeighborElementQuery.h"
@@ -67,8 +139,30 @@ template<typename TDataType>
 void declare_neighbor_element_query(py::module& m, std::string typestr) {
 	using Class = dyno::NeighborElementQuery<TDataType>;
 	using Parent = dyno::ComputeModule;
+
+	class NeighborElementQueryTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void compute() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::NeighborElementQuery<TDataType>,
+				compute
+			);
+		}
+	};
+
+	class NeighborElementQueryPublicist : public Class
+	{
+	public:
+		using Class::compute;
+	};
+
 	std::string pyclass_name = std::string("NeighborElementQuery") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, NeighborElementQueryTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varSelfCollision", &Class::varSelfCollision, py::return_value_policy::reference)
 		.def("varDHead", &Class::varDHead, py::return_value_policy::reference)
@@ -77,7 +171,9 @@ void declare_neighbor_element_query(py::module& m, std::string typestr) {
 		.def("inDiscreteElements", &Class::inDiscreteElements, py::return_value_policy::reference)
 		.def("inCollisionMask", &Class::inCollisionMask, py::return_value_policy::reference)
 		.def("inAttribute", &Class::inAttribute, py::return_value_policy::reference)
-		.def("outContacts", &Class::outContacts, py::return_value_policy::reference);
+		.def("outContacts", &Class::outContacts, py::return_value_policy::reference)
+		// protected
+		.def("compute", &NeighborElementQueryPublicist::compute);
 }
 
 #include "Collision/NeighborPointQuery.h"
@@ -85,15 +181,39 @@ template<typename TDataType>
 void declare_neighbor_point_query(py::module& m, std::string typestr) {
 	using Class = dyno::NeighborPointQuery<TDataType>;
 	using Parent = dyno::ComputeModule;
+
+	class NeighborPointQueryTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void compute() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::NeighborPointQuery<TDataType>,
+				compute
+			);
+		}
+	};
+
+	class NeighborPointQueryPublicist : public Class
+	{
+	public:
+		using Class::compute;
+	};
+
 	std::string pyclass_name = std::string("NeighborPointQuery") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>NPQ(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
+	py::class_<Class, Parent, NeighborPointQueryTrampoline,  std::shared_ptr<Class>>NPQ(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	NPQ.def(py::init<>())
 		.def("varSpatial", &Class::varSpatial, py::return_value_policy::reference)
 		.def("varSizeLimit", &Class::varSizeLimit, py::return_value_policy::reference)
 		.def("inRadius", &Class::inRadius, py::return_value_policy::reference)
 		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
 		.def("inOther", &Class::inOther, py::return_value_policy::reference)
-		.def("outNeighborIds", &Class::outNeighborIds, py::return_value_policy::reference);
+		.def("outNeighborIds", &Class::outNeighborIds, py::return_value_policy::reference)
+		// protected
+		.def("compute", &NeighborPointQueryPublicist::compute);
 
 	py::enum_<typename Class::Spatial>(NPQ, "Spatial")
 		.value("UNIFORM", Class::Spatial::UNIFORM)
@@ -107,14 +227,38 @@ template<typename TDataType>
 void declare_neighbor_triangle_query(py::module& m, std::string typestr) {
 	using Class = dyno::NeighborTriangleQuery<TDataType>;
 	using Parent = dyno::ComputeModule;
+
+	class NeighborTriangleQueryTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void compute() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::NeighborTriangleQuery<TDataType>,
+				compute
+			);
+		}
+	};
+
+	class NeighborTriangleQueryPublicist : public Class
+	{
+	public:
+		using Class::compute;
+	};
+
 	std::string pyclass_name = std::string("NeighborTriangleQuery") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>NTQ(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
+	py::class_<Class, Parent, NeighborTriangleQueryTrampoline, std::shared_ptr<Class>>NTQ(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	NTQ.def(py::init<>())
 		.def("varSpatial", &Class::varSpatial, py::return_value_policy::reference)
 		.def("inRadius", &Class::inRadius, py::return_value_policy::reference)
 		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
 		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
-		.def("outNeighborIds", &Class::outNeighborIds, py::return_value_policy::reference);
+		.def("outNeighborIds", &Class::outNeighborIds, py::return_value_policy::reference)
+		// protected
+		.def("compute", &NeighborTriangleQueryPublicist::compute);
 
 	py::enum_<typename Class::Spatial>(NTQ, "Spatial")
 		.value("BVH", Class::Spatial::BVH)
@@ -126,13 +270,37 @@ template <typename TDataType>
 void declare_anchor_point_to_point_set(py::module& m, std::string typestr) {
 	using Class = dyno::AnchorPointToPointSet<TDataType>;
 	using Parent = dyno::TopologyMapping;
+
+	class AnchorPointToPointSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		bool apply() override
+		{
+			PYBIND11_OVERRIDE(
+				bool,
+				dyno::AnchorPointToPointSet<TDataType>,
+				apply
+			);
+		}
+	};
+
+	class AnchorPointToPointSetPublicist : public Class
+	{
+	public:
+		using Class::apply;
+	};
+
 	std::string pyclass_name = std::string("AnchorPointToPointSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, AnchorPointToPointSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inDiscreteElements", &Class::inDiscreteElements, py::return_value_policy::reference)
 		.def("inCenter", &Class::inCenter, py::return_value_policy::reference)
 		.def("inRotationMatrix", &Class::inRotationMatrix, py::return_value_policy::reference)
-		.def("outPointSet", &Class::outPointSet, py::return_value_policy::reference);
+		.def("outPointSet", &Class::outPointSet, py::return_value_policy::reference)
+		// protected
+		.def("apply", &AnchorPointToPointSetPublicist::apply);
 }
 
 #include "Mapping/BoundingBoxToEdgeSet.h"
@@ -140,11 +308,35 @@ template <typename TDataType>
 void declare_bounding_box_to_edge_set(py::module& m, std::string typestr) {
 	using Class = dyno::BoundingBoxToEdgeSet<TDataType>;
 	using Parent = dyno::TopologyMapping;
+
+	class BoundingBoxToEdgeSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		bool apply() override
+		{
+			PYBIND11_OVERRIDE(
+				bool,
+				dyno::BoundingBoxToEdgeSet<TDataType>,
+				apply
+			);
+		}
+	};
+
+	class BoundingBoxToEdgeSetPublicist : public Class
+	{
+	public:
+		using Class::apply;
+	};
+
 	std::string pyclass_name = std::string("BoundingBoxToEdgeSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, BoundingBoxToEdgeSetTrampoline,  std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inAABB", &Class::inAABB, py::return_value_policy::reference)
-		.def("outEdgeSet", &Class::outEdgeSet, py::return_value_policy::reference);
+		.def("outEdgeSet", &Class::outEdgeSet, py::return_value_policy::reference)
+		// protected
+		.def("apply", &BoundingBoxToEdgeSetPublicist::apply);
 }
 
 #include "Mapping/ContactsToEdgeSet.h"
@@ -152,12 +344,36 @@ template<typename TDataType>
 void declare_contacts_to_edge_set(py::module& m, std::string typestr) {
 	using Class = dyno::ContactsToEdgeSet<TDataType>;
 	using Parent = dyno::TopologyMapping;
+
+	class ContactsToEdgeSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		bool apply() override
+		{
+			PYBIND11_OVERRIDE(
+				bool,
+				dyno::ContactsToEdgeSet<TDataType>,
+				apply
+			);
+		}
+	};
+
+	class ContactsToEdgeSetPublicist : public Class
+	{
+	public:
+		using Class::apply;
+	};
+
 	std::string pyclass_name = std::string("ContactsToEdgeSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, ContactsToEdgeSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varScale", &Class::varScale, py::return_value_policy::reference)
 		.def("inContacts", &Class::inContacts, py::return_value_policy::reference)
-		.def("outEdgeSet", &Class::outEdgeSet, py::return_value_policy::reference);
+		.def("outEdgeSet", &Class::outEdgeSet, py::return_value_policy::reference)
+		// protected
+		.def("apply", &ContactsToEdgeSetPublicist::apply);
 }
 
 #include "Mapping/ContactsToPointSet.h"
@@ -165,11 +381,35 @@ template<typename TDataType>
 void declare_contacts_to_point_set(py::module& m, std::string typestr) {
 	using Class = dyno::ContactsToPointSet<TDataType>;
 	using Parent = dyno::TopologyMapping;
+
+	class ContactsToPointSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		bool apply() override
+		{
+			PYBIND11_OVERRIDE(
+				bool,
+				dyno::ContactsToPointSet<TDataType>,
+				apply
+			);
+		}
+	};
+
+	class ContactsToPointSetPublicist : public Class
+	{
+	public:
+		using Class::apply;
+	};
+
 	std::string pyclass_name = std::string("ContactsToPointSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, ContactsToPointSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inContacts", &Class::inContacts, py::return_value_policy::reference)
-		.def("outPointSet", &Class::outPointSet, py::return_value_policy::reference);
+		.def("outPointSet", &Class::outPointSet, py::return_value_policy::reference)
+		// protected
+		.def("apply", &ContactsToPointSetPublicist::apply);
 }
 
 #include "Mapping/DiscreteElementsToTriangleSet.h"
@@ -177,11 +417,35 @@ template <typename TDataType>
 void declare_discrete_elements_to_triangle_set(py::module& m, std::string typestr) {
 	using Class = dyno::DiscreteElementsToTriangleSet<TDataType>;
 	using Parent = dyno::TopologyMapping;
+
+	class DiscreteElementsToTriangleSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		bool apply() override
+		{
+			PYBIND11_OVERRIDE(
+				bool,
+				dyno::DiscreteElementsToTriangleSet<TDataType>,
+				apply
+			);
+		}
+	};
+
+	class DiscreteElementsToTriangleSetPublicist : public Class
+	{
+	public:
+		using Class::apply;
+	};
+
 	std::string pyclass_name = std::string("DiscreteElementsToTriangleSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, DiscreteElementsToTriangleSetTrampoline,std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inDiscreteElements", &Class::inDiscreteElements, py::return_value_policy::reference)
-		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference);
+		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference)
+		// protected
+		.def("apply", &DiscreteElementsToTriangleSetPublicist::apply);
 }
 
 #include "Mapping/Extract.h"
@@ -189,36 +453,108 @@ template <typename TDataType>
 void declare_extract_edge_set_from_polygon_set(py::module& m, std::string typestr) {
 	using Class = dyno::ExtractEdgeSetFromPolygonSet<TDataType>;
 	using Parent = dyno::TopologyMapping;
+
+	class ExtractEdgeSetFromPolygonSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		bool apply() override
+		{
+			PYBIND11_OVERRIDE(
+				bool,
+				dyno::ExtractEdgeSetFromPolygonSet<TDataType>,
+				apply
+			);
+		}
+	};
+
+	class ExtractEdgeSetFromPolygonSetPublicist : public Class
+	{
+	public:
+		using Class::apply;
+	};
+
 	std::string pyclass_name = std::string("ExtractEdgeSetFromPolygonSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, ExtractEdgeSetFromPolygonSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
 		.def("inPolygonSet", &Class::inPolygonSet, py::return_value_policy::reference)
-		.def("outEdgeSet", &Class::outEdgeSet, py::return_value_policy::reference);
+		.def("outEdgeSet", &Class::outEdgeSet, py::return_value_policy::reference)
+		// protected
+		.def("apply", &ExtractEdgeSetFromPolygonSetPublicist::apply);
 }
 
 template <typename TDataType>
 void declare_extract_triangle_set_from_polygon_set(py::module& m, std::string typestr) {
 	using Class = dyno::ExtractTriangleSetFromPolygonSet<TDataType>;
 	using Parent = dyno::TopologyMapping;
+
+	class ExtractTriangleSetFromPolygonSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		bool apply() override
+		{
+			PYBIND11_OVERRIDE(
+				bool,
+				dyno::ExtractTriangleSetFromPolygonSet<TDataType>,
+				apply
+			);
+		}
+	};
+
+	class ExtractTriangleSetFromPolygonSetPublicist : public Class
+	{
+	public:
+		using Class::apply;
+	};
+
 	std::string pyclass_name = std::string("ExtractTriangleSetFromPolygonSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, ExtractTriangleSetFromPolygonSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
 		.def("inPolygonSet", &Class::inPolygonSet, py::return_value_policy::reference)
-		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference);
+		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference)
+		// protected
+		.def("apply", &ExtractTriangleSetFromPolygonSetPublicist::apply);
 }
 
 template <typename TDataType>
 void declare_extract_qaud_set_from_polygon_set(py::module& m, std::string typestr) {
 	using Class = dyno::ExtractQaudSetFromPolygonSet<TDataType>;
 	using Parent = dyno::TopologyMapping;
+
+	class ExtractQaudSetFromPolygonSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		bool apply() override
+		{
+			PYBIND11_OVERRIDE(
+				bool,
+				dyno::ExtractQaudSetFromPolygonSet<TDataType>,
+				apply
+			);
+		}
+	};
+
+	class ExtractQaudSetFromPolygonSetPublicist : public Class
+	{
+	public:
+		using Class::apply;
+	};
+
 	std::string pyclass_name = std::string("ExtractQaudSetFromPolygonSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, ExtractQaudSetFromPolygonSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
 		.def("inPolygonSet", &Class::inPolygonSet, py::return_value_policy::reference)
-		.def("outQuadSet", &Class::outQuadSet, py::return_value_policy::reference);
+		.def("outQuadSet", &Class::outQuadSet, py::return_value_policy::reference)
+		// protected
+		.def("apply", &ExtractQaudSetFromPolygonSetPublicist::apply);
 }
 
 #include "Mapping/FrameToPointSet.h"
@@ -226,12 +562,36 @@ template <typename TDataType>
 void declare_frame_to_point_set(py::module& m, std::string typestr) {
 	using Class = dyno::FrameToPointSet<TDataType>;
 	using Parent = dyno::TopologyMapping;
+
+	class FrameToPointSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		bool initializeImpl() override
+		{
+			PYBIND11_OVERRIDE(
+				bool,
+				dyno::FrameToPointSet<TDataType>,
+				initializeImpl
+			);
+		}
+	};
+
+	class FrameToPointSetPublicist : public Class
+	{
+	public:
+		using Class::initializeImpl;
+	};
+
 	std::string pyclass_name = std::string("FrameToPointSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, FrameToPointSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("initialize", &Class::initialize)
 		.def("applyTransform", &Class::applyTransform)
-		.def("apply", &Class::apply);
+		.def("apply", &Class::apply)
+		// protected
+		.def("initializeImpl", &FrameToPointSetPublicist::initializeImpl);
 }
 
 #include "Mapping/HeightFieldToTriangleSet.h"
@@ -239,13 +599,37 @@ template <typename TDataType>
 void declare_height_field_to_triangle_set(py::module& m, std::string typestr) {
 	using Class = dyno::HeightFieldToTriangleSet<TDataType>;
 	using Parent = dyno::TopologyMapping;
+
+	class HeightFieldToTriangleSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		bool apply() override
+		{
+			PYBIND11_OVERRIDE(
+				bool,
+				dyno::HeightFieldToTriangleSet<TDataType>,
+				apply
+			);
+		}
+	};
+
+	class HeightFieldToTriangleSetPublicist : public Class
+	{
+	public:
+		using Class::apply;
+	};
+
 	std::string pyclass_name = std::string("HeightFieldToTriangleSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, HeightFieldToTriangleSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inHeightField", &Class::inHeightField, py::return_value_policy::reference)
 		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference)
 		.def("varScale", &Class::varScale, py::return_value_policy::reference)
-		.def("varTranslation", &Class::varTranslation, py::return_value_policy::reference);
+		.def("varTranslation", &Class::varTranslation, py::return_value_policy::reference)
+		// protected
+		.def("apply", &HeightFieldToTriangleSetPublicist::apply);
 }
 
 #include "Mapping/MergeSimplexSet.h"
@@ -253,13 +637,37 @@ template <typename TDataType>
 void declare_merge_simplex_set(py::module& m, std::string typestr) {
 	using Class = dyno::MergeSimplexSet<TDataType>;
 	using Parent = dyno::Node;
+
+	class MergeSimplexSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void resetStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::MergeSimplexSet<TDataType>,
+				resetStates
+			);
+		}
+	};
+
+	class MergeSimplexSetPublicist : public Class
+	{
+	public:
+		using Class::resetStates;
+	};
+
 	std::string pyclass_name = std::string("MergeSimplexSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, MergeSimplexSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inEdgeSet", &Class::inEdgeSet, py::return_value_policy::reference)
 		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
 		.def("inTetrahedronSet", &Class::inTetrahedronSet, py::return_value_policy::reference)
-		.def("outSimplexSet", &Class::outSimplexSet, py::return_value_policy::reference);
+		.def("outSimplexSet", &Class::outSimplexSet, py::return_value_policy::reference)
+		// protected
+		.def("resetStates", &MergeSimplexSetPublicist::resetStates);
 }
 
 #include "Mapping/MergeTriangleSet.h"
@@ -267,12 +675,47 @@ template <typename TDataType>
 void declare_merge_triangle_set(py::module& m, std::string typestr) {
 	using Class = dyno::MergeTriangleSet<TDataType>;
 	using Parent = dyno::Node;
+
+	class MergeTriangleSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void resetStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::MergeTriangleSet<TDataType>,
+				resetStates
+			);
+		}
+
+		void updateStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::MergeTriangleSet<TDataType>,
+				updateStates
+			);
+		}
+	};
+
+	class MergeTriangleSetPublicist : public Class
+	{
+	public:
+		using Class::resetStates;
+		using Class::updateStates;
+	};
+
 	std::string pyclass_name = std::string("MergeTriangleSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, MergeTriangleSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("stateTriangleSet", &Class::stateTriangleSet, py::return_value_policy::reference)
 		.def("inFirst", &Class::inFirst, py::return_value_policy::reference)
-		.def("inSecond", &Class::inSecond, py::return_value_policy::reference);
+		.def("inSecond", &Class::inSecond, py::return_value_policy::reference)
+		// protected
+		.def("resetStates", &MergeTriangleSetPublicist::resetStates)
+		.def("updateStates", &MergeTriangleSetPublicist::updateStates);
 }
 
 #include "Mapping/PointSetToPointSet.h"
@@ -280,15 +723,39 @@ template <typename TDataType>
 void declare_point_set_to_point_set(py::module& m, std::string typestr) {
 	using Class = dyno::PointSetToPointSet<TDataType>;
 	using Parent = dyno::TopologyMapping;
+
+	class PointSetToPointSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		bool initializeImpl() override
+		{
+			PYBIND11_OVERRIDE(
+				bool,
+				dyno::PointSetToPointSet<TDataType>,
+				initializeImpl
+			);
+		}
+	};
+
+	class PointSetToPointSetPublicist : public Class
+	{
+	public:
+		using Class::initializeImpl;
+	};
+
 	std::string pyclass_name = std::string("PointSetToPointSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, PointSetToPointSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def(py::init<std::shared_ptr<dyno::PointSet<TDataType>>, std::shared_ptr<dyno::PointSet<TDataType>> >())
 		.def("setSearchingRadius", &Class::setSearchingRadius)
 		.def("setFrom", &Class::setFrom)
 		.def("setTo", &Class::setTo)
 		.def("apply", &Class::apply)
-		.def("match", &Class::match);
+		.def("match", &Class::match)
+		// protected
+		.def("initializeImpl", &PointSetToPointSetPublicist::initializeImpl);
 }
 
 #include "Mapping/PointSetToTriangleSet.h"
@@ -296,12 +763,47 @@ template <typename TDataType>
 void declare_point_set_to_triangle_set(py::module& m, std::string typestr) {
 	using Class = dyno::PointSetToTriangleSet<TDataType>;
 	using Parent = dyno::Node;
+
+	class PointSetToTriangleSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void resetStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::PointSetToTriangleSet<TDataType>,
+				resetStates
+			);
+		}
+
+		void updateStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::PointSetToTriangleSet<TDataType>,
+				updateStates
+			);
+		}
+	};
+
+	class PointSetToTriangleSetPublicist : public Class
+	{
+	public:
+		using Class::resetStates;
+		using Class::updateStates;
+	};
+
 	std::string pyclass_name = std::string("PointSetToTriangleSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, PointSetToTriangleSetTrampoline,std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inPointSet", &Class::inPointSet, py::return_value_policy::reference)
 		.def("inInitialShape", &Class::inInitialShape, py::return_value_policy::reference)
-		.def("outShape", &Class::outShape, py::return_value_policy::reference);
+		.def("outShape", &Class::outShape, py::return_value_policy::reference)
+		// protected
+		.def("resetStates", &PointSetToTriangleSetPublicist::resetStates)
+		.def("updateStates", &PointSetToTriangleSetPublicist::updateStates);
 }
 
 #include "Mapping/QuadSetToTriangleSet.h"
@@ -309,11 +811,35 @@ template <typename TDataType>
 void declare_quad_set_to_triangle_set(py::module& m, std::string typestr) {
 	using Class = dyno::QuadSetToTriangleSet<TDataType>;
 	using Parent = dyno::TopologyMapping;
+
+	class QuadSetToTriangleSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		bool apply() override
+		{
+			PYBIND11_OVERRIDE(
+				bool,
+				dyno::QuadSetToTriangleSet<TDataType>,
+				apply
+			);
+		}
+	};
+
+	class QuadSetToTriangleSetPublicist : public Class
+	{
+	public:
+		using Class::apply;
+	};
+
 	std::string pyclass_name = std::string("QuadSetToTriangleSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, QuadSetToTriangleSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inQuadSet", &Class::inQuadSet, py::return_value_policy::reference)
-		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference);
+		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference)
+		// protected
+		.def("apply", &QuadSetToTriangleSetPublicist::apply);
 }
 
 #include "Mapping/SplitSimplexSet.h"
@@ -321,13 +847,39 @@ template <typename TDataType>
 void declare_split_simplex_set(py::module& m, std::string typestr) {
 	using Class = dyno::SplitSimplexSet<TDataType>;
 	using Parent = dyno::Node;
+
+	class SplitSimplexSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void resetStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::SplitSimplexSet<TDataType>,
+				resetStates
+			);
+		}
+
+	};
+
+	class SplitSimplexSetPublicist : public Class
+	{
+	public:
+		using Class::resetStates;
+	};
+
+
 	std::string pyclass_name = std::string("SplitSimplexSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, SplitSimplexSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inSimplexSet", &Class::inSimplexSet, py::return_value_policy::reference)
 		.def("outEdgeSet", &Class::outEdgeSet, py::return_value_policy::reference)
 		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference)
-		.def("outTetrahedronSet", &Class::outTetrahedronSet, py::return_value_policy::reference);
+		.def("outTetrahedronSet", &Class::outTetrahedronSet, py::return_value_policy::reference)
+		// protected
+		.def("resetStates", &SplitSimplexSetPublicist::resetStates);
 }
 
 #include "Mapping/TetrahedronSetToPointSet.h"
@@ -335,13 +887,48 @@ template <typename TDataType>
 void declare_tetrahedron_set_to_point_set(py::module& m, std::string typestr) {
 	using Class = dyno::TetrahedronSetToPointSet<TDataType>;
 	using Parent = dyno::TopologyMapping;
+
+	class TetrahedronSetToPointSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		bool apply() override
+		{
+			PYBIND11_OVERRIDE(
+				bool,
+				dyno::TetrahedronSetToPointSet<TDataType>,
+				apply
+			);
+		}
+
+		bool initializeImpl() override
+		{
+			PYBIND11_OVERRIDE(
+				bool,
+				dyno::TetrahedronSetToPointSet<TDataType>,
+				initializeImpl
+			);
+		}
+	};
+
+	class TetrahedronSetToPointSetPublicist : public Class
+	{
+	public:
+		using Class::apply;
+		using Class::initializeImpl;
+	};
+
 	std::string pyclass_name = std::string("TetrahedronSetToPointSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, TetrahedronSetToPointSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("setSearchingRadius", &Class::setSearchingRadius)
 		.def("setFrom", &Class::setFrom)
 		.def("setTo", &Class::setTo)
-		.def("match", &Class::match);
+		.def("match", &Class::match)
+		// protected
+		.def("apply", &TetrahedronSetToPointSetPublicist::apply)
+		.def("initializeImpl", &TetrahedronSetToPointSetPublicist::initializeImpl);
 }
 
 #include "Mapping/TextureMeshToTriangleSet.h"
@@ -349,24 +936,83 @@ template <typename TDataType>
 void declare_texture_mesh_to_triangle_set(py::module& m, std::string typestr) {
 	using Class = dyno::TextureMeshToTriangleSet<TDataType>;
 	using Parent = dyno::TopologyMapping;
+
+	class TextureMeshToTriangleSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		bool apply() override
+		{
+			PYBIND11_OVERRIDE(
+				bool,
+				dyno::TextureMeshToTriangleSet<TDataType>,
+				apply
+			);
+		}
+	};
+
+	class TextureMeshToTriangleSetPublicist : public Class
+	{
+	public:
+		using Class::apply;
+	};
+
 	std::string pyclass_name = std::string("TextureMeshToTriangleSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, TextureMeshToTriangleSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inTextureMesh", &Class::inTextureMesh, py::return_value_policy::reference)
 		.def("inTransform", &Class::inTransform, py::return_value_policy::reference)
-		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference);
+		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference)
+		// protected
+		.def("apply", &TextureMeshToTriangleSetPublicist::apply);
 }
 
 template <typename TDataType>
 void declare_texture_mesh_to_triangle_set_node(py::module& m, std::string typestr) {
 	using Class = dyno::TextureMeshToTriangleSetNode<TDataType>;
 	using Parent = dyno::Node;
+
+	class TextureMeshToTriangleSetNodeTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void resetStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::TextureMeshToTriangleSetNode<TDataType>,
+				resetStates
+			);
+		}
+
+		void updateStates() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::TextureMeshToTriangleSetNode<TDataType>,
+				updateStates
+			);
+		}
+	};
+
+	class TextureMeshToTriangleSetNodePublicist : public Class
+	{
+	public:
+		using Class::resetStates;
+		using Class::updateStates;
+	};
+
 	std::string pyclass_name = std::string("TextureMeshToTriangleSetNode") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, TextureMeshToTriangleSetNodeTrampoline,std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("caption", &Class::caption)
 		.def("inTextureMesh", &Class::inTextureMesh, py::return_value_policy::reference)
-		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference);
+		.def("outTriangleSet", &Class::outTriangleSet, py::return_value_policy::reference)
+		// protected
+		.def("resetStates", &TextureMeshToTriangleSetNodePublicist::resetStates)
+		.def("updateStates", &TextureMeshToTriangleSetNodePublicist::updateStates);
 }
 
 #include "Module/CalculateMaximum.h"
@@ -558,8 +1204,30 @@ template <typename TDataType>
 void declare_discrete_elements(py::module& m, std::string typestr) {
 	using Class = dyno::DiscreteElements<TDataType>;
 	using Parent = dyno::TopologyModule;
+
+	class DiscreteElementsTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void updateTopology() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::DiscreteElements<TDataType>,
+				updateTopology
+			);
+		}
+	};
+
+	class DiscreteElementsPublicist : public Class
+	{
+	public:
+		using Class::updateTopology;
+	};
+
 	std::string pyclass_name = std::string("DiscreteElements") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, DiscreteElementsTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("scale", &Class::scale)
 
@@ -624,7 +1292,9 @@ void declare_discrete_elements(py::module& m, std::string typestr) {
 		.def("requestSphereInGlobal", &Class::requestSphereInGlobal, py::return_value_policy::reference)
 		.def("requestTetInGlobal", &Class::requestTetInGlobal, py::return_value_policy::reference)
 		.def("requestCapsuleInGlobal", &Class::requestCapsuleInGlobal, py::return_value_policy::reference)
-		.def("requestTriangleInGlobal", &Class::requestTriangleInGlobal, py::return_value_policy::reference);
+		.def("requestTriangleInGlobal", &Class::requestTriangleInGlobal, py::return_value_policy::reference)
+		// protected
+		.def("updateTopology", &DiscreteElementsPublicist::updateTopology);
 }
 
 #include "Topology/DistanceField3D.h"
@@ -692,8 +1362,32 @@ void declare_edge_set(py::module& m, std::string typestr) {
 	using Class = dyno::EdgeSet<TDataType>;
 	using Parent = dyno::PointSet<TDataType>;
 	typedef typename dyno::TopologyModule::Edge Edge;
+
+	class EdgeSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void updateTopology() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::EdgeSet<TDataType>,
+				updateTopology
+			);
+		}
+	};
+
+	class EdgeSetPublicist : public Class
+	{
+	public:
+		using Class::updateTopology;
+		using Class::updateEdges;
+		using Class::updateVer2Edge;
+	};
+
 	std::string pyclass_name = std::string("EdgeSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, EdgeSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("set_edges", py::overload_cast<std::vector<Edge>&>(&Class::setEdges))
 		.def("set_edges", py::overload_cast<dyno::Array<Edge, DeviceType::GPU>&>(&Class::setEdges))
@@ -704,7 +1398,11 @@ void declare_edge_set(py::module& m, std::string typestr) {
 		.def("clear", &Class::clear)
 		.def("loadSmeshFile", &Class::loadSmeshFile)
 
-		.def("requestPointNeighbors", &Class::requestPointNeighbors);
+		.def("requestPointNeighbors", &Class::requestPointNeighbors)
+		// protected
+		.def("updateTopology", &EdgeSetPublicist::updateTopology)
+		.def("updateEdges", &EdgeSetPublicist::updateEdges)
+		.def("updateVer2Edge", &EdgeSetPublicist::updateVer2Edge);
 }
 
 #include "Topology/Frame.h"
@@ -812,10 +1510,43 @@ void declare_quad_set(py::module& m, std::string typestr) {
 	using Class = dyno::QuadSet<TDataType>;
 	using Parent = dyno::EdgeSet<TDataType>;
 	typedef typename dyno::TopologyModule::Quad Quad;
+
+	class QuadSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void updateTopology() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::QuadSet<TDataType>,
+				updateTopology
+			);
+		}
+
+		void updateEdges() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::QuadSet<TDataType>,
+				updateEdges
+			);
+		}
+	};
+
+	class QuadSetPublicist : public Class
+	{
+	public:
+		using Class::updateTopology;
+		using Class::updateEdges;
+		using Class::updateQuads;
+	};
+
 	std::string pyclass_name = std::string("QuadSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, QuadSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		
+
 		.def("set_quads", py::overload_cast<std::vector<Quad>&>(&Class::setQuads))
 		.def("set_quads", py::overload_cast<dyno::Array<Quad, DeviceType::GPU>&>(&Class::setQuads))
 
@@ -823,7 +1554,11 @@ void declare_quad_set(py::module& m, std::string typestr) {
 		.def("vertex2Quad", &Class::vertex2Quad, py::return_value_policy::reference)
 		.def("copyFrom", &Class::copyFrom)
 		.def("isEmpty", &Class::isEmpty)
-		.def("requestVertexNormals", &Class::requestVertexNormals, py::return_value_policy::reference);
+		.def("requestVertexNormals", &Class::requestVertexNormals, py::return_value_policy::reference)
+		// protected
+		.def("updateTopology", &QuadSetPublicist::updateTopology)
+		.def("updateEdges", &QuadSetPublicist::updateEdges)
+		.def("updateQuads", &QuadSetPublicist::updateQuads);
 }
 
 #include "Topology/HexahedronSet.h"
@@ -832,8 +1567,30 @@ void declare_hexahedron_set(py::module& m, std::string typestr) {
 	using Class = dyno::HexahedronSet<TDataType>;
 	using Parent = dyno::QuadSet<TDataType>;
 	typedef typename dyno::TopologyModule::Hexahedron Hexahedron;
+
+	class HexahedronSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void updateQuads() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::HexahedronSet<TDataType>,
+				updateQuads
+			);
+		}
+	};
+
+	class HexahedronSetPublicist : public Class
+	{
+	public:
+		using Class::updateQuads;
+	};
+
 	std::string pyclass_name = std::string("HexahedronSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, HexahedronSetTrampoline,std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("set_hexahedrons", py::overload_cast<std::vector<Hexahedron>&>(&Class::setHexahedrons))
 		.def("set_hexahedrons", py::overload_cast<dyno::Array<Hexahedron, DeviceType::GPU>&>(&Class::setHexahedrons))
@@ -842,7 +1599,9 @@ void declare_hexahedron_set(py::module& m, std::string typestr) {
 		.def("getQua2Hex", &Class::getQua2Hex, py::return_value_policy::reference)
 		.def("getVer2Hex", &Class::getVer2Hex, py::return_value_policy::reference)
 		.def("getVolume", &Class::getVolume)
-		.def("copyFrom", &Class::copyFrom);
+		.def("copyFrom", &Class::copyFrom)
+		// protected
+		.def("updateQuads", &HexahedronSetPublicist::updateQuads);
 }
 
 #include "Topology/JointInfo.h"
@@ -957,8 +1716,40 @@ template <typename TDataType>
 void declare_polygon_set(py::module& m, std::string typestr) {
 	using Class = dyno::PolygonSet<TDataType>;
 	using Parent = dyno::EdgeSet<TDataType>;
+
+	class PolygonSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void updateTopology() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::PolygonSet<TDataType>,
+				updateTopology
+			);
+		}
+
+		void updateEdges() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::PolygonSet<TDataType>,
+				updateEdges
+			);
+		}
+	};
+
+	class PolygonSetPublicist : public Class
+	{
+	public:
+		using Class::updateTopology;
+		using Class::updateEdges;
+	};
+
 	std::string pyclass_name = std::string("PolygonSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, PolygonSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("setPolygons", py::overload_cast<const dyno::ArrayList<dyno::uint, DeviceType::CPU>&>(&Class::setPolygons))
 		.def("setPolygons", py::overload_cast<const dyno::ArrayList<dyno::uint, DeviceType::GPU>&>(&Class::setPolygons))
@@ -973,7 +1764,11 @@ void declare_polygon_set(py::module& m, std::string typestr) {
 		.def("extractTriangleSet", &Class::extractTriangleSet)
 		.def("extractQuadSet", &Class::extractQuadSet)
 		.def("turnIntoTriangleSet", &Class::turnIntoTriangleSet)
-		.def("triangleSetToPolygonSet", &Class::triangleSetToPolygonSet);
+		.def("triangleSetToPolygonSet", &Class::triangleSetToPolygonSet)
+		// protected
+		.def("updateTopology", &PolygonSetPublicist::updateTopology)
+		.def("updateEdges", &PolygonSetPublicist::updateEdges);
+
 }
 
 #include "Topology/SimplexSet.h"
@@ -984,8 +1779,30 @@ void declare_simplex_set(py::module& m, std::string typestr) {
 	typedef typename dyno::TopologyModule::Edge Edge;
 	typedef typename dyno::TopologyModule::Triangle Triangle;
 	typedef typename dyno::TopologyModule::Tetrahedron Tetrahedron;
+
+	class SimplexSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void updateTopology() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::SimplexSet<TDataType>,
+				updateTopology
+			);
+		}
+	};
+
+	class SimplexSetPublicist : public Class
+	{
+	public:
+		using Class::updateTopology;
+	};
+
 	std::string pyclass_name = std::string("SimplexSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, SimplexSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("copyFrom", &Class::copyFrom)
 		.def("isEmpty", &Class::isEmpty)
@@ -1000,7 +1817,9 @@ void declare_simplex_set(py::module& m, std::string typestr) {
 		.def("extractSimplex3D", &Class::extractSimplex3D)
 		.def("extractPointSet", &Class::extractPointSet)
 		.def("extractEdgeSet", &Class::extractEdgeSet)
-		.def("extractTriangleSet", &Class::extractTriangleSet);
+		.def("extractTriangleSet", &Class::extractTriangleSet)
+		// protected
+		.def("updateTopology", &SimplexSetPublicist::updateTopology);
 }
 
 #include "Topology/SparseGridHash.h"
@@ -1073,8 +1892,41 @@ void declare_triangle_set(py::module& m, std::string typestr) {
 	typedef typename TDataType::Real Real;
 	typedef typename TDataType::Coord Coord;
 	typedef typename dyno::TopologyModule::Triangle Triangle;
+
+	class TriangleSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void updateTopology() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::TriangleSet<TDataType>,
+				updateTopology
+			);
+		}
+
+		void updateEdges() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::TriangleSet<TDataType>,
+				updateEdges
+			);
+		}
+	};
+
+	class TriangleSetPublicist : public Class
+	{
+	public:
+		using Class::updateTopology;
+		using Class::updateEdges;
+		using Class::updateTriangles;
+	};
+
 	std::string pyclass_name = std::string("TriangleSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, TriangleSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("setTriangles", py::overload_cast<std::vector<Triangle>&>(&Class::setTriangles))
 		.def("setTriangles", py::overload_cast<dyno::Array<Triangle, DeviceType::GPU>&>(&Class::setTriangles))
@@ -1093,7 +1945,11 @@ void declare_triangle_set(py::module& m, std::string typestr) {
 
 		.def("requestTriangle2Triangle", &Class::requestTriangle2Triangle)
 		.def("requestEdgeNormals", &Class::requestEdgeNormals)
-		.def("requestVertexNormals", &Class::requestVertexNormals);
+		.def("requestVertexNormals", &Class::requestVertexNormals)
+		// protected
+		.def("updateTopology", &TriangleSetPublicist::updateTopology)
+		.def("updateEdges", &TriangleSetPublicist::updateEdges)
+		.def("updateTriangles", &TriangleSetPublicist::updateTriangles);
 }
 
 #include "Topology/TetrahedronSet.h"
@@ -1105,8 +1961,41 @@ void declare_tetrahedron_set(py::module& m, std::string typestr) {
 	typedef typename TDataType::Coord Coord;
 	typedef typename dyno::TopologyModule::Triangle Triangle;
 	typedef typename dyno::TopologyModule::Tetrahedron Tetrahedron;
+
+	class TetrahedronSetTrampoline : public Class
+	{
+	public:
+		using Class::Class;
+
+		void updateTopology() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::TetrahedronSet<TDataType>,
+				updateTopology
+			);
+		}
+
+		void updateTriangles() override
+		{
+			PYBIND11_OVERRIDE(
+				void,
+				dyno::TetrahedronSet<TDataType>,
+				updateTriangles
+			);
+		}
+	};
+
+	class TetrahedronSetPublicist : public Class
+	{
+	public:
+		using Class::updateTopology;
+		using Class::updateTriangles;
+		using Class::updateTetrahedrons;
+	};
+
 	std::string pyclass_name = std::string("TetrahedronSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, TetrahedronSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("loadTetFile", &Class::loadTetFile)
 
@@ -1123,7 +2012,11 @@ void declare_tetrahedron_set(py::module& m, std::string typestr) {
 		.def("requestPointNeighbors", &Class::requestPointNeighbors, py::return_value_policy::reference)
 		.def("requestSurfaceMeshIds", &Class::requestSurfaceMeshIds, py::return_value_policy::reference)
 		.def("extractSurfaceMesh", &Class::extractSurfaceMesh, py::return_value_policy::reference)
-		.def("calculateVolume", &Class::calculateVolume, py::return_value_policy::reference);
+		.def("calculateVolume", &Class::calculateVolume, py::return_value_policy::reference)
+		// protected
+		.def("updateTopology", &TetrahedronSetPublicist::updateTopology)
+		.def("updateTriangles", &TetrahedronSetPublicist::updateTriangles)
+		.def("updateTetrahedrons", &TetrahedronSetPublicist::updateTetrahedrons);
 }
 
 #include "Topology/UniformGrid.h"

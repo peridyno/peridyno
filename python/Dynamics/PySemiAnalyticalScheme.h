@@ -46,7 +46,7 @@ void declare_particle_relaxtion_on_mesh(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("ParticleRelaxtionOnMesh") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, ParticleRelaxtionOnMeshTrampoline,std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varIterationNumber", &Class::varIterationNumber, py::return_value_policy::reference)
 		.def("varNormalForceStrength", &Class::varNormalForceStrength, py::return_value_policy::reference)
@@ -91,7 +91,7 @@ void declare_semi_analytical_incompressibility_module(py::module& m, std::string
 	};
 
 	std::string pyclass_name = std::string("SemiAnalyticalIncompressibilityModule") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, SemiAnalyticalIncompressibilityModuleTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("constrain", &Class::constrain)
 		.def("getPosition", &Class::getPosition)
@@ -171,7 +171,7 @@ void declare_semi_analytical_particle_shifting(py::module& m, std::string typest
 	};
 
 	std::string pyclass_name = std::string("SemiAnalyticalParticleShifting") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, SemiAnalyticalParticleShiftingTrampoline,std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varInterationNumber", &Class::varInterationNumber, py::return_value_policy::reference)
 		.def("varInertia", &Class::varInertia, py::return_value_policy::reference)
@@ -284,7 +284,7 @@ void declare_semi_analytical_sfi_node(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("SemiAnalyticalSFINode") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, SemiAnalyticalSFINodeTrampoline,std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("inTriangleSet", &Class::inTriangleSet, py::return_value_policy::reference)
 		.def("varFast", &Class::varFast, py::return_value_policy::reference)
@@ -390,7 +390,7 @@ void declare_triangular_mesh_boundary(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("TriangularMeshBoundary") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, TriangularMeshBoundaryTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varThickness", &Class::varThickness, py::return_value_policy::reference)
 		.def("varTangentialFriction", &Class::varTangentialFriction, py::return_value_policy::reference)
@@ -440,7 +440,7 @@ void declare_triangular_mesh_constraint(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("TriangularMeshConstraint") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, TriangularMeshConstraintTrampoline,std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varThickness", &Class::varThickness, py::return_value_policy::reference)
 		.def("varTangentialFriction", &Class::varTangentialFriction, py::return_value_policy::reference)

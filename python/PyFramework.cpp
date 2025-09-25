@@ -1109,7 +1109,6 @@ void pybind_framework(py::module& m)
 	class ComputeModuleTrampoline : public ComputeModule
 	{
 	public:
-		using ComputeModule::ComputeModule;
 
 		void compute() override
 		{
@@ -1127,7 +1126,7 @@ void pybind_framework(py::module& m)
 		using ComputeModule::compute;
 	};
 
-	py::class_<ComputeModule, Module, std::shared_ptr<ComputeModule>>(m, "ComputeModule")
+	py::class_<ComputeModule, Module, ComputeModuleTrampoline, std::shared_ptr<ComputeModule>>(m, "ComputeModule")
 		.def("getModuleType", &dyno::ComputeModule::getModuleType)
 		// protected
 		.def("compute", &ComputeModulePublicist::compute);
@@ -1152,7 +1151,6 @@ void pybind_framework(py::module& m)
 	class PipelineTrampoline : public Pipeline
 	{
 	public:
-		using Pipeline::Pipeline;
 
 		void updateImpl() override
 		{
@@ -1182,7 +1180,7 @@ void pybind_framework(py::module& m)
 		using Pipeline::printDebugInfo;
 	};
 
-	py::class_<Pipeline, Module, std::shared_ptr<Pipeline>>(m, "Pipeline")
+	py::class_<Pipeline, Module, PipelineTrampoline, std::shared_ptr<Pipeline>>(m, "Pipeline")
 		.def("sizeOfDynamicModules", &Pipeline::sizeOfDynamicModules)
 		.def("sizeOfPersistentModules", &Pipeline::sizeOfPersistentModules)
 		.def("pushModule", &Pipeline::pushModule)
@@ -1211,7 +1209,6 @@ void pybind_framework(py::module& m)
 	class ConstraintModuleTrampoline : public ConstraintModule
 	{
 	public:
-		using ConstraintModule::ConstraintModule;
 
 		void updateImpl() override
 		{
@@ -1229,7 +1226,7 @@ void pybind_framework(py::module& m)
 		using ConstraintModule::updateImpl;
 	};
 
-	py::class_<ConstraintModule, Module, std::shared_ptr<ConstraintModule>>(m, "ConstraintModule")
+	py::class_<ConstraintModule, Module, ConstraintModuleTrampoline, std::shared_ptr<ConstraintModule>>(m, "ConstraintModule")
 		.def("constrain", &dyno::ConstraintModule::constrain)
 		.def("getModuleType", &dyno::ConstraintModule::getModuleType)
 		// protected
@@ -1238,7 +1235,6 @@ void pybind_framework(py::module& m)
 	class GroupModuleTrampoline : public GroupModule
 	{
 	public:
-		using GroupModule::GroupModule;
 
 		void updateImpl() override
 		{
@@ -1257,7 +1253,7 @@ void pybind_framework(py::module& m)
 		using GroupModule::updateImpl;
 	};
 
-	py::class_<GroupModule, Module, std::shared_ptr<GroupModule>>(m, "GroupModule")
+	py::class_<GroupModule, Module, GroupModuleTrampoline, std::shared_ptr<GroupModule>>(m, "GroupModule")
 		.def(py::init<>())
 		.def("pushModule", &GroupModule::pushModule)
 		.def("moduleList", &GroupModule::moduleList, py::return_value_policy::reference)
@@ -1454,8 +1450,6 @@ void pybind_framework(py::module& m)
 			class KeyboardInputModuleTrampoline : public KeyboardInputModule
 			{
 			public:
-				using KeyboardInputModule::KeyboardInputModule;
-
 				void onEvent(dyno::PKeyboardEvent event) override
 				{
 					PYBIND11_OVERRIDE_PURE(
@@ -1495,7 +1489,6 @@ void pybind_framework(py::module& m)
 			class MouseInputModuleTrampoline : public MouseInputModule
 			{
 			public:
-				using MouseInputModule::MouseInputModule;
 
 				void onEvent(dyno::PMouseEvent event) override
 				{
@@ -1525,7 +1518,7 @@ void pybind_framework(py::module& m)
 				using MouseInputModule::requireUpdate;
 			};
 
-			py::class_<MouseInputModule, InputModule, std::shared_ptr<MouseInputModule>>(m, "MouseInputModule")
+			py::class_<MouseInputModule, InputModule, MouseInputModuleTrampoline,std::shared_ptr<MouseInputModule>>(m, "MouseInputModule")
 				.def(py::init<>())
 				.def("enqueueEvent", &MouseInputModule::enqueueEvent)
 				.def("varCacheEvent", &MouseInputModule::varCacheEvent)
@@ -1587,15 +1580,13 @@ void pybind_framework(py::module& m)
 				using AnimationPipeline::printDebugInfo;
 			};
 
-			py::class_<AnimationPipeline, Pipeline, std::shared_ptr<AnimationPipeline>>(m, "AnimationPipeline", py::buffer_protocol(), py::dynamic_attr())
+			py::class_<AnimationPipeline, Pipeline, AnimationPipelineTrampoline, std::shared_ptr<AnimationPipeline>>(m, "AnimationPipeline", py::buffer_protocol(), py::dynamic_attr())
 				.def(py::init<Node*>())
 				.def("printDebugInfo", &AnimationPipelinePublicist::printDebugInfo);
 
 			class TopologyModuleTrampoline : public TopologyModule
 			{
 			public:
-				using TopologyModule::TopologyModule;
-
 				void updateTopology() override
 				{
 					PYBIND11_OVERRIDE_PURE(
@@ -1612,7 +1603,7 @@ void pybind_framework(py::module& m)
 				using TopologyModule::updateTopology;
 			};
 
-			py::class_<TopologyModule, OBase, std::shared_ptr<TopologyModule>>(m, "TopologyModule")
+			py::class_<TopologyModule, OBase, TopologyModuleTrampoline, std::shared_ptr<TopologyModule>>(m, "TopologyModule")
 				.def(py::init<>())
 				.def("getDOF", &TopologyModule::getDOF)
 				.def("tagAsChanged", &TopologyModule::tagAsChanged)

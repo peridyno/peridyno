@@ -29,7 +29,7 @@ void declare_fast_marching_method_GPU(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("FastMarchingMethodGPU") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, FastMarchingMethodGPUTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varSpacing", &Class::varSpacing, py::return_value_policy::reference)
 		.def("varBoolType", &Class::varBoolType, py::return_value_policy::reference)
@@ -71,7 +71,7 @@ void declare_fast_sweeping_method(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("FastSweepingMethod") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, FastSweepingMethodTrampoline,std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varSpacing", &Class::varSpacing, py::return_value_policy::reference)
 		.def("varPadding", &Class::varPadding, py::return_value_policy::reference)
@@ -111,7 +111,7 @@ void declare_fast_sweeping_method_GPU(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("FastSweepingMethodGPU") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, FastSweepingMethodGPUTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varSpacing", &Class::varSpacing, py::return_value_policy::reference)
 		.def("varPadding", &Class::varPadding, py::return_value_policy::reference)
@@ -170,7 +170,7 @@ void declare_volume_to_triangle_set(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("VolumeToTriangleSet") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, VolumeToTriangleSetTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varIsoValue", &Class::varIsoValue, py::return_value_policy::reference)
 		.def("inVolume", &Class::inVolume, py::return_value_policy::reference)
@@ -208,7 +208,7 @@ void declare_multiscale_fast_iterative_method(py::module& m, std::string typestr
 	};
 
 	std::string pyclass_name = std::string("MultiscaleFastIterativeMethod") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, MultiscaleFastIterativeMethodTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varSpacing", &Class::varSpacing,py::return_value_policy::reference)
 		.def("varPadding", &Class::varPadding, py::return_value_policy::reference)
@@ -249,7 +249,7 @@ void declare_multiscale_fast_iterative_for_boolean_method(py::module& m, std::st
 	};
 
 	std::string pyclass_name = std::string("MultiscaleFastIterativeMethodForBoolean") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, MultiscaleFastIterativeMethodForBooleanTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varBoolType", &Class::varBoolType, py::return_value_policy::reference)
 		.def("varSpacing", &Class::varSpacing, py::return_value_policy::reference)
@@ -327,7 +327,7 @@ void declare_basic_shape_to_volume(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("BasicShapeToVolume") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, BasicShapeToVolumeTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varInerted", &Class::varInerted, py::return_value_policy::reference)
 		.def("varGridSpacing", &Class::varGridSpacing, py::return_value_policy::reference)
@@ -378,7 +378,7 @@ void declare_marching_cubes(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("MarchingCubes") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, MarchingCubesTrampoline,std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("getNodeType", &Class::getNodeType)
 
@@ -420,7 +420,7 @@ void declare_volume_bool(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("VolumeBool") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>VB(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
+	py::class_<Class, Parent, VolumeBooleanTrampoline,std::shared_ptr<Class>>VB(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	VB.def(py::init<>())
 		.def("getNodeType", &Class::getNodeType)
 
@@ -464,7 +464,7 @@ void declare_volume_clipper(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("VolumeClipper") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, VolumeClipperTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("getNodeType", &Class::getNodeType)
 
@@ -515,7 +515,7 @@ void declare_volume_generator(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("VolumeGenerator") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, VolumeGeneratorTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varSpacing", &Class::varSpacing, py::return_value_policy::reference)
 		.def("varPadding", &Class::varPadding, py::return_value_policy::reference)
@@ -556,7 +556,7 @@ void declare_volume_loader(py::module& m, std::string typestr) {
 	};
 
 	std::string pyclass_name = std::string("VolumeLoader") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+	py::class_<Class, Parent, VolumeLoaderTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def("varFileName", &Class::varFileName, py::return_value_policy::reference)
 		// protected
