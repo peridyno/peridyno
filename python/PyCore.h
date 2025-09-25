@@ -140,12 +140,12 @@ void declare_quat(py::module& m, std::string typestr) {
 }
 
 #include "Array/Array.h"
-template<typename T, DeviceType deviceType>
-void declare_array(py::module& m, std::string typestr, std::string type)
+template<typename T>
+void declare_array_CPU(py::module& m, std::string type)
 {
-	using Class = dyno::Array<T, deviceType>;
+	using Class = dyno::Array<T, DeviceType::CPU>;
 	using uint = unsigned int;
-	std::string pyclass_name = typestr + std::string("Array") + type;
+	std::string pyclass_name = std::string("CArray") + type;
 	py::class_<Class>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
 		.def(py::init<uint>())
@@ -153,10 +153,52 @@ void declare_array(py::module& m, std::string typestr, std::string type)
 		.def("reset", &Class::reset)
 		.def("clear", &Class::clear)
 		.def("deviceType", &Class::deviceType)
+		.def("__getitem__", [](Class& self, unsigned int idx) -> T& {
+		if (idx >= self.size()) {
+			throw py::index_error("Index out of range");
+		}
+		return self[idx];
+			}, py::return_value_policy::reference_internal)
 		.def("size", &Class::size)
 		.def("isCPU", &Class::isCPU)
 		.def("isGPU", &Class::isGPU)
-		.def("isEmpty", &Class::isEmpty);
+		.def("isEmpty", &Class::isEmpty)
+		.def("assign", py::overload_cast<const T&>(&Class::assign))
+		.def("assign", py::overload_cast<uint, const T&>(&Class::assign))
+		.def("assign", py::overload_cast<const dyno::Array<T, DeviceType::GPU>&>(&Class::assign))
+		.def("assign", py::overload_cast<const dyno::Array<T, DeviceType::CPU>&>(&Class::assign))
+		.def("assign", py::overload_cast<const std::vector<T>&>(&Class::assign));
+}
+
+template<typename T>
+void declare_array_GPU(py::module& m, std::string type)
+{
+	using Class = dyno::Array<T, DeviceType::GPU>;
+	using uint = unsigned int;
+	std::string pyclass_name = std::string("DArray") + type;
+	py::class_<Class>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def(py::init<uint>())
+		.def("resize", &Class::resize)
+		.def("reset", &Class::reset)
+		.def("clear", &Class::clear)
+		//.def("begin", &Class::begin)
+		.def("deviceType", &Class::deviceType)
+		.def("__getitem__", [](Class& self, unsigned int idx) -> T& {
+		if (idx >= self.size()) {
+			throw py::index_error("Index out of range");
+		}
+		return self[idx];
+			}, py::return_value_policy::reference_internal)
+		.def("size", &Class::size)
+				.def("isCPU", &Class::isCPU)
+				.def("isGPU", &Class::isGPU)
+				.def("isEmpty", &Class::isEmpty)
+				.def("assign", py::overload_cast<const dyno::Array<T, DeviceType::GPU>&>(&Class::assign))
+				.def("assign", py::overload_cast<const dyno::Array<T, DeviceType::CPU>&>(&Class::assign))
+				.def("assign", py::overload_cast<const dyno::Array<T, DeviceType::GPU>&, const uint, const uint, const uint>(&Class::assign))
+				.def("assign", py::overload_cast<const dyno::Array<T, DeviceType::CPU>&, const uint, const uint, const uint>(&Class::assign));
+		//.def("assign", py::overload_cast<const std::vector<T>&, const uint count, const uint, const uint>(&Class::assign));
 }
 
 #include "Primitive/Primitive3D.h"

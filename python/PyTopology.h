@@ -1272,7 +1272,7 @@ void declare_discrete_elements(py::module& m, std::string typestr) {
 
 		.def("ballAndSocketJoints", &Class::ballAndSocketJoints, py::return_value_policy::reference)
 		.def("sliderJoints", &Class::sliderJoints, py::return_value_policy::reference)
-		.def("hingeJoints", &Class::hingeJoints, py::return_value_policy::reference)
+		.def("hingeJoints", &Class::hingeJoints, py::return_value_policy::reference_internal)
 		.def("fixedJoints", &Class::fixedJoints, py::return_value_policy::reference)
 		.def("pointJoints", &Class::pointJoints, py::return_value_policy::reference)
 		.def("distanceJoints", &Class::distanceJoints, py::return_value_policy::reference)

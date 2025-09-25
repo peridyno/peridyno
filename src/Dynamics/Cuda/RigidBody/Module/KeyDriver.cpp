@@ -76,6 +76,9 @@ namespace dyno
 					int keyJointID = action.joint;
 					float keyValue = action.value;
 
+					std::cout << c_hinge.size() << std::endl;
+					std::cout << keyJointID << std::endl;
+
 					c_hinge[keyJointID].setMoter(speed * keyValue);
 				}
 				

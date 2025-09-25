@@ -1480,8 +1480,8 @@ void pybind_framework(py::module& m)
 
 			py::class_<KeyboardInputModule, InputModule, KeyboardInputModuleTrampoline, std::shared_ptr<KeyboardInputModule>>(m, "KeyboardInputModule")
 				.def(py::init<>())
-				.def("varCacheEvent", &KeyboardInputModule::varCacheEvent)
-				.def("enqueueEvent", &KeyboardInputModule::enqueueEvent)
+				.def("varCacheEvent", &KeyboardInputModule::varCacheEvent, py::return_value_policy::reference)
+				.def("enqueueEvent", &KeyboardInputModule::enqueueEvent, py::return_value_policy::reference)
 				.def("onEvent", &KeyboardInputModulePublicist::onEvent)
 				.def("updateImpl", &KeyboardInputModulePublicist::updateImpl)
 				.def("requireUpdate", &KeyboardInputModulePublicist::requireUpdate);
@@ -1716,12 +1716,12 @@ void pybind_framework(py::module& m)
 			declare_p_enum(m);
 
 			//declare_var<float>(m, "f");
-			declare_var<bool>(m, "b");
-			declare_var<uint>(m, "uint");
-			declare_var<int>(m, "int");
+			declare_var<bool>(m, "Bool");
+			declare_var<uint>(m, "Uint");
+			declare_var<int>(m, "Int");
 			declare_var<Real>(m, "Real");
 			//declare_var<Coord>(m, "Coord");
-			declare_var<std::string>(m, "s");
+			declare_var<std::string>(m, "S");
 			declare_var<dyno::Vec3f>(m, "3f");
 			declare_var<dyno::Vec3d>(m, "3d");
 			declare_var<dyno::Vec3i>(m, "3i");

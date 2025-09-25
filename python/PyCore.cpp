@@ -1,4 +1,5 @@
 #include "PyCore.h"
+#include <Topology/DiscreteElements.h>
 
 void pybind_core(py::module& m)
 {
@@ -49,7 +50,12 @@ void pybind_core(py::module& m)
 		.def_readwrite("w", &dyno::TOrientedBox3D<Real>::w)
 		.def_readwrite("extent", &dyno::TOrientedBox3D<Real>::extent);
 
-	declare_array<dyno::TOrientedBox3D<Real>, DeviceType::GPU>(m, "D", "TOrientedBox3D");
+	// GPU
+	declare_array_GPU<dyno::TOrientedBox3D<Real>>(m, "TOrientedBox3D");
+	declare_array_GPU<dyno::HingeJoint<Real>>(m, "HingeJoint");
+
+	// CPU
+	declare_array_CPU<dyno::HingeJoint<Real>>(m, "HingeJoint");
 
 	//for GL_GhostSPH sample
 	py::bind_vector<std::vector<dyno::Vec3f>>(m, "VectorVec3f", py::module_local(false))
