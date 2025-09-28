@@ -5,7 +5,7 @@
 #include "Field.h"
 #include "QPiecewiseSpinBox.h"
 
-#include <QPushButton.h>
+#include <QPushButton>
 
 namespace dyno
 {
