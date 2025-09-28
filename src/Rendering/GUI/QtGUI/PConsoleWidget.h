@@ -6,6 +6,22 @@
 #include <QTreeView>
 #include <QListView>
 
+#include <QTextEdit.h>
+#include <QPushButton.h>
+
+
+// Slots macro definition conflicts with Python
+#ifdef slots
+#undef slots
+#endif
+
+// python
+#include <pybind11/embed.h>
+namespace py = pybind11;
+
+#define slots Q_SLOTS
+
+
 
 namespace dyno
 {
@@ -17,9 +33,18 @@ namespace dyno
 	public:
 		explicit PConsoleWidget(QWidget *parent = nullptr);
 
+
 	signals:
 
 	public slots:
+		void execute(const std::string& src);
+
+	private:
+		std::string getPythonErrorDetails();
+
+	private:
+		QTextEdit* mCodeEditor;
+		QPushButton* updateButton;
 	};
 
 	class QContentBrowser : public QWidget

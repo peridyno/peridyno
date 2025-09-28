@@ -44,10 +44,116 @@ namespace dyno
 	};
 
 
-	PConsoleWidget::PConsoleWidget(QWidget *parent) :
+	PConsoleWidget::PConsoleWidget(QWidget* parent) :
 		QWidget(parent)
 	{
-//		setMinimumHeight(200);
+
+		QVBoxLayout* layout = new QVBoxLayout(this);
+		this->setLayout(layout);
+
+		mCodeEditor = new QTextEdit(this);
+		mCodeEditor->setObjectName("Python Code");
+		mCodeEditor->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+		layout->addWidget(mCodeEditor);
+
+		updateButton = new QPushButton("update", this);
+		layout->addWidget(updateButton);
+
+
+		connect(updateButton, &QPushButton::clicked, this, [this]() {
+			const std::string& code = mCodeEditor->toPlainText().toStdString();
+			execute(code);
+			});
+
+	}
+
+	void PConsoleWidget::execute(const std::string& src)
+	{
+		bool flag = true;
+		py::scoped_interpreter guard{};
+
+		try {
+			auto locals = py::dict();
+			py::exec(src, py::globals(), locals);
+
+			std::cout << "python" << std::endl;
+
+			if (locals.contains("scn"))
+			{
+				auto scene = locals["scn"].cast<std::shared_ptr<dyno::SceneGraph>>();
+				if (scene)
+				{
+					std::cout << "Scn" << std::endl;
+				}
+			}
+			else
+			{
+				
+				//Wt::WMessageBox::show("Error", "Please define 'scn = dyno.SceneGraph()'", Wt::StandardButton::Ok);
+			}
+		}
+		catch (const std::exception& e) {
+			//Wt::WMessageBox::show("Error", e.what(), Wt::StandardButton::Ok);
+
+			std::cout << e.what() << std::endl;
+			std::cout << getPythonErrorDetails() << std::endl;
+			flag = false;
+		}
+	}
+
+	std::string PConsoleWidget::getPythonErrorDetails()
+	{
+		if (!PyErr_Occurred()) {
+			return "No Python error occurred";
+		}
+
+		PyObject* type, * value, * traceback;
+		PyErr_Fetch(&type, &value, &traceback);
+		PyErr_NormalizeException(&type, &value, &traceback);
+
+		std::string errorMsg;
+
+		if (value) {
+			py::object py_value = py::reinterpret_borrow<py::object>(value);
+			errorMsg = py::str(py_value).cast<std::string>();
+		}
+		else {
+			errorMsg = "Unknown Python error";
+		}
+
+		// 如果有 traceback，获取堆栈信息
+		if (traceback) {
+			py::object py_traceback = py::reinterpret_borrow<py::object>(traceback);
+
+			// 导入 traceback 模块来格式化错误信息
+			try {
+				py::module traceback_module = py::module::import("traceback");
+				py::object format_tb = traceback_module.attr("format_tb");
+				py::object tb_list = format_tb(py_traceback);
+				py::object formatted = traceback_module.attr("format_exception_only")(type, value);
+
+				// 组合完整的错误信息
+				std::string traceback_str;
+				for (auto item : tb_list) {
+					traceback_str += item.cast<std::string>();
+				}
+				for (auto item : formatted) {
+					traceback_str += item.cast<std::string>();
+				}
+
+				if (!traceback_str.empty()) {
+					errorMsg = traceback_str;
+				}
+			}
+			catch (...) {
+				// 如果格式化失败，使用基本错误信息
+			}
+		}
+
+		PyErr_Restore(type, value, traceback);
+		PyErr_Clear();
+
+		return errorMsg;
 	}
 
 	QContentBrowser::QContentBrowser(QWidget* parent /*= nullptr*/)
