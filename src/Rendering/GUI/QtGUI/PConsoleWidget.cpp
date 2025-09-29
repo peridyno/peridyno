@@ -8,6 +8,8 @@
 #include <QPixmap>
 #include "NodeFactory.h"
 
+#include "PSimulationThread.h"
+
 namespace dyno
 {
 	class CustomFileSystemModel : public QFileSystemModel
@@ -51,17 +53,48 @@ namespace dyno
 		QVBoxLayout* layout = new QVBoxLayout(this);
 		this->setLayout(layout);
 
-		mCodeEditor = new QTextEdit(this);
+		mCodeEditor = new QsciScintilla(this);
 		mCodeEditor->setObjectName("Python Code");
+
+		mCodeEditor->setMinimumSize(100, 100);
+
+		mPythonLexer = new QsciLexerPython(mCodeEditor);
+		mCodeEditor->setLexer(mPythonLexer);
+
 		mCodeEditor->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+		
+		// line numbers
+		mCodeEditor->setMarginsBackgroundColor(QColor("#f0f0f0"));
+		mCodeEditor->setMarginLineNumbers(1, true);
+		mCodeEditor->setMarginWidth(1, "0000");
+
+		// indentation
+		mCodeEditor->setIndentationsUseTabs(false);
+		mCodeEditor->setIndentationWidth(4);
+		mCodeEditor->setTabWidth(4);
+		mCodeEditor->setAutoIndent(true);
+
+		// brace match
+		mCodeEditor->setBraceMatching(QsciScintilla::SloppyBraceMatch);
+		mCodeEditor->setMatchedBraceBackgroundColor(QColor("#ffff00"));
+
+		mCodeEditor->setFolding(QsciScintilla::BoxedTreeFoldStyle);
+
+		// auto completion
+		mCodeEditor->setAutoCompletionSource(QsciScintilla::AcsAll);
+		mCodeEditor->setAutoCompletionCaseSensitivity(false);
+		mCodeEditor->setAutoCompletionThreshold(1);
+
 		layout->addWidget(mCodeEditor);
+
+		
 
 		updateButton = new QPushButton("update", this);
 		layout->addWidget(updateButton);
 
 
 		connect(updateButton, &QPushButton::clicked, this, [this]() {
-			const std::string& code = mCodeEditor->toPlainText().toStdString();
+			const std::string& code = mCodeEditor->text().toStdString();
 			execute(code);
 			});
 
@@ -69,35 +102,27 @@ namespace dyno
 
 	void PConsoleWidget::execute(const std::string& src)
 	{
-		bool flag = true;
 		py::scoped_interpreter guard{};
 
 		try {
 			auto locals = py::dict();
 			py::exec(src, py::globals(), locals);
 
-			std::cout << "python" << std::endl;
-
 			if (locals.contains("scn"))
 			{
 				auto scene = locals["scn"].cast<std::shared_ptr<dyno::SceneGraph>>();
 				if (scene)
 				{
-					std::cout << "Scn" << std::endl;
+					PSimulationThread::instance()->createNewScene(scene);
 				}
 			}
 			else
 			{
-				
-				//Wt::WMessageBox::show("Error", "Please define 'scn = dyno.SceneGraph()'", Wt::StandardButton::Ok);
+				std::cout << getPythonErrorDetails() << std::endl;
 			}
 		}
 		catch (const std::exception& e) {
-			//Wt::WMessageBox::show("Error", e.what(), Wt::StandardButton::Ok);
-
-			std::cout << e.what() << std::endl;
-			std::cout << getPythonErrorDetails() << std::endl;
-			flag = false;
+			QMessageBox::critical(nullptr, "Error", e.what());
 		}
 	}
 

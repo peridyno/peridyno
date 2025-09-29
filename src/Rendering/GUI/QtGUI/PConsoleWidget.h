@@ -8,6 +8,10 @@
 
 #include <QTextEdit.h>
 #include <QPushButton.h>
+#include <QMessageBox.h>
+
+#include <Qsci/qsciscintilla.h>
+#include <Qsci/qscilexerpython.h>
 
 
 // Slots macro definition conflicts with Python
@@ -43,7 +47,8 @@ namespace dyno
 		std::string getPythonErrorDetails();
 
 	private:
-		QTextEdit* mCodeEditor;
+		QsciScintilla* mCodeEditor;
+		QsciLexerPython* mPythonLexer;
 		QPushButton* updateButton;
 	};
 

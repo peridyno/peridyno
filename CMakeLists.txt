@@ -136,7 +136,7 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	#option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
 	#option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
 	option(PERIDYNO_PLUGIN_ALL "Enable binding the plugin libraries" ON)
-	option(PERIDYNO_PYTHON_BINDING "Enable python binding with pybind11" OFF)
+	option(PERIDYNO_PYTHON_BINDING "Enable python binding with pybind11" ON)
 	if(PERIDYNO_PYTHON_BINDING)
 	    add_subdirectory(python)
 	endif()
@@ -162,10 +162,10 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	# VTK rendering support, off by default
 	option(PERIDYNO_PLUGIN_VTK "Enable VTK plugin for visualization" OFF)
 	# Qt GUI support, off by default
-	option(PERIDYNO_QT_GUI "Enable building Qt{5 or 6}-based applications" OFF)
+	option(PERIDYNO_QT_GUI "Enable building Qt{5 or 6}-based applications" ON)
 
 	# Wt GUI to support web applications, off by default
-	option(PERIDYNO_WT_GUI "Enable building web applications" OFF)
+	option(PERIDYNO_WT_GUI "Enable building web applications" ON)
 
 	# Add Plugin folder
 	if(PERIDYNO_PLUGIN_ALL)

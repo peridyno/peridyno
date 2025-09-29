@@ -25,3 +25,6 @@
 [submodule "data"]
 	path = data
 	url = https://gitee.com/peridyno/data.git
+[submodule "external/qscintilla"]
+	path = external/qscintilla
+	url = https://gitee.com/unibeam/qscintilla.git

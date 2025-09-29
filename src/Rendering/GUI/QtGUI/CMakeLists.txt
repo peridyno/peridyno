@@ -122,6 +122,9 @@ target_link_libraries(${LIB_NAME} PUBLIC
 add_subdirectory(${PROJECT_SOURCE_DIR}/external/pybind11 pybind11)
 target_link_libraries(${LIB_NAME} PRIVATE pybind11::embed)
 
+add_subdirectory(${PROJECT_SOURCE_DIR}/external/qscintilla/src qscintilla)
+target_link_libraries(${LIB_NAME} PRIVATE qscintilla)
+
 target_compile_definitions(${LIB_NAME} PRIVATE PERIDYNO_QTGUI_EXPORTS)
 
 if (${QT_VERSION_MAJOR} EQUAL 6)
