@@ -59,14 +59,36 @@ namespace dyno
 		mCodeEditor->setMinimumSize(100, 100);
 
 		mPythonLexer = new QsciLexerPython(mCodeEditor);
+		applyDarkTheme(mPythonLexer);
 		mCodeEditor->setLexer(mPythonLexer);
 
+		QsciAPIs* apis = new QsciAPIs(mPythonLexer);
+		apis->add(QString("import"));
+		apis->add(QString("QtPathHelper"));
+		apis->add(QString("PyPeridyno"));
+		apis->add(QString("scn"));
+		apis->add(QString("dyno"));
+		apis->add(QString("addNode"));
+		apis->add(QString("SceneGraph"));
+		apis->add(QString("connect"));
+		apis->add(QString("pushModule"));
+		apis->add(QString("setValue"));
+		apis->add(QString("Vector3f"));
+		apis->prepare();
+
 		mCodeEditor->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+		mCodeEditor->setCaretForegroundColor(QColor("#d4d4d4"));
 		
 		// line numbers
-		mCodeEditor->setMarginsBackgroundColor(QColor("#f0f0f0"));
+		mCodeEditor->setMarginsBackgroundColor(QColor("#454545"));
+		mCodeEditor->setMarginsForegroundColor(QColor("#d4d4d4"));
 		mCodeEditor->setMarginLineNumbers(1, true);
 		mCodeEditor->setMarginWidth(1, "0000");
+
+		// auto completion
+		mCodeEditor->setAutoCompletionSource(QsciScintilla::AcsAll);
+		mCodeEditor->setAutoCompletionCaseSensitivity(true);
+		mCodeEditor->setAutoCompletionThreshold(1);
 
 		// indentation
 		mCodeEditor->setIndentationsUseTabs(false);
@@ -74,20 +96,12 @@ namespace dyno
 		mCodeEditor->setTabWidth(4);
 		mCodeEditor->setAutoIndent(true);
 
-		// brace match
-		mCodeEditor->setBraceMatching(QsciScintilla::SloppyBraceMatch);
-		mCodeEditor->setMatchedBraceBackgroundColor(QColor("#ffff00"));
+		// font
+		mCodeEditor->SendScintilla(QsciScintilla::SCI_SETCODEPAGE, QsciScintilla::SC_CP_UTF8);
 
-		mCodeEditor->setFolding(QsciScintilla::BoxedTreeFoldStyle);
-
-		// auto completion
-		mCodeEditor->setAutoCompletionSource(QsciScintilla::AcsAll);
-		mCodeEditor->setAutoCompletionCaseSensitivity(false);
-		mCodeEditor->setAutoCompletionThreshold(1);
+		mCodeEditor->setMouseTracking(true);
 
 		layout->addWidget(mCodeEditor);
-
-		
 
 		updateButton = new QPushButton("update", this);
 		layout->addWidget(updateButton);
@@ -179,6 +193,81 @@ namespace dyno
 		PyErr_Clear();
 
 		return errorMsg;
+	}
+
+	void PConsoleWidget::applyDarkTheme(QsciLexerPython* lexer)
+	{
+		if (!lexer)
+			return;
+
+		// set font
+		QFont font("Courier New");
+		lexer->setFont(font);
+
+		// set color
+		QColor backgroundColor("#1c1c1c");
+		QColor defaultColor("#d4d4d4");
+		QColor commentColor(87, 166, 74);
+		QColor numberColor(181, 206, 168);
+		QColor stringColor(206, 145, 120);
+		QColor keywordColor(86, 156, 214);
+		QColor classNameColor(78, 201, 176);
+		QColor functionColor(220, 220, 170);
+		QColor operatorColor(180, 180, 180);
+		QColor identifierColor(220, 220, 220);
+		QColor decoratorColor(197, 134, 192);
+		QColor fstringColor(214, 157, 133);
+		QColor highlightedIdColor(255, 215, 0);
+		QColor unclosedStringColor(255, 100, 100);
+
+		// set background color
+		lexer->setPaper(backgroundColor);
+		lexer->setDefaultPaper(backgroundColor);
+
+		// set font color
+		lexer->setColor(defaultColor);
+		lexer->setDefaultColor(defaultColor);
+
+		// comment
+		lexer->setColor(commentColor, 1);                    // Comment
+		lexer->setColor(commentColor, 12);                   // CommentBlock
+
+		// number
+		lexer->setColor(numberColor, 2);                     // Number
+
+		// string
+		lexer->setColor(stringColor, 3);                     // DoubleQuotedString
+		lexer->setColor(stringColor, 4);                     // SingleQuotedString
+		lexer->setColor(stringColor, 6);                     // TripleSingleQuotedString
+		lexer->setColor(stringColor, 7);                     // TripleDoubleQuotedString
+
+		// f-string
+		lexer->setColor(fstringColor, 16);                   // DoubleQuotedFString
+		lexer->setColor(fstringColor, 17);                   // SingleQuotedFString
+		lexer->setColor(fstringColor, 18);                   // TripleSingleQuotedFString
+		lexer->setColor(fstringColor, 19);                   // TripleDoubleQuotedFString
+
+		// keyword
+		lexer->setColor(keywordColor, 5);                    // Keyword
+		lexer->setColor(classNameColor, 8);                  // ClassName
+		lexer->setColor(functionColor, 9);                   // FunctionMethodName
+		lexer->setColor(operatorColor, 10);                  // Operator
+		lexer->setColor(identifierColor, 11);                // Identifier
+		lexer->setColor(highlightedIdColor, 14);             // HighlightedIdentifier
+		lexer->setColor(decoratorColor, 15);                 // Decorator
+
+		// error word
+		lexer->setColor(unclosedStringColor, 13);            // UnclosedString
+
+		// set font
+		lexer->setFont(font, 8);                             // ClassName
+		lexer->setFont(font, 9);                             // FunctionMethodName
+
+		//// keyword bold font
+		//QFont boldFont("Courier New", 10);
+		//boldFont.setBold(true);
+		//lexer->setFont(boldFont, 5);
+
 	}
 
 	QContentBrowser::QContentBrowser(QWidget* parent /*= nullptr*/)

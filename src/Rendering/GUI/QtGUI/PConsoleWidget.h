@@ -12,6 +12,9 @@
 
 #include <Qsci/qsciscintilla.h>
 #include <Qsci/qscilexerpython.h>
+#include <Qsci/qsciapis.h>
+#include <QApplication>
+#include <QWheelEvent>
 
 
 // Slots macro definition conflicts with Python
@@ -45,6 +48,10 @@ namespace dyno
 
 	private:
 		std::string getPythonErrorDetails();
+
+		void applyDarkTheme(QsciLexerPython* lexer);
+
+		void applyLightTheme(QsciLexerPython* lexer);
 
 	private:
 		QsciScintilla* mCodeEditor;
