@@ -15,12 +15,13 @@
 #undef slots
 #endif
 
+#ifdef PERIDYNO_QT_PYTHON_CONSOLE
 // python
 #include <pybind11/embed.h>
 namespace py = pybind11;
+#endif
 
 #define slots Q_SLOTS
-
 
 #ifdef PERIDYNO_QT_PYTHON_CONSOLE
 
@@ -42,13 +43,13 @@ namespace dyno
 
 	signals:
 
+#ifdef PERIDYNO_QT_PYTHON_CONSOLE
 	public Q_SLOTS:
 		void execute(const std::string& src);
 
 	private:
 		std::string getPythonErrorDetails();
 
-#ifdef PERIDYNO_QT_PYTHON_CONSOLE
 		void applyDarkTheme(QsciLexerPython* lexer);
 
 		void applyLightTheme(QsciLexerPython* lexer);

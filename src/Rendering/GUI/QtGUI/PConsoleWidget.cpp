@@ -45,8 +45,6 @@ namespace dyno
 		}
 	};
 
-#ifdef PERIDYNO_QT_PYTHON_CONSOLE
-
 	PConsoleWidget::PConsoleWidget(QWidget* parent) :
 		QWidget(parent)
 	{
@@ -54,6 +52,7 @@ namespace dyno
 		QVBoxLayout* layout = new QVBoxLayout(this);
 		this->setLayout(layout);
 
+#ifdef PERIDYNO_QT_PYTHON_CONSOLE
 		mCodeEditor = new QsciScintilla(this);
 		mCodeEditor->setObjectName("Python Code");
 
@@ -112,14 +111,14 @@ namespace dyno
 			const std::string& code = mCodeEditor->text().toStdString();
 			execute(code);
 			});
-
+#endif
 	}
 
 	PConsoleWidget::~PConsoleWidget()
 	{
 	}
 
-
+#ifdef PERIDYNO_QT_PYTHON_CONSOLE
 	void PConsoleWidget::execute(const std::string& src)
 	{
 		py::scoped_interpreter guard{};

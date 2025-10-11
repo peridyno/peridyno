@@ -121,9 +121,6 @@ target_link_libraries(${LIB_NAME} PUBLIC
 
 target_compile_definitions(${LIB_NAME} PRIVATE PERIDYNO_QTGUI_EXPORTS)
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/external/pybind11 pybind11)
-target_link_libraries(${LIB_NAME} PRIVATE pybind11::embed)
-
 if (${QT_VERSION_MAJOR} EQUAL 6)
     target_link_libraries(${LIB_NAME} PUBLIC Qt6::Core5Compat Qt6::OpenGLWidgets)  
 
@@ -131,8 +128,12 @@ if (${QT_VERSION_MAJOR} EQUAL 6)
     
     if(PERIDYNO_QT_PYTHON_CONSOLE)
         add_compile_definitions(PERIDYNO_QT_PYTHON_CONSOLE)
+
+        add_subdirectory(${PROJECT_SOURCE_DIR}/external/pybind11 pybind11)
         add_subdirectory(${PROJECT_SOURCE_DIR}/external/qscintilla/src qscintilla)
+        
         target_link_libraries(${LIB_NAME} PRIVATE qscintilla)
+        target_link_libraries(${LIB_NAME} PRIVATE pybind11::embed)
     endif()
 endif()
 
