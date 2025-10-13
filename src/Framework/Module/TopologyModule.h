@@ -19,6 +19,40 @@
 
 namespace dyno
 {
+	struct NBoundingBox
+	{
+		NBoundingBox() {
+			lower = Vec3f(-1);
+			upper = Vec3f(1);
+		}
+
+		NBoundingBox(Vec3f lo, Vec3f hi) {
+			lower = lo;
+			upper = hi;
+		}
+
+		Vec3f lower = Vec3f(-1);
+		Vec3f upper = Vec3f(1);
+
+		NBoundingBox& join(const NBoundingBox box) {
+			lower = lower.minimum(box.lower);
+			upper = upper.maximum(box.upper);
+
+			return *this;
+		}
+
+		NBoundingBox& intersect(const NBoundingBox box) {
+			lower = lower.maximum(box.lower);
+			upper = upper.minimum(box.upper);
+
+			return *this;
+		}
+
+		float maxLength() {
+			return std::max(upper[0] - lower[0], std::max(upper[1] - lower[1], upper[2] - lower[2]));
+		}
+	};
+
 	typedef int PointType;
 
 class TopologyModule : public OBase
@@ -65,6 +99,7 @@ public:
 	//std::string getModuleType() override { return "TopologyModule"; }
 
 	void update();
+	virtual NBoundingBox getTopologyBoundingBox() { return NBoundingBox(); };
 
 protected:
 
