@@ -13,6 +13,14 @@
 
 #include "Collision/Attribute.h"
 
+#include <set>
+
+#include <algorithm>
+
+#include <random>
+
+#include <optional>
+
 
 namespace dyno 
 {
@@ -42,6 +50,36 @@ namespace dyno
 		DArray<Vec3f> velocity,
 		DArray<Vec3f> angular_velocity,
 		DArray<Mat3f> inertia_init,
+		float dt
+	);
+
+	void updateGestureNoSelf(
+		DArray<Attribute> attribute,
+		DArray<Vec3f> initPos,
+		DArray<Vec3f> pos,
+		DArray<Quat1f> initRotQuat,
+		DArray<Quat1f> rotQuat,
+		DArray<Mat3f> initRotMat,
+		DArray<Mat3f> rotMat,
+		DArray<Vec3f> velocity,
+		DArray<Vec3f> angular_velocity,
+		float dt
+	);
+
+	void updateInitialGuess(
+		DArray<Attribute> attribute,
+		DArray<Vec3f> pos,
+		DArray<Quat1f> rotQuat,
+		DArray<Vec3f> normalPos,
+		DArray<Quat1f> normalRotQuat,
+		DArray<Mat3f> rotMat,
+		DArray<Mat3f> inertia,
+		DArray<Vec3f> velocity,
+		DArray<Vec3f> pre_velocity,
+		DArray<Vec3f> angular_velocity,
+		DArray<Mat3f> inertia_init,
+		bool hasGravity,
+		Real Gravity,
 		float dt
 	);
 
@@ -151,6 +189,14 @@ namespace dyno
 	
 	void setUpContactAndFrictionConstraints(
 		DArray<TConstraintPair<float>> constraints,
+		DArray<TContactPair<float>> contactsInLocalFrame,
+		DArray<Vec3f> pos,
+		DArray<Mat3f> rotMat,
+		bool hasFriction
+	);
+
+	void setUpContactAndFrictionConstraintForces(
+		DArray<TConstraintForce<float>> constraintForces,
 		DArray<TContactPair<float>> contactsInLocalFrame,
 		DArray<Vec3f> pos,
 		DArray<Mat3f> rotMat,
@@ -469,4 +515,106 @@ namespace dyno
 		DArray<float>& CFM,
 		DArray<TConstraintPair<float>>& constraints
 	);
+
+
+	class DynamicGraphColoring {
+	public:
+		/**
+		 * @brief Default constructor.
+		 */
+		DynamicGraphColoring();
+
+		/**
+		 * @brief Initializes the graph with a given number of vertices and a list of edges.
+		 * @param num_v The number of vertices in the graph.
+		 * @param initial_edges A vector of pairs representing the initial edges.
+		 */
+		void initializeGraph(int num_v, const std::set<std::pair<int, int>>& initial_edges);
+
+		/**
+		 * @brief Performs the initial coloring of the graph.
+		 */
+		void performInitialColoring();
+
+		/**
+		 * @brief Applies a batch of edge additions and deletions to the graph and resolves conflicts.
+		 * @param add_edges A vector of pairs representing edges to be added.
+		 * @param delete_edges A vector of pairs representing edges to be deleted.
+		 */
+		void applyBatchUpdate(const std::set<std::pair<int, int>>& add_edges, const std::set<std::pair<int, int>>& delete_edges);
+
+		/**
+		 * @brief Gets the current coloring of the vertices.
+		 * @return A const reference to the vector of colors.
+		 */
+		const std::vector<int>& getColors() const { return colors; }
+
+		const std::vector<std::vector<int>>& getCategories() const { return categories; }
+
+		/**
+		 * @brief Gets the number of colors currently used.
+		 * @return The number of colors.
+		 */
+		int getNumColors() const { return num_colors; }
+
+		/**
+		 * @brief Checks if the graph structure has been initialized.
+		 * @return True if initializeGraph() has been called, false otherwise.
+		 */
+		bool isGraphInitialized() const {
+			return graph_initialized_;
+		}
+
+	private:
+		std::vector<std::vector<int>> graph;      // Adjacency list representation of the graph
+		std::vector<int> colors;                  // Stores the color of each vertex
+		std::vector<std::vector<int>> categories; // Vertices grouped by color
+		int num_vertices;                         // Number of vertices
+		int num_colors;                           // Number of colors used
+		bool graph_initialized_ = false;
+
+		/**
+		 * @brief Rebuilds the 'categories' data structure based on the current 'colors'.
+		 */
+		void rebuildCategories();
+
+		/**
+		 * @brief Finds a new valid color for a given node.
+		 * @param node The vertex to find a new color for.
+		 * @return An optional integer representing the new color. Returns an empty optional if no new color is found.
+		 */
+		std::optional<int> findNewColorFor(int node);
+
+		/**
+		 * @brief Checks if a node is in conflict (shares a color with a neighbor).
+		 * @param node The vertex to check.
+		 * @return True if the node is in conflict, false otherwise.
+		 */
+		bool isConflictNode(int node);
+
+		/**
+		 * @brief Updates the color of a node and the corresponding data structures.
+		 * @param node The vertex to update.
+		 * @param old_color The previous color of the vertex.
+		 * @param new_color The new color for the vertex.
+		 */
+		void updateNodeColor(int node, int old_color, int new_color);
+
+		// --- Helper functions for coloring ---
+
+		std::vector<int> orderedGreedyColoring(const std::vector<std::vector<int>>& graph);
+
+		void balanceColoring(const std::vector<std::vector<int>>& graph, std::vector<int>& colors, float goal_ratio = 1.5, int maxAttempts = 1000);;
+	};
+
+	void constraintsMappingToEdges(DArray<TConstraintPair<float>> constraints, std::vector<std::pair<int, int>>& edges);
+
+	void constraintForceMappingToEdges(
+		DArray<TConstraintForce<float>> constraintForces,
+		std::set<std::pair<int, int>>& edges
+	);
+
+	void reduceContacts(DArray<TContactPair<float>>& contacts, float normalThreshold, float penetrationThreshold);
+
+	void reduceContacts_Optimized(DArray<TContactPair<float>>& contacts, float normalThreshold, float penetrationThreshold);
 }

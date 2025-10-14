@@ -1,4 +1,10 @@
 #include "SharedFuncsForRigidBody.h"
+#define CLAMP(value, min_val, max_val) \
+    minimum(maximum((value), (min_val)), (max_val))
+#include <thrust/sort.h>
+#include <thrust/copy.h>
+#include <thrust/device_vector.h>
+#include <thrust/iterator/zip_iterator.h>
 
 namespace dyno
 {
@@ -71,8 +77,8 @@ namespace dyno
 			velocity[tId] += impulse[2 * tId];
 			angular_velocity[tId] += impulse[2 * tId + 1];
 			//Damping
-			/*velocity[tId] *= 1.0f / (1.0f + dt * linearDamping);
-			angular_velocity[tId] *= 1.0f / (1.0f + dt * angularDamping);*/
+			velocity[tId] *= 1.0f / (1.0f + dt * linearDamping);
+			angular_velocity[tId] *= 1.0f / (1.0f + dt * angularDamping);
 		}
 	}
 
@@ -111,6 +117,120 @@ namespace dyno
 	* @param dt					time step
 	* This function update the gesture of rigids based on velocity and timeStep
 	*/
+	__global__ void SF_updateGestureNoSelf(
+		DArray<Attribute> attribute,
+		DArray<Vec3f> initPos,
+		DArray<Vec3f> pos,
+		DArray<Quat1f> rotQuat,
+		DArray<Quat1f> initRotQuat,
+		DArray<Mat3f> rotMat,
+		DArray<Mat3f> initRotMat,
+		DArray<Vec3f> velocity,
+		DArray<Vec3f> angular_velocity,
+		float dt
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= pos.size())
+			return;
+
+		if (!attribute[tId].isFixed())
+		{
+			pos[tId] = initPos[tId] + velocity[tId] * dt;
+
+			initRotQuat[tId].normalize();
+			rotQuat[tId] = initRotQuat[tId] + dt * 0.5f *
+				Quat1f(angular_velocity[tId][0], angular_velocity[tId][1], angular_velocity[tId][2], 0.0)
+				* (initRotQuat[tId]);
+			rotQuat[tId].normalize();
+
+			rotMat[tId] = rotQuat[tId].toMatrix3x3();
+		}
+	}
+
+	__global__ void SF_updateInitialGuess(
+		DArray<Attribute> attribute,
+		DArray<Vec3f> pos,
+		DArray<Quat1f> rotQuat,
+		DArray<Vec3f> normalPos,
+		DArray<Quat1f> normalRotQuat,
+		DArray<Mat3f> rotMat,
+		DArray<Mat3f> inertia,
+		DArray<Vec3f> velocity,
+		DArray<Vec3f> pre_velocity,
+		DArray<Vec3f> angular_velocity,
+		DArray<Mat3f> inertia_init,
+		bool hasGravity,
+		Real Gravity,
+		float dt
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= pos.size())
+			return;
+
+		if (!attribute[tId].isFixed())
+		{
+			if (!hasGravity) {
+				Gravity = 0.0;
+			}
+			// normal pos
+			normalPos[tId] = pos[tId] + velocity[tId] * dt + Vec3f(0, Gravity, 0) * dt * dt;
+			normalRotQuat[tId] = rotQuat[tId] + dt * 0.5f * Quat1f(angular_velocity[tId][0], angular_velocity[tId][1], angular_velocity[tId][2], 0.0)
+				* (rotQuat[tId]);
+			normalRotQuat[tId].normalize();
+
+			//initial guess
+			Vec3f accel = (velocity[tId] - pre_velocity[tId]) / dt;
+			Real accelExt = accel.y * sign(Gravity);
+			Real accelWeight = CLAMP(accelExt / abs(Gravity), 0.0f, 1.0f);
+			if (!isfinite(accelWeight)) accelWeight = 0.0f;
+
+			pos[tId] = pos[tId] + velocity[tId] * dt + Vec3f(0, Gravity, 0) * dt * dt * accelWeight;
+			rotQuat[tId] = normalRotQuat[tId];
+			rotMat[tId] = rotQuat[tId].toMatrix3x3();
+			inertia[tId] = rotMat[tId] * inertia_init[tId] * rotMat[tId].inverse();
+		}
+
+	}
+
+	void updateInitialGuess(
+		DArray<Attribute> attribute,
+		DArray<Vec3f> pos,
+		DArray<Quat1f> rotQuat,
+		DArray<Vec3f> normalPos,
+		DArray<Quat1f> normalRotQuat,
+		DArray<Mat3f> rotMat,
+		DArray<Mat3f> inertia,
+		DArray<Vec3f> velocity,
+		DArray<Vec3f> pre_velocity,
+		DArray<Vec3f> angular_velocity,
+		DArray<Mat3f> inertia_init,
+		bool hasGravity,
+		Real Gravity,
+		float dt
+	)
+	{
+		cuExecute(pos.size(),
+			SF_updateInitialGuess,
+			attribute,
+			pos,
+			rotQuat,
+			normalPos,
+			normalRotQuat,
+			rotMat,
+			inertia,
+			velocity,
+			pre_velocity,
+			angular_velocity,
+			inertia_init,
+			hasGravity,
+			Gravity,
+			dt);
+	}
+
+
+
 	__global__ void SF_updateGesture(
 		DArray<Attribute> attribute,
 		DArray<Vec3f> pos,
@@ -167,6 +287,33 @@ namespace dyno
 			velocity,
 			angular_velocity,
 			inertia_init,
+			dt);
+	}
+
+	void updateGestureNoSelf(
+		DArray<Attribute> attribute,
+		DArray<Vec3f> initPos,
+		DArray<Vec3f> pos,
+		DArray<Quat1f> initRotQuat,
+		DArray<Quat1f> rotQuat,
+		DArray<Mat3f> initRotMat,
+		DArray<Mat3f> rotMat,
+		DArray<Vec3f> velocity,
+		DArray<Vec3f> angular_velocity,
+		float dt
+	)
+	{
+		cuExecute(pos.size(),
+			SF_updateGestureNoSelf,
+			attribute,
+			initPos,
+			pos,
+			initRotQuat,
+			rotQuat,
+			initRotMat,
+			rotMat,
+			velocity,
+			angular_velocity,
 			dt);
 	}
 
@@ -653,6 +800,8 @@ namespace dyno
 			B[4 * tId + 3] = Coord(0);
 		}
 	}
+
+
 
 	template<typename Coord, typename Matrix, typename Constraint>
 	__global__ void SF_calculateJacobianMatrixForNJS(
@@ -2376,6 +2525,91 @@ namespace dyno
 		}
 	}
 
+	template<typename Coord, typename Matrix, typename Contact, typename ConstraintForce>
+	__global__ void SF_setUpContactAndFrictionConstraintForces(
+		DArray<ConstraintForce> constraintForces,
+		DArray<Contact> contactsInLocalFrame,
+		DArray<Coord> pos,
+		DArray<Matrix> rotMat,
+		bool hasFriction
+	)
+	{
+		int tId = threadIdx.x + blockDim.x * blockIdx.x;
+
+		int contact_size = contactsInLocalFrame.size();
+		if (tId >= contact_size) return;
+
+		int idx1 = contactsInLocalFrame[tId].bodyId1;
+		int idx2 = contactsInLocalFrame[tId].bodyId2;
+
+		constraintForces[tId * 2].bodyId = idx1;
+		constraintForces[tId * 2].FrombodyId = idx2;
+		constraintForces[tId * 2 + 1].bodyId = idx2;
+		constraintForces[tId * 2 + 1].FrombodyId = idx1;
+
+		Coord pos1 = pos[idx1];
+		Coord r1 = rotMat[idx1] * contactsInLocalFrame[tId].pos1;
+		Coord pos2 = idx2 != INVALID ? pos[idx2] : Coord(0);
+		Coord r2 = idx2 != INVALID ? rotMat[idx2] * contactsInLocalFrame[tId].pos2 : contactsInLocalFrame[tId].pos2;
+
+		Coord normal1 = contactsInLocalFrame[tId].normal1;
+		Coord normal2, normal3;
+
+		if (abs(normal1.x) >= 0.57735) {
+			normal2 = Coord(normal1.y, -normal1.x, 0.0);
+		}
+		else {
+			normal2 = Coord(0.0, normal1.z, -normal1.y);
+		}
+		normal2.normalize();
+
+		normal3 = normal1.cross(normal2);
+		normal3.normalize();
+		
+		// calculateConstraint and Jacobian
+		constraintForces[tId * 2].bodyId = idx1;
+		constraintForces[tId * 2].FrombodyId = idx2;
+		constraintForces[tId * 2].C[0] = minimum(contactsInLocalFrame[tId].interpenetration + (pos2 + r2 - pos1 - r1).dot(contactsInLocalFrame[tId].normal1), 0.0f);
+		constraintForces[tId * 2].J[0] = -normal1;
+		constraintForces[tId * 2].J[1] = -r1.cross(normal1);
+		constraintForces[tId * 2].Penalty = Coord(1000, 0, 0);
+		constraintForces[tId * 2].Lambda = Coord(0);
+		constraintForces[tId * 2].type = ConstraintForceType::CF_CONTACT_NOFRICTION;
+
+		constraintForces[tId * 2 + 1].bodyId = idx2;
+		constraintForces[tId * 2 + 1].FrombodyId = idx1;
+		constraintForces[tId * 2 + 1].C[0] = minimum(contactsInLocalFrame[tId].interpenetration + (pos2 + r2 - pos1 - r1).dot(contactsInLocalFrame[tId].normal1), 0.0f);
+		constraintForces[tId * 2 + 1].J[0] = normal1;
+		constraintForces[tId * 2 + 1].J[1] = r2.cross(normal1);
+		constraintForces[tId * 2 + 1].Penalty = Coord(1000, 0, 0);
+		constraintForces[tId * 2 + 1].Lambda = Coord(0);
+		constraintForces[tId * 2 + 1].type = ConstraintForceType::CF_CONTACT_NOFRICTION;
+
+		if (hasFriction) {
+			constraintForces[tId * 2].C[1] = (pos2 + r2 - pos1 - r2).dot(normal2);
+			constraintForces[tId * 2].C[2] = (pos2 + r2 - pos1 - r2).dot(normal3);
+			constraintForces[tId * 2].J[2] = -normal2;
+			constraintForces[tId * 2].J[3] = -r1.cross(normal2);
+			constraintForces[tId * 2].J[4] = -normal3;
+			constraintForces[tId * 2].J[5] = -r1.cross(normal3);
+			constraintForces[tId * 2].Penalty = Coord(1000);
+			constraintForces[tId * 2].Lambda = Coord(0);
+			constraintForces[tId * 2].type = ConstraintForceType::CF_CONTACT_FRICTION;
+
+			constraintForces[tId * 2 + 1].C[1] = (pos2 + r2 - pos1 - r2).dot(normal2);
+			constraintForces[tId * 2 + 1].C[2] = (pos2 + r2 - pos1 - r2).dot(normal3);
+			constraintForces[tId * 2 + 1].J[2] = normal2;
+			constraintForces[tId * 2 + 1].J[3] = r2.cross(normal2);
+			constraintForces[tId * 2 + 1].J[4] = normal3;
+			constraintForces[tId * 2 + 1].J[5] = r2.cross(normal3);
+			constraintForces[tId * 2 + 1].Penalty = Coord(1000);
+			constraintForces[tId * 2 + 1].Lambda = Coord(0);
+			constraintForces[tId * 2 + 1].type = ConstraintForceType::CF_CONTACT_FRICTION;
+		}
+		constraintForces[tId * 2].isValid = true;
+	}
+
+
 	void setUpContactAndFrictionConstraints(
 		DArray<TConstraintPair<float>> constraints,
 		DArray<TContactPair<float>> contactsInLocalFrame,
@@ -2391,6 +2625,24 @@ namespace dyno
 			pos,
 			rotMat,
 			hasFriction);
+	}
+
+	void setUpContactAndFrictionConstraintForces(
+		DArray<TConstraintForce<float>> constraintForces,
+		DArray<TContactPair<float>> contactsInLocalFrame,
+		DArray<Vec3f> pos,
+		DArray<Mat3f> rotMat,
+		bool hasFriction
+	)
+	{
+		cuExecute(contactsInLocalFrame.size(),
+			SF_setUpContactAndFrictionConstraintForces,
+			constraintForces,
+			contactsInLocalFrame,
+			pos,
+			rotMat,
+			hasFriction);
+
 	}
 
 	/**
@@ -5293,4 +5545,550 @@ namespace dyno
 			constraints);
 	}
 
+
+	std::vector<int> DynamicGraphColoring:: orderedGreedyColoring(const std::vector<std::vector<int>>& graph) {
+		const int num_vertices = graph.size();
+		if(num_vertices == 0) {
+			return {};
+		}
+
+		std::vector<int> colors(num_vertices, -1); // -1 means uncolored
+		std::vector<int> degree(num_vertices);
+		std::vector<std::list<int>::iterator> vertex_iterators(num_vertices);
+		std::vector<std::list<int>> color_buckets(num_vertices);
+
+		int max_degree = 0;
+
+		for (int i = 0; i < num_vertices; ++i) {
+			degree[i] = graph[i].size();
+			color_buckets[degree[i]].push_front(i);
+			vertex_iterators[i] = color_buckets[degree[i]].begin();
+			if(degree[i] > max_degree) {
+				max_degree = degree[i];
+			}
+		}
+
+		std::vector<int> processing_order;
+		processing_order.reserve(num_vertices);
+		int min_degree_idx = 0;
+
+		for (int i = 0; i < num_vertices; ++i) {
+			while(min_degree_idx <= max_degree && color_buckets[min_degree_idx].empty()) {
+				++min_degree_idx;
+			}
+
+			if(min_degree_idx > max_degree) {
+				break; // No more vertices to process
+			}
+
+			int current_vertex = color_buckets[min_degree_idx].front();
+			color_buckets[min_degree_idx].pop_front();
+			processing_order.push_back(current_vertex);
+			degree[current_vertex] = -1; // Mark as processed
+
+			for (int neighbor : graph[current_vertex]) {
+				if(degree[neighbor] != -1) {
+					int old_degree = degree[neighbor];
+					color_buckets[old_degree].erase(vertex_iterators[neighbor]);
+					degree[neighbor]--;
+					int new_degree = degree[neighbor];
+					color_buckets[new_degree].push_front(neighbor);
+					vertex_iterators[neighbor] = color_buckets[new_degree].begin();
+					if(new_degree < min_degree_idx) {
+						min_degree_idx = new_degree;
+					}
+				}
+			}
+		}
+
+		int max_color_used = 0;
+		std::reverse(processing_order.begin(), processing_order.end());
+		for (int node_to_color : processing_order) {
+			std::vector<bool> used_colors(max_color_used + 2, false);
+			for (int neighbor : graph[node_to_color]) {
+				if (colors[neighbor] != -1) used_colors[colors[neighbor]] = true;
+			}
+			int node_color = 0;
+			while (node_color < used_colors.size() && used_colors[node_color]) node_color++;
+			colors[node_to_color] = node_color;
+			max_color_used = std::max(max_color_used, node_color);
+		}
+
+		return colors;
+	}
+
+
+	void DynamicGraphColoring::balanceColoring(const std::vector<std::vector<int>>& graph, std::vector<int>& colors, float goal_ratio, int maxAttempts) {
+		if(colors.empty()) {
+			return; // No colors to balance
+		}
+		int num_colors = *std::max_element(colors.begin(), colors.end()) + 1;
+		if(num_colors <= 1) {
+			return; // No need to balance if there's only one color
+		}
+
+		std::vector<std::vector<int>> categories(num_colors);
+
+		for (int i = 0; i < colors.size(); ++i) {
+			if(colors[i] >= 0)
+				categories[colors[i]].push_back(i);
+		}
+
+		std::mt19937 gen(std::random_device{}());
+		for (int attempt = 0; attempt < maxAttempts; ++attempt) {
+			int biggest_idx = -1, smallest_idx = -1;
+			size_t max_size = 0, min_size = colors.size() + 1;
+			for (int i = 0; i < num_colors; ++i) {
+				if (categories[i].size() > max_size) {
+					max_size = categories[i].size();
+					biggest_idx = i;
+				}
+				if(!categories[i].empty() && categories[i].size() < min_size) {
+					min_size = categories[i].size();
+					smallest_idx = i;
+				}
+			}
+
+			if(biggest_idx == -1 || smallest_idx == -1 || biggest_idx == smallest_idx) {
+				break; // No more balancing needed
+			}
+
+			if(min_size > 0 && (static_cast<float>(max_size) / min_size) <= goal_ratio) {
+				break; // Already balanced
+			}
+
+			auto& biggestCatNodes = categories[biggest_idx];
+			if (biggestCatNodes.empty()) continue;
+
+			std::uniform_int_distribution<> dis(0, biggestCatNodes.size() - 1);
+			int node_index_in_category = dis(gen);
+			int node_to_move = biggestCatNodes[node_index_in_category];
+
+			bool is_changeable = true;
+			for (int n : graph[node_to_move]) {
+				if (colors[n] == smallest_idx) {
+					is_changeable = false;
+					break;
+				}
+			}
+
+			if (is_changeable) {
+				colors[node_to_move] = smallest_idx;
+				categories[smallest_idx].push_back(node_to_move);
+				std::swap(biggestCatNodes[node_index_in_category], biggestCatNodes.back());
+				biggestCatNodes.pop_back();
+			}
+		}
+	}
+
+
+
+	DynamicGraphColoring::DynamicGraphColoring() : num_vertices(0), num_colors(0) {}
+
+	void DynamicGraphColoring::initializeGraph(int num_v, const std::set<std::pair<int, int>>& initial_edges) {
+		this->num_vertices = num_v;
+		graph.assign(num_vertices, std::vector<int>());
+
+		for (const auto& edge : initial_edges) {
+			if (edge.first < num_vertices && edge.second < num_vertices && edge.first >= 0 && edge.second >= 0) {
+				graph[edge.first].push_back(edge.second);
+				graph[edge.second].push_back(edge.first);
+			}
+		}
+		this->graph_initialized_ = true;
+	}
+
+	void DynamicGraphColoring::performInitialColoring() {
+		if (num_vertices == 0) return;
+
+		// Perform initial coloring
+		colors = orderedGreedyColoring(graph);
+		this->num_colors = colors.empty() ? 0 : *std::max_element(colors.begin(), colors.end()) + 1;
+
+		// Balance the coloring
+		balanceColoring(graph, colors);
+		this->num_colors = colors.empty() ? 0 : *std::max_element(colors.begin(), colors.end()) + 1;
+
+		// Rebuild internal data structures based on the new coloring
+		rebuildCategories();
+	}
+
+	void DynamicGraphColoring::applyBatchUpdate(const std::set<std::pair<int, int>>& add_edges, const std::set<std::pair<int, int>>& delete_edges) {
+		// Step 1: Update graph structure
+		for (const auto& edge : add_edges) {
+			int u = edge.first;
+			int v = edge.second;
+
+			if (u >= num_vertices || v >= num_vertices || u < 0 || v < 0 || u == v) continue;
+
+			if (std::find(graph[u].begin(), graph[u].end(), v) == graph[u].end()) {
+				graph[u].push_back(v);
+				graph[v].push_back(u);
+			}
+		}
+
+		for (const auto& edge : delete_edges) {
+			int u = edge.first;
+			int v = edge.second;
+
+			if (u >= num_vertices || v >= num_vertices || u < 0 || v < 0 || u == v) continue;
+
+			graph[u].erase(std::remove(graph[u].begin(), graph[u].end(), v), graph[u].end());
+			graph[v].erase(std::remove(graph[v].begin(), graph[v].end(), u), graph[v].end());
+		}
+
+		// Step 2: Conflict Detection
+		std::set<int> conflict_vertices;
+		for (const auto& edge : add_edges) {
+			if (colors[edge.first] == colors[edge.second]) {
+				// Add the vertex with the smaller degree to the conflict set for potential recoloring
+				if (graph[edge.first].size() < graph[edge.second].size()) {
+					conflict_vertices.insert(edge.first);
+				}
+				else {
+					conflict_vertices.insert(edge.second);
+				}
+			}
+		}
+
+		// Step 3: Conflict Resolution
+		for (int vertex : conflict_vertices) {
+			if (isConflictNode(vertex)) {
+				int old_color = colors[vertex];
+				std::optional<int> new_color_opt = findNewColorFor(vertex);
+				if (new_color_opt.has_value()) {
+					updateNodeColor(vertex, old_color, new_color_opt.value());
+				}
+			}
+		}
+
+		// Optionally, re-balance the coloring after updates
+		balanceColoring(graph, colors);
+		this->num_colors = colors.empty() ? 0 : *std::max_element(colors.begin(), colors.end()) + 1;
+		rebuildCategories(); // Rebuild categories after potential color changes
+	}
+
+	void DynamicGraphColoring::rebuildCategories() {
+		if (num_colors == 0) {
+			categories.clear();
+			return;
+		}
+		categories.assign(num_colors, std::vector<int>());
+		for (int i = 0; i < num_vertices; ++i) {
+			if (colors[i] >= 0) {
+				if (colors[i] >= categories.size()) {
+					categories.resize(colors[i] + 1);
+				}
+				categories[colors[i]].push_back(i);
+			}
+		}
+	}
+
+	std::optional<int> DynamicGraphColoring::findNewColorFor(int node) {
+		std::vector<bool> used_colors(num_colors, false);
+		for (int neighbor : graph[node]) {
+			if (colors[neighbor] != -1) {
+				used_colors[colors[neighbor]] = true;
+			}
+		}
+		for (int c = 0; c < num_colors; ++c) {
+			if (!used_colors[c]) {
+				return c;
+			}
+		}
+		// If no existing color is available, create a new one.
+		num_colors++;
+		return num_colors - 1;
+	}
+
+	bool DynamicGraphColoring::isConflictNode(int node) {
+		for (int neighbor : graph[node]) {
+			if (colors[node] == colors[neighbor]) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void DynamicGraphColoring::updateNodeColor(int node, int old_color, int new_color) {
+		colors[node] = new_color;
+
+		if (new_color >= categories.size()) {
+			categories.resize(new_color + 1);
+		}
+
+		// Remove node from its old color category
+		if (old_color != -1 && old_color < categories.size()) {
+			auto& old_cat_nodes = categories[old_color];
+			old_cat_nodes.erase(std::remove(old_cat_nodes.begin(), old_cat_nodes.end(), node), old_cat_nodes.end());
+		}
+
+		// Add node to its new color category
+		categories[new_color].push_back(node);
+	}
+
+
+	void constraintsMappingToEdges(DArray<TConstraintPair<float>> constraints, std::vector<std::pair<int, int>>& edges) {
+		CArray<TConstraintPair<float>> c_constraints;
+		c_constraints.assign(constraints);
+
+		std::set<std::pair<int, int>> unique_edges;
+
+		for (int i = 0; i < c_constraints.size(); ++i) {
+			auto constraint = c_constraints[i];
+			if (constraint.bodyId2 == INVALID || constraint.bodyId1 == constraint.bodyId2) {
+				continue;
+			}
+
+			int u = std::min(constraint.bodyId1, constraint.bodyId2);
+			int v = std::max(constraint.bodyId1, constraint.bodyId2);
+
+			unique_edges.insert({ u, v });
+		}
+		edges.assign(unique_edges.begin(), unique_edges.end());
+
+		c_constraints.clear();
+	}
+
+	void constraintForceMappingToEdges(
+		DArray<TConstraintForce<float>> constraintForces,
+		std::set<std::pair<int, int>>& edges
+	)
+	{
+		CArray<TConstraintForce<float>> c_constraint_forces;
+		c_constraint_forces.assign(constraintForces);
+
+
+		for (int i = 0; i < c_constraint_forces.size(); ++i) {
+			auto constraintForce = c_constraint_forces[i];
+			if (constraintForce.bodyId == INVALID || constraintForce.FrombodyId == INVALID) {
+				continue;
+			}
+
+			int u = std::min(constraintForce.bodyId, constraintForce.FrombodyId);
+			int v = std::max(constraintForce.bodyId, constraintForce.FrombodyId);
+
+			edges.insert({ u, v });
+		}
+
+		c_constraint_forces.clear();
+	}
+
+
+	template<typename Coord, typename Matrix, typename Quat, typename ConstraintForce>
+	__global__ void SF_IterationPosition(
+		DArray<Coord> pos,
+		DArray<Coord> init_pos,
+		DArray<Quat> quat,
+		DArray<Quat> init_quat,
+		DArray<Matrix> rotMat,
+		DArray<Matrix> initialInertia,
+		DArray<Matrix> inertia,
+		DArray<Real> mass,
+		DArray<ConstraintForce> constraintforces,
+		Real dt
+	)
+	{
+		int tId = threadIdx.x + blockIdx.x * blockDim.x;
+
+		if (tId >= pos.size()) {
+			return;
+		}
+		Real dt_inverse = 1.0 / dt;
+
+		// f is a 6 vector
+		Coord f1 = (-mass[tId] * Matrix::identityMatrix() * dt_inverse * dt_inverse) * (pos[tId] - init_pos[tId]);
+		Quat rot_diff = 2 * quat[tId] * init_quat[tId].inverse();
+		rot_diff.normalize();
+		Coord rot_diff_vec = Coord(rot_diff.x, rot_diff.y, rot_diff.z);
+		Coord f2 = (-inertia[tId] * dt_inverse * dt_inverse) * rot_diff_vec;
+
+		// H is a 6 * 6 matrix
+		Matrix H_1 = mass[tId] * Matrix::identityMatrix() * dt_inverse * dt_inverse;
+		Matrix H_2 = Matrix(0);
+		Matrix H_3 = Matrix(0);
+		Matrix H_4 = inertia[tId] * dt_inverse * dt_inverse;
+
+	}
+
+	__global__ void RC_MarkRedundantContacts(
+		DArray<TContactPair<float>> contacts,
+		DArray<int> keepFlags,
+		float normalThreshold,
+		float penetrationThreshold)
+	{
+		int i = threadIdx.x + blockIdx.x * blockDim.x;
+		if (i >= contacts.size()) return;
+
+		if (keepFlags[i] == 0) return;
+
+		auto& contact_i = contacts[i];
+
+		for (int j = 0; j < i; j++) {
+			if (keepFlags[j] == 0) continue;
+
+			auto& contact_j = contacts[j];
+
+			if (contact_i.bodyId1 == contact_j.bodyId1 && contact_i.bodyId2 == contact_j.bodyId2) {
+				float normalDiff = (contact_i.normal1 - contact_j.normal1).norm();
+
+
+				float penetrationDiff = abs(contact_i.interpenetration - contact_j.interpenetration);
+
+				if (normalDiff < normalThreshold && penetrationDiff < penetrationThreshold) {
+					keepFlags[i] = 0;
+					break;
+				}
+			}
+		}
+	}
+
+	__global__ void RC_CopyKeptContacts(
+		DArray<TContactPair<float>> contacts,
+		DArray<int> keepFlags,
+		DArray<TContactPair<float>> reducedContacts)
+	{
+		int i = threadIdx.x + blockIdx.x * blockDim.x;
+		if (i >= contacts.size()) return;
+
+		if (keepFlags[i] == 1) {
+
+			int targetIdx = 0;
+			for (int j = 0; j < i; j++) {
+				if (keepFlags[j] == 1) {
+					targetIdx++;
+				}
+			}
+
+			reducedContacts[targetIdx] = contacts[i];
+		}
+	}
+
+	void reduceContacts(DArray<TContactPair<float>>& contacts, float normalThreshold, float penetrationThreshold) {
+		if (contacts.size() <= 1) return;
+
+		std::vector<int> keepFlags_c(contacts.size(), 1);
+		CArray<int> keepFlags_cc;
+		keepFlags_cc.assign(keepFlags_c);
+		DArray<int> keepFlags;
+		keepFlags.assign(keepFlags_cc);
+
+		DArray<TContactPair<float>> reducedContacts;
+
+		cuExecute(contacts.size(),
+			RC_MarkRedundantContacts,
+			contacts,
+			keepFlags,
+			normalThreshold,
+			penetrationThreshold);
+
+		int keepCount = thrust::reduce(thrust::device, keepFlags.begin(), keepFlags.begin()+keepFlags.size(), 0, thrust::plus<int>());
+
+		reducedContacts.resize(keepCount);
+
+		cuExecute(contacts.size(),
+			RC_CopyKeptContacts,
+			contacts,
+			keepFlags,
+			reducedContacts);
+
+		contacts.assign(reducedContacts);
+	}
+
+
+	__global__ void RC_MarkRedundantContacts_Robust(
+		DArray<TContactPair<float>> contacts,
+		DArray<int> keepFlags,
+		float normalThreshold,      
+		float penetrationThreshold)
+	{
+		int i = threadIdx.x + blockIdx.x * blockDim.x;
+		if (i >= contacts.size()) return;
+
+		if (keepFlags[i] == 0) return;
+
+		auto& contact_i = contacts[i];
+		auto body_i_first = minimum(contact_i.bodyId1, contact_i.bodyId2);
+		auto body_i_second = maximum(contact_i.bodyId1, contact_i.bodyId2);
+
+		for (int j = 0; j < i; j++) {
+			auto& contact_j = contacts[j];
+
+			auto body_j_first = minimum(contact_j.bodyId1, contact_j.bodyId2);
+			auto body_j_second = maximum(contact_j.bodyId1, contact_j.bodyId2);
+
+			if (body_i_first == body_j_first && body_i_second == body_j_second) {
+
+				float dot_product = contact_i.normal1.dot(contact_j.normal1);
+
+				if (abs(dot_product) > normalThreshold) {
+					float penetrationDiff = abs(contact_i.interpenetration - contact_j.interpenetration);
+
+					if (penetrationDiff < penetrationThreshold) {
+						float posDiff = (contact_i.pos1 - contact_j.pos1).norm();
+						if (posDiff < penetrationThreshold) {
+							keepFlags[i] = 0;
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	__global__ void RC_CopyKeptContacts_Atomic(
+		DArray<TContactPair<float>> contacts,
+		DArray<int> keepFlags,
+		DArray<TContactPair<float>> reducedContacts,
+		DArray<int> d_write_idx) 
+	{
+		int i = threadIdx.x + blockIdx.x * blockDim.x;
+		if (i >= contacts.size()) return;
+
+		if (keepFlags[i] == 1) {
+			int targetIdx = atomicAdd(&d_write_idx[0], 1);
+			reducedContacts[targetIdx] = contacts[i];
+		}
+	}
+
+
+	void reduceContacts_Optimized(DArray<TContactPair<float>>& contacts, float normalThreshold, float penetrationThreshold) {
+		if (contacts.size() <= 1) return;
+		std::vector<int> keepFlags_h(contacts.size(), 1);
+		DArray<int> keepFlags;
+		keepFlags.assign(keepFlags_h); 
+
+		cuExecute(contacts.size(),
+			RC_MarkRedundantContacts_Robust,
+			contacts,
+			keepFlags,
+			normalThreshold,
+			penetrationThreshold);
+
+
+		int keepCount = thrust::reduce(thrust::device, keepFlags.begin(), keepFlags.begin() + keepFlags.size(), 0, thrust::plus<int>());
+
+		if (keepCount == contacts.size()) {
+			return; 
+		}
+		if (keepCount == 0) {
+			contacts.resize(0);
+			return;
+		}
+
+		DArray<TContactPair<float>> reducedContacts;
+		reducedContacts.resize(keepCount);
+
+		DArray<int> d_write_idx(1);
+		d_write_idx.reset();
+
+		cuExecute(contacts.size(),
+			RC_CopyKeptContacts_Atomic,
+			contacts,
+			keepFlags,
+			reducedContacts,
+			d_write_idx);
+
+		contacts.assign(reducedContacts);
+	}
 }

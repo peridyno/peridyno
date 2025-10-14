@@ -25,6 +25,8 @@ namespace dyno
 		DArray<Box3D> box,
 		DArray<Tet3D> tet,
 		DArray<Capsule3D> cap,
+		DArray<MedialCone3D> medialcone,
+		DArray<MedialSlab3D> medialslab,
 		DArray<int> count,
 		Coord hi,
 		Coord lo,
@@ -239,6 +241,175 @@ namespace dyno
 
 			count[pId] = cnt;
 		}
+		else if (eleType == ET_MEDIALCONE) // medialcone
+		{
+			int cnt = 0;
+
+			MedialCone3D cone_i = medialcone[pId - elementOffset.medialConeIndex()];
+
+			Coord v0 = cone_i.v[0];
+			Coord v1 = cone_i.v[1];
+			Real radius0 = cone_i.radius[0];
+			Real radius1 = cone_i.radius[1];
+
+			// Check v0 with radius0
+			if (v0.x + radius0 >= hi.x)
+			{
+				cnt++;
+			}
+			if (v0.x - radius0 <= lo.x)
+			{
+				cnt++;
+			}
+
+			if (v0.y + radius0 >= hi.y)
+			{
+				cnt++;
+			}
+			if (v0.y - radius0 <= lo.y)
+			{
+				cnt++;
+			}
+
+			if (v0.z + radius0 >= hi.z)
+			{
+				cnt++;
+			}
+			if (v0.z - radius0 <= lo.z)
+			{
+				cnt++;
+			}
+
+			// Check v1 with radius1
+			if (v1.x + radius1 >= hi.x)
+			{
+				cnt++;
+			}
+			if (v1.x - radius1 <= lo.x)
+			{
+				cnt++;
+			}
+
+			if (v1.y + radius1 >= hi.y)
+			{
+				cnt++;
+			}
+			if (v1.y - radius1 <= lo.y)
+			{
+				cnt++;
+			}
+
+			if (v1.z + radius1 >= hi.z)
+			{
+				cnt++;
+			}
+			if (v1.z - radius1 <= lo.z)
+			{
+				cnt++;
+			}
+
+			count[pId] = cnt;
+			}
+		else if (eleType == ET_MEDIALSLAB) // medialslab
+		{
+			int cnt = 0;
+
+			MedialSlab3D slab_i = medialslab[pId - elementOffset.medialSlabIndex()];
+
+			Coord v0 = slab_i.v[0];
+			Coord v1 = slab_i.v[1];
+			Coord v2 = slab_i.v[2];
+			Real radius0 = slab_i.radius[0];
+			Real radius1 = slab_i.radius[1];
+			Real radius2 = slab_i.radius[2];
+
+			// Check v0 with radius0
+			if (v0.x + radius0 >= hi.x)
+			{
+				cnt++;
+			}
+			if (v0.x - radius0 <= lo.x)
+			{
+				cnt++;
+			}
+
+			if (v0.y + radius0 >= hi.y)
+			{
+				cnt++;
+			}
+			if (v0.y - radius0 <= lo.y)
+			{
+				cnt++;
+			}
+
+			if (v0.z + radius0 >= hi.z)
+			{
+				cnt++;
+			}
+			if (v0.z - radius0 <= lo.z)
+			{
+				cnt++;
+			}
+
+			// Check v1 with radius1
+			if (v1.x + radius1 >= hi.x)
+			{
+				cnt++;
+			}
+			if (v1.x - radius1 <= lo.x)
+			{
+				cnt++;
+			}
+
+			if (v1.y + radius1 >= hi.y)
+			{
+				cnt++;
+			}
+			if (v1.y - radius1 <= lo.y)
+			{
+				cnt++;
+			}
+
+			if (v1.z + radius1 >= hi.z)
+			{
+				cnt++;
+			}
+			if (v1.z - radius1 <= lo.z)
+			{
+				cnt++;
+			}
+
+			// Check v2 with radius2
+			if (v2.x + radius2 >= hi.x)
+			{
+				cnt++;
+			}
+			if (v2.x - radius2 <= lo.x)
+			{
+				cnt++;
+			}
+
+			if (v2.y + radius2 >= hi.y)
+			{
+				cnt++;
+			}
+			if (v2.y - radius2 <= lo.y)
+			{
+				cnt++;
+			}
+
+			if (v2.z + radius2 >= hi.z)
+			{
+				cnt++;
+			}
+			if (v2.z - radius2 <= lo.z)
+			{
+				cnt++;
+			}
+
+			count[pId] = cnt;
+			}
+
 	}
 
 	template <typename Coord, typename ContactPair>
@@ -247,6 +418,8 @@ namespace dyno
 		DArray<Box3D> box,
 		DArray<Tet3D> tet,
 		DArray<Capsule3D> cap,
+		DArray<MedialCone3D> medialcone,
+		DArray<MedialSlab3D> medialslab,
 		DArray<int> count,
 		DArray<ContactPair> nbq,
 		DArray<Pair<uint, uint>> mapping,
@@ -641,6 +814,352 @@ namespace dyno
 				cnt++;
 			}
 		}
+		else if (eleType == ET_MEDIALCONE)
+		{
+			int cnt = 0;
+			int start_i = count[pId];
+
+			MedialCone3D cone_i = medialcone[pId - elementOffset.medialConeIndex()];
+
+			Coord v0 = cone_i.v[0];
+			Coord v1 = cone_i.v[1];
+			Real radius0 = cone_i.radius[0];
+			Real radius1 = cone_i.radius[1];
+
+			// v0 boundary contacts
+			if (v0.x + radius0 >= hi.x)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(-1, 0, 0);
+				nbq[cnt + start_i].pos1 = v0 + Coord(radius0, 0, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = v0.x + radius0 - hi.x;
+				cnt++;
+			}
+			if (v0.x - radius0 <= lo.x)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(1, 0, 0);
+				nbq[cnt + start_i].pos1 = v0 - Coord(radius0, 0, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.x - (v0.x - radius0);
+				cnt++;
+			}
+
+			if (v0.y + radius0 >= hi.y)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, -1, 0);
+				nbq[cnt + start_i].pos1 = v0 + Coord(0, radius0, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = v0.y + radius0 - hi.y;
+				cnt++;
+			}
+			if (v0.y - radius0 <= lo.y)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 1, 0);
+				nbq[cnt + start_i].pos1 = v0 - Coord(0, radius0, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.y - (v0.y - radius0);
+				cnt++;
+			}
+
+			if (v0.z + radius0 >= hi.z)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 0, -1);
+				nbq[cnt + start_i].pos1 = v0 + Coord(0, 0, radius0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = v0.z + radius0 - hi.z;
+				cnt++;
+			}
+			if (v0.z - radius0 <= lo.z)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 0, 1);
+				nbq[cnt + start_i].pos1 = v0 - Coord(0, 0, radius0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.z - (v0.z - radius0);
+				cnt++;
+			}
+
+			// v1 boundary contacts
+			if (v1.x + radius1 >= hi.x)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(-1, 0, 0);
+				nbq[cnt + start_i].pos1 = v1 + Coord(radius1, 0, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = v1.x + radius1 - hi.x;
+				cnt++;
+			}
+			if (v1.x - radius1 <= lo.x)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(1, 0, 0);
+				nbq[cnt + start_i].pos1 = v1 - Coord(radius1, 0, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.x - (v1.x - radius1);
+				cnt++;
+			}
+
+			if (v1.y + radius1 >= hi.y)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, -1, 0);
+				nbq[cnt + start_i].pos1 = v1 + Coord(0, radius1, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = v1.y + radius1 - hi.y;
+				cnt++;
+			}
+			if (v1.y - radius1 <= lo.y)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 1, 0);
+				nbq[cnt + start_i].pos1 = v1 - Coord(0, radius1, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.y - (v1.y - radius1);
+				cnt++;
+			}
+
+			if (v1.z + radius1 >= hi.z)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 0, -1);
+				nbq[cnt + start_i].pos1 = v1 + Coord(0, 0, radius1);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = v1.z + radius1 - hi.z;
+				cnt++;
+			}
+			if (v1.z - radius1 <= lo.z)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 0, 1);
+				nbq[cnt + start_i].pos1 = v1 - Coord(0, 0, radius1);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.z - (v1.z - radius1);
+				cnt++;
+			}
+			}
+		else if (eleType == ET_MEDIALSLAB)
+		{
+			int cnt = 0;
+			int start_i = count[pId];
+
+			MedialSlab3D slab_i = medialslab[pId - elementOffset.medialSlabIndex()];
+
+			Coord v0 = slab_i.v[0];
+			Coord v1 = slab_i.v[1];
+			Coord v2 = slab_i.v[2];
+			Real radius0 = slab_i.radius[0];
+			Real radius1 = slab_i.radius[1];
+			Real radius2 = slab_i.radius[2];
+
+			// v0 boundary contacts
+			if (v0.x + radius0 >= hi.x)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(-1, 0, 0);
+				nbq[cnt + start_i].pos1 = v0 + Coord(radius0, 0, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = v0.x + radius0 - hi.x;
+				cnt++;
+			}
+			if (v0.x - radius0 <= lo.x)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(1, 0, 0);
+				nbq[cnt + start_i].pos1 = v0 - Coord(radius0, 0, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.x - (v0.x - radius0);
+				cnt++;
+			}
+
+			if (v0.y + radius0 >= hi.y)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, -1, 0);
+				nbq[cnt + start_i].pos1 = v0 + Coord(0, radius0, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = v0.y + radius0 - hi.y;
+				cnt++;
+			}
+			if (v0.y - radius0 <= lo.y)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 1, 0);
+				nbq[cnt + start_i].pos1 = v0 - Coord(0, radius0, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.y - (v0.y - radius0);
+				cnt++;
+			}
+
+			if (v0.z + radius0 >= hi.z)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 0, -1);
+				nbq[cnt + start_i].pos1 = v0 + Coord(0, 0, radius0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = v0.z + radius0 - hi.z;
+				cnt++;
+			}
+			if (v0.z - radius0 <= lo.z)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 0, 1);
+				nbq[cnt + start_i].pos1 = v0 - Coord(0, 0, radius0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.z - (v0.z - radius0);
+				cnt++;
+			}
+
+			// v1 boundary contacts
+			if (v1.x + radius1 >= hi.x)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(-1, 0, 0);
+				nbq[cnt + start_i].pos1 = v1 + Coord(radius1, 0, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = v1.x + radius1 - hi.x;
+				cnt++;
+			}
+			if (v1.x - radius1 <= lo.x)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(1, 0, 0);
+				nbq[cnt + start_i].pos1 = v1 - Coord(radius1, 0, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.x - (v1.x - radius1);
+				cnt++;
+			}
+
+			if (v1.y + radius1 >= hi.y)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, -1, 0);
+				nbq[cnt + start_i].pos1 = v1 + Coord(0, radius1, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = v1.y + radius1 - hi.y;
+				cnt++;
+			}
+			if (v1.y - radius1 <= lo.y)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 1, 0);
+				nbq[cnt + start_i].pos1 = v1 - Coord(0, radius1, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.y - (v1.y - radius1);
+				cnt++;
+			}
+
+			if (v1.z + radius1 >= hi.z)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 0, -1);
+				nbq[cnt + start_i].pos1 = v1 + Coord(0, 0, radius1);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = v1.z + radius1 - hi.z;
+				cnt++;
+			}
+			if (v1.z - radius1 <= lo.z)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 0, 1);
+				nbq[cnt + start_i].pos1 = v1 - Coord(0, 0, radius1);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.z - (v1.z - radius1);
+				cnt++;
+			}
+
+			// v2 boundary contacts
+			if (v2.x + radius2 >= hi.x)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(-1, 0, 0);
+				nbq[cnt + start_i].pos1 = v2 + Coord(radius2, 0, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = v2.x + radius2 - hi.x;
+				cnt++;
+			}
+			if (v2.x - radius2 <= lo.x)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(1, 0, 0);
+				nbq[cnt + start_i].pos1 = v2 - Coord(radius2, 0, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.x - (v2.x - radius2);
+				cnt++;
+			}
+
+			if (v2.y + radius2 >= hi.y)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, -1, 0);
+				nbq[cnt + start_i].pos1 = v2 + Coord(0, radius2, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = v2.y + radius2 - hi.y;
+				cnt++;
+			}
+			if (v2.y - radius2 <= lo.y)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 1, 0);
+				nbq[cnt + start_i].pos1 = v2 - Coord(0, radius2, 0);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.y - (v2.y - radius2);
+				cnt++;
+			}
+
+			if (v2.z + radius2 >= hi.z)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 0, -1);
+				nbq[cnt + start_i].pos1 = v2 + Coord(0, 0, radius2);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = v2.z + radius2 - hi.z;
+				cnt++;
+			}
+			if (v2.z - radius2 <= lo.z)
+			{
+				nbq[cnt + start_i].bodyId1 = rbId;
+				nbq[cnt + start_i].bodyId2 = -1;
+				nbq[cnt + start_i].normal1 = Coord(0, 0, 1);
+				nbq[cnt + start_i].pos1 = v2 - Coord(0, 0, radius2);
+				nbq[cnt + start_i].contactType = ContactType::CT_BOUDNARY;
+				nbq[cnt + start_i].interpenetration = lo.z - (v2.z - radius2);
+				cnt++;
+			}
+			}
 	}
 
 	template<typename TDataType>
@@ -658,6 +1177,8 @@ namespace dyno
 		DArray<Sphere3D>& sphereInGlobal = discreteSet->spheresInGlobal();
 		DArray<Tet3D>& tetInGlobal = discreteSet->tetsInGlobal();
 		DArray<Capsule3D>& capsuleInGlobal = discreteSet->capsulesInGlobal();
+		DArray<MedialCone3D>& medialConeInGlobal = discreteSet->medialConesInGlobal();
+		DArray<MedialSlab3D>& medialSlabInGlobal = discreteSet->medialSlabsInGlobal();
 
 		ElementOffset offset = discreteSet->calculateElementOffset();
 
@@ -671,6 +1192,8 @@ namespace dyno
 				boxInGlobal,
 				tetInGlobal,
 				capsuleInGlobal,
+				medialConeInGlobal,
+				medialSlabInGlobal,
 				mBoundaryContactCounter,
 				upperBound,
 				lowerBound,
@@ -688,6 +1211,8 @@ namespace dyno
 					boxInGlobal,
 					tetInGlobal,
 					capsuleInGlobal,
+					medialConeInGlobal,
+					medialSlabInGlobal,
 					mBoundaryContactCounter,
 					this->outContacts()->getData(),
 					discreteSet->shape2RigidBodyMapping(),

@@ -261,9 +261,18 @@ namespace dyno
 
 		if (!this->inContacts()->isEmpty() || topo->totalJointSize() > 0)
 		{
+			std::cout << this->inContacts()->size() << std::endl;
+			if (!this->inContacts()->isEmpty()) {
+				float normalThreshold = 0.998f;      
+				float penetrationThreshold = 0.001f; 
+
+				reduceContacts_Optimized(this->inContacts()->getData(), normalThreshold, penetrationThreshold);
+			}
+
 			if (mContactsInLocalFrame.size() != this->inContacts()->size()) {
 				mContactsInLocalFrame.resize(this->inContacts()->size());
 			}
+			std::cout << this->inContacts()->size() << std::endl;
 
 			setUpContactsInLocalFrame(
 				mContactsInLocalFrame,

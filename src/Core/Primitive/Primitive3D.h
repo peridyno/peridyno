@@ -103,6 +103,8 @@ namespace dyno
 	template <typename Real> class TCylinder3D;
 	template <typename Real> class TCone3D;
 	template <typename Real> class TGrid3D;
+	template <typename Real> class TMedialCone3D;
+	template <typename Real> class TMedialSlab3D;
 
 	template<typename Real>
 	class TPoint3D
@@ -715,6 +717,49 @@ namespace dyno
 		Coord3D v[4];
 	};
 
+
+	template<typename Real>
+	class TMedialCone3D{
+	public:
+		typedef  Vector<Real, 2> Coord2D;
+		typedef  Vector<Real, 3> Coord3D;
+		typedef  SquareMatrix<Real, 3> Matrix3D;
+
+	public:
+		DYN_FUNC TMedialCone3D();
+		DYN_FUNC TMedialCone3D(const Coord3D& v0, const Coord3D& v1, const Real& r0, const Real& r1);
+		DYN_FUNC TMedialCone3D(const TMedialCone3D<Real>& cone);
+
+		DYN_FUNC Real volume() const;
+		DYN_FUNC bool isValid() const;
+
+		DYN_FUNC TAlignedBox3D<Real> aabb() const;
+
+		Coord3D v[2];
+		Real radius[2];
+	};
+
+	template<typename Real>
+	class TMedialSlab3D{
+	public:
+		typedef  Vector<Real, 2> Coord2D;
+		typedef  Vector<Real, 3> Coord3D;
+		typedef  SquareMatrix<Real, 3> Matrix3D;
+
+	public:
+		DYN_FUNC TMedialSlab3D();
+		DYN_FUNC TMedialSlab3D(const Coord3D& v0, const Coord3D& v1, const Coord3D& v2, const Real& r0, const Real& r1, const Real& r2);
+		DYN_FUNC TMedialSlab3D(const TMedialSlab3D<Real>& slab);
+
+		DYN_FUNC Real volume() const;
+		DYN_FUNC bool isValid() const;
+
+		DYN_FUNC TAlignedBox3D<Real> aabb() const;
+
+		Coord3D v[3];
+		Real radius[3];
+	};
+
 	template<typename Real>
 	class TAlignedBox3D
 	{
@@ -823,6 +868,8 @@ namespace dyno
 	template class TOrientedBox3D<float>;
 	template class TCylinder3D<float>;
 	template class TCone3D<float>;
+	template class TMedialCone3D<float>;
+	template class TMedialSlab3D<float>;
 
 	template class TPoint3D<double>;
 	template class TLine3D<double>;
@@ -857,6 +904,8 @@ namespace dyno
 	typedef TOrientedBox3D<float> OrientedBox3D;
 	typedef TCylinder3D<float> Cylinder3D;
 	typedef TCone3D<float> Cone3D;
+	typedef TMedialCone3D<float> MedialCone3D;
+	typedef TMedialSlab3D<float> MedialSlab3D;
 #else
 	//convenient typedefs 
 	typedef TPoint3D<double> Point3D;

@@ -27,7 +27,7 @@ namespace dyno
 	template<typename TDataType>
 	uint DiscreteElements<TDataType>::totalSize()
 	{
-		return mBoxesInLocal.size() + mSpheresInLocal.size() + mTetsInLocal.size() + mCapsulesInLocal.size() + mTrianglesInLocal.size();
+		return mBoxesInLocal.size() + mSpheresInLocal.size() + mTetsInLocal.size() + mCapsulesInLocal.size() + mTrianglesInLocal.size() + mMedialConesInLocal.size() + mMedialSlabsInLocal.size();
 	}
 
 	template<typename TDataType>
@@ -67,6 +67,18 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	uint DiscreteElements<TDataType>::medialConeIndex()
+	{
+		return triangleIndex() + this->trianglesInLocal().size();
+	}
+
+	template<typename TDataType>
+	uint DiscreteElements<TDataType>::medialSlabIndex()
+	{
+		return medialConeIndex() + this->medialConesInLocal().size();
+	}
+
+	template<typename TDataType>
 	ElementOffset DiscreteElements<TDataType>::calculateElementOffset()
 	{
 		ElementOffset elementOffset;
@@ -75,7 +87,8 @@ namespace dyno
 		elementOffset.setTetRange(tetIndex(), tetIndex() + this->tetsInLocal().size());
 		elementOffset.setCapsuleRange(capsuleIndex(), capsuleIndex() + this->capsulesInLocal().size());
 		elementOffset.setTriangleRange(triangleIndex(), triangleIndex() + this->trianglesInLocal().size());
-
+		elementOffset.setMedialConeRange(medialConeIndex(), medialConeIndex() + this->medialConesInLocal().size());
+		elementOffset.setMedialSlabRange(medialSlabIndex(), medialSlabIndex() + this->medialSlabsInLocal().size());
 		return elementOffset;
 	}
 
@@ -110,6 +123,18 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	void DiscreteElements<TDataType>::setMedialCones(DArray<MedialCone3D>& cones)
+	{
+		mMedialConesInLocal.assign(cones);
+	}
+
+	template<typename TDataType>
+	void DiscreteElements<TDataType>::setMedialSlabs(DArray<MedialSlab3D>& slabs)
+	{
+		mMedialSlabsInLocal.assign(slabs);
+	}
+
+	template<typename TDataType>
 	void DiscreteElements<TDataType>::setTetBodyId(DArray<int>& body_id)
 	{
 		m_tet_body_mapping.assign(body_id);
@@ -135,12 +160,16 @@ namespace dyno
 		mTetsInLocal.assign(de.mTetsInLocal);
 		mCapsulesInLocal.assign(de.mCapsulesInLocal);
 		mTrianglesInLocal.assign(de.mTrianglesInLocal);
+		mMedialConesInLocal.assign(de.mMedialConesInLocal);
+		mMedialSlabsInLocal.assign(de.mMedialSlabsInLocal);
 
 		mSphereInGlobal.assign(de.mSphereInGlobal);
 		mBoxInGlobal.assign(de.mBoxInGlobal);
 		mTetInGlobal.assign(de.mTetInGlobal);
 		mCapsuleInGlobal.assign(de.mCapsuleInGlobal);
 		mTriangleInGlobal.assign(de.mTriangleInGlobal);
+		mMedialConesInGlobal.assign(de.mMedialConesInGlobal);
+		mMedialSlabsInGlobal.assign(de.mMedialSlabsInGlobal);
 
 		mShape2RigidBody.assign(de.mShape2RigidBody);
 		mPosition.assign(de.mPosition);
@@ -210,9 +239,20 @@ namespace dyno
 		{
 			pair.first = (tId - elementOffset.tetIndex()) + offsetShape[3];
 		}
-		else
+		// Triangle id
+		else if (tId < elementOffset.medialConeIndex())
 		{
 			pair.first = (tId - elementOffset.triangleIndex()) + offsetShape[4];
+		}
+		// Medial Cone id
+		else if (tId < elementOffset.medialSlabIndex())
+		{
+			pair.first = (tId - elementOffset.medialConeIndex()) + offsetShape[5];
+		}
+		// Medial Slab id
+		else
+		{
+			pair.first = (tId - elementOffset.medialSlabIndex()) + offsetShape[6];
 		}
 
 		mapping[tId + offsetMapping] = pair;
@@ -227,6 +267,8 @@ namespace dyno
 		uint sizeOfCapsules = 0;
 		uint sizeOfTets = 0;
 		uint sizeOfTriangles = 0;
+		uint sizeOfMedialCones = 0;
+		uint sizeOfMedialSlabs = 0;
 
 		for (uint i = 0; i < topos.size(); i++)
 		{
@@ -237,6 +279,8 @@ namespace dyno
 			sizeOfCapsules += topo->capsulesInLocal().size();
 			sizeOfTets += topo->tetsInLocal().size();
 			sizeOfTriangles += topo->trianglesInLocal().size();
+			sizeOfMedialCones += topo->medialConesInLocal().size();
+			sizeOfMedialSlabs += topo->medialSlabsInLocal().size();
 		}
 
 		mSpheresInLocal.resize(sizeOfSpheres);
@@ -244,12 +288,16 @@ namespace dyno
 		mCapsulesInLocal.resize(sizeOfCapsules);
 		mTetsInLocal.resize(sizeOfTets);
 		mTrianglesInLocal.resize(sizeOfTriangles);
+		mMedialConesInLocal.resize(sizeOfMedialCones);
+		mMedialSlabsInLocal.resize(sizeOfMedialSlabs);
 
 		uint offsetOfSpheres = 0;
 		uint offsetOfBoxes = 0;
 		uint offsetOfTets = 0;
 		uint offsetOfCapsules = 0;
 		uint offsetOfTriangles = 0;
+		uint offsetOfMedialCones = 0;
+		uint offsetOfMedialSlabs = 0;
 		for (uint i = 0; i < topos.size(); i++)
 		{
 			auto topo = topos[i];
@@ -259,12 +307,16 @@ namespace dyno
 			mCapsulesInLocal.assign(topo->capsulesInLocal(), topo->capsulesInLocal().size(), offsetOfCapsules, 0);
 			mTetsInLocal.assign(topo->tetsInLocal(), topo->tetsInLocal().size(), offsetOfTets, 0);
 			mTrianglesInLocal.assign(topo->trianglesInLocal(), topo->trianglesInLocal().size(), offsetOfTriangles, 0);
+			mMedialConesInLocal.assign(topo->medialConesInLocal(), topo->medialConesInLocal().size(), offsetOfMedialCones, 0);
+			mMedialSlabsInLocal.assign(topo->medialSlabsInLocal(), topo->medialSlabsInLocal().size(), offsetOfMedialSlabs, 0);
 
 			offsetOfSpheres += topo->spheresInLocal().size();
 			offsetOfBoxes += topo->boxesInLocal().size();
 			offsetOfCapsules += topo->capsulesInLocal().size();
 			offsetOfTets += topo->tetsInLocal().size();
 			offsetOfTriangles += topo->trianglesInLocal().size();
+			offsetOfMedialCones += topo->medialConesInLocal().size();
+			offsetOfMedialSlabs += topo->medialSlabsInLocal().size();
 		}
 
 		//Merge rigid body states
@@ -304,14 +356,16 @@ namespace dyno
 
 		uint offsetOfMapping = 0;
 		offsetOfRigidBodies = 0;
-		CArray<uint> offsetArrayInHost(5);
+		CArray<uint> offsetArrayInHost(7);
 		offsetArrayInHost[0] = 0;
 		offsetArrayInHost[1] = offsetArrayInHost[0] + sizeOfSpheres;
 		offsetArrayInHost[2] = offsetArrayInHost[1] + sizeOfBoxes;
 		offsetArrayInHost[3] = offsetArrayInHost[2] + sizeOfTets;
 		offsetArrayInHost[4] = offsetArrayInHost[3] + sizeOfCapsules;
+		offsetArrayInHost[5] = offsetArrayInHost[4] + sizeOfTriangles;
+		offsetArrayInHost[6] = offsetArrayInHost[5] + sizeOfMedialCones;
 
-		DArray<uint> offsetArrayInDevice(5);
+		DArray<uint> offsetArrayInDevice(7);
 		for (uint i = 0; i < topos.size(); i++)
 		{
 			auto topo = topos[i];
@@ -332,6 +386,8 @@ namespace dyno
 			offsetArrayInHost[2] += topo->tetsInLocal().size();
 			offsetArrayInHost[3] += topo->capsulesInLocal().size();
 			offsetArrayInHost[4] += topo->trianglesInLocal().size();
+			offsetArrayInHost[5] += topo->medialConesInLocal().size();
+			offsetArrayInHost[6] += topo->medialSlabsInLocal().size();
 		}
 
 		thrust::sort(thrust::device, mShape2RigidBody.begin(), mShape2RigidBody.begin() + mShape2RigidBody.size(), thrust::less<Pair<uint, uint>>());
@@ -453,6 +509,32 @@ namespace dyno
 	}
 
 	template<typename Real>
+	DYN_FUNC TMedialCone3D<Real> local2Global(const TMedialCone3D<Real>& cone, const Vector<Real, 3>& t, const SquareMatrix<Real, 3>& r)
+	{
+		TMedialCone3D<Real> ret;
+		ret.v[0] = t + r * cone.v[0];
+		ret.v[1] = t + r * cone.v[1];
+		ret.radius[0] = cone.radius[0];
+		ret.radius[1] = cone.radius[1];
+		
+		return ret;
+	}
+
+	template<typename Real>
+	DYN_FUNC TMedialSlab3D<Real> local2Global(const TMedialSlab3D<Real>& slab, const Vector<Real, 3>& t, const SquareMatrix<Real, 3>& r)
+	{
+		TMedialSlab3D<Real> ret;
+		ret.v[0] = t + r * slab.v[0];
+		ret.v[1] = t + r * slab.v[1];
+		ret.v[2] = t + r * slab.v[2];
+		ret.radius[0] = slab.radius[0];
+		ret.radius[1] = slab.radius[1];
+		ret.radius[2] = slab.radius[2];
+
+		return ret;
+	}
+
+	template<typename Real>
 	DYN_FUNC TTriangle3D<Real> local2Global(const TTriangle3D<Real>& tri, const Vector<Real, 3>& t, const SquareMatrix<Real, 3>& r)
 	{
 		TTriangle3D<Real> ret;
@@ -470,11 +552,15 @@ namespace dyno
 		DArray<Tet3D> tetInGlobal,
 		DArray<Capsule3D> capInGlobal,
 		DArray<Triangle3D> triInGlobal,
+		DArray<MedialCone3D> coneInGlobal,
+		DArray<MedialSlab3D> slabInGlobal,
 		DArray<Box3D> boxInLocal,
 		DArray<Sphere3D> sphereInLocal,
 		DArray<Tet3D> tetInLocal,
 		DArray<Capsule3D> capInLocal,
 		DArray<Triangle3D> triInLocal,
+		DArray<MedialCone3D> coneInLocal,
+		DArray<MedialSlab3D> slabInLocal,
 		DArray<Coord> positionGlobal,
 		DArray<Matrix> rotationGlobal,
 		DArray<Pair<uint, uint>> mapping,
@@ -518,6 +604,16 @@ namespace dyno
 			triInGlobal[tId - elementOffset.triangleIndex()] = local2Global(triInLocal[tId - elementOffset.triangleIndex()], t, r);
 			break;
 		}
+		case ET_MEDIALCONE:
+		{
+			coneInGlobal[tId - elementOffset.medialConeIndex()] = local2Global(coneInLocal[tId - elementOffset.medialConeIndex()], t, r);
+			break;
+		}
+		case ET_MEDIALSLAB:
+		{
+			slabInGlobal[tId - elementOffset.medialSlabIndex()] = local2Global(slabInLocal[tId - elementOffset.medialSlabIndex()], t, r);
+			break;
+		}
 		default:
 			break;
 		}
@@ -529,7 +625,9 @@ namespace dyno
 		DArray<Sphere3D>& sphereInGlobal, 
 		DArray<Tet3D>& tetInGlobal, 
 		DArray<Capsule3D>& capInGlobal,
-		DArray<Triangle3D>& triInGlobal)
+		DArray<Triangle3D>& triInGlobal,
+		DArray<MedialCone3D>& coneInGlobal,
+		DArray<MedialSlab3D>& slabInGlobal)
 	{
 		auto elementOffset = this->calculateElementOffset();
 
@@ -538,9 +636,14 @@ namespace dyno
 		tetInGlobal.assign(this->tetsInLocal());
 		capInGlobal.assign(this->capsulesInLocal());
 		triInGlobal.assign(this->trianglesInLocal());
+		coneInGlobal.assign(this->medialConesInLocal());
+		slabInGlobal.assign(this->medialSlabsInLocal());
 
 		uint num = this->totalSize();
 
+		/*std::cout << num << std::endl;
+		std::cout << coneInGlobal.size();
+		std::cout << slabInGlobal.size();*/
 		cuExecute(num,
 			DE_Local2Global,
 			boxInGlobal,
@@ -548,11 +651,15 @@ namespace dyno
 			tetInGlobal,
 			capInGlobal,
 			triInGlobal,
+			coneInGlobal,
+			slabInGlobal,
 			this->boxesInLocal(),
 			this->spheresInLocal(),
 			this->tetsInLocal(),
 			this->capsulesInLocal(),
 			this->trianglesInLocal(),
+			this->medialConesInLocal(),
+			this->medialSlabsInLocal(),
 			mPosition,
 			mRotation,
 			mShape2RigidBody,
@@ -739,7 +846,7 @@ namespace dyno
 	template<typename TDataType>
 	void DiscreteElements<TDataType>::updateTopology()
 	{
-		this->requestDiscreteElementsInGlobal(mBoxInGlobal, mSphereInGlobal, mTetInGlobal, mCapsuleInGlobal, mTriangleInGlobal);
+		this->requestDiscreteElementsInGlobal(mBoxInGlobal, mSphereInGlobal, mTetInGlobal, mCapsuleInGlobal, mTriangleInGlobal, mMedialConesInGlobal, mMedialSlabsInGlobal);
 	}
 
 	DEFINE_CLASS(DiscreteElements);

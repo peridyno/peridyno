@@ -27,7 +27,8 @@ namespace dyno
 		CONE,
 		CAPSULE,
 		CYLINDER,
-		TET,
+		MEDIALCONE,
+		MEDIALSLAB,
 		UNKNOWN
 	};
 
