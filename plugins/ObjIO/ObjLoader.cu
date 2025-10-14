@@ -3,7 +3,6 @@
 #include "Topology/TriangleSet.h"
 #include <iostream>
 #include <sys/stat.h>
-#include <sstream>
 
 #include "GLWireframeVisualModule.h"
 #include "GLSurfaceVisualModule.h"
@@ -37,10 +36,6 @@ namespace dyno
 		this->varVelocity()->attach(callback);
 		this->varSequence()->attach(callback);
 		this->varAngularVelocity()->attach(callback);
-		// Manual pose related
-		this->varUseManualPose()->attach(callback);
-		this->varManualPosition()->attach(callback);
-		this->varManualRotation()->attach(callback);
 
 		auto surfacerender = std::make_shared<GLSurfaceVisualModule>();
 		surfacerender->setVisible(true);
@@ -54,10 +49,7 @@ namespace dyno
 	template<typename TDataType>
 	void ObjLoader<TDataType>::animationUpdate()
 	{
-		if (this->varSequence()->getValue() == true ||
-			this->varVelocity()->getValue() != Vec3f(0) ||
-			this->varAngularVelocity()->getValue() != Vec3f(0) ||
-			this->varUseManualPose()->getValue() == true)
+		if (this->varSequence()->getValue() == true || this->varVelocity()->getValue() != Vec3f(0) || this->varAngularVelocity()->getValue() != Vec3f(0))
 			this->setForceUpdate(true);
 		else
 			this->setForceUpdate(false);
@@ -131,88 +123,30 @@ namespace dyno
 			centerInit = center;
 		}
 
-		if (this->varUseManualPose()->getValue())
+		Coord velocity = this->varVelocity()->getData();
+		Coord angularVelocity = this->varAngularVelocity()->getData();
+
+		Real dt = 0.001f;
+		//Real dt = this->stateTimeStep()->getData();
+		rotQuat = rotQuat.normalize();
+		rotQuat += dt * 0.5f *
+			Quat<Real>(angularVelocity[0], angularVelocity[1], angularVelocity[2], 0.0) * (rotQuat);
+
+		rotQuat = rotQuat.normalize();
+		rotMat = rotQuat.toMatrix3x3();
+
+		center += velocity * dt;
+
+		if (!triSet->getTriangles().isEmpty() && !triSet->getVertex2Triangles().isEmpty())
 		{
-			Coord manualPos;
-			Coord manualRotDeg;
-
-			while (true)
-			{
-				std::cout << "input (x y z yaw pitch roll) " << std::flush;
-				std::string line;
-				if (!std::getline(std::cin, line))
-				{
-					manualPos = this->varManualPosition()->getValue();
-					manualRotDeg = this->varManualRotation()->getValue();
-					break;
-				}
-				if (line == "exit" || line == "quit" || line == "q")
-				{
-					this->varUseManualPose()->setValue(false);
-					return; 
-				}
-				for (auto& ch : line) { if (ch == ',') ch = ' '; }
-				std::stringstream ss(line);
-				Real px, py, pz, yawDeg, pitchDeg, rollDeg;
-				if (ss >> px >> py >> pz >> yawDeg >> pitchDeg >> rollDeg)
-				{
-					manualPos = Coord(px, py, pz);
-					manualRotDeg = Coord(yawDeg, pitchDeg, rollDeg);
-					this->varManualPosition()->setValue(manualPos);
-					this->varManualRotation()->setValue(manualRotDeg);
-					break;
-				}
-			}
-
-			Real yaw = manualRotDeg[0] * PI / 180;
-			Real pitch = manualRotDeg[1] * PI / 180;
-			Real roll = manualRotDeg[2] * PI / 180;
-
-			rotQuat = Quat<Real>::fromEulerAngles(yaw, pitch, roll);
-			rotQuat = rotQuat.normalize();
-			rotMat = rotQuat.toMatrix3x3();
-
-			center = manualPos;
-
-			if (!triSet->getTriangles().isEmpty() && !triSet->getVertex2Triangles().isEmpty())
-			{
-				cuExecute(triSet->getPoints().size(),
-					K_InitKernelFunctionMesh,
-					triSet->getPoints(),
-					initPos,
-					center,
-					centerInit,
-					rotMat
-				);
-			}
-		}
-		else
-		{
-			Coord velocity = this->varVelocity()->getData();
-			Coord angularVelocity = this->varAngularVelocity()->getData();
-
-			Real dt = 0.001f;
-			//Real dt = this->stateTimeStep()->getData();
-			rotQuat = rotQuat.normalize();
-			rotQuat += dt * 0.5f *
-				Quat<Real>(angularVelocity[0], angularVelocity[1], angularVelocity[2], 0.0) * (rotQuat);
-
-			rotQuat = rotQuat.normalize();
-			rotMat = rotQuat.toMatrix3x3();
-
-			center += velocity * dt;
-
-			if (!triSet->getTriangles().isEmpty() && !triSet->getVertex2Triangles().isEmpty())
-			{
-				cuExecute(triSet->getPoints().size(),
-					K_InitKernelFunctionMesh,
-					triSet->getPoints(),
-					initPos,
-					center,
-					centerInit,
-					rotMat
-				);
-			}
+			cuExecute(triSet->getPoints().size(),
+				K_InitKernelFunctionMesh,
+				triSet->getPoints(),
+				initPos,
+				center,
+				centerInit,
+				rotMat
+			);
 		}
 
 	}

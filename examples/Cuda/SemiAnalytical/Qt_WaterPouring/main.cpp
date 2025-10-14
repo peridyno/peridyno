@@ -1,4 +1,5 @@
-#include "UbiApp.h"
+#include "QtGUI/QtApp.h"
+
 #include "SceneGraph.h"
 
 #include "ParticleSystem/Emitters/SquareEmitter.h"
@@ -25,7 +26,6 @@
 #include "initializeModeling.h"
 #include "ParticleSystem/initializeParticleSystem.h"
 #include "SemiAnalyticalScheme/initializeSemiAnalyticalScheme.h"
-#include "ObjIO/ObjLoader.h"
 
 using namespace std;
 using namespace dyno;
@@ -43,30 +43,13 @@ std::shared_ptr<SceneGraph> createScene()
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
 	plane->varScale()->setValue(Vec3f(2.0f, 0.0f, 2.0f));
 
-	auto objLoader = scn->addNode(std::make_shared<ObjLoader<DataType3f>>());
-	objLoader->varFileName()->setValue(getAssetPath() + "Obj/Cup.obj");
-
-	objLoader->varLocation()->setValue(Vec3f(0, 0, 0));
-	objLoader->varScale()->setValue(Vec3f(0.2, 0.2, 0.2));
-	//objLoader->varCenter()->setValue(Vec3f(0.0f, 0.255f, 0.630f));
-	objLoader->varAngularVelocity()->setValue(Vec3f(0, 2.0f, 0.0f));
-	//objLoader->varVelocity()->setValue(Vec3f(0.0f, 0.0f, 2.0f));
-
-	objLoader->graphicsPipeline()->clear();
-	objLoader->setForceUpdate(true);
-
+	auto sphere = scn->addNode(std::make_shared<SphereModel<DataType3f>>());
+	sphere->varLocation()->setValue(Vec3f(0.0f, 0.5f, 0.0f));
+	sphere->varScale()->setValue(Vec3f(0.2f, 0.2f, 0.2f));
 
 	auto merge = scn->addNode(std::make_shared<MergeTriangleSet<DataType3f>>());
 	plane->stateTriangleSet()->connect(merge->inFirst());
-	objLoader->outTriangleSet()->connect(merge->inSecond());
-
-	auto sRenderf = std::make_shared<GLSurfaceVisualModule>();
-	sRenderf->setColor(Color(1.0f, 1.0f, 1.0f));
-	sRenderf->setAlpha(0.2f);
-	sRenderf->setVisible(true);
-	merge->stateTriangleSet()->connect(sRenderf->inTriangleSet());
-	merge->graphicsPipeline()->pushModule(sRenderf);
-
+	sphere->stateTriangleSet()->connect(merge->inSecond());
 
 	//SFI node
 	auto sfi = scn->addNode(std::make_shared<SemiAnalyticalSFINode<DataType3f>>());
@@ -83,7 +66,7 @@ int main()
 	PaticleSystem::initStaticPlugin();
 	SemiAnalyticalScheme::initStaticPlugin();
 
-	UbiApp app(GUIType::GUI_QT);
+	QtApp app;
 	app.setSceneGraph(createScene());
 	app.initialize(1024, 768);
 	app.mainLoop();
