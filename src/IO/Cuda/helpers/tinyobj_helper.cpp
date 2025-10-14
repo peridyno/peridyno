@@ -151,7 +151,7 @@ namespace dyno
 			tShapes[sId]->texCoordIndex.assign(texCoordIndex);
 
 			auto shapeCenter = (lo + hi) / 2;
-			if(!dotransform)
+			if(!useToCenter)
 				shapeCenter = Vec3f(0);
 			tShapes[sId]->boundingBox = TAlignedBox3D<Real>(lo, hi);
 			tShapes[sId]->boundingTransform = Transform3f(shapeCenter, Quat1f().toMatrix3x3());
