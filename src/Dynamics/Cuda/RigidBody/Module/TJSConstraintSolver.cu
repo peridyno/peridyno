@@ -139,10 +139,6 @@ namespace dyno
 		}
 
 		auto sizeOfRigids = this->inCenter()->size();
-		if (mContactNumber.size() != sizeOfRigids) {
-			mContactNumber.resize(sizeOfRigids);
-		}
-		mContactNumber.reset();
 
 		if (mJ.size() != 4 * constraint_size) {
 			mJ.resize(4 * constraint_size);
@@ -215,6 +211,8 @@ namespace dyno
 		}
 		mImpulseC.reset();
 		mImpulseExt.reset();
+
+		Real dt = this->inTimeStep()->getData();
 
 		if (!this->inContacts()->isEmpty() || topo->totalJointSize() > 0) {
 			// reduce the contacts
@@ -289,7 +287,63 @@ namespace dyno
 						this->varHertz()->getValue()
 					);
 				}
+
+				updateVelocity(
+					this->inAttribute()->getData(),
+					this->inVelocity()->getData(),
+					this->inAngularVelocity()->getData(),
+					mImpulseC,
+					this->varLinearDamping()->getValue(),
+					this->varAngularDamping()->getValue(),
+					dh
+				);
+
+				updateGesture(
+					this->inAttribute()->getData(),
+					this->inCenter()->getData(),
+					this->inQuaternion()->getData(),
+					this->inRotationMatrix()->getData(),
+					this->inInertia()->getData(),
+					this->inVelocity()->getData(),
+					this->inAngularVelocity()->getData(),
+					this->inInitialInertia()->getData(),
+					dh
+				);
 			}
+		}
+		else
+		{
+			if (this->varGravityEnabled()->getValue())
+			{
+				setUpGravity(
+					mImpulseExt,
+					this->varGravityValue()->getValue(),
+					dt
+				);
+			}
+
+
+			updateVelocity(
+				this->inAttribute()->getData(),
+				this->inVelocity()->getData(),
+				this->inAngularVelocity()->getData(),
+				mImpulseExt,
+				this->varLinearDamping()->getValue(),
+				this->varAngularDamping()->getValue(),
+				dt
+			);
+
+			updateGesture(
+				this->inAttribute()->getData(),
+				this->inCenter()->getData(),
+				this->inQuaternion()->getData(),
+				this->inRotationMatrix()->getData(),
+				this->inInertia()->getData(),
+				this->inVelocity()->getData(),
+				this->inAngularVelocity()->getData(),
+				this->inInitialInertia()->getData(),
+				dt
+			);
 		}
 	}
 
