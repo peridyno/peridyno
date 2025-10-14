@@ -17,10 +17,7 @@
 #pragma once
 #include "VirtualParticleGenerator.h"
 #include "VirtualParticleStructure.h"
-#include "ParticleSystem/Module/Kernel.h"
-#include "ParticleSystem/Module/SummationDensity.h"
 
-#include "Collision/NeighborPointQuery.h"
 
 namespace dyno {
 
@@ -66,7 +63,6 @@ namespace dyno {
 		/**
 		* @brief Virtual Particles Sampling Distance
 		*/
-
 		DEF_VAR(Real, SamplingDistance, Real(0.005), "");
 
 		/**
@@ -76,10 +72,8 @@ namespace dyno {
 
 
 	private:
-		SpikyKernel<Real> m_kernel;
 
 		Real gridSize;
-
 
 		DArray<Coord> m_anchorPoint;
 

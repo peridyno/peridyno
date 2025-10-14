@@ -35,14 +35,6 @@ namespace dyno
 		this->varReshuffleParticles()->setValue(false);
 		this->varSmoothingLength()->setValue(2.4);
 
-		//auto smoothingLength = std::make_shared<FloatingNumber<TDataType>>();
-		//this->animationPipeline()->pushModule(smoothingLength);
-		//smoothingLength->varValue()->setValue(Real(0.012));
-
-		//auto samplingDistance = std::make_shared<FloatingNumber<TDataType>>();
-		//this->animationPipeline()->pushModule(samplingDistance);
-		//samplingDistance->varValue()->setValue(Real(0.005));
-
 		auto m_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
 		this->stateSmoothingLength()->connect(m_nbrQuery->inRadius());
 		this->statePositionMerged()->connect(m_nbrQuery->inPosition());

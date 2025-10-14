@@ -25,6 +25,9 @@ namespace dyno
 		m_gridMass.clear();
 		m_C.clear();
 		m_J.clear();
+		m_pVelo_old.clear();	//Old Particle Velocity 
+		m_gVelo_old.clear();	//Old Grid Velocity
+		m_FlipVelocity.clear(); //FLIP Velocity
 	}
 
 	template <typename Real>

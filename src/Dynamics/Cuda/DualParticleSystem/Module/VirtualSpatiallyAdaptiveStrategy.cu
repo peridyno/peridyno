@@ -1,15 +1,11 @@
 #include "VirtualSpatiallyAdaptiveStrategy.h"
 #include "Node.h"
-#include "ParticleSystem/Module/SummationDensity.h"
 #include "Topology/GridHash.h"
-
 #include <thrust/sort.h>
 
 
 namespace dyno
 {
-	
-
 	IMPLEMENT_TCLASS(VirtualSpatiallyAdaptiveStrategy, TDataType)
 
 	template<typename TDataType>
@@ -20,8 +16,6 @@ namespace dyno
 		this->varSamplingDistance()->setValue(Real(0.005));
 		this->varRestDensity()->setValue(Real(1000));
 		gridSize = this->varSamplingDistance()->getData();
-		
-		
 	}
 
 	template<typename TDataType>
@@ -123,9 +117,9 @@ namespace dyno
 	}
 
 	/*
-*@brief	Virtual particles' candinate points
-*		Every particle has 33 neighbors.
-*/
+	*@brief	Virtual particles' candinate points
+	*		Every particle has 33 neighbors.
+	*/
 	template<typename Real, typename Coord>
 	__global__ void AFV_AnchorNeighbor_33
 	(

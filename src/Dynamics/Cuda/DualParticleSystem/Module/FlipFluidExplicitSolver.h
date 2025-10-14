@@ -48,7 +48,6 @@ namespace dyno {
 		DEF_ARRAY_IN(Coord, AdaptGridPosition, DeviceType::GPU, "Input adaptive grid position");
 
 		DEF_VAR_IN(Real, GridSpacing, "Spacing distance of grids");
-		//DEF_VAR_IN(Vec3i, BoxGridNum, "");
 
 		DEF_VAR_IN(Real, SamplingDistance, "");
 
@@ -75,7 +74,6 @@ namespace dyno {
 		DArray<Coord> m_pVelo_old;	//Old Particle Velocity 
 		DArray<Coord> m_gVelo_old;	//Old Grid Velocity
 		DArray<Coord> m_FlipVelocity; //FLIP Velocity
-
 
 		Real E = 5;				//stiffness 
 		Real particle_Density = 1.0f;

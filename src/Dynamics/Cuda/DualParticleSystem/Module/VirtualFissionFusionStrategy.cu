@@ -1,6 +1,5 @@
 #include "VirtualFissionFusionStrategy.h"
 #include "Node.h"
-#include "ParticleSystem/Module/SummationDensity.h"
 #include <thrust/sort.h>
 
 namespace dyno
@@ -315,10 +314,7 @@ namespace dyno
 		int id = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (id >= pos.size()) return;
 
-
-
 		Coord pos_ref = pos[id] - origin + Coord(dh / 4.0);
-		//Coord pos_ref = pos[id] - origin;
 		Coord a(0);
 
 		a[0] = (Real)((int)(floor(pos_ref[0] / dh))) * dh;
@@ -677,8 +673,6 @@ namespace dyno
 			kernel
 		);
 
-		//std::cout <<"!!!!!!!!!!!" << this->varStretchedRegionCriteria()->getDataPtr()->currentKey() << std::endl;
-
 		cuExecute(r_num, GridFission_StateJudge,
 			mCurrentParticleStates,
 			mDivergence,
@@ -915,14 +909,6 @@ namespace dyno
 			mCandidateCodes,
 			gridSize
 		);
-
-
-		//if (this->outVirtualParticles()->isEmpty())
-		//{
-		//	this->outVirtualParticles()->allocate();
-		//}
-
-		//this->outVirtualParticles()->resize(mFissionVirtualParicles.size());
 
 		cuExecute(mFissionVirtualParicles.size(),
 			GridFission_CopyToVpos,

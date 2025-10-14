@@ -51,16 +51,6 @@ namespace dyno
 
 		DEF_VAR_STATE(Real, GridSpacing, 0.005, "Spacing distance of grids");
 
-		//DECLARE_ENUM(EVirtualParticleSamplingStrategy,
-		//	ColocationStrategy = 0,
-		//	ParticleShiftingStrategy = 1,
-		//	SpatiallyAdaptiveStrategy = 2);
-
-		//DEF_ENUM(EVirtualParticleSamplingStrategy,
-		//	VirtualParticleSamplingStrategy,
-		//	EVirtualParticleSamplingStrategy::SpatiallyAdaptiveStrategy,
-		//	"Virtual Particle Sampling Strategy");
-
 	protected:
 
 		void resetStates();
@@ -68,10 +58,6 @@ namespace dyno
 		void preUpdateStates();
 
 		void postUpdateStates();
-
-		//void animationPipelineWithoutVirtualPartilce(
-		//	int key
-		//);
 
 		std::shared_ptr<VirtualParticleGenerator<TDataType>> vpGen;
 

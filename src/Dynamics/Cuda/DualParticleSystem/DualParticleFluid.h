@@ -41,10 +41,6 @@ namespace dyno
 		DualParticleFluid(int key);
 		~DualParticleFluid();
 
-		//DEF_ARRAY_STATE(Attribute, ParticleAttribute, DeviceType::GPU, "Real Particle Attribute");
-
-		//DEF_ARRAY_STATE(Coord, BoundaryNorm, DeviceType::GPU, "Boundary Norm");
-
 		DEF_ARRAY_STATE(Coord, VirtualPosition, DeviceType::GPU, "Virtual Particle");
 
 		DEF_INSTANCE_STATE(PointSet<TDataType>, VirtualPointSet, "Topology");

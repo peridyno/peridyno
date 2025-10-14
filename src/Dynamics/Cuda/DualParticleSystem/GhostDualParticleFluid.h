@@ -28,7 +28,6 @@
 namespace dyno
 {
 
-
 	template<typename TDataType>
 	class GhostDualParticleFluid :  public DualParticleFluid<TDataType>
 	{

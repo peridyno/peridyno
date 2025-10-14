@@ -29,8 +29,6 @@ namespace dyno
 	}
 
 
-
-
 	template<typename TDataType>
 	MpmFluid<TDataType>::MpmFluid()
 		: ParticleFluid<TDataType>()
@@ -46,7 +44,6 @@ namespace dyno
 		auto samplingDistance = std::make_shared<FloatingNumber<TDataType>>();
 		this->animationPipeline()->pushModule(samplingDistance);
 		samplingDistance->varValue()->setValue(Real(0.005));
-
 
 		auto m_adaptive_virtual_position = std::make_shared<VirtualSpatiallyAdaptiveStrategy<TDataType>>();
 		this->statePosition()->connect(m_adaptive_virtual_position->inRPosition());
@@ -78,19 +75,6 @@ namespace dyno
 		smoothingLength->outFloating()->connect(m_vv_nbrQuery->inRadius());
 		vpGen->outVirtualParticles()->connect(m_vv_nbrQuery->inPosition());
 		this->animationPipeline()->pushModule(m_vv_nbrQuery);
-
-		//auto m_dualIsph = std::make_shared<DualParticleIsphModule<TDataType>>();
-		//smoothingLength->outFloating()->connect(m_dualIsph->varSmoothingLength());
-		//this->stateTimeStep()->connect(m_dualIsph->inTimeStep());
-		//this->statePosition()->connect(m_dualIsph->inRPosition());
-		//vpGen->outVirtualParticles()->connect(m_dualIsph->inVPosition());
-		//this->stateVelocity()->connect(m_dualIsph->inVelocity());
-		//m_nbrQuery->outNeighborIds()->connect(m_dualIsph->inNeighborIds());
-		//m_rv_nbrQuery->outNeighborIds()->connect(m_dualIsph->inRVNeighborIds());
-		//m_vr_nbrQuery->outNeighborIds()->connect(m_dualIsph->inVRNeighborIds());
-		//m_vv_nbrQuery->outNeighborIds()->connect(m_dualIsph->inVVNeighborIds());
-		//this->stateTimeStep()->connect(m_dualIsph->inTimeStep());
-		//this->animationPipeline()->pushModule(m_dualIsph);
 
 		auto m_flipEx = std::make_shared <FlipFluidExplicitSolver<TDataType>>();
 		samplingDistance->outFloating()->connect(m_flipEx->inSamplingDistance());

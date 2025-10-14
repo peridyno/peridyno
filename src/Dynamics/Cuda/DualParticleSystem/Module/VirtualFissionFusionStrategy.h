@@ -37,7 +37,6 @@ namespace dyno {
 	*/
 
 
-
 		DECLARE_TCLASS(VirtualFissionFusionStrategy, TDataType)
 
 	public:
