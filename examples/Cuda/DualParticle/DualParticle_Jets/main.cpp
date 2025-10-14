@@ -1,21 +1,22 @@
 #include <GlfwApp.h>
-#include "SceneGraph.h"
-#include <Log.h>
+#include <SceneGraph.h>
+
+///Particle Emitter
+#include <ParticleSystem/Emitters/PoissonEmitter.h>
+
+///Fluid Solver
+#include <DualParticleSystem/DualParticleFluid.h>
+#include <ParticleSystem/MakeParticleSystem.h>
+
+///Renderer
 #include <Module/CalculateNorm.h>
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
 #include <ColorMapping.h>
 #include <ImColorbar.h>
-#include "DualParticleSystem/DualParticleFluid.h"
-#include "ParticleSystem/MakeParticleSystem.h"
-#include <BasicShapes/CubeModel.h>
-#include <Samplers/ShapeSampler.h>
-#include <ParticleSystem/Emitters/PoissonEmitter.h>
 
 using namespace std;
 using namespace dyno;
-
-bool useVTK = false;
 
 std::shared_ptr<SceneGraph> createScene()
 {
@@ -44,7 +45,7 @@ std::shared_ptr<SceneGraph> createScene()
 	emitter2->varLocation()->setValue(Vec3f(-0.2f, 0.5f, -0.0f));
 
 	auto fluid = scn->addNode(std::make_shared<DualParticleFluid<DataType3f>>(
-		DualParticleFluid<DataType3f>::EVirtualParticleSamplingStrategy::SpatiallyAdaptiveStrategy));
+		DualParticleFluid<DataType3f>::FissionFusionStrategy));
 	emitter->connect(fluid->importParticleEmitters());
 	emitter2->connect(fluid->importParticleEmitters());
 

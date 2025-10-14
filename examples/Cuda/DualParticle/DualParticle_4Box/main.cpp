@@ -1,25 +1,34 @@
-#include <GlfwApp.h>
+#include <UbiApp.h>
 #include <SceneGraph.h>
 
+///Particle fluid solver
+#include <DualParticleSystem/DualParticleFluid.h>
+#include <DualParticleSystem/GhostDualParticleFluid.h>
+#include <ParticleSystem/Emitters/SquareEmitter.h>
+#include <ParticleSystem/MakeParticleSystem.h>
+
+///Particle Sampling
+#include <BasicShapes/CubeModel.h>
+#include <Samplers/ShapeSampler.h>
+
+///Volume boundary
 #include <Volume/BasicShapeToVolume.h>
 #include <Multiphysics/VolumeBoundary.h>
 
+///Render
 #include <Module/CalculateNorm.h>
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
 #include <ColorMapping.h>
 #include <ImColorbar.h>
 
-#include "DualParticleSystem/DualParticleFluid.h"
-#include "ParticleSystem/MakeParticleSystem.h"
-#include <BasicShapes/CubeModel.h>
-#include <Samplers/ShapeSampler.h>
-#include <ParticleSystem/Emitters/SquareEmitter.h>
 
 using namespace std;
 using namespace dyno;
 
 bool useVTK = false;
+
+#define COMPARISON_MODE
 
 std::shared_ptr<SceneGraph> createScene()
 {
@@ -71,23 +80,27 @@ std::shared_ptr<SceneGraph> createScene()
 	auto initialParticles4 = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
 	sampler4->statePointSet()->promoteOuput()->connect(initialParticles4->inPoints());
 
-
-
-	auto fluid = scn->addNode(std::make_shared<DualParticleFluid<DataType3f>>());
-	fluid->varReshuffleParticles()->setValue(true);
+	auto fluid = scn->addNode(std::make_shared<DualParticleFluid<DataType3f>>(DualParticleFluid<DataType3f>::FissionFusionStrategy));
 	initialParticles1->connect(fluid->importInitialStates());
 	initialParticles2->connect(fluid->importInitialStates());
 	initialParticles3->connect(fluid->importInitialStates());
 	initialParticles4->connect(fluid->importInitialStates());
+	fluid->graphicsPipeline()->clear();
+
+	auto feature = fluid->animationPipeline()->findFirstModule<ThinFeature<DataType3f>>();
+	if (feature != nullptr)
+	{
+		feature->varThreshold()->setValue(0.15);
+	}
 
 	//Create a boundary
 	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
-	cubeBoundary->varLocation()->setValue(Vec3f(0.0f, 1.0f, 0.0f));
-	cubeBoundary->varLength()->setValue(Vec3f(0.5f, 2.0f, 0.5f));
+	cubeBoundary->varLocation()->setValue(Vec3f(0.0f, 0.5f, 0.0f));
+	cubeBoundary->varLength()->setValue(Vec3f(0.6f, 1.0f, 0.6f));
 	cubeBoundary->setVisible(false);
 
 	auto cube2vol = scn->addNode(std::make_shared<BasicShapeToVolume<DataType3f>>());
-	cube2vol->varGridSpacing()->setValue(0.02f);
+	cube2vol->varGridSpacing()->setValue(0.01f);
 	cube2vol->varInerted()->setValue(true);
 	cubeBoundary->connect(cube2vol->importShape());
 
@@ -96,47 +109,60 @@ std::shared_ptr<SceneGraph> createScene()
 
 	fluid->connect(container->importParticleSystems());
 
-	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
-	fluid->stateVelocity()->connect(calculateNorm->inVec());
-	fluid->graphicsPipeline()->pushModule(calculateNorm);
+	//auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
+	//fluid->stateVelocity()->connect(calculateNorm->inVec());
+	//fluid->graphicsPipeline()->pushModule(calculateNorm);
 
-	auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
-	colorMapper->varMax()->setValue(5.0f);
-	calculateNorm->outNorm()->connect(colorMapper->inScalar());
-	fluid->graphicsPipeline()->pushModule(colorMapper);
+	//auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
+	//colorMapper->varMax()->setValue(5.0f);
+	//calculateNorm->outNorm()->connect(colorMapper->inScalar());
+	//fluid->graphicsPipeline()->pushModule(colorMapper);
 
 	auto ptRender = std::make_shared<GLPointVisualModule>();
-	ptRender->setColor(Color(1, 0, 0));
-	ptRender->varPointSize()->setValue(0.0035f);
+	ptRender->setColor(Color(0.14, 0.9, 0.92));
+	ptRender->varPointSize()->setValue(0.0018f);
 	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 	fluid->statePointSet()->connect(ptRender->inPointSet());
-	colorMapper->outColor()->connect(ptRender->inColor());
+	//colorMapper->outColor()->connect(ptRender->inColor());
 	fluid->graphicsPipeline()->pushModule(ptRender);
 
 	// A simple color bar widget for node
-	auto colorBar = std::make_shared<ImColorbar>();
-	colorBar->varMax()->setValue(5.0f);
-	colorBar->varFieldName()->setValue("Velocity");
-	calculateNorm->outNorm()->connect(colorBar->inScalar());
+	//auto colorBar = std::make_shared<ImColorbar>();
+	//colorBar->varMax()->setValue(1.0f);
+	//colorBar->varFieldName()->setValue("Velocity");
+	//calculateNorm->outNorm()->connect(colorBar->inScalar());
+	// 
 	// add the widget to app
-	fluid->graphicsPipeline()->pushModule(colorBar);
+	//fluid->graphicsPipeline()->pushModule(colorBar);
 
-	auto vpRender = std::make_shared<GLPointVisualModule>();
-	vpRender->setColor(Color(1, 1, 0));
-	vpRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-	fluid->stateVirtualPointSet()->connect(vpRender->inPointSet());
-	vpRender->varPointSize()->setValue(0.0005);
-	fluid->graphicsPipeline()->pushModule(vpRender);
+	//auto vpRender = std::make_shared<GLPointVisualModule>();
+	//vpRender->setColor(Color(1, 1, 0));
+	//vpRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
+	//fluid->stateVirtualPointSet()->connect(vpRender->inPointSet());
+	//vpRender->varPointSize()->setValue(0.0005);
+	//fluid->graphicsPipeline()->pushModule(vpRender);
 
 	return scn;
 }
 
 int main()
 {
-	GlfwApp window;
+	UbiApp window(GUIType::GUI_QT);
 	window.setSceneGraph(createScene());
-	window.initialize(1024, 768);
+	window.initialize(2048, 1080);
+
+	auto cam = window.renderWindow()->getCamera();
+
+	auto renderer = std::dynamic_pointer_cast<dyno::GLRenderEngine>(window.renderWindow()->getRenderEngine());
+	if (renderer) {
+		renderer->setEnvStyle(EEnvStyle::Studio);
+		renderer->showGround = false;
+		renderer->setUseEnvmapBackground(false);
+	}
+
 	window.mainLoop();
+
+
 
 	return 0;
 }
