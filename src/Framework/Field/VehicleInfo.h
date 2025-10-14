@@ -7,6 +7,7 @@
 #include "Vector.h"
 #include "Matrix.h"
 #include "OBase.h"
+#include "Module/InputModule.h"
 
 
 namespace dyno {
@@ -150,6 +151,45 @@ namespace dyno {
 		float Intensity = 1;
 	};
 
+	struct HingeAction
+	{
+		HingeAction(int jointId, float value) 
+		{
+			this->joint = jointId;
+			this->value = value;
+		}
+		int joint = -1;
+		float value = -1;
+	};
+
+	class Key2HingeConfig
+	{
+	public:
+
+		Key2HingeConfig() {}
+		~Key2HingeConfig() {}
+
+
+		void addMap(PKeyboardType key, int jointId, float value)
+		{
+			auto& vec = key2Hinge[key];
+
+			for (auto& action : vec)
+			{
+				if (action.joint == jointId)
+				{
+					action.value = value;
+					return;
+				}
+			}
+
+			vec.emplace_back(jointId, value);
+		}
+
+		std::map<PKeyboardType, std::vector<HingeAction>> key2Hinge;
+
+
+	};
 
 }
 #include "VehicleInfo.inl"

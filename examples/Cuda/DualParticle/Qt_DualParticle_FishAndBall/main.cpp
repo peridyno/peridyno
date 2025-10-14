@@ -1,32 +1,28 @@
 #include <QtApp.h>
 #include <SceneGraph.h>
 
-#include <SemiAnalyticalScheme/TriangularMeshBoundary.h>
-#include <StaticMeshLoader.h>
-#include <PointsLoader.h>
-#include <BasicShapes/SphereModel.h>
-
+///Particle fluid solver
 #include <DualParticleSystem/DualParticleFluid.h>
 #include <ParticleSystem/MakeParticleSystem.h>
 #include <ParticleSystem/Emitters/PoissonEmitter.h>
-#include "Auxiliary/DataSource.h"
 
+///Particle Sampling
+#include <PointsLoader.h>
+
+///Mesh boundary
+#include <BasicShapes/SphereModel.h>
+#include <SemiAnalyticalScheme/TriangularMeshBoundary.h>
+
+///Renderer
 #include <Module/CalculateNorm.h>
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
 #include <ColorMapping.h>
 #include <ImColorbar.h>
-#include "DualParticleSystem/DualParticleFluid.h"
-#include "ParticleSystem/MakeParticleSystem.h"
-#include <BasicShapes/SphereModel.h>
-#include <SemiAnalyticalScheme/TriangularMeshBoundary.h>
-#include <StaticMeshLoader.h>
 #include <GLSurfaceVisualModule.h>
 
 using namespace std;
 using namespace dyno;
-
-bool useVTK = false;
 
 std::shared_ptr<SceneGraph> createScene()
 {
@@ -41,8 +37,9 @@ std::shared_ptr<SceneGraph> createScene()
 	auto initialParticles = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f >>());
 	ptsLoader->outPointSet()->promoteOuput()->connect(initialParticles->inPoints());
 
-	auto fluid = scn->addNode(std::make_shared<DualParticleFluid<DataType3f>>());
-	fluid->varReshuffleParticles()->setValue(true);
+	auto fluid = scn->addNode(std::make_shared<DualParticleFluid<DataType3f>>(
+		DualParticleFluid<DataType3f>::FissionFusionStrategy));
+
 	initialParticles->connect(fluid->importInitialStates());
 
 	auto ball = scn->addNode(std::make_shared<SphereModel<DataType3f>>());
@@ -97,7 +94,6 @@ std::shared_ptr<SceneGraph> createScene()
 int main()
 {
 
-	//GlfwApp window;
 	QtApp window;
 	window.setSceneGraph(createScene());
 	window.initialize(1024, 768);

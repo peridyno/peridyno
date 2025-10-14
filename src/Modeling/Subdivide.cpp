@@ -8,9 +8,10 @@
 namespace dyno
 {
 
-    void loopSubdivide(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles) {
-        Map<EKey, uint> middlePointIndexCache; 
-        std::vector<TopologyModule::Triangle> newTriangles; 
+    template<typename TDataType>
+    void Subdivide<TDataType>::loopSubdivide(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles) {
+        Map<EKey, uint> middlePointIndexCache;
+        std::vector<TopologyModule::Triangle> newTriangles;
         std::vector<Vec3f> newVertices;
         TriangleSet<DataType3f> triSet;
 
@@ -18,14 +19,13 @@ namespace dyno
         triSet.setPoints(vertices);
         triSet.setTriangles(triangles);
         triSet.update();
-        triSet.updateTriangle2Edge();
-
+       
         CArray<TopologyModule::Edg2Tri> c_Edg2Tri;
-        c_Edg2Tri.assign(triSet.getEdge2Triangle());
+        c_Edg2Tri.assign(triSet.edge2Triangle());
         CArray<TopologyModule::Tri2Edg> c_Tri2Edg;
-        c_Tri2Edg.assign(triSet.getTriangle2Edge());
+        c_Tri2Edg.assign(triSet.triangle2Edge());
         CArray<TopologyModule::Edge> c_Edge;
-        c_Edge.assign(triSet.getEdges());
+        c_Edge.assign(triSet.edgeIndices());
         CArrayList<int> c_ver2edge;
         c_ver2edge.assign(triSet.vertex2Edge());
 
@@ -192,14 +192,14 @@ namespace dyno
 
 
     template<typename TDataType>
-    void Subdivide<TDataType>::resetStates() 
+    void Subdivide<TDataType>::resetStates()
     {
         this->varChanged();
     }
 
 
     template<typename TDataType>
-    void Subdivide<TDataType>::varChanged() 
+    void Subdivide<TDataType>::varChanged()
     {
         auto inTri = this->inInTriangleSet()->constDataPtr();
 
@@ -208,9 +208,9 @@ namespace dyno
 
         CArray<Vec3f> c_v;
         CArray<TopologyModule::Triangle> c_t;
-        
+
         c_v.assign(inTri->getPoints());
-        c_t.assign(inTri->getTriangles());
+        c_t.assign(inTri->triangleIndices());
 
         for (size_t i = 0; i < c_v.size(); i++)
         {
@@ -233,5 +233,5 @@ namespace dyno
 
 
     DEFINE_CLASS(Subdivide);
-	
+
 }

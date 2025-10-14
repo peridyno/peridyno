@@ -45,6 +45,13 @@ namespace dyno {
 
 		std::vector<std::vector<ConnectionInfo>> mConnectionInfo;
 
-
+		void NodeFieldInputConnection(
+			FBase* fieldSrc,
+			tinyxml2::XMLDocument& doc,
+			std::map<ObjectId, uint> indices,
+			std::shared_ptr<Node> node,
+			uint ToIndex,
+			tinyxml2::XMLElement* nodeConnectionsXml
+		);
 	};
 }

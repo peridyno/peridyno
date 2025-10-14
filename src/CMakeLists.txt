@@ -9,13 +9,11 @@ add_subdirectory(Framework)
 
 add_subdirectory(Topology)
 
-if(PERIDYNO_LIBRARY_FRAMEWORK AND PERIDYNO_LIBRARY_RENDERING)
-    add_subdirectory(Rendering)
-endif()
+add_subdirectory(Rendering)
 
-if(PERIDYNO_LIBRARY_IO)
+#if(PERIDYNO_LIBRARY_IO)
     add_subdirectory(IO)
-endif()
+#endif()
 
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
     add_subdirectory(Interaction)

@@ -46,7 +46,7 @@ namespace Qt
 			auto fInputs = getInputFields();
 			for (int i = 0; i < fInputs.size(); i++)
 			{
-				mFieldInport[i] = std::make_shared<QtFieldData>(fInputs[i]);;
+				mFieldInport[i] = std::make_shared<QtFieldData>(fInputs[i]);
 			}
 		}
 
@@ -80,26 +80,39 @@ namespace Qt
 		case PortType::In:
 			if (portIndex < mNodeInport.size()) {
 				//TODO: return more accurate description
-				return NodeDataType{ "port", "port", PortShape::Bullet };
+				return NodeDataType{ "port", "port", PortShape::Diamond };
 			}
 			else {
 				auto& inputFields = this->getInputFields();
 				std::string str = inputFields[portIndex - mNodeInport.size()]->getClassName();
 
-				return NodeDataType{ str.c_str(), str.c_str(), PortShape::Point };
+				if (str == "FInstance" || str == "FInstances")
+				{
+					std::string insName = dyno::InstanceBase::className();
+					return NodeDataType{ insName.c_str(), insName.c_str(), PortShape::Point };
+				}
+				else
+					return NodeDataType{ str.c_str(), str.c_str(), PortShape::Point };
+
 			}
 			break;
 
 		case PortType::Out:
 			if (portIndex == 0) {
 				//TODO: return more accurate description
-				return NodeDataType{ "port", "port", PortShape::Bullet };
+				return NodeDataType{ "port", "port", PortShape::Diamond };
 			}
 			else {
 				auto& outputFields = this->getOutputFields();
 				std::string str = outputFields[portIndex - 1]->getClassName();
 
-				return NodeDataType{ str.c_str(), str.c_str(), PortShape::Point };
+				if (str == "FInstance" || str == "FInstances")
+				{
+					std::string insName = dyno::InstanceBase::className();
+					return NodeDataType{ insName.c_str(), insName.c_str(), PortShape::Point };
+				}
+				else
+					return NodeDataType{ str.c_str(), str.c_str(), PortShape::Point };
 			}
 			
 			break;
@@ -174,6 +187,8 @@ namespace Qt
 		case PortType::None:
 			break;
 		}
+
+		return QString("");
 	}
 
 	QString QtNodeWidget::portTips(PortType portType, PortIndex portIndex) const
@@ -304,26 +319,21 @@ namespace Qt
 
 				auto fieldInp = mFieldInport[portIndex - mNodeInport.size()];
 
-				if (fieldInp->getField()->getClassName() == fieldExp->getField()->getClassName())
+				auto fIn = fieldInp->getField();
+				auto fExp = fieldExp->getField();
+
+				dyno::InstanceBase* instIn = dynamic_cast<dyno::InstanceBase*>(fIn);
+				dyno::InstanceBase* instOut = dynamic_cast<dyno::InstanceBase*>(fExp);
+
+				if (instIn != nullptr && instOut != nullptr)
+					return instIn->canBeConnectedBy(instOut);
+				else if (instIn == nullptr && instOut == nullptr)
 				{
-					std::string className = fieldInp->getField()->getClassName();
-					if (className == dyno::InstanceBase::className())
-					{
-						dyno::InstanceBase* instIn = dynamic_cast<dyno::InstanceBase*>(fieldInp->getField());
-						dyno::InstanceBase* instOut = dynamic_cast<dyno::InstanceBase*>(fieldExp->getField());
-
-						if (instIn != nullptr && instOut != nullptr)
-							return instIn->canBeConnectedBy(instOut);
-
-						return false;
-					}
-					else
-						return fieldInp->getField()->getTemplateName() == fieldExp->getField()->getTemplateName();
+					return fIn->getClassName() == fExp->getClassName() && fIn->getTemplateName() == fExp->getTemplateName();
 				}
 				else
-				{
 					return false;
-				}
+
 			}
 			catch (std::bad_cast)
 			{
@@ -347,7 +357,9 @@ namespace Qt
 		}
 		else
 		{
-			return ConnectionPolicy::One;
+			auto fieldInp = mFieldInport[portIndex - mNodeInport.size()];
+
+			return fieldInp->getField()->inputPolicy() == FBase::One ? ConnectionPolicy::One : ConnectionPolicy::Many;
 		}
 	}
 

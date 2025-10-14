@@ -1,12 +1,10 @@
 #include "VariationalApproximateProjection.h"
 #include "SummationDensity.h"
-
 #include "Algorithm/Function2Pt.h"
 #include "Algorithm/Functional.h"
 #include "Algorithm/Arithmetic.h"
 #include "Algorithm/Reduction.h"
 
-#include "Kernel.h"
 
 namespace dyno
 {
@@ -35,7 +33,7 @@ namespace dyno
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&VariationalApproximateProjection<TDataType>::varChanged, this));
 		this->varKernelType()->attach(callback);
-		this->varRestDensity()->attach(callback);		
+		this->varRestDensity()->attach(callback);
 	}
 
 	template<typename TDataType>
@@ -65,42 +63,6 @@ namespace dyno
 		}
 	}
 
-//	__device__ inline float kernWeight(const float r, const float h)
-//	{
-//		const float q = r / h;
-//		if (q > 1.0f) return 0.0f;
-//		else {
-//			const float d = 1.0f - q;
-//			const float hh = h*h;
-////			return 45.0f / ((float)M_PI * hh*h) *d*d;
-//			return (1.0-pow(q, 4.0f));
-////			return (1.0 - q)*(1.0 - q)*h*h;
-//		}
-//	}
-//
-//	__device__ inline float kernWR(const float r, const float h)
-//	{
-//		float w = kernWeight(r, h);
-//		const float q = r / h;
-//		if (q < 0.4f)
-//		{
-//			return w / (0.4f*h);
-//		}
-//		return w / r;
-//	}
-//
-//	__device__ inline float kernWRR(const float r, const float h)
-//	{
-//		float w = kernWeight(r, h);
-//		const float q = r / h;
-//		if (q < 0.4f)
-//		{
-//			return w / (0.16f*h*h);
-//		}
-//		return w / r/r;
-//	}
-
-
 	template <typename Real, typename Coord, typename Kernel>
 	__global__ void VAP_ComputeAlpha
 	(
@@ -108,8 +70,8 @@ namespace dyno
 		DArray<Coord> position,
 		DArray<Attribute> attribute,
 		DArrayList<int> neighbors,
-		Real smoothingLength,		
-		Kernel gradient,
+		Real smoothingLength,
+		Kernel weight,
 		Real scale)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -128,7 +90,7 @@ namespace dyno
 
 			if (r > EPSILON)
 			{
-				Real a_ij = gradient(r, smoothingLength, scale);
+				Real a_ij = weight(r, smoothingLength, scale);
 				alpha_i += a_ij;
 			}
 		}
@@ -188,7 +150,7 @@ namespace dyno
 			Attribute att_j = attribute[j];
 			if (r > EPSILON)
 			{
-				Real wrr_ij = invAlpha*kernWRR(r, smoothingLength, scale);
+				Real wrr_ij = invAlpha * kernWRR(r, smoothingLength, scale);
 				if (att_j.isDynamic())
 				{
 					diaA_total += wrr_ij;
@@ -198,7 +160,7 @@ namespace dyno
 				}
 				else
 				{
-					diaA_total += 2.0f*wrr_ij;
+					diaA_total += 2.0f * wrr_ij;
 				}
 			}
 		}
@@ -218,7 +180,7 @@ namespace dyno
 		Real smoothingLength,
 		Kernel kernWRR,
 		Real scale
-		)
+	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
@@ -237,7 +199,7 @@ namespace dyno
 
 			if (r > EPSILON && attribute[j].isDynamic())
 			{
-				Real wrr_ij = invAlpha_i*kernWRR(r, smoothingLength, scale);
+				Real wrr_ij = invAlpha_i * kernWRR(r, smoothingLength, scale);
 				A_i += wrr_ij;
 				atomicAdd(&diaA[j], wrr_ij);
 			}
@@ -246,7 +208,7 @@ namespace dyno
 		atomicAdd(&diaA[pId], A_i);
 	}
 
-	template <typename Real, typename Coord, typename Kernel>
+	template <typename Real, typename Coord>
 	__global__ void VAP_DetectSurface
 	(
 		DArray<Real> Aii,
@@ -257,9 +219,7 @@ namespace dyno
 		DArray<Attribute> attribute,
 		DArrayList<int> neighbors,
 		Real smoothingLength,
-		Real maxA,
-		Kernel gradient,
-		Real scale
+		Real maxA
 	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -283,9 +243,9 @@ namespace dyno
 
 			if (r > EPSILON && attribute[j].isDynamic())
 			{
-				float weight = -gradient(r, smoothingLength, scale);
+				float weight = -kernSmooth.Gradient(r, smoothingLength);
 				total_weight += weight;
-				div_i += (position[j] - pos_i)*(weight / r);
+				div_i += (position[j] - pos_i) * (weight / r);
 			}
 
 			if (!attribute[j].isDynamic())
@@ -339,7 +299,7 @@ namespace dyno
 		Real dt,
 		Kernel gradient,
 		Real scale
-		)
+	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
@@ -360,11 +320,11 @@ namespace dyno
 			if (r > EPSILON && attribute[j].isFluid())
 			{
 				Real wr_ij = gradient(r, smoothingLength, scale);
-				Coord g = -invAlpha_i*(pos_i - position[j])*wr_ij*(1.0f / r);
+				Coord g = -invAlpha_i * (pos_i - position[j]) * wr_ij * (1.0f / r);
 
 				if (attribute[j].isDynamic())
 				{
-					Real div_ij = 0.5f*(vel_i - velocity[j]).dot(g)*restDensity / dt;	//dv_ij = 1 / alpha_i * (v_i-v_j).*(x_i-x_j) / r * (w / r);
+					Real div_ij = 0.5f * (vel_i - velocity[j]).dot(g) * restDensity / dt;	//dv_ij = 1 / alpha_i * (v_i-v_j).*(x_i-x_j) / r * (w / r);
 					atomicAdd(&divergence[pId], div_ij);
 					atomicAdd(&divergence[j], div_ij);
 				}
@@ -375,31 +335,26 @@ namespace dyno
 
 					Coord dVel = vel_i - velocity[j];
 					Real magNVel = dVel.dot(normal_j);
-					Coord nVel = magNVel*normal_j;
+					Coord nVel = magNVel * normal_j;
 					Coord tVel = dVel - nVel;
 
 					//float div_ij = dot(2.0f*dot(vel_i - velArr[j], normal_i)*normal_i, g)*const_vc_state.restDensity / dt;
-					//printf("Boundary dVel: %f %f %f\n", div_ij, pos_i.x, pos_i.y);
-					//printf("Normal: %f %f %f; Position: %f %f %f \n", normal_i.x, normal_i.y, normal_i.z, posArr[j].x, posArr[j].y, posArr[j].z);
 					if (magNVel < -EPSILON)
 					{
-						Real div_ij = g.dot(2.0f*(nVel + tangential*tVel))*restDensity / dt;
-						//						printf("Boundary div: %f \n", div_ij);
+						Real div_ij = g.dot(2.0f * (nVel + tangential * tVel)) * restDensity / dt;
+
 						atomicAdd(&divergence[pId], div_ij);
 					}
 					else
 					{
-						Real div_ij = g.dot(2.0f*(separation*nVel + tangential*tVel))*restDensity / dt;
+						Real div_ij = g.dot(2.0f * (separation * nVel + tangential * tVel)) * restDensity / dt;
 						atomicAdd(&divergence[pId], div_ij);
 					}
 
 				}
 			}
 		}
-		// 		if (rhoArr[pId] > const_vc_state.restDensity)
-		// 		{
-		// 			atomicAdd(&divArr[pId], 1000.0f/const_vc_state.smoothingLength*(rhoArr[pId] - const_vc_state.restDensity) / (const_vc_state.restDensity * dt));
-		// 		}
+
 	}
 
 	template <typename Real, typename Coord>
@@ -416,11 +371,13 @@ namespace dyno
 		if (pId >= density.size()) return;
 		if (!attribute[pId].isDynamic()) return;
 
+		//divergence[pId] *= 1000.0f;
+
 		Coord pos_i = position[pId];
 		if (density[pId] > restDensity)
 		{
 			Real ratio = (density[pId] - restDensity) / restDensity;
-			atomicAdd(&divergence[pId], 5*restDensity * ratio / (dt * dt));
+			atomicAdd(&divergence[pId], 5.0 * restDensity * ratio / (dt * dt));
 		}
 	}
 
@@ -438,7 +395,7 @@ namespace dyno
 		Real smoothingLength,
 		Kernel kernWRR,
 		Real scale
-		)
+	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
@@ -460,10 +417,10 @@ namespace dyno
 			if (r > EPSILON && attribute[j].isDynamic())
 			{
 				Real wrr_ij = kernWRR(r, smoothingLength, scale);
-				Real a_ij = -invAlpha_i*wrr_ij;
+				Real a_ij = -invAlpha_i * wrr_ij;
 				//				residual += con1*a_ij*preArr[j];
-				atomicAdd(&residual[pId], con1*a_ij*pressure[j]);
-				atomicAdd(&residual[j], con1*a_ij*pressure[pId]);
+				atomicAdd(&residual[pId], con1 * a_ij * pressure[j]);
+				atomicAdd(&residual[j], con1 * a_ij * pressure[pId]);
 			}
 		}
 	}
@@ -488,6 +445,8 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= posArr.size()) return;
 
+		CorrectedMPSKernel<Real> Mpskernel;
+
 		if (attArr[pId].isDynamic())
 		{
 			Coord pos_i = posArr[pId];
@@ -499,13 +458,13 @@ namespace dyno
 			float total_weight = 0.0f;
 			List<int>& list_i = neighbors[pId];
 			int nbSize = list_i.size();
-			
+
 			//A_i = glm::mat3();
 
 			float invAii = 1.0f / aiiArr[pId];
 			Coord vel_i = velArr[pId];
 			Coord dv_i = Coord(0.0f);
-			float scale = 0.1f*dt / restDensity;
+			float scale = 0.1f * dt / restDensity;
 			for (int ne = 0; ne < nbSize; ne++)
 			{
 				int j = list_i[ne];
@@ -515,11 +474,11 @@ namespace dyno
 				if (r > EPSILON)
 				{
 					Real weight = -invAii * gradient(r, smoothingLength, scale);
-					Coord dnij = -scale * (pos_i - posArr[j])*weight*(1.0f / r);
+					Coord dnij = -scale * (pos_i - posArr[j]) * weight * (1.0f / r);
 					Coord corrected = dnij;// Vec2Float(A_i*Float2Vec(dnij));
 
 					Real clamp_r = r;
-					Coord dvij = (preArr[j] - preArr[pId])*corrected;
+					Coord dvij = (preArr[j] - preArr[pId]) * corrected;
 					Coord dvjj = (preArr[j] +/* const_vc_state.pAir*/0) * corrected;
 
 					//Calculate asymmetric pressure force
@@ -536,16 +495,16 @@ namespace dyno
 					}
 					else
 					{
-						Real weight = 1.0f*invAii* gradient(r, smoothingLength, scale);
+						Real weight = 1.0f * invAii * Mpskernel.WeightRR(r, smoothingLength);
 						Coord nij = (pos_i - posArr[j]);
-						dv_i += weight * (velArr[j] - vel_i).dot(nij)*nij;
+						dv_i += weight * (velArr[j] - vel_i).dot(nij) * nij;
 					}
 
 					//Stabilize particles under compression state.
 					if (preArr[j] + preArr[pId] > 0.0f)
 					{
 						Real clamp_r = r;
-						Coord dvij = (preArr[pId])*dnij;
+						Coord dvij = (preArr[pId]) * dnij;
 
 						if (att_j.isDynamic())
 						{
@@ -565,221 +524,25 @@ namespace dyno
 	}
 
 
-// 	template <typename Real, typename Coord>
-// 	__global__ void VAP_UpdateVelocityBoundaryCorrected(
-// 		DArray<Real> pressure,
-// 		DArray<Real> alpha,
-// 		DArray<bool> bSurface,
-// 		DArray<Coord> position,
-// 		DArray<Coord> velocity,
-// 		DArray<Coord> normal,
-// 		DArray<Attribute> attribute,
-// 		DArrayList<int> neighbors,
-// 		Real restDensity,
-// 		Real airPressure,
-// 		Real sliding,
-// 		Real separation,
-// 		Real smoothingLength,
-// 		Real dt)
-// 	{
-// 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-// 		if (pId >= position.size()) return;
-// 
-// 		if (attribute[pId].isDynamic())
-// 		{
-// 			Coord pos_i = position[pId];
-// 			Real p_i = pressure[pId];
-// 
-// 			Real ceo = 1.6f;
-// 
-// 			Real invAlpha = 1.0f / alpha[pId];
-// 			Coord vel_i = velocity[pId];
-// 			Coord dv_i(0.0f);
-// 			Real scale = 1.0f*dt / restDensity;
-// 
-// 			List<int>& list_i = neighbors[pId];
-// 			int nbSize = list_i.size();
-// 			for (int ne = 0; ne < nbSize; ne++)
-// 			{
-// 				int j = list_i[ne];
-// 				Real r = (pos_i - position[j]).norm();
-// 
-// 				Attribute att_j = attribute[j];
-// 				if (r > EPSILON)
-// 				{
-// 					Real weight = -invAlpha*kernWR(r, smoothingLength);
-// 					Coord dnij = (pos_i - position[j])*(1.0f / r);
-// 					Coord corrected = dnij;
-// 					if (corrected.norm() > EPSILON)
-// 					{
-// 						corrected = corrected.normalize();
-// 					}
-// 					corrected = -scale*weight*corrected;
-// 
-// 					Coord dvij = (pressure[j] - pressure[pId])*corrected;
-// 					Coord dvjj = (pressure[j] + airPressure) * corrected;
-// 					Coord dvij_sym = 0.5f*(pressure[pId] + pressure[j])*corrected;
-// 
-// 					//Calculate asymmetric pressure force
-// 					if (att_j.isDynamic())
-// 					{
-// 						if (bSurface[pId])
-// 						{
-// 							dv_i += dvjj;
-// 						}
-// 						else
-// 						{
-// 							dv_i += dvij;
-// 						}
-// 
-// 						if (bSurface[j])
-// 						{
-// 							Coord dvii = -(pressure[pId] + airPressure) * corrected;
-// 							atomicAdd(&velocity[j][0], ceo*dvii[0]);
-// 							atomicAdd(&velocity[j][1], ceo*dvii[1]);
-// 							atomicAdd(&velocity[j][2], ceo*dvii[2]);
-// 						}
-// 						else
-// 						{
-// 							atomicAdd(&velocity[j][0], ceo*dvij[0]);
-// 							atomicAdd(&velocity[j][1], ceo*dvij[1]);
-// 							atomicAdd(&velocity[j][2], ceo*dvij[2]);
-// 						}
-// 					}
-// 					else
-// 					{
-// 						Coord dvii = 2.0f*(pressure[pId]) * corrected;
-// 						if (bSurface[pId])
-// 						{
-// 							dv_i += dvii;
-// 						}
-// 
-// 						float weight = 2.0f*invAlpha*kernWeight(r, smoothingLength);
-// 						Coord nij = (pos_i - position[j]);
-// 						if (nij.norm() > EPSILON)
-// 						{
-// 							nij = nij.normalize();
-// 						}
-// 						else
-// 							nij = Coord(1.0f, 0.0f, 0.0f);
-// 
-// 						Coord normal_j = normal[j];
-// 						Coord dVel = velocity[j] - vel_i;
-// 						Real magNVel = dVel.dot(normal_j);
-// 						Coord nVel = magNVel*normal_j;
-// 						Coord tVel = dVel - nVel;
-// 						if (magNVel > EPSILON)
-// 						{
-// 							dv_i += weight*nij.dot(nVel + sliding*tVel)*nij;
-// 						}
-// 						else
-// 						{
-// 							dv_i += weight*nij.dot(separation*nVel + sliding*tVel)*nij;
-// 						}
-// 
-// 
-// 						// 						float weight = 2.0f*invAlpha*kernWRR(r, const_vc_state.smoothingLength);
-// 						// 						float3 nij = (pos_i - posArr[j]);
-// 						// 						//printf("Normal: %f %f %f; Position: %f %f %f \n", normal_i.x, normal_i.y, normal_i.z, posArr[j].x, posArr[j].y, posArr[j].z);
-// 						// 						dv_i += weight*dot(velArr[j] - vel_i, nij)*nij;
-// 					}
-// 
-// 				}
-// 			}
-// 
-// 			dv_i *= ceo;
-// 
-// 			atomicAdd(&velocity[pId][0], dv_i[0]);
-// 			atomicAdd(&velocity[pId][1], dv_i[1]);
-// 			atomicAdd(&velocity[pId][2], dv_i[2]);
-// 		}
-// 	}
+	template<typename Coord>
+	__global__ void VC_InitializeNormal(
+		DArray<Coord> normal)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= normal.size()) return;
 
- 	template<typename Coord>
- 	__global__ void VC_InitializeNormal(
- 		DArray<Coord> normal)
- 	{
- 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
- 		if (pId >= normal.size()) return;
- 
- 		normal[pId] = Coord(0);
- 	}
- 
- 	__global__ void VC_InitializeAttribute(
- 		DArray<Attribute> attr)
- 	{
- 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
- 		if (pId >= attr.size()) return;
- 
- 		attr[pId].setDynamic();
- 	}
+		normal[pId] = Coord(0);
+	}
 
-// 	template<typename TDataType>
-// 	bool VelocityConstraint<TDataType>::initializeImpl()
-// 	{
-// 		int num = this->inPosition()->size();
-// 
-// 		m_alpha.resize(num);
-// 		m_Aii.resize(num);
-// 		m_AiiFluid.resize(num);
-// 		m_AiiTotal.resize(num);
-// 		m_pressure.resize(num);
-// 		m_divergence.resize(num);
-// 		m_bSurface.resize(num);
-// 
-// 		m_y.resize(num);
-// 		m_r.resize(num);
-// 		m_p.resize(num);
-// 
-// 		m_pressure.resize(num);
-// 
-// 		m_reduce = Reduction<float>::Create(num);
-// 		m_arithmetic = Arithmetic<float>::Create(num);
-// 
-// 
-// 		uint pDims = cudaGridSize(num, BLOCK_SIZE);
-// 
-// 		m_alpha.reset();
-// 		VC_ComputeAlpha << <pDims, BLOCK_SIZE >> > (
-// 			m_alpha,
-// 			this->inPosition()->getData(),
-// 			this->inAttribute()->getData(),
-// 			this->inNeighborIds()->getData(),
-// 			this->inSmoothingLength()->getData());
-// 
-// 		m_maxAlpha = m_reduce->maximum(m_alpha.begin(), m_alpha.size());
-// 
-// 		VC_CorrectAlpha << <pDims, BLOCK_SIZE >> > (
-// 			m_alpha,
-// 			m_maxAlpha);
-// 
-// 		m_AiiFluid.reset();
-// 		VC_ComputeDiagonalElement << <pDims, BLOCK_SIZE >> > (
-// 			m_AiiFluid,
-// 			m_alpha,
-// 			this->inPosition()->getData(),
-// 			this->inAttribute()->getData(),
-// 			this->inNeighborIds()->getData(),
-// 			this->inSmoothingLength()->getData());
-// 
-// 		m_maxA = m_reduce->maximum(m_AiiFluid.begin(), m_AiiFluid.size());
-// 
-// 		std::cout << "Max alpha: " << m_maxAlpha << std::endl;
-// 		std::cout << "Max A: " << m_maxA << std::endl;
-// 
-// //		m_normal.resize(num);
-// //		m_attribute.resize(num);
-// 
-// // 		cuExecute(num,
-// // 			VC_InitializeNormal,
-// // 			m_normal.getData());
-// 
-// // 		cuExecute(num,
-// // 			VC_InitializeAttribute,
-// // 			m_attribute.getData());
-// 
-// 		return true;
-// 	}
+	__global__ void VC_InitializeAttribute(
+		DArray<Attribute> attr)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= attr.size()) return;
+
+		attr[pId].setDynamic();
+	}
+
 
 	template<typename TDataType>
 	void VariationalApproximateProjection<TDataType>::varChanged()
@@ -828,7 +591,7 @@ namespace dyno
 		m_arithmetic = Arithmetic<float>::Create(num);
 
 		mAlpha.reset();
-		cuFirstOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
+		cuZerothOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
 			VAP_ComputeAlpha,
 			mAlpha,
 			this->inPosition()->getData(),
@@ -870,20 +633,20 @@ namespace dyno
 			this->resizeArray(num);
 		}
 		Real dt = this->inTimeStep()->getValue();
-
+	
 		mAlpha.reset();
 
-		cuFirstOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
+		cuZerothOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
 			VAP_ComputeAlpha,
-			mAlpha, 
+			mAlpha,
 			this->inPosition()->getData(),
 			this->inAttribute()->getData(),
-			this->inNeighborIds()->getData(), 
+			this->inNeighborIds()->getData(),
 			this->inSmoothingLength()->getValue());
 
-		cuExecute(num, 
+		cuExecute(num,
 			VAP_CorrectAlpha,
-			mAlpha, 
+			mAlpha,
 			mAlphaMax);
 
 		//compute the diagonal elements of the coefficient matrix
@@ -892,9 +655,9 @@ namespace dyno
 
 		cuSecondOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
 			VAP_ComputeDiagonalElement,
-			mAiiFluid, 
-			mAiiTotal, 
-			mAlpha, 
+			mAiiFluid,
+			mAiiTotal,
+			mAlpha,
 			this->inPosition()->getData(),
 			this->inAttribute()->getData(),
 			this->inNeighborIds()->getData(),
@@ -903,7 +666,7 @@ namespace dyno
 		mIsSurface.reset();
 		mAii.reset();
 
-		cuFirstOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
+		cuExecute(num,
 			VAP_DetectSurface,
 			mAii,
 			mIsSurface,
@@ -947,7 +710,7 @@ namespace dyno
 			this->inPosition()->getData(),
 			this->varRestDensity()->getData(),
 			dt);
-		
+
 		//solve the linear system of equations with a conjugate gradient method.
 		m_y.reset();
 
@@ -1017,23 +780,20 @@ namespace dyno
 // 			dt);
 
 
-		cuFirstOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor, 
+		cuFirstOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
 			VAP_UpdateVelocity1rd,
 			mPressure,
 			mAlpha,
 			mIsSurface,
 			this->inPosition()->getData(),
- 			this->inVelocity()->getData(),
+			this->inVelocity()->getData(),
 			this->inAttribute()->getData(),
 			this->inNeighborIds()->getData(),
 			this->varRestDensity()->getValue(),
 			this->inSmoothingLength()->getValue(),
 			dt);
+
 	}
-
-
-
-
 
 	DEFINE_CLASS(VariationalApproximateProjection);
 }

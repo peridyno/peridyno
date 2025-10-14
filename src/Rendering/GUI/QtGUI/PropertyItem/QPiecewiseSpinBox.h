@@ -30,7 +30,7 @@
 
 //PeriDyno
 #include "Format.h"
-#include "FCallBackFunc.h"
+#include "FCallbackFunc.h"
 #include "QtGUI/Common.h"
 
 //C++
@@ -57,13 +57,45 @@ namespace dyno
 	public:
 		explicit QPiecewiseSpinBox(QWidget* parent = nullptr);
 
+	public:
+
+	protected:
+		bool eventFilter(QObject* obj, QEvent* event) override;
+
+		void createValueDialog();
+
+		QValidator::State validate(QString& input, int& pos) const override
+		{
+			if (input.isEmpty())
+				return QValidator::Intermediate;
+
+			bool ok = false;
+			int val = input.toInt(&ok);
+
+			if (!ok)
+				return QValidator::Invalid;
+
+			if (val < minimum())
+			{
+				input = QString::number(this->minimum());
+			}
+			else if (val > maximum())
+			{
+				input = QString::number(this->maximum());
+			}
+
+			return QValidator::Acceptable;
+		}
+
 	private:
 		
 		void wheelEvent(QWheelEvent* event);
 
 		void contextMenuEvent(QContextMenuEvent* event) override;
 
+		void mousePressEvent(QMouseEvent* event) override;
+
 	private:
-		QValueDialog* mValueModify = nullptr;
+		QValueDialog* mValueDialog = nullptr;
 	};
 }

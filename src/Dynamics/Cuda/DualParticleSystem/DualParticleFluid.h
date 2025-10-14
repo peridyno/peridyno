@@ -22,6 +22,8 @@
 #include "Module/VirtualSpatiallyAdaptiveStrategy.h"
 #include "Module/VirtualColocationStrategy.h"
 #include "Module/VirtualParticleShiftingStrategy.h"
+#include "Module/VirtualFissionFusionStrategy.h"
+#include "Module/ThinFeature.h"
 
 namespace dyno
 {
@@ -39,10 +41,6 @@ namespace dyno
 		DualParticleFluid(int key);
 		~DualParticleFluid();
 
-		DEF_ARRAY_STATE(Attribute, ParticleAttribute, DeviceType::GPU, "Real Particle Attribute");
-
-		DEF_ARRAY_STATE(Coord, BoundaryNorm, DeviceType::GPU, "Boundary Norm");
-
 		DEF_ARRAY_STATE(Coord, VirtualPosition, DeviceType::GPU, "Virtual Particle");
 
 		DEF_INSTANCE_STATE(PointSet<TDataType>, VirtualPointSet, "Topology");
@@ -50,7 +48,8 @@ namespace dyno
 		DECLARE_ENUM(EVirtualParticleSamplingStrategy,
 			ColocationStrategy = 0,
 			ParticleShiftingStrategy = 1,
-			SpatiallyAdaptiveStrategy = 2);
+			SpatiallyAdaptiveStrategy = 2,
+			FissionFusionStrategy = 3	);
 
 		DEF_ENUM(EVirtualParticleSamplingStrategy,
 			VirtualParticleSamplingStrategy,
@@ -64,10 +63,6 @@ namespace dyno
 		void preUpdateStates();
 
 		void postUpdateStates();
-
-		void animationPipelineWithoutVirtualPartilce(
-			int key
-		);
 
 		std::shared_ptr<VirtualParticleGenerator<TDataType>> vpGen;
 

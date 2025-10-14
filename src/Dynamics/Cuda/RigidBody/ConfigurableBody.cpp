@@ -79,7 +79,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void ConfigurableBody<TDataType>::resetStates()
+	void ConfigurableBody<TDataType>::updateConfig()
 	{
 		this->clearRigidBodySystem();
 		this->clearVechicle();
@@ -110,7 +110,7 @@ namespace dyno
 
 		for (size_t j = 0; j < vehicleNum; j++)
 		{
-			
+
 
 			std::vector<std::shared_ptr<PdActor>> Actors;
 
@@ -162,7 +162,7 @@ namespace dyno
 						currentBox.center = Vec3f(0.0f);
 						currentBox.halfLength = (up - down) / 2 * rigidInfo[i].mHalfLength;
 						currentBox.rot = Quat1f(transform.rotation());
-						
+
 						rigidbody.position = Quat1f(instances[j].rotation()).rotate(T + rigidInfo[i].transform.translation()) + instances[j].translation();
 						rigidbody.angle = Quat1f(instances[j].rotation());
 						Actors[i] = this->addBox(currentBox, rigidbody, density);
@@ -185,7 +185,7 @@ namespace dyno
 
 					case dyno::Sphere:
 						currentSphere.center = Vec3f(0.0f);
-						currentSphere.rot =  Quat1f(transform.rotation());
+						currentSphere.rot = Quat1f(transform.rotation());
 						currentSphere.radius = std::abs(up.y - down.y) / 2 * rigidInfo[i].radius;
 
 						rigidbody.position = Quat1f(instances[j].rotation()).rotate(T + rigidInfo[i].transform.translation()) + instances[j].translation();
@@ -329,6 +329,13 @@ namespace dyno
 		}
 
 
+
+	}
+
+	template<typename TDataType>
+	void ConfigurableBody<TDataType>::resetStates()
+	{
+		this->updateConfig();
 		/***************** Reset *************/
 		ArticulatedBody<TDataType>::resetStates();
 

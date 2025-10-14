@@ -6,6 +6,29 @@
 
 namespace dyno
 {
+// Axes are:
+//
+//      y
+//      |     
+//      |   
+//      | 
+//      +----- x
+//	  /
+//	 /
+//  z
+
+// Vertex and edge layout:
+//
+//            3             2
+//            +-------------+               +-----2-------+   
+//          / |           / |             / |            /|   
+//        /   |         /   |          11   3         10   1
+//    7 +-----+-------+  6  |         +-----+6------+     |   
+//      |   0 +-------+-----+ 1       |     +-----0-+-----+   
+//      |   /         |   /           7   8         5   9
+//      | /           | /             | /           | /       
+//    4 +-------------+ 5             +------4------+         
+
 	__device__
 	uint edgeTable[256] =
 	{
@@ -609,7 +632,8 @@ namespace dyno
 	__global__ void CountVerticeNumber(
 		DArray<int> num,
 		DArray3D<Real> distances,
-		Real isoValue)
+		Real isoValue,
+		Real h)
 	{
 		uint i = threadIdx.x + blockDim.x * blockIdx.x;
 		uint j = threadIdx.y + blockDim.y * blockIdx.y;
@@ -622,14 +646,14 @@ namespace dyno
 		if (i >= nx - 1 || j >= ny - 1 || k >= nz - 1) return;
 
 		uint cubeindex;
-		cubeindex = uint(distances(i, j, k) < isoValue);
-		cubeindex += uint(distances(i + 1, j, k) < isoValue) * 2;
-		cubeindex += uint(distances(i + 1, j + 1, k) < isoValue) * 4;
-		cubeindex += uint(distances(i, j + 1, k) < isoValue) * 8;
-		cubeindex += uint(distances(i, j, k + 1) < isoValue) * 16;
-		cubeindex += uint(distances(i + 1, j , k + 1) < isoValue) * 32;
-		cubeindex += uint(distances(i + 1, j + 1, k + 1) < isoValue) * 64;
-		cubeindex += uint(distances(i, j + 1, k + 1) < isoValue) * 128;
+		cubeindex = uint(Inside(distances(i, j, k), isoValue, h));
+		cubeindex += uint(Inside(distances(i + 1, j, k), isoValue, h)) * 2;
+		cubeindex += uint(Inside(distances(i + 1, j + 1, k), isoValue, h)) * 4;
+		cubeindex += uint(Inside(distances(i, j + 1, k), isoValue, h)) * 8;
+		cubeindex += uint(Inside(distances(i, j, k + 1), isoValue, h)) * 16;
+		cubeindex += uint(Inside(distances(i + 1, j , k + 1), isoValue, h)) * 32;
+		cubeindex += uint(Inside(distances(i + 1, j + 1, k + 1), isoValue, h)) * 64;
+		cubeindex += uint(Inside(distances(i, j + 1, k + 1), isoValue, h)) * 128;
 
 		num[i + j * (nx - 1) + k * (nx - 1) * (ny - 1)] = numVertsTable[cubeindex];
 	}
@@ -638,16 +662,57 @@ namespace dyno
 	void MarchingCubesHelper<TDataType>::countVerticeNumber(
 		DArray<int>& num, 
 		DArray3D<Real>& distances, 
-		Real isoValue)
+		Real isoValue,
+		Real h)
 	{
 		cuExecute3D(make_uint3(distances.nx() - 1, distances.ny() - 1, distances.nz() - 1),
 			CountVerticeNumber,
 			num,
 			distances,
-			isoValue);
+			isoValue,
+			h);
 	}
 
-	// compute interpolated vertex along an edge
+	//A smooth interpolation
+	template<typename Real>
+	GPU_FUNC Real interpolate(Real isolevel, Real f0, Real f1, Real h)
+	{
+		Real l0, l1;
+		Real flip;
+		if (f1 > f0)
+		{
+			l1 = f1;
+			l0 = f0;
+			flip = false;
+		}
+		else
+		{
+			l1 = f0;
+			l0 = f1;
+			flip = true;
+		}
+
+		// If the distance between two neighbors nodes is two small, scale it to a threshold, here threshold = 0.1 is selected as an empirical value
+		Real threshold = 0.1 * h;
+		Real H = l1 - l0 < threshold ? threshold : l1 - l0;
+
+		Real t = (isolevel - l0) / H;
+
+		t = clamp(t, Real(0), Real(1));
+
+		return flip ? 1 - t : t;
+	}
+
+	// A smooth interpolation for vertex
+	template<typename Real, typename Coord>
+	GPU_FUNC	Coord vertexInterp(Real isolevel, Coord p0, Coord p1, Real f0, Real f1, Real h)
+	{
+		Real t = interpolate(isolevel, f0, f1, h);
+
+		return (1 - t) * p0 + t * p1;
+	}
+
+	// A exact interpolation for vertex, however this could possible cause sudden change of the iso-surface
 	template<typename Real, typename Coord>
 	__device__	Coord vertexInterp(Real isolevel, Coord p0, Coord p1, Real f0, Real f1)
 	{
@@ -661,9 +726,9 @@ namespace dyno
 		return (1 - t) * p0 + t * p1;
 	}
 
-	// compute interpolated vertex along an edge
+	// A interpolation depending on extral signed distances
 	template<typename Real, typename Coord>
-	__device__	Coord vertexInterp(Real& value, Coord p0, Coord p1, Real f0, Real f1, Real d0, Real d1)
+	GPU_FUNC	Coord vertexInterp(Real& value, Coord p0, Coord p1, Real f0, Real f1, Real d0, Real d1)
 	{
 		if (abs(d0 - d1) < EPSILON)
 		{
@@ -734,20 +799,20 @@ namespace dyno
 		vIds[7] = distances.index(i, j + 1, k + 1);
 
 		Coord vertlist[12];
-		vertlist[0] = vertexInterp(isoValue, v[0], v[1], field[0], field[1]);
-		vertlist[1] = vertexInterp(isoValue, v[1], v[2], field[1], field[2]);
-		vertlist[2] = vertexInterp(isoValue, v[2], v[3], field[2], field[3]);
-		vertlist[3] = vertexInterp(isoValue, v[3], v[0], field[3], field[0]);
+		vertlist[0] = vertexInterp(isoValue, v[0], v[1], field[0], field[1], h);
+		vertlist[1] = vertexInterp(isoValue, v[1], v[2], field[1], field[2], h);
+		vertlist[2] = vertexInterp(isoValue, v[2], v[3], field[2], field[3], h);
+		vertlist[3] = vertexInterp(isoValue, v[3], v[0], field[3], field[0], h);
 
-		vertlist[4] = vertexInterp(isoValue, v[4], v[5], field[4], field[5]);
-		vertlist[5] = vertexInterp(isoValue, v[5], v[6], field[5], field[6]);
-		vertlist[6] = vertexInterp(isoValue, v[6], v[7], field[6], field[7]);
-		vertlist[7] = vertexInterp(isoValue, v[7], v[4], field[7], field[4]);
+		vertlist[4] = vertexInterp(isoValue, v[4], v[5], field[4], field[5], h);
+		vertlist[5] = vertexInterp(isoValue, v[5], v[6], field[5], field[6], h);
+		vertlist[6] = vertexInterp(isoValue, v[6], v[7], field[6], field[7], h);
+		vertlist[7] = vertexInterp(isoValue, v[7], v[4], field[7], field[4], h);
 
-		vertlist[8] = vertexInterp(isoValue, v[0], v[4], field[0], field[4]);
-		vertlist[9] = vertexInterp(isoValue, v[1], v[5], field[1], field[5]);
-		vertlist[10] = vertexInterp(isoValue, v[2], v[6], field[2], field[6]);
-		vertlist[11] = vertexInterp(isoValue, v[3], v[7], field[3], field[7]);
+		vertlist[8] = vertexInterp(isoValue, v[0], v[4], field[0], field[4], h);
+		vertlist[9] = vertexInterp(isoValue, v[1], v[5], field[1], field[5], h);
+		vertlist[10] = vertexInterp(isoValue, v[2], v[6], field[2], field[6], h);
+		vertlist[11] = vertexInterp(isoValue, v[3], v[7], field[3], field[7], h);
 
 		EKey edgelist[12];
 		edgelist[0] = EKey(vIds[0], vIds[1]);
@@ -766,14 +831,14 @@ namespace dyno
 		edgelist[11] = EKey(vIds[3], vIds[7]);
 
 		uint cubeindex;
-		cubeindex = uint(distances(i, j, k) < isoValue);
-		cubeindex += uint(distances(i + 1, j, k) < isoValue) * 2;
-		cubeindex += uint(distances(i + 1, j + 1, k) < isoValue) * 4;
-		cubeindex += uint(distances(i, j + 1, k) < isoValue) * 8;
-		cubeindex += uint(distances(i, j, k + 1) < isoValue) * 16;
-		cubeindex += uint(distances(i + 1, j, k + 1) < isoValue) * 32;
-		cubeindex += uint(distances(i + 1, j + 1, k + 1) < isoValue) * 64;
-		cubeindex += uint(distances(i, j + 1, k + 1) < isoValue) * 128;
+		cubeindex = uint(Inside(distances(i, j, k), isoValue, h));
+		cubeindex += uint(Inside(distances(i + 1, j, k), isoValue, h)) * 2;
+		cubeindex += uint(Inside(distances(i + 1, j + 1, k), isoValue, h)) * 4;
+		cubeindex += uint(Inside(distances(i, j + 1, k), isoValue, h)) * 8;
+		cubeindex += uint(Inside(distances(i, j, k + 1), isoValue, h)) * 16;
+		cubeindex += uint(Inside(distances(i + 1, j, k + 1), isoValue, h)) * 32;
+		cubeindex += uint(Inside(distances(i + 1, j + 1, k + 1), isoValue, h)) * 64;
+		cubeindex += uint(Inside(distances(i, j + 1, k + 1), isoValue, h)) * 128;
 
 		uint numVerts = numVertsTable[cubeindex];
 
@@ -1106,7 +1171,7 @@ namespace dyno
 		vertlist[8] = vertexInterp(scalar[8], v[0], v[4], field[0], field[4], d0, d4);
 		vertlist[9] = vertexInterp(scalar[9], v[1], v[5], field[1], field[5], d1, d5);
 		vertlist[10] = vertexInterp(scalar[10], v[2], v[6], field[2], field[6], d2, d6);
-		vertlist[11] = vertexInterp(scalar[10], v[3], v[7], field[3], field[7], d3, d7);
+		vertlist[11] = vertexInterp(scalar[11], v[3], v[7], field[3], field[7], d3, d7);
 
 		int index1D = i + j * (nx - 1) + k * (nx - 1) * (ny - 1);
 

@@ -1,7 +1,6 @@
 #include "MultibodySystem.h"
 
-#include "Module/TJConstraintSolver.h"
-#include "Module/PJSConstraintSolver.h"
+#include "Module/TJSoftConstraintSolver.h"
 #include "Module/ContactsUnion.h"
 
 #include "Collision/NeighborElementQuery.h"
@@ -35,12 +34,9 @@ namespace dyno
 		this->stateAttribute()->connect(elementQuery->inAttribute());
 		this->animationPipeline()->pushModule(elementQuery);
 
-		/*auto cdBV = std::make_shared<CollistionDetectionTriangleSet<TDataType>>();
+		auto cdBV = std::make_shared<CollistionDetectionTriangleSet<TDataType>>();
 		this->stateTopology()->connect(cdBV->inDiscreteElements());
 		this->inTriangleSet()->connect(cdBV->inTriangleSet());
-		this->animationPipeline()->pushModule(cdBV);*/
-		auto cdBV = std::make_shared<CollistionDetectionBoundingBox<TDataType>>();
-		this->stateTopology()->connect(cdBV->inDiscreteElements());
 		this->animationPipeline()->pushModule(cdBV);
 
 		auto merge = std::make_shared<ContactsUnion<TDataType>>();
@@ -48,7 +44,7 @@ namespace dyno
 		cdBV->outContacts()->connect(merge->inContactsB());
 		this->animationPipeline()->pushModule(merge);
 
-		auto iterSolver = std::make_shared<TJConstraintSolver<TDataType>>();
+		auto iterSolver = std::make_shared<TJSoftConstraintSolver<TDataType>>();
 		this->stateTimeStep()->connect(iterSolver->inTimeStep());
 		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
 		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
@@ -140,19 +136,22 @@ namespace dyno
 				auto vehicle = vehicles[i];
 
 				uint num = vehicle->stateMass()->size();
+				if (num > 0) 
+				{
+					stateMass.assign(vehicle->stateMass()->constData(), vehicle->stateMass()->size(), offset, 0);
+					stateCenter.assign(vehicle->stateCenter()->constData(), vehicle->stateCenter()->size(), offset, 0);
+					stateVelocity.assign(vehicle->stateVelocity()->constData(), vehicle->stateVelocity()->size(), offset, 0);
+					stateAngularVelocity.assign(vehicle->stateAngularVelocity()->constData(), vehicle->stateAngularVelocity()->size(), offset, 0);
+					stateRotationMatrix.assign(vehicle->stateRotationMatrix()->constData(), vehicle->stateRotationMatrix()->size(), offset, 0);
+					stateInertia.assign(vehicle->stateInertia()->constData(), vehicle->stateInertia()->size(), offset, 0);
+					stateInitialInertia.assign(vehicle->stateInitialInertia()->constData(), vehicle->stateInitialInertia()->size(), offset, 0);
+					stateQuaternion.assign(vehicle->stateQuaternion()->constData(), vehicle->stateQuaternion()->size(), offset, 0);
+					stateCollisionMask.assign(vehicle->stateCollisionMask()->constData(), vehicle->stateCollisionMask()->size(), offset, 0);
+					stateAttribute.assign(vehicle->stateAttribute()->constData(), vehicle->stateAttribute()->size(), offset, 0);
+					stateFrictionCoefficients.assign(vehicle->stateFrictionCoefficients()->constData(), vehicle->stateFrictionCoefficients()->size(), offset, 0);
+					offset += num;
+				}
 
-				stateMass.assign(vehicle->stateMass()->constData(), vehicle->stateMass()->size(), offset, 0);
-				stateCenter.assign(vehicle->stateCenter()->constData(), vehicle->stateCenter()->size(), offset, 0);
-				stateVelocity.assign(vehicle->stateVelocity()->constData(), vehicle->stateVelocity()->size(), offset, 0);
-				stateAngularVelocity.assign(vehicle->stateAngularVelocity()->constData(), vehicle->stateAngularVelocity()->size(), offset, 0);
-				stateRotationMatrix.assign(vehicle->stateRotationMatrix()->constData(), vehicle->stateRotationMatrix()->size(), offset, 0);
-				stateInertia.assign(vehicle->stateInertia()->constData(), vehicle->stateInertia()->size(), offset, 0);
-				stateInitialInertia.assign(vehicle->stateInitialInertia()->constData(), vehicle->stateInitialInertia()->size(), offset, 0);
-				stateQuaternion.assign(vehicle->stateQuaternion()->constData(), vehicle->stateQuaternion()->size(), offset, 0);
-				stateCollisionMask.assign(vehicle->stateCollisionMask()->constData(), vehicle->stateCollisionMask()->size(), offset, 0);
-				stateAttribute.assign(vehicle->stateAttribute()->constData(), vehicle->stateAttribute()->size(), offset, 0);
-				stateFrictionCoefficients.assign(vehicle->stateFrictionCoefficients()->constData(), vehicle->stateFrictionCoefficients()->size(), offset, 0);
-				offset += num;
 			}
 
 			//TODO: Replace with a GPU-based algorithm?

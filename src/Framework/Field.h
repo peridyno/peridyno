@@ -125,7 +125,7 @@ namespace dyno {
 			*data = val;
 		}
 
-		if(notify)
+		if(notify && isActive())
 			this->update();
 
 		this->tick();

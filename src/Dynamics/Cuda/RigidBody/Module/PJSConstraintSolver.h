@@ -23,7 +23,6 @@
 #include "Collision/Attribute.h"
 #include "Collision/CollisionData.h"
 
-
 namespace dyno
 {
 	template<typename TDataType>
@@ -59,9 +58,9 @@ namespace dyno
 
 		DEF_VAR(Real, Slop, 0.0001, "");
 
-		DEF_VAR(Real, BaumgarteRate, 0.3, "");
+		DEF_VAR(Real, BaumgarteRate, 0.2, "");
 
-		DEF_VAR(uint, IterationNumberForVelocitySolver, 100, "");
+		DEF_VAR(uint, IterationNumberForVelocitySolver, 300, "");
 
 		DEF_VAR(Real, LinearDamping, 0.1, "");
 
@@ -127,8 +126,6 @@ namespace dyno
 
 		DArray<Real> mErrors;
 		DArray<Real> mA;
-
-		//DynamicGraphColoring mGraphColoring;
 
 	};
 }

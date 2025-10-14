@@ -77,9 +77,6 @@ namespace dyno
 
 		this->stateTriangleSet()->promoteOuput();
 		this->statePolygonSet()->promoteOuput();
-
-		tempScale = this->varScale()->getValue();
-
 	}
 
 	template<typename TDataType>
@@ -91,11 +88,11 @@ namespace dyno
 	template<typename TDataType>
 	NBoundingBox CapsuleModel<TDataType>::boundingBox()
 	{
-		auto center = this->varLocation()->getData();
-		auto rot = this->varRotation()->getData();
-		auto scale = this->varScale()->getData();
+		auto center = this->varLocation()->getValue();
+		auto rot = this->varRotation()->getValue();
+		auto scale = this->varScale()->getValue();
 
-		auto radius = this->varRadius()->getData();
+		auto radius = this->varRadius()->getValue();
 
 		Coord length(radius);
 		length[0] *= scale[0];
@@ -125,9 +122,6 @@ namespace dyno
 		return ret;
 	}
 
-
-
-
 	template<typename TDataType>
 	void CapsuleModel<TDataType>::varChanged()
 	{
@@ -135,21 +129,9 @@ namespace dyno
 		auto rot = this->varRotation()->getValue();
 		auto scale = this->varScale()->getValue();
 
-		Real radiusScale = scale.x;
+		this->varScale()->setValue(Coord(scale.x, scale.y, scale.x), false);
 
-		if (scale.x != tempScale.x ) 
-		{
-			radiusScale = scale.x;
-		}
-		else if (scale.z != tempScale.z)
-		{
-			radiusScale = scale.z;
-
-		}
-		tempScale = Vec3f(radiusScale, scale.y, radiusScale);
-		this->varScale()->setValue(Coord(tempScale), false);
-
-		auto radius = this->varRadius()->getValue() * radiusScale;
+		auto radius = this->varRadius()->getValue() * scale.x;
 		auto latitude = this->varLatitude()->getValue();
 		auto longitude = this->varLongitude()->getValue();
 		Real halfHeight = this->varHeight()->getValue() / 2 * scale.y;
@@ -161,11 +143,6 @@ namespace dyno
 		TCapsule3D<Real> capsulePrim = TCapsule3D<Real>(center, q, radius, halfHeight);
 
 		this->outCapsule()->setValue(capsulePrim);
-
-
-
-
-
 
 		auto polySet = this->statePolygonSet()->getDataPtr();
 

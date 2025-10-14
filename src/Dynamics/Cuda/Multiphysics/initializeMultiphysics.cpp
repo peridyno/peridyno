@@ -3,9 +3,8 @@
 #include "NodeFactory.h"
 
 #include "VolumeBoundary.h"
-#include "AdaptiveBoundary.h"
 
-#include "PoissonDiskSampling.h"
+#include "PoissonDiskSampler.h"
 
 namespace dyno
 {
@@ -46,14 +45,6 @@ namespace dyno
 
 		auto group = page->addGroup("Volume");
 
-		group->addAction(
-			"Adaptive Boundary",
-			"ToolBarIco/Volume/AdaptiveBoundary.png",
-			[=]()->std::shared_ptr<Node> {
-				auto node = std::make_shared<AdaptiveBoundary<DataType3f>>();
-				return node;
-			});
-
 		auto psPage = factory->addPage(
 			"Particle System",
 			"ToolBarIco/ParticleSystem/ParticleSystem.png");
@@ -64,7 +55,7 @@ namespace dyno
 			"Poisson Disk Sampler",
 			"ToolBarIco/Modeling/PoissonDiskSampler_v2.png",
 			[=]()->std::shared_ptr<Node> {
-				return std::make_shared<PoissonDiskSampling<DataType3f>>();
+				return std::make_shared<PoissonDiskSampler<DataType3f>>();
 			});
 	}
 }

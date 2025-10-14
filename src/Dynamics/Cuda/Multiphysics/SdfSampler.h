@@ -17,10 +17,9 @@
 #include "Node.h"
 #include "Topology/LevelSet.h"
 #include "Topology/HexahedronSet.h"
-#include <cmath>
-#include <Volume/VolumeOctree.h>
 
-#include "Samplers/Sampler.h"
+#include <Volume/Volume.h>
+#include <Samplers/Sampler.h>
 
 namespace dyno {
 
@@ -36,29 +35,26 @@ namespace dyno {
 		SdfSampler();
 		~SdfSampler() override;
 
+		DEF_VAR(float, Spacing, Real(0.02), " ");
+	public:
+		DEF_NODE_PORT(Volume<TDataType>, Volume, "");
+
+	protected:
 		void resetStates() override;
 
 		bool validateInputs() override;
 
-		std::shared_ptr<dyno::DistanceField3D<TDataType>>  convert2Uniform(
-			VolumeOctree<TDataType>* volume,
-			Real h);
+	private:
+		std::shared_ptr<DistanceField3D<TDataType>> m_inputSDF;
 
-	public:
-		DEF_NODE_PORT(VolumeOctree<TDataType>, Volume, "");
+		Coord mCubeTilt = Coord(0.0f);
 
-		//DEF_INSTANCE_OUT(PointSet<TDataType>, PointSet, "");
+		Coord mX = Coord(1.0f, 0.0f, 0.0f);	//Cube Init X Rotation
+		Coord mY = Coord(0.0f, 1.0f, 0.0f);	//Cube Init Y Rotation
+		Coord mZ = Coord(0.0f, 0.0f, 1.0f);	//Cube Init Z Rotation
 
-		DEF_VAR(float, Spacing, Real(0.02), " ");
-
-		DEF_VAR(Vec3f, CubeTilt, 0, "Cube Init Rotation");
-
-		DEF_VAR(Vec3f, X, Coord(1, 0.0f, 0.0f), "Cube Init X Rotation");
-		DEF_VAR(Vec3f, Y, Coord(0.0f, 1, 0.0f), "Cube Init Y Rotation");
-		DEF_VAR(Vec3f, Z, Coord(0.0f, 0.0f, 1), "Cube Init Z Rotation");
-
-		DEF_VAR(Real, Alpha, Real(0), " ");
-		DEF_VAR(Real, Beta, Real(0), " ");
-		DEF_VAR(Real, Gamma, Real(0), " ");
+		Real mAlpha = 0.0f;
+		Real mBeta = 0.0f;
+		Real mGamma = 0.0f;
 	};
 }

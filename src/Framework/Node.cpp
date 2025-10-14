@@ -17,15 +17,6 @@ Node::~Node()
 {
 	mModuleList.clear();
 
-// 	for (auto port : mImportNodes)
-// 	{
-// 		auto& nodes = port->getNodes();
-// 		for (auto node : nodes)
-// 		{
-// 			node->disconnect(port);
-// 		}
-// 	}
-
 	for (auto port : mExportNodes)
 	{
 		this->disconnect(port);

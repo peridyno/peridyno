@@ -15,7 +15,7 @@ namespace dyno
 	void TextureMesh::safeConvert2TriangleSet(TriangleSet<DataType3f>& triangleSet)
 	{
 		triangleSet.setPoints(this->vertices());
-		auto& triangles = triangleSet.getTriangles();
+		auto& triangles = triangleSet.triangleIndices();
 
 		int size = 0;
 		for (auto it : mShapes)
@@ -30,7 +30,7 @@ namespace dyno
 	void TextureMesh::convert2TriangleSet(TriangleSet<DataType3f>& triangleSet)
 	{
 		triangleSet.setPoints(this->vertices());
-		auto& triangles = triangleSet.getTriangles();
+		auto& triangles = triangleSet.triangleIndices();
 		int num = 0;
 		for (size_t i = 0; i < mShapes.size(); i++)
 		{

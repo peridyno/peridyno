@@ -64,6 +64,8 @@ namespace dyno
 
 		void mainLoop() override {};
 
+		void setDefaultAnimationOption(bool op);
+
 	protected:
 		void initializeGL() override;		
 		void paintGL() override;		

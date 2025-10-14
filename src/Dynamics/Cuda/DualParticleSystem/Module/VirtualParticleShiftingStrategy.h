@@ -62,10 +62,7 @@ namespace dyno {
 
 		DEF_VAR(Real, SmoothingLength, Real(0.0075), "");
 
-		//DEF_VAR(Real, VirtualRestDensity, Real(1000.0f), "");
-
 		DEF_VAR_IN(uint, FrameNumber, "Frame number");
-
 
 		/**
 		* @brief Real Particle positions
@@ -77,24 +74,19 @@ namespace dyno {
 		*/
 		DEF_ARRAYLIST_OUT(int, VVNeighborIds, DeviceType::GPU, "Return virtual particles' virtual neighbor ids");
 
-
 		/**
 		* @brief Final particle densities
 		*/
 		DEF_ARRAY_OUT(Real, VDensity, DeviceType::GPU, "Final particle density");
 
-		//DEF_EMPTY_IN_ARRAY(Type, ParticleType, DeviceType::GPU, "Particle Type");
-
 	private:
 		SpikyKernel<Real> m_kernel;
 		DArray<Real> m_lamda;
 		DArray<Coord> m_deltaPos;
-		//	DArray<Coord> m_position_old;
 
 		Real maxDensity;
 
 	private:
-		//std::shared_ptr<SummationDensity<TDataType>> m_v_summation;
 
 		std::shared_ptr <SummationDensity<TDataType>> m_vv_density;
 		std::shared_ptr <NeighborPointQuery<TDataType>> m_vv_nbrQuery;

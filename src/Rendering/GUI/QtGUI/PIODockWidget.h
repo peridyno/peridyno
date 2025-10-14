@@ -62,6 +62,7 @@ namespace dyno
 	class PIOTabWidget;
 	class PLogWidget;
 	class PConsoleWidget;
+	class QContentBrowser;
 
 	class PIODockWidget : public QDockWidget
 	{
@@ -74,6 +75,7 @@ namespace dyno
 
 		PLogWidget* logWidget() { return mLogWidget; }
 		PConsoleWidget* consoleWidget() { return mConsoleWidget; }
+		QContentBrowser* contentBrowser() { return mContentBrowser; }
 
 	public slots:
 		void toggleLogging();
@@ -99,6 +101,7 @@ namespace dyno
 
 		PLogWidget* mLogWidget;
 		PConsoleWidget* mConsoleWidget;
+		QContentBrowser* mContentBrowser;
 	};
 }
 

@@ -409,8 +409,8 @@ __global__ void CR_UpDate_Contact_Force(
 	{
 		auto topo = this->inTriangularMesh()->getDataPtr();
 		int vNum = this->inOldPosition()->size();
-		auto& indices = topo->getTriangles();
-		auto& ver2tri = topo->getVertex2Triangles();
+		auto& indices = topo->triangleIndices();
+		auto& ver2tri = topo->vertex2Triangle();
 
 		int tNum = indices.size();
 
@@ -455,9 +455,9 @@ __global__ void CR_UpDate_Contact_Force(
 	
 		int vNum = this->inOldPosition()->size();
 		auto topo = this->inTriangularMesh()->getDataPtr();
-		auto& indices = topo->getTriangles();
+		auto& indices = topo->triangleIndices();
 		int tNum = indices.size();
-		auto& ver2tri = topo->getVertex2Triangles();
+		auto& ver2tri = topo->vertex2Triangle();
 
 		auto& contactForce = this->outContactForce()->getData();
 		if (contactForce.size() != vNum) {

@@ -73,9 +73,9 @@ namespace dyno
 		this->isPressed = false;
 		
 		this->outOtherEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
-		this->outOtherEdgeSet()->getDataPtr()->getEdges().resize(0);
+		this->outOtherEdgeSet()->getDataPtr()->edgeIndices().resize(0);
 		this->outSelectedEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
-		this->outSelectedEdgeSet()->getDataPtr()->getEdges().resize(0);
+		this->outSelectedEdgeSet()->getDataPtr()->edgeIndices().resize(0);
 	}
 
 	template<typename TDataType>
@@ -303,7 +303,7 @@ namespace dyno
 	void EdgeInteraction<TDataType>::calcEdgeIntersectClick()
 	{
 		auto& initialEdgeSet = this->inInitialEdgeSet()->getData();
-		auto& edges = initialEdgeSet.getEdges();
+		auto& edges = initialEdgeSet.edgeIndices();
 		auto& points = initialEdgeSet.getPoints();
 
 		this->tempNumT = edges.size();
@@ -455,7 +455,7 @@ namespace dyno
 		TPlane3D<Real> plane32 = TPlane3D<Real>(ray3.origin, ray2.direction.cross(ray3.direction));
 		
 		auto& initialEdgeSet = this->inInitialEdgeSet()->getData();
-		auto& edges = initialEdgeSet.getEdges();
+		auto& edges = initialEdgeSet.edgeIndices();
 		auto& points = initialEdgeSet.getPoints();
 		DArray<int> intersected;
 		intersected.resize(edges.size());
@@ -578,7 +578,7 @@ namespace dyno
 	void EdgeInteraction<TDataType>::mergeIndex()
 	{
 		auto& initialEdgeSet = this->inInitialEdgeSet()->getData();
-		auto& edges = initialEdgeSet.getEdges();
+		auto& edges = initialEdgeSet.edgeIndices();
 		auto& points = initialEdgeSet.getPoints();
 		DArray<int> intersected;
 		intersected.resize(edges.size());

@@ -2,6 +2,7 @@
 
 namespace dyno
 {
+	IMPLEMENT_TCLASS(HeightFieldToTriangleSet, TDataType)
 	template<typename TDataType>
 	HeightFieldToTriangleSet<TDataType>::HeightFieldToTriangleSet()
 		: TopologyMapping()
@@ -66,7 +67,7 @@ namespace dyno
 		auto triSet = this->outTriangleSet()->getDataPtr();
 
 		auto& vertices = triSet->getPoints();
-		auto& indices = triSet->getTriangles();
+		auto& indices = triSet->triangleIndices();
 
 		int numOfVertices = heights->width() * heights->height();
 		int numOfTriangles = 2 * (heights->width() - 1) * (heights->height() - 1);

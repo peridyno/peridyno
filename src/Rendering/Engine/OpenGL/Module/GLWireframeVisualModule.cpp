@@ -83,7 +83,7 @@ namespace dyno
 	{
 		// copy data
 		auto edgeSet = this->inEdgeSet()->getDataPtr();
-		auto edges = edgeSet->getEdges();
+		auto edges = edgeSet->edgeIndices();
 		auto vertices = edgeSet->getPoints();
 
 		mVertexBuffer.load(vertices);

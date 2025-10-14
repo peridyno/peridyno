@@ -213,7 +213,7 @@ namespace dyno
 		
 		auto& initialTriangleSet = this->inInitialTriangleSet()->getData();
 		auto& points = initialTriangleSet.getPoints();
-		auto& triangles = initialTriangleSet.getTriangles();
+		auto& triangles = initialTriangleSet.triangleIndices();
 		DArray<int> intersected_t;
 		intersected_t.resize(triangles.size());
 

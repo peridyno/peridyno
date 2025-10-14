@@ -22,6 +22,8 @@
 
 #include "Mapping/MergeTriangleSet.h"
 
+#include "GltfLoader.h"
+
 namespace dyno 
 {
 	std::atomic<ModelingInitializer*> ModelingInitializer::gInstance;
@@ -49,6 +51,23 @@ namespace dyno
 	void ModelingInitializer::initializeActions()
 	{
 		NodeFactory* factory = NodeFactory::instance();
+
+		factory->addContentAction(std::string("gltf"),
+			[=](const std::string& path)->std::shared_ptr<Node>
+			{
+				auto node = std::make_shared<GltfLoader<DataType3f>>();
+				node->varFileName()->setValue(path);
+				return node;
+			});
+
+		factory->addContentAction(std::string("glb"),
+			[=](const std::string& path)->std::shared_ptr<Node>
+			{
+				auto node = std::make_shared<GltfLoader<DataType3f>>();
+				node->varFileName()->setValue(path);
+				return node;
+			});
+
 
 		auto page = factory->addPage(
 			"Modeling", 

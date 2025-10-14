@@ -10,29 +10,22 @@ namespace dyno
 {
 	template<typename TDataType>
 	Merge<TDataType>::Merge()
-
 	{
-
-		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
+		this->stateTriangleSets()->setDataPtr(std::make_shared<TriangleSets<TDataType>>());
 
 		auto glModule = std::make_shared<GLSurfaceVisualModule>();
 		glModule->setColor(Color(0.8f, 0.3f, 0.25f));
 		glModule->setVisible(true);
-		this->stateTriangleSet()->connect(glModule->inTriangleSet());
+		this->stateTriangleSets()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
-
-		this->inTriangleSet01()->tagOptional(true);
-		this->inTriangleSet02()->tagOptional(true);
-		this->inTriangleSet03()->tagOptional(true);
-		this->inTriangleSet04()->tagOptional(true);
 
 		auto ptModule = std::make_shared<GLPointVisualModule>();
 		ptModule->setVisible(false);
-		this->stateTriangleSet()->connect(ptModule->inPointSet());
+		this->stateTriangleSets()->connect(ptModule->inPointSet());
 		this->graphicsPipeline()->pushModule(ptModule);
 		ptModule->varPointSize()->setValue(0.01);
 
-		this->stateTriangleSet()->promoteOuput();
+		this->stateTriangleSets()->promoteOuput();
 	}
 
 	template<typename TDataType>
@@ -47,41 +40,26 @@ namespace dyno
 		if (this->varUpdateMode()->getData() == UpdateMode::Tick)
 		{
 			MergeGPU();
-		}
+		}	
 	}
 
 	template<typename TDataType>
 	void Merge<TDataType>::MergeGPU()
 	{
-		auto tri01 = this->inTriangleSet01()->getDataPtr();
-		auto tri02 = this->inTriangleSet02()->getDataPtr();
-		auto tri03 = this->inTriangleSet03()->getDataPtr();
-		auto tri04 = this->inTriangleSet04()->getDataPtr();
+		auto num = this->inTriangleSets()->size();
 
-		std::shared_ptr<TriangleSet<TDataType>> temp = std::make_shared<TriangleSet<DataType3f>>();
+		std::vector<std::shared_ptr<TriangleSet<TDataType>>> tsArray;
+		for (uint i = 0; i < num; i++)
+		{
+			auto ts = this->inTriangleSets()->constDataPtr(i);
 
-		auto topo = this->stateTriangleSet()->getDataPtr();
-		if (tri01 != NULL)
-		{
-			temp->copyFrom(*temp->merge(*tri01));
-			printf("Merge TriangleSet01\n");
+			tsArray.push_back(ts);
 		}
-		if (tri02 != NULL)
-		{
-			temp->copyFrom(*temp->merge(*tri02));
-			printf("Merge TriangleSet02\n");
-		}
-		if (tri03 != NULL)
-		{
-			temp->copyFrom(*temp->merge(*tri03));
-			printf("Merge TriangleSet03\n");
-		}
-		if (tri04 != NULL)
-		{
-			temp->copyFrom(*temp->merge(*tri04));
-			printf("Merge TriangleSet04\n");
-		}
-		topo->copyFrom(*temp);
+
+		auto topo = this->stateTriangleSets()->getDataPtr();
+		topo->load(tsArray);
+
+		tsArray.clear();
 	}
 
 	DEFINE_CLASS(Merge);

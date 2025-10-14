@@ -66,64 +66,6 @@ namespace dyno
 		velArr[pId] = vec;
 	}
 
-	template<typename Real, typename Coord, typename TDataType>
-	__global__ void K_ConstrainSDF_With_Coupling(
-		DArray<Coord> posArr,
-		DArray<Coord> velArr,
-		DistanceField3D<TDataType> df,
-		Real normalFriction,
-		Real tangentialFriction,
-		Real dt,
-		Real particleMass,
-		Coord rigidBodyCom,
-		DArray<Coord> totalImpulse)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= posArr.size()) return;
-
-		Coord pos = posArr[pId];
-		Coord vel_initial = velArr[pId];
-
-		Real dist;
-		Coord normal;
-		df.getDistance(pos, dist, normal);
-		// constrain particle
-		if (dist <= 0) {
-			Real olddist = -dist;
-			RandNumber rGen(pId);
-			dist = 0.0001f * rGen.Generate();
-			// reflect position
-			pos -= (olddist + dist) * normal;
-			// reflect velocity
-			Coord vec_final = vel_initial;
-			Real vlength = vec_final.norm();
-			Real vec_n = vec_final.dot(normal);
-			Coord vec_normal = vec_n * normal;
-			Coord vec_tan = vec_final - vec_normal;
-			if (vec_n > 0) vec_normal = -vec_normal;
-			vec_normal *= (1.0f - normalFriction);
-			vec_final = vec_normal + vec_tan * (1.0f - tangentialFriction);
-
-			posArr[pId] = pos;
-			velArr[pId] = vec_final;
-
-			Coord impulse = (vel_initial - vec_final) * particleMass;
-
-			Coord r = pos - rigidBodyCom;
-
-			Coord torque = r.cross(impulse);
-
-			atomicAdd(&totalImpulse[0].x, impulse.x);
-			atomicAdd(&totalImpulse[0].y, impulse.y);
-			atomicAdd(&totalImpulse[0].z, impulse.z);
-
-			atomicAdd(&totalImpulse[1].x, torque.x);
-			atomicAdd(&totalImpulse[1].y, torque.y);
-			atomicAdd(&totalImpulse[1].z, torque.z);
-		}
-
-	}
-
 	template<typename TDataType>
 	void BoundaryConstraint<TDataType>::constrain()
 	{
@@ -156,7 +98,6 @@ namespace dyno
 	void BoundaryConstraint<TDataType>::constrain(DArray<Coord>& position, DArray<Coord>& velocity, DistanceField3D<TDataType>& sdf, Real dt)
 	{
 		uint pDim = cudaGridSize(position.size(), BLOCK_SIZE);
-		/*
 		K_ConstrainSDF << <pDim, BLOCK_SIZE >> > (
 			position,
 			velocity,
@@ -164,30 +105,6 @@ namespace dyno
 			this->varNormalFriction()->getData(),
 			this->varTangentialFriction()->getData(),
 			dt);
-		*/
-		Real particleMass = 0.001;
-		CArray<Coord> impulse_host;
-		impulse_host.resize(2);
-		impulse_host.reset();
-		DArray<Coord> impulse;
-		impulse.assign(impulse_host);
-		Coord com = (sdf.lowerBound() + sdf.upperBound()) / 2;
-		
-		K_ConstrainSDF_With_Coupling << <pDim, BLOCK_SIZE >> > (
-			position,
-			velocity,
-			sdf,
-			this->varNormalFriction()->getData(),
-			this->varTangentialFriction()->getData(),
-			dt,
-			particleMass,
-			com,
-			impulse);
-
-		impulse_host.assign(impulse);
-		for (int i = 0; i < 2; i++) {
-			std::cout << impulse_host[i].x << " " << impulse_host[i].y << " " << impulse_host[i].z << std::endl;
-		}
 	}
 
 	template<typename TDataType>

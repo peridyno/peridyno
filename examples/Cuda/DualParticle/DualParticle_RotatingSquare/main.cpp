@@ -1,30 +1,31 @@
 #include <GlfwApp.h>
-#include "SceneGraph.h"
-#include <Log.h>
+#include <SceneGraph.h>
 
+///Particle Sampler & Shapes
+#include <BasicShapes/CubeModel.h>
+#include <Samplers/ShapeSampler.h>
+#include <ParticleSystem/Emitters/SquareEmitter.h>
+#include <StaticMeshLoader.h>
+
+///Particle fluid solver
+#include <DualParticleSystem/DualParticleFluid.h>
+#include <DualParticleSystem/Module/VirtualSpatiallyAdaptiveStrategy.h>
+#include <DualParticleSystem/Module/VirtualColocationStrategy.h>
+#include <DualParticleSystem/Module/VirtualParticleShiftingStrategy.h>
+#include <DualParticleSystem/Module/DualParticleIsphModule.h>
+#include <ParticleSystem/Module/ImplicitViscosity.h>
+#include <ParticleSystem/MakeParticleSystem.h>
+#include "RotatingSquarePatchModule.h"
+
+///Renderer
 #include <Module/CalculateNorm.h>
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
 #include <ColorMapping.h>
 #include <ImColorbar.h>
-#include "DualParticleSystem/DualParticleFluid.h"
-#include "ParticleSystem/MakeParticleSystem.h"
-#include <BasicShapes/CubeModel.h>
-#include <Samplers/ShapeSampler.h>
-#include <ParticleSystem/Emitters/SquareEmitter.h>
-#include <StaticMeshLoader.h>
-#include <GLSurfaceVisualModule.h>
-#include "Collision/Attribute.h"
-#include "DualParticleSystem/Module/VirtualSpatiallyAdaptiveStrategy.h"
-#include "DualParticleSystem/Module/VirtualColocationStrategy.h"
-#include "DualParticleSystem/Module/VirtualParticleShiftingStrategy.h"
-#include "DualParticleSystem/Module/DualParticleIsphModule.h"
-#include "ParticleSystem/Module/ImplicitViscosity.h"
-#include "RotatingSquarePatchModule.h"
-#include "Auxiliary/DataSource.h"
+
 using namespace std;
 using namespace dyno;
-
 
 std::shared_ptr<SceneGraph> createScene()
 {
@@ -47,19 +48,18 @@ std::shared_ptr<SceneGraph> createScene()
 	auto initialParticles = scene->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
 	sampler->statePointSet()->promoteOuput()->connect(initialParticles->inPoints());
 
-
-	//auto ptsLoader = scene->addNode(std::make_shared<ParticleLoader<DataType3f>>());
-	//ptsLoader->loadParticles(Vec3f(-0.12, 0.1, -0.12), Vec3f(0.12, 0.104, 0.12), 0.005);
-	//auto initialParticles = scene->addNode(std::make_shared<MakeParticleSystem<DataType3f >>());
-	//ptsLoader->statePointSet()->promoteOuput()->connect(initialParticles->inPoints());
-
-	auto fluid = scene->addNode(std::make_shared<DualParticleFluid<DataType3f>>());
+	auto fluid = scene->addNode(std::make_shared<DualParticleFluid<DataType3f>>(2));
+	//fluid->setDt(0.001f);
 	initialParticles->connect(fluid->importInitialStates());
 
 	fluid->animationPipeline()->clear();
 	{
 		fluid->varReshuffleParticles()->setValue(false);
 
+		auto m_nbrQuery = std::make_shared<NeighborPointQuery<DataType3f>>();
+		fluid->stateSmoothingLength()->connect(m_nbrQuery->inRadius());
+		fluid->statePosition()->connect(m_nbrQuery->inPosition());
+		fluid->animationPipeline()->pushModule(m_nbrQuery);
 		fluid->varSmoothingLength()->setValue(2.4);
 
 		std::shared_ptr<VirtualParticleGenerator<DataType3f>> vpGen;
@@ -92,14 +92,8 @@ std::shared_ptr<SceneGraph> createScene()
 			vpGen = m_virtual_equal_to_Real;
 		}
 
-
 		fluid->animationPipeline()->pushModule(vpGen);
 		vpGen->outVirtualParticles()->connect(fluid->stateVirtualPosition());
-
-		auto m_nbrQuery = std::make_shared<NeighborPointQuery<DataType3f>>();
-		fluid->stateSmoothingLength()->connect(m_nbrQuery->inRadius());
-		fluid->statePosition()->connect(m_nbrQuery->inPosition());
-		fluid->animationPipeline()->pushModule(m_nbrQuery);
 
 		auto m_rv_nbrQuery = std::make_shared<NeighborPointQuery<DataType3f>>();
 		fluid->stateSmoothingLength()->connect(m_rv_nbrQuery->inRadius());
@@ -136,12 +130,11 @@ std::shared_ptr<SceneGraph> createScene()
 		fluid->stateTimeStep()->connect(m_integrator->inTimeStep());
 		fluid->statePosition()->connect(m_integrator->inPosition());
 		fluid->stateVelocity()->connect(m_integrator->inVelocity());
-		fluid->stateParticleAttribute()->connect(m_integrator->inAttribute());
 		fluid->animationPipeline()->pushModule(m_integrator);
 
 		auto m_visModule = std::make_shared<ImplicitViscosity<DataType3f>>();
 		m_visModule->varViscosity()->setValue(Real(0.1));
-		fluid->stateTimeStep()->connect(m_visModule->inTimeStep());
+		fluid->stateSamplingDistance()->connect(m_visModule->inSamplingDistance());
 		fluid->stateSmoothingLength()->connect(m_visModule->inSmoothingLength());
 		fluid->stateTimeStep()->connect(m_visModule->inTimeStep());
 		fluid->statePosition()->connect(m_visModule->inPosition());
@@ -193,10 +186,5 @@ int main()
 	window.setSceneGraph(createScene());
 	window.initialize(1024, 768);
 	window.mainLoop();
-
 	return 0;
 }
-
-
-
-

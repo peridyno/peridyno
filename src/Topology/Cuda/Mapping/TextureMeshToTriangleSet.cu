@@ -77,7 +77,7 @@ namespace dyno
 		auto ts = this->outTriangleSet()->getDataPtr();
 
 		auto& vertices = ts->getPoints();
-		auto& indices = ts->getTriangles();
+		auto& indices = ts->triangleIndices();
 
 		vertices.assign(mesh->vertices());
 

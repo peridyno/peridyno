@@ -1,26 +1,22 @@
 #include <GlfwApp.h>
 #include <SceneGraph.h>
 
-#include <ParticleSystem/MakeParticleSystem.h>
+///Particle Emitter
 #include <ParticleSystem/Emitters/PoissonEmitter.h>
 
+///Fluid Solver
+#include <DualParticleSystem/DualParticleFluid.h>
+#include <ParticleSystem/MakeParticleSystem.h>
+
+///Renderer
 #include <Module/CalculateNorm.h>
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
 #include <ColorMapping.h>
 #include <ImColorbar.h>
 
-#include "DualParticleSystem/DualParticleFluid.h"
-#include "ParticleSystem/MakeParticleSystem.h"
-#include <BasicShapes/CubeModel.h>
-#include <Samplers/ShapeSampler.h>
-#include <ParticleSystem/Emitters/SquareEmitter.h>
-#include <ParticleSystem/Emitters/PoissonEmitter.h>
-
 using namespace std;
 using namespace dyno;
-
-bool useVTK = false;
 
 std::shared_ptr<SceneGraph> createScene()
 {

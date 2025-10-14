@@ -13,7 +13,7 @@ namespace dyno
 
 	class AppBase {
 	public:
-		AppBase() {};
+		AppBase() { std::cout << "\033[32m\033[1m" << ">>>: The program is loading necessary modules, it could take a while depending on your hardware... " << "\033[0m" << std::endl; }
 		~AppBase() {};
 
 		virtual void initialize(int width, int height, bool usePlugin = false) {};

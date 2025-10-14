@@ -12,7 +12,7 @@ namespace dyno
 	template<typename TDataType>
 	TetraMeshWriter<TDataType>::TetraMeshWriter() : OutputModule()
 	{
-
+		this->varPrefix()->setValue("obj");
 	}
 
 	template<typename TDataType>
@@ -20,28 +20,12 @@ namespace dyno
 	{
 	}
 
-
-	template<typename TDataType>
-	bool TetraMeshWriter<TDataType>::updatePtr() 
-	{
-		if (this->ptr_TetrahedronSet == nullptr) {
-			return false;
-		}
-		this->ptr_triangles = &( this->ptr_TetrahedronSet->getTriangles() );
-		this->ptr_tri2tet = &( this->ptr_TetrahedronSet->getTri2Tet() );
-		this->ptr_vertices = &( this->ptr_TetrahedronSet->getPoints() );
-		this->ptr_tets = &( this->ptr_TetrahedronSet->getTetrahedrons() );
-	}
-
 	template<typename TDataType>
 	void TetraMeshWriter<TDataType>::output() 
 	{
-		if (this->ptr_tri2tet == nullptr || this->ptr_triangles == nullptr || this->ptr_vertices == nullptr) {
-			printf("------Tetra Mesh Writer: array nullptr \n");
-			return;
-		}
-
-		std::string filename = this->constructFileName() + this->file_postfix;
+		auto tetSet = this->inTetrahedronSet()->constDataPtr();
+		
+		std::string filename = this->constructFileName();
 		std::ofstream output(filename.c_str(), std::ios::out);
 
 		if (!output.is_open()) {
@@ -49,24 +33,15 @@ namespace dyno
 			return;
 		}
 
-		printf("Output Surface!!!!!!!!\n");
-
-		this->updatePtr();
-
 		CArray<Coord> host_vertices;
 		CArray<Triangle> host_triangles;
 		CArray<Tri2Tet> host_tri2tet;
 		CArray<Tetrahedron> host_tets;
 
-		host_vertices.resize( (*(this->ptr_vertices)).size() );
-		host_triangles.resize( (*(this->ptr_triangles)).size() );
-		host_tri2tet.resize( (*(this->ptr_tri2tet)).size() );
-		host_tets.resize((*(this->ptr_tets)).size());
-
-		host_vertices.assign(*(this->ptr_vertices));
-		host_triangles.assign(*(this->ptr_triangles));
-		host_tri2tet.assign(*(this->ptr_tri2tet));
-		host_tets.assign(*(this->ptr_tets));
+		host_vertices.assign(tetSet->getPoints());
+		host_triangles.assign(tetSet->triangleIndices());
+		host_tri2tet.assign(tetSet->triangle2Tetrahedron());
+		host_tets.assign(tetSet->tetrahedronIndices());
 
 		for (uint i = 0; i < host_vertices.size(); ++i) {
 			output << "v " << host_vertices[i][0] << " " << host_vertices[i][1] << " " << host_vertices[i][2] << std::endl;

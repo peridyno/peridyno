@@ -45,6 +45,7 @@ namespace Qt
 
 		bool portCaptionVisible(PortType portType, PortIndex portIndex) const override;
 
+		bool allowImported() const override { return false; }
 		bool allowExported() const override { return true; }
 
 		bool hotKeyRenderChecked() const override { return !mNode->isVisible(); }

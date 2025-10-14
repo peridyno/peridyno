@@ -49,6 +49,23 @@ namespace dyno
 
 		BasicShapeType type = shape->getShapeType();
 
+		auto calculateAxisAlignedBoundingBox = [=](Coord& lo, Coord& hi, const Coord v0, const Coord v1, Real h, int padding) {
+			int v0_i = std::floor(v0.x / h);
+			int v0_j = std::floor(v0.y / h);
+			int v0_k = std::floor(v0.z / h);
+
+			int v1_i = std::ceil(v1.x / h);
+			int v1_j = std::ceil(v1.y / h);
+			int v1_k = std::ceil(v1.z / h);
+
+			lo = h * Coord(v0_i - padding, v0_j - padding, v0_k - padding);
+			hi = h * Coord(v1_i + padding, v1_j + padding, v1_k + padding);
+			};
+
+
+		Coord lo;
+		Coord hi;
+
 		if (type == BasicShapeType::CUBE)
 		{
 			auto cubeModel = dynamic_cast<CubeModel<TDataType>*>(shape);
@@ -61,16 +78,11 @@ namespace dyno
 
 				auto& sdf = levelset->getSDF();
 
-				auto lo = aabb.v0;
-				auto hi = aabb.v1;
-
-				int nx = floor((hi[0] - lo[0]) / h);
-				int ny = floor((hi[1] - lo[1]) / h);
-				int nz = floor((hi[2] - lo[2]) / h);
-
 				uint padding = 5;
 
-				sdf.setSpace(lo - padding * h, hi + padding * h, h);
+				calculateAxisAlignedBoundingBox(lo, hi, aabb.v0, aabb.v1, h, padding);
+
+				sdf.setSpace(lo, hi, h);
 				sdf.loadBox(aabb.v0, aabb.v1, inverted);
 			}
 		}
@@ -86,16 +98,11 @@ namespace dyno
 
 				auto& sdf = levelset->getSDF();
 
-				auto lo = aabb.v0;
-				auto hi = aabb.v1;
-
-				int nx = floor((hi[0] - lo[0]) / h);
-				int ny = floor((hi[1] - lo[1]) / h);
-				int nz = floor((hi[2] - lo[2]) / h);
-
 				uint padding = 5;
 
-				sdf.setSpace(lo - padding * h, hi + padding * h, h);
+				calculateAxisAlignedBoundingBox(lo, hi, aabb.v0, aabb.v1, h, padding);
+
+				sdf.setSpace(lo, hi, h);
 				sdf.loadSphere(sphere.center, sphere.radius, inverted);
 			}
 		}

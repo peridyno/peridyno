@@ -107,7 +107,7 @@ namespace dyno
 
 		////**********************************  build Normal by Cuda **********************************////
 		{
-			DArray<TopologyModule::Triangle>& d_triangles = inTriSet->getTriangles();
+			DArray<TopologyModule::Triangle>& d_triangles = inTriSet->triangleIndices();
 			d_points = inTriSet->getPoints();
 			d_edges.resize(d_triangles.size());
 			d_normalPt.resize(d_triangles.size() * 2);

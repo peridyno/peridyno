@@ -28,6 +28,21 @@ namespace dyno {
 		m_Count.clear();
 		m_Density.clear();
 		//m_output->close();
+
+		if (m_reduce)
+		{
+			delete m_reduce;
+		}
+
+		if (m_arithmetic)
+		{
+			delete m_arithmetic;
+		}
+
+		if (m_reduce_real)
+		{
+			delete m_reduce_real;
+		}
 	};
 
 

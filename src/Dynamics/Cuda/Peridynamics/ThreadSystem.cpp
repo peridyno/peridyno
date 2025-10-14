@@ -68,7 +68,7 @@ namespace dyno
 		
 		edgeSet->setPoints(particles);
 		
-		auto& dEdge = edgeSet->getEdges();
+		auto& dEdge = edgeSet->edgeIndices();
 		dEdge.resize(edges.size());
 		dEdge.assign(edges);
 

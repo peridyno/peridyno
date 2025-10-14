@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #pragma once
-#include "Node.h"
+#include "Node/ParametricModel.h"
 
 #include "Topology/LevelSet.h"
 #include "Topology/TriangleSet.h"
@@ -22,7 +22,7 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class VolumeClipper : public Node
+	class VolumeClipper : public ParametricModel<TDataType>
 	{
 		DECLARE_TCLASS(VolumeClipper, TDataType)
 	public:
@@ -35,9 +35,6 @@ namespace dyno
 		std::string getNodeType() override { return "Volume"; }
 
 	public:
-		DEF_VAR(Coord, Translation, Coord(0), "");
-		DEF_VAR(Coord, Rotation, Coord(0), "");
-
 		DEF_ARRAY_STATE(Real, Field, DeviceType::GPU, "Signed distance field defined on trianglular vertices");
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, Plane, "");

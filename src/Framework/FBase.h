@@ -47,6 +47,16 @@ public:
 	FBase(std::string name, std::string description, FieldTypeEnum type = FieldTypeEnum::Param, OBase* parent = nullptr);
 	virtual ~FBase();
 
+	/**
+	*  @brief Field with a policy of FInputPolicy::Many is not allowed to be connected to FInputPolicy::One
+	*	Field with policy of FInputPolicy::One can either be connected to a field of FInputPolicy::One or FInputPolicy::Many
+	*/
+	enum FInputPolicy
+	{
+		One,
+		Many
+	};
+
 	virtual uint size() = 0;
 	virtual const std::string getTemplateName() { return std::string(""); }
 	virtual const std::string getClassName() { return std::string("Field"); }
@@ -67,10 +77,30 @@ public:
 	void setAutoDestroy(bool autoDestroy);
 	void setDerived(bool derived);
 
-	uint sizeOfSinks() { return (uint)mSinks.size(); }
+	uint sizeOfSinks();
+	uint sizeOfValidSources();
+	
+	void requestValidSources(std::vector<FBase*>& src);
+
+	//Used for fields with FInputPolicy::One
+	FBase* getSource();
+	FBase* getTopField();
+
+	//Used for fields with FInputPolicy::Many
+	std::vector<FBase*>& getSources() { return mMultipleSources; }
 	std::vector<FBase*>& getSinks() { return mSinks; }
 
+
+
 	bool isModified();
+
+	/**
+	 * @brief A variable to control the visibility of the field
+	 *
+	 * @return true when the field is active, otherwise return false
+	 */
+	bool isActive();
+	void setActive(bool b);
 
 	void tick();
 	void tack();
@@ -91,11 +121,11 @@ public:
 	virtual bool connect(FBase* dst) = 0;
 	virtual bool disconnect(FBase* dst);
 
+
+	virtual FInputPolicy inputPolicy() { return FInputPolicy::One; }
+
 	virtual inline std::string serialize() { return ""; }
 	virtual inline bool deserialize(const std::string& str) { return false; }
-
-	FBase* getTopField();
-	FBase* getSource();
 
 	/**
 	 * @brief Display a state field as an ouput field
@@ -135,8 +165,11 @@ public:
 protected:
 	void setSource(FBase* source);
 
-	void addSink(FBase* f);
+	bool addSink(FBase* f);
 	bool removeSink(FBase* f);
+
+	bool addSource(FBase* f);
+	bool removeSource(FBase* f);
 
 	bool connectField(FBase* dst);
 	bool disconnectField(FBase* dst);
@@ -152,12 +185,18 @@ private:
 	bool m_autoDestroyable = true;
 	bool m_derived = false;
 
+	bool mActive = true;
+
 	float m_min = -FLT_MAX;
 	float m_max = FLT_MAX;
 
 	OBase* mOwner = nullptr;
 
-	FBase* mSource = nullptr;
+	/**
+	 * If the input policy is FInputPolicy::One, use mSource, otherwise use mMultipleSources for data traversal.
+	 */
+	FBase* mSingleSource = nullptr;
+	std::vector<FBase*> mMultipleSources;
 
 	std::vector<FBase*> mSinks;
 

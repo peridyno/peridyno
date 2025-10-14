@@ -184,6 +184,9 @@ namespace dyno
 	template<typename TDataType>
 	void PolygonSet<TDataType>::updateEdges()
 	{
+		// Update Edge from Polygon Mesh
+		// Light Map {Poly2Edg, Edg2Poly}
+				
 		uint polyNum = mPolygonIndex.size();
 
 		DArray<uint> radix(polyNum);
@@ -387,6 +390,8 @@ namespace dyno
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= counter.size()) return;
 
+		if (polygonIndices[tId].size() < 3) return;
+
 		counter[tId] = polygonIndices[tId].size() - 2;
 	}
 
@@ -421,7 +426,7 @@ namespace dyno
 		uint polyNum = mPolygonIndex.size();
 
 		DArray<uint> radix(polyNum);
-
+		radix.reset();
 		cuExecute(polyNum,
 			PolygonSet_CountTriangleNumber,
 			radix,
@@ -451,11 +456,11 @@ namespace dyno
 	{
 		this->setPoints(ts.getPoints());
 		
-		this->mPolygonIndex.resize(ts.getTriangles().size(),3);
+		this->mPolygonIndex.resize(ts.triangleIndices().size(),3);
 
-		cuExecute(ts.getTriangles().size(),
+		cuExecute(ts.triangleIndices().size(),
 			triSet2PolygonSet,
-			ts.getTriangles(),
+			ts.triangleIndices(),
 			this->mPolygonIndex
 		);
 
