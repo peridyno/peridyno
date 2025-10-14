@@ -170,6 +170,8 @@ namespace dyno
 		if (tId >= nbr.size()) return;
 
 		ContactId ids = nbr[tId];
+		
+
 		ElementType eleType_i = elementOffset.checkElementType(ids.bodyId1);
 		ElementType eleType_j = elementOffset.checkElementType(ids.bodyId2);
 

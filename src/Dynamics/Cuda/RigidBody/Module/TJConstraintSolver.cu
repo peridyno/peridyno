@@ -248,16 +248,6 @@ namespace dyno
 	void TJConstraintSolver<TDataType>::constrain()
 	{
 		uint bodyNum = this->inCenter()->size();
-		std::string filename = getAssetPath() + std::string("numbers2.txt");
-		std::ofstream outFile(filename, std::ios::out | std::ios::app);
-
-		// 检查文件是否成功打开
-		if (!outFile.is_open()) {
-			std::cerr << "错误：无法打开文件进行写入！" << std::endl;
-		}
-		outFile << this->inContacts()->size() << std::endl;
-
-		outFile.close();
 
 		auto topo = this->inDiscreteElements()->constDataPtr();
 
@@ -271,9 +261,18 @@ namespace dyno
 
 		if (!this->inContacts()->isEmpty() || topo->totalJointSize() > 0)
 		{
+			std::cout << this->inContacts()->size() << std::endl;
+			if (!this->inContacts()->isEmpty()) {
+				float normalThreshold = 0.998f;      
+				float penetrationThreshold = 0.001f; 
+
+				reduceContacts_Optimized(this->inContacts()->getData(), normalThreshold, penetrationThreshold);
+			}
+
 			if (mContactsInLocalFrame.size() != this->inContacts()->size()) {
 				mContactsInLocalFrame.resize(this->inContacts()->size());
 			}
+			std::cout << this->inContacts()->size() << std::endl;
 
 			setUpContactsInLocalFrame(
 				mContactsInLocalFrame,

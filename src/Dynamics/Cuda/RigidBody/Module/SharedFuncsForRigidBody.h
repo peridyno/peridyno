@@ -66,6 +66,23 @@ namespace dyno
 		float dt
 	);
 
+	void updateInitialGuess(
+		DArray<Attribute> attribute,
+		DArray<Vec3f> pos,
+		DArray<Quat1f> rotQuat,
+		DArray<Vec3f> normalPos,
+		DArray<Quat1f> normalRotQuat,
+		DArray<Mat3f> rotMat,
+		DArray<Mat3f> inertia,
+		DArray<Vec3f> velocity,
+		DArray<Vec3f> pre_velocity,
+		DArray<Vec3f> angular_velocity,
+		DArray<Mat3f> inertia_init,
+		bool hasGravity,
+		Real Gravity,
+		float dt
+	);
+
 	void updatePositionAndRotation(
 		DArray<Vec3f> pos,
 		DArray<Quat1f> rotQuat,
@@ -172,6 +189,14 @@ namespace dyno
 	
 	void setUpContactAndFrictionConstraints(
 		DArray<TConstraintPair<float>> constraints,
+		DArray<TContactPair<float>> contactsInLocalFrame,
+		DArray<Vec3f> pos,
+		DArray<Mat3f> rotMat,
+		bool hasFriction
+	);
+
+	void setUpContactAndFrictionConstraintForces(
+		DArray<TConstraintForce<float>> constraintForces,
 		DArray<TContactPair<float>> contactsInLocalFrame,
 		DArray<Vec3f> pos,
 		DArray<Mat3f> rotMat,
@@ -504,7 +529,7 @@ namespace dyno
 		 * @param num_v The number of vertices in the graph.
 		 * @param initial_edges A vector of pairs representing the initial edges.
 		 */
-		void initializeGraph(int num_v, const std::vector<std::pair<int, int>>& initial_edges);
+		void initializeGraph(int num_v, const std::set<std::pair<int, int>>& initial_edges);
 
 		/**
 		 * @brief Performs the initial coloring of the graph.
@@ -516,13 +541,15 @@ namespace dyno
 		 * @param add_edges A vector of pairs representing edges to be added.
 		 * @param delete_edges A vector of pairs representing edges to be deleted.
 		 */
-		void applyBatchUpdate(const std::vector<std::pair<int, int>>& add_edges, const std::vector<std::pair<int, int>>& delete_edges);
+		void applyBatchUpdate(const std::set<std::pair<int, int>>& add_edges, const std::set<std::pair<int, int>>& delete_edges);
 
 		/**
 		 * @brief Gets the current coloring of the vertices.
 		 * @return A const reference to the vector of colors.
 		 */
 		const std::vector<int>& getColors() const { return colors; }
+
+		const std::vector<std::vector<int>>& getCategories() const { return categories; }
 
 		/**
 		 * @brief Gets the number of colors currently used.
@@ -581,4 +608,13 @@ namespace dyno
 	};
 
 	void constraintsMappingToEdges(DArray<TConstraintPair<float>> constraints, std::vector<std::pair<int, int>>& edges);
+
+	void constraintForceMappingToEdges(
+		DArray<TConstraintForce<float>> constraintForces,
+		std::set<std::pair<int, int>>& edges
+	);
+
+	void reduceContacts(DArray<TContactPair<float>>& contacts, float normalThreshold, float penetrationThreshold);
+
+	void reduceContacts_Optimized(DArray<TContactPair<float>>& contacts, float normalThreshold, float penetrationThreshold);
 }

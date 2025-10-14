@@ -1,4 +1,10 @@
 #include "SharedFuncsForRigidBody.h"
+#define CLAMP(value, min_val, max_val) \
+    minimum(maximum((value), (min_val)), (max_val))
+#include <thrust/sort.h>
+#include <thrust/copy.h>
+#include <thrust/device_vector.h>
+#include <thrust/iterator/zip_iterator.h>
 
 namespace dyno
 {
@@ -140,6 +146,87 @@ namespace dyno
 
 			rotMat[tId] = rotQuat[tId].toMatrix3x3();
 		}
+	}
+
+	__global__ void SF_updateInitialGuess(
+		DArray<Attribute> attribute,
+		DArray<Vec3f> pos,
+		DArray<Quat1f> rotQuat,
+		DArray<Vec3f> normalPos,
+		DArray<Quat1f> normalRotQuat,
+		DArray<Mat3f> rotMat,
+		DArray<Mat3f> inertia,
+		DArray<Vec3f> velocity,
+		DArray<Vec3f> pre_velocity,
+		DArray<Vec3f> angular_velocity,
+		DArray<Mat3f> inertia_init,
+		bool hasGravity,
+		Real Gravity,
+		float dt
+	)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= pos.size())
+			return;
+
+		if (!attribute[tId].isFixed())
+		{
+			if (!hasGravity) {
+				Gravity = 0.0;
+			}
+			// normal pos
+			normalPos[tId] = pos[tId] + velocity[tId] * dt + Vec3f(0, Gravity, 0) * dt * dt;
+			normalRotQuat[tId] = rotQuat[tId] + dt * 0.5f * Quat1f(angular_velocity[tId][0], angular_velocity[tId][1], angular_velocity[tId][2], 0.0)
+				* (rotQuat[tId]);
+			normalRotQuat[tId].normalize();
+
+			//initial guess
+			Vec3f accel = (velocity[tId] - pre_velocity[tId]) / dt;
+			Real accelExt = accel.y * sign(Gravity);
+			Real accelWeight = CLAMP(accelExt / abs(Gravity), 0.0f, 1.0f);
+			if (!isfinite(accelWeight)) accelWeight = 0.0f;
+
+			pos[tId] = pos[tId] + velocity[tId] * dt + Vec3f(0, Gravity, 0) * dt * dt * accelWeight;
+			rotQuat[tId] = normalRotQuat[tId];
+			rotMat[tId] = rotQuat[tId].toMatrix3x3();
+			inertia[tId] = rotMat[tId] * inertia_init[tId] * rotMat[tId].inverse();
+		}
+
+	}
+
+	void updateInitialGuess(
+		DArray<Attribute> attribute,
+		DArray<Vec3f> pos,
+		DArray<Quat1f> rotQuat,
+		DArray<Vec3f> normalPos,
+		DArray<Quat1f> normalRotQuat,
+		DArray<Mat3f> rotMat,
+		DArray<Mat3f> inertia,
+		DArray<Vec3f> velocity,
+		DArray<Vec3f> pre_velocity,
+		DArray<Vec3f> angular_velocity,
+		DArray<Mat3f> inertia_init,
+		bool hasGravity,
+		Real Gravity,
+		float dt
+	)
+	{
+		cuExecute(pos.size(),
+			SF_updateInitialGuess,
+			attribute,
+			pos,
+			rotQuat,
+			normalPos,
+			normalRotQuat,
+			rotMat,
+			inertia,
+			velocity,
+			pre_velocity,
+			angular_velocity,
+			inertia_init,
+			hasGravity,
+			Gravity,
+			dt);
 	}
 
 
@@ -713,6 +800,8 @@ namespace dyno
 			B[4 * tId + 3] = Coord(0);
 		}
 	}
+
+
 
 	template<typename Coord, typename Matrix, typename Constraint>
 	__global__ void SF_calculateJacobianMatrixForNJS(
@@ -2436,6 +2525,91 @@ namespace dyno
 		}
 	}
 
+	template<typename Coord, typename Matrix, typename Contact, typename ConstraintForce>
+	__global__ void SF_setUpContactAndFrictionConstraintForces(
+		DArray<ConstraintForce> constraintForces,
+		DArray<Contact> contactsInLocalFrame,
+		DArray<Coord> pos,
+		DArray<Matrix> rotMat,
+		bool hasFriction
+	)
+	{
+		int tId = threadIdx.x + blockDim.x * blockIdx.x;
+
+		int contact_size = contactsInLocalFrame.size();
+		if (tId >= contact_size) return;
+
+		int idx1 = contactsInLocalFrame[tId].bodyId1;
+		int idx2 = contactsInLocalFrame[tId].bodyId2;
+
+		constraintForces[tId * 2].bodyId = idx1;
+		constraintForces[tId * 2].FrombodyId = idx2;
+		constraintForces[tId * 2 + 1].bodyId = idx2;
+		constraintForces[tId * 2 + 1].FrombodyId = idx1;
+
+		Coord pos1 = pos[idx1];
+		Coord r1 = rotMat[idx1] * contactsInLocalFrame[tId].pos1;
+		Coord pos2 = idx2 != INVALID ? pos[idx2] : Coord(0);
+		Coord r2 = idx2 != INVALID ? rotMat[idx2] * contactsInLocalFrame[tId].pos2 : contactsInLocalFrame[tId].pos2;
+
+		Coord normal1 = contactsInLocalFrame[tId].normal1;
+		Coord normal2, normal3;
+
+		if (abs(normal1.x) >= 0.57735) {
+			normal2 = Coord(normal1.y, -normal1.x, 0.0);
+		}
+		else {
+			normal2 = Coord(0.0, normal1.z, -normal1.y);
+		}
+		normal2.normalize();
+
+		normal3 = normal1.cross(normal2);
+		normal3.normalize();
+		
+		// calculateConstraint and Jacobian
+		constraintForces[tId * 2].bodyId = idx1;
+		constraintForces[tId * 2].FrombodyId = idx2;
+		constraintForces[tId * 2].C[0] = minimum(contactsInLocalFrame[tId].interpenetration + (pos2 + r2 - pos1 - r1).dot(contactsInLocalFrame[tId].normal1), 0.0f);
+		constraintForces[tId * 2].J[0] = -normal1;
+		constraintForces[tId * 2].J[1] = -r1.cross(normal1);
+		constraintForces[tId * 2].Penalty = Coord(1000, 0, 0);
+		constraintForces[tId * 2].Lambda = Coord(0);
+		constraintForces[tId * 2].type = ConstraintForceType::CF_CONTACT_NOFRICTION;
+
+		constraintForces[tId * 2 + 1].bodyId = idx2;
+		constraintForces[tId * 2 + 1].FrombodyId = idx1;
+		constraintForces[tId * 2 + 1].C[0] = minimum(contactsInLocalFrame[tId].interpenetration + (pos2 + r2 - pos1 - r1).dot(contactsInLocalFrame[tId].normal1), 0.0f);
+		constraintForces[tId * 2 + 1].J[0] = normal1;
+		constraintForces[tId * 2 + 1].J[1] = r2.cross(normal1);
+		constraintForces[tId * 2 + 1].Penalty = Coord(1000, 0, 0);
+		constraintForces[tId * 2 + 1].Lambda = Coord(0);
+		constraintForces[tId * 2 + 1].type = ConstraintForceType::CF_CONTACT_NOFRICTION;
+
+		if (hasFriction) {
+			constraintForces[tId * 2].C[1] = (pos2 + r2 - pos1 - r2).dot(normal2);
+			constraintForces[tId * 2].C[2] = (pos2 + r2 - pos1 - r2).dot(normal3);
+			constraintForces[tId * 2].J[2] = -normal2;
+			constraintForces[tId * 2].J[3] = -r1.cross(normal2);
+			constraintForces[tId * 2].J[4] = -normal3;
+			constraintForces[tId * 2].J[5] = -r1.cross(normal3);
+			constraintForces[tId * 2].Penalty = Coord(1000);
+			constraintForces[tId * 2].Lambda = Coord(0);
+			constraintForces[tId * 2].type = ConstraintForceType::CF_CONTACT_FRICTION;
+
+			constraintForces[tId * 2 + 1].C[1] = (pos2 + r2 - pos1 - r2).dot(normal2);
+			constraintForces[tId * 2 + 1].C[2] = (pos2 + r2 - pos1 - r2).dot(normal3);
+			constraintForces[tId * 2 + 1].J[2] = normal2;
+			constraintForces[tId * 2 + 1].J[3] = r2.cross(normal2);
+			constraintForces[tId * 2 + 1].J[4] = normal3;
+			constraintForces[tId * 2 + 1].J[5] = r2.cross(normal3);
+			constraintForces[tId * 2 + 1].Penalty = Coord(1000);
+			constraintForces[tId * 2 + 1].Lambda = Coord(0);
+			constraintForces[tId * 2 + 1].type = ConstraintForceType::CF_CONTACT_FRICTION;
+		}
+		constraintForces[tId * 2].isValid = true;
+	}
+
+
 	void setUpContactAndFrictionConstraints(
 		DArray<TConstraintPair<float>> constraints,
 		DArray<TContactPair<float>> contactsInLocalFrame,
@@ -2451,6 +2625,24 @@ namespace dyno
 			pos,
 			rotMat,
 			hasFriction);
+	}
+
+	void setUpContactAndFrictionConstraintForces(
+		DArray<TConstraintForce<float>> constraintForces,
+		DArray<TContactPair<float>> contactsInLocalFrame,
+		DArray<Vec3f> pos,
+		DArray<Mat3f> rotMat,
+		bool hasFriction
+	)
+	{
+		cuExecute(contactsInLocalFrame.size(),
+			SF_setUpContactAndFrictionConstraintForces,
+			constraintForces,
+			contactsInLocalFrame,
+			pos,
+			rotMat,
+			hasFriction);
+
 	}
 
 	/**
@@ -5493,7 +5685,7 @@ namespace dyno
 
 	DynamicGraphColoring::DynamicGraphColoring() : num_vertices(0), num_colors(0) {}
 
-	void DynamicGraphColoring::initializeGraph(int num_v, const std::vector<std::pair<int, int>>& initial_edges) {
+	void DynamicGraphColoring::initializeGraph(int num_v, const std::set<std::pair<int, int>>& initial_edges) {
 		this->num_vertices = num_v;
 		graph.assign(num_vertices, std::vector<int>());
 
@@ -5521,7 +5713,7 @@ namespace dyno
 		rebuildCategories();
 	}
 
-	void DynamicGraphColoring::applyBatchUpdate(const std::vector<std::pair<int, int>>& add_edges, const std::vector<std::pair<int, int>>& delete_edges) {
+	void DynamicGraphColoring::applyBatchUpdate(const std::set<std::pair<int, int>>& add_edges, const std::set<std::pair<int, int>>& delete_edges) {
 		// Step 1: Update graph structure
 		for (const auto& edge : add_edges) {
 			int u = edge.first;
@@ -5658,4 +5850,245 @@ namespace dyno
 		c_constraints.clear();
 	}
 
+	void constraintForceMappingToEdges(
+		DArray<TConstraintForce<float>> constraintForces,
+		std::set<std::pair<int, int>>& edges
+	)
+	{
+		CArray<TConstraintForce<float>> c_constraint_forces;
+		c_constraint_forces.assign(constraintForces);
+
+
+		for (int i = 0; i < c_constraint_forces.size(); ++i) {
+			auto constraintForce = c_constraint_forces[i];
+			if (constraintForce.bodyId == INVALID || constraintForce.FrombodyId == INVALID) {
+				continue;
+			}
+
+			int u = std::min(constraintForce.bodyId, constraintForce.FrombodyId);
+			int v = std::max(constraintForce.bodyId, constraintForce.FrombodyId);
+
+			edges.insert({ u, v });
+		}
+
+		c_constraint_forces.clear();
+	}
+
+
+	template<typename Coord, typename Matrix, typename Quat, typename ConstraintForce>
+	__global__ void SF_IterationPosition(
+		DArray<Coord> pos,
+		DArray<Coord> init_pos,
+		DArray<Quat> quat,
+		DArray<Quat> init_quat,
+		DArray<Matrix> rotMat,
+		DArray<Matrix> initialInertia,
+		DArray<Matrix> inertia,
+		DArray<Real> mass,
+		DArray<ConstraintForce> constraintforces,
+		Real dt
+	)
+	{
+		int tId = threadIdx.x + blockIdx.x * blockDim.x;
+
+		if (tId >= pos.size()) {
+			return;
+		}
+		Real dt_inverse = 1.0 / dt;
+
+		// f is a 6 vector
+		Coord f1 = (-mass[tId] * Matrix::identityMatrix() * dt_inverse * dt_inverse) * (pos[tId] - init_pos[tId]);
+		Quat rot_diff = 2 * quat[tId] * init_quat[tId].inverse();
+		rot_diff.normalize();
+		Coord rot_diff_vec = Coord(rot_diff.x, rot_diff.y, rot_diff.z);
+		Coord f2 = (-inertia[tId] * dt_inverse * dt_inverse) * rot_diff_vec;
+
+		// H is a 6 * 6 matrix
+		Matrix H_1 = mass[tId] * Matrix::identityMatrix() * dt_inverse * dt_inverse;
+		Matrix H_2 = Matrix(0);
+		Matrix H_3 = Matrix(0);
+		Matrix H_4 = inertia[tId] * dt_inverse * dt_inverse;
+
+	}
+
+	__global__ void RC_MarkRedundantContacts(
+		DArray<TContactPair<float>> contacts,
+		DArray<int> keepFlags,
+		float normalThreshold,
+		float penetrationThreshold)
+	{
+		int i = threadIdx.x + blockIdx.x * blockDim.x;
+		if (i >= contacts.size()) return;
+
+		if (keepFlags[i] == 0) return;
+
+		auto& contact_i = contacts[i];
+
+		for (int j = 0; j < i; j++) {
+			if (keepFlags[j] == 0) continue;
+
+			auto& contact_j = contacts[j];
+
+			if (contact_i.bodyId1 == contact_j.bodyId1 && contact_i.bodyId2 == contact_j.bodyId2) {
+				float normalDiff = (contact_i.normal1 - contact_j.normal1).norm();
+
+
+				float penetrationDiff = abs(contact_i.interpenetration - contact_j.interpenetration);
+
+				if (normalDiff < normalThreshold && penetrationDiff < penetrationThreshold) {
+					keepFlags[i] = 0;
+					break;
+				}
+			}
+		}
+	}
+
+	__global__ void RC_CopyKeptContacts(
+		DArray<TContactPair<float>> contacts,
+		DArray<int> keepFlags,
+		DArray<TContactPair<float>> reducedContacts)
+	{
+		int i = threadIdx.x + blockIdx.x * blockDim.x;
+		if (i >= contacts.size()) return;
+
+		if (keepFlags[i] == 1) {
+
+			int targetIdx = 0;
+			for (int j = 0; j < i; j++) {
+				if (keepFlags[j] == 1) {
+					targetIdx++;
+				}
+			}
+
+			reducedContacts[targetIdx] = contacts[i];
+		}
+	}
+
+	void reduceContacts(DArray<TContactPair<float>>& contacts, float normalThreshold, float penetrationThreshold) {
+		if (contacts.size() <= 1) return;
+
+		std::vector<int> keepFlags_c(contacts.size(), 1);
+		CArray<int> keepFlags_cc;
+		keepFlags_cc.assign(keepFlags_c);
+		DArray<int> keepFlags;
+		keepFlags.assign(keepFlags_cc);
+
+		DArray<TContactPair<float>> reducedContacts;
+
+		cuExecute(contacts.size(),
+			RC_MarkRedundantContacts,
+			contacts,
+			keepFlags,
+			normalThreshold,
+			penetrationThreshold);
+
+		int keepCount = thrust::reduce(thrust::device, keepFlags.begin(), keepFlags.begin()+keepFlags.size(), 0, thrust::plus<int>());
+
+		reducedContacts.resize(keepCount);
+
+		cuExecute(contacts.size(),
+			RC_CopyKeptContacts,
+			contacts,
+			keepFlags,
+			reducedContacts);
+
+		contacts.assign(reducedContacts);
+	}
+
+
+	__global__ void RC_MarkRedundantContacts_Robust(
+		DArray<TContactPair<float>> contacts,
+		DArray<int> keepFlags,
+		float normalThreshold,      
+		float penetrationThreshold)
+	{
+		int i = threadIdx.x + blockIdx.x * blockDim.x;
+		if (i >= contacts.size()) return;
+
+		if (keepFlags[i] == 0) return;
+
+		auto& contact_i = contacts[i];
+		auto body_i_first = minimum(contact_i.bodyId1, contact_i.bodyId2);
+		auto body_i_second = maximum(contact_i.bodyId1, contact_i.bodyId2);
+
+		for (int j = 0; j < i; j++) {
+			auto& contact_j = contacts[j];
+
+			auto body_j_first = minimum(contact_j.bodyId1, contact_j.bodyId2);
+			auto body_j_second = maximum(contact_j.bodyId1, contact_j.bodyId2);
+
+			if (body_i_first == body_j_first && body_i_second == body_j_second) {
+
+				float dot_product = contact_i.normal1.dot(contact_j.normal1);
+
+				if (abs(dot_product) > normalThreshold) {
+					float penetrationDiff = abs(contact_i.interpenetration - contact_j.interpenetration);
+
+					if (penetrationDiff < penetrationThreshold) {
+						float posDiff = (contact_i.pos1 - contact_j.pos1).norm();
+						if (posDiff < penetrationThreshold) {
+							keepFlags[i] = 0;
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	__global__ void RC_CopyKeptContacts_Atomic(
+		DArray<TContactPair<float>> contacts,
+		DArray<int> keepFlags,
+		DArray<TContactPair<float>> reducedContacts,
+		DArray<int> d_write_idx) 
+	{
+		int i = threadIdx.x + blockIdx.x * blockDim.x;
+		if (i >= contacts.size()) return;
+
+		if (keepFlags[i] == 1) {
+			int targetIdx = atomicAdd(&d_write_idx[0], 1);
+			reducedContacts[targetIdx] = contacts[i];
+		}
+	}
+
+
+	void reduceContacts_Optimized(DArray<TContactPair<float>>& contacts, float normalThreshold, float penetrationThreshold) {
+		if (contacts.size() <= 1) return;
+		std::vector<int> keepFlags_h(contacts.size(), 1);
+		DArray<int> keepFlags;
+		keepFlags.assign(keepFlags_h); 
+
+		cuExecute(contacts.size(),
+			RC_MarkRedundantContacts_Robust,
+			contacts,
+			keepFlags,
+			normalThreshold,
+			penetrationThreshold);
+
+
+		int keepCount = thrust::reduce(thrust::device, keepFlags.begin(), keepFlags.begin() + keepFlags.size(), 0, thrust::plus<int>());
+
+		if (keepCount == contacts.size()) {
+			return; 
+		}
+		if (keepCount == 0) {
+			contacts.resize(0);
+			return;
+		}
+
+		DArray<TContactPair<float>> reducedContacts;
+		reducedContacts.resize(keepCount);
+
+		DArray<int> d_write_idx(1);
+		d_write_idx.reset();
+
+		cuExecute(contacts.size(),
+			RC_CopyKeptContacts_Atomic,
+			contacts,
+			keepFlags,
+			reducedContacts,
+			d_write_idx);
+
+		contacts.assign(reducedContacts);
+	}
 }
