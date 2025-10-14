@@ -17,11 +17,11 @@
 
 #include "Collision/Attribute.h"
 
-//ParticleSystem
+ //ParticleSystem
 #include "ParticleApproximation.h"
 #include "ParticleSystem/Module/Kernel.h"
 
-namespace dyno 
+namespace dyno
 {
 	template<typename TDataType> class SummationDensity;
 	template<typename TDataType> class Reduction;
@@ -44,7 +44,7 @@ namespace dyno
 
 		VariationalApproximateProjection();
 		~VariationalApproximateProjection() override;
-		
+
 		DEF_VAR(Real, RestDensity, Real(1000), "");
 
 		DEF_VAR_IN(Real, TimeStep, "Time step size");
@@ -56,7 +56,7 @@ namespace dyno
 		DEF_ARRAY_IN(Coord, Normal, DeviceType::GPU, "");
 
 		DEF_ARRAY_IN(Attribute, Attribute, DeviceType::GPU, "");
-		
+
 		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "");
 
 		void compute() override;
@@ -64,7 +64,7 @@ namespace dyno
 		void resizeArray(int num);
 
 		void varChanged();
-		
+
 	protected:
 
 	private:
@@ -98,6 +98,8 @@ namespace dyno
 		Arithmetic<Real>* m_arithmetic;
 
 		CorrectedMPSKernel<Real> Mpskernel;
+
+		SmoothKernel<Real> kernSmooth;
 
 		std::shared_ptr<SummationDensity<TDataType>> mDensityCalculator;
 	};
