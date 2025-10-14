@@ -42,5 +42,8 @@ namespace dyno
 
 	protected:
 		void resetStates() override;
+
+		void updateConfig();
+
 	};
 }

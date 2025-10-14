@@ -16,11 +16,8 @@
 
 #pragma once
 #include "VirtualParticleGenerator.h"
+#include "VirtualParticleStructure.h"
 
-#include "ParticleSystem/Module/Kernel.h"
-#include "ParticleSystem/Module/SummationDensity.h"
-
-#include "Collision/NeighborPointQuery.h"
 
 namespace dyno {
 
@@ -28,17 +25,12 @@ namespace dyno {
 
 	/*
 	*@Brief: Spatially Adaptive Strategy (S.C.) in Dual-particle SPH method. (Virtual paritlce genorator).
-	*@Note : When the strategy is adopted, the dual-particle method has the best quality
 	*@Paper: Liu et al., ACM Trans Graph (TOG). 2024. (A Dual-Particle Approach for Incompressible SPH Fluids) doi.org/10.1145/3649888
 	*/
-
 
 	typedef unsigned short OcIndex;
 	typedef unsigned long long int OcKey;
 	typedef unsigned short Level;
-
-
-
 
 	template<typename TDataType>
 	class VirtualSpatiallyAdaptiveStrategy : public VirtualParticleGenerator<TDataType>
@@ -71,7 +63,6 @@ namespace dyno {
 		/**
 		* @brief Virtual Particles Sampling Distance
 		*/
-
 		DEF_VAR(Real, SamplingDistance, Real(0.005), "");
 
 		/**
@@ -81,10 +72,8 @@ namespace dyno {
 
 
 	private:
-		SpikyKernel<Real> m_kernel;
 
 		Real gridSize;
-
 
 		DArray<Coord> m_anchorPoint;
 
@@ -100,17 +89,6 @@ namespace dyno {
 		DArray<uint32_t> m_candidateCodes;
 
 		DArray<Coord> m_virtual_position;
-
-	private:
-		//std::shared_ptr<SummationDensity<TDataType>> m_v_summation;
-
-		std::shared_ptr <SummationDensity<TDataType>> m_vv_density;
-
-
-		std::shared_ptr<NeighborPointQuery<TDataType>> m_rv_nbrQuery;
-		std::shared_ptr<NeighborPointQuery<TDataType>> m_vr_nbrQuery;
-		std::shared_ptr<NeighborPointQuery<TDataType>> m_vv_nbrQuery;
-
 		
 	};
 }

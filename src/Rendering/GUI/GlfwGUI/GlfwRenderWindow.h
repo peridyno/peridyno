@@ -41,6 +41,8 @@ namespace dyno {
 		void setButtonAction(uint action) { mButtonAction = action; }
 		void setButtonState(ButtonState state) { mButtonState = state; }
 
+		void setDefaultAnimationOption(bool op) override { mAnimationToggle = op; }
+
 		uint getButtonType() const { return mButtonType; }
 		uint getButtonMode() { return mButtonMode; }
 		uint getButtonAction() const { return mButtonAction; }

@@ -28,7 +28,6 @@
 namespace dyno
 {
 
-	void loopSubdivide(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles);
 
 
 	template<typename TDataType>
@@ -54,6 +53,9 @@ namespace dyno
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
+	public:
+
+		static void loopSubdivide(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles);
 
 	protected:
 		void resetStates() override;

@@ -65,7 +65,7 @@ namespace dyno
 		auto outSet = this->outEdgeSet()->getDataPtr();
 
 		auto& vertices = outSet->getPoints();
-		auto& edges = outSet->getEdges();
+		auto& edges = outSet->edgeIndices();
 
 		uint num = aabbs.size();
 		vertices.resize(8 * num);

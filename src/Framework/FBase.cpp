@@ -46,12 +46,12 @@ namespace dyno
 	void FBase::setSource(FBase* source)
 	{
 		m_derived = source == nullptr ? false : true;
-		mSource = source;
+		mSingleSource = source;
 	}
 
 	FBase* FBase::getSource()
 	{
-		return mSource;
+		return mSingleSource;
 	}
 
 	FBase* FBase::promoteOuput()
@@ -102,7 +102,7 @@ namespace dyno
 		return this;
 	}
 
-	void FBase::addSink(FBase* f)
+	bool FBase::addSink(FBase* f)
 	{
 		auto it = std::find(mSinks.begin(), mSinks.end(), f);
 
@@ -110,15 +110,18 @@ namespace dyno
 		{
 			mSinks.push_back(f);
 
-//			f->setDerived(true);
-			f->setSource(this);
+			if (f->inputPolicy() == FInputPolicy::One)
+				f->setSource(this);
+			else
+				f->addSource(this);
 
 			Log::sendMessage(Log::Info, FormatConnectionInfo(this, f, true, true));
 
-			return;
+			return true;
 		}
 
 		Log::sendMessage(Log::Info, FormatConnectionInfo(this, f, true, false));
+		return false;
 	}
 
 	bool FBase::removeSink(FBase* f)
@@ -129,8 +132,10 @@ namespace dyno
 		{
 			mSinks.erase(it);
 
-//			f->setDerived(false);
-			f->setSource(nullptr);
+			if (f->inputPolicy() == FInputPolicy::One)
+				f->setSource(nullptr);
+			else
+				f->removeSource(this);
 
 			Log::sendMessage(Log::Info, FormatConnectionInfo(this, f, false, true));
 
@@ -139,6 +144,38 @@ namespace dyno
 
 		Log::sendMessage(Log::Info, FormatConnectionInfo(this, f, false, false));
 
+		return false;
+	}
+
+	bool FBase::addSource(FBase* f)
+	{
+		auto it = std::find(mMultipleSources.begin(), mMultipleSources.end(), f);
+
+		if (it == mMultipleSources.end()) {
+			mMultipleSources.push_back(f);
+
+			Log::sendMessage(Log::Info, FormatConnectionInfo(this, f, true, true));
+
+			return true;
+		}
+
+		Log::sendMessage(Log::Info, FormatConnectionInfo(this, f, true, false));
+		return false;
+	}
+
+	bool FBase::removeSource(FBase* f)
+	{
+		auto it = std::find(mMultipleSources.begin(), mMultipleSources.end(), f);
+
+		if (it != mMultipleSources.end())
+		{
+			mMultipleSources.erase(it);
+
+			Log::sendMessage(Log::Info, FormatConnectionInfo(this, f, false, true));
+			return true;
+		}
+
+		Log::sendMessage(Log::Info, FormatConnectionInfo(this, f, false, false));
 		return false;
 	}
 
@@ -162,10 +199,41 @@ namespace dyno
 		m_derived = derived;
 	}
 
+	uint FBase::sizeOfValidSources()
+	{
+		if (this->inputPolicy() == FInputPolicy::One)
+		{
+			return mSingleSource == nullptr ? 0 : 1;
+		}
+		else
+			return mMultipleSources.size();
+	}
+
+	void FBase::requestValidSources(std::vector<FBase*>& src)
+	{
+		src.clear();
+		if (this->inputPolicy() == FInputPolicy::One)
+		{
+			if (mSingleSource != nullptr) src.push_back(mSingleSource);
+		}
+		else
+		{
+			src.assign(mMultipleSources.begin(), mMultipleSources.end());
+		}
+	}
+
+	uint FBase::sizeOfSinks()
+	{
+		return (uint)mSinks.size();
+	}
+
 	bool FBase::connectField(FBase* dst)
 	{
-		if (dst->getSource() != nullptr && dst->getSource() != this) {
-			dst->getSource()->removeSink(dst);
+		if (dst->inputPolicy() == FInputPolicy::One)
+		{
+			if (dst->getSource() != nullptr && dst->getSource() != this) {
+				dst->getSource()->removeSink(dst);
+			}
 		}
 
 		//If state is connected to an input field of the other node, the field should be exported
@@ -195,7 +263,7 @@ namespace dyno
 
 	FBase* FBase::getTopField()
 	{
-		return mSource == nullptr ? this : mSource->getTopField();
+		return mSingleSource == nullptr ? this : mSingleSource->getTopField();
 	}
 
 	void FBase::update()
@@ -242,9 +310,31 @@ namespace dyno
 
 	bool FBase::isModified()
 	{
-		FBase* topField = this->getTopField();
+		if (this->inputPolicy() == FInputPolicy::One)
+		{
+			FBase* topField = this->getTopField();
+			return mTackTime < topField->mTickTime;
+		}
+		else
+		{
+			for (auto src : mMultipleSources)
+			{
+				FBase* topField = src->getTopField();
+				if (mTackTime < topField->mTickTime)
+					return true;
+			}
+			return false;
+		}
+	}
 
-		return mTackTime < topField->mTickTime;
+	bool FBase::isActive()
+	{
+		return mActive;
+	}
+
+	void FBase::setActive(bool b)
+	{
+		mActive = b;
 	}
 
 	void FBase::tick()
@@ -289,9 +379,7 @@ namespace dyno
 
 		while (!mSinks.empty()) {
 			auto sink = mSinks.back();
-			sink->setSource(nullptr);
-
-			mSinks.pop_back();
+			this->disconnectField(sink);
 		}
 
 		mCallbackFunc.clear();

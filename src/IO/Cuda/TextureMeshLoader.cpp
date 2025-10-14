@@ -15,6 +15,7 @@ namespace dyno
 		auto callbackLoadFile = std::make_shared<FCallBackFunc>(std::bind(&TextureMeshLoader::callbackLoadFile, this));
 
 		this->varFileName()->attach(callbackLoadFile);
+		this->varUseInstanceTransform()->attach(callbackLoadFile);
 
 		auto callbackTransform = std::make_shared<FCallBackFunc>(std::bind(&TextureMeshLoader::callbackTransform, this));
 		this->varLocation()->attach(callbackTransform);
@@ -33,6 +34,7 @@ namespace dyno
 		mInitialVertex.clear();
 		mInitialNormal.clear();
 		mInitialTexCoord.clear();
+		initialShapeCenter.clear();
 	}
 
 	void TextureMeshLoader::resetStates()
@@ -47,7 +49,7 @@ namespace dyno
 
 		auto texMesh = this->stateTextureMesh()->getDataPtr();
 		
-		bool success = loadTextureMeshFromObj(texMesh, fullname);
+		bool success = loadTextureMeshFromObj(texMesh, fullname,this->varUseInstanceTransform()->getValue());
 		if (!success)
 			return;
 
@@ -55,44 +57,40 @@ namespace dyno
 		mInitialNormal.assign(texMesh->normals());
 		mInitialTexCoord.assign(texMesh->texCoords());
 
-		//reset the transform
-		this->varLocation()->setValue(Vec3f(0));
-		this->varRotation()->setValue(Vec3f(0));
-		this->varScale()->setValue(Vec3f(1));
+		auto& shape = this->stateTextureMesh()->getDataPtr()->shapes();
+		initialShapeCenter.clear();
+		for (size_t i = 0; i < shape.size(); i++)
+		{
+			initialShapeCenter.pushBack(shape[i]->boundingTransform.translation());
+		}
+
+		callbackTransform();
 	}
 
 	void TextureMeshLoader::callbackTransform()
 	{
-#ifdef CUDA_BACKEND
-		TriangleSet<DataType3f> ts;
-#endif
+		auto& shape = this->stateTextureMesh()->getDataPtr()->shapes();
+		auto vertices = this->stateTextureMesh()->getDataPtr()->vertices();
+		CArray<Vec3f> cv;
+		cv.assign(vertices);
 
-#ifdef VK_BACKEND
-		TriangleSet ps;
-#endif
-		ts.setPoints(mInitialVertex);
-		ts.setNormals(mInitialNormal);
-
-		// apply transform to vertices
+		if (varUseInstanceTransform()->getValue())
 		{
-			auto t = this->varLocation()->getValue();
-			auto q = this->computeQuaternion();
-			auto s = this->varScale()->getValue();
-
-#ifdef CUDA_BACKEND
-			ts.scale(s);
-			ts.rotate(q);
-			ts.translate(t);
-#endif
+			for (size_t i = 0; i < shape.size(); i++)
+			{
+				auto quat = this->computeQuaternion();
+				shape[i]->boundingTransform.translation() = quat.rotate(initialShapeCenter[i]) * this->varScale()->getValue() + this->varLocation()->getValue();
+				shape[i]->boundingTransform.rotation() = quat.toMatrix3x3();
+				shape[i]->boundingTransform.scale() = this->varScale()->getValue();
+			}
 		}
-
-		auto texMesh = this->stateTextureMesh()->getDataPtr();
-
-		texMesh->vertices().assign(ts.getPoints());
-		texMesh->normals().assign(ts.getVertexNormals());
-		texMesh->texCoords().assign(mInitialTexCoord);
-
-		ts.clear();
+		else
+		{
+			for (size_t i = 0; i < shape.size(); i++)
+			{
+				shape[i]->boundingTransform.translation() = Vec3f(0);
+			}
+		}
 	}
 
 }

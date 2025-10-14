@@ -50,6 +50,8 @@ public:
 
 	Wt::Signal<std::shared_ptr<dyno::Node>>& selectNodeSignal() { return _selectNodeSignal; };
 
+	void setDefaultAnimationOption(bool op) override {};
+
 protected:
 	void initializeGL();
 	void makeCurrent();

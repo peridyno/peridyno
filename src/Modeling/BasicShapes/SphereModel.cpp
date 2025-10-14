@@ -256,8 +256,14 @@ namespace dyno
 		for (int i = 0; i < vts.size(); i++) {
 			vts[i] = RV(vts[i] * scale * fixScale + RV(center));
 		}
-
-
+		
+		if (this->varIcosahedronStep()->getValue() >= 2) 
+		{
+			for (int i = 0; i < (int)this->varIcosahedronStep()->getValue() - 1; i++)
+			{
+				Subdivide<TDataType>::loopSubdivide(vts, trs);
+			}
+		}
 
 
 		this->stateTriangleSet()->getDataPtr()->setPoints(vts);
@@ -289,9 +295,17 @@ namespace dyno
 		if (this->varType()->getDataPtr()->currentKey() == SphereType::Icosahedron)
 		{
 			icosahedronSphere();
+
+			this->varLongitude()->setActive(false);
+			this->varLatitude()->setActive(false);
+			this->varIcosahedronStep()->setActive(true);
 		}
 		else {
 			standardSphere();
+
+			this->varLongitude()->setActive(true);
+			this->varLatitude()->setActive(true);
+			this->varIcosahedronStep()->setActive(false);
 		}
 
 	}

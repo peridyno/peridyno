@@ -43,15 +43,15 @@ std::shared_ptr<SceneGraph> creatScene()
 	// Scene Setting
 	scn->setTotalTime(3.0f);
 	scn->setGravity(Vec3f(0.0f, -9.8f, 0.0f));
-	scn->setLowerBound(Vec3f(-0.5f, 0.0f, -4.0f));
-	scn->setUpperBound(Vec3f(0.5f, 1.0f, 4.0f));
+	scn->setLowerBound(Vec3f(-0.5f, 0.0f, -8.0f));
+	scn->setUpperBound(Vec3f(0.5f, 1.0f, 8.0f));
 
 
 	// Create Var
 	Vec3f velocity = Vec3f(0, 0, 6);
 	Color color = Color(1, 1, 1);
 
-	Vec3f LocationBody = Vec3f(0, 0.01, -1);
+	Vec3f LocationBody = Vec3f(0, 0.00, -1);
 
 	Vec3f anglurVel = Vec3f(100, 0, 0);
 	Vec3f scale = Vec3f(0.4, 0.4, 0.4);
@@ -107,16 +107,16 @@ std::shared_ptr<SceneGraph> creatScene()
 	auto mergeWheel = scn->addNode(std::make_shared<Merge<DataType3f>>());
 	mergeWheel->varUpdateMode()->setCurrentKey(1);
 
-	wheelSet[0]->outTriangleSet()->connect(mergeWheel->inTriangleSet01());
-	wheelSet[1]->outTriangleSet()->connect(mergeWheel->inTriangleSet02());
-	wheelSet[2]->outTriangleSet()->connect(mergeWheel->inTriangleSet03());
-	wheelSet[3]->outTriangleSet()->connect(mergeWheel->inTriangleSet04());
+	wheelSet[0]->outTriangleSet()->connect(mergeWheel->inTriangleSets());
+	wheelSet[1]->outTriangleSet()->connect(mergeWheel->inTriangleSets());
+	wheelSet[2]->outTriangleSet()->connect(mergeWheel->inTriangleSets());
+	wheelSet[3]->outTriangleSet()->connect(mergeWheel->inTriangleSets());
 
 	//MergeRoad
 	auto mergeRoad = scn->addNode(std::make_shared<Merge<DataType3f>>());
 	mergeRoad->varUpdateMode()->setCurrentKey(1);
-	mergeWheel->stateTriangleSet()->promoteOuput()->connect(mergeRoad->inTriangleSet01());
-	ObjRoad->outTriangleSet()->connect(mergeRoad->inTriangleSet03());
+	mergeWheel->stateTriangleSets()->promoteOuput()->connect(mergeRoad->inTriangleSets());
+	ObjRoad->outTriangleSet()->connect(mergeRoad->inTriangleSets());
 
 	//Obj boundary
 	auto ObjBoundary = scn->addNode(std::make_shared<ObjLoader<DataType3f>>());
@@ -126,9 +126,9 @@ std::shared_ptr<SceneGraph> creatScene()
 	auto glBoundary = ObjBoundary->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
 	glBoundary->setColor(color);
 
-	ObjBoundary->outTriangleSet()->connect(mergeRoad->inTriangleSet02());
+	ObjBoundary->outTriangleSet()->connect(mergeRoad->inTriangleSets());
 	ObjBoundary->graphicsPipeline()->disable();
-	ObjJeep->outTriangleSet()->connect(mergeRoad->inTriangleSet04());
+	ObjJeep->outTriangleSet()->connect(mergeRoad->inTriangleSets());
 
 	//SetVisible
 	mergeRoad->graphicsPipeline()->disable();
@@ -168,7 +168,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	//sfi->varFast()->setValue(true);
 	fluid->connect(meshBoundary->importParticleSystems());
 
-	mergeRoad->stateTriangleSet()->promoteOuput()->connect(meshBoundary->inTriangleSet());
+	mergeRoad->stateTriangleSets()->promoteOuput()->connect(meshBoundary->inTriangleSet());
 
 	//Create a boundary
 	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());

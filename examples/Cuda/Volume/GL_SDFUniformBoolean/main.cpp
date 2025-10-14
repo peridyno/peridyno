@@ -22,9 +22,11 @@ std::shared_ptr<SceneGraph> createScene1()
 	mesh1->varLocation()->setValue(Vec3f(-0.2f, 0.0f, 0.0f));
 	mesh1->varType()->setCurrentKey(SphereModel<DataType3f>::Icosahedron);
 	mesh1->varIcosahedronStep()->setValue(3);
+	mesh1->setVisible(false);
 
 	auto sdfUniformA = scn->addNode(std::make_shared<VolumeGenerator<DataType3f>>());
-	sdfUniformA->varSpacing()->setValue(0.069f);
+	sdfUniformA->varSpacing()->setValue(0.02f);
+	sdfUniformA->setVisible(false);
 
 	mesh1->stateTriangleSet()->connect(sdfUniformA->inTriangleSet());
 
@@ -33,15 +35,18 @@ std::shared_ptr<SceneGraph> createScene1()
 	mesh2->varLocation()->setValue(Vec3f(0.2f, 0.0f, 0.0f));
 	mesh2->varType()->setCurrentKey(SphereModel<DataType3f>::Icosahedron);
 	mesh2->varIcosahedronStep()->setValue(3);
+	mesh2->setVisible(false);
 
 	auto sdfUniformB = scn->addNode(std::make_shared<VolumeGenerator<DataType3f>>());
-	sdfUniformB->varSpacing()->setValue(0.05f);
+	sdfUniformB->varSpacing()->setValue(0.02f);
+	sdfUniformB->setVisible(false);
 
 	mesh2->stateTriangleSet()->connect(sdfUniformB->inTriangleSet());
 
 
 	auto volumeBool1 = scn->addNode(std::make_shared<VolumeBoolean<DataType3f>>());
 	volumeBool1->varSpacing()->setValue(0.05f);
+	volumeBool1->varBoolType()->setCurrentKey(BoolType::Intersect);
 	sdfUniformA->outLevelSet()->connect(volumeBool1->inA());
 	sdfUniformB->outLevelSet()->connect(volumeBool1->inB());
 

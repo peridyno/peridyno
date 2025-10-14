@@ -283,7 +283,12 @@ namespace dyno
             ClipVertex cv;
 
             // B
-            if (((InFront(da) && InFront(db)) || On(da) || On(db)))
+            if (On(da) || On(db))
+            {
+                if (InFront(db) || On(db)) 
+                    out[outCount++] = b;
+            }
+            else if ((InFront(da) && InFront(db)))
             {
                 out[outCount++] = b;
             }
@@ -295,11 +300,12 @@ namespace dyno
             }
             else if (Behind(da) && InFront(db))
 			{
-				cv.v = a.v + (b.v - a.v) * (da / (da - db));
+				//Remove the duplicated point in case inCount == 2
+                if (inCount > 2) { 
+                    cv.v = a.v + (b.v - a.v) * (da / (da - db)); 
+                    out[outCount++] = cv; 
+                }
 				out[outCount++] = b;
-
-                //Remove the duplicated point in case inCount == 2
-                if (inCount > 2) out[outCount++] = cv;
             }
 
             a = b;
@@ -4080,7 +4086,7 @@ namespace dyno
         TSegment3D<Real> interSeg(Vector<Real, 3>(0), Vector<Real, 3>(0));
         TSegment3D<Real> capCenterline = cap.centerline();
         auto num = capCenterline.intersect(box, interSeg);
-        bool intersected = num > 0 || interSeg.lengthSquared() > REAL_EPSILON_SQUARED ? true : false;
+        bool intersected = num > 0 ? true : false;
 
         TSegment3D<Real> prox;
         if (!intersected)

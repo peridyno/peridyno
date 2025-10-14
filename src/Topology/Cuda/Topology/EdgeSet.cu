@@ -128,11 +128,21 @@ namespace dyno
 		edgeIds[t[1]].atomicInsert(tId);
 	}
 
+
 	template<typename TDataType>
 	void EdgeSet<TDataType>::updateTopology()
 	{
 		this->updateEdges();
 
+		this->updateVer2Edge();
+
+		PointSet<TDataType>::updateTopology();
+	
+	}
+
+	template<typename TDataType>
+	void EdgeSet<TDataType>::updateVer2Edge()
+	{
 		//Update the vertex to edge mapping
 		DArray<uint> counter;
 		counter.resize(this->mCoords.size());
@@ -152,8 +162,6 @@ namespace dyno
 			mEdges);
 
 		counter.clear();
-
-		PointSet<TDataType>::updateTopology();
 	}
 
 	template<typename TDataType>

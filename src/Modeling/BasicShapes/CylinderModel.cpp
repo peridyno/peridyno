@@ -12,7 +12,6 @@ namespace dyno
 	CylinderModel<TDataType>::CylinderModel()
 		: BasicShape<TDataType>()
 	{
-
 		this->varRow()->setRange(1, 500);
 		this->varColumns()->setRange(3, 500);
 		this->varRadius()->setRange(0.001f, 20.0f);
@@ -77,7 +76,9 @@ namespace dyno
 		std::vector<Coord> vertices;
 		std::vector<TopologyModule::Triangle> triangle;
 
+		this->varScale()->setValue(Coord(scale.x, scale.y, scale.x), false);
 
+		scale = this->varScale()->getValue();
 
 
 		Coord Location;

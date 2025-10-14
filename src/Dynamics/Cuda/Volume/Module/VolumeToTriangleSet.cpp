@@ -22,7 +22,7 @@ namespace dyno
 	{
 		Real iso = this->varIsoValue()->getValue();
 
-		auto levelset = this->ioVolume()->constDataPtr();
+		auto levelset = this->inVolume()->constDataPtr();
 
 		auto& sdf = levelset->getSDF();
 
@@ -50,7 +50,8 @@ namespace dyno
 		MarchingCubesHelper<TDataType>::countVerticeNumber(
 			voxelVertNum,
 			distances,
-			iso);
+			iso,
+			h);
 
 		Reduction<int> reduce;
 		int totalVNum = reduce.accumulate(voxelVertNum.begin(), voxelVertNum.size());

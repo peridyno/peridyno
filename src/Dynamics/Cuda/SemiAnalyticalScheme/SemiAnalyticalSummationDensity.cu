@@ -25,7 +25,7 @@ namespace dyno
 	{
 		auto ts = this->inTriangleSet()->constDataPtr();
 		auto& triVertex = ts->getPoints();
-		auto& triIndex = ts->getTriangles();
+		auto& triIndex = ts->triangleIndices();
 
 		int p_num = this->inPosition()->getDataPtr()->size();
 		int n_num = this->inNeighborIds()->getDataPtr()->size();
@@ -61,7 +61,7 @@ namespace dyno
 	{
 		auto ts = this->inTriangleSet()->constDataPtr();
 		auto& triVertex = ts->getPoints();
-		auto& triIndex = ts->getTriangles();
+		auto& triIndex = ts->triangleIndices();
 
 		compute(
 			rho,

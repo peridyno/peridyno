@@ -36,12 +36,6 @@ private:									\
 public:									\
 	inline FVar<T>* out##name() {return &out_##name;}
 
-#define DEF_VAR_STATE(T, name, value, desc) \
-private:									\
-	FVar<T> state_##name = FVar<T>(T(value), std::string(#name), desc, FieldTypeEnum::State, this);			\
-public:										\
-	inline FVar<T>* state##name() {return &state_##name;}
-
 /**
 *	Macro definition for input/output of type instance
 */
@@ -57,43 +51,11 @@ private:									\
 public:									\
 	inline FInstance<T>* out##name() {return &out_##name;}
 
-#define DEF_INSTANCE_IO(T, name, desc) \
-private:									\
-	FInstance<T> io_##name = FInstance<T>(std::string(#name), desc, FieldTypeEnum::IO, this);			\
-public:									\
-	inline FInstance<T>* io##name() {return &io_##name;}
-
-/**
- * @brief Macro definitions for instance state
- *
- */
-#define DEF_INSTANCE_STATE(T, name, desc)		\
-private:									\
-	FInstance<T> state_##name = FInstance<T>(std::string(#name), desc, FieldTypeEnum::State, this);	\
-public:									\
-	inline FInstance<T>* state##name() {return &state_##name;}
-
-/**
- * @brief Macro definitions for an array of instance
- */
-#define DEF_INSTANCES_STATE(T, name, desc)		\
-private:									\
-	FArray<std::shared_ptr<T>, DeviceType::CPU> state_##name = FArray<std::shared_ptr<T>, DeviceType::CPU>(std::string(#name)+std::string("(s)"), desc, FieldTypeEnum::State, this);	\
-public:									\
-	inline FArray<std::shared_ptr<T>, DeviceType::CPU>* state##name##s() {return &state_##name;}
-
-#define DEF_INSTANCES_IN(T, name, desc)		\
-private:									\
-	FArray<std::shared_ptr<T>, DeviceType::CPU> in_##name = FArray<std::shared_ptr<T>, DeviceType::CPU>(std::string(#name)+std::string("(s)"), desc, FieldTypeEnum::In, this);	\
-public:									\
-	inline FArray<std::shared_ptr<T>, DeviceType::CPU>* in##name##s() {return &in_##name;}
-
-#define DEF_INSTANCES_OUT(T, name, desc)		\
-private:									\
-	FArray<std::shared_ptr<T>, DeviceType::CPU> out_##name = FArray<std::shared_ptr<T>, DeviceType::CPU>(std::string(#name)+std::string("(s)"), desc, FieldTypeEnum::Out, this);	\
-public:									\
-	inline FArray<std::shared_ptr<T>, DeviceType::CPU>* out##namee##s() {return &out_##name;}
-
+// #define DEF_INSTANCE_IO(T, name, desc) \
+// private:									\
+// 	FInstance<T> io_##name = FInstance<T>(std::string(#name), desc, FieldTypeEnum::IO, this);			\
+// public:									\
+// 	inline FInstance<T>* io##name() {return &io_##name;}
 
 /**
 *	Macro definition for input/output of type Array

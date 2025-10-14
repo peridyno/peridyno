@@ -37,6 +37,7 @@ public:
 
 	typedef VectorND<PointType, 2>	Edg2Tri;
 	typedef VectorND<PointType, 3>	Tri2Edg;
+	typedef VectorND<PointType, 3>	Tri2Tri;
 
 	typedef VectorND<PointType, 2>	Edg2Quad;
 	typedef VectorND<PointType, 4>	Quad2Edg;

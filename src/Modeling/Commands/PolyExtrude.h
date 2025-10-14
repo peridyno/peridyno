@@ -23,7 +23,7 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class PolyExtrude : public Group<TDataType>
+	class PolyExtrude : virtual public Group<TDataType>
 	{
 		DECLARE_TCLASS(PolyExtrude, TDataType);
 

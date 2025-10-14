@@ -83,11 +83,11 @@ namespace dyno {
 			Str.append(std::to_string(it.mRigidBodyName_2.rigidBodyId) + " ");
 			Str.append(std::to_string(int(it.mUseMoter)) + " ");
 			Str.append(std::to_string(int(it.mUseRange)) + " ");
-			Str.append(std::to_string(int(it.mAnchorPoint[0])) + " " + std::to_string(int(it.mAnchorPoint[1])) + " " + std::to_string(int(it.mAnchorPoint[2])) + " ");
-			Str.append(std::to_string(int(it.mMin)) + " ");
-			Str.append(std::to_string(int(it.mMax)) + " ");
-			Str.append(std::to_string(int(it.mMoter)) + " ");
-			Str.append(std::to_string(int(it.mAxis[0])) + " " + std::to_string(int(it.mAxis[1])) + " " + std::to_string(int(it.mAxis[2])) + " ");
+			Str.append(std::to_string(it.mAnchorPoint[0]) + " " + std::to_string(it.mAnchorPoint[1]) + " " + std::to_string(it.mAnchorPoint[2]) + " ");
+			Str.append(std::to_string(it.mMin) + " ");
+			Str.append(std::to_string(it.mMax) + " ");
+			Str.append(std::to_string(it.mMoter) + " ");
+			Str.append(std::to_string(it.mAxis[0]) + " " + std::to_string(it.mAxis[1]) + " " + std::to_string(it.mAxis[2]) + " ");
 
 			if (i != Array.size() - 1)
 			{

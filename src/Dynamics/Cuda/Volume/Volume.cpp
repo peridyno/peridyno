@@ -16,7 +16,7 @@ namespace dyno
 		this->setAutoHidden(true);
 
 		auto mapper = std::make_shared<VolumeToTriangleSet<TDataType>>();
-		this->stateLevelSet()->connect(mapper->ioVolume());
+		this->stateLevelSet()->connect(mapper->inVolume());
 		this->graphicsPipeline()->pushModule(mapper);
 
 		auto renderer = std::make_shared<GLSurfaceVisualModule>();

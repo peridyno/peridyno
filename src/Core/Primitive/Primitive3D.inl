@@ -2320,13 +2320,13 @@ namespace dyno
 		{
 			interSeg.v0 = origin + iRay.leftLimit() * direction;
 			interSeg.v1 = origin + iRay.rightLimit() * direction;
-			return 2;
+			return interNum;
 		}
 		else if (iRay.inside(t1))
 		{
 			interSeg.v0 = origin + iRay.leftLimit() * direction;
 			interSeg.v1 = interSeg.v0;
-			return 1;
+			return 2;
 		}
 		else
 		{
@@ -2796,26 +2796,40 @@ namespace dyno
 	template<typename Real>
 	DYN_FUNC int TSegment3D<Real>::intersect(const TOrientedBox3D<Real>& obb, TSegment3D<Real>& interSeg) const
 	{
-		//transform to the local coordinate system of obb
-		Coord3D diff0 = v0 - obb.center;
-		Coord3D diff1 = v1 - obb.center;
-		Coord3D v0Prime = Coord3D(diff0.dot(obb.u), diff0.dot(obb.v), diff0.dot(obb.w));
-		Coord3D v1Prime = Coord3D(diff1.dot(obb.u), diff1.dot(obb.v), diff1.dot(obb.w));
+		int num = TLine3D<Real>(v0, direction()).intersect(obb, interSeg);
+		if (num == 0) {
+			return 0;
+		}
 
-		TSegment3D<Real> tmp = TSegment3D<Real>(v0Prime, v1Prime);
+		Real t0 = parameter(interSeg.startPoint());
+		Real t1 = parameter(interSeg.endPoint());
 
-		int ret = tmp.intersect(TAlignedBox3D<Real>(-obb.extent, obb.extent), interSeg);
+		Interval<Real> iSeg(0, 1);
 
-		Coord3D pPrime = interSeg.startPoint();
-		Coord3D qPrime = interSeg.endPoint();
+		Interval<Real> iInter = iSeg.intersect(Interval<Real>(t0, t1));
 
-		//transform back to the global coordinate system
-		Coord3D p = pPrime[0] * obb.u + pPrime[1] * obb.v + pPrime[2] * obb.w + obb.center;
-		Coord3D q = qPrime[0] * obb.u + qPrime[1] * obb.v + qPrime[2] * obb.w + obb.center;
+		if (abs(iInter.size()) < EPSILON)
+		{
+			Coord3D p = v0 + iInter.leftLimit() * direction();
+			Coord3D q = v0 + iInter.rightLimit() * direction();
 
-		interSeg = TSegment3D<Real>(p, q);
+			interSeg = TSegment3D<Real>(p, q);
 
-		return ret;
+			return 1;
+		}
+		else if (!iInter.isEmpty())
+		{
+			Coord3D p = v0 + iInter.leftLimit() * direction();
+			Coord3D q = v0 + iInter.rightLimit() * direction();
+
+			interSeg = TSegment3D<Real>(p, q);
+
+			return 2;
+		}
+		else
+		{
+			return 0;
+		}
 	}
 
 	template<typename Real>

@@ -1220,7 +1220,7 @@ namespace dyno
 			triNormal.resize(shape->vertexIndex.size());
 
 
-			DArrayList<int>& point2Tri = triSetHelper->getVertex2Triangles();
+			const DArrayList<int>& point2Tri = triSetHelper->vertex2Triangle();
 
 			cuExecute(shape->vertexIndex.size(),
 				computeTriangleNormal,

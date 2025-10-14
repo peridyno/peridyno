@@ -54,30 +54,6 @@ namespace dyno
 		quadIds[q[3]].atomicInsert(tId);
 	}
 
-	template<typename TDataType>
-	DArrayList<int>& QuadSet<TDataType>::getVertex2Quads()
-	{
-		DArray<uint> counter(this->mCoords.size());
-		counter.reset();
-
-		cuExecute(mQuads.size(),
-			QS_CountQuads,
-			counter,
-			mQuads);
-
-		mVer2Quad.resize(counter);
-
-		counter.reset();
-		cuExecute(mQuads.size(),
-			QS_SetupQuadIds,
-			mVer2Quad,
-			mQuads);
-
-		counter.clear();
-
-		return mVer2Quad;
-	}
-
 	template<typename EKey, typename Quad>
 	__global__ void QS_SetupKeys(
 		DArray<EKey> keys,
@@ -137,17 +113,15 @@ namespace dyno
 				e2Q[1] = quadIds[tId + 1];
 
 			edg2Quad[shift] = e2Q;
-
-			 			//printf("T2T %d: %d %d \n", shift, t2T[0], t2T[1]);
-			 
-			 			//printf("Tri %d: %d %d %d; Tet: %d \n", shift, keys[tId][0], keys[tId][1], keys[tId][2], tetIds[tId]);
-			 			//printf("Counter: %d \n", shift, counter[tId]);
 		}
 	}
 
 	template<typename TDataType>
 	void QuadSet<TDataType>::updateEdges()
 	{
+		// Update Edge from quad Mesh
+		// Light Map {Edg2Quad}
+		
 		uint quadSize = mQuads.size();
 		DArray<EKey> keys;
 		DArray<int> quadIds;
@@ -176,7 +150,7 @@ namespace dyno
 
 		mEdg2Quad.resize(edgeNum);
 
-		auto& pEdges = this->getEdges();
+		auto& pEdges = this->edgeIndices();
 		pEdges.resize(edgeNum);
 		cuExecute(keys.size(),
 			QS_SetupEdges,
@@ -206,12 +180,8 @@ namespace dyno
 	template<typename TDataType>
 	void QuadSet<TDataType>::copyFrom(QuadSet<TDataType>& quadSet)
 	{
-		mVer2Quad.assign(quadSet.mVer2Quad);
-
-		mQuads.resize(quadSet.mQuads.size());
 		mQuads.assign(quadSet.mQuads);
-
-		mEdg2Quad.resize(quadSet.mEdg2Quad.size());
+		mVer2Quad.assign(quadSet.mVer2Quad);
 		mEdg2Quad.assign(quadSet.mEdg2Quad);
 
 		EdgeSet<TDataType>::copyFrom(quadSet);
@@ -260,31 +230,43 @@ namespace dyno
 	{
 		this->updateQuads();
 
+		//Update the mapping from vertices to quads
+		DArray<uint> counter(this->mCoords.size());
+		counter.reset();
+
+		cuExecute(mQuads.size(),
+			QS_CountQuads,
+			counter,
+			mQuads);
+
+		mVer2Quad.resize(counter);
+
+		counter.reset();
+		cuExecute(mQuads.size(),
+			QS_SetupQuadIds,
+			mVer2Quad,
+			mQuads);
+
+		counter.clear();
+
 		EdgeSet<TDataType>::updateTopology();
 	}
 
 	template<typename TDataType>
-	void QuadSet<TDataType>::updateVertexNormal()
+	void QuadSet<TDataType>::requestVertexNormals(DArray<Coord>& normals)
 	{
-		if (this->outVertexNormal()->isEmpty())
-			this->outVertexNormal()->allocate();
-
-		auto& vn = this->outVertexNormal()->getData();
-
 		uint vertSize = this->mCoords.size();
 
-		if (vn.size() != vertSize) {
-			vn.resize(vertSize);
+		if (normals.size() != vertSize) {
+			normals.resize(vertSize);
 		}
-
-		auto& vert2Quad = getVertex2Quads();
 
 		cuExecute(vertSize,
 			QS_SetupVertexNormals,
-			vn,
+			normals,
 			this->mCoords,
 			mQuads,
-			vert2Quad);
+			mVer2Quad);
 	}
 
 	DEFINE_CLASS(QuadSet);

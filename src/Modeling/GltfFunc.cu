@@ -231,7 +231,7 @@ namespace dyno
 
 						std::vector<TopologyModule::Triangle> tempTriangles;
 
-						getTriangles(model, primitive, tempTriangles, primitive_PointOffest);
+						triangleIndices(model, primitive, tempTriangles, primitive_PointOffest);
 
 						vertexIndex = (tempTriangles);
 						normalIndex = (tempTriangles);
@@ -675,7 +675,7 @@ namespace dyno
 
 	// ***************************** get triangle vertexID *************************** //
 
-	void getTriangles(
+	void triangleIndices(
 		tinygltf::Model& model,
 		const tinygltf::Primitive& primitive,
 		std::vector<TopologyModule::Triangle>& triangles,

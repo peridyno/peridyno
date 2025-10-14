@@ -351,13 +351,13 @@ namespace dyno
 		auto triSet = this->outTriangleSet()->getDataPtr();
 
 		auto& vertices = triSet->getPoints();
-		auto& indices = triSet->getTriangles();
+		auto& indices = triSet->triangleIndices();
 
 		auto& sphereVertices = mStandardSphere.getPoints();
-		auto& sphereIndices = mStandardSphere.getTriangles();
+		auto& sphereIndices = mStandardSphere.triangleIndices();
 
 		auto& capsuleVertices = mStandardCapsule.getPoints();
-		auto& capsuleIndices = mStandardCapsule.getTriangles();
+		auto& capsuleIndices = mStandardCapsule.triangleIndices();
 		
 		int numOfVertices = 8 * numOfBoxes + 4 * numOfTets + sphereVertices.size() * numOfSpheres + capsuleVertices.size() * numofCaps + 2 * sphereVertices.size() * numOfMedialCones + 3 * sphereVertices.size() * numOfMedialSlabs;
 		int numOfTriangles = 12 * numOfBoxes + 4 * numOfTets + sphereIndices.size() * numOfSpheres + capsuleIndices.size() * numofCaps + 2 * sphereIndices.size() * numOfMedialCones + 3 * sphereIndices.size() * numOfMedialSlabs;

@@ -8,10 +8,12 @@
 //ParticleSystem
 #include "ParticleSystem/Module/ImplicitViscosity.h"
 #include "ParticleSystem/Module/ParticleIntegrator.h"
+#include "ParticleSystem/Module/SemiImplicitDensitySolver.h"
+#include "ParticleSystem/Module/VariationalApproximateProjection.h"
 
 //DualParticleSystem
 #include "Module/DualParticleIsphModule.h"
-
+#include <DualParticleSystem/Module/ThinFeature.h>
 
 
 namespace dyno
@@ -29,8 +31,9 @@ namespace dyno
 
 	template<typename TDataType>
 	DualParticleFluid<TDataType>::DualParticleFluid()
-		: DualParticleFluid<TDataType>::DualParticleFluid(2)
+		: DualParticleFluid<TDataType>::DualParticleFluid(3)
 	{
+
 	}
 
 
@@ -43,6 +46,11 @@ namespace dyno
 		this->varSmoothingLength()->setValue(2.4);
 
 		this->animationPipeline()->clear();
+
+		auto m_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+		this->stateSmoothingLength()->connect(m_nbrQuery->inRadius());
+		this->statePosition()->connect(m_nbrQuery->inPosition());
+		this->animationPipeline()->pushModule(m_nbrQuery);
 
 		if (key == EVirtualParticleSamplingStrategy::SpatiallyAdaptiveStrategy)
 		{
@@ -64,19 +72,39 @@ namespace dyno
 		}
 		else if (key == EVirtualParticleSamplingStrategy::ColocationStrategy)
 		{
-			auto m_virtual_equal_to_Real = std::make_shared<VirtualColocationStrategy<TDataType >>();
+			auto m_virtual_equal_to_Real = std::make_shared<VirtualColocationStrategy<TDataType>>();
 			this->statePosition()->connect(m_virtual_equal_to_Real->inRPosition());
 			this->animationPipeline()->pushModule(m_virtual_equal_to_Real);
 			vpGen = m_virtual_equal_to_Real;
 		}
+		else if (key == EVirtualParticleSamplingStrategy::FissionFusionStrategy)
+		{
+			auto feature = std::make_shared<ThinFeature<TDataType>>();
+			this->statePosition()->connect(feature->inPosition());
+			m_nbrQuery->outNeighborIds()->connect(feature->inNeighborIds());
+			this->stateSmoothingLength()->connect(feature->inSmoothingLength());
+			this->stateSamplingDistance()->connect(feature->inSamplingDistance());
+			feature->varThreshold()->setValue(0.1f);
+			this->animationPipeline()->pushModule(feature);
+
+			auto gridFission = std::make_shared<VirtualFissionFusionStrategy<TDataType>>();
+			gridFission->varTransitionRegionThreshold()->setValue(0.01);
+			feature->outThinSheet()->connect(gridFission->inThinSheet());
+			feature->outThinFeature()->connect(gridFission->inThinFeature());
+			this->statePosition()->connect(gridFission->inRPosition());
+			this->stateVelocity()->connect(gridFission->inRVelocity());
+			m_nbrQuery->outNeighborIds()->connect(gridFission->inNeighborIds());
+			this->stateSmoothingLength()->connect(gridFission->inSmoothingLength());
+			this->stateSamplingDistance()->connect(gridFission->inSamplingDistance());
+			this->stateFrameNumber()->connect(gridFission->inFrameNumber());
+			this->stateTimeStep()->connect(gridFission->inTimeStep());
+			this->animationPipeline()->pushModule(gridFission);
+			gridFission->varMinDist()->setValue(0.002);
+			vpGen = gridFission;
+		}
 
 		this->animationPipeline()->pushModule(vpGen);
 		vpGen->outVirtualParticles()->connect(this->stateVirtualPosition());
-
-		auto m_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
-		this->stateSmoothingLength()->connect(m_nbrQuery->inRadius());
-		this->statePosition()->connect(m_nbrQuery->inPosition());
-		this->animationPipeline()->pushModule(m_nbrQuery);
 
 		auto m_rv_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
 		this->stateSmoothingLength()->connect(m_rv_nbrQuery->inRadius());
@@ -97,28 +125,29 @@ namespace dyno
 
 		auto m_dualIsph = std::make_shared<DualParticleIsphModule<TDataType>>();
 		this->stateSmoothingLength()->connect(m_dualIsph->varSmoothingLength());
+		this->stateSamplingDistance()->connect(m_dualIsph->varSamplingDistance());
 		this->stateTimeStep()->connect(m_dualIsph->inTimeStep());
 		this->statePosition()->connect(m_dualIsph->inRPosition());
 		vpGen->outVirtualParticles()->connect(m_dualIsph->inVPosition());
 		this->stateVelocity()->connect(m_dualIsph->inVelocity());
+		m_dualIsph->varResidualThreshold()->setValue(0.001f);
 		//this->stateParticleAttribute()->connect(m_dualIsph->inParticleAttribute());
 		//this->stateBoundaryNorm()->connect(m_dualIsph->inBoundaryNorm());
 		m_nbrQuery->outNeighborIds()->connect(m_dualIsph->inNeighborIds());
 		m_rv_nbrQuery->outNeighborIds()->connect(m_dualIsph->inRVNeighborIds());
 		m_vr_nbrQuery->outNeighborIds()->connect(m_dualIsph->inVRNeighborIds());
 		m_vv_nbrQuery->outNeighborIds()->connect(m_dualIsph->inVVNeighborIds());
-		this->stateTimeStep()->connect(m_dualIsph->inTimeStep());
+		m_dualIsph->varWarmStart()->setValue(true);
 		this->animationPipeline()->pushModule(m_dualIsph);
 
 		auto m_integrator = std::make_shared<ParticleIntegrator<TDataType>>();
 		this->stateTimeStep()->connect(m_integrator->inTimeStep());
 		this->statePosition()->connect(m_integrator->inPosition());
 		this->stateVelocity()->connect(m_integrator->inVelocity());
-		this->stateParticleAttribute()->connect(m_integrator->inAttribute());
 		this->animationPipeline()->pushModule(m_integrator);
 
 		auto m_visModule = std::make_shared<ImplicitViscosity<TDataType>>();
-		m_visModule->varViscosity()->setValue(Real(0.3));
+		m_visModule->varViscosity()->setValue(Real(0.5));
 		this->stateTimeStep()->connect(m_visModule->inTimeStep());
 		this->stateSamplingDistance()->connect(m_visModule->inSamplingDistance());
 		this->stateSmoothingLength()->connect(m_visModule->inSmoothingLength());
@@ -145,14 +174,9 @@ namespace dyno
 		if(ptSet != nullptr)
 		{
 			auto pts = ptSet->getPoints();
-			this->stateBoundaryNorm()->resize(pts.size());
-			this->stateParticleAttribute()->resize(pts.size());
-
-			cuExecute(pts.size(), DPS_AttributeReset,
-				this->stateParticleAttribute()->getData());
-
-			this->stateBoundaryNorm()->getDataPtr()->reset();
 		}
+
+		std::cout << "Real particle number " << this->statePosition()->size() << std::endl;
 
 		if (this->stateVirtualPointSet()->isEmpty())
 		{
@@ -177,12 +201,6 @@ namespace dyno
 		this->varReshuffleParticles()->setValue(false);
 		this->ParticleFluid<TDataType>::preUpdateStates();
 
-		this->stateBoundaryNorm()->resize(this->statePosition()->size());
-		this->stateBoundaryNorm()->reset();
-		this->stateParticleAttribute()->resize(this->statePosition()->size());
-
-		cuExecute(this->statePosition()->size(), DPS_AttributeReset,
-			this->stateParticleAttribute()->getData());
 	}
 
 

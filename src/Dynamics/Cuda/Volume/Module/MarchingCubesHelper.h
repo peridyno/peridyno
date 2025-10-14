@@ -25,6 +25,15 @@
 
 namespace dyno
 {
+#define Inside( a, iso, h ) \
+    ((a) < float(iso - 0.001953125 * h ))
+
+#define Outside( a, iso, h ) \
+    ((a) > float( iso + 0.001953125 * h ))
+
+#define OnSurface( a, iso, h ) \
+    ((a) <= float( iso + 0.001953125 * h ) && (a) >= float(iso - 0.001953125 * h ))
+
 	template<typename TDataType>
 	class MarchingCubesHelper 
 	{
@@ -43,7 +52,8 @@ namespace dyno
 		static void countVerticeNumber(
 			DArray<int>& num,
 			DArray3D<Real>& distances,
-			Real isoValue);
+			Real isoValue,
+			Real h);
 
 		static void constructTriangles(
 			DArray<Coord>& vertices,

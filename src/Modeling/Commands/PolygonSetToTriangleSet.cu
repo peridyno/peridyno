@@ -236,7 +236,7 @@ namespace dyno
 		if (tNum < 1)
 			return;
 
-		auto& triangles = triset->getTriangles();
+		auto& triangles = triset->triangleIndices();
 		triangles.resize(tNum);
 
 		cuExecute(polyNum,

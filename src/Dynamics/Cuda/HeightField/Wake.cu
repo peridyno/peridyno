@@ -150,7 +150,7 @@ namespace dyno
 			auto avesselAngularVelocity = vessel->stateAngularVelocity()->getData();
 			// printf("[Wake center] %f %f %f\n", vesselCenter.x, vesselCenter.y, vesselCenter.z);
 			auto& vertices = triangles.getPoints();
-			auto& indices = triangles.getTriangles();
+			auto& indices = triangles.triangleIndices();
 
 			uint num = indices.size();
 

@@ -69,8 +69,6 @@ namespace dyno
 
 	private:
 		void varChanged();
-
-		Vec3f tempScale = Vec3f(1);
 	};
 
 

@@ -71,11 +71,12 @@ namespace dyno
 		this->ray1 = TRay3D<Real>();
 		this->ray2 = TRay3D<Real>();
 		this->isPressed = false;
-
-		this->outOtherTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
-		this->outOtherTriangleSet()->getDataPtr()->getTriangles().resize(0);
-		this->outSelectedTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
-		this->outSelectedTriangleSet()->getDataPtr()->getTriangles().resize(0);
+		if (this->outSelectedTriangleSet()->isEmpty())
+			this->outSelectedTriangleSet()->allocate();
+		if (this->outOtherTriangleSet()->isEmpty())
+			this->outOtherTriangleSet()->allocate();
+		if (this->outTriangleIndex()->isEmpty())
+			this->outTriangleIndex()->allocate();
 	}
 
 	template<typename TDataType>
@@ -134,8 +135,8 @@ namespace dyno
 			}
 			else
 			{
-				//printf("Mouse repeated: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
-				if (this->isPressed)
+				
+				if (this->isPressed) 
 				{
 					this->ray2.origin = event.ray.origin;
 					this->ray2.direction = event.ray.direction;
@@ -145,9 +146,11 @@ namespace dyno
 					{
 						if (this->varSurfacePickingType()->getValue() == PickingTypeSelection::Both || this->varSurfacePickingType()->getValue() == PickingTypeSelection::Click)
 							this->calcIntersectClick();
+						//printf("Mouse repeated Clicking: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
 					}
 					else
 					{
+						//printf("Mouse repeated Draging: Origin: %f %f %f; Direction: %f %f %f \n", event.ray.origin.x, event.ray.origin.y, event.ray.origin.z, event.ray.direction.x, event.ray.direction.y, event.ray.direction.z);
 						if (this->varSurfacePickingType()->getValue() == PickingTypeSelection::Both || this->varSurfacePickingType()->getValue() == PickingTypeSelection::Drag)
 						{
 							this->calcIntersectDrag();
@@ -482,7 +485,7 @@ namespace dyno
 	{
 		auto& initialTriangleSet = this->inInitialTriangleSet()->getData();
 		auto& points = initialTriangleSet.getPoints();
-		auto& triangles = initialTriangleSet.getTriangles();
+		auto& triangles = initialTriangleSet.triangleIndices();
 		DArray<int> intersected;
 		intersected.resize(triangles.size());
 		cuExecute(triangles.size(),
@@ -517,10 +520,8 @@ namespace dyno
 
 		if (this->varToggleFlood()->getValue())
 		{
-			auto& Tri2Edg = initialTriangleSet.getTriangle2Edge();
-			auto& Edge2Tri = initialTriangleSet.getEdge2Triangle();
-			Edge2Tri.resize(0);
-			initialTriangleSet.updateTriangle2Edge();
+			auto& Tri2Edg = initialTriangleSet.triangle2Edge();
+			auto& Edge2Tri = initialTriangleSet.edge2Triangle();
 			int intersected_size_t_o = 0;
 			int intersected_size_t = 1;
 			while (intersected_size_t > intersected_size_t_o && intersected_size_t < triangles.size())
@@ -732,7 +733,7 @@ namespace dyno
 
 		auto& initialTriangleSet = this->inInitialTriangleSet()->getData();
 		auto& points = initialTriangleSet.getPoints();
-		auto& triangles = initialTriangleSet.getTriangles();
+		auto& triangles = initialTriangleSet.triangleIndices();
 		DArray<int> intersected;
 		intersected.resize(triangles.size());
 		cuExecute(triangles.size(),
@@ -931,7 +932,7 @@ namespace dyno
 	{
 		auto& initialTriangleSet = this->inInitialTriangleSet()->getData();
 		auto& points = initialTriangleSet.getPoints();
-		auto& triangles = initialTriangleSet.getTriangles();
+		auto& triangles = initialTriangleSet.triangleIndices();
 		DArray<int> intersected;
 		intersected.resize(triangles.size());
 		cuExecute(triangles.size(),

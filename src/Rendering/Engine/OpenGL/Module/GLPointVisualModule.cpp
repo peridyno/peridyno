@@ -84,6 +84,7 @@ namespace dyno
 	{
 		mNumPoints = mPosition.count();
 		if (mNumPoints == 0) return;
+		//printf("GLPoints Visual Module: %d \n", mNumPoints);
 
 		mPosition.updateGL();
 		mVertexArray.bindVertexBuffer(&mPosition, 0, 3, GL_FLOAT, 0, 0, 0);

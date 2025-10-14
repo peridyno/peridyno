@@ -77,7 +77,7 @@ namespace dyno
 		auto VertexIn = this->inSpline()->getData().getPoints();
 		auto VertexIn2 = this->inTriangleSet()->getData().getPoints();
 		auto lengthV2 = this->inTriangleSet()->getData().getPointSize();
-		auto TriIn = this->inTriangleSet()->getData().getTriangles();
+		auto TriIn = this->inTriangleSet()->getData().triangleIndices();
 
 		if (this->varAccelerate()->getData())
 		{

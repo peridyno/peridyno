@@ -32,7 +32,7 @@ namespace dyno
 
 	void getQuatByIndex(tinygltf::Model& model, int index, std::vector<Quat<float>>& result);
 
-	void getTriangles(tinygltf::Model& model, const tinygltf::Primitive& primitive, std::vector<TopologyModule::Triangle>& triangles, int pointOffest);
+	void triangleIndices(tinygltf::Model& model, const tinygltf::Primitive& primitive, std::vector<TopologyModule::Triangle>& triangles, int pointOffest);
 
 	std::string getTexUri(const std::vector<tinygltf::Texture>& textures, const std::vector<tinygltf::Image>& images, int index);
 

@@ -690,4 +690,27 @@ TEST(OrientedBox3D, intersectWithOBB) {
 
 	EXPECT_EQ(point1.distance(obb), 1);
 	EXPECT_EQ(point2.distance(obb), Real(-0.5));
+
+	Segment3D seg0(Vec3f(0), Vec3f(2.0f, 0.0f, 0.0f));
+	Segment3D seg1(Vec3f(-2.0f, 0.0f, 0.0f), Vec3f(2.0f, 0.0f, 0.0f));
+	Segment3D seg2(Vec3f(1.5f, 0.0f, 0.0f), Vec3f(2.0f, 0.0f, 0.0f));
+	Segment3D seg3(Vec3f(1.0f, 0.0f, 0.0f), Vec3f(2.0f, 0.0f, 0.0f));
+	OrientedBox3D obb0(Vec3f(0), Quat1f(), Vec3f(1));
+
+	Segment3D interSeg;
+	int num = seg0.intersect(obb, interSeg);
+
+	EXPECT_EQ(num == 2, true);
+
+	num = seg1.intersect(obb, interSeg);
+
+	EXPECT_EQ(num == 2, true);
+
+	num = seg2.intersect(obb, interSeg);
+
+	EXPECT_EQ(num == 0, true);
+
+	num = seg3.intersect(obb, interSeg);
+
+	EXPECT_EQ(num == 1, true);
 }

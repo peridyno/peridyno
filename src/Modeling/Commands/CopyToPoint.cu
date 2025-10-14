@@ -44,7 +44,7 @@ namespace dyno
 
 
 		auto VertexIn = this->inTriangleSetIn()->getData().getPoints();
-		auto TriangleIn = this->inTriangleSetIn()->getData().getTriangles();
+		auto TriangleIn = this->inTriangleSetIn()->getData().triangleIndices();
 		auto target = this->inTargetPointSet()->getData().getPoints();
 
 

@@ -58,6 +58,7 @@ namespace dyno
 		connect(mToolBar, &PModuleEditorToolBar::showResetPipeline, moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::showResetPipeline);
 		connect(mToolBar, &PModuleEditorToolBar::showAnimationPipeline, moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::showAnimationPipeline);
 		connect(mToolBar, &PModuleEditorToolBar::showGraphicsPipeline, moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::showGraphicsPipeline);
+		connect(mToolBar->updateAction(), &QAction::triggered, moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::reconstructActivePipeline);
 
 		connect(mToolBar->updateAction(), &QAction::triggered, 
 			[=]() {

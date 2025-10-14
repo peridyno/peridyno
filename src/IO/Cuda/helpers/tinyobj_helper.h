@@ -29,11 +29,12 @@ namespace dyno
 		Real volume;
 	};
 
-
-	bool loadTextureMeshFromObj(std::shared_ptr<TextureMesh> texMesh, const FilePath& fullname, bool dotransform=true);
+	bool loadTextureMeshFromObj(std::shared_ptr<TextureMesh> texMesh, const FilePath& fullname,bool useToCenter = true);
 
 	bool manualParseSceneConfig(const std::string& xmlPath, std::vector<SceneObject>& sceneObjects, std::vector<Asset>& assets);
 
 	bool loadObjects(std::shared_ptr<TextureMesh> texMesh, std::vector<Asset>& assets, std::vector<SceneObject>& sceneObjects, bool doTransform = true);
-
+	
+	bool loadObj(std::vector<Vec3f>& points, std::vector<TopologyModule::Triangle>& triangles, std::string filename, bool append = false);
+	
 }

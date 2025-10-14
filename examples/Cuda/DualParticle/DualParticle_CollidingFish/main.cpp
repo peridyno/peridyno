@@ -1,12 +1,14 @@
-
 #include <UbiApp.h>
 #include <SceneGraph.h>
 
-#include <PointsLoader.h>
-
+///Particle fluid solver
 #include <DualParticleSystem/DualParticleFluid.h>
 #include <ParticleSystem/MakeParticleSystem.h>
 
+///Particle Sampler
+#include <PointsLoader.h>
+
+///Render
 #include <Module/CalculateNorm.h>
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
@@ -41,7 +43,7 @@ std::shared_ptr<SceneGraph> createScene()
 	initialParticles2->varInitialVelocity()->setValue(Vec3f(0.0f, 0.0f, 1.5f));
 	ptsLoader2->outPointSet()->promoteOuput()->connect(initialParticles2->inPoints());
 
-	auto fluid = scn->addNode(std::make_shared<DualParticleFluid<DataType3f>>());
+	auto fluid = scn->addNode(std::make_shared<DualParticleFluid<DataType3f>>(DualParticleFluid<DataType3f>::FissionFusionStrategy));
 	fluid->varReshuffleParticles()->setValue(true);
 	initialParticles->connect(fluid->importInitialStates());
 	initialParticles2->connect(fluid->importInitialStates());
@@ -57,7 +59,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto ptRender = std::make_shared<GLPointVisualModule>();
 	ptRender->setColor(Color(1, 0, 0));
-	ptRender->varPointSize()->setValue(0.0035f);
+	ptRender->varPointSize()->setValue(0.0025f);
 	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 	fluid->statePointSet()->connect(ptRender->inPointSet());
 	colorMapper->outColor()->connect(ptRender->inColor());

@@ -36,14 +36,14 @@ namespace dyno
 		{
 			FVar<float>* f = TypeInfo::cast<FVar<float>>(field);
 
-			spinner->setValue((double)f->getValue());
+			spinner->setRealValue((double)f->getValue());
 			slider->setValue((double)f->getValue());
 		}
 		else if (template_name == std::string(typeid(double).name()))
 		{
 			FVar<double>* f = TypeInfo::cast<FVar<double>>(field);
 
-			spinner->setValue((double)f->getValue());
+			spinner->setRealValue((double)f->getValue());
 			slider->setValue(f->getValue());
 		}
 
@@ -55,13 +55,14 @@ namespace dyno
 
 		FormatFieldWidgetName(field->getObjectName());
 
-		QObject::connect(slider, SIGNAL(valueChanged(double)), spinner, SLOT(ModifyValueAndUpdate(double)));
-		QObject::connect(spinner, SIGNAL(valueChanged(double)), slider, SLOT(setValue(double)));
-		QObject::connect(spinner, SIGNAL(valueChanged(double)), this, SLOT(updateField(double)));
+		QObject::connect(slider, SIGNAL(valueChanged(double)), this, SLOT(onSliderValueChanged(double)));
+
+		QObject::connect(spinner, SIGNAL(editingFinishedWithValue(double)), this, SLOT(updateField(double)));
 
 		QObject::connect(name, SIGNAL(toggle(bool)), spinner, SLOT(toggleDecimals(bool)));
 
-		QObject::connect(this, SIGNAL(fieldChanged()), this, SLOT(updateWidget()));
+//		QObject::connect(spinner, SIGNAL(editingFinishedWithValue(double)), this, SLOT(onSpinnerEditingFinished(double)));
+//		QObject::connect(this, SIGNAL(fieldChanged()), this, SLOT(updateWidget()));
 	}
 
 	QRealFieldWidget::~QRealFieldWidget()
@@ -76,14 +77,12 @@ namespace dyno
 		if (template_name == std::string(typeid(float).name()))
 		{
 			FVar<float>* f = TypeInfo::cast<FVar<float>>(field());
-			f->setValue((float)v);
-			f->update();
+			f->setValue((float)v,false);
 		}
 		else if (template_name == std::string(typeid(double).name()))
 		{
 			FVar<double>* f = TypeInfo::cast<FVar<double>>(field());
-			f->setValue(v);
-			f->update();
+			f->setValue(v, false);
 		}
 
 		emit fieldChanged();
@@ -108,6 +107,11 @@ namespace dyno
 			slider->setValue(f->getValue());
 			slider->blockSignals(false);
 		}
+	}
+
+	void QRealFieldWidget::onSliderValueChanged(double val)
+	{
+		spinner->triggerEditingFinished(val);
 	}
 }
 

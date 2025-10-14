@@ -31,12 +31,13 @@ namespace dyno {
         LandScape();
         ~LandScape();
 
-        DArray2D<Real>& getInitialHeights() { return mInitialHeights; }
     public:
  
         DEF_VAR(Real, PatchSize, Real(256), "Real patch size");
 
         DEF_VAR(FilePath, FileName, "", "");
+
+        DEF_ARRAY2D_STATE(Real, InitialHeights, DeviceType::GPU, "Initial height field");
 
         DEF_INSTANCE_STATE(HeightField<TDataType>, HeightField, "Topology");
 
@@ -49,8 +50,6 @@ namespace dyno {
 
     private:
         std::string fileName;
-
-        DArray2D<Real> mInitialHeights;
     };
 
     IMPLEMENT_TCLASS(LandScape, TDataType)
