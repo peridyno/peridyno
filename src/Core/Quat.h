@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file Quat.h
  * @brief Implementation of quaternion
  * 
@@ -52,7 +52,17 @@ namespace dyno
 
 		DYN_FUNC Quat(const Vector<Real, 3> u0, const Vector<Real, 3> u1); // u0 --[rot]--> u1
 		DYN_FUNC Quat(const Quat<Real> &);
-		DYN_FUNC explicit Quat(const SquareMatrix<Real, 3> &);   //init from a 3x3matrix
+
+		/**
+		 * @brief Construct a quaternion from a 3x3 rotation matrix
+		 * 
+		 *	 Be aware that the sign is ambiguous because any given rotation has two possible quaternion representations. 
+		 *		If one is known, the other can be found by taking the negative of all four terms. 
+		 *		This has the effect of reversing both the rotation angle and the axis of rotation.
+		 *		So for all rotation quaternions, (q_0, q_1, q_2, q_3) and (−q_0, −q_1, −q_2, −q_3) produce identical rotations. 
+		 *		To convert from a rotation matrix to a quaternion, we must arbitrarily pick one of the two possible answers as described in steps 1 and 2.
+		 */
+		DYN_FUNC explicit Quat(const SquareMatrix<Real, 3> &);
 		DYN_FUNC explicit Quat(const SquareMatrix<Real, 4> &);    //init from a 4x4matrix
 
 		// yaw (Z), pitch (Y), roll (X);     
