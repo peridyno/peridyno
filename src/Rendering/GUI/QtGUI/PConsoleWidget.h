@@ -9,6 +9,16 @@
 #include <QTextEdit.h>
 #include <QPushButton.h>
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+#include <QMessageBox.h>
+
+#include <Qsci/qsciscintilla.h>
+#include <Qsci/qscilexerpython.h>
+#include <Qsci/qsciapis.h>
+#include <QApplication>
+#include <QWheelEvent>
+>>>>>>> a78b0e817c5a4a4db2f4998dfdb78e8f19b327cd
 
 =======
 #include <QMessageBox.h>
@@ -69,8 +79,16 @@ namespace dyno
 		std::string getPythonErrorDetails();
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+		void applyDarkTheme(QsciLexerPython* lexer);
+
+		void applyLightTheme(QsciLexerPython* lexer);
+
+>>>>>>> a78b0e817c5a4a4db2f4998dfdb78e8f19b327cd
 	private:
-		QTextEdit* mCodeEditor;
+		QsciScintilla* mCodeEditor;
+		QsciLexerPython* mPythonLexer;
 		QPushButton* updateButton;
 =======
 		void applyDarkTheme(QsciLexerPython* lexer);

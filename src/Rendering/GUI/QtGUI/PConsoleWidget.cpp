@@ -57,9 +57,35 @@ namespace dyno
 		this->setLayout(layout);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 		mCodeEditor = new QTextEdit(this);
+=======
+		mCodeEditor = new QsciScintilla(this);
+>>>>>>> a78b0e817c5a4a4db2f4998dfdb78e8f19b327cd
 		mCodeEditor->setObjectName("Python Code");
+
+		mCodeEditor->setMinimumSize(100, 100);
+
+		mPythonLexer = new QsciLexerPython(mCodeEditor);
+		applyDarkTheme(mPythonLexer);
+		mCodeEditor->setLexer(mPythonLexer);
+
+		QsciAPIs* apis = new QsciAPIs(mPythonLexer);
+		apis->add(QString("import"));
+		apis->add(QString("QtPathHelper"));
+		apis->add(QString("PyPeridyno"));
+		apis->add(QString("scn"));
+		apis->add(QString("dyno"));
+		apis->add(QString("addNode"));
+		apis->add(QString("SceneGraph"));
+		apis->add(QString("connect"));
+		apis->add(QString("pushModule"));
+		apis->add(QString("setValue"));
+		apis->add(QString("Vector3f"));
+		apis->prepare();
+
 		mCodeEditor->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+<<<<<<< HEAD
 =======
 #ifdef PERIDYNO_QT_PYTHON_CONSOLE
 		mCodeEditor = new QsciScintilla(this);
@@ -86,6 +112,8 @@ namespace dyno
 		apis->prepare();
 
 		mCodeEditor->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+=======
+>>>>>>> a78b0e817c5a4a4db2f4998dfdb78e8f19b327cd
 		mCodeEditor->setCaretForegroundColor(QColor("#d4d4d4"));
 		
 		// line numbers
@@ -110,7 +138,10 @@ namespace dyno
 
 		mCodeEditor->setMouseTracking(true);
 
+<<<<<<< HEAD
 >>>>>>> dev
+=======
+>>>>>>> a78b0e817c5a4a4db2f4998dfdb78e8f19b327cd
 		layout->addWidget(mCodeEditor);
 
 		updateButton = new QPushButton("update", this);
@@ -119,7 +150,11 @@ namespace dyno
 
 		connect(updateButton, &QPushButton::clicked, this, [this]() {
 <<<<<<< HEAD
+<<<<<<< HEAD
 			const std::string& code = mCodeEditor->toPlainText().toStdString();
+=======
+			const std::string& code = mCodeEditor->text().toStdString();
+>>>>>>> a78b0e817c5a4a4db2f4998dfdb78e8f19b327cd
 			execute(code);
 			});
 
@@ -127,35 +162,27 @@ namespace dyno
 
 	void PConsoleWidget::execute(const std::string& src)
 	{
-		bool flag = true;
 		py::scoped_interpreter guard{};
 
 		try {
 			auto locals = py::dict();
 			py::exec(src, py::globals(), locals);
 
-			std::cout << "python" << std::endl;
-
 			if (locals.contains("scn"))
 			{
 				auto scene = locals["scn"].cast<std::shared_ptr<dyno::SceneGraph>>();
 				if (scene)
 				{
-					std::cout << "Scn" << std::endl;
+					PSimulationThread::instance()->createNewScene(scene);
 				}
 			}
 			else
 			{
-				
-				//Wt::WMessageBox::show("Error", "Please define 'scn = dyno.SceneGraph()'", Wt::StandardButton::Ok);
+				std::cout << getPythonErrorDetails() << std::endl;
 			}
 		}
 		catch (const std::exception& e) {
-			//Wt::WMessageBox::show("Error", e.what(), Wt::StandardButton::Ok);
-
-			std::cout << e.what() << std::endl;
-			std::cout << getPythonErrorDetails() << std::endl;
-			flag = false;
+			QMessageBox::critical(nullptr, "Error", e.what());
 		}
 	}
 
@@ -220,6 +247,7 @@ namespace dyno
 >>>>>>> dev
 	}
 
+<<<<<<< HEAD
 	PConsoleWidget::~PConsoleWidget()
 	{
 	}
@@ -306,6 +334,8 @@ namespace dyno
 		return errorMsg;
 	}
 
+=======
+>>>>>>> a78b0e817c5a4a4db2f4998dfdb78e8f19b327cd
 	void PConsoleWidget::applyDarkTheme(QsciLexerPython* lexer)
 	{
 		if (!lexer)
@@ -381,8 +411,11 @@ namespace dyno
 
 	}
 
+<<<<<<< HEAD
 #endif // PERIDYNO_QT_PYTHON_CONSOLE
 
+=======
+>>>>>>> a78b0e817c5a4a4db2f4998dfdb78e8f19b327cd
 	QContentBrowser::QContentBrowser(QWidget* parent /*= nullptr*/)
 		: QWidget()
 	{
