@@ -485,7 +485,7 @@ namespace dyno
 			{
 				for (int i = 0; i < (int)step - 1; i++)
 				{
-					loopSubdivide(vertices, triangles);
+					Subdivide<TDataType>::loopSubdivide(vertices, triangles);
 				}
 			}
 		}
