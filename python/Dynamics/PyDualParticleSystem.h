@@ -20,8 +20,6 @@ void declare_dual_particle_fluid_system(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>DPFS(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
 	DPFS.def(py::init<>())
 		.def(py::init<int>())
-		.def("stateParticleAttribute", &Class::stateParticleAttribute, py::return_value_policy::reference)
-		.def("stateBoundaryNorm", &Class::stateBoundaryNorm, py::return_value_policy::reference)
 		.def("stateVirtualPosition", &Class::stateVirtualPosition, py::return_value_policy::reference)
 		.def("stateVirtualPointSet", &Class::stateVirtualPointSet, py::return_value_policy::reference)
 		.def("varVirtualParticleSamplingStrategy", &Class::varVirtualParticleSamplingStrategy, py::return_value_policy::reference)
@@ -51,7 +49,6 @@ void declare_dual_particle_isph_module(py::module& m, std::string typestr) {
 		.def("varRestDensity", &Class::varRestDensity, py::return_value_policy::reference)
 		.def("varSamplingDistance", &Class::varSamplingDistance, py::return_value_policy::reference)
 		.def("varSmoothingLength", &Class::varSmoothingLength, py::return_value_policy::reference)
-		.def("varPpeSmoothingLength", &Class::varPpeSmoothingLength, py::return_value_policy::reference)
 		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
 		.def("inRPosition", &Class::inRPosition, py::return_value_policy::reference)
 		.def("inVPosition", &Class::inVPosition, py::return_value_policy::reference)

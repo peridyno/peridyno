@@ -63,6 +63,7 @@ namespace dyno
 		mCodeEditor->setLexer(mPythonLexer);
 
 		QsciAPIs* apis = new QsciAPIs(mPythonLexer);
+
 		apis->add(QString("import"));
 		apis->add(QString("QtPathHelper"));
 		apis->add(QString("PyPeridyno"));
@@ -74,6 +75,10 @@ namespace dyno
 		apis->add(QString("pushModule"));
 		apis->add(QString("setValue"));
 		apis->add(QString("Vector3f"));
+		 
+		if (!apis->load(QString::fromStdString(getAssetPath() + "PromptFunctionName")))
+			QMessageBox::warning(this, QString("提示"), QString("读取文件失败"));
+
 		apis->prepare();
 
 		mCodeEditor->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -87,7 +92,7 @@ namespace dyno
 
 		// auto completion
 		mCodeEditor->setAutoCompletionSource(QsciScintilla::AcsAll);
-		mCodeEditor->setAutoCompletionCaseSensitivity(true);
+		mCodeEditor->setAutoCompletionCaseSensitivity(false);
 		mCodeEditor->setAutoCompletionThreshold(1);
 
 		// indentation
