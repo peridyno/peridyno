@@ -1,4 +1,4 @@
-#include "PConsoleWidget.h"
+Ôªø#include "PConsoleWidget.h"
 #include "Platform.h"
 #include <QListWidget>
 #include <QDir>
@@ -45,10 +45,6 @@ namespace dyno
 		}
 	};
 
-<<<<<<< HEAD
-
-=======
->>>>>>> dev
 	PConsoleWidget::PConsoleWidget(QWidget* parent) :
 		QWidget(parent)
 	{
@@ -56,37 +52,6 @@ namespace dyno
 		QVBoxLayout* layout = new QVBoxLayout(this);
 		this->setLayout(layout);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-		mCodeEditor = new QTextEdit(this);
-=======
-		mCodeEditor = new QsciScintilla(this);
->>>>>>> a78b0e817c5a4a4db2f4998dfdb78e8f19b327cd
-		mCodeEditor->setObjectName("Python Code");
-
-		mCodeEditor->setMinimumSize(100, 100);
-
-		mPythonLexer = new QsciLexerPython(mCodeEditor);
-		applyDarkTheme(mPythonLexer);
-		mCodeEditor->setLexer(mPythonLexer);
-
-		QsciAPIs* apis = new QsciAPIs(mPythonLexer);
-		apis->add(QString("import"));
-		apis->add(QString("QtPathHelper"));
-		apis->add(QString("PyPeridyno"));
-		apis->add(QString("scn"));
-		apis->add(QString("dyno"));
-		apis->add(QString("addNode"));
-		apis->add(QString("SceneGraph"));
-		apis->add(QString("connect"));
-		apis->add(QString("pushModule"));
-		apis->add(QString("setValue"));
-		apis->add(QString("Vector3f"));
-		apis->prepare();
-
-		mCodeEditor->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-<<<<<<< HEAD
-=======
 #ifdef PERIDYNO_QT_PYTHON_CONSOLE
 		mCodeEditor = new QsciScintilla(this);
 		mCodeEditor->setObjectName("Python Code");
@@ -112,10 +77,8 @@ namespace dyno
 		apis->prepare();
 
 		mCodeEditor->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-=======
->>>>>>> a78b0e817c5a4a4db2f4998dfdb78e8f19b327cd
 		mCodeEditor->setCaretForegroundColor(QColor("#d4d4d4"));
-		
+
 		// line numbers
 		mCodeEditor->setMarginsBackgroundColor(QColor("#454545"));
 		mCodeEditor->setMarginsForegroundColor(QColor("#d4d4d4"));
@@ -138,10 +101,6 @@ namespace dyno
 
 		mCodeEditor->setMouseTracking(true);
 
-<<<<<<< HEAD
->>>>>>> dev
-=======
->>>>>>> a78b0e817c5a4a4db2f4998dfdb78e8f19b327cd
 		layout->addWidget(mCodeEditor);
 
 		updateButton = new QPushButton("update", this);
@@ -149,105 +108,12 @@ namespace dyno
 
 
 		connect(updateButton, &QPushButton::clicked, this, [this]() {
-<<<<<<< HEAD
-<<<<<<< HEAD
-			const std::string& code = mCodeEditor->toPlainText().toStdString();
-=======
-			const std::string& code = mCodeEditor->text().toStdString();
->>>>>>> a78b0e817c5a4a4db2f4998dfdb78e8f19b327cd
-			execute(code);
-			});
-
-	}
-
-	void PConsoleWidget::execute(const std::string& src)
-	{
-		py::scoped_interpreter guard{};
-
-		try {
-			auto locals = py::dict();
-			py::exec(src, py::globals(), locals);
-
-			if (locals.contains("scn"))
-			{
-				auto scene = locals["scn"].cast<std::shared_ptr<dyno::SceneGraph>>();
-				if (scene)
-				{
-					PSimulationThread::instance()->createNewScene(scene);
-				}
-			}
-			else
-			{
-				std::cout << getPythonErrorDetails() << std::endl;
-			}
-		}
-		catch (const std::exception& e) {
-			QMessageBox::critical(nullptr, "Error", e.what());
-		}
-	}
-
-	std::string PConsoleWidget::getPythonErrorDetails()
-	{
-		if (!PyErr_Occurred()) {
-			return "No Python error occurred";
-		}
-
-		PyObject* type, * value, * traceback;
-		PyErr_Fetch(&type, &value, &traceback);
-		PyErr_NormalizeException(&type, &value, &traceback);
-
-		std::string errorMsg;
-
-		if (value) {
-			py::object py_value = py::reinterpret_borrow<py::object>(value);
-			errorMsg = py::str(py_value).cast<std::string>();
-		}
-		else {
-			errorMsg = "Unknown Python error";
-		}
-
-		// »Áπ˚”– traceback£¨ªÒ»°∂—’ª–≈œ¢
-		if (traceback) {
-			py::object py_traceback = py::reinterpret_borrow<py::object>(traceback);
-
-			// µº»Î traceback ƒ£øÈ¿¥∏Ò ΩªØ¥ÌŒÛ–≈œ¢
-			try {
-				py::module traceback_module = py::module::import("traceback");
-				py::object format_tb = traceback_module.attr("format_tb");
-				py::object tb_list = format_tb(py_traceback);
-				py::object formatted = traceback_module.attr("format_exception_only")(type, value);
-
-				// ◊È∫œÕÍ’˚µƒ¥ÌŒÛ–≈œ¢
-				std::string traceback_str;
-				for (auto item : tb_list) {
-					traceback_str += item.cast<std::string>();
-				}
-				for (auto item : formatted) {
-					traceback_str += item.cast<std::string>();
-				}
-
-				if (!traceback_str.empty()) {
-					errorMsg = traceback_str;
-				}
-			}
-			catch (...) {
-				// »Áπ˚∏Ò ΩªØ ß∞‹£¨ π”√ª˘±æ¥ÌŒÛ–≈œ¢
-			}
-		}
-
-		PyErr_Restore(type, value, traceback);
-		PyErr_Clear();
-
-		return errorMsg;
-=======
 			const std::string& code = mCodeEditor->text().toStdString();
 			execute(code);
 			});
 #endif
->>>>>>> dev
 	}
 
-<<<<<<< HEAD
 	PConsoleWidget::~PConsoleWidget()
 	{
 	}
@@ -334,8 +200,6 @@ namespace dyno
 		return errorMsg;
 	}
 
-=======
->>>>>>> a78b0e817c5a4a4db2f4998dfdb78e8f19b327cd
 	void PConsoleWidget::applyDarkTheme(QsciLexerPython* lexer)
 	{
 		if (!lexer)
@@ -411,11 +275,8 @@ namespace dyno
 
 	}
 
-<<<<<<< HEAD
 #endif // PERIDYNO_QT_PYTHON_CONSOLE
 
-=======
->>>>>>> a78b0e817c5a4a4db2f4998dfdb78e8f19b327cd
 	QContentBrowser::QContentBrowser(QWidget* parent /*= nullptr*/)
 		: QWidget()
 	{
@@ -431,9 +292,9 @@ namespace dyno
 		model->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
 		model->sort(0, Qt::AscendingOrder);
 
-//		QObject::connect(model, SIGNAL(directoryLoaded(QString)), SLOT(findDirectory(QString)));
+		//		QObject::connect(model, SIGNAL(directoryLoaded(QString)), SLOT(findDirectory(QString)));
 
-		// File system
+				// File system
 		treeView = new QTreeView(this);
 		treeView->setModel(model);
 		treeView->setHeaderHidden(true);	//Show tree header
@@ -447,7 +308,7 @@ namespace dyno
 
 
 		QStringList filter;
-		filter <<"*.png" << "*.jpg" << "*.bmp" << "*.obj" << "*.gltf" << "*.glb" << "*.fbx" << "*.STL" << "*.stl" << "*.xml";
+		filter << "*.png" << "*.jpg" << "*.bmp" << "*.obj" << "*.gltf" << "*.glb" << "*.fbx" << "*.STL" << "*.stl" << "*.xml";
 		auto* listModel = new CustomFileSystemModel(this);
 		listModel->setRootPath(path.c_str());
 		listModel->setFilter(QDir::Files | QDir::NoDotAndDotDot);
@@ -491,7 +352,7 @@ namespace dyno
 		newListModel->setNameFilterDisables(false);
 		newListModel->sort(0, Qt::AscendingOrder);
 
- 		listView->setModel(newListModel);
+		listView->setModel(newListModel);
 		listView->setRootIndex(newListModel->index(path));
 	}
 
