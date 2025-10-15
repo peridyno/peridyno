@@ -28,6 +28,8 @@ namespace dyno
 		CAPSULE,
 		CYLINDER,
 		TET,
+		MEDIALCONE,
+		MEDIALSLAB,
 		UNKNOWN
 	};
 

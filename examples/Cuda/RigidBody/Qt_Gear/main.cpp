@@ -29,7 +29,6 @@ std::shared_ptr<SceneGraph> createSceneGraph()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 	scn->setGravity(Vec3f(0.0f, -9.8f, 0.0f));
 
-	auto gear = scn->addNode(std::make_shared<Gear<DataType3f>>());
 
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
 	plane->varLengthX()->setValue(50);
@@ -38,6 +37,10 @@ std::shared_ptr<SceneGraph> createSceneGraph()
 	plane->varSegmentZ()->setValue(10);
 
 	auto convoy = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
+
+
+	auto gear = scn->addNode(std::make_shared<MatBody<DataType3f>>());
+	gear->setXMLPath("ma/scene3.xml");
 	gear->connect(convoy->importVehicles());
 
 	plane->stateTriangleSet()->connect(convoy->inTriangleSet());
@@ -47,11 +50,17 @@ std::shared_ptr<SceneGraph> createSceneGraph()
 
 int main()
 {
-	UbiApp app(GUIType::GUI_QT);
+	/*UbiApp app(GUIType::GUI_QT);
 	app.setSceneGraph(createSceneGraph());
 
 	app.initialize(1280, 768);
 	app.renderWindow()->getCamera()->setUnitScale(3.0f);
+	app.mainLoop();
+
+	return 0;*/
+	UbiApp app(GUIType::GUI_QT);
+	app.setSceneGraph(createSceneGraph());
+	app.initialize(1280, 768);
 	app.mainLoop();
 
 	return 0;

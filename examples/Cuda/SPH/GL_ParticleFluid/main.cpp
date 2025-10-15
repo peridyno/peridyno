@@ -35,8 +35,8 @@ std::shared_ptr<SceneGraph> createScene()
 
 	//Create a cube
 	auto cube = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
-	cube->varLocation()->setValue(Vec3f(0.6, 0.6, 0.5));
-	cube->varLength()->setValue(Vec3f(0.5, 0.5, 0.5));
+	cube->varLocation()->setValue(Vec3f(0.6, 0.2, 0.5));
+	cube->varLength()->setValue(Vec3f(0.2, 0.05, 0.2));
 	cube->graphicsPipeline()->disable();
 
 	//Create a sampler

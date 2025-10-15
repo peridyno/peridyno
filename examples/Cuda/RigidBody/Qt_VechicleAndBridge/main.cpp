@@ -179,7 +179,7 @@ std::shared_ptr<SceneGraph> creatCar()
 			auto& hingeJoint = jeep->createHingeJoint(Actors[it], Actors[5]);
 			hingeJoint.setAnchorPoint(Actors[it]->center);
 			hingeJoint.setAxis(Vec3f(1, 0, 0));
-			hingeJoint.setMoter(30);
+			hingeJoint.setMoter(10);
 
 		}
 		else

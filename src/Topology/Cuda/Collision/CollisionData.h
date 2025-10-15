@@ -3,6 +3,11 @@
 #include "Vector.h"
 #include "Matrix.h"
 #include "Quat.h"
+#include <thrust/device_vector.h>
+#include <thrust/sort.h>
+#include <thrust/reduce.h>
+#include <thrust/functional.h>
+
 
 namespace dyno
 {
@@ -87,6 +92,20 @@ namespace dyno
 		CN_UNKNOWN
 	};
 
+	enum ConstraintForceType
+	{
+		CF_CONTACT_FRICTION,
+		CF_CONTACT_NOFRICTION,
+		CF_ANCHOR_EQUAL,
+		CF_ANCHOR_TRANS,
+		CF_BAN_ROT,
+		CF_ALLOW_ROT1D,
+		CF_JOINT_NO_MOVE,
+		CF_UNKNOW
+	};
+
+
+
 	struct BoxInfo
 	{
 		BoxInfo()
@@ -128,6 +147,33 @@ namespace dyno
 		Vector<Real, 3> v[4];
 	};
 
+	struct MedialConeInfo {
+		MedialConeInfo()
+		{
+			v[0] = Vec3f(0);
+			v[1] = Vec3f(1, 0, 0);
+			radius[0] = 1.0;
+			radius[1] = 1.0;
+			
+		}
+		Vector<Real, 3> v[2];
+		Real radius[2];
+	};
+
+	struct MedialSlabInfo {
+		MedialSlabInfo()
+		{
+			v[0] = Vec3f(0);
+			v[1] = Vec3f(1, 0, 0);
+			v[2] = Vec3f(0, 1, 0);
+			radius[0] = 1.0;
+			radius[1] = 1.0;
+			radius[2] = 1.0;
+		}
+		Vector<Real, 3> v[3];
+		Real radius[3];
+	};
+
 	struct CapsuleInfo
 	{
 		CapsuleInfo()
@@ -165,6 +211,13 @@ namespace dyno
 			contacts[contactCount].position = pos;
 			contacts[contactCount].penetration = dep;
 			contactCount++;
+		}
+
+		DYN_FUNC void pushContactReWrite(const Vector<Real, 3>& pos, const Real& dep)
+		{
+			contacts[0].position = pos;
+			contacts[0].penetration = dep;
+			contactCount = 1;
 		}
 
 		DYN_FUNC void pushContact(const TContact<Real>& contact)
@@ -222,6 +275,7 @@ namespace dyno
 
 		ContactType contactType;
 	};
+
 
 	template<typename Real>
 	class TConstraintPair
@@ -281,5 +335,28 @@ namespace dyno
 
 		Quat1f rotQuat;
 
+	};
+
+
+	template<typename Real>
+	class TConstraintForce {
+	public:
+		DYN_FUNC TConstraintForce()
+		{
+			bodyId = FrombodyId = INVALID;
+			type = CF_UNKNOW;
+		}
+
+		int bodyId;
+		int FrombodyId;
+		// MAX 3D Constraint
+		Vec3f C;
+		Vec3f Lambda;
+		Vec3f Penalty;
+		Vec3f Stiffness;
+		Vec3f J[6];
+		Vec3f H[36];
+		ConstraintForceType type;
+		bool isValid;
 	};
 }

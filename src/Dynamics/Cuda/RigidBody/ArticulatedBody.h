@@ -23,8 +23,11 @@
 
 #include "Field/FilePath.h"
 
+#include "helpers/tinyobj_helper.h"
+
 namespace dyno 
 {
+
 	template<typename TDataType>
 	class ArticulatedBody : virtual public ParametricModel<TDataType>, virtual public RigidBodySystem<TDataType>
 	{
@@ -57,6 +60,8 @@ namespace dyno
 
 		DEF_ARRAY_STATE(int, BindingTag, DeviceType::GPU, "");
 
+		DEF_VAR(bool, DoTransform, true, "");
+
 	protected:
 		void resetStates() override;
 
@@ -86,11 +91,14 @@ namespace dyno
 
 			return instanceQ;
 		}
-
+	public:
+		std::vector<SceneObject> mObjects;
+		std::vector<Asset> mAssets;
 	private:
 		std::vector<Pair<uint, uint>> mBindingPair;
 
 		std::vector<std::shared_ptr<PdActor>> mActors;
+
 	};
 
 

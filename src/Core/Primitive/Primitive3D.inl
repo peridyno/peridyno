@@ -3912,6 +3912,119 @@ namespace dyno
 	}
 
 	template<typename Real>
+	DYN_FUNC TMedialCone3D<Real>::TMedialCone3D()
+	{
+		this->v[0] = Coord3D(Real(0));
+		this->v[1] = Coord3D(Real(0), Real(1), Real(0));
+		this->radius[0] = Real(1);
+		this->radius[1] = Real(1);
+	}
+
+	template<typename Real>
+	DYN_FUNC TMedialCone3D<Real>::TMedialCone3D(const Coord3D& v0, const Coord3D& v1, const Real& r0, const Real& r1)
+	{
+		this->v[0] = v0;
+		this->v[1] = v1;
+		this->radius[0] = r0;
+		this->radius[1] = r1;
+	}
+
+	template<typename Real>
+	DYN_FUNC TMedialCone3D<Real>::TMedialCone3D(const TMedialCone3D& cone)
+	{
+		this->v[0] = cone.v[0];
+		this->v[1] = cone.v[1];
+		this->radius[0] = cone.radius[0];
+		this->radius[1] = cone.radius[1];
+	}
+
+	template<typename Real>
+	DYN_FUNC TAlignedBox3D<Real> TMedialCone3D<Real>::aabb() const
+	{
+		TAlignedBox3D<Real> abox;
+		Vec3f min_sphere_0 = this->v[0] - radius[0];
+		Vec3f max_sphere_0 = this->v[0] + radius[0];
+		Vec3f min_sphere_1 = this->v[1] - radius[1];
+		Vec3f max_sphere_1 = this->v[1] + radius[1];
+
+		abox.v0 = minimum(min_sphere_0, min_sphere_1);
+		abox.v1 = maximum(max_sphere_0, max_sphere_1);
+
+		return abox;
+	}
+
+	template<typename Real>
+	DYN_FUNC Real TMedialCone3D<Real>::volume() const
+	{
+		Real v_hemi1 = Real(2.0 / 3.0) * M_PI * radius[0] * radius[0] * radius[0];
+		Real v_frustum = Real(1.0 / 3.0) * M_PI * (radius[0] * radius[0] + radius[0] * radius[1] + radius[1] * radius[1]) * (this->v[1] - this->v[0]).norm();
+		Real v_hemi2 = Real(2.0 / 3.0) * M_PI * radius[1] * radius[1] * radius[1];
+		return v_frustum + v_hemi1 + v_hemi2;
+	}
+
+	template<typename Real>
+	DYN_FUNC bool TMedialCone3D<Real>::isValid() const
+	{
+		return this->radius[0] >= EPSILON && this->radius[1] >= EPSILON && (this->v[1]-this->v[0]).norm() >= EPSILON;
+	}
+
+	template<typename Real>
+	DYN_FUNC TMedialSlab3D<Real>::TMedialSlab3D()
+	{
+		this->v[0] = Coord3D(Real(0));
+		this->v[1] = Coord3D(Real(0), Real(1), Real(0));
+		this->v[2] = Coord3D(Real(0), Real(-1), Real(0));
+		this->radius[0] = Real(1);
+		this->radius[1] = Real(1);
+		this->radius[2] = Real(1);
+	}
+
+	template<typename Real>
+	DYN_FUNC TMedialSlab3D<Real>::TMedialSlab3D(const Coord3D& v0, const Coord3D& v1, const Coord3D& v2, const Real& r0, const Real& r1, const Real& r2)
+	{
+		this->v[0] = v0;
+		this->v[1] = v1;
+		this->v[2] = v2;
+		this->radius[0] = r0;
+		this->radius[1] = r1;
+		this->radius[2] = r2;
+	}
+
+	template<typename Real>
+	DYN_FUNC TMedialSlab3D<Real>::TMedialSlab3D(const TMedialSlab3D& slab)
+	{
+		this->v[0] = slab.v[0];
+		this->v[1] = slab.v[1];
+		this->v[2] = slab.v[2];
+		this->radius[0] = slab.radius[0];
+		this->radius[1] = slab.radius[1];
+		this->radius[2] = slab.radius[2];
+	}
+
+	template<typename Real>
+	DYN_FUNC Real TMedialSlab3D<Real>::volume() const
+	{
+		return Real(1.0);
+	}
+
+	template<typename Real>
+	DYN_FUNC TAlignedBox3D<Real> TMedialSlab3D<Real>::aabb() const
+	{
+		TAlignedBox3D<Real> abox;
+		Vec3f min_sphere_0 = this->v[0] - radius[0];
+		Vec3f max_sphere_0 = this->v[0] + radius[0];
+		Vec3f min_sphere_1 = this->v[1] - radius[1];
+		Vec3f max_sphere_1 = this->v[1] + radius[1];
+		Vec3f min_sphere_2 = this->v[2] - radius[2];
+		Vec3f max_sphere_2 = this->v[2] + radius[2];
+
+		abox.v0 = minimum(minimum(min_sphere_0, min_sphere_1), min_sphere_2);
+		abox.v1 = maximum(maximum(max_sphere_0, max_sphere_1), max_sphere_2);
+
+		return abox;
+	}
+
+	template<typename Real>
 	DYN_FUNC TAlignedBox3D<Real>::TAlignedBox3D()
 	{
 		v0 = Coord3D(Real(-1));

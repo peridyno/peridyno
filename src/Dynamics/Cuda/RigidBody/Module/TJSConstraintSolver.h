@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Liang Ruikai
+ * Copyright 2025 Liang Ruikai
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,15 @@
 #include "RigidBody/RigidBodyShared.h"
 
 #include "Topology/DiscreteElements.h"
-
 #include "Collision/Attribute.h"
 #include "Collision/CollisionData.h"
 
 namespace dyno
 {
 	template<typename TDataType>
-	class TJConstraintSolver : public ConstraintModule
+	class TJSConstraintSolver : public ConstraintModule
 	{
-		DECLARE_TCLASS(TJConstraintSolver, TDataType)
+		DECLARE_TCLASS(TJSConstraintSolver, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -45,8 +44,8 @@ namespace dyno
 		typedef typename ::dyno::FixedJoint<Real> FixedJoint;
 		typedef typename ::dyno::PointJoint<Real> PointJoint;
 
-		TJConstraintSolver();
-		~TJConstraintSolver();
+		TJSConstraintSolver();
+		~TJSConstraintSolver();
 
 	public:
 		DEF_VAR(bool, FrictionEnabled, true, "");
@@ -59,15 +58,17 @@ namespace dyno
 
 		DEF_VAR(Real, Slop, 0, "");
 
-		DEF_VAR(Real, BaumgarteBias, 0.2, "");
+		DEF_VAR(uint, IterationNumberForVelocitySolver, 30, "");
 
 		DEF_VAR(uint, SubStepping, 10, "");
-
-		DEF_VAR(uint, IterationNumberForVelocitySolver, 30, "");
 
 		DEF_VAR(Real, LinearDamping, 0.1, "");
 
 		DEF_VAR(Real, AngularDamping, 0.1, "");
+
+		DEF_VAR(Real, DampingRatio, 1.0, "");
+
+		DEF_VAR(Real, Hertz, 300, "");
 
 	public:
 		DEF_VAR_IN(Real, TimeStep, "Time step size");
@@ -96,6 +97,7 @@ namespace dyno
 
 		DEF_ARRAY_IN(Real, FrictionCoefficients, DeviceType::GPU, "FrictionCoefficients of rigid bodies");
 
+
 	protected:
 		void constrain() override;
 
@@ -121,7 +123,5 @@ namespace dyno
 		DArray<Real> mK_1;
 		DArray<Mat2f> mK_2;
 		DArray<Matrix> mK_3;
-
-		DArray<Real> mErrors;
 	};
 }

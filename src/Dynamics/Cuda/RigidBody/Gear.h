@@ -32,5 +32,34 @@ namespace dyno
 	protected:
 		void resetStates() override;
 	};
+
+	template<typename TDataType>
+	class MatBody : virtual public ArticulatedBody<TDataType>
+	{
+		DECLARE_TCLASS(MatBody, TDataType)
+	public:
+		typedef typename TDataType::Real Real;
+		typedef typename TDataType::Coord Coord;
+
+		MatBody();
+		~MatBody() override;
+		void loadMa(std::string file_path, int objectId);
+		void setXMLPath(std::string file_path)
+		{
+			this->mXmlPath = file_path;
+		}
+
+		std::vector<std::vector<Vec4f>> Vertices;
+		std::vector<std::vector<Vec2i>> Edges;
+		std::vector<std::vector<Vec3i>>	Faces;
+
+	protected:
+		void resetStates() override;
+
+	private:
+		std::string mXmlPath;
+	};
+
+
 }
 
