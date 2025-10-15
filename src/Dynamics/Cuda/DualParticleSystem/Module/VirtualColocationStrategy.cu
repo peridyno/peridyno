@@ -56,10 +56,6 @@ namespace dyno
 		//this->inVPosition()->connect(this->outVirtualParticles());
 	}
 
-
-
-	
-
 	DEFINE_CLASS(VirtualColocationStrategy);
 
 }

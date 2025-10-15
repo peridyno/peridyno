@@ -18,7 +18,9 @@ namespace dyno
 		: ConstraintModule()
 		, m_airPressure(Real(0))
 		, m_reduce(NULL)
+		, m_reduce_r(NULL)
 		, m_arithmetic(NULL)
+		, m_arithmetic_r(NULL)
 	{
 		this->inParticleAttribute()->tagOptional(true);
 		this->inBoundaryNorm()->tagOptional(true);
@@ -26,7 +28,7 @@ namespace dyno
 		this->varSamplingDistance()->setValue(Real(0.005));
 		this->varRestDensity()->setValue(Real(1000));
 		this->varSmoothingLength()->setValue(Real(    0.0125));
-		this->varPpeSmoothingLength()->setValue(Real( 0.0125));
+		//this->varPpeSmoothingLength()->setValue(Real( 0.0125));
 
 		m_summation = std::make_shared<SummationDensity<TDataType>>();
 		this->varRestDensity()->connect(m_summation->varRestDensity());
@@ -50,6 +52,9 @@ namespace dyno
 		this->inVPosition()->connect(m_vv_summation->inPosition());
 		this->inVVNeighborIds()->connect(m_vv_summation->inNeighborIds());
 
+		//outfile_iter.open("DPISPH_ITER.txt");
+		//outfile_virtualNumber.open("DPISPH_VIRTUAL.txt");
+		//outfile_density.open("DPISPH_DENSITY.txt");
 	}
 
 	template<typename TDataType>
@@ -59,18 +64,15 @@ namespace dyno
 		m_r.clear();
 		m_Aii.clear();
 		m_virtualAirFlag.clear();
-		m_virtualAirWeight.clear();
 		m_pressure.clear();
-		m_solidVirtualPaticleFlag.clear();
 		m_virtualVelocity.clear();
 		m_source.clear();
 		m_Ax.clear();
 		m_r.clear();
 		m_p.clear();
-		m_residual.clear();
 		m_Gp.clear();
 		m_GpNearSolid.clear();
-
+		m_RealPressure.clear();
 
 		if (m_reduce)
 		{
@@ -80,7 +82,35 @@ namespace dyno
 		{
 			delete m_arithmetic;
 		}
+		if (m_reduce_r)
+		{
+			delete m_reduce_r;
+		}
+		if (m_arithmetic_r)
+		{
+			delete m_arithmetic_r;
+		}
 
+		//m_RealVolumeEst.clear();
+		//m_VirtualVolumeEst.clear();
+
+		//if (outfile_iter.is_open())
+		//{
+		//	outfile_iter << '\n';
+		//	outfile_iter.close();
+		//}
+
+		//if (outfile_virtualNumber.is_open())
+		//{
+		//	outfile_virtualNumber << '\n';
+		//	outfile_virtualNumber.close();
+		//}
+
+		//if (outfile_density.is_open())
+		//{
+		//	outfile_density << '\n';
+		//	outfile_density.close();
+		//}
 	}
 
 	/*
@@ -127,7 +157,6 @@ namespace dyno
 
 		if (m_pressure.size() != num_v)
 			m_pressure.resize(num_v);
-
 		if (m_Ax.size() != num_v)
 			m_Ax.resize(num_v);
 		if (m_Aii.size() != num_v)
@@ -142,8 +171,6 @@ namespace dyno
 			m_source.resize(num_v);
 		if (m_virtualVelocity.size() != num_v)
 			m_virtualVelocity.resize(num_v);
-		if (m_solidVirtualPaticleFlag.size() != num_v)
-			m_solidVirtualPaticleFlag.resize(num_v);
 		if (this->outVirtualBool()->isEmpty())
 			this->outVirtualBool()->allocate();
 		if (this->outVirtualWeight()->isEmpty())
@@ -152,6 +179,8 @@ namespace dyno
 			this->outVirtualBool()->resize(num_v);
 		if (this->outVirtualWeight()->size() != num_v)
 			this->outVirtualWeight()->resize(num_v);
+		//if (m_VirtualVolumeEst.size() != num_v)
+		//	m_VirtualVolumeEst.resize(num_v);
 
 		if (m_reduce)
 		{
@@ -161,6 +190,16 @@ namespace dyno
 		else 
 		{
 			m_reduce = Reduction<float>::Create(num_v);
+		}
+
+		if (m_reduce_r)
+		{
+			delete m_reduce_r;
+			m_reduce_r = Reduction<float>::Create(num);
+		}
+		else
+		{
+			m_reduce_r = Reduction<float>::Create(num);
 		}
 
 		if (m_arithmetic)
@@ -186,15 +225,25 @@ namespace dyno
 		if (m_GpNearSolid.size() != num)
 			m_GpNearSolid.resize(num);
 
-		//if (m_arithmetic_r)
+		if (m_RealPressure.size() != num)
+		{
+			m_RealPressure.resize(num);
+			m_RealPressure.reset();
+		}
+
+		//if (m_RealVolumeEst.size() != num)
 		//{
-		//	delete m_arithmetic_r;
-		//	m_arithmetic_r = Arithmetic<float>::Create(num);
+		//	m_RealVolumeEst.resize(num);
 		//}
-		//else
-		//{
-		//	m_arithmetic_r = Arithmetic<float>::Create(num);
-		//}
+		if (m_arithmetic_r)
+		{
+			delete m_arithmetic_r;
+			m_arithmetic_r = Arithmetic<float>::Create(num);
+		}
+		else
+		{
+			m_arithmetic_r = Arithmetic<float>::Create(num);
+		}
 		return true;
 	}
 
@@ -224,7 +273,6 @@ namespace dyno
 		if (pId >= solidVirtual.size()) return;
 
 		solidVirtual[pId] = false;
-
 		List<int> & list_i_vr = vr_neighbors[pId];
 		int nbSize = list_i_vr.size();
 		Real c = 0.0f;
@@ -238,12 +286,10 @@ namespace dyno
 				c += kernel.Weight(r_ij, h) * mass / density[j];
 			}
 			w += kernel.Weight(r_ij, h) * mass / density[j];
-			//w = 1.0f;
 		}
+
 		if (w < EPSILON) w = EPSILON;
 		fluidFraction[pId]	= c / w;
-
-		
 
 		if (fluidFraction[pId] > threshold)
 		{
@@ -252,10 +298,7 @@ namespace dyno
 		else
 		{
 			solidVirtual[pId] = false;
-			
 		}
-
-
 
 	}
 
@@ -306,9 +349,7 @@ namespace dyno
 					Coord nVel = magNVel * norm[j];
 					Coord tVel = dVel - nVel;
 
-
 					Gwij = kernel.Gradient(r_ij, h) * (virtualPosition[pId] - realPosition[j]) / r_ij;
-
 
 					if (magNVel < -EPSILON)
 					{
@@ -318,15 +359,11 @@ namespace dyno
 					{
 						value += 2 * (0.1 * nVel + 0.01*tVel).dot(Gwij) * mass / density[pId];
 					}
-
 				}
-
-
 			}
 		}
 		
 		source[pId] -= -value * restDensity / dt;
-
 	}
 
 	/*
@@ -334,7 +371,6 @@ namespace dyno
 	* Virtual-air particle velocity should be zero; 
 	* 
 	*/
-
 	template <typename Real, typename Coord>
 	__global__ void  DualParticle_SmoothVirtualVelocity(
 		DArray<Coord> virtualVelocity,
@@ -342,13 +378,14 @@ namespace dyno
 		DArray<Coord> virtualPosition,
 		DArray<Coord> realPosition,
 		DArrayList<int> vr_neighbors,
+		DArray<Attribute> r_att,
 		DArray<bool> virtualAir,
 		DArray<bool> virtualSolid,
-		DArray<Real> density,			
+		DArray<Real> density,
 		CubicKernel<Real> kernel,
-		Real mass,			
+		Real mass,
 		Real h
-		)
+	)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= virtualPosition.size()) return;
@@ -359,30 +396,30 @@ namespace dyno
 			return;
 		}
 
-		List<int> & list_i_vr = vr_neighbors[pId];
+		List<int>& list_i_vr = vr_neighbors[pId];
 		int nbSize_vr = list_i_vr.size();
 		Real total_w(0);
 		Coord total_vw(0);
 		for (int ne = 0; ne < nbSize_vr; ne++)
 		{
 			int j = list_i_vr[ne];
-			Real r_ij = (virtualPosition[pId] - realPosition[j]).norm();
-			Real wij = kernel.Weight(r_ij ,h);
-			total_w += wij;
-			total_vw += velocity[j] * wij;
+			if (r_att[j].isDynamic())
+			{
+				Real r_ij = (virtualPosition[pId] - realPosition[j]).norm();
+				Real wij = kernel.Weight(r_ij, h);
+				total_w += wij;
+				total_vw += velocity[j] * wij;
+			}
 		}
 
-		if (total_w > EPSILON) 
+		if (total_w > EPSILON)
 		{
-			if (nbSize_vr == 0) printf("1-ERROR: pId  %d \r\n", pId);
 			virtualVelocity[pId] = total_vw / total_w;
 		}
 		else
 		{
-			if (nbSize_vr != 0) printf("0-ERROR: pId  %d \r\n", pId);
 			virtualVelocity[pId] = Coord(0.0f);
 		}
-
 	}
 
 	template <typename Real, typename Coord>
@@ -471,9 +508,6 @@ namespace dyno
 		}
 	}
 
-
-
-
 	template <typename Real, typename Coord>
 	__global__ void DualParticle_LaplacianPressure
 	(
@@ -496,7 +530,6 @@ namespace dyno
 		{
 			return;
 		}
-			
 
 		if (virtualAir[pId] == true)
 		{
@@ -514,10 +547,7 @@ namespace dyno
 
 			Real rij = (v_pos[pId] - v_pos[j]).norm();
 
-
-
 			if (rij > EPSILON && virtualAir[j] == false && virtualSolid[j] == false)
-			//if (rij > EPSILON && virtualAir[j] == false)
 			{
 				Real dwij = kernel.Gradient(rij, h) / rij;
 				temp += 8 * mass * dwij / pow((rho_vv[pId] + rho_vv[j]), 2) * pressure[j];
@@ -562,7 +592,6 @@ namespace dyno
 
 			Real rij = (v_pos[pId] - v_pos[j]).norm();
 
-			//if (rij > EPSILON && virtualAir[j] == false && virtualSolid[j] == false)
 			if (rij > EPSILON && virtualAir[j] == false)
 			{
 				Real dwij = kernel.Gradient(rij, h) / rij;
@@ -618,9 +647,7 @@ namespace dyno
 		}
 		value = value * dt / rho_0;
 		gradient[pId] = value;
-		//Coord v = velocity[pId];
 		velocity[pId] -= gradient[pId] ;
-
 	}
 
 
@@ -705,7 +732,6 @@ namespace dyno
 	* @brief: Modify gradient pressures if the fluid particle near solids.
 	* @Paper: Bridson. Fluid simulation for computer graphics, Second Edition. (Section 5.1, The Discrete Pressure Gradient)
 	*/
-
 	template <typename Real, typename Coord>
 	__global__ void DualParticle_GradientNearSolid
 	(
@@ -761,16 +787,15 @@ namespace dyno
 				Coord tVel = dVel - nVel;
 				if (magNVel < -EPSILON)
 				{
-					dvij += nij.dot(nVel +  0.01 * dVel) * weight * nij;
+					dvij += nij.dot(nVel +  0.01 * tVel) * weight * nij;
 				}
 				else
 				{
-					dvij += nij.dot(0.1 * nVel + 0.01 * dVel) * weight * nij;
+					dvij += nij.dot(0.1 * nVel + 0.01 * tVel) * weight * nij;
 				}
 
 			}
 		}
-
 		gradidentComp[pId] = 2 * dt * dvij / rho_0;
 		velocity[pId] -= gradidentComp[pId];
 	}
@@ -866,10 +891,8 @@ namespace dyno
 		for (int ne = 0; ne < nbSize_i; ne++)
 		{
 			int j = list_i[ne];
-
 			Real rij = (v_pos[pId] - v_pos[j]).norm();
 
-			//if (rij > EPSILON && virtualAir[j] == false && virtualSolid[j] == true)
 			if (rij > EPSILON &&  virtualSolid[j] == true)
 			{
 				Real dwij = kernel.Gradient(rij, h) / rij;
@@ -877,7 +900,6 @@ namespace dyno
 				solidCounter++;
 			}
 		}
-
 		Real value = Aii[pId] + temp;
 		Aii[pId] = value;
 	}
@@ -896,10 +918,7 @@ namespace dyno
 		{
 			velocity[pId] = Coord(0.0f);
 		}
-
 	}
-
-
 
 	template <typename Real>
 	__global__ void DualParticle_VolumeTest
@@ -911,7 +930,6 @@ namespace dyno
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= volume.size()) return;
-
 		volume[pId] = mass / density[pId];
 	}
 
@@ -931,6 +949,108 @@ namespace dyno
 			volume[pId] = mass / density[pId];
 		else
 			volume[pId] = 0.0f;
+	}
+
+	template <typename Real, typename Coord>
+	__global__ void DualParticle_PressureV2R
+	(
+		DArray<Real> RealPressure,
+		DArray<Real> VirtualPressure,
+		DArray<Coord> RPosition,
+		DArray<Coord> VPosition,
+		DArray<bool> virtualAir,
+		DArray<bool> virtualSolid,
+		DArrayList<int> RVNeighbors,
+		Real mass,
+		CubicKernel<Real> kernel,
+		Real h
+	)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= RPosition.size()) return;
+
+		int nbSize_i = RVNeighbors[pId].size();
+		List<int>& list_i = RVNeighbors[pId];
+
+		Real totalWeight(0.0f);
+		Real pressureWeight(0.0f);
+
+		for (int ne = 0; ne < nbSize_i; ne++)
+		{
+			int j = list_i[ne];
+			if ((virtualAir[j] != true)&&(virtualSolid[j] != true))
+			{
+				Real rij = (RPosition[pId] - VPosition[j]).norm();
+				Real wij = kernel.Weight(rij, h);
+
+				if (rij < EPSILON)
+				{
+					RealPressure[pId] = VirtualPressure[j];
+					return;
+				}
+
+				totalWeight += wij;
+				pressureWeight += VirtualPressure[j] * wij;
+			}
+		}
+		if (totalWeight < 1000 * EPSILON) totalWeight = 1000 * EPSILON;
+
+		Real avr_pressure = pressureWeight / totalWeight;
+		RealPressure[pId] = avr_pressure;
+	}
+
+
+	template <typename Real, typename Coord>
+	__global__ void DualParticle_PressureR2V
+	(
+		DArray<Real> VirtualPressure,
+		DArray<Real> RealPressure,
+		DArray<Coord> RPosition,
+		DArray<Coord> VPosition,
+		DArray<bool> virtualAir,
+		DArray<bool> virtualSolid,
+		DArrayList<int> VRNeighbors,
+		Real mass,
+		CubicKernel<Real> kernel,
+		Real h
+	)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= VirtualPressure.size()) return;
+		if ((virtualAir[pId] == true)||(virtualSolid[pId] == true)) return;
+
+		int nbSize_i = VRNeighbors[pId].size();
+		List<int>& list_i = VRNeighbors[pId];
+
+		Real totalWeight(0.0f);
+		Real pressureWeight(0.0f);
+
+		for (int ne = 0; ne < nbSize_i; ne++)
+		{
+			int j = list_i[ne];
+
+			Real rij = (VPosition[pId] - RPosition[j]).norm();
+			Real wij = kernel.Weight(rij, h);
+
+			if ((rij < EPSILON))
+			{
+				VirtualPressure[pId] = RealPressure[j];
+				return;
+			}
+
+			totalWeight += wij;
+			pressureWeight += RealPressure[j] * wij;
+		}
+
+		if (totalWeight > 1000 * EPSILON)
+		{
+			Real avr_pressure = pressureWeight / totalWeight;
+			VirtualPressure[pId] = avr_pressure;
+		}
+		else
+		{
+			VirtualPressure[pId] = 0.0f;
+		}
 	}
 
 
@@ -965,9 +1085,7 @@ namespace dyno
 				gp += (pressure[pId] - pressure[j]) * (vpos[pId] - vpos[j]) / rij;
 			}
 		}
-
 		vGp[pId] = gp;
-
 	}
 
 	template <typename Real, typename Coord>
@@ -1005,14 +1123,10 @@ namespace dyno
 			{
 				dwij = kernel.Gradient(rij, h);
 				value += mass * (pressure[j] - pressure[pId]) * dwij * (vpos[pId] - vpos[j]) / (rij * rho_0);
-				//value += mass * (pressure[j]) * dwij * (vpos[pId] - vpos[j]) / (rij * rho_0);
 			}
 		}
-
 		vGp[pId] = value;
 	}
-
-
 
 	/*
 	* @brief: Using moving least square aproach to calculate Gradient pressures
@@ -1035,7 +1149,6 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= velocity.size()) return;
 
-
 		List<int> & list_i = rv_neighbors[pId];
 		int nbSize_i = list_i.size();
 
@@ -1048,7 +1161,6 @@ namespace dyno
 		Real wij(0.0f);			/*Weight*/
 		Real rij(0.0f);
 		
-
 		/*Momentum Matrix*/
 		for (int ne = 0; ne < nbSize_i; ne++)
 		{
@@ -1068,7 +1180,6 @@ namespace dyno
 
 		Matrix4x4 M_inv = M.inverse();
 		
-
 		Coord tgp(0.0f);
 		for (int ne = 0; ne < nbSize_i; ne++)
 		{
@@ -1132,9 +1243,7 @@ namespace dyno
 
 		auto & m_virtualSolidFlag = this->outVirtualBool()->getData();
 		Real dt = this->inTimeStep()->getData();
-		Real h1 = this->varSmoothingLength()->getData();
-		Real h2 = this->varPpeSmoothingLength()->getData();
-
+		Real h = this->varSmoothingLength()->getData();
 
 		if (this->inParticleAttribute()->isEmpty() 
 			|| this->inParticleAttribute()->size() != num
@@ -1147,7 +1256,6 @@ namespace dyno
 			this->inBoundaryNorm()->resize(num);
 			this->inBoundaryNorm()->reset();
 		}
-
 
 		m_summation->update();
 		m_vv_summation->update();
@@ -1183,7 +1291,7 @@ namespace dyno
 			kernel,
 			m_particleMass,
 			0.999f,
-			h1
+			h
 		);
 		
 		cuExecute(num_v, DualParticle_SmoothVirtualVelocity,
@@ -1192,12 +1300,13 @@ namespace dyno
 			this->inVPosition()->getData(),
 			this->inRPosition()->getData(),
 			this->inVRNeighborIds()->getData(),
+			this->inParticleAttribute()->getData(),
 			m_virtualAirFlag,
 			m_virtualSolidFlag,
 			m_summation->outDensity()->getData(),
 			kernel,
 			m_particleMass,
-			h1
+			h
 		);
 
 		m_source.reset();
@@ -1224,7 +1333,7 @@ namespace dyno
 			restDensity,
 			m_particleMass,		
 			dt,				
-			h1			
+			h			
 		);
 
 		cuExecute(num_v, DualParticle_SolidBoundaryDivergenceCompsate,
@@ -1243,7 +1352,7 @@ namespace dyno
 			restDensity,
 			m_v_particleMass,				
 			dt,							
-			h1					
+			h					
 			);
 
 		cuExecute(num_v, DualParticle_DensityCompensate,
@@ -1253,19 +1362,34 @@ namespace dyno
 				m_virtualSolidFlag,
 				restDensity,
 				dt,
-				h1
+				h
 				);
 
 		m_r.reset();
 		m_Ax.reset();
 
-		if (m_pressure.size() != virtualNumber_old)
+		m_pressure.reset();
+
+		if (this->varWarmStart()->getValue())
 		{
-			m_pressure.reset();
+			cuExecute(num_v, DualParticle_PressureR2V,
+				m_pressure,
+				m_RealPressure,
+				this->inRPosition()->getData(),
+				this->inVPosition()->getData(),
+				m_virtualAirFlag,
+				m_virtualSolidFlag,
+				this->inVRNeighborIds()->getData(),
+				m_v_particleMass,
+				kernel,
+				h
+			);
 		}
+		//else {
+		//	m_pressure.reset();
+		//}
 
-		virtualNumber_old = m_pressure.size();
-
+			
 		cuExecute(num_v, DualParticle_AiiInLaplacian,
 			m_Aii,
 			this->inVPosition()->getData(),
@@ -1275,7 +1399,7 @@ namespace dyno
 			m_vv_summation->outDensity()->getData(),
 			kernel,
 			m_v_particleMass,
-			h2
+			h
 		);
 
 		if ((frag_number <= 3) || abs(max_Aii) < EPSILON)
@@ -1300,7 +1424,7 @@ namespace dyno
 			kernel, 
 			max_Aii, 
 			m_v_particleMass, 
-			h2
+			h
 			);
 
 		cuExecute(num_v, DualParticle_LaplacianPressure,
@@ -1314,7 +1438,7 @@ namespace dyno
 			m_vv_summation->outDensity()->getData(),
 			kernel,
 			m_v_particleMass,
-			h2
+			h
 			);
 
 		Function2Pt::subtract(m_r, m_source, m_Ax);
@@ -1343,7 +1467,7 @@ namespace dyno
 				m_vv_summation->outDensity()->getData(),
 				kernel,
 				m_v_particleMass,
-				h2
+				h
 				);
 
 			float alpha = rr / m_arithmetic->Dot(m_p, m_Ax);
@@ -1360,6 +1484,11 @@ namespace dyno
 			//std::cout<<"*DUAL-ISPH:: iter:"<< iter <<": Err-" << err << std::endl;
 		}
 		std::cout << "*DUAL-ISPH::Solver::Iteration:" << iter << "||RelativeError:" << err/ max_err * 100 <<"%" << std::endl;
+
+		//outfile_iter << iter;
+		//outfile_iter << std::endl;
+		//outfile_virtualNumber << this->inVPosition()->size();
+		//outfile_virtualNumber << std::endl;
 
 		m_GpNearSolid.reset();
 
@@ -1380,7 +1509,7 @@ namespace dyno
 				restDensity,
 				dt,
 				m_v_particleMass,
-				h1
+				h
 				);
 
 		cuExecute(num, DualParticle_GradientNearSolid,
@@ -1399,8 +1528,25 @@ namespace dyno
 				restDensity,
 				dt, 
 				m_v_particleMass, 
-				h1
+				h
 				);
+
+		if (this->varWarmStart()->getValue())
+		{
+			m_RealPressure.reset();
+			cuExecute(num, DualParticle_PressureV2R,
+				m_RealPressure, 
+				m_pressure, 
+				this->inRPosition()->getData(), 
+				this->inVPosition()->getData(), 
+				m_virtualAirFlag,
+				m_virtualSolidFlag,
+				this->inRVNeighborIds()->getData(),
+				m_v_particleMass, 
+				kernel,
+				h
+			);
+		}
 
 		/*
 		*  Gradient Pressure On Virtual Points (Finite Difference)
@@ -1451,7 +1597,6 @@ namespace dyno
 		//	0.011f
 		//	);
 
-
 		/*
 		*  Moving least square approgh for Gradient Pressure On Virtual Points (SPH)
 		*/
@@ -1470,7 +1615,39 @@ namespace dyno
 		//	);
 
 
-	
+		//cuExecute(num, DualParticle_VolumeTest,
+		//	m_RealVolumeEst,
+		//	m_summation->outDensity()->getData(),
+		//	m_v_particleMass
+		//);
+
+		//cuExecute(num_v, DualParticle_VolumeTest,
+		//	m_VirtualVolumeEst,
+		//	m_vr_summation->outDensity()->getData(),
+		//	m_v_particleMass
+		//);
+
+		//Real VirtualVolumeEst = m_reduce->average(
+		//	m_VirtualVolumeEst.begin(),
+		//	m_VirtualVolumeEst.size()
+		//);
+
+		//Real RealVolumeEst = m_reduce_r->average(
+		//	m_RealVolumeEst.begin(),
+		//	m_RealVolumeEst.size()
+		//);
+
+		Real VirtualDensityEst = m_reduce->average(
+			m_vr_summation->outDensity()->getData().begin(),
+			m_vr_summation->outDensity()->getData().size()
+		);
+
+		Real RealDensityEst = m_reduce_r->average(
+			m_summation->outDensity()->getData().begin(),
+			m_summation->outDensity()->getData().size()
+		);
+
+		//outfile_density << VirtualDensityEst << "\t" << RealDensityEst << std::endl;
 	}
 
 	template<typename TDataType>
@@ -1482,8 +1659,9 @@ namespace dyno
 		int num_v = this->inVPosition()->size();
 
 		m_reduce = Reduction<float>::Create(num_v);
+		m_reduce_r = Reduction<float>::Create(num);
 		m_arithmetic = Arithmetic<float>::Create(num_v);
-	//	m_arithmetic_r = Arithmetic<float>::Create(num);
+		m_arithmetic_r = Arithmetic<float>::Create(num);
 
 		return true;
 	}

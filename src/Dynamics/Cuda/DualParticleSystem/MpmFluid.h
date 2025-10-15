@@ -22,39 +22,34 @@
 #include "Module/VirtualSpatiallyAdaptiveStrategy.h"
 #include "Module/VirtualColocationStrategy.h"
 #include "Module/VirtualParticleShiftingStrategy.h"
-#include "Module/VirtualFissionFusionStrategy.h"
-#include "Module/ThinFeature.h"
+#include "Module/FlipFluidExplicitSolver.h"
 
 namespace dyno
 {
 	template<typename TDataType>
-	class DualParticleFluid : public ParticleFluid<TDataType>
+	class MpmFluid : public ParticleFluid<TDataType>
 	{
-		DECLARE_TCLASS(DualParticleFluid, TDataType)
+		DECLARE_TCLASS(MpmFluid, TDataType)
 
 	public:
 
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		DualParticleFluid();
-		DualParticleFluid(int key);
-		~DualParticleFluid();
+		MpmFluid();
+		~MpmFluid();
 
-		DEF_ARRAY_STATE(Coord, VirtualPosition, DeviceType::GPU, "Virtual Particle");
+		DEF_ARRAY_STATE(Attribute, ParticleAttribute, DeviceType::GPU, "Real Particle Attribute");
+
+		DEF_ARRAY_STATE(Coord, BoundaryNorm, DeviceType::GPU, "Boundary Norm");
+
+		DEF_ARRAY_STATE(Coord, GridPosition, DeviceType::GPU, "Grid Position");
 
 		DEF_INSTANCE_STATE(PointSet<TDataType>, VirtualPointSet, "Topology");
 
-		DECLARE_ENUM(EVirtualParticleSamplingStrategy,
-			ColocationStrategy = 0,
-			ParticleShiftingStrategy = 1,
-			SpatiallyAdaptiveStrategy = 2,
-			FissionFusionStrategy = 3	);
+		DEF_ARRAY_STATE(Coord, GridVelocity, DeviceType::GPU, "Velocity on Grid");
 
-		DEF_ENUM(EVirtualParticleSamplingStrategy,
-			VirtualParticleSamplingStrategy,
-			EVirtualParticleSamplingStrategy::SpatiallyAdaptiveStrategy,
-			"Virtual Particle Sampling Strategy");
+		DEF_VAR_STATE(Real, GridSpacing, 0.005, "Spacing distance of grids");
 
 	protected:
 
@@ -70,6 +65,6 @@ namespace dyno
 
 	};
 
-	IMPLEMENT_TCLASS(DualParticleFluid, TDataType)
+	IMPLEMENT_TCLASS(MpmFluid, TDataType)
 }
 

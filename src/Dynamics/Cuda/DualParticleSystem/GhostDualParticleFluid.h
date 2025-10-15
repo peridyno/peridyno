@@ -1,5 +1,5 @@
 /**
- * Copyright 2022-2024 Shusen Liu
+ * Copyright 2025 Shusen Liu
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 #pragma once
+#include "DualParticleFluid.h"
+#include "ParticleSystem/GhostFluid.h"
 #include "ParticleSystem/ParticleFluid.h"
 #include "ParticleSystem/Emitters/ParticleEmitter.h"
 #include "Topology/PointSet.h"
@@ -22,39 +24,50 @@
 #include "Module/VirtualSpatiallyAdaptiveStrategy.h"
 #include "Module/VirtualColocationStrategy.h"
 #include "Module/VirtualParticleShiftingStrategy.h"
-#include "Module/VirtualFissionFusionStrategy.h"
-#include "Module/ThinFeature.h"
 
 namespace dyno
 {
+
 	template<typename TDataType>
-	class DualParticleFluid : public ParticleFluid<TDataType>
+	class GhostDualParticleFluid :  public DualParticleFluid<TDataType>
 	{
-		DECLARE_TCLASS(DualParticleFluid, TDataType)
+		DECLARE_TCLASS(GhostDualParticleFluid, TDataType)
 
 	public:
 
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		DualParticleFluid();
-		DualParticleFluid(int key);
-		~DualParticleFluid();
+		GhostDualParticleFluid();
+		GhostDualParticleFluid(int key);
 
-		DEF_ARRAY_STATE(Coord, VirtualPosition, DeviceType::GPU, "Virtual Particle");
+		~GhostDualParticleFluid();
 
-		DEF_INSTANCE_STATE(PointSet<TDataType>, VirtualPointSet, "Topology");
+		/**
+		 * @brief Particle position for both the fluid and solid
+		 */
+		DEF_ARRAY_STATE(Coord, PositionMerged, DeviceType::GPU, "Particle position");
 
-		DECLARE_ENUM(EVirtualParticleSamplingStrategy,
-			ColocationStrategy = 0,
-			ParticleShiftingStrategy = 1,
-			SpatiallyAdaptiveStrategy = 2,
-			FissionFusionStrategy = 3	);
 
-		DEF_ENUM(EVirtualParticleSamplingStrategy,
-			VirtualParticleSamplingStrategy,
-			EVirtualParticleSamplingStrategy::SpatiallyAdaptiveStrategy,
-			"Virtual Particle Sampling Strategy");
+		/**
+		 * @brief Particle velocity
+		 */
+		DEF_ARRAY_STATE(Coord, VelocityMerged, DeviceType::GPU, "Particle velocity");
+
+		/**
+		 * @brief Particle Attribute
+		 */
+		DEF_ARRAY_STATE(Attribute, AttributeMerged, DeviceType::GPU, "Particle attribute");
+
+
+		/**
+		* @brief Particle Normal
+		*/
+		DEF_ARRAY_STATE(Coord, NormalMerged, DeviceType::GPU, "Particle normal");
+
+
+		DEF_NODE_PORTS(GhostParticles<TDataType>, BoundaryParticle, "Initial boundary ghost particles");
+
 
 	protected:
 
@@ -64,12 +77,10 @@ namespace dyno
 
 		void postUpdateStates();
 
-		std::shared_ptr<VirtualParticleGenerator<TDataType>> vpGen;
-
 	private:
 
+		void constructMergedArrays();
 	};
 
-	IMPLEMENT_TCLASS(DualParticleFluid, TDataType)
+	IMPLEMENT_TCLASS(GhostDualParticleFluid, TDataType)
 }
-
