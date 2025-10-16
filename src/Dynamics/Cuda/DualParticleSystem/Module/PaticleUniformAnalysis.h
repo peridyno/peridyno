@@ -28,7 +28,7 @@ namespace dyno {
 
 		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "Input particle position");
 
-		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "Input particle position");
+		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "Input particle velocity");
 
 		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "");
 

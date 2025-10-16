@@ -10,6 +10,9 @@ namespace dyno {
 	template<typename TDataType>
 	PaticleUniformAnalysis<TDataType>::PaticleUniformAnalysis()
 		: ConstraintModule()
+		, m_reduce(NULL)
+		, m_arithmetic(NULL)
+		, m_reduce_real(NULL)
 	{
 		mSummation = std::make_shared<SummationDensity<TDataType>>();
 		this->inSmoothingLength()->connect(mSummation->inSmoothingLength());
@@ -28,6 +31,21 @@ namespace dyno {
 		m_Count.clear();
 		m_Density.clear();
 		//m_output->close();
+
+		if (m_reduce != nullptr)
+		{
+			delete m_reduce;
+		}
+
+		if (m_arithmetic)
+		{
+			delete m_arithmetic;
+		}
+
+		if (m_reduce_real)
+		{
+			delete m_reduce_real;
+		}
 	};
 
 

@@ -1,12 +1,16 @@
-#include <GlfwApp.h>
+#include <QtApp.h>
 #include <SceneGraph.h>
 
-///Particle Emitter
-#include <ParticleSystem/Emitters/PoissonEmitter.h>
-
-///Fluid Solver
-#include <DualParticleSystem/DualParticleFluid.h>
+///Particle Sampler & Shapes
+#include <BasicShapes/CubeModel.h>
+#include <Volume/BasicShapeToVolume.h>
+#include <Multiphysics/VolumeBoundary.h>
+#include <Samplers/ShapeSampler.h>
 #include <ParticleSystem/MakeParticleSystem.h>
+
+///Particle fluid solver
+#include <DualParticleSystem/DualParticleFluid.h>
+#include <DualParticleSystem/MpmFluid.h>
 
 ///Renderer
 #include <Module/CalculateNorm.h>
@@ -21,22 +25,38 @@ using namespace dyno;
 std::shared_ptr<SceneGraph> createScene()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
-	scn->setUpperBound(Vec3f(3.0, 3.0, 3.0));
+	scn->setUpperBound(Vec3f(3.0, 3, 3.0));
 	scn->setLowerBound(Vec3f(-3.0, -3.0, -3.0));
 
-	auto emitter = scn->addNode(std::make_shared<PoissonEmitter<DataType3f>>());
-	emitter->varSpacing()->setValue(0.0f);
-	emitter->varRotation()->setValue(Vec3f(0.0f, 0.0f, -180.0f));
-	emitter->varSamplingDistance()->setValue(0.008f);
-	emitter->varEmitterShape()->getDataPtr()->setCurrentKey(1);
-	emitter->varWidth()->setValue(0.1f);
-	emitter->varHeight()->setValue(0.1f);
-	emitter->varVelocityMagnitude()->setValue(1.5);
-	emitter->varLocation()->setValue(Vec3f(0.0f, 0.5f, 0.0f));
+	auto cube = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
+	cube->varLocation()->setValue(Vec3f(0.125, 0.125, 0.125));
+	cube->varLength()->setValue(Vec3f(0.15, 0.15, 0.15));
+	cube->graphicsPipeline()->disable();
+	auto sampler = scn->addNode(std::make_shared<ShapeSampler<DataType3f>>());
+	sampler->varSamplingDistance()->setValue(0.005);
+	sampler->setVisible(false);
+	cube->connect(sampler->importShape());
+	auto initialParticles = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
+	sampler->statePointSet()->promoteOuput()->connect(initialParticles->inPoints());
 
-	auto fluid = scn->addNode(std::make_shared<DualParticleFluid<DataType3f>>());
-	//fluid->varReshuffleParticles()->setValue(true);
-	emitter->connect(fluid->importParticleEmitters());
+	auto fluid = scn->addNode(std::make_shared<MpmFluid<DataType3f>>());
+	initialParticles->connect(fluid->importInitialStates());
+
+	//Create a boundary
+	auto cubeBoundary = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
+	cubeBoundary->varLocation()->setValue(Vec3f(0.0f, 1.0f, 0.0f));
+	cubeBoundary->varLength()->setValue(Vec3f(0.5f, 2.0f, 0.5f));
+	cubeBoundary->setVisible(false);
+
+	auto cube2vol = scn->addNode(std::make_shared<BasicShapeToVolume<DataType3f>>());
+	cube2vol->varGridSpacing()->setValue(0.02f);
+	cube2vol->varInerted()->setValue(true);
+	cubeBoundary->connect(cube2vol->importShape());
+
+	auto container = scn->addNode(std::make_shared<VolumeBoundary<DataType3f>>());
+	cube2vol->connect(container->importVolumes());
+
+	fluid->connect(container->importParticleSystems());
 
 	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
 	fluid->stateVelocity()->connect(calculateNorm->inVec());
@@ -49,8 +69,9 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto ptRender = std::make_shared<GLPointVisualModule>();
 	ptRender->setColor(Color(1, 0, 0));
-	ptRender->varPointSize()->setValue(0.0015f);
+	ptRender->varPointSize()->setValue(0.0025);
 	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
+
 	fluid->statePointSet()->connect(ptRender->inPointSet());
 	colorMapper->outColor()->connect(ptRender->inColor());
 	fluid->graphicsPipeline()->pushModule(ptRender);
@@ -60,6 +81,7 @@ std::shared_ptr<SceneGraph> createScene()
 	colorBar->varMax()->setValue(5.0f);
 	colorBar->varFieldName()->setValue("Velocity");
 	calculateNorm->outNorm()->connect(colorBar->inScalar());
+
 	// add the widget to app
 	fluid->graphicsPipeline()->pushModule(colorBar);
 
@@ -75,8 +97,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
-
-	GlfwApp window;
+	QtApp window;
 	window.setSceneGraph(createScene());
 	window.initialize(1024, 768);
 	window.mainLoop();

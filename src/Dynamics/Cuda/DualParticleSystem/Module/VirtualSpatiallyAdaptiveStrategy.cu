@@ -1,214 +1,11 @@
 #include "VirtualSpatiallyAdaptiveStrategy.h"
 #include "Node.h"
-#include "ParticleSystem/Module/SummationDensity.h"
 #include "Topology/GridHash.h"
-
 #include <thrust/sort.h>
 
 
 namespace dyno
 {
-	__constant__ int diff_v[27][3] =
-	{
-		0, 0, 0,
-		0, 0, 1,
-		0, 1, 0,
-		1, 0, 0,
-		0, 0, -1,
-		0, -1, 0,
-		-1, 0, 0,
-		0, 1, 1,
-		0, 1, -1,
-		0, -1, 1,
-		0, -1, -1,
-		1, 0, 1,
-		1, 0, -1,
-		-1, 0, 1,
-		-1, 0, -1,
-		1, 1, 0,
-		1, -1, 0,
-		-1, 1, 0,
-		-1, -1, 0,
-		1, 1, 1,
-		1, 1, -1,
-		1, -1, 1,
-		-1, 1, 1,
-		1, -1, -1,
-		-1, 1, -1,
-		-1, -1, 1,
-		-1, -1, -1
-	};
-
-
-	__constant__ int diff_v_33[33][3] =
-	{
-		0, 0, 0,
-		0, 0, 1,
-		0, 1, 0,
-		1, 0, 0,
-		0, 0, -1,
-		0, -1, 0,
-		-1, 0, 0,
-		0, 1, 1,
-		0, 1, -1,
-		0, -1, 1,
-		0, -1, -1,
-		1, 0, 1,
-		1, 0, -1,
-		-1, 0, 1,
-		-1, 0, -1,
-		1, 1, 0,
-		1, -1, 0,
-		-1, 1, 0,
-		-1, -1, 0,
-		1, 1, 1,
-		1, 1, -1,
-		1, -1, 1,
-		-1, 1, 1,
-		1, -1, -1,
-		-1, 1, -1,
-		-1, -1, 1,
-		-1, -1, -1,
-		2, 0, 0,
-		-2, 0, 0,
-		0, 2, 0,
-		0, -2, 0,
-		0, 0, 2,
-		0, 0, -2
-		
-	};
-
-
-	__constant__ int diff_v_125[125][3] =
-	{
-		-2, -2, -2,
-		-2, -2, -1,
-		-2, -2, 0,
-		-2, -2, 1,
-		-2, -2, 2,
-		-2, -1, -2,
-		-2, -1, -1,
-		-2, -1, 0,
-		-2, -1, 1,
-		-2, -1, 2,
-		-2, 0, -2,
-		-2, 0, -1,
-		-2, 0, 0,
-		-2, 0, 1,
-		-2, 0, 2,
-		-2, 1, -2,
-		-2, 1, -1,
-		-2, 1, 0,
-		-2, 1, 1,
-		-2, 1, 2,
-		-2, 2, -2,
-		-2, 2, -1,
-		-2, 2, 0,
-		-2, 2, 1,
-		-2, 2, 2,
-		-1, -2, -2,
-		-1, -2, -1,
-		-1, -2, 0,
-		-1, -2, 1,
-		-1, -2, 2,
-		-1, -1, -2,
-		-1, -1, -1,
-		-1, -1, 0,
-		-1, -1, 1,
-		-1, -1, 2,
-		-1, 0, -2,
-		-1, 0, -1,
-		-1, 0, 0,
-		-1, 0, 1,
-		-1, 0, 2,
-		-1, 1, -2,
-		-1, 1, -1,
-		-1, 1, 0,
-		-1, 1, 1,
-		-1, 1, 2,
-		-1, 2, -2,
-		-1, 2, -1,
-		-1, 2, 0,
-		-1, 2, 1,
-		-1, 2, 2,
-		0, -2, -2,
-		0, -2, -1,
-		0, -2, 0,
-		0, -2, 1,
-		0, -2, 2,
-		0, -1, -2,
-		0, -1, -1,
-		0, -1, 0,
-		0, -1, 1,
-		0, -1, 2,
-		0, 0, -2,
-		0, 0, -1,
-		0, 0, 0,
-		0, 0, 1,
-		0, 0, 2,
-		0, 1, -2,
-		0, 1, -1,
-		0, 1, 0,
-		0, 1, 1,
-		0, 1, 2,
-		0, 2, -2,
-		0, 2, -1,
-		0, 2, 0,
-		0, 2, 1,
-		0, 2, 2,
-		1, -2, -2,
-		1, -2, -1,
-		1, -2, 0,
-		1, -2, 1,
-		1, -2, 2,
-		1, -1, -2,
-		1, -1, -1,
-		1, -1, 0,
-		1, -1, 1,
-		1, -1, 2,
-		1, 0, -2,
-		1, 0, -1,
-		1, 0, 0,
-		1, 0, 1,
-		1, 0, 2,
-		1, 1, -2,
-		1, 1, -1,
-		1, 1, 0,
-		1, 1, 1,
-		1, 1, 2,
-		1, 2, -2,
-		1, 2, -1,
-		1, 2, 0,
-		1, 2, 1,
-		1, 2, 2,
-		2, -2, -2,
-		2, -2, -1,
-		2, -2, 0,
-		2, -2, 1,
-		2, -2, 2,
-		2, -1, -2,
-		2, -1, -1,
-		2, -1, 0,
-		2, -1, 1,
-		2, -1, 2,
-		2, 0, -2,
-		2, 0, -1,
-		2, 0, 0,
-		2, 0, 1,
-		2, 0, 2,
-		2, 1, -2,
-		2, 1, -1,
-		2, 1, 0,
-		2, 1, 1,
-		2, 1, 2,
-		2, 2, -2,
-		2, 2, -1,
-		2, 2, 0,
-		2, 2, 1,
-		2, 2, 2
-	};
-
-
 	IMPLEMENT_TCLASS(VirtualSpatiallyAdaptiveStrategy, TDataType)
 
 	template<typename TDataType>
@@ -219,8 +16,6 @@ namespace dyno
 		this->varSamplingDistance()->setValue(Real(0.005));
 		this->varRestDensity()->setValue(Real(1000));
 		gridSize = this->varSamplingDistance()->getData();
-		
-		
 	}
 
 	template<typename TDataType>
@@ -322,9 +117,9 @@ namespace dyno
 	}
 
 	/*
-*@brief	Virtual particles' candinate points
-*		Every particle has 33 neighbors.
-*/
+	*@brief	Virtual particles' candinate points
+	*		Every particle has 33 neighbors.
+	*/
 	template<typename Real, typename Coord>
 	__global__ void AFV_AnchorNeighbor_33
 	(
@@ -645,8 +440,7 @@ namespace dyno
 		cudaDeviceSynchronize();
 		gridSize = this->varSamplingDistance()->getData();
 		int num = this->inRPosition()->size();
-		if (num == 0) return;
-
+		
 		if (num == 0) return;
 
 		int node_num = num * (int)(this->varCandidatePointCount()->getDataPtr()->currentKey());

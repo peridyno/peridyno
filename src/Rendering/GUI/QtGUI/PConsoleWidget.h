@@ -6,21 +6,69 @@
 #include <QTreeView>
 #include <QListView>
 
+#include <QTextEdit.h>
+#include <QPushButton.h>
+#include <QMessageBox.h>
+
+// Slots macro definition conflicts with Python
+#ifdef slots
+#undef slots
+#endif
+
+#ifdef PERIDYNO_QT_PYTHON_CONSOLE
+// python
+#include <pybind11/embed.h>
+namespace py = pybind11;
+#endif
+
+#define slots Q_SLOTS
+
+#ifdef PERIDYNO_QT_PYTHON_CONSOLE
+
+#include <Qsci/qsciscintilla.h>
+#include <Qsci/qscilexerpython.h>
+#include <Qsci/qsciapis.h>
+
+#endif //PERIDYNO_QT_PYTHON_CONSOLE
+
 
 namespace dyno
 {
-	class Node;
-
 	class PConsoleWidget : public QWidget
 	{
 		Q_OBJECT
 	public:
 		explicit PConsoleWidget(QWidget *parent = nullptr);
+		~PConsoleWidget();
 
 	signals:
 
-	public slots:
+#ifdef PERIDYNO_QT_PYTHON_CONSOLE
+	public Q_SLOTS:
+		void execute(const std::string& src);
+
+	private:
+		std::string getPythonErrorDetails();
+
+		void applyDarkTheme(QsciLexerPython* lexer);
+
+		void applyLightTheme(QsciLexerPython* lexer);
+
+	private:
+		QsciScintilla* mCodeEditor;
+		QsciLexerPython* mPythonLexer;
+		QPushButton* updateButton;
+
+#endif //PERIDYNO_QT_PYTHON_CONSOLE
 	};
+}
+
+
+
+
+namespace dyno
+{
+	class Node;
 
 	class QContentBrowser : public QWidget
 	{

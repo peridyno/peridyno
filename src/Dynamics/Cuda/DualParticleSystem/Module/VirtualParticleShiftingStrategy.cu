@@ -96,7 +96,6 @@ namespace dyno
 				}
 			}
 		}
-
 	}
 
 	template <typename Real, typename Coord>
@@ -108,11 +107,7 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= v_posArr.size()) return;
 		v_posArr[pId] += dPos[pId];
-
-
 	}
-
-
 
 	template <typename Real, typename Coord>
 	__global__ void T_RealCopytoVirtual(
@@ -127,7 +122,6 @@ namespace dyno
 		v_posArr[pId] = r_posArr[pId];
 
 	}
-
 
 	template<typename TDataType>
 	VirtualParticleShiftingStrategy<TDataType>::VirtualParticleShiftingStrategy()
