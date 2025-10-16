@@ -16,6 +16,9 @@
 
 #pragma once
 #include "Module.h"
+#include "Log.h"
+#include <sstream>
+#include "Object.h"
 
 namespace dyno 
 {
@@ -37,7 +40,7 @@ namespace dyno
 
 	class PrintInt : public DebugInfo
 	{
-		DECLARE_CLASS(PrintInt);
+		//DECLARE_CLASS(PrintInt);
 	public:
 		PrintInt();
 
@@ -46,11 +49,11 @@ namespace dyno
 		void print() override;
 	};
 
-	IMPLEMENT_CLASS(PrintInt);
+	//IMPLEMENT_CLASS(PrintInt);
 
 	class PrintUnsigned : public DebugInfo
 	{
-		DECLARE_CLASS(PrintUnsigned);
+		//DECLARE_CLASS(PrintUnsigned);
 	public:
 		PrintUnsigned();
 
@@ -59,11 +62,11 @@ namespace dyno
 		void print() override;
 	};
 
-	IMPLEMENT_CLASS(PrintUnsigned);
+	//IMPLEMENT_CLASS(PrintUnsigned);
 
 	class PrintFloat : public DebugInfo
 	{
-		DECLARE_CLASS(PrintFloat);
+		//DECLARE_CLASS(PrintFloat);
 	public:
 		PrintFloat();
 		~PrintFloat() {};
@@ -73,11 +76,11 @@ namespace dyno
 		void print() override;
 	};
 
-	IMPLEMENT_CLASS(PrintFloat);
+	//IMPLEMENT_CLASS(PrintFloat);
 
 	class PrintVector : public DebugInfo
 	{
-		DECLARE_CLASS(PrintVector);
+		//DECLARE_CLASS(PrintVector);
 	public:
 		PrintVector();
 		~PrintVector() {};
@@ -87,5 +90,5 @@ namespace dyno
 		void print() override;
 	};
 
-	IMPLEMENT_CLASS(PrintVector);
+	//IMPLEMENT_CLASS(PrintVector);
 }

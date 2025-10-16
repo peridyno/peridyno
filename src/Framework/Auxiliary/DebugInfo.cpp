@@ -1,7 +1,5 @@
 #include "DebugInfo.h"
-#include "Log.h"
 
-#include <sstream>
 
 namespace dyno 
 {
