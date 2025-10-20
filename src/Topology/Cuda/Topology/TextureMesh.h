@@ -44,6 +44,11 @@ namespace dyno
 		DArray2D<Vec4f> texColor;
 
 		DArray2D<Vec4f> texBump;
+
+		DArray2D<Vec4f> texORM;
+
+		DArray2D<Vec4f> texAlpha;
+
 		float bumpScale = 1.f;
 	};
 

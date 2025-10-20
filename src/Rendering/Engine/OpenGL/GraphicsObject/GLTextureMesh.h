@@ -51,6 +51,8 @@ namespace dyno
 		// color texture
 		XTexture2D<dyno::Vec4f> texColor;
 		XTexture2D<dyno::Vec4f> texBump;
+		XTexture2D<dyno::Vec4f> texORM;
+		XTexture2D<dyno::Vec4f> texAlpha;
 
 		bool mInitialized = false;
 	};

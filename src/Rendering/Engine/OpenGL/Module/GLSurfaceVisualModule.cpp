@@ -6,6 +6,7 @@
 #include "surface.vert.h"
 #include "surface.frag.h"
 #include "surface.geom.h"
+#include "ShaderStruct.h"
 
 namespace dyno
 {
@@ -224,17 +225,16 @@ namespace dyno
 
 		// material 
 		{
-			struct {
-				glm::vec3 color;
-				float metallic;
-				float roughness;
-				float alpha;
-			} pbr;
+
+			PBRMaterial pbr;
 			auto color = this->varBaseColor()->getValue();
-			pbr.color = { color.r, color.g, color.b };
+			pbr.color = glm::vec3{ color.r, color.g, color.b };
 			pbr.metallic = this->varMetallic()->getValue();
 			pbr.roughness = this->varRoughness()->getValue();
 			pbr.alpha = this->varAlpha()->getValue();
+			pbr.useAOTex = 0;
+			pbr.useMetallicTex = 0;
+			pbr.useRoughnessTex = 0;
 			mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
 		}
 

@@ -69,15 +69,26 @@ vec3 Shade()
 		Lo += radiance * brdf;
 	}
 
+// IBL
+	if(true)
+	{
+		// convert to world space...
+	    mat4 invView = inverse(uRenderParams.view);
+		N = normalize(vec3(invView * vec4(N, 0))); 
+		V = normalize(vec3(invView * vec4(V, 0))); 
+		Lo += EvalPBR_IBL(vColor, uMetallic, uRoughness, N, V);
+	}
+	
 	// ambient light
-	vec3 ambient = uRenderParams.ambient.rgb * uRenderParams.ambient.a * vColor;
-
+	{
+		Lo += uRenderParams.ambient.rgb * uRenderParams.ambient.a * vColor;
+	}
+	 
 	// final color
-	vec3 color = ambient + Lo;
-	color = ReinhardTonemap(color);
-	color = GammaCorrect(color);
+	Lo = ReinhardTonemap(Lo);
+	Lo = GammaCorrect(Lo);
 
-	return color;
+	return Lo;
 }
 
 void ColorPass(void)

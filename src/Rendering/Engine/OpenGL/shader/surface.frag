@@ -23,6 +23,7 @@ layout(location = 1) out ivec4 fragIndices;
 
 layout(binding = 10) uniform sampler2D uTexColor;
 layout(binding = 11) uniform sampler2D uTexBump;
+layout(binding = 12) uniform sampler2D uTexORM;
 
 layout(location = 4) uniform float uBumpScale = 1.0;
 
@@ -33,6 +34,30 @@ vec3 GetViewDir()
 		return vec3(0, 0, 1);
 	// perspective projection
 	return normalize(-fs_in.position);
+}
+
+vec3 GetORM()
+{
+		vec3 ormTexValue = texture(uTexORM, fs_in.texCoord.xy).rgb;
+
+		vec3 ormValue ;
+		if(uMtl.useAOTex == 0)
+			ormValue.x = 1.0;
+		else
+			ormValue.x = ormTexValue.x;
+
+		if(uMtl.useRoughnessTex == 0)
+			ormValue.y = uMtl.roughness;
+		else
+			ormValue.y = ormTexValue.y;
+
+		if(uMtl.useMetallicTex == 0)
+			ormValue.z = uMtl.metallic;
+		else
+			ormValue.z = ormTexValue.z;
+
+		return ormValue;
+
 }
 
 vec3 GetNormal()
@@ -70,6 +95,78 @@ vec3 GetColor()
 	return fs_in.color;
 }
 
+float VSM(vec3 projCoords)
+{
+		// From http://fabiensanglard.net/shadowmappingVSM/index.php
+		float distance = min(1.0, projCoords.z);
+		vec2  moments = texture(uTexShadow, projCoords.xy).rg;
+
+		// Surface is fully lit. as the current fragment is before the light occluder
+		if (distance < moments.x)
+			return 1.0;
+
+		// The fragment is either in shadow or penumbra. We now use chebyshev's upperBound to check
+		// How likely this pixel is to be lit (p_max)
+		float variance = moments.y - (moments.x * moments.x);
+		variance = max(variance, 0.00001);
+
+		float d = distance - moments.x;
+		float p_max = variance / (variance + d * d);
+
+		// simple patch to color bleeding 
+		p_max = (p_max - uShadowBlock.minValue) / (1.0 - uShadowBlock.minValue);
+		p_max = clamp(p_max, 0.0, 1.0);
+
+		return p_max;
+}
+
+
+float ShadowMap(vec3 projCoords)
+{
+	float bias = getBias(fs_in.normal);
+	//bias = max(0.005 * (1.0 - dot(normal, normalize(lightPos))), 0.001);
+
+	float closestDepth = texture(uTexShadow, projCoords.xy).r;
+	float currentDepth = projCoords.z;
+
+	return (currentDepth - bias <= closestDepth) ? 1.0 : 0.0;
+}
+
+float PCF(vec3 projCoords)
+{
+		ivec2 texSize = textureSize(uTexShadow, 0);
+		vec2 texelSize = 1.0 /vec2(texSize);
+		int range = 3;
+		int samples = 0;
+		float shadow = 0.0;
+
+		bool UseVSM = false;
+
+		for (int x = -range; x <= range; ++x) 
+		{
+			for (int y = -range; y <= range; ++y) 
+			{ 
+				if(UseVSM)
+					shadow +=VSM(vec3(projCoords.xy + vec2(x, y) * texelSize,projCoords.z)); 
+				else
+					shadow += ShadowMap(vec3(projCoords.xy + vec2(x, y) * texelSize,projCoords.z));
+				samples++;
+			}
+		}
+		shadow /= float(samples);
+		return shadow;
+}
+
+vec3 GetShadowFactorSM(vec3 pos)
+{ 
+	vec4 posLightSpace = uShadowBlock.transform * vec4(pos, 1);
+	vec3 projCoords = posLightSpace.xyz / posLightSpace.w;	// NDC
+	projCoords = projCoords * 0.5 + 0.5;
+	
+	float vsmResult = VSM(projCoords);
+	return vec3(vsmResult);	
+}
+
 vec3 Shade()
 {
 	vec3 N = GetNormal();
@@ -82,13 +179,17 @@ vec3 Shade()
 	vec3 color = vec3(0);
 
 	vec3 baseColor = GetColor();
+	vec3 ORM = GetORM();
+
+	vec3 ORMCorrect = GammaCorrectWithGamma(ORM,2.2);
 
 	// for main directional light
 	{
+
 		vec3 L = normalize(uRenderParams.direction.xyz);
 	
 		// evaluate BRDF
-		vec3 brdf = EvalPBR(baseColor, uMtl.metallic, uMtl.roughness, N, V, L);
+		vec3 brdf = EvalPBR(baseColor, ORMCorrect.b, ORMCorrect.g, N, V, L);
 
 		// do not consider attenuation
 		vec3 radiance = uRenderParams.intensity.rgb * uRenderParams.intensity.a;
@@ -96,16 +197,17 @@ vec3 Shade()
 		// shadow
 		vec3 shadowFactor = vec3(1);
 		if (uRenderParams.direction.w != 0)
-			shadowFactor = GetShadowFactor(fs_in.position);
+			shadowFactor = GetShadowFactorSM(fs_in.position);
 
 		color += shadowFactor * radiance * brdf;
+		//color += shadowFactor * radiance * brdf * mix(vec3(1.0), vec3(ORM.r,ORM.r,ORM.r), 0.3);
+		//color = shadowFactor * vec3(0.0,1.0,1.0) ;
 	}
 	
 	// for a simple camera light
 	{
 		// evaluate BRDF
-		vec3 brdf = EvalPBR(baseColor, uMtl.metallic, uMtl.roughness, N, V, V);
-
+		vec3 brdf = EvalPBR(baseColor,  ORMCorrect.b, ORMCorrect.g, N, V, V);
 		// do not consider attenuation
 		vec3 radiance = uRenderParams.camera.rgb * uRenderParams.camera.a;
 
@@ -113,20 +215,22 @@ vec3 Shade()
 		color += radiance * brdf; 
 	}
 
+
 	// IBL
 	{
 		// convert to world space...
 	    mat4 invView = inverse(uRenderParams.view);
 		N = normalize(vec3(invView * vec4(N, 0))); 
 		V = normalize(vec3(invView * vec4(V, 0))); 
-		color += EvalPBR_IBL(baseColor, uMtl.metallic, uMtl.roughness, N, V);
+
+		color += EvalPBR_IBL(baseColor, ORMCorrect.b, ORMCorrect.g, N, V);
 	}
 	
 	// ambient light
 	{
 		color += uRenderParams.ambient.rgb * uRenderParams.ambient.a * baseColor;
 	}
-	 
+
 	// final color
 	color = ReinhardTonemap(color);
 	color = GammaCorrect(color);
@@ -146,12 +250,15 @@ vec3 ShadeTransparency()
 	vec3 Lo = vec3(0);	
 	vec3 baseColor = GetColor();
 
+	vec3 ORM = GetORM();
+	vec3 ORMCorrect = GammaCorrectWithGamma(ORM,2.2);
+
 	// for main directional light
 	{
 		vec3 L = normalize(uRenderParams.direction.xyz);
 	
 		// evaluate BRDF
-		vec3 brdf = EvalPBR(baseColor, uMtl.metallic, uMtl.roughness, N, V, L);
+		vec3 brdf = EvalPBR(baseColor, ORMCorrect.b, ORMCorrect.g, N, V, L);
 
 		// do not consider attenuation
 		vec3 radiance = uRenderParams.intensity.rgb * uRenderParams.intensity.a;
@@ -167,7 +274,7 @@ vec3 ShadeTransparency()
 	// for a simple camera light
 	{
 		// evaluate BRDF
-		vec3 brdf = EvalPBR(baseColor, uMtl.metallic, uMtl.roughness, N, V, V);
+		vec3 brdf = EvalPBR(baseColor, ORMCorrect.b, ORMCorrect.g, N, V, V);
 
 		// do not consider attenuation
 		vec3 radiance = uRenderParams.camera.rgb * uRenderParams.camera.a;

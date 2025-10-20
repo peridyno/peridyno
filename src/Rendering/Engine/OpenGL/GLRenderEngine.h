@@ -124,6 +124,9 @@ namespace dyno
 		bool					bEnableFXAA = false;
 		FXAA*					mFXAAFilter;
 
+		//ShadowType
+		int						mShadowType = 2;
+
 		// Envmap
 		std::string				mEnvmapFilePath = getAssetPath() + "textures/hdr/venice_dawn_1_4k.hdr";
 		Envmap*					mEnvmap = 0;

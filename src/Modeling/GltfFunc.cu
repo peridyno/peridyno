@@ -537,6 +537,24 @@ namespace dyno
 					reMats[matId]->texBump.clear();
 			}
 
+			auto ormTexId = material.pbrMetallicRoughness.metallicRoughnessTexture.index;
+			std::string ormUri = getTexUri(textures, images, ormTexId);
+
+			if (!ormUri.empty())
+			{
+				auto root = filename.path().parent_path();
+				ormUri = (root / ormUri).string();
+
+				if (loader->loadImage(ormUri.c_str(), texture, STBI_rgb))
+				{
+					reMats[matId]->texORM.assign(texture);
+				}
+			}
+			else
+			{
+				if (reMats[matId]->texORM.size())
+					reMats[matId]->texORM.clear();
+			}
 		}
 
 	}

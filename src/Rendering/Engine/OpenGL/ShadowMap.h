@@ -49,6 +49,9 @@ namespace dyno
 
 		int  getNumBlurIterations() const;
 		void setNumBlurIterations(int iter);
+		void setLightRadius(float radius);
+		float getLightRadius();
+
 
 	private:
 		// framebuffers
@@ -68,10 +71,12 @@ namespace dyno
 
 		// num of blur interations for VSM
 		int				blurIters = 1;
+		float			mLightRadius = 1;
 
 	public:
 
 		// patch to color bleeding, min p_max
 		float			minValue = 0.1f;
+
 	};
 }

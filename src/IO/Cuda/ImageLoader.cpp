@@ -5,7 +5,7 @@
 
 namespace dyno {
 
-    bool ImageLoader::loadImage(const char* path, CArray2D<Vec4f>& img) {
+    bool ImageLoader::loadImage(const char* path, CArray2D<Vec4f>& img, int req_comp) {
         int x, y, comp;
         stbi_set_flip_vertically_on_load(true);
 

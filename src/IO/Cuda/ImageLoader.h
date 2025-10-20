@@ -13,7 +13,7 @@ namespace dyno {
 
         ImageLoader() {}
         ~ImageLoader() {}
-        static bool loadImage(const char* path, CArray2D<Vec4f>& img);
+        static bool loadImage(const char* path, CArray2D<Vec4f>& img, int req_comp = STBI_default);
     };
 
 } 

@@ -24,12 +24,16 @@ namespace dyno
 	{
 		texColor.release();
 		texBump.release();
+		texORM.release();
+		texAlpha.release();
 	}
 
 	void GLMaterial::updateGL()
 	{
 		texColor.updateGL();
 		texBump.updateGL();
+		texORM.updateGL();
+		texAlpha.updateGL();
 	}
 
 	/**
@@ -152,6 +156,8 @@ namespace dyno
 			mMaterials[i]->bumpScale = mesh->materials()[i]->bumpScale;
 			mMaterials[i]->texColor.load(mesh->materials()[i]->texColor);
 			mMaterials[i]->texBump.load(mesh->materials()[i]->texBump);
+			mMaterials[i]->texORM.load(mesh->materials()[i]->texORM);
+			mMaterials[i]->texAlpha.load(mesh->materials()[i]->texAlpha);
 
 			mapper[mesh->materials()[i]] = i;
 		}	
