@@ -22,7 +22,7 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class Group : public Node
+	class Group : virtual public Node
 	{
 		DECLARE_TCLASS(Group, TDataType);
 

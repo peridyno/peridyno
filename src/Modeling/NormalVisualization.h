@@ -27,7 +27,7 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class NormalVisualization : public Node
+	class NormalVisualization : virtual public Node
 	{
 		DECLARE_TCLASS(Normal, TDataType);
 

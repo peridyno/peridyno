@@ -27,7 +27,7 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class ConvertToTextureMesh : public ModelEditing<TDataType>
+	class ConvertToTextureMesh : virtual public ModelEditing<TDataType>
 	{
 		DECLARE_TCLASS(CubeModel, TDataType);
 
