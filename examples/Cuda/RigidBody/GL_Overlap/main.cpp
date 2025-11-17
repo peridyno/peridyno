@@ -23,65 +23,49 @@ std::shared_ptr<SceneGraph> creatBricks()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	auto rigid = scn->addNode(std::make_shared<RigidBodySystem<DataType3f>>());
-	RigidBodyInfo rA, rB, rC, rD;
-	BoxInfo box1, box2, box3;
 
-	rA.position = Vec3f(0, 0.5, 0);
-	box1.halfLength = Vec3f(1.0, 0.05, 1.0);
+	//box.halfLength = Vec3f(0.1, 0.1, 0.1);
 
-	rB.position = Vec3f(0, 0.2, 0.8);
-	box2.halfLength = Vec3f(0.7, 0.1, 0.1);
+	/*for (int i = 0; i < 5; i++)
+	{
+		rigidBody.position = Vec3f(0.5f, 0.11, i * 0.3);
+		rigidBody.linearVelocity = Vec3f(1.0, 0, 0);
+		rigidBody.friction = 0.02 * (i+1);
+		auto boxAt = rigid->addBox(box, rigidBody, 100);
+	}*/
 
-	rC.position = Vec3f(0, 0.2, -0.8);
-	box3.halfLength = Vec3f(0.7, 0.1, 0.1);
 
-	auto bodyActor = rigid->addBox(box1, rA);
-	auto frontActor = rigid->addBox(box2, rB);
-	auto rearActor = rigid->addBox(box3, rC);
+	Real boardLength = 4.0f;
+	Real boardWidth = 0.5f;
+	Real boardThickness = 0.02f;
+	Real boardAngle = M_PI / 5.0f;
+	Real boxEdgeLength = 0.2f;
+	Real d = boardLength * 0.75f;
 
-	SphereInfo sphere;
-	sphere.radius = 0.1;
+	RigidBodyInfo rigidBody;
+	rigidBody.friction = 0.9f;
+	BoxInfo box;
 
-	rA.position = Vec3f(0.9, 0.1, 0.8);
+	box.halfLength = Vec3f(0.5f * boardLength, boardThickness, boardWidth);
+	box.rot = Quat1f(boardAngle, Vec3f(0, 0, 1).normalize());
+	rigidBody.position = Vec3f(0.0f, 0.5f * boardLength * sinf(boardAngle), 0.0f);
+	rigidBody.motionType = BodyType::Dynamic;
+	auto & ac = rigid->addBox(box, rigidBody, 10);
+	auto& fixedJoint = rigid->createUnilateralFixedJoint(ac);
+	fixedJoint.setAnchorPoint(rigidBody.position);
+
+	box.halfLength = Vec3f(boxEdgeLength / 2.0f);
+
+	rigidBody.position = Vec3f(cosf(boardAngle) * ((0.5f * boxEdgeLength + boardThickness + 0.0001f) / tanf(boardAngle) + d) - (0.5f * boxEdgeLength + boardThickness + 0.0001f) / sinf(boardAngle) - 0.5f * cosf(boardAngle) * boardLength, \
+		sinf(boardAngle) * ((0.5f * boxEdgeLength + boardThickness + 0.0001f) / tanf(boardAngle) + d), \
+		0.0f);
+
+	box.rot = Quat1f(boardAngle, Vec3f(0, 0, 1).normalize());
+	rigidBody.bodyId = 1;
+	rigidBody.motionType = BodyType::Dynamic;
+	rigid->addBox(box, rigidBody, 1000);
+
 	
-	rB.position = Vec3f(-0.9, 0.1, 0.8);
-
-	rC.position = Vec3f(0.9, 0.1, -0.8);
-
-	rD.position = Vec3f(-0.9, 0.1, -0.8);
-
-	auto frontLeftTire = rigid->addSphere(sphere, rA);
-	auto frontRightTire = rigid->addSphere(sphere, rB);
-	auto rearLeftTire = rigid->addSphere(sphere, rC);
-	auto rearRightTire = rigid->addSphere(sphere, rD);
-
-	auto& joint1 = rigid->createHingeJoint(frontLeftTire, frontActor);
-	joint1.setAnchorPoint(frontLeftTire->center);
-	joint1.setAxis(Vec3f(1, 0, 0));
-	joint1.setMoter(30);
-
-	auto& joint2 = rigid->createHingeJoint(frontRightTire, frontActor);
-	joint2.setAnchorPoint(frontRightTire->center);
-	joint2.setAxis(Vec3f(1, 0, 0));
-	joint2.setMoter(30);
-
-	auto& joint3 = rigid->createHingeJoint(rearLeftTire, rearActor);
-	joint3.setAnchorPoint(rearLeftTire->center);
-	joint3.setAxis(Vec3f(1, 0, 0));
-	joint3.setMoter(30);
-
-	auto& joint4 = rigid->createHingeJoint(rearRightTire, rearActor);
-	joint4.setAnchorPoint(rearRightTire->center);
-	joint4.setAxis(Vec3f(1, 0, 0));
-	joint4.setMoter(30);
-
-	auto& joint5 = rigid->createFixedJoint(rearActor, bodyActor);
-	joint5.setAnchorPoint(rearActor->center);
-
-	auto& joint6 = rigid->createHingeJoint(frontActor, bodyActor);
-	joint6.setAnchorPoint(frontActor->center);
-	joint6.setAxis(Vec3f(0, 1, 0));
-	joint6.setRange(M_PI / 12, M_PI / 12);
 
 
 	auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
@@ -112,15 +96,15 @@ std::shared_ptr<SceneGraph> creatBricks()
 	rigid->graphicsPipeline()->pushModule(wireRender);
 
 	//Visualize contact points
-	/*auto contactPointMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
+	auto contactPointMapper = std::make_shared<ContactsToPointSet<DataType3f>>();
 	elementQuery->outContacts()->connect(contactPointMapper->inContacts());
 	rigid->graphicsPipeline()->pushModule(contactPointMapper);
 
 	auto pointRender = std::make_shared<GLPointVisualModule>();
 	pointRender->setColor(Color(1, 0, 0));
-	pointRender->varPointSize()->setValue(0.003f);
+	pointRender->varPointSize()->setValue(0.03f);
 	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
-	rigid->graphicsPipeline()->pushModule(pointRender);*/
+	rigid->graphicsPipeline()->pushModule(pointRender);
 
 	return scn;
 }

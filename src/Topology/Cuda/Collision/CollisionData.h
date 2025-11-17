@@ -89,6 +89,7 @@ namespace dyno
 		CN_JOINT_NO_MOVE_1,
 		CN_JOINT_NO_MOVE_2,
 		CN_JOINT_NO_MOVE_3,
+		CN_CONTACT_BLOCK,
 		CN_UNKNOWN
 	};
 

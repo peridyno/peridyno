@@ -52,12 +52,11 @@ namespace dyno
 		if (contact_size != 0)
 		{
 			auto& contacts = this->inContacts()->getData();
-			setUpContactAndFrictionConstraints(
+			setUpContactAndFrictionConstraintsBlock(
 				mVelocityConstraints,
 				mContactsInLocalFrame,
 				this->inCenter()->getData(),
-				this->inRotationMatrix()->getData(),
-				this->varFrictionEnabled()->getData()
+				this->inRotationMatrix()->getData()
 			);
 
 			current_index += contact_size;
@@ -168,7 +167,7 @@ namespace dyno
 			mVelocityConstraints
 		);
 
-		calculateK(
+		calculateKBlock(
 			mVelocityConstraints,
 			mJ,
 			mB,
@@ -268,7 +267,7 @@ namespace dyno
 				initializeJacobian(dh);
 
 				for (int j = 0; j < this->varIterationNumberForVelocitySolver()->getValue(); j++) {
-					JacobiIterationForSoft(
+					JacobiIterationForSoftBlock(
 						mLambda,
 						mImpulseC,
 						mJ,

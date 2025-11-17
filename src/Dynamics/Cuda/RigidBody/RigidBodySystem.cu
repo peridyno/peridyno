@@ -175,6 +175,7 @@ namespace dyno
 		float lz = 2.0f * box.halfLength[2];
 
 		Real mass = density * lx * ly * lz;
+		printf("%lf\n", mass);
 
 		// Calculate the inertia of box in the local frame
 		auto localInertia = 1.0f / 12.0f * mass
