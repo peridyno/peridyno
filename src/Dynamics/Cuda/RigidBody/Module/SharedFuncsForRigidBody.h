@@ -472,7 +472,7 @@ namespace dyno
 
 	void setUpContactAndFrictionConstraintsBlock(
 		DArray<TConstraintPair<float>> constraints,
-		DArray<TContactPoint<float>> contactsInLocalFrame,
+		DArray<TContactPair<float>> contactsInLocalFrame,
 		DArray<Vec3f> pos,
 		DArray<Mat3f> rotMat
 	);

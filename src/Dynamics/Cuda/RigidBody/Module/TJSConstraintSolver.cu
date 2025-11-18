@@ -174,6 +174,7 @@ namespace dyno
 			this->inCenter()->getData(),
 			this->inInertia()->getData(),
 			this->inMass()->getData(),
+			mK_1,
 			mK_2,
 			mK_3
 		);

@@ -5334,7 +5334,7 @@ namespace dyno
 
 		constraints[baseIndex].interpenetration = minimum(0.0f, contactsInLocalFrame[tId].interpenetration + (constraints[baseIndex].pos2 - constraints[baseIndex].pos1).dot(contactsInLocalFrame[tId].normal1));
 		constraints[baseIndex].type = ConstraintType::CN_NONPENETRATION;
-		constraints[baseIndex].isValid = constraints[baseIndex].interpenetration < 0.0f ? true : false;
+		constraints[baseIndex].isValid = true;
 
 		Coord normal1 = constraints[baseIndex].normal1;
 
@@ -5372,7 +5372,7 @@ namespace dyno
 
 	void setUpContactAndFrictionConstraintsBlock(
 		DArray<TConstraintPair<float>> constraints,
-		DArray<TContactPoint<float>> contactsInLocalFrame,
+		DArray<TContactPair<float>> contactsInLocalFrame,
 		DArray<Vec3f> pos,
 		DArray<Mat3f> rotMat
 	)

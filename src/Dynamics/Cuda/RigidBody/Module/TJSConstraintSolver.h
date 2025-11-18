@@ -18,7 +18,7 @@
  #pragma once
  #include "Module/ConstraintModule.h"
  #include "RigidBody/RigidBodyShared.h"
- #include "Topology/DiscreElements.h"
+#include "Topology/DiscreteElements.h"
  #include "Collision/Attribute.h"
  #include "Collision/CollisionData.h"
 
