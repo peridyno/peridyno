@@ -14,10 +14,10 @@
 #include "Rendering/PyRendering.h"
 #include "Rendering/PyQt.h"
 
+#include "Dynamics/PyParticleSystem.h"
 #include "Dynamics/PyDualParticleSystem.h"
 #include "Dynamics/PySemiAnalyticalScheme.h"
 #include "Dynamics/PyVolume.h"
-#include "Dynamics/PyParticleSystem.h"
 #include "Dynamics/PyMultiphysics.h"
 #include "Dynamics/PyPeridynamics.h"
 #include "Dynamics/PyRigidBody.h"

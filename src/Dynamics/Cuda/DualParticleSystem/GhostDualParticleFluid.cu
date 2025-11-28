@@ -89,7 +89,7 @@ namespace dyno
 			this->vpGen = gridFission;
 		}
 
-		this->animationPipeline()->pushModule(vpGen);
+		this->animationPipeline()->pushModule(this->vpGen);
 		this->vpGen->outVirtualParticles()->connect(this->stateVirtualPosition());
 
 		auto m_rv_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();

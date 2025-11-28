@@ -243,7 +243,7 @@ namespace dyno
     inline DYN_FUNC unsigned int countbit(unsigned int x) { unsigned int cnt = 0; while(x) {x -= lowbit(x); cnt++;} return cnt;}
     
     // Count Leading Zeros
-    inline DYN_FUNC unsigned int __builtin_clz(unsigned int x) {
+    inline DYN_FUNC unsigned int builtin_clz(unsigned int x) {
         unsigned int r = 0;
         if (!(x & 0xFFFF0000)) r += 16, x <<= 16;
         if (!(x & 0xFF000000)) r += 8,  x <<= 8;
@@ -254,7 +254,7 @@ namespace dyno
     }
 
     // Most Significant Bit: return y for 1 << y ( assert unsigned int is 32-bits)
-    inline DYN_FUNC unsigned int MSB(unsigned int x) {return 32 - __builtin_clz(x);}    
+    inline DYN_FUNC unsigned int MSB(unsigned int x) {return 32 - builtin_clz(x);}    
 
     // return the id of lowest bit of x
     inline DYN_FUNC unsigned int lownum(unsigned int x) {return MSB(lowbit(x));}

@@ -84,6 +84,35 @@ void declare_energy_analyish(py::module& m, std::string typestr)
 		.def("setOutputPath", &Class::setOutputPath);
 }
 
+#include "DualParticleSystem/Module/FlipFluidExplicitSolver.h"
+template <typename TDataType>
+void declare_flip_fluid_explicit_solver(py::module& m, std::string typestr)
+{
+	using Class = dyno::FlipFluidExplicitSolver<TDataType>;
+	using Parent = dyno::ConstraintModule;
+	std::string pyclass_name = std::string("FlipFluidExplicitSolver") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>DFFES(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
+		DFFES.def(py::init<>())
+		.def("inTimeStep", &Class::inTimeStep, py::return_value_policy::reference)
+		.def("inParticlePosition", &Class::inParticlePosition, py::return_value_policy::reference)
+		.def("inParticleVelocity", &Class::inParticleVelocity, py::return_value_policy::reference)
+		.def("inGridVelocity", &Class::inGridVelocity, py::return_value_policy::reference)
+		.def("inPGNeighborIds", &Class::inPGNeighborIds, py::return_value_policy::reference)
+		.def("inAdaptGridPosition", &Class::inAdaptGridPosition, py::return_value_policy::reference)
+		.def("inGridSpacing", &Class::inGridSpacing, py::return_value_policy::reference)
+		.def("inSamplingDistance", &Class::inSamplingDistance, py::return_value_policy::reference)
+		.def("varFlipAlpha", &Class::varFlipAlpha, py::return_value_policy::reference)
+		.def("varStiffness", &Class::varStiffness, py::return_value_policy::reference)
+		.def("inFrameNumber", &Class::inFrameNumber, py::return_value_policy::reference)
+		.def("varInterpolationModel", &Class::varInterpolationModel, py::return_value_policy::reference);
+
+	py::enum_<typename Class::InterpolationModel>(DFFES, "InterpolationModel")
+		.value("PIC", Class::InterpolationModel::PIC)
+		.value("APIC", Class::InterpolationModel::APIC)
+		.value("FLIP", Class::InterpolationModel::FLIP)
+		.value("NFLIP", Class::InterpolationModel::NFLIP);
+}
+
 #include "DualParticleSystem/Module/PaticleUniformAnalysis.h"
 template <typename TDataType>
 void declare_paticle_uniform_analysis(py::module& m, std::string typestr)
@@ -107,6 +136,28 @@ void declare_paticle_uniform_analysis(py::module& m, std::string typestr)
 		.def("inSamplingDistance", &Class::inSamplingDistance, py::return_value_policy::reference);
 }
 
+
+#include "DualParticleSystem/Module/ThinFeature.h"
+template <typename TDataType>
+void declare_thin_feature(py::module& m, std::string typestr)
+{
+	using Class = dyno::ThinFeature<TDataType>;
+	using Parent = dyno::ParticleApproximation<TDataType>;
+	std::string pyclass_name = std::string("ThinFeature") + typestr;
+	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("inPosition", &Class::inPosition, py::return_value_policy::reference)
+		.def("inNeighborIds", &Class::inNeighborIds, py::return_value_policy::reference)
+
+		.def("outThinSheet", &Class::outThinSheet, py::return_value_policy::reference)
+		.def("outThinFeature", &Class::outThinFeature, py::return_value_policy::reference)
+		.def("outDensity", &Class::outDensity, py::return_value_policy::reference)
+
+		.def("varThreshold", &Class::varThreshold)
+		.def("varRestDensity", &Class::varRestDensity)
+		.def("compute", &Class::compute);
+}
+
 #include "DualParticleSystem/Module/VirtualParticleGenerator.h"
 template <typename TDataType>
 void declare_virtual_particle_generator(py::module& m, std::string typestr) {
@@ -116,6 +167,7 @@ void declare_virtual_particle_generator(py::module& m, std::string typestr) {
 	py::class_<Class, Parent, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def("outVirtualParticles", &Class::outVirtualParticles, py::return_value_policy::reference);
 }
+
 
 #include "DualParticleSystem/Module/VirtualColocationStrategy.h"
 template <typename TDataType>
@@ -149,30 +201,6 @@ void declare_virtual_particle_shifting_strategy(py::module& m, std::string types
 		.def("inRPosition", &Class::inRPosition, py::return_value_policy::reference)
 		.def("outVVNeighborIds", &Class::outVVNeighborIds, py::return_value_policy::reference)
 		.def("outVDensity", &Class::outVDensity, py::return_value_policy::reference);
-}
-
-#include "DualParticleSystem/Module/VirtualSpatiallyAdaptiveStrategy.h"
-template <typename TDataType>
-void declare_virtual_spatially_adaptive_strategy(py::module& m, std::string typestr) {
-	using Class = dyno::VirtualSpatiallyAdaptiveStrategy<TDataType>;
-	using Parent = dyno::VirtualParticleGenerator<TDataType>;
-	std::string pyclass_name = std::string("VirtualSpatiallyAdaptiveStrategy") + typestr;
-	py::class_<Class, Parent, std::shared_ptr<Class>>VSAS(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr());
-
-	py::enum_<typename Class::CandidatePointCount>(VSAS, "CandidatePointCount")
-		.value("neighbors_8", Class::CandidatePointCount::neighbors_8)
-		.value("neighbors_27", Class::CandidatePointCount::neighbors_27)
-		.value("neighbors_33", Class::CandidatePointCount::neighbors_33)
-		.value("neighbors_125", Class::CandidatePointCount::neighbors_125)
-		.export_values();
-
-	VSAS.def(py::init<>())
-		.def("constrain", &Class::constrain)
-		.def("setHashGridSize", &Class::setHashGridSize)
-		.def("varCandidatePointCount", &Class::varCandidatePointCount, py::return_value_policy::reference)
-		.def("varRestDensity", &Class::varRestDensity, py::return_value_policy::reference)
-		.def("varSamplingDistance", &Class::varSamplingDistance, py::return_value_policy::reference)
-		.def("inRPosition", &Class::inRPosition, py::return_value_policy::reference);
 }
 
 void pybind_dual_particle_system(py::module& m);

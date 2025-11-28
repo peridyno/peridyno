@@ -600,10 +600,10 @@ void declare_rigid_body_system(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("RigidBodySystem") + typestr;
 	py::class_<Class, Parent, RigidBodySystemTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("addBox", &Class::addBox, py::arg("box"), py::arg("bodyDef"), py::arg("density") = TDataType::Real(100))
-		.def("addSphere", &Class::addSphere, py::arg("sphere"), py::arg("bodyDef"), py::arg("density") = TDataType::Real(100))
-		.def("addTet", &Class::addTet, py::arg("tet"), py::arg("bodyDef"), py::arg("density") = TDataType::Real(100))
-		.def("addCapsule", &Class::addCapsule, py::arg("capsule"), py::arg("bodyDef"), py::arg("density") = TDataType::Real(100))
+		/*.def("addBox", &Class::addBox, py::arg("box"), py::arg("bodyDef"), py::arg("density") = typename TDataType::Real(100))
+		.def("addSphere", &Class::addSphere, py::arg("sphere"), py::arg("bodyDef"), py::arg("density") = typename TDataType::Real(100))
+		.def("addTet", &Class::addTet, py::arg("tet"), py::arg("bodyDef"), py::arg("density") = typename TDataType::Real(100))
+		.def("addCapsule", &Class::addCapsule, py::arg("capsule"), py::arg("bodyDef"), py::arg("density") = typename TDataType::Real(100))*/
 		.def("create_rigid_body", py::overload_cast<const Coord&, const TQuat&>(&Class::createRigidBody))
 		.def("create_rigid_body", py::overload_cast<const dyno::RigidBodyInfo&>(&Class::createRigidBody))
 		.def("bindBox", &Class::bindBox)
@@ -698,7 +698,7 @@ void declare_articulated_body(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("ArticulatedBody") + typestr;
 	py::class_<Class, Parent1, Parent2, ArticulatedBodyTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("bindSphere", &Class::bindSphere)
+		//.def("bindSphere", &Class::bindSphere)
 
 		.def("varFilePath", &Class::varFilePath, py::return_value_policy::reference)
 		.def("varVehiclesTransform", &Class::varVehiclesTransform, py::return_value_policy::reference)

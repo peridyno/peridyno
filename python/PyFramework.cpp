@@ -95,6 +95,67 @@ void declare_reset_act(py::module& m)
 		.def(py::init<>());
 }
 
+#include "Field/VehicleInfo.h"
+void declare_vehicle_rigid_body_info(py::module& m) {
+	using Class = dyno::VehicleRigidBodyInfo;
+	std::string pyclass_name = std::string("VehicleRigidBodyInfo");
+	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def(py::init<dyno::Name_Shape, int, dyno::ConfigShapeType, Real>())
+		.def(py::init<dyno::Name_Shape, int, dyno::ConfigShapeType, dyno::Transform3f, Real>());
+}
+
+void declare_vehicle_joint_info(py::module& m) {
+	using Class = dyno::VehicleJointInfo;
+	std::string pyclass_name = std::string("VehicleJointInfo");
+	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>());
+	//.def(py::init<dyno::Name_Shape, dyno::Name_Shape, dyno::ConfigShapeType, dyno::Vector<Real, 3>, dyno::Vector<Real, 3>, bool, Real, bool, Real, Real>());
+}
+
+
+void declare_vehicle_bind(py::module& m) {
+	using Class = dyno::VehicleBind;
+	std::string pyclass_name = std::string("VehicleBind");
+	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def(py::init<int>())
+		.def("isValid", &Class::isValid, py::return_value_policy::reference)
+		.def_readwrite("mVehicleRigidBodyInfo", &Class::mVehicleRigidBodyInfo)
+		.def_readwrite("mVehicleJointInfo", &Class::mVehicleJointInfo);
+}
+
+void declare_animation_2_joint_config(py::module& m) {
+	using Class = dyno::Animation2JointConfig;
+	std::string pyclass_name = std::string("Animation2JointConfig");
+	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def(py::init<std::string, int, uint>())
+		.def(py::init<std::string, int, uint, float>())
+		.def_readwrite("JointName", &Class::JointName)
+		.def_readwrite("JointId", &Class::JointId)
+		.def_readwrite("Axis", &Class::Axis)
+		.def_readwrite("Intensity", &Class::Intensity);
+}
+
+void declare_hinge_action(py::module& m) {
+	using Class = dyno::HingeAction;
+	std::string pyclass_name = std::string("HingeAction");
+	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<int, float>())
+		.def_readwrite("joint", &Class::joint)
+		.def_readwrite("value", &Class::value);
+}
+
+void declare_key_2_hinge_config(py::module& m) {
+	using Class = dyno::Key2HingeConfig;
+	std::string pyclass_name = std::string("Key2HingeConfig");
+	py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+		.def(py::init<>())
+		.def("addMap", &Class::addMap)
+		.def_readwrite("key2Hinge", &Class::key2Hinge);
+}
+
 void pybind_log(py::module& m) {}
 
 void pybind_framework(py::module& m)

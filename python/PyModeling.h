@@ -1,7 +1,7 @@
 #pragma once
 #include "PyCommon.h"
 
-#include "PyFramework.h"
+//#include "PyFramework.h"
 #include "BasicShapes/BasicShape.h"
 template <typename TDataType>
 void declare_basic_shape(py::module& m, std::string typestr) {

@@ -46,7 +46,7 @@ void declare_poission_disk_position_shifting(py::module& m, std::string typestr)
 		.def("compute", &PoissionDiskPositionShiftingPublicist::compute, py::return_value_policy::reference);
 }
 
-#include "Multiphysics/ComputeSurfaceLevelset.h"
+#include "Multiphysics/ComputeSurfaceLevelSet.h"
 template <typename TDataType>
 void declare_compute_surface_level_set(py::module& m, std::string typestr) {
 	using Class = dyno::ComputeSurfaceLevelset<TDataType>;
