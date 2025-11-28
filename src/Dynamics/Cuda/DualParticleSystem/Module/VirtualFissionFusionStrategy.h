@@ -114,7 +114,7 @@ namespace dyno {
 
 		CubicKernel<Real> kernel;
 
-		SpikyKernel<Real> SpikyKernel;
+		SpikyKernel<Real> mSpikyKernel;
 
 		DArray<Real> mDivergence;					/*@brief Velocity Divergence of real particle*/
 
