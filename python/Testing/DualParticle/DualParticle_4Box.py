@@ -1,4 +1,3 @@
-import QtPathHelper
 import PyPeridyno as dyno
 from PyPeridyno import Vector3f
 
