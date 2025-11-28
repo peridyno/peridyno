@@ -66,18 +66,6 @@ std::shared_ptr<SceneGraph> createScene()
 	wake->varMagnitude()->setValue(0.2f);
 	wake->connect(ocean->importCapillaryWaves());
 
-	auto mapper = std::make_shared<HeightFieldToTriangleSet<DataType3f>>();
-
-	ocean->stateHeightField()->connect(mapper->inHeightField());
-	ocean->graphicsPipeline()->pushModule(mapper);
-
-	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Color(0.0f, 0.2f, 1.0f));
-	sRender->varUseVertexNormal()->setValue(true);
-	sRender->varAlpha()->setValue(0.6);
-	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
-	ocean->graphicsPipeline()->pushModule(sRender);
-
 	auto boat = scn->addNode(std::make_shared<Vessel<DataType3f>>());
 	boat->varDensity()->setValue(150.0f);
 	boat->varBarycenterOffset()->setValue(Vec3f(0.0f, 0.0f, -0.5f));

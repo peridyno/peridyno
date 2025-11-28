@@ -85,9 +85,9 @@
 #define DEFAULT_METHODS(x)             \
   ~x() = default;                      \
   x(const x &) = default;              \
-  x(x &&) TINYGLTF_NOEXCEPT = default; \
   x &operator=(const x &) = default;   \
   x &operator=(x &&) TINYGLTF_NOEXCEPT = default;
+    //  x(x &&) TINYGLTF_NOEXCEPT = default; \
 
 namespace tinygltf {
 

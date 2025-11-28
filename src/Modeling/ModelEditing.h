@@ -21,7 +21,7 @@ namespace dyno
 {
 
 	template<typename TDataType>
-	class ModelEditing : public Node
+	class ModelEditing : virtual public Node
 	{
 	public:
 		ModelEditing() {};

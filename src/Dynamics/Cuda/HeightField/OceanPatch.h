@@ -32,7 +32,7 @@ namespace dyno {
     };
 
     template<typename TDataType>
-    class OceanPatch : public Node
+    class OceanPatch : virtual public Node
     {
         DECLARE_TCLASS(OceanPatch, TDataType)
     public:

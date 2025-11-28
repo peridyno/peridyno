@@ -354,7 +354,9 @@ namespace dyno
 					if (!textureName.empty() && textureName.back() == '"') {
 						textureName.pop_back();
 					}
-					size_t found = textureName.find_last_of('\\/');
+					size_t found = textureName.find_last_of('\\');
+					if (found == std::string::npos)
+						found = textureName.find_last_of('/');
 					if (found != std::string::npos) {
 						return textureName.substr(found + 1);
 					}

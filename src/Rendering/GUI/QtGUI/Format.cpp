@@ -73,12 +73,12 @@ namespace dyno
 			return qName;
 		}
 
-		QRegularExpression regexp0("[A-Za-z()\\s]*");
+		QRegularExpression regexp0("[A-Za-z0-9]*");
 		QRegularExpressionMatchIterator match0 = regexp0.globalMatch(qName);
 
 		QString subStr = match0.hasNext() ? match0.next().captured() : QString("Port");
 
-		QRegularExpression regexp("[A-Za-z()\\s]*");
+		QRegularExpression regexp("[A-Za-z0-9]*");
 		QRegularExpressionMatchIterator match = regexp.globalMatch(subStr);
 
 		QString ret;

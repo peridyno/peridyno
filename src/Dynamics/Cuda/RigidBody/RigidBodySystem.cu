@@ -5,6 +5,7 @@
 #include "Collision/CollistionDetectionBoundingBox.h"
 
 #include "RigidBody/Module/TJConstraintSolver.h"
+#include "RigidBody/Module/TJSConstraintSolver.h"
 #include "RigidBody/Module/TJSoftConstraintSolver.h"
 #include "RigidBody/Module/PJSNJSConstraintSolver.h"
 #include "RigidBody/Module/PJSConstraintSolver.h"
@@ -43,12 +44,12 @@ namespace dyno
 
 		this->animationPipeline()->pushModule(merge);
 
-		auto iterSolver = std::make_shared<TJConstraintSolver<TDataType>>();
+		auto iterSolver = std::make_shared<TJSConstraintSolver<TDataType>>();
 		this->stateTimeStep()->connect(iterSolver->inTimeStep());
 		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
 		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
 		this->varGravityValue()->connect(iterSolver->varGravityValue());
-		this->varFrictionCoefficient()->connect(iterSolver->varFrictionCoefficient());
+		//this->varFrictionCoefficient()->connect(iterSolver->varFrictionCoefficient());
 		this->varSlop()->connect(iterSolver->varSlop());
 		this->stateMass()->connect(iterSolver->inMass());
 		

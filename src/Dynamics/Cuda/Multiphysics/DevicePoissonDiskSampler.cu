@@ -1,5 +1,6 @@
 #include "DevicePoissonDiskSampler.h"
-#include <curand_kernel.h>
+#include "curand_kernel.h"
+#include "Algorithm/CudaRand.h"
 #include <thrust/sort.h>
 #include <chrono>
 
