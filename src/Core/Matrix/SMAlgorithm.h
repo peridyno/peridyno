@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 #pragma once
-#include "Array/Array.h"
-#include "Array/ArrayMap.h"
+#include "Node/ParametricModel.h"
+#include "Primitive/Primitive2D.h"
 
 
 namespace dyno 
