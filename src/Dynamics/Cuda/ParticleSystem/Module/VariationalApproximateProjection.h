@@ -35,7 +35,7 @@ namespace dyno
 	 * 			Refer to "A Variational Staggered Particle Framework for Incompressible Free-Surface Flows", [arXiv:2001.09421], 2020.
 	 */
 	template<typename TDataType>
-	class VariationalApproximateProjection : public ParticleApproximation<TDataType>
+	class VariationalApproximateProjection : virtual public ParticleApproximation<TDataType>
 	{
 		DECLARE_TCLASS(VariationalApproximateProjection, TDataType)
 	public:

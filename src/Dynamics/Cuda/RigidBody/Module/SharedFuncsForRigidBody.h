@@ -469,4 +469,42 @@ namespace dyno
 		DArray<float>& CFM,
 		DArray<TConstraintPair<float>>& constraints
 	);
+
+	void setUpContactAndFrictionConstraintsBlock(
+		DArray<TConstraintPair<float>> constraints,
+		DArray<TContactPair<float>> contactsInLocalFrame,
+		DArray<Vec3f> pos,
+		DArray<Mat3f> rotMat
+	);
+
+	void calculateKBlock(
+		DArray<TConstraintPair<float>> constraints,
+		DArray<Vec3f> J,
+		DArray<Vec3f> B,
+		DArray<Vec3f> pos,
+		DArray<Mat3f> inertia,
+		DArray<float> mass,
+		DArray<float> K_1,
+		DArray<Mat2f> K_2,
+		DArray<Mat3f> K_3
+	);
+
+	void JacobiIterationForSoftBlock(
+		DArray<float> lambda,
+		DArray<Vec3f> impulse,
+		DArray<Vec3f> J,
+		DArray<Vec3f> B,
+		DArray<float> eta,
+		DArray<TConstraintPair<float>> constraints,
+		DArray<int> nbq,
+		DArray<float> K_1,
+		DArray<Mat2f> K_2,
+		DArray<Mat3f> K_3,
+		DArray<float> mass,
+		DArray<float> mu,
+		float g,
+		float dt,
+		float zeta,
+		float hertz
+	);
 }

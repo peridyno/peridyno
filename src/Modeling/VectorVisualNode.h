@@ -27,7 +27,7 @@
 namespace dyno
 {
 	template<typename TDataType>
-	class VectorVisualNode :public Node
+	class VectorVisualNode :virtual public Node
 	{
 		DECLARE_TCLASS(VectorVisualNode, TDataType);
 

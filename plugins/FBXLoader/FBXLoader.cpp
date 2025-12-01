@@ -345,6 +345,7 @@ namespace dyno
 			for (size_t i = 0; i < matCount; i++)
 			{
 				auto mat = currentMesh->getMaterial(i);
+
 				std::shared_ptr<Material> material = NULL;
 				if (MaterialManager::getMaterial(mat->name))
 				{
@@ -364,7 +365,9 @@ namespace dyno
 						if (!textureName.empty() && textureName.back() == '"') {
 							textureName.pop_back();
 						}
-						size_t found = textureName.find_last_of('\\/');
+						size_t found = textureName.find_last_of('\\');
+						if (found == std::string::npos)
+							found = textureName.find_last_of('/');
 						if (found != std::string::npos) {
 							return textureName.substr(found + 1);
 						}
@@ -440,8 +443,6 @@ namespace dyno
 					}
 					meshInfo->materials.push_back(material);
 				}			
-
-				
 
 			}
 
