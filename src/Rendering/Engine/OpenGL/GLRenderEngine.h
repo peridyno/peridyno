@@ -74,6 +74,8 @@ namespace dyno
 
 		inline std::string getEnvmapFilePath() { return mEnvmapFilePath; }
 
+		int  getShadowMapSize();
+		void updateShadowMapAttribute()override;
 	private:
 		void createFramebuffer();
 		void resizeFramebuffer(int w, int h, int samples);
@@ -95,6 +97,10 @@ namespace dyno
 		std::vector<RenderItem> mRenderItems;
 
 	private:
+
+		//Texture2DMultiSample	mColorCorrectTex;
+		Program* mPostProcessProgram;
+
 		// internal framebuffer
 		Framebuffer				mFramebuffer;
 		Texture2DMultiSample	mColorTex;

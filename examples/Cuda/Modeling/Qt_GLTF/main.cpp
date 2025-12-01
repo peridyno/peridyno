@@ -1,4 +1,4 @@
-#include <QtApp.h>
+#include "UbiApp.h"
 using namespace dyno;
 
 #include "RigidBody/initializeRigidBody.h"
@@ -13,7 +13,10 @@ using namespace dyno;
 #include "GltfLoader.h"
 
 #include <GLRenderEngine.h>
-
+#include "Topology/MaterialManager.h"
+#include "Break_MakeTextureMesh.h"
+#include "GLPhotorealisticRender.h"
+#include "ImageLoader.h"
 /**
  * @brief This example demonstrate how to load plugin libraries in a static way
  */
@@ -27,13 +30,35 @@ int main()
 	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
 	gltf->varFileName()->setValue(std::string(getAssetPath() + "Jeep/JeepGltf/jeep.gltf"));
 
-	// hard code
-	// car body material
-	gltf->stateTextureMesh()->getData().materials()[5]->metallic = 1.f;
-	gltf->stateTextureMesh()->getData().materials()[5]->roughness = 0.15f;
-	// wheel
-	gltf->stateTextureMesh()->getData().materials()[4]->metallic = 0.f;
-	gltf->stateTextureMesh()->getData().materials()[4]->roughness = 1.f;
+	auto srcMaterial = MaterialManager::getMaterial("BodyMaterial");
+	auto customMaterial = MaterialManager::createCustomMaterial(srcMaterial);
+	gltf->graphicsPipeline()->pushModule(srcMaterial);
+
+	auto matPipeline = customMaterial->materialPipeline();
+	gltf->graphicsPipeline()->pushModule(customMaterial);
+		
+	auto texCorrect = std::make_shared<ColorCorrect>();
+	srcMaterial->outTexColor()->connect(texCorrect->inTexture());
+	texCorrect->varSaturation()->setValue(0);
+	texCorrect->outTexture()->connect(customMaterial->inTexColor());
+	matPipeline->pushModule(texCorrect);
+	gltf->graphicsPipeline()->pushModule(texCorrect);
+	
+	auto image = std::make_shared<ImageLoaderModule>();
+	image->varImagePath()->setValue(std::string(getAssetPath() + "Jeep/JeepGltf/jeep_body_camouflage.png"));
+	matPipeline->pushModule(image);
+
+	matPipeline->updateMaterialPipline();
+	gltf->graphicsPipeline()->pushModule(image);
+
+	auto assignMaterial = std::make_shared<AssignTextureMeshMaterial<DataType3f>>();
+	assignMaterial->varShapeIndex()->setValue(5);
+	assignMaterial->varMaterialName()->setValue(customMaterial->getName());
+	auto textureRender = gltf->graphicsPipeline()->findFirstModule<GLPhotorealisticRender>();
+	if(textureRender)
+		assignMaterial->outTextureMesh()->connect(textureRender->inTextureMesh());
+	gltf->stateTextureMesh()->connect(assignMaterial->inTextureMesh());
+	gltf->graphicsPipeline()->pushModule(assignMaterial);
 
 	Modeling::initStaticPlugin();
 	RigidBody::initStaticPlugin();
@@ -44,7 +69,8 @@ int main()
 	Multiphysics::initStaticPlugin();
 	dynoIO::initStaticPlugin();
 
-	QtApp app;
+
+	UbiApp app(GUIType::GUI_QT);
 	app.setSceneGraph(scn);
 	app.initialize(1920, 1080);
 

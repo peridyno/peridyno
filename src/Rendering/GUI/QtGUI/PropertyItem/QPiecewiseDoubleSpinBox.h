@@ -190,9 +190,9 @@ namespace dyno
 			if (fabs(this->value() - this->realValue) > (isDouble ? DBL_EPSILON : FLT_EPSILON))
 			{
 				this->setRealValue(this->value());
-				emit editingFinishedWithValue(this->realValue);
-
 			}
+			emit editingFinishedWithValue(this->realValue);
+
 		}
 
 		void triggerEditingFinished(double value)

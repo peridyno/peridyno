@@ -51,6 +51,7 @@ namespace dyno
 		void setNumBlurIterations(int iter);
 		void setLightRadius(float radius);
 		float getLightRadius();
+		void getMergedBoundingBoxInFrustum(const glm::mat4& proj, const std::vector<Vec3f>& up, const std::vector<Vec3f>& low, Vec3f& resultUp, Vec3f& resultLow);
 
 
 	private:
@@ -72,11 +73,12 @@ namespace dyno
 		// num of blur interations for VSM
 		int				blurIters = 1;
 		float			mLightRadius = 1;
-
+		
 	public:
 
 		// patch to color bleeding, min p_max
 		float			minValue = 0.1f;
-
+		bool			clampToSceneBounds = true;
+		bool			useSceneBounds = false;
 	};
 }

@@ -325,15 +325,9 @@ namespace dyno
 		}
 
 		auto texMesh = this->stateTextureMesh()->getDataPtr();
-		//materials
-		loadGLTFMaterial(*newModel, texMesh, filename);
 
-		
 		loadGLTFShape(*newModel, texMesh, filename, &initialPosition,&initialNormal, &d_mesh_Matrix,&d_shape_meshId, this->stateSkin()->getDataPtr());
-		
-
-
-		
+			
 		this->stateSkin()->getDataPtr()->mesh = texMesh;
 
 		this->stateSkin()->getDataPtr()->initialPosition = initialPosition;
@@ -379,7 +373,7 @@ namespace dyno
 	template<typename TDataType>
 	void GltfLoader<TDataType>::updateTransform()
 	{
-		if (!bool(this->stateTextureMesh()->getDataPtr()->shapes().size()))
+		if (!bool(this->stateTextureMesh()->constDataPtr()->shapes().size()))
 			return;
 		//updateModelTransformMatrix
 		this->updateTransformState();
@@ -391,19 +385,19 @@ namespace dyno
 
 		}
 
-		if (this->stateTextureMesh()->getDataPtr()->vertices().size())
+		if (this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices().size())
 		{
 			//Move by Dir
 			if (true)
 			{
-				cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
+				cuExecute(this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices().size(),
 					ShapeTransform,
 					initialPosition,
-					this->stateTextureMesh()->getDataPtr()->vertices(),
+					this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices(),
 					initialNormal,
-					this->stateTextureMesh()->getDataPtr()->normals(),
+					this->stateTextureMesh()->getDataPtr()->meshDataPtr()->normals(),
 					d_mesh_Matrix,
-					this->stateTextureMesh()->getDataPtr()->shapeIds(),
+					this->stateTextureMesh()->getDataPtr()->meshDataPtr()->shapeIds(),
 					d_shape_meshId
 				);
 			}
@@ -423,13 +417,13 @@ namespace dyno
 		for (uint i = 0; i < shapeNum; i++)
 		{
 			DArray<int> counter;
-			counter.resize(this->stateTextureMesh()->getDataPtr()->vertices().size());
+			counter.resize(this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices().size());
 
 
-			cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
+			cuExecute(this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices().size(),
 				C_Shape_PointCounter,
 				counter,
-				this->stateTextureMesh()->getDataPtr()->shapeIds(),
+				this->stateTextureMesh()->getDataPtr()->meshDataPtr()->shapeIds(),
 				i
 			);
 
@@ -442,10 +436,10 @@ namespace dyno
 			Scan<int> scan;
 			scan.exclusive(counter.begin(), counter.size());
 
-			cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
+			cuExecute(this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices().size(),
 				C_SetupPoints,
 				targetPoints,
-				this->stateTextureMesh()->getDataPtr()->vertices(),
+				this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices(),
 				counter
 			);
 
@@ -468,16 +462,16 @@ namespace dyno
 		}
 
 		d_ShapeCenter.assign(c_shapeCenter);	// Used to "ToCenter"
-		unCenterPosition.assign(this->stateTextureMesh()->getDataPtr()->vertices());
+		unCenterPosition.assign(this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices());
 
 		//ToCenter
 		if (varUseInstanceTransform()->getValue())
 		{
-			cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
+			cuExecute(this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices().size(),
 				ShapeToCenter,
 				unCenterPosition,
-				this->stateTextureMesh()->getDataPtr()->vertices(),
-				this->stateTextureMesh()->getDataPtr()->shapeIds(),
+				this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices(),
+				this->stateTextureMesh()->getDataPtr()->meshDataPtr()->shapeIds(),
 				d_ShapeCenter
 			);
 
@@ -557,7 +551,7 @@ namespace dyno
 				Vec2u& range = skinInfo.skin_VerticeRange[i];
 
 				skinAnimation(initialPosition,
-					mesh->vertices(),
+					mesh->meshDataPtr()->vertices(),
 					this->stateJointInverseBindMatrix()->getData(),
 					this->stateJointsData()->getDataPtr()->mJointWorldMatrix,
 
@@ -574,7 +568,7 @@ namespace dyno
 
 				skinAnimation(
 					initialNormal,
-					mesh->normals(),
+					mesh->meshDataPtr()->normals(),
 					this->stateJointInverseBindMatrix()->getData(),
 					this->stateJointsData()->getDataPtr()->mJointWorldMatrix,
 

@@ -1,0 +1,450 @@
+/**
+ * Copyright 2025 Yuzhong Guo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#pragma once
+#include "Node.h"
+#include "Module/TopologyMapping.h"
+
+#include "Topology/TextureMesh.h"
+#include "Topology/TriangleSet.h"
+#include "Module/ComputeModule.h"
+#include <Field/Color.h>
+#include "Field/FilePath.h"
+#include "Topology/MaterialManager.h"
+
+namespace dyno
+{
+//	class MaterialGroup : public TopologyModule
+//	{
+//	public:
+//		MaterialGroup() {};
+//		~MaterialGroup() = default;
+//		std::shared_ptr<std::vector<std::shared_ptr<Material>>> Materials;
+//
+//		FInstance<TextureMesh>* TexMeshSource = NULL;
+//	};
+//
+//	class ShapeGroup : public TopologyModule
+//	{
+//	public:
+//		ShapeGroup() {};
+//		~ShapeGroup() = default;
+//
+//		std::shared_ptr<std::vector<std::shared_ptr<Shape>>> Shapes;
+//		FInstance<TextureMesh>* TexMeshSource = NULL;
+//	};
+//
+//
+//	template<typename TDataType>
+//	class BreakTextureMesh : public ComputeModule
+//	{
+//		DECLARE_TCLASS(BreakTextureMesh, TDataType)
+//	public:
+//		typedef typename TDataType::Real Real;
+//		typedef typename TDataType::Coord Coord;
+//		typedef typename ::dyno::Transform<Real, 3> Transform;
+//
+//		BreakTextureMesh();
+//		~BreakTextureMesh();
+//		void compute() override;
+//		std::string caption() override { return "BreakTextureMeshModule"; }
+//		void breakTexMesh();
+//
+//		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "");
+//
+//		DEF_ARRAY_OUT(Vec3f, Vertices, DeviceType::GPU, "");
+//		DEF_ARRAY_OUT(Vec3f, Normals, DeviceType::GPU, "");
+//		DEF_ARRAY_OUT(Vec2f, TexCoords, DeviceType::GPU, "");
+//		DEF_ARRAY_OUT(uint, ShapeIds, DeviceType::GPU, "");
+//
+//		DEF_INSTANCE_OUT(MaterialGroup, MaterialGroup, "");
+//		DEF_INSTANCE_OUT(ShapeGroup, ShapeGroup, "");
+//
+//	protected:
+//
+//	};
+//
+//	template<typename TDataType>
+//	class MakeTextureMesh : public ComputeModule
+//	{
+//		DECLARE_TCLASS(MakeTextureMesh, TDataType)
+//	public:
+//		typedef typename TDataType::Real Real;
+//		typedef typename TDataType::Coord Coord;
+//		typedef typename ::dyno::Transform<Real, 3> Transform;
+//
+//		MakeTextureMesh();
+//		~MakeTextureMesh();
+//		void compute() override;
+//
+//		void onFieldChanged();
+//		std::string caption() override { return "MakeTextureMesh"; }
+//
+//		DEF_INSTANCE_OUT(TextureMesh, TextureMesh, "");
+//
+//		DEF_ARRAY_IN(Vec3f, Vertices, DeviceType::GPU, "");
+//		DEF_ARRAY_IN(Vec3f, Normals, DeviceType::GPU, "");
+//		DEF_ARRAY_IN(Vec2f, TexCoords, DeviceType::GPU, "");
+//		DEF_ARRAY_IN(uint, ShapeIds, DeviceType::GPU, "");
+//
+//		DEF_INSTANCE_IN(MaterialGroup, MaterialGroup, "");
+//		DEF_INSTANCE_IN(ShapeGroup, ShapeGroup, "");
+//
+//	protected:
+//		
+//	};
+//
+//	template<typename TDataType>
+//	class GetMaterialFromGroup : public ComputeModule
+//	{
+//		DECLARE_TCLASS(GetMaterialFromGroup, TDataType)
+//	public:
+//		typedef typename TDataType::Real Real;
+//		typedef typename TDataType::Coord Coord;
+//		typedef typename ::dyno::Transform<Real, 3> Transform;
+//
+//		GetMaterialFromGroup() ;
+//		~GetMaterialFromGroup() {};
+//		void compute() override;
+//		void onIndexChanged();
+//		void updateMaterial();
+//		std::string caption() override { return "GetMaterialFromGroup"; }
+//
+//		DEF_VAR(uint, Index, 0, "");
+//
+//		DEF_VAR(Color, Color, Color(1),"");
+//		DEF_VAR(float, Metallic, 0, "");
+//		DEF_VAR(float, Roughness, 0, "");
+//		DEF_VAR(float, Alpha, 0, "");
+//		DEF_VAR(float, BumpScale, 0, "");
+//
+//		DEF_INSTANCE_IN(MaterialGroup, MaterialGroup, "");
+//		DEF_INSTANCE_OUT(Material, Material, "");
+//
+//		DEF_ARRAY2D_OUT(Vec4f, TexColor, DeviceType::GPU, "TexColor");
+//		DEF_ARRAY2D_OUT(Vec4f, TexBump, DeviceType::GPU, "texBump");
+//		DEF_ARRAY2D_OUT(Vec4f, TexORM, DeviceType::GPU, "texORM");
+//		DEF_ARRAY2D_OUT(Vec4f, TexAlpha, DeviceType::GPU, "texAlpha");
+//
+//	protected:
+//
+//	private:
+//		std::shared_ptr<Material> mMaterial = NULL;
+//	};
+//
+//	template<typename TDataType>
+//	class GetShapeFromGroup : public ComputeModule
+//	{
+//		DECLARE_TCLASS(GetShapeFromGroup, TDataType)
+//	public:
+//		typedef typename TDataType::Real Real;
+//		typedef typename TDataType::Coord Coord;
+//		typedef typename ::dyno::Transform<Real, 3> Transform;
+//
+//		GetShapeFromGroup();
+//		~GetShapeFromGroup() {};
+//
+//		void onFieldChanged();
+//		void compute() override { onFieldChanged(); };
+//		std::string caption() override { return "GetShapeFromGroup"; }
+//
+//		DEF_VAR(uint, Index, 0, "");
+//
+//		DEF_INSTANCE_IN(ShapeGroup, ShapeGroup, "");
+//		DEF_INSTANCE_IN(Material, MaterialOverride, "");
+//		DEF_INSTANCE_OUT(Shape, Shape, "");
+//
+//	protected:
+//
+//	private:
+//		std::shared_ptr<Material> mMaterial = NULL;
+//	};
+//
+//
+//	template<typename TDataType>
+//	class MaterialBinder : public ComputeModule
+//	{
+//		DECLARE_TCLASS(MaterialBinder, TDataType)
+//	public:
+//		typedef typename TDataType::Real Real;
+//		typedef typename TDataType::Coord Coord;
+//		typedef typename ::dyno::Transform<Real, 3> Transform;
+//
+//		MaterialBinder();
+//		~MaterialBinder() {};
+//
+//		void onFieldChanged();
+//		void compute() override { onFieldChanged(); };
+//		std::string caption() override { return "MaterialBinder"; }
+//
+//		DEF_INSTANCE_IN(Shape, Shape, "");
+//		DEF_INSTANCE_IN(Material, Material, "");
+//		DEF_INSTANCE_OUT(Shape, Shape, "");
+//
+//	protected:
+//
+//	};
+//
+//	template<typename TDataType>
+//	class MakeShapeGroup : public ComputeModule
+//	{
+//		DECLARE_TCLASS(MakeShapeGroup, TDataType)
+//	public:
+//		typedef typename TDataType::Real Real;
+//		typedef typename TDataType::Coord Coord;
+//		typedef typename ::dyno::Transform<Real, 3> Transform;
+//
+//		MakeShapeGroup();
+//		~MakeShapeGroup() {};
+//
+//		void onFieldChanged();
+//		void compute() override { onFieldChanged(); };
+//		std::string caption() override { return "MakeShapeGroup"; }
+//
+//		DEF_INSTANCE_IN(Shape, Shape0, "");
+//		DEF_INSTANCE_IN(Shape, Shape1, "");
+//		DEF_INSTANCE_IN(Shape, Shape2, "");
+//		DEF_INSTANCE_IN(Shape, Shape3, "");
+//		DEF_INSTANCE_IN(Shape, Shape4, "");
+//		DEF_INSTANCE_IN(Shape, Shape5, "");
+//		DEF_INSTANCE_IN(Shape, Shape6, "");
+//		DEF_INSTANCE_IN(Shape, Shape7, "");
+//		DEF_INSTANCE_IN(Shape, Shape8, "");
+//		DEF_INSTANCE_IN(Shape, Shape9, "");
+//
+//		DEF_INSTANCE_OUT(ShapeGroup, ShapeGroup, "");
+//
+//	protected:
+//
+//
+//	private:
+//		std::vector<FInstance<Shape>*> ShapeInstances;
+//	};
+//
+//
+//	template<typename TDataType>
+//	class TextureMeshCorrect : public ComputeModule
+//	{
+//		DECLARE_TCLASS(TextureMeshCorrect, TDataType)
+//	public:
+//		typedef typename TDataType::Real Real;
+//		typedef typename TDataType::Coord Coord;
+//		typedef typename ::dyno::Transform<Real, 3> Transform;
+//
+//		TextureMeshCorrect();
+//		~TextureMeshCorrect() {};
+//
+//		void IndexChange();
+//		void onFieldChanged();
+//		void compute() override { onFieldChanged(); };
+//		std::string caption() override { return "TextureMeshCorrect"; }
+//
+//		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "");
+//		//Texture
+//		DEF_VAR(uint,ShapeIndex,0,"");
+//
+//		DEF_ARRAY2D_IN(Vec4f, ColorTextureOverride, DeviceType::GPU, "ColorTextureOverride");
+//		DEF_ARRAY2D_IN(Vec4f, NormalTextureOverride, DeviceType::GPU, "NormalTextureOverride");
+//		DEF_ARRAY2D_IN(Vec4f, ORMTextureOverride, DeviceType::GPU, "ORMTextureOverride");
+//		DEF_ARRAY2D_IN(Vec4f, AlphaTextureOverride, DeviceType::GPU, "AlphaTextureOverride");
+//
+//		//Color Correct
+//		DEF_VAR(float, Saturation, 1, "");
+//		DEF_VAR(Vec3f, Offset, Vec3f(0), "");
+//		DEF_VAR(float, Contrast, 1, "");
+//		DEF_VAR(float, Gamma, 1, "");
+//
+//		//Bump
+//		DEF_VAR(float, BumpScale, 0, "");
+//
+//		//ORM
+//		DEF_VAR(float, Metallic, 0, "");
+//		DEF_VAR(float, Roughness, 0, "");
+//		DEF_VAR(float, Alpha, 1, "");
+//		DEF_VAR(float, AO, 1, "");
+//
+//		DEF_INSTANCE_OUT(TextureMesh, TextureMesh, "");
+//
+//	protected:
+//
+//	};
+//
+//
+
+	class ColorCorrect : public MaterialManagedModule
+	{
+		DECLARE_CLASS(ColorCorrect)
+	public:
+
+		ColorCorrect();
+		ColorCorrect(std::shared_ptr<ColorCorrect> other)
+		{
+			this->varSaturation()->setValue(other->varSaturation()->getValue());
+			this->varHUEOffset()->setValue(other->varHUEOffset()->getValue());
+			this->varContrast()->setValue(other->varContrast()->getValue());
+			this->varGamma()->setValue(other->varGamma()->getValue());
+			this->varTintColor()->setValue(other->varTintColor()->getValue());
+
+			other->inTexture()->getSource()->connect(this->inTexture());
+
+			if (!other->outTexture()->isEmpty())
+			{
+				if (this->outTexture()->isEmpty())
+					this->outTexture()->allocate();
+				this->outTexture()->assign(other->outTexture()->getData());
+			}
+			initial();
+		}
+		~ColorCorrect() {};
+
+		void onFieldChanged();
+		void updateImpl() override { onFieldChanged(); };
+		std::string caption() override { return "ColorCorrect"; }
+
+		void initial();
+
+		DEF_ARRAY2D_IN(Vec4f, Texture, DeviceType::GPU, "ColorTextureOverride");
+
+		//Color Correct
+		DEF_VAR(float, Saturation, 1, "");
+		DEF_VAR(float, HUEOffset, 0, "");
+		DEF_VAR(float, Contrast, 1, "");
+		DEF_VAR(float, Gamma, 1, "");
+		DEF_VAR(Color, TintColor, Color(1), "");
+		DEF_VAR(float, TintIntensity,0,"");
+		DEF_ARRAY2D_OUT(Vec4f, Texture, DeviceType::GPU,"");
+
+	protected:
+		virtual std::shared_ptr<MaterialManagedModule> clone() const override
+		{
+			std::shared_ptr<MaterialManagedModule> materialPtr = MaterialManager::getMaterialManagedModule(this->getName());
+			if (!materialPtr)
+			{
+				printf("Error: newColorCorrect::clone() Failed!! \n");
+				return nullptr;
+			}
+
+			std::shared_ptr<ColorCorrect> colorCorrect = std::dynamic_pointer_cast<ColorCorrect>(materialPtr);
+			if (!colorCorrect)
+			{
+				printf("Error: newColorCorrect::clone() Cast Failed!!  \n");
+				return nullptr;
+			}
+
+			std::shared_ptr<ColorCorrect> newColorCorrect(new ColorCorrect(colorCorrect));
+
+			return newColorCorrect;
+		}
+	};
+
+
+	/*template<typename TDataType>
+	class TempUpdate : public ComputeModule
+	{
+		DECLARE_TCLASS(TempUpdate, TDataType)
+	public:
+		typedef typename TDataType::Real Real;
+		typedef typename TDataType::Coord Coord;
+		typedef typename ::dyno::Transform<Real, 3> Transform;
+
+		TempUpdate() 
+		{
+			auto updateButton = std::make_shared<FCallBackFunc>(std::bind(&TempUpdate<TDataType>::onFieldChanged, this));
+			this->varUpdate()->attach(updateButton);
+		}
+		~TempUpdate() {};
+
+		void onFieldChanged();
+		void compute() override { };
+		std::string caption() override { return "TempUpdateButton"; }
+		
+		void setPipeline(std::shared_ptr<MaterialPipeline>pipeline) { matPipeline = pipeline; }
+
+		DEF_VAR(bool, Update, false, "");
+
+		DEF_ARRAY2D_OUT(Vec4f, Texture, DeviceType::GPU, "");
+
+		std::shared_ptr<MaterialPipeline> matPipeline = NULL;
+	protected:
+
+	};*/
+
+
+	template<typename TDataType>
+	class AssignTextureMeshMaterial : public ComputeModule
+	{
+		DECLARE_TCLASS(AssignTextureMeshMaterial, TDataType)
+
+	public:
+		typedef typename TDataType::Real Real;
+		typedef typename TDataType::Coord Coord;
+		typedef typename ::dyno::Transform<Real, 3> Transform;
+
+		AssignTextureMeshMaterial();
+		~AssignTextureMeshMaterial()
+		{
+			removeMaterialReference();
+		};
+
+		void updateAssign();
+		void compute() override;
+
+		std::shared_ptr<Module> getSelfPtr()
+		{
+			std::shared_ptr<Module> foundModule = nullptr;
+			if (this->getParentNode()) 
+			{
+				const auto& modules = this->getParentNode()->getModuleList();
+
+				for (const auto& modulePtr : modules) {
+					if (modulePtr->objectId() == this->objectId()) {
+						foundModule = modulePtr;
+						break;
+					}
+				}
+
+				if (foundModule) {
+					std::cout << "found Module£¬ID = " << foundModule->objectId() << std::endl;
+
+				}
+				else {
+					std::cout << "not found Module" << std::endl;
+				}
+			}
+			
+			return foundModule;
+		}
+
+		std::string caption() override { return "AssignTextureMeshMaterial"; }
+
+		//Texture
+		DEF_VAR(uint, ShapeIndex, 0, "");
+		DEF_VAR(std::string, MaterialName, "", "");
+		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "");
+		DEF_INSTANCE_OUT(TextureMesh, TextureMesh, "");
+
+	public:
+		std::shared_ptr<Material> varMat = nullptr;
+
+	protected:
+		void removeMaterialReference()
+		{
+			auto selfPtr = getSelfPtr();
+
+			if (varMat && selfPtr)
+				varMat->removeAssigner(selfPtr);
+		}
+	};
+}

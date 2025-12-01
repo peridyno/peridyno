@@ -12,7 +12,10 @@ layout(std140, binding = 0) uniform RenderParams
 	vec4 intensity;
 	vec4 direction;
 	vec4 camera;
-	vec4 shadowType;
+	float ShadowMultiplier;
+	float SampleRoughness;
+	float SamplePower;
+	float SampleOffset;
 	// parameters
 	int width;
 	int height;

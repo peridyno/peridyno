@@ -15,57 +15,59 @@ namespace dyno
 	{
 		this->setName("ObjMeshRenderer");
 
-		this->varMaterialIndex()->attach(std::make_shared<FCallBackFunc>(
+		this->varMaterialShapeIndex()->attach(std::make_shared<FCallBackFunc>(
 			[=]() {
-				uint idx = this->varMaterialIndex()->getValue();
+				uint idx = this->varMaterialShapeIndex()->getValue();
 
-				if (mTextureMesh.materials().size() > idx)
+				if (idx < mTextureMesh.shapes().size())
 				{
-					auto material = mTextureMesh.materials()[idx];
-
-					this->varAlpha()->setValue(material->alpha);
-					this->varMetallic()->setValue(material->metallic);
-					this->varRoughness()->setValue(material->roughness);
-					this->varBaseColor()->setValue(Color(material->baseColor.x, material->baseColor.y, material->baseColor.z));
+					auto material = mTextureMesh.shapes()[idx]->material;
+					if (material) 
+					{
+						this->varAlpha()->setValue(material->alpha);
+						this->varMetallic()->setValue(material->metallic);
+						this->varRoughness()->setValue(material->roughness);
+						this->varBaseColor()->setValue(Color(material->baseColor.x, material->baseColor.y, material->baseColor.z));
+					}
 				}
 			}));
 
 		this->varMetallic()->attach(
 			std::make_shared<FCallBackFunc>(
 				[=]() {
-					uint idx = this->varMaterialIndex()->getValue();
+					uint idx = this->varMaterialShapeIndex()->getValue();
 
-					if (mTextureMesh.materials().size() > idx)
+					if (idx < mTextureMesh.shapes().size())
 					{
-						auto material = mTextureMesh.materials()[idx];
-
-						material->metallic = this->varMetallic()->getValue();
+						auto material = mTextureMesh.shapes()[idx]->material;
+						if (material) 
+							material->metallic = this->varMetallic()->getValue();
 					}
 				}));
 
 		this->varRoughness()->attach(
 			std::make_shared<FCallBackFunc>(
 				[=]() {
-					uint idx = this->varMaterialIndex()->getValue();
+					uint idx = this->varMaterialShapeIndex()->getValue();
 
-					if (mTextureMesh.materials().size() > idx)
+					if (idx < mTextureMesh.shapes().size())
 					{
-						auto material = mTextureMesh.materials()[idx];
-
-						material->roughness = this->varRoughness()->getValue();
+						auto material = mTextureMesh.shapes()[idx]->material;
+						if (material)
+							material->roughness = this->varRoughness()->getValue();
 					}
 				}));
 
 		this->varAlpha()->attach(
 			std::make_shared<FCallBackFunc>(
 				[=]() {
-					uint idx = this->varMaterialIndex()->getValue();
+					uint idx = this->varMaterialShapeIndex()->getValue();
 
-					if (mTextureMesh.materials().size() > idx)
+					if (idx < mTextureMesh.shapes().size())
 					{
-						auto material = mTextureMesh.materials()[idx];
-
-						material->roughness = this->varAlpha()->getValue();
+						auto material = mTextureMesh.shapes()[idx]->material;
+						if (material)
+							material->roughness = this->varAlpha()->getValue();
 					}
 				}));
 
@@ -141,21 +143,20 @@ namespace dyno
 	{
 		if (this->inTextureMesh()->isModified()) {
 			mTextureMesh.load(this->inTextureMesh()->constDataPtr());
-			this->varMaterialIndex()->setRange(0, mTextureMesh.materials().size() - 1);
+			this->varMaterialShapeIndex()->setRange(0,mTextureMesh.shapes().size());
 		}
 
 #ifdef CUDA_BACKEND
 		auto texMesh = this->inTextureMesh()->constDataPtr();
-		if (texMesh->materials().size() > 0)
-		{
-			mTangentSpaceConstructor->update();
 
-			if (!mTangentSpaceConstructor->outTangent()->isEmpty())
-			{
-				mTangent.load(mTangentSpaceConstructor->outTangent()->constData());
-				mBitangent.load(mTangentSpaceConstructor->outBitangent()->constData());
-			}
+		mTangentSpaceConstructor->update();
+
+		if (!mTangentSpaceConstructor->outTangent()->isEmpty())
+		{
+			mTangent.load(mTangentSpaceConstructor->outTangent()->constData());
+			mBitangent.load(mTangentSpaceConstructor->outBitangent()->constData());
 		}
+		
 #endif
 	}
 

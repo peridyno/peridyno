@@ -126,8 +126,6 @@ namespace dyno
 		return corners;
 	}
 
-
-	// 计算视锥平面
 	glm::vec4 computePlane(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c)
 	{
 		glm::vec3 normal = glm::normalize(glm::cross(b - a, c - a));
@@ -171,7 +169,7 @@ namespace dyno
 	}
 
 
-	void getMergedBoundingBoxInFrustum(const glm::mat4& proj, const std::vector<Vec3f>& up, const std::vector<Vec3f>& low, Vec3f& resultUp, Vec3f& resultLow)
+	void ShadowMap::getMergedBoundingBoxInFrustum(const glm::mat4& proj, const std::vector<Vec3f>& up, const std::vector<Vec3f>& low, Vec3f& resultUp, Vec3f& resultLow)
 	{
 		auto frustumCorners = getFrustumCorners(proj);
 		auto planes = getFrustumPlanes(frustumCorners);
@@ -203,7 +201,6 @@ namespace dyno
 				}
 			}
 		}
-
 	}
 
 	glm::mat4 getLightViewMatrix(glm::vec3 lightDir)
@@ -268,6 +265,41 @@ namespace dyno
 		return lightProj;
 	}
 
+	void GetBoundingBoxOfAllNodes(dyno::SceneGraph* scene, std::vector<Vec3f>& uppers, std::vector<Vec3f>& lowers, bool clampToSceneBounds)
+	{
+		if (!scene->isEmpty())
+		{
+			Vec3f sceneLower = scene->getLowerBound();
+			Vec3f sceneUpper = scene->getUpperBound();
+
+			for (SceneGraph::Iterator itor = scene->begin(); itor != scene->end(); itor++) {
+				auto node = itor.get();
+				if (node->isVisible())
+				{
+					if (clampToSceneBounds)
+					{
+						uppers.push_back(Vec3f(
+							node->boundingBox().upper.x > sceneUpper.x ? sceneUpper.x : node->boundingBox().upper.x,
+							node->boundingBox().upper.y > sceneUpper.y ? sceneUpper.y : node->boundingBox().upper.y,
+							node->boundingBox().upper.z > sceneUpper.z ? sceneUpper.z : node->boundingBox().upper.z
+						));
+						lowers.push_back(Vec3f(
+							node->boundingBox().lower.x < sceneLower.x ? sceneLower.x : node->boundingBox().lower.x,
+							node->boundingBox().lower.y < sceneLower.y ? sceneLower.y : node->boundingBox().lower.y,
+							node->boundingBox().lower.z < sceneLower.z ? sceneLower.z : node->boundingBox().lower.z
+						));
+					}
+					else
+					{
+						uppers.push_back(node->boundingBox().upper);
+						lowers.push_back(node->boundingBox().lower);
+					}
+				}
+			}
+
+		}
+	}
+
 	void ShadowMap::update(dyno::SceneGraph* scene, const dyno::RenderParams& rparams)
 	{
 		if (sizeUpdated)
@@ -284,24 +316,20 @@ namespace dyno
 		mFramebuffer.clearDepth(1.0);
 		mFramebuffer.clearColor(1.0, 1.0, 1.0, 1.0);
 
-		std::vector<Vec3f> uppers;
-		std::vector<Vec3f> lowers;
-
-		if (!scene->isEmpty()) 
+		Vec3f resultUp, resultLow;
+		if (useSceneBounds) 
 		{
-			for (SceneGraph::Iterator itor = scene->begin(); itor != scene->end(); itor++) {
-				auto node = itor.get();
-				if (node->isVisible()) 
-				{
-					uppers.push_back(node->boundingBox().upper);
-					lowers.push_back(node->boundingBox().lower);
-				}
-			}
+			resultUp = scene->getUpperBound();
+			resultLow = scene->getLowerBound();
 		}
+		else 
+		{
+			std::vector<Vec3f> uppers;
+			std::vector<Vec3f> lowers;
+			GetBoundingBoxOfAllNodes(scene, uppers, lowers, clampToSceneBounds);
 
-		Vec3f resultUp,resultLow;
-		getMergedBoundingBoxInFrustum(rparams.transforms.proj, uppers, lowers, resultUp, resultLow);
-
+			getMergedBoundingBoxInFrustum(rparams.transforms.proj, uppers, lowers, resultUp, resultLow);
+		}
 
 		if (rparams.light.mainLightShadow > 0.f	&& 
 			scene != nullptr && !scene->isEmpty())
@@ -371,7 +399,6 @@ namespace dyno
 			shadow.minValue = minValue;
 			//shadow.lightRadius = mLightRadius;
 			//shadow.range = this->blurIters;
-
 
 			mShadowUniform.load(&shadow, sizeof(shadow));
 		}

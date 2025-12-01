@@ -27,6 +27,8 @@
 
 #include "screen.vert.h"
 #include "blend.frag.h"
+#include "postprocess.frag.h"
+#include "surface.frag.h"
 
 namespace dyno
 {
@@ -135,6 +137,11 @@ namespace dyno
 		mBlendProgram = Program::createProgramSPIRV(
 			SCREEN_VERT, sizeof(SCREEN_VERT),
 			BLEND_FRAG, sizeof(BLEND_FRAG));
+
+
+		mPostProcessProgram = Program::createProgramSPIRV(
+			SCREEN_VERT, sizeof(SCREEN_VERT),
+			POSTPROCESS_FRAG, sizeof(POSTPROCESS_FRAG));
 	}
 
 
@@ -202,6 +209,25 @@ namespace dyno
 
 			this->setUseEnvmapBackground(true);
 			this->setEnvmapScale(1.0f);
+		}
+	}
+
+	int GLRenderEngine::getShadowMapSize()
+	{
+		if (!mShadowMap)
+		{
+			shadowQuality = mShadowMap->getSize();
+		}
+		return shadowQuality;
+	}
+
+	void GLRenderEngine::updateShadowMapAttribute()
+	{
+		if (!mShadowMap) 
+		{
+			mShadowMap->setSize(shadowQuality);
+			mShadowMap->clampToSceneBounds = bClampToSceneBound;
+			mShadowMap->useSceneBounds = bUseSceneBoundForShadow;
 		}
 	}
 
@@ -427,7 +453,8 @@ namespace dyno
 			mRenderHelper->drawBBox(params, p0, p1);
 		}
 
-		// Step 6: draw to final framebuffer with fxaa filter
+
+		//// Step 6: draw to final framebuffer with fxaa filter
 		{
 			// restore previous framebuffer
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);

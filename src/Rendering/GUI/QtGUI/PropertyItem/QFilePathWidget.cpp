@@ -15,7 +15,7 @@ namespace dyno
 	QStringFieldWidget::QStringFieldWidget(FBase* field)
 		: QFieldWidget(field)
 	{
-		FVar<std::string>* f = TypeInfo::cast<FVar<std::string>>(field);
+		f = TypeInfo::cast<FVar<std::string>>(field);
 
 		//this->setStyleSheet("border:none");
 		QHBoxLayout* layout = new QHBoxLayout;
@@ -42,6 +42,7 @@ namespace dyno
 		layout->setSpacing(3);
 
 		connect(fieldname, &QLineEdit::textChanged, this, &QStringFieldWidget::updateField);
+		QObject::connect(this, SIGNAL(fieldChanged()), this, SLOT(updateWidget()));
 	}
 
 	void QStringFieldWidget::updateField(QString str)
@@ -53,6 +54,12 @@ namespace dyno
 		}
 		f->setValue(str.toStdString());
 		f->update();
+	}
+
+	void QStringFieldWidget::updateWidget()
+	{
+		std::string str = f->getValue();
+		fieldname->setText(QString::fromStdString(str));
 	}
 
 	QFilePathWidget::QFilePathWidget(FBase* field)
@@ -146,5 +153,7 @@ namespace dyno
 
 		emit fieldChanged();
 	}
+
+
 }
 

@@ -120,7 +120,7 @@ namespace dyno
 					Vec2u& range = skinInfo.skin_VerticeRange[i];
 
 					skinAnimation(skinInfo.initialPosition,
-						textureMesh->vertices(),
+						textureMesh->meshDataPtr()->vertices(),
 						jointInfo.mJointInverseBindMatrix,
 						jointInfo.mJointWorldMatrix,
 
@@ -137,7 +137,7 @@ namespace dyno
 
 					skinAnimation(
 						skinInfo.initialNormal,
-						textureMesh->normals(),
+						textureMesh->meshDataPtr()->normals(),
 						jointInfo.mJointInverseBindMatrix,
 						jointInfo.mJointWorldMatrix,
 

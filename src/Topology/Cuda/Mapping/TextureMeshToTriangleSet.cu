@@ -79,7 +79,7 @@ namespace dyno
 		auto& vertices = ts->getPoints();
 		auto& indices = ts->triangleIndices();
 
-		vertices.assign(mesh->vertices());
+		vertices.assign(mesh->meshDataPtr()->vertices());
 
 		if (indices.size() != indexNum)
 		{
@@ -110,7 +110,7 @@ namespace dyno
 			cuExecute(vertices.size(),
 				TM2TS_TransformVertices,
 				vertices,
-				mesh->shapeIds(),
+				mesh->meshDataPtr()->shapeIds(),
 				devT,
 				this->inTransform()->constData());
 
@@ -133,7 +133,7 @@ namespace dyno
 			cuExecute(vertices.size(),
 				TransformVertices,
 				vertices,
-				mesh->shapeIds(),
+				mesh->meshDataPtr()->shapeIds(),
 				devT
 			);
 

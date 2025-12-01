@@ -46,6 +46,26 @@ void dyno::RenderWindow::setMainLightDirection(glm::vec3 dir)
 	mRenderParams.light.mainLightDirection = -dir;
 }
 
+void dyno::RenderWindow::setMainLightShadowMultiplier(float ShadowMultiplier)
+{
+	mRenderParams.light.ShadowMultiplier = ShadowMultiplier;
+}
+
+void dyno::RenderWindow::setMainLightSampleRoughness(float SampleRoughness)
+{
+	mRenderParams.light.SampleRoughness = SampleRoughness;
+}
+
+void dyno::RenderWindow::setMainLightSamplePower(float SamplePower)
+{
+	mRenderParams.light.SamplePower = SamplePower;
+}
+
+void dyno::RenderWindow::setMainLightSampleOffset(float SampleOffset)
+{
+	mRenderParams.light.SampleOffset = SampleOffset;
+}
+
 const dyno::Selection& dyno::RenderWindow::select(int x, int y, int w, int h)
 {
 	selectedObject = mRenderEngine->select(x, y, w, h);

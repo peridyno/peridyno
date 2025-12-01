@@ -19,49 +19,34 @@
 #include "Module/TopologyModule.h"
 #include "Primitive/Primitive3D.h"
 #include "TriangleSet.h"
-
+#include <set>
+#include <regex>
+#include "MaterialManager.h"
 
 namespace dyno
 {
-	// simple PBR material model
-	class Material : public Object
-	{
-	public:
-		Material() {};
-		~Material() override {
-			texColor.clear();
-			texBump.clear();
-		};
-
-	public:
-
-		Vec3f baseColor = { 0.8f, 0.8f, 0.8f };
-		
-		float metallic  = 0.0f;
-		float roughness = 1.0f;
-		float alpha = 1.0f;
-
-		DArray2D<Vec4f> texColor;
-
-		DArray2D<Vec4f> texBump;
-
-		DArray2D<Vec4f> texORM;
-
-		DArray2D<Vec4f> texAlpha;
-
-		float bumpScale = 1.f;
-	};
-
+	
 	class Shape : public Object
 	{
 	public:
 		Shape() {};
-		~Shape() override {
+		Shape(const Shape& other) 
+		{
+			this->vertexIndex.assign(other.vertexIndex);
+			this->normalIndex.assign(other.normalIndex);
+			this->texCoordIndex.assign(other.texCoordIndex);
+			this->boundingBox = other.boundingBox;
+			this->boundingTransform = other.boundingTransform;
+			this->material = other.material;
+		}
+		~Shape() override { clear(); };
+		void clear() 
+		{
 			vertexIndex.clear();
 			normalIndex.clear();
 			texCoordIndex.clear();
-		};
-
+			material = nullptr;
+		}
 		DArray<TopologyModule::Triangle> vertexIndex;
 		DArray<TopologyModule::Triangle> normalIndex;
 		DArray<TopologyModule::Triangle> texCoordIndex;
@@ -73,19 +58,54 @@ namespace dyno
 
 	};
 
-	class TextureMesh : public TopologyModule
+
+	class MeshData : public Object
 	{
 	public:
-		TextureMesh();
-		~TextureMesh() override;
+
+		MeshData() {};
+		~MeshData() { clear(); };
+		void clear() 
+		{
+			mVertices.clear();
+			mNormals.clear();
+			mTexCoords.clear();
+			mShapeIds.clear();
+		}
+
+		void assign(std::shared_ptr<MeshData> dataPtr)
+		{
+			if (dataPtr) 
+			{
+				mVertices.assign(dataPtr->vertices());
+				mNormals.assign(dataPtr->normals());
+				mTexCoords.assign(dataPtr->texCoords());
+				mShapeIds.assign(dataPtr->shapeIds());
+			}
+		}
 
 		DArray<Vec3f>& vertices() { return mVertices; }
 		DArray<Vec3f>& normals() { return mNormals; }
 		DArray<Vec2f>& texCoords() { return mTexCoords; }
 		DArray<uint>& shapeIds() { return mShapeIds; }
 
+	private:
+		DArray<Vec3f> mVertices;
+		DArray<Vec3f> mNormals;
+		DArray<Vec2f> mTexCoords;
+		DArray<uint> mShapeIds;
+
+	};
+
+	class TextureMesh : public TopologyModule
+	{
+	public:
+		TextureMesh();
+		~TextureMesh() override;
+
+		std::shared_ptr<MeshData>& meshDataPtr();
+
 		std::vector<std::shared_ptr<Shape>>& shapes() { return mShapes; }
-		std::vector<std::shared_ptr<Material>>& materials() { return mMaterials; }
 
 		void merge(const std::shared_ptr<TextureMesh>& texMesh01, const std::shared_ptr<TextureMesh>& texMesh02);
 
@@ -105,12 +125,9 @@ namespace dyno
 		);
 
 	private:
-		DArray<Vec3f> mVertices;
-		DArray<Vec3f> mNormals;
-		DArray<Vec2f> mTexCoords;
-		DArray<uint> mShapeIds;
-
-		std::vector<std::shared_ptr<Material>> mMaterials;
+		std::shared_ptr<MeshData> mMeshData = NULL;
 		std::vector<std::shared_ptr<Shape>> mShapes;
 	};
+
+	
 };

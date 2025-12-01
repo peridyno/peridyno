@@ -173,7 +173,6 @@ namespace dyno
 
 		std::shared_ptr<TextureMesh> texMesh = this->stateTextureMesh()->getDataPtr();
 		texMesh->shapes().resize(1);
-		texMesh->materials().resize(1);
 
 		createTextureMesh();
 
@@ -185,8 +184,8 @@ namespace dyno
 
 		createMaterial();
 
-		auto& TargetPoints = texMesh->vertices();
-		texMesh->shapeIds().assign(std::vector<uint>(TargetPoints.size(), 0));
+		auto& TargetPoints = texMesh->meshDataPtr()->vertices();
+		texMesh->meshDataPtr()->shapeIds().assign(std::vector<uint>(TargetPoints.size(), 0));
 	
 	}
 
@@ -205,10 +204,10 @@ namespace dyno
 		texMesh->shapes()[0] = std::make_shared<Shape>();
 		texMesh->shapes()[0]->vertexIndex.resize(SourceTriangles.size());
 
-		texMesh->vertices().resize(SourceTriangles.size() * 3);
+		texMesh->meshDataPtr()->vertices().resize(SourceTriangles.size() * 3);
 
 		auto& TargetTriangles = texMesh->shapes()[0]->vertexIndex;
-		auto& TargetPoints = texMesh->vertices();
+		auto& TargetPoints = texMesh->meshDataPtr()->vertices();
 
 		// ShapeIndex and rebuild Points;
 		cuExecute(SourceTriangles.size(),
@@ -226,9 +225,9 @@ namespace dyno
 	{
 		std::shared_ptr<TextureMesh> texMesh = this->stateTextureMesh()->getDataPtr();
 		auto& TargetTriangles = texMesh->shapes()[0]->vertexIndex;
-		auto& TargetPoints = texMesh->vertices();
+		auto& TargetPoints = texMesh->meshDataPtr()->vertices();
 		// Normals
-		auto& Normals = texMesh->normals();
+		auto& Normals = texMesh->meshDataPtr()->normals();
 		Normals.resize(TargetPoints.size());
 
 		cuExecute(TargetTriangles.size(),
@@ -248,10 +247,10 @@ namespace dyno
 		if (!bool(texMesh->shapes().size()))
 			return;
 		auto& TargetTriangles = texMesh->shapes()[0]->vertexIndex;
-		auto& TargetPoints = texMesh->vertices();
-		auto& Normals = texMesh->normals();
+		auto& TargetPoints = texMesh->meshDataPtr()->vertices();
+		auto& Normals = texMesh->meshDataPtr()->normals();
 
-		auto& TexCoords = texMesh->texCoords();
+		auto& TexCoords = texMesh->meshDataPtr()->texCoords();
 		TexCoords.resize(TargetPoints.size());
 		//this->statePointColors()->resize(TargetPoints.size());
 		//auto& colors = this->statePointColors()->getData();
@@ -270,14 +269,13 @@ namespace dyno
 	void ConvertToTextureMesh<TDataType>::createMaterial()
 	{
 		std::shared_ptr<TextureMesh> texMesh = this->stateTextureMesh()->getDataPtr();
-		if (texMesh->shapes().empty() | texMesh->vertices().isEmpty())
+		if (texMesh->shapes().empty() | texMesh->meshDataPtr()->vertices().isEmpty())
 			return;
 
 		auto& TargetTriangles = texMesh->shapes()[0]->vertexIndex;
-		auto& TargetPoints = texMesh->vertices();
+		auto& TargetPoints = texMesh->meshDataPtr()->vertices();
 		// Assign Material;
-		texMesh->materials()[0] = std::make_shared<Material>();
-		texMesh->shapes()[0]->material = texMesh->materials()[0];
+		texMesh->shapes()[0]->material = MaterialManager::NewMaterial();
 
 		//set Material
 		dyno::CArray2D<dyno::Vec4f> texture(1, 1);
@@ -286,14 +284,14 @@ namespace dyno
 		if (diffusePath.size())
 		{
 			if (loadTexture(diffusePath.c_str(), texture))
-				texMesh->shapes()[0]->material->texColor.assign(texture);
+				texMesh->shapes()[0]->material->outTexColor()->getDataPtr()->assign(texture);
 		}
 
 		auto bumpPath = this->varNormalTexture()->getValue().string();
 		if (bumpPath.size())
 		{
 			if (loadTexture(bumpPath.c_str(), texture))
-				texMesh->shapes()[0]->material->texBump.assign(texture);
+				texMesh->shapes()[0]->material->outTexBump()->getDataPtr()->assign(texture);
 		}
 
 	}
@@ -310,7 +308,7 @@ namespace dyno
 		auto SourcePoints = triSet->getPoints();
 
 		auto& TargetTriangles = texMesh->shapes()[0]->vertexIndex;
-		auto& TargetPoints = texMesh->vertices();
+		auto& TargetPoints = texMesh->meshDataPtr()->vertices();
 
 		// Move To Center, use Transform
 		Reduction<Coord> reduceBounding;

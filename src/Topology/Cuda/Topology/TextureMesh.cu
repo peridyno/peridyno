@@ -12,9 +12,16 @@ namespace dyno
 		this->clear();
 	}
 
+	std::shared_ptr<MeshData>& TextureMesh::meshDataPtr() 
+	{
+		if (!mMeshData)
+			mMeshData = std::make_shared<MeshData>();
+		return mMeshData;
+	}
+
 	void TextureMesh::safeConvert2TriangleSet(TriangleSet<DataType3f>& triangleSet)
 	{
-		triangleSet.setPoints(this->vertices());
+		triangleSet.setPoints(this->meshDataPtr()->vertices());
 		auto& triangles = triangleSet.triangleIndices();
 
 		int size = 0;
@@ -29,7 +36,7 @@ namespace dyno
 
 	void TextureMesh::convert2TriangleSet(TriangleSet<DataType3f>& triangleSet)
 	{
-		triangleSet.setPoints(this->vertices());
+		triangleSet.setPoints(this->meshDataPtr()->vertices());
 		auto& triangles = triangleSet.triangleIndices();
 		int num = 0;
 		for (size_t i = 0; i < mShapes.size(); i++)
@@ -129,69 +136,55 @@ namespace dyno
 
 	void TextureMesh::merge(const std::shared_ptr<TextureMesh>& texMesh01, const std::shared_ptr<TextureMesh>& texMesh02)
 	{
-		auto vertices01 = texMesh01->vertices();
-		auto vertices02 = texMesh02->vertices();
+		auto vertices01 = texMesh01->meshDataPtr()->vertices();
+		auto vertices02 = texMesh02->meshDataPtr()->vertices();
 
-		this->vertices().resize(vertices01.size() + vertices02.size());
+		this->meshDataPtr()->vertices().resize(vertices01.size() + vertices02.size());
 
-		cuExecute(this->vertices().size(),
+		cuExecute(this->meshDataPtr()->vertices().size(),
 			mergeVec3f,
 			vertices01,
 			vertices02,
-			this->vertices(),
+			this->meshDataPtr()->vertices(),
 			vertices01.size()
 		);
 
-		auto normals01 = texMesh01->normals();
-		auto normals02 = texMesh02->normals();
-		this->normals().resize(normals01.size() + normals02.size());
+		auto normals01 = texMesh01->meshDataPtr()->normals();
+		auto normals02 = texMesh02->meshDataPtr()->normals();
+		this->meshDataPtr()->normals().resize(normals01.size() + normals02.size());
 
-		cuExecute(this->normals().size(),
+		cuExecute(this->meshDataPtr()->normals().size(),
 			mergeVec3f,
 			normals01,
 			normals02,
-			this->normals(),
+			this->meshDataPtr()->normals(),
 			normals01.size()
 		);
 
-		auto texCoords01 = texMesh01->texCoords();
-		auto texCoords02 = texMesh02->texCoords();
-		this->texCoords().resize(texCoords01.size() + texCoords02.size());
+		auto texCoords01 = texMesh01->meshDataPtr()->texCoords();
+		auto texCoords02 = texMesh02->meshDataPtr()->texCoords();
+		this->meshDataPtr()->texCoords().resize(texCoords01.size() + texCoords02.size());
 
-		cuExecute(this->texCoords().size(),
+		cuExecute(this->meshDataPtr()->texCoords().size(),
 			mergeVec2f,
 			texCoords01,
 			texCoords02,
-			this->texCoords(),
+			this->meshDataPtr()->texCoords(),
 			texCoords01.size()
 		);
 
-		auto shapeIds01 = texMesh01->shapeIds();
-		auto shapeIds02 = texMesh02->shapeIds();
-		this->shapeIds().resize(shapeIds01.size() + shapeIds02.size());
+		auto shapeIds01 = texMesh01->meshDataPtr()->shapeIds();
+		auto shapeIds02 = texMesh02->meshDataPtr()->shapeIds();
+		this->meshDataPtr()->shapeIds().resize(shapeIds01.size() + shapeIds02.size());
 
-		cuExecute(this->texCoords().size(),
+		cuExecute(this->meshDataPtr()->texCoords().size(),
 			mergeShapeId,
 			shapeIds01,
 			shapeIds02,
-			this->shapeIds(),
+			this->meshDataPtr()->shapeIds(),
 			shapeIds01.size(),
 			texMesh01->shapes().size()
 		);
-
-
-		auto material01 = texMesh01->materials();
-		auto material02 = texMesh02->materials();
-
-		auto outMaterials = this->materials();
-		outMaterials.clear();
-
-		for (auto it : material01)
-			outMaterials.push_back(it);
-
-		for (auto it : material02)
-			outMaterials.push_back(it);
-
 
 		auto shapes01 = texMesh01->shapes();
 		auto shapes02 = texMesh02->shapes();
@@ -248,16 +241,11 @@ namespace dyno
 		}
 
 		this->shapes() = outShapes;
-		this->materials() = outMaterials;
 	}
 
 	void TextureMesh::clear()
 	{
-		mVertices.clear();
-		mNormals.clear();
-		mTexCoords.clear();
-		mMaterials.clear();
-		mShapeIds.clear();
+		this->mMeshData = NULL;
 		mShapes.clear();
 	}
 
@@ -306,13 +294,13 @@ namespace dyno
 		for (uint i = 0; i < this->shapes().size(); i++)
 		{
 			DArray<int> counter;
-			counter.resize(this->vertices().size());
+			counter.resize(this->meshDataPtr()->vertices().size());
 
 
-			cuExecute(this->vertices().size(),
+			cuExecute(this->meshDataPtr()->vertices().size(),
 				C_Shape_PointCounter,
 				counter,
-				this->shapeIds(),
+				this->meshDataPtr()->shapeIds(),
 				i
 			);
 
@@ -325,10 +313,10 @@ namespace dyno
 			Scan<int> scan;
 			scan.exclusive(counter.begin(), counter.size());
 
-			cuExecute(this->vertices().size(),
+			cuExecute(this->meshDataPtr()->vertices().size(),
 				C_SetupPoints,
 				targetPoints,
-				this->vertices(),
+				this->meshDataPtr()->vertices(),
 				counter
 			);
 

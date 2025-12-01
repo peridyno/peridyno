@@ -182,6 +182,8 @@ vec3 Shade()
 	vec3 ORM = GetORM();
 
 	vec3 ORMCorrect = GammaCorrectWithGamma(ORM,2.2);
+		
+	vec3 artFactor = vec3 (0);
 
 	// for main directional light
 	{
@@ -200,10 +202,18 @@ vec3 Shade()
 			shadowFactor = GetShadowFactorSM(fs_in.position);
 
 		color += shadowFactor * radiance * brdf;
-		//color += shadowFactor * radiance * brdf * mix(vec3(1.0), vec3(ORM.r,ORM.r,ORM.r), 0.3);
-		//color = shadowFactor * vec3(0.0,1.0,1.0) ;
+
+		vec3 brdf_art = EvalPBR(vec3(1), 0, uRenderParams.SampleRoughness, N, V, L);
+		vec3 radiance_art = vec3(1) * uRenderParams.intensity.a;
+		artFactor = shadowFactor * radiance_art * brdf_art;
+		artFactor = artFactor + vec3(uRenderParams.SampleOffset);
+		artFactor = pow(artFactor,vec3(uRenderParams.SamplePower)) - vec3(uRenderParams.SampleOffset);
+		artFactor = GammaCorrect(artFactor);
+		artFactor = (1 - uRenderParams.ShadowMultiplier) + artFactor * uRenderParams.ShadowMultiplier;
+		artFactor = ReinhardTonemap(artFactor);
 	}
-	
+
+
 	// for a simple camera light
 	{
 		// evaluate BRDF
@@ -232,6 +242,7 @@ vec3 Shade()
 	}
 
 	// final color
+	color *= artFactor;
 	color = ReinhardTonemap(color);
 	color = GammaCorrect(color);
 

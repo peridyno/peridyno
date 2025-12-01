@@ -13,6 +13,10 @@ namespace dyno
 
 	void Buffer::create(int target, int usage)
 	{
+		if (id != GL_INVALID_INDEX) 
+		{
+			release();
+		}
 		glGenBuffers(1, &id);
 		this->target = target;
 		this->usage = usage;

@@ -98,7 +98,6 @@ namespace dyno
 		inline XBuffer<Vec2f>& texCoords() { return mTexCoord; }
 
 		inline std::vector<std::shared_ptr<GLShape>>& shapes() { return mShapes; }
-		inline std::vector<std::shared_ptr<GLMaterial>>& materials() { return mMaterials; }
 
 	private:
 		XBuffer<Vec3f> mVertices;
@@ -106,7 +105,6 @@ namespace dyno
 		XBuffer<Vec2f> mTexCoord;
 
 		std::vector<std::shared_ptr<GLShape>> mShapes;
-		std::vector<std::shared_ptr<GLMaterial>> mMaterials;
 
 		bool mInitialized = false;
 	};
