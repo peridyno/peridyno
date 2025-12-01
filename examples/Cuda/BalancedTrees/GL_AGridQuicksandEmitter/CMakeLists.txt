@@ -5,5 +5,5 @@ if(PERIDYNO_LIBRARY_VOLUME)
         ParticleSystem
         UbiGUI
         EulerFluid)
-    add_example(GL_AGridQuicksandEmitter AASDF LIB_DEPENDENCY)
+    add_example(GL_AGridQuicksandEmitter BalancedTrees LIB_DEPENDENCY)
 endif()

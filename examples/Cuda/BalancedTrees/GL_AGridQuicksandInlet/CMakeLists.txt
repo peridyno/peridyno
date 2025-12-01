@@ -1,14 +1,14 @@
 if(PERIDYNO_LIBRARY_VOLUME)
     set(LIB_DEPENDENCY 
-		ABCExporter
+        ABCExporter
         Core 
         Framework 
         IO          
         Volume
-		Modeling
+        Modeling
         ParticleSystem
         UbiGUI
         GLRenderEngine
         EulerFluid)
-    add_example(GL_AGridQuicksand AASDF LIB_DEPENDENCY)
+    add_example(GL_AGridQuicksandInlet BalancedTrees LIB_DEPENDENCY)
 endif()

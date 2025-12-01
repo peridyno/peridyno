@@ -10,5 +10,5 @@ if(PERIDYNO_LIBRARY_VOLUME)
         ObjIO
         QtGUI
         GLRenderEngine)
-    add_example(Qt_AGrid2DBoat AASDF LIB_DEPENDENCY)
+    add_example(Qt_AGrid2DBoat BalancedTrees LIB_DEPENDENCY)
 endif()
