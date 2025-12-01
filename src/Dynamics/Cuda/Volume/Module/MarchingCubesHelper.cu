@@ -1,7 +1,6 @@
 #include "MarchingCubesHelper.h"
 
 #include "Topology/EdgeSet.h"
-
 #include <thrust/sort.h>
 
 namespace dyno
@@ -703,6 +702,7 @@ namespace dyno
 		return flip ? 1 - t : t;
 	}
 
+
 	// A smooth interpolation for vertex
 	template<typename Real, typename Coord>
 	GPU_FUNC	Coord vertexInterp(Real isolevel, Coord p0, Coord p1, Real f0, Real f1, Real h)
@@ -1029,35 +1029,35 @@ namespace dyno
 
 		p = origin + Coord(i * h, j * h, k * h);
 		d = p.distance(plane);
-		cubeindex = uint(d < isoValue);
+		cubeindex = uint(Inside(d, isoValue, h));
 
 		p = origin + Coord((i + 1) * h, j * h, k * h);
 		d = p.distance(plane);
-		cubeindex += uint(d < isoValue) * 2;
+		cubeindex += uint(Inside(d, isoValue, h)) * 2;
 
 		p = origin + Coord((i + 1) * h, (j + 1) * h, k * h);
 		d = p.distance(plane);
-		cubeindex += uint(d < isoValue) * 4;
+		cubeindex += uint(Inside(d, isoValue, h)) * 4;
 
 		p = origin + Coord(i * h, (j + 1) * h, k * h);
 		d = p.distance(plane);
-		cubeindex += uint(d < isoValue) * 8;
+		cubeindex += uint(Inside(d, isoValue, h)) * 8;
 
 		p = origin + Coord(i * h, j * h, (k + 1) * h);
 		d = p.distance(plane);
-		cubeindex += uint(d < isoValue) * 16;
+		cubeindex += uint(Inside(d, isoValue, h)) * 16;
 
 		p = origin + Coord((i + 1) * h, j * h, (k + 1) * h);
 		d = p.distance(plane);
-		cubeindex += uint(d < isoValue) * 32;
+		cubeindex += uint(Inside(d, isoValue, h)) * 32;
 
 		p = origin + Coord((i + 1) * h, (j + 1) * h, (k + 1) * h);
 		d = p.distance(plane);
-		cubeindex += uint(d < isoValue) * 64;
+		cubeindex += uint(Inside(d, isoValue, h)) * 64;
 
 		p = origin + Coord(i * h, (j + 1) * h, (k + 1) * h);
 		d = p.distance(plane);
-		cubeindex += uint(d < isoValue) * 128;
+		cubeindex += uint(Inside(d, isoValue, h)) * 128;
 
 
 		num[i + j * (nx - 1) + k * (nx - 1) * (ny - 1)] = numVertsTable[cubeindex];
@@ -1126,35 +1126,35 @@ namespace dyno
 		TPoint3D<Real> pos;
 		pos = v[0];
 		Real d0 = pos.distance(plane);
-		cubeindex = uint(d0 < isoValue);
+		cubeindex = uint(Inside(d0, isoValue, h));
 
 		pos = v[1];
 		Real d1 = pos.distance(plane);
-		cubeindex += uint(d1 < isoValue) * 2;
+		cubeindex += uint(Inside(d1, isoValue, h)) * 2;
 
 		pos = v[2];
 		Real d2 = pos.distance(plane);
-		cubeindex += uint(d2 < isoValue) * 4;
+		cubeindex += uint(Inside(d2, isoValue, h)) * 4;
 
 		pos = v[3];
 		Real d3 = pos.distance(plane);
-		cubeindex += uint(d3 < isoValue) * 8;
+		cubeindex += uint(Inside(d3, isoValue, h)) * 8;
 
 		pos = v[4];
 		Real d4 = pos.distance(plane);
-		cubeindex += uint(d4 < isoValue) * 16;
+		cubeindex += uint(Inside(d4, isoValue, h)) * 16;
 
 		pos = v[5];
 		Real d5 = pos.distance(plane);
-		cubeindex += uint(d5 < isoValue) * 32;
+		cubeindex += uint(Inside(d5, isoValue, h)) * 32;
 
 		pos = v[6];
 		Real d6 = pos.distance(plane);
-		cubeindex += uint(d6 < isoValue) * 64;
+		cubeindex += uint(Inside(d6, isoValue, h)) * 64;
 
 		pos = v[7];
 		Real d7 = pos.distance(plane);
-		cubeindex += uint(d7 < isoValue) * 128;
+		cubeindex += uint(Inside(d7, isoValue, h)) * 128;
 
 		Real scalar[12];
 		Coord vertlist[12];
@@ -1372,60 +1372,67 @@ namespace dyno
 	template<typename Real, typename Coord>
 	__global__ void MCH_CountVertexNumberForOctreeClipper(
 		DArray<uint> num,
-		DArray<Coord> vertices,
+		DArray<AdaptiveGridNode> nodes,
+		Coord origin,
+		Real dx,
+		Level lmax,
 		TPlane3D<Real> plane)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= num.size()) return;
 
-		int vIdx = 8 * pId;
+		if (nodes[pId].isLeaf())
+		{
+			Real up_dx = dx * (1 << (lmax - (nodes[pId].m_level)));
 
-		Real d;
-		TPoint3D<Real> p;
+			Real d;
+			TPoint3D<Real> p;
 
-		Real isoValue = 0.0;
+			Real isoValue = 0.0;
 
-		uint cubeindex;
+			uint cubeindex;
 
-		p = vertices[vIdx];
-		d = p.distance(plane);
-		cubeindex = uint(d < isoValue);
+			p = nodes[pId].m_position + Coord(-0.5 * up_dx, -0.5 * up_dx, -0.5 * up_dx);
+			Real d1 = p.distance(plane);
+			cubeindex = uint(d1 < isoValue + EPSILON);
 
-		p = vertices[vIdx + 1];
-		d = p.distance(plane);
-		cubeindex += uint(d < isoValue) * 2;
+			p = nodes[pId].m_position + Coord(0.5 * up_dx, -0.5 * up_dx, -0.5 * up_dx);
+			Real d2 = p.distance(plane);
+			cubeindex += uint(d2 < isoValue + EPSILON) * 2;
 
-		p = vertices[vIdx + 2];
-		d = p.distance(plane);
-		cubeindex += uint(d < isoValue) * 4;
+			p = nodes[pId].m_position + Coord(0.5 * up_dx, 0.5 * up_dx, -0.5 * up_dx);
+			Real d3 = p.distance(plane);
+			cubeindex += uint(d3 < isoValue) * 4;
 
-		p = vertices[vIdx + 3];
-		d = p.distance(plane);
-		cubeindex += uint(d < isoValue) * 8;
+			p = nodes[pId].m_position + Coord(-0.5 * up_dx, 0.5 * up_dx, -0.5 * up_dx);
+			Real d4 = p.distance(plane);
+			cubeindex += uint(d4 < isoValue) * 8;
 
-		p = vertices[vIdx + 4];
-		d = p.distance(plane);
-		cubeindex += uint(d < isoValue) * 16;
+			p = nodes[pId].m_position + Coord(-0.5 * up_dx, -0.5 * up_dx, 0.5 * up_dx);
+			Real d5 = p.distance(plane);
+			cubeindex += uint(d5 < isoValue + EPSILON) * 16;
 
-		p = vertices[vIdx + 5];
-		d = p.distance(plane);
-		cubeindex += uint(d < isoValue) * 32;
+			p = nodes[pId].m_position + Coord(0.5 * up_dx, -0.5 * up_dx, 0.5 * up_dx);
+			Real d6 = p.distance(plane);
+			cubeindex += uint(d6 < isoValue + EPSILON) * 32;
 
-		p = vertices[vIdx + 6];
-		d = p.distance(plane);
-		cubeindex += uint(d < isoValue) * 64;
+			p = nodes[pId].m_position + Coord(0.5 * up_dx, 0.5 * up_dx, 0.5 * up_dx);
+			Real d7 = p.distance(plane);
+			cubeindex += uint(d7 < isoValue) * 64;
 
-		p = vertices[vIdx + 7];
-		d = p.distance(plane);
-		cubeindex += uint(d < isoValue) * 128;
+			p = nodes[pId].m_position + Coord(-0.5 * up_dx, 0.5 * up_dx, 0.5 * up_dx);
+			Real d8 = p.distance(plane);
+			cubeindex += uint(d8 < isoValue) * 128;
 
-		num[pId] = numVertsTable[cubeindex];
+			num[pId] = numVertsTable[cubeindex];
+		}
 	}
 
 	template<typename TDataType>
 	void MarchingCubesHelper<TDataType>::countVerticeNumberForOctreeClipper(
 		DArray<uint>& num, 
-		DArray<Coord>& vertices,  
+		DArray<AdaptiveGridNode>& nodes,
+		std::shared_ptr<AdaptiveGridSet<TDataType>> gridSet,
 		TPlane3D<Real> plane)
 	{
 		cuExecute(num.size(),
@@ -1444,113 +1451,120 @@ namespace dyno
 		DArray<Coord> triangleVertices,
 		DArray<TopologyModule::Triangle> triangles,
 		DArray<uint> vertNum,
-		DArray<Coord> cellVertices,
+		DArray<AdaptiveGridNode> nodes,
+		DArray<int> node2ver,
 		DArray<Real> sdfs,
+		Coord origin,
+		Real dx,
+		Level lmax,
 		TPlane3D<Real> plane)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= vertNum.size()) return;
 
-		int vIdx = 8 * pId;
-
-		Coord v[8];
-		v[0] = cellVertices[vIdx];
-		v[1] = cellVertices[vIdx + 1];
-		v[2] = cellVertices[vIdx + 2];
-		v[3] = cellVertices[vIdx + 3];
-		v[4] = cellVertices[vIdx + 4];
-		v[5] = cellVertices[vIdx + 5];
-		v[6] = cellVertices[vIdx + 6];
-		v[7] = cellVertices[vIdx + 7];
-
-		Real isoValue = Real(0);
-
-		Real field[8];
-		field[0] = sdfs[vIdx];
-		field[1] = sdfs[vIdx + 1];
-		field[2] = sdfs[vIdx + 2];
-		field[3] = sdfs[vIdx + 3];
-		field[4] = sdfs[vIdx + 4];
-		field[5] = sdfs[vIdx + 5];
-		field[6] = sdfs[vIdx + 6];
-		field[7] = sdfs[vIdx + 7];
-
-		uint cubeindex;
-		TPoint3D<Real> pos;
-		pos = cellVertices[vIdx];
-		Real d0 = pos.distance(plane);
-		cubeindex = uint(d0 < isoValue);
-
-		pos = cellVertices[vIdx + 1];
-		Real d1 = pos.distance(plane);
-		cubeindex += uint(d1 < isoValue) * 2;
-
-		pos = cellVertices[vIdx + 2];
-		Real d2 = pos.distance(plane);
-		cubeindex += uint(d2 < isoValue) * 4;
-
-		pos = cellVertices[vIdx + 3];
-		Real d3 = pos.distance(plane);
-		cubeindex += uint(d3 < isoValue) * 8;
-
-		pos = cellVertices[vIdx + 4];
-		Real d4 = pos.distance(plane);
-		cubeindex += uint(d4 < isoValue) * 16;
-
-		pos = cellVertices[vIdx + 5];
-		Real d5 = pos.distance(plane);
-		cubeindex += uint(d5 < isoValue) * 32;
-
-		pos = cellVertices[vIdx + 6];
-		Real d6 = pos.distance(plane);
-		cubeindex += uint(d6 < isoValue) * 64;
-
-		pos = cellVertices[vIdx + 7];
-		Real d7 = pos.distance(plane);
-		cubeindex += uint(d7 < isoValue) * 128;
-
-		Real scalar[12];
-		Coord vertlist[12];
-		vertlist[0] = vertexInterp(scalar[0], v[0], v[1], field[0], field[1], d0, d1);
-		vertlist[1] = vertexInterp(scalar[1], v[1], v[2], field[1], field[2], d1, d2);
-		vertlist[2] = vertexInterp(scalar[2], v[2], v[3], field[2], field[3], d2, d3);
-		vertlist[3] = vertexInterp(scalar[3], v[3], v[0], field[3], field[0], d3, d0);
-
-		vertlist[4] = vertexInterp(scalar[4], v[4], v[5], field[4], field[5], d4, d5);
-		vertlist[5] = vertexInterp(scalar[5], v[5], v[6], field[5], field[6], d5, d6);
-		vertlist[6] = vertexInterp(scalar[6], v[6], v[7], field[6], field[7], d6, d7);
-		vertlist[7] = vertexInterp(scalar[7], v[7], v[4], field[7], field[4], d7, d4);
-
-		vertlist[8] = vertexInterp(scalar[8], v[0], v[4], field[0], field[4], d0, d4);
-		vertlist[9] = vertexInterp(scalar[9], v[1], v[5], field[1], field[5], d1, d5);
-		vertlist[10] = vertexInterp(scalar[10], v[2], v[6], field[2], field[6], d2, d6);
-		vertlist[11] = vertexInterp(scalar[10], v[3], v[7], field[3], field[7], d3, d7);
-
-		uint numVerts = numVertsTable[cubeindex];
-
-		int radix = vertNum[pId];
-
-		Real c[3];
-		for (int n = 0; n < numVerts; n += 3)
+		if (nodes[pId].isLeaf())
 		{
-			uint edge;
-			edge = triTable[cubeindex][n];
-			v[0] = vertlist[edge];
-			c[0] = scalar[edge];
+			Real up_dx = dx * (1 << (lmax - (nodes[pId].m_level)));
 
-			edge = triTable[cubeindex][n + 1];
-			v[1] = vertlist[edge];
-			c[1] = scalar[edge];
+			Coord v[8];
+			v[0] = nodes[pId].m_position + Coord(-0.5 * up_dx, -0.5 * up_dx, -0.5 * up_dx);
+			v[1] = nodes[pId].m_position + Coord(0.5 * up_dx, -0.5 * up_dx, -0.5 * up_dx);
+			v[2] = nodes[pId].m_position + Coord(0.5 * up_dx, 0.5 * up_dx, -0.5 * up_dx);
+			v[3] = nodes[pId].m_position + Coord(-0.5 * up_dx, 0.5 * up_dx, -0.5 * up_dx);
+			v[4] = nodes[pId].m_position + Coord(-0.5 * up_dx, -0.5 * up_dx, 0.5 * up_dx);
+			v[5] = nodes[pId].m_position + Coord(0.5 * up_dx, -0.5 * up_dx, 0.5 * up_dx);
+			v[6] = nodes[pId].m_position + Coord(0.5 * up_dx, 0.5 * up_dx, 0.5 * up_dx);
+			v[7] = nodes[pId].m_position + Coord(-0.5 * up_dx, 0.5 * up_dx, 0.5 * up_dx);
 
-			edge = triTable[cubeindex][n + 2];
-			v[2] = vertlist[edge];
-			c[2] = scalar[edge];
+			Real isoValue = Real(0);
 
-			triangles[radix / 3] = TopologyModule::Triangle(radix, radix + 1, radix + 2);
+			Real field[8];
+			field[0] = sdfs[node2ver[8 * pId]];
+			field[1] = sdfs[node2ver[8 * pId + 1]];
+			field[2] = sdfs[node2ver[8 * pId + 2]];
+			field[3] = sdfs[node2ver[8 * pId + 3]];
+			field[4] = sdfs[node2ver[8 * pId + 4]];
+			field[5] = sdfs[node2ver[8 * pId + 5]];
+			field[6] = sdfs[node2ver[8 * pId + 6]];
+			field[7] = sdfs[node2ver[8 * pId + 7]];
 
-			triangleVertices[radix] = v[0];	vertSDFs[radix] = c[0];	radix++;
-			triangleVertices[radix] = v[1];	vertSDFs[radix] = c[1];	radix++;
-			triangleVertices[radix] = v[2];	vertSDFs[radix] = c[2];	radix++;
+			uint cubeindex;
+			TPoint3D<Real> pos;
+			pos = v[0];
+			Real d0 = pos.distance(plane);
+			cubeindex = uint(d0 < isoValue + EPSILON);
+
+			pos = v[1];
+			Real d1 = pos.distance(plane);
+			cubeindex += uint(d1 < isoValue + EPSILON) * 2;
+
+			pos = v[2];
+			Real d2 = pos.distance(plane);
+			cubeindex += uint(d2 < isoValue) * 4;
+
+			pos = v[3];
+			Real d3 = pos.distance(plane);
+			cubeindex += uint(d3 < isoValue) * 8;
+
+			pos = v[4];
+			Real d4 = pos.distance(plane);
+			cubeindex += uint(d4 < isoValue + EPSILON) * 16;
+
+			pos = v[5];
+			Real d5 = pos.distance(plane);
+			cubeindex += uint(d5 < isoValue + EPSILON) * 32;
+
+			pos = v[6];
+			Real d6 = pos.distance(plane);
+			cubeindex += uint(d6 < isoValue) * 64;
+
+			pos = v[7];
+			Real d7 = pos.distance(plane);
+			cubeindex += uint(d7 < isoValue) * 128;
+
+			Real scalar[12];
+			Coord vertlist[12];
+			vertlist[0] = vertexInterp(scalar[0], v[0], v[1], field[0], field[1], d0, d1);
+			vertlist[1] = vertexInterp(scalar[1], v[1], v[2], field[1], field[2], d1, d2);
+			vertlist[2] = vertexInterp(scalar[2], v[2], v[3], field[2], field[3], d2, d3);
+			vertlist[3] = vertexInterp(scalar[3], v[3], v[0], field[3], field[0], d3, d0);
+
+			vertlist[4] = vertexInterp(scalar[4], v[4], v[5], field[4], field[5], d4, d5);
+			vertlist[5] = vertexInterp(scalar[5], v[5], v[6], field[5], field[6], d5, d6);
+			vertlist[6] = vertexInterp(scalar[6], v[6], v[7], field[6], field[7], d6, d7);
+			vertlist[7] = vertexInterp(scalar[7], v[7], v[4], field[7], field[4], d7, d4);
+
+			vertlist[8] = vertexInterp(scalar[8], v[0], v[4], field[0], field[4], d0, d4);
+			vertlist[9] = vertexInterp(scalar[9], v[1], v[5], field[1], field[5], d1, d5);
+			vertlist[10] = vertexInterp(scalar[10], v[2], v[6], field[2], field[6], d2, d6);
+			vertlist[11] = vertexInterp(scalar[11], v[3], v[7], field[3], field[7], d3, d7);
+
+			uint numVerts = numVertsTable[cubeindex];
+
+			int radix = vertNum[pId];
+
+			Real c[3];
+			for (int n = 0; n < numVerts; n += 3)
+			{
+				uint edge;
+				edge = triTable[cubeindex][n];
+				v[0] = vertlist[edge];
+				c[0] = scalar[edge];
+
+				edge = triTable[cubeindex][n + 1];
+				v[1] = vertlist[edge];
+				c[1] = scalar[edge];
+
+				edge = triTable[cubeindex][n + 2];
+				v[2] = vertlist[edge];
+				c[2] = scalar[edge];
+
+				triangles[radix / 3] = TopologyModule::Triangle(radix, radix + 1, radix + 2);
+
+				triangleVertices[radix] = v[0];	vertSDFs[radix] = c[0];	radix++;
+				triangleVertices[radix] = v[1];	vertSDFs[radix] = c[1];	radix++;
+				triangleVertices[radix] = v[2];	vertSDFs[radix] = c[2];	radix++;
+			}
 		}
 	}
 
@@ -1560,7 +1574,8 @@ namespace dyno
 		DArray<Coord>& triangleVertices, 
 		DArray<TopologyModule::Triangle>& triangles, 
 		DArray<uint>& num, 
-		DArray<Coord>& cellVertices, 
+		DArray<AdaptiveGridNode>& nodes,
+		std::shared_ptr<AdaptiveGridSet<TDataType>> gridSet,
 		DArray<Real>& sdfs,
 		TPlane3D<Real> plane)
 	{
@@ -1573,12 +1588,17 @@ namespace dyno
 			triangleVertices,
 			triangles,
 			num,
-			cellVertices,
+			nodes,
+			node2ver,
 			sdfs,
 			gridSet->adaptiveGridOrigin(),
 			gridSet->adaptiveGridDx(),
 			gridSet->adaptiveGridLevelMax(),
 			plane);
+
+		vertex.clear();
+		vertex_neighbor.clear();
+		node2ver.clear();
 	}
 
 	DEFINE_CLASS(MarchingCubesHelper);
