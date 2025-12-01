@@ -381,13 +381,13 @@ namespace dyno
 			nodes[mark[tId]] = nodes_buf[tId];
 	}
 
-	template <typename Real>
+	template <typename Real, typename Coord2D>
 	__global__ void CFS_ComputeNodesAll(
 		DArray<AdaptiveGridNode2D> nodes,
 		DArray<OcKey> nodes_morton,
 		Level levelmin,
 		Level levelmax,
-		Vec2f origin,
+		Coord2D origin,
 		Real dx,
 		int minnum,
 		int gresolution)
@@ -402,7 +402,7 @@ namespace dyno
 			gresolution = gresolution >> levelmin;
 
 			Real gdx = dx * gresolution;
-			Vec2f gpos(origin[0] + (gnx + 0.5)*gdx, origin[1] + (gny + 0.5)*gdx);
+			Coord2D gpos(origin[0] + (gnx + 0.5)*gdx, origin[1] + (gny + 0.5)*gdx);
 
 			nodes[tId] = AdaptiveGridNode2D(levelmin, OcKey(tId), gpos);
 		}
@@ -418,12 +418,12 @@ namespace dyno
 			RecoverFromMortonCode2D(nmorton, gnx, gny);
 			gresolution = gresolution >> nlevel;
 			Real gdx = dx * gresolution;
-			Vec2f gpos(origin[0] + (gnx + 0.5) * gdx, origin[1] + (gny + 0.5) * gdx);
+			Coord2D gpos(origin[0] + (gnx + 0.5) * gdx, origin[1] + (gny + 0.5) * gdx);
 
 			nodes[minnum + 4 * index] = AdaptiveGridNode2D(nlevel, nmorton, gpos);
-			nodes[minnum + 4 * index + 1] = AdaptiveGridNode2D(nlevel, nmorton + 1, gpos + Vec2f(gdx, 0));
-			nodes[minnum + 4 * index + 2] = AdaptiveGridNode2D(nlevel, nmorton + 2, gpos + Vec2f(0, gdx));
-			nodes[minnum + 4 * index + 3] = AdaptiveGridNode2D(nlevel, nmorton + 3, gpos + Vec2f(gdx, gdx));
+			nodes[minnum + 4 * index + 1] = AdaptiveGridNode2D(nlevel, nmorton + 1, gpos + Coord2D(gdx, 0));
+			nodes[minnum + 4 * index + 2] = AdaptiveGridNode2D(nlevel, nmorton + 2, gpos + Coord2D(0, gdx));
+			nodes[minnum + 4 * index + 3] = AdaptiveGridNode2D(nlevel, nmorton + 3, gpos + Coord2D(gdx, gdx));
 		}
 	}
 
@@ -479,10 +479,10 @@ namespace dyno
 		Level mLevelnum,
 		int mType)
 	{
-		auto& nodes = AGridSet->getAGrids();
-		Real m_dx = AGridSet->getDx();
-		Vec2f m_origin = AGridSet->getOrigin();
-		Level m_levelmax = AGridSet->getLevelMax();
+		auto& nodes = AGridSet->adaptiveGridNode2D();
+		Real m_dx = AGridSet->adaptiveGridDx2D();
+		Coord2D m_origin = AGridSet->adaptiveGridOrigin2D();
+		Level m_levelmax = AGridSet->adaptiveGridLevelMax2D();
 		AGridSet->setLevelNum(mLevelnum);
 		if (mLevelnum > m_levelmax)
 		{
@@ -909,15 +909,15 @@ namespace dyno
 		Level mLevelnum,
 		int mType)
 	{
-		auto& nodes = AGridSet->getAGrids();
-		Real m_dx = AGridSet->getDx();
-		Vec2f m_origin = AGridSet->getOrigin();
-		Level m_levelmax = AGridSet->getLevelMax();
+		auto& nodes = AGridSet->adaptiveGridNode2D();
+		Real m_dx = AGridSet->adaptiveGridDx2D();
+		Coord2D m_origin = AGridSet->adaptiveGridOrigin2D();
+		Level m_levelmax = AGridSet->adaptiveGridLevelMax2D();
 		AGridSet->setLevelNum(mLevelnum);
 		assert(mLevelnum <= m_levelmax);
 		AGridSet->setQuadType(mType);
 		int max_resolution = (1 << m_levelmax);
-		int num_buffer = 3 * (nodes.size() - (AGridSet->getLeafNum()));
+		int num_buffer = 3 * (nodes.size() - (AGridSet->adaptiveGridLeafNum2D()));
 		num_buffer += (num_buffer % 2 == 0) ? 1 : 0;
 
 		DArray<OcKey> buffer_key(num_buffer);

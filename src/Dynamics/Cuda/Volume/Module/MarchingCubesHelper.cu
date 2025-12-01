@@ -1431,7 +1431,10 @@ namespace dyno
 		cuExecute(num.size(),
 			MCH_CountVertexNumberForOctreeClipper,
 			num,
-			vertices,
+			nodes,
+			gridSet->adaptiveGridOrigin(),
+			gridSet->adaptiveGridDx(),
+			gridSet->adaptiveGridLevelMax(),
 			plane);
 	}
 
@@ -1561,6 +1564,9 @@ namespace dyno
 		DArray<Real>& sdfs,
 		TPlane3D<Real> plane)
 	{
+		DArray<Coord> vertex;
+		DArray<int> vertex_neighbor, node2ver;
+		gridSet->extractVertex(vertex, vertex_neighbor, node2ver);
 		cuExecute(num.size(),
 			MCH_ConstructTrianglesForOctreeClipper,
 			vertSDFs,
@@ -1569,6 +1575,9 @@ namespace dyno
 			num,
 			cellVertices,
 			sdfs,
+			gridSet->adaptiveGridOrigin(),
+			gridSet->adaptiveGridDx(),
+			gridSet->adaptiveGridLevelMax(),
 			plane);
 	}
 

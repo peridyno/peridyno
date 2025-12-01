@@ -131,7 +131,7 @@ namespace dyno
 		initParameter();
 		auto& points = this->inPosition()->getData();
 		Real dx = this->inRadius()->getData();
-		Coord m_origin = mAGrid->getOrigin();
+		Coord m_origin = mAGrid->adaptiveGridOrigin();
 
 		DArray<OcKey> node_buf(points.size());
 		cuExecute(points.size(),
@@ -208,14 +208,14 @@ namespace dyno
 		mAGridGen->inAGridSet()->setDataPtr(mAGrid);
 		mAGridGen->varOctreeType()->setCurrentKey(AdaptiveGridGenerator<DataType3f>::FACE_BALANCED);
 		mAGridGen->varNeighMode()->setCurrentKey(AdaptiveGridGenerator<DataType3f>::TEWNTY_SEVEN_NEIGHBOR);
-		Level lnum = mAGrid->getLevelMax();
+		Level lnum = mAGrid->adaptiveGridLevelMax();
 		mAGridGen->varLevelNum()->setValue(lnum);
 		mAGridGen->compute();
 
 		//auto volumeSet = mVolumeOctree->stateSDFTopology()->getDataPtr();
 		//std::clock_t Time1 = clock();
 
-		mAGrid->getLeafs27(m_node, m_neighbor);
+		mAGrid->extractLeafs27(m_node, m_neighbor);
 		mAGrid->accessRandom(m_pIndex, particles);
 		//std::clock_t Time2 = clock();
 		//printf("Neighbor Point Query Adaptive: access time  %d  %d \n", int(Time2 - Time1), particles.size());

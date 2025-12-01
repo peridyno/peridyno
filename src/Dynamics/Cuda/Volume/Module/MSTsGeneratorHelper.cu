@@ -1084,10 +1084,10 @@ namespace dyno
 		Level mLevelnum,
 		int mType)
 	{
-		auto& nodes = AGridSet->getAGrids();
-		Real m_dx = AGridSet->getDx();
-		Coord m_origin = AGridSet->getOrigin();
-		Level m_levelmax = AGridSet->getLevelMax();
+		auto& nodes = AGridSet->adaptiveGridNode();
+		Real m_dx = AGridSet->adaptiveGridDx();
+		Coord m_origin = AGridSet->adaptiveGridOrigin();
+		Level m_levelmax = AGridSet->adaptiveGridLevelMax();
 		AGridSet->setLevelNum(mLevelnum);
 		assert(mLevelnum <= m_levelmax);
 		AGridSet->setOctreeType(mType);
@@ -1569,17 +1569,17 @@ namespace dyno
 	{
 		GTimer timer;
 
-		auto& nodes = AGridSet->getAGrids();
-		auto& neighbors = AGridSet->getNeighbors();
-		Real m_dx = AGridSet->getDx();
-		Coord m_origin = AGridSet->getOrigin();
-		Level m_levelmax = AGridSet->getLevelMax();
+		auto& nodes = AGridSet->adaptiveGridNode();
+		auto& neighbors = AGridSet->adaptiveGridNeighbors();
+		Real m_dx = AGridSet->adaptiveGridDx();
+		Coord m_origin = AGridSet->adaptiveGridOrigin();
+		Level m_levelmax = AGridSet->adaptiveGridLevelMax();
 		AGridSet->setLevelNum(mLevelnum);
 		assert(mLevelnum <= m_levelmax);
 		AGridSet->setOctreeType(mType);
 
 		int max_resolution = (1 << m_levelmax);
-		int num_buffer = 3 * (nodes.size() - (AGridSet->getLeafNum()));
+		int num_buffer = 3 * (nodes.size() - (AGridSet->adaptiveGridLeafNum()));
 		num_buffer += (num_buffer % 2 == 0) ? 1 : 0;
 
 		DArray<OcKey> buffer_key(num_buffer);
