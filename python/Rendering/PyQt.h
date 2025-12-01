@@ -1,7 +1,7 @@
 #pragma once
 #include "../PyCommon.h"
 
-#include "QtApp.h"
+#include "QtGUI/QtApp.h"
 
 void declare_qt_app(py::module& m);
 
