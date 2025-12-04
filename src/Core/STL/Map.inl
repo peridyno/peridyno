@@ -43,6 +43,49 @@ namespace dyno
 	}
 
 	template <typename MKey, typename T>
+	DYN_FUNC Pair<MKey, T>* Map<MKey, T>::plusInsert(Pair<MKey, T> pair)
+	{
+		//return the index of the first element that is equel to or biger than val
+		int t = leftBound(pair, m_pairs, m_size);
+
+		//if the key is equel, add values together
+		if (m_pairs[t] == pair)
+		{
+			m_pairs[t].second += pair.second;
+			return m_pairs + t;
+		}
+
+		//return nullptr if the data buffer is full
+		if (m_size >= m_maxSize) return nullptr;
+
+		//insert val to t location
+		for (int j = m_size; j > t; j--)
+		{
+			m_pairs[j] = m_pairs[j - 1];
+		}
+		m_pairs[t] = pair;
+		m_size++;
+
+		return m_pairs + t;
+	}
+
+#ifdef CUDA_BACKEND
+	template <typename MKey, typename T>
+	DYN_FUNC Pair<MKey, T>* Map<MKey, T>::atomicInsert(Pair<MKey, T> pair)
+	{
+		//return nullptr if the data buffer is full
+		if (m_size >= this->m_maxSize) return nullptr;
+
+		const uint one = 1;
+		int index = atomicAdd(&(this->m_size), one);
+
+		this->m_pairs[index] = pair;
+
+		return this->m_pairs + index;
+	}
+#endif
+
+	template <typename MKey, typename T>
 	DYN_FUNC void Map<MKey, T>::clear()
 	{
 		m_size = 0;
@@ -52,6 +95,12 @@ namespace dyno
 	DYN_FUNC uint Map<MKey, T>::size()
 	{
 		return m_size;
+	}
+
+	template <typename MKey, typename T>
+	DYN_FUNC uint Map<MKey, T>::maxSize()
+	{
+		return m_maxSize;
 	}
 
 	template <typename MKey, typename T>

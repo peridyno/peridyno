@@ -41,9 +41,12 @@ namespace dyno
 	 * @brief 2D geometric primitives in two-dimensional space
 	 *
 	 */
+	template <typename Real> class TAlignedBox2D;
+	template <typename Real> class TOrientedBox2D;
 	template <typename Real> class TTriangle2D;
 	template <typename Real> class TRectangle2D;
 	template <typename Real> class TDisk2D;
+	template <typename Real> class TPolygon2D;
 
 
 	template<typename Real>
@@ -96,6 +99,7 @@ namespace dyno
 		DYN_FUNC bool inside(const TRay2D<Real>& ray) const;
 		DYN_FUNC bool inside(const TSegment2D<Real>& segment) const;
 		DYN_FUNC bool inside(const TCircle2D<Real>& circle) const;
+		DYN_FUNC bool inside(const TOrientedBox2D<Real>& circle) const;
 
 		DYN_FUNC const TSegment2D<Real> operator-(const TPoint2D<Real>& pt) const;
 
@@ -242,6 +246,8 @@ namespace dyno
 		DYN_FUNC TCircle2D(const Coord2D& c, const Real& r);
 		DYN_FUNC TCircle2D(const TCircle2D<Real>& circle);
 
+		DYN_FUNC TAlignedBox2D<Real> aabb();
+
 		Coord2D center;
 		Real radius;
 		Real theta;
@@ -258,9 +264,28 @@ namespace dyno
 		DYN_FUNC TAlignedBox2D(const Coord2D& p0, const Coord2D& p1);
 		DYN_FUNC TAlignedBox2D(const TAlignedBox2D<Real>& box);
 
+		DYN_FUNC TAlignedBox2D<Real> merge(const TAlignedBox2D<Real>& aabb) const;
 
 		Coord2D v0;
 		Coord2D v1;
+	};
+
+	template<typename Real>
+	class TOrientedBox2D
+	{
+	public:
+		typedef  Vector<Real, 2> Coord2D;
+
+	public:
+		DYN_FUNC TOrientedBox2D();
+		DYN_FUNC TOrientedBox2D(const Coord2D c, const Coord2D u_t, const Coord2D v_t, const Coord2D ext);
+		DYN_FUNC TOrientedBox2D(const TOrientedBox2D<Real>& obb);
+
+		DYN_FUNC TAlignedBox2D<Real> aabb();
+
+		Coord2D center;
+		Coord2D u, v;
+		Coord2D extent;
 	};
 
 #define MAX_POLYGON_VERTEX_NUM 8
@@ -304,9 +329,13 @@ namespace dyno
 		uint size = 0;
 		Real _radius = 0.005f;
 	};
-
+	template class TCircle2D<float>;
 	template class TAlignedBox2D<float>;
+	template class TOrientedBox2D<float>;
+
+	template class TCircle2D<double>;
 	template class TAlignedBox2D<double>;
+	template class TOrientedBox2D<double>;
 }
 
 #include "Primitive2D.inl"
