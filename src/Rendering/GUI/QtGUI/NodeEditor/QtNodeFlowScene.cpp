@@ -38,6 +38,11 @@ namespace Qt
 			id++;
 
 			QString str = QString::fromStdString(c.first);
+			std::cout << str.toStdString() << "\n";
+			//if (str.toStdString() == std::string("FBXLoader<DataType3f>"))
+			//{
+			//	int a = 1;
+			//}
 			auto obj = dyno::Object::createObject(str.toStdString());
 			std::shared_ptr<dyno::Node> node(dynamic_cast<dyno::Node*>(obj));
 

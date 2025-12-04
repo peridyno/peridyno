@@ -36,6 +36,20 @@ std::shared_ptr<SceneGraph> createSceneGraph()
 	auto convoy = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
 	tank->connect(convoy->importVehicles());
 
+	std::vector<Transform3f> transforms;
+
+	int xNum = 10;
+	int zNum = 1;
+
+	for (size_t i = 0; i < xNum; i++)
+	{
+		for (size_t j = 0; j < zNum; j++)
+		{
+			transforms.push_back(Transform3f(Vec3f(i * 4, 0, j * 8), Mat3f::identityMatrix()));
+		}
+	}
+	tank->varVehiclesTransform()->setValue(transforms);
+
 // 	plane->stateTriangleSet()->connect(jeep->inTriangleSet());
 // 	plane->stateTriangleSet()->connect(tank->inTriangleSet());
 
