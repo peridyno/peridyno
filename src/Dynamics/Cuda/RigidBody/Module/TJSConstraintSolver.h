@@ -67,6 +67,12 @@ namespace dyno
 
 		DEF_VAR(Real, Hertz, 300, "");
 
+		DEF_VAR(bool, warmStartEnabled, true, "");
+
+		DEF_VAR(Real, Gamma, 0.95, "");
+
+		DEF_VAR(Real, distThreshold, 0.01, "");
+
 	public:
 		DEF_VAR_IN(Real, TimeStep, "Time step size");
 
@@ -99,7 +105,7 @@ namespace dyno
 		void constrain() override;
 
 	private:
-		void initializeJacobian(Real dt);
+		void initializeJacobian(Real dt, bool resetLambda);
 
 	private:
 		DArray<Coord> mJ;
@@ -120,5 +126,11 @@ namespace dyno
         DArray<Real> mK_1;
 		DArray<Mat2f> mK_2;
 		DArray<Matrix> mK_3;
+
+		DArray<CacheContact> cacheContacts;
+
+		std::vector<float> errors;
+
+		int frameNum = 0;
 	};
 }

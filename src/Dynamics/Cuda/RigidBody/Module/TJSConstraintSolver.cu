@@ -18,7 +18,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void TJSConstraintSolver<TDataType>::initializeJacobian(Real dt)
+	void TJSConstraintSolver<TDataType>::initializeJacobian(Real dt, bool resetLambda)
 	{
 		int constraint_size = 0;
 		int contact_size = this->inContacts()->size();
@@ -155,7 +155,8 @@ namespace dyno
 		mK_2.reset();
 		mK_3.reset();
 		mEta.reset();
-		mLambda.reset();
+		
+		if(resetLambda) mLambda.reset();
 
 		calculateJacobianMatrix(
 			mJ,
@@ -257,7 +258,36 @@ namespace dyno
 				);
 
 				mImpulseC.reset();
-				initializeJacobian(dh);
+				
+				if (i == 0) {
+					initializeJacobian(dh, true);
+					if (cacheContacts.size() != 0 && this->varwarmStartEnabled()->getValue()) {
+						RunWarmStart(
+							mContactsInLocalFrame,
+							mLambda,
+							cacheContacts,
+							this->vardistThreshold()->getValue(),
+							this->varGamma()->getValue()
+						);
+					}
+				}
+				else {
+					if (this->varwarmStartEnabled()->getValue()) {
+						initializeJacobian(dh, false);
+						warmStartLambda(
+							mB,
+							mLambda,
+							mVelocityConstraints,
+							mImpulseC,
+							this->varGamma()->getValue()
+						);
+					}
+					else {
+						initializeJacobian(dh, true);
+					}
+					
+				}
+				
 
 				for (int j = 0; j < this->varIterationNumberForVelocitySolver()->getValue(); j++) {
 					JacobiIterationForSoftBlock(
@@ -279,6 +309,8 @@ namespace dyno
 						this->varHertz()->getValue()
 					);
 				}
+
+				errors.push_back(checkOutError(mJ, mImpulseC, mVelocityConstraints, mEta));
 
 				updateVelocity(
 					this->inAttribute()->getData(),
@@ -337,6 +369,30 @@ namespace dyno
 				dt
 			);
 		}
+
+		frameNum++;
+
+		if (frameNum == 500) {
+			std::ofstream outfile;
+			outfile.open("C:/Users/admin/Desktop/warmStartBrick.txt", std::ios::app);
+
+			if (outfile.is_open()) {
+				for (const auto& item : errors) {
+					outfile << item << "\n";
+				}
+				outfile.close();
+			}
+			else {
+				std::cerr << "无法打开文件" << std::endl;
+			}
+		}
+
+		cacheContacts.resize(mContactsInLocalFrame.size());
+		StoreCacheKernel(
+			mContactsInLocalFrame,
+			mLambda,
+			cacheContacts
+		);
 	}
 	DEFINE_CLASS(TJSConstraintSolver);
 }

@@ -13,6 +13,9 @@
 
 #include "Collision/Attribute.h"
 
+#include <thrust/sort.h>
+#include <thrust/execution_policy.h>
+
 
 namespace dyno 
 {
@@ -506,5 +509,27 @@ namespace dyno
 		float dt,
 		float zeta,
 		float hertz
+	);
+
+	void warmStartLambda(
+		DArray<Vec3f>& B,
+		DArray<float>& lambda,
+		DArray<TConstraintPair<float>>& constraints,
+		DArray<Vec3f>& impulse,
+		float gamma
+	);
+
+	void StoreCacheKernel(
+		DArray<TContactPair<Real>> oldContacts,
+		DArray<float> oldLambdas,
+		DArray<CacheContact> cacheBuffer
+	);
+
+	void RunWarmStart(
+		DArray<TContactPair<float>>& newContacts,
+		DArray<Real>& lambda,
+		DArray<CacheContact>& cacheBuffer,
+		Real distThreshold,
+		Real gamma
 	);
 }

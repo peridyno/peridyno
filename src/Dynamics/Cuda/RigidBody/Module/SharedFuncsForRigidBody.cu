@@ -4806,6 +4806,46 @@ namespace dyno
 	}
 
 	template<typename Real, typename Coord, typename Constraint>
+	__global__ void SF_warmStartLambdaBuildImpulse(
+		DArray<Coord> B,
+		DArray<Real> lambda,
+		DArray<Coord> impulse,
+		DArray<Constraint> constraints,
+		float gamma
+	)
+	{
+		int tId = threadIdx.x + blockIdx.x * blockDim.x;
+		if (tId >= lambda.size())
+			return;
+		if (!constraints[tId].isValid)
+			return;
+
+		int idx1 = constraints[tId].bodyId1;
+		int idx2 = constraints[tId].bodyId2;
+
+		lambda[tId] *= gamma;
+
+		Real lambda_i = lambda[tId];
+
+		atomicAdd(&impulse[2 * idx1][0], B[4 * tId][0] * lambda_i);
+		atomicAdd(&impulse[2 * idx1][1], B[4 * tId][1] * lambda_i);
+		atomicAdd(&impulse[2 * idx1][2], B[4 * tId][2] * lambda_i);
+		atomicAdd(&impulse[2 * idx1 + 1][0], B[4 * tId + 1][0] * lambda_i);
+		atomicAdd(&impulse[2 * idx1 + 1][1], B[4 * tId + 1][1] * lambda_i);
+		atomicAdd(&impulse[2 * idx1 + 1][2], B[4 * tId + 1][2] * lambda_i);
+
+		if (idx2 != INVALID)
+		{
+			atomicAdd(&impulse[2 * idx2][0], B[4 * tId + 2][0] * lambda_i);
+			atomicAdd(&impulse[2 * idx2][1], B[4 * tId + 2][1] * lambda_i);
+			atomicAdd(&impulse[2 * idx2][2], B[4 * tId + 2][2] * lambda_i);
+			atomicAdd(&impulse[2 * idx2 + 1][0], B[4 * tId + 3][0] * lambda_i);
+			atomicAdd(&impulse[2 * idx2 + 1][1], B[4 * tId + 3][1] * lambda_i);
+			atomicAdd(&impulse[2 * idx2 + 1][2], B[4 * tId + 3][2] * lambda_i);
+		}
+	}
+
+	template<typename Real, typename Coord, typename Constraint>
 	__global__ void SF_matrixMultiplyVecUseImpulse(
 		DArray<Coord> J,
 		DArray<Coord> impulse,
@@ -4833,6 +4873,23 @@ namespace dyno
 
 		ans[tId] = tmp;
 		
+	}
+
+	void warmStartLambda(
+		DArray<Vec3f>& B,
+		DArray<float>& lambda,
+		DArray<TConstraintPair<float>>& constraints,
+		DArray<Vec3f>& impulse,
+		float gamma
+	)
+	{
+		cuExecute(constraints.size(),
+			SF_warmStartLambdaBuildImpulse,
+			B,
+			lambda,
+			impulse,
+			constraints,
+			gamma);
 	}
 
 
@@ -5889,5 +5946,144 @@ namespace dyno
 			hertz);
 	}
 
+
+	DYN_FUNC unsigned long long GenerateKey(int idA, int idB) {
+		int minId = (idA < idB) ? idA : idB;
+		int maxId = (idA < idB) ? idB : idA;
+		return ((unsigned long long)(unsigned int)minId << 32) | (unsigned int)maxId;
+	}
+
+	__global__ void SF_StoreCacheKernel(
+		DArray<TContactPair<Real>> oldContacts,
+		DArray<float> oldLambdas,
+		DArray<CacheContact> cacheBuffer
+	) {
+		int idx = threadIdx.x + blockIdx.x * blockDim.x;
+		if (idx >= oldContacts.size()) return;
+
+		const TContactPair<Real>& contact = oldContacts[idx];
+
+		int idA = contact.bodyId1;
+		int idB = contact.bodyId2;
+		int refBodyId = (idA < idB || idB == INVALID) ? idA : idB;
+		Vec3f localP = (idA < idB) ? contact.pos1 : contact.pos2;
+
+		cacheBuffer[idx].sortKey = GenerateKey(idA, idB);
+		cacheBuffer[idx].localPos = localP;
+		cacheBuffer[idx].lambda1 = oldLambdas[idx * 3 + 0];
+		cacheBuffer[idx].lambda2 = oldLambdas[idx * 3 + 1];
+		cacheBuffer[idx].lambda3 = oldLambdas[idx * 3 + 2];
+	}
+
+	void StoreCacheKernel(
+		DArray<TContactPair<Real>> oldContacts,
+		DArray<float> oldLambdas,
+		DArray<CacheContact> cacheBuffer
+	)
+	{
+		cuExecute(oldContacts.size(),
+			SF_StoreCacheKernel,
+			oldContacts,
+			oldLambdas,
+			cacheBuffer);
+	}
+
+	struct ContactComparator {
+		__device__ bool operator()(const CacheContact& a, const CacheContact& b) {
+			return a.sortKey < b.sortKey;
+		}
+	};
+
+
+	void sortCacheOnGPU(DArray<CacheContact>& d_cacheBuffer)
+	{
+		thrust::sort(thrust::device, d_cacheBuffer.begin(), d_cacheBuffer.begin() + d_cacheBuffer.size(),ContactComparator());
+	}
+
+
+	__global__ void MatchAndWarmStartKernel(
+		DArray<TContactPair<float>> newContacts,
+		DArray<Real> lambda,
+		DArray<CacheContact> sortedCache,
+		Real distThreshold,
+		Real gamma
+	)
+	{
+		int idx = threadIdx.x + blockIdx.x * blockDim.x;
+
+		if (idx >= newContacts.size()) return;
+
+		TContactPair<Real>& curr = newContacts[idx];
+		
+		int idxA = curr.bodyId1;
+		int idxB = curr.bodyId2;
+
+		unsigned long long key = GenerateKey(curr.bodyId1, curr.bodyId2);
+
+		int refBodyId = (idxA < idxB || idxB == INVALID) ? idxA : idxB;
+		Vec3f localP = (idxA < idxB) ? curr.pos1 : curr.pos2;
+		
+		int l = 0, r = sortedCache.size() - 1;
+		int startIdx = -1;
+		while (l <= r) {
+			int mid = l + (r - l) / 2;
+			if (sortedCache[mid].sortKey >= key) {
+				if (sortedCache[mid].sortKey == key) startIdx = mid;
+				r = mid - 1; 
+			}
+			else {
+				l = mid + 1;
+			}
+		}
+
+		startIdx = l;
+	
+		int bestMatchIdx = -1;
+
+		Real bestDistSq = distThreshold * distThreshold;
+
+		if (startIdx != -1) {
+			for (int i = startIdx; i < sortedCache.size(); i++) {
+				if (sortedCache[i].sortKey != key) break;
+
+				Vec3f diff = localP - sortedCache[i].localPos;
+				Real distSq = diff.normSquared();
+
+				if (distSq < bestDistSq) {
+					bestDistSq = distSq;
+					bestMatchIdx = i;
+				}
+			}
+		}
+
+		int outIdx = idx * 3;
+		if (bestMatchIdx != -1) {
+			lambda[outIdx] = sortedCache[bestMatchIdx].lambda1 * gamma;
+			lambda[outIdx + 1] = sortedCache[bestMatchIdx].lambda2 * gamma;
+			lambda[outIdx + 2] = sortedCache[bestMatchIdx].lambda3 * gamma;
+		}
+	}
+
+
+	void RunWarmStart(
+		DArray<TContactPair<float>>& newContacts,
+		DArray<Real>& lambda,
+		DArray<CacheContact>& cacheBuffer,
+		Real distThreshold,
+		Real gamma
+	)
+	{
+		if (cacheBuffer.size() > 0) {
+			sortCacheOnGPU(cacheBuffer);
+
+			cuExecute(newContacts.size(),
+				MatchAndWarmStartKernel,
+				newContacts,
+				lambda,
+				cacheBuffer,
+				distThreshold,
+				gamma);
+		}
+	}
 
 }

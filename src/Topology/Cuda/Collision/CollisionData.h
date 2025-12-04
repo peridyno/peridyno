@@ -282,4 +282,12 @@ namespace dyno
 		Quat1f rotQuat;
 
 	};
+
+	struct CacheContact {
+		unsigned long long sortKey;
+		Vec3f localPos;
+		Real lambda1;
+		Real lambda2;
+		Real lambda3;
+	};
 }
