@@ -124,11 +124,19 @@ namespace dyno
 		Bicycle();
 		~Bicycle() override;
 
-		DEF_VAR_OUT(bool, Reset, "Reset");
+	public:
+		DEF_VAR_STATE(Real, SteeringAngle, 0, "");
+
+		DEF_VAR_STATE(Real, Thrust, 0, "");
 
 	protected:
 		void resetStates() override;
 
+		void postUpdateStates() override;
+
+	private:
+		void setSteeringAngle(Real v);
+		void setThrust(Real v);
 	};
 }
 
