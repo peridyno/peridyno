@@ -18,55 +18,64 @@ namespace dyno
 		this->varMaterialIndex()->attach(std::make_shared<FCallBackFunc>(
 			[=]() {
 				uint idx = this->varMaterialIndex()->getValue();
-
-				if (mTextureMesh.materials().size() > idx)
+				auto inTexMesh = this->inTextureMesh()->getDataPtr();
+				if (!inTexMesh)
+					return;
+				if (inTexMesh->materials().size() > idx)
 				{
-					auto material = mTextureMesh.materials()[idx];
+					auto material = inTexMesh->materials()[idx];
 
 					this->varAlpha()->setValue(material->alpha);
 					this->varMetallic()->setValue(material->metallic);
 					this->varRoughness()->setValue(material->roughness);
 					this->varBaseColor()->setValue(Color(material->baseColor.x, material->baseColor.y, material->baseColor.z));
 				}
+				
 			}));
 
 		this->varMetallic()->attach(
 			std::make_shared<FCallBackFunc>(
 				[=]() {
 					uint idx = this->varMaterialIndex()->getValue();
-
-					if (mTextureMesh.materials().size() > idx)
+					auto inTexMesh = this->inTextureMesh()->getDataPtr();
+					if (!inTexMesh)
+						return;
+					if (inTexMesh->materials().size() > idx)
 					{
-						auto material = mTextureMesh.materials()[idx];
-
+						auto material = inTexMesh->materials()[idx];
 						material->metallic = this->varMetallic()->getValue();
-					}
+						mTextureMesh.materials()[idx]->metallic = material->metallic;
+					}	
 				}));
 
 		this->varRoughness()->attach(
 			std::make_shared<FCallBackFunc>(
 				[=]() {
 					uint idx = this->varMaterialIndex()->getValue();
-
-					if (mTextureMesh.materials().size() > idx)
+					auto inTexMesh = this->inTextureMesh()->getDataPtr();
+					if (!inTexMesh)
+						return;
+					if (inTexMesh->materials().size() > idx)
 					{
-						auto material = mTextureMesh.materials()[idx];
-
+						auto material = inTexMesh->materials()[idx];
 						material->roughness = this->varRoughness()->getValue();
-					}
+						mTextureMesh.materials()[idx]->roughness = material->roughness;
+					}	
 				}));
 
 		this->varAlpha()->attach(
 			std::make_shared<FCallBackFunc>(
 				[=]() {
 					uint idx = this->varMaterialIndex()->getValue();
-
-					if (mTextureMesh.materials().size() > idx)
+					auto inTexMesh = this->inTextureMesh()->getDataPtr();
+					if (!inTexMesh)
+						return;
+					if (inTexMesh->materials().size() > idx)
 					{
-						auto material = mTextureMesh.materials()[idx];
-
-						material->roughness = this->varAlpha()->getValue();
-					}
+						auto material = inTexMesh->materials()[idx];
+						material->alpha = this->varAlpha()->getValue();
+						mTextureMesh.materials()[idx]->alpha = material->alpha;
+					}		
 				}));
 
 #ifdef CUDA_BACKEND
@@ -127,12 +136,17 @@ namespace dyno
 
 	void GLPhotorealisticRender::updateGL()
 	{
-		mTangent.updateGL();
-		mBitangent.updateGL();
+		if (mNeedUpdateTextureMesh)
+		{
+			mTangent.updateGL();
+			mBitangent.updateGL();
 
-		mShapeTransform.updateGL();
+			mShapeTransform.updateGL();
 
-		mTextureMesh.updateGL();
+			mTextureMesh.updateGL();
+
+			mNeedUpdateTextureMesh = false;
+		}
 
 		glCheckError();
 	}
@@ -142,6 +156,7 @@ namespace dyno
 		if (this->inTextureMesh()->isModified()) {
 			mTextureMesh.load(this->inTextureMesh()->constDataPtr());
 			this->varMaterialIndex()->setRange(0, mTextureMesh.materials().size() - 1);
+			mNeedUpdateTextureMesh = true;
 		}
 
 #ifdef CUDA_BACKEND

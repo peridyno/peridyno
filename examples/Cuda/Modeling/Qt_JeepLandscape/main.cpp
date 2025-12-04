@@ -60,8 +60,20 @@ std::shared_ptr<SceneGraph> creatScene()
 
 	auto multibody = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
 	jeep->connect(multibody->importVehicles());
-	jeep->varLocation()->setValue(Vec3f(0,1,-5));
+	jeep->varLocation()->setValue(Vec3f(0,10,-5));
+	std::vector<Transform3f> transforms;
 
+	int xNum = 10;
+	int zNum = 10;
+
+	for (size_t i = 0; i < xNum; i++)
+	{
+		for (size_t j = 0; j < zNum; j++)
+		{
+			transforms.push_back(Transform3f(Vec3f(i * 4, 0, j * 8), Mat3f::identityMatrix()));
+		}
+	}
+	jeep->varVehiclesTransform()->setValue(transforms);
 	auto ObjLand = scn->addNode(std::make_shared<ObjLoader<DataType3f>>());
 	ObjLand->varFileName()->setValue(getAssetPath() + "landscape/Landscape_resolution_1000_1000.obj");
 	ObjLand->varScale()->setValue(Vec3f(6));

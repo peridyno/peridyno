@@ -32,7 +32,9 @@ namespace dyno
 		~QIntegerFieldWidget() override {};
 
 	public slots:
-		void changeValue(int);
+		//Called when the field is updated
+		void updateField(int);
+
 	};
 
 	class QUIntegerFieldWidget : public QFieldWidget
@@ -45,6 +47,7 @@ namespace dyno
 		~QUIntegerFieldWidget() override {};
 
 	public slots:
-		void changeValue(int);
+		//Called when the field is updated
+		void updateField(int);
 	};
 }

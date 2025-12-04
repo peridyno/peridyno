@@ -340,6 +340,7 @@ namespace dyno
 
 		if (module != nullptr)
 			emit moduleUpdated(module);
+
 	}
 
 	QWidget* PPropertyWidget::createFieldWidget(FBase* field) {

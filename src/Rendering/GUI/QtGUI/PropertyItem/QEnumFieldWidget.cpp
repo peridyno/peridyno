@@ -65,6 +65,7 @@ namespace dyno
 
 		f->getDataPtr()->setCurrentKey(mComboxIndexMap[index]);
 		//To notify the field is updated
-		f->update();
+		//f->update();
+		emit fieldChanged();
 	}
 }

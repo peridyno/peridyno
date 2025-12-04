@@ -269,6 +269,11 @@ void ImWindow::draw(RenderWindow* app)
 
 				ImGui::Separator();
 
+				ImGui::Checkbox("Force Render", &mForceRender);
+				ImGui::Spacing();
+
+				ImGui::Separator();
+
 				if (scene) {
 					bool canPrintValidationInfo = scene->isValidationInfoPrintable();
 					if (ImGui::Checkbox("Print Validation Info", &canPrintValidationInfo))
@@ -449,6 +454,11 @@ void dyno::ImWindow::setEnableViewManipulate(bool flag)
 	this->mEnableViewManipulate = flag;
 }
 
+bool dyno::ImWindow::isGuizmoDisplayed()
+{
+	return mGuizmoDisplayed;
+}
+
 void ImWindow::mouseReleaseEvent(const PMouseEvent& event)
 {
 	// reset mouse status
@@ -493,8 +503,8 @@ void dyno::ImWindow::drawNodeManipulator(std::shared_ptr<Node> n, glm::mat4 view
 {
 	// TODO: type conversion...
 	auto node = std::dynamic_pointer_cast<ParametricModel<DataType3f>>(n);
-
-	if (!node) return;
+	mGuizmoDisplayed = node ? true : false;
+	if (!mGuizmoDisplayed) return;
 
 	// get original transform
 	dyno::Vec3f t0 = node->varLocation()->getData();

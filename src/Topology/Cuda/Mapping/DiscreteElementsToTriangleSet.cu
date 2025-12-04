@@ -8,8 +8,7 @@ namespace dyno
 	DiscreteElementsToTriangleSet<TDataType>::DiscreteElementsToTriangleSet()
 		: TopologyMapping()
 	{
-		mStandardSphere.loadObjFile(getAssetPath() + "standard/standard_icosahedron.obj");
-		mStandardCapsule.loadObjFile(getAssetPath() + "standard/standard_capsule.obj");
+
 	}
 
 	template<typename Triangle>
@@ -215,6 +214,11 @@ namespace dyno
 			this->outTriangleSet()->allocate();
 		}
 
+		if (mStandardSphere.isEmpty())
+		{
+			mStandardSphere.loadObjFile(getAssetPath() + "standard/standard_icosahedron.obj");
+			mStandardCapsule.loadObjFile(getAssetPath() + "standard/standard_capsule.obj");
+		}
 		auto inTopo = this->inDiscreteElements()->constDataPtr();
 
 		DArray<Box3D>& boxInGlobal = inTopo->boxesInGlobal();

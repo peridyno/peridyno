@@ -273,7 +273,7 @@ namespace dyno
 
 		QString caption = s.nodeDataModel()->caption();
 
-		PModuleEditor* moduleEditor = new PModuleEditor(clickedNode);
+		PModuleEditor* moduleEditor = new PModuleEditor(clickedNode, mOpenGLWidget);
 		moduleEditor->setWindowTitle("Module Editor -- " + caption);
 		moduleEditor->resize(1024, 600);
 		moduleEditor->setMinimumSize(512, 360);
@@ -285,6 +285,7 @@ namespace dyno
 
 		connect(moduleEditor, &PModuleEditor::changed, mOpenGLWidget, &POpenGLWidget::updateGraphicsContext);
 		connect(moduleEditor->moduleFlowScene(), &Qt::QtModuleFlowScene::nodeExportChanged, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::updateNodeGraphView);
+
 	}
 
 	void PMainWindow::showMessage()
@@ -364,8 +365,9 @@ namespace dyno
 				else
 					qNode->nodeGraphicsObject().setSelected(false);
 			}
-			});
+		});
 
+		connect(mPropertyWidget, &PPropertyWidget::nodeUpdated, mOpenGLWidget, &POpenGLWidget::onNodeUpdated);
 
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeSelected, [=](Qt::QtNode& n)
 			{
@@ -378,6 +380,8 @@ namespace dyno
 					mOpenGLWidget->update();
 				}
 			});
+
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeRenderingKeyChanged,mOpenGLWidget, &POpenGLWidget::nodeNodeRenderingKeyUpdated);
 
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeDeselected, [=]()
 			{

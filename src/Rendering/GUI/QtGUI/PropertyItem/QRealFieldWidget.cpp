@@ -44,6 +44,7 @@ namespace dyno
 			FVar<double>* f = TypeInfo::cast<FVar<double>>(field);
 
 			spinner->setRealValue((double)f->getValue());
+			spinner->setDouble(true);
 			slider->setValue(f->getValue());
 		}
 
