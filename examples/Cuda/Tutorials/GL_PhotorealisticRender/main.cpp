@@ -28,7 +28,7 @@ std::shared_ptr<SceneGraph> createScene()
 		mesh->varLocation()->setValue(Vec3f(1.5f, 1.3f, 0.5f));
 	}
 
-	if (false) {
+	if (1) {
 		auto mesh = scn->addNode(std::make_shared<TextureMeshLoader>());
 		mesh->varFileName()->setValue(std::string("C:/Users/win11/Desktop/testMeetMat/MeetMat.obj"));
 		//mesh->varFileName()->setValue("C:/Users/M/Desktop/land/Landscape.obj");
