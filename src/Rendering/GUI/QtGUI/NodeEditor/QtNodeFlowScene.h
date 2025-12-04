@@ -9,6 +9,7 @@ namespace Qt
 {
 
 using dyno::SceneGraph;
+class dyno::Node;
 
 /// Scene holds connections and nodes.
 class QtNodeFlowScene
@@ -34,6 +35,12 @@ public:
 
 	float dx() { return mDx; }
 	float dy() { return mDy; }
+
+public:
+
+signals:
+	void nodeRenderingKeyChanged(std::shared_ptr<dyno::Node> node);
+
 
 public Q_SLOTS:
 	/**

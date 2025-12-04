@@ -41,7 +41,11 @@ namespace dyno
 
 	void GLPhotorealisticInstanceRender::updateGL()
 	{
-		mXTransformBuffer.updateGL();
+		if (mNeedUpdateInstanceTransform)
+		{
+			mXTransformBuffer.updateGL();
+			mNeedUpdateInstanceTransform = false;
+		}
 
 		GLPhotorealisticRender::updateGL();
 	}
@@ -59,6 +63,7 @@ namespace dyno
 			mLists.assign(inst->lists());
 
 			mXTransformBuffer.load(inst->elements());
+			mNeedUpdateInstanceTransform = true;
 		}
 
 		GLPhotorealisticRender::updateImpl();
