@@ -146,7 +146,9 @@ namespace dyno
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodePlaced, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeInputUpdated, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
 
-		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, mOpenGLWidget, &POpenGLWidget::updateGraphicsContext);
+		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, [=]() {
+			mOpenGLWidget->updateGraphicsContext();
+			});
 		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, mOpenGLWidget, &POpenGLWidget::updateOneFrame);
 		connect(PSimulationThread::instance(), &PSimulationThread::sceneGraphChanged, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::updateNodeGraphView);
 
@@ -283,7 +285,7 @@ namespace dyno
 		moduleEditor->setAttribute(Qt::WA_DeleteOnClose, true);
 		moduleEditor->show();
 
-		connect(moduleEditor, &PModuleEditor::changed, mOpenGLWidget, &POpenGLWidget::updateGraphicsContext);
+		connect(moduleEditor, SIGNAL(changed(Node*)), mOpenGLWidget, SLOT(updateGraphicsContext(Node*)));
 		connect(moduleEditor->moduleFlowScene(), &Qt::QtModuleFlowScene::nodeExportChanged, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::updateNodeGraphView);
 
 	}
