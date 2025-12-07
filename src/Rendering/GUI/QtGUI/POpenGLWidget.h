@@ -87,7 +87,7 @@ namespace dyno
 		void paintEvent(QPaintEvent* event) override;
 
 	public slots:
-		void updateGrpahicsContext();
+		void updateGraphicsContext();
 		void updateGraphicsContext(Node* node);
 
 		void onNodeUpdated(std::shared_ptr<Node> node);

@@ -226,7 +226,7 @@ namespace dyno
 		qreal ratio = devicePixelRatio();
 
 		this->setWindowSize(floor(w * ratio), floor(h * ratio));
-		updateGrpahicsContext();
+		updateGraphicsContext();
 	}
 
 	PButtonType mappingMouseButton(QMouseEvent* event)
@@ -305,7 +305,7 @@ namespace dyno
 			mtempCursorX = event->x();
 		}
 
-		updateGrpahicsContext();
+		updateGraphicsContext();
 	}
 
 	void POpenGLWidget::mouseReleaseEvent(QMouseEvent *event)
@@ -362,7 +362,7 @@ namespace dyno
 			mImWindow.mouseReleaseEvent(mouseEvent);
 		}
 
-		updateGrpahicsContext();
+		updateGraphicsContext();
 	}
 
 	void POpenGLWidget::mouseMoveEvent(QMouseEvent *event)
@@ -411,7 +411,7 @@ namespace dyno
 			mImWindow.mouseMoveEvent(mouseEvent);
 		}
 
-		updateGrpahicsContext();
+		updateGraphicsContext();
 	}
 
 	void POpenGLWidget::wheelEvent(QWheelEvent *event)
@@ -469,7 +469,7 @@ namespace dyno
 			emit this->nodeSelected(s.items[0].node);
 	}
 
-	void POpenGLWidget::updateGrpahicsContext()
+	void POpenGLWidget::updateGraphicsContext()
 	{
 		makeCurrent();
 
@@ -513,7 +513,7 @@ namespace dyno
 	void POpenGLWidget::onModuleUpdated(std::shared_ptr<Module> node)
 	{
 		if(!mBlockFieldUpdate)
-			updateGrpahicsContext();
+			updateGraphicsContext();
 	}
 
 	void POpenGLWidget::nodeNodeRenderingKeyUpdated(std::shared_ptr<Node> node)
