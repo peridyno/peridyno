@@ -19,12 +19,15 @@
 #include "NodeEditor/QtModuleFlowWidget.h"
 
 #include "PPropertyWidget.h"
+#include "POpenGLWidget.h"
 
 namespace dyno
 {
-	PModuleEditor::PModuleEditor(Qt::QtNodeWidget* widget)
+	PModuleEditor::PModuleEditor(Qt::QtNodeWidget* widget,POpenGLWidget* openGLWidget)
 		: QMainWindow(nullptr)
 	{
+		this->mOpenGLWidget = openGLWidget;
+
 		mToolBar = new PModuleEditorToolBar();
 
 		//Set up property dock widget
@@ -59,6 +62,8 @@ namespace dyno
 		connect(mToolBar, &PModuleEditorToolBar::showAnimationPipeline, moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::showAnimationPipeline);
 		connect(mToolBar, &PModuleEditorToolBar::showGraphicsPipeline, moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::showGraphicsPipeline);
 		connect(mToolBar->updateAction(), &QAction::triggered, moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::reconstructActivePipeline);
+		if (mOpenGLWidget) 
+			connect(propertyWidget, &PPropertyWidget::moduleUpdated, mOpenGLWidget, &POpenGLWidget::onModuleUpdated);
 
 		connect(mToolBar->updateAction(), &QAction::triggered, 
 			[=]() {

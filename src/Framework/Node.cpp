@@ -136,6 +136,8 @@ void Node::updateStates()
 
 void Node::update()
 {
+	mSyncRenderAndSim.lock();
+
 	if (!this->validateInputs()) {
 		return;
 	}
@@ -169,10 +171,13 @@ void Node::update()
 			f_out->tick();
 		}
 	}
+
+	mSyncRenderAndSim.unlock();
 }
 
 void Node::reset()
 {
+	mSyncRenderAndSim.lock();
 	if (this->validateInputs()) {
 		this->stateElapsedTime()->setValue(0.0f);
 		this->stateFrameNumber()->setValue(0);
@@ -182,6 +187,7 @@ void Node::reset()
 		//When the node is reset, call tick() to force updating all modules
 		this->tick();
 	}
+	mSyncRenderAndSim.unlock();
 }
 
 NBoundingBox Node::boundingBox()
@@ -198,7 +204,10 @@ void Node::updateGraphicsContext()
 {
 	if (mRenderingEnabled)
 	{
-		this->graphicsPipeline()->update();
+		if (mSyncRenderAndSim.try_lock()) {
+			this->graphicsPipeline()->update();
+			mSyncRenderAndSim.unlock();
+		}
 	}
 }
 

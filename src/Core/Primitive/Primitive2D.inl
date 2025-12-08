@@ -202,6 +202,16 @@ namespace dyno
 	}
 
 	template<typename Real>
+	DYN_FUNC bool TPoint2D<Real>::inside(const TOrientedBox2D<Real>& obox) const
+	{
+		Coord2D local_p = origin - obox.center;
+		Real pro_u = local_p.dot(obox.u);
+		Real pro_v = local_p.dot(obox.v);
+
+		return abs(pro_u) < obox.extent[0] && abs(pro_v) < obox.extent[1];
+	}
+
+	template<typename Real>
 	DYN_FUNC const TSegment2D<Real> TPoint2D<Real>::operator-(const TPoint2D<Real>& pt) const
 	{
 		return TSegment2D<Real>(pt.origin, origin);
@@ -893,6 +903,17 @@ namespace dyno
 	}
 
 	template<typename Real>
+	DYN_FUNC TAlignedBox2D<Real> TCircle2D<Real>::aabb()
+	{
+		TAlignedBox2D<Real> abox;
+
+		abox.v0 = center - radius;
+		abox.v1 = center + radius;
+
+		return abox;
+	}
+
+	template<typename Real>
 	DYN_FUNC TAlignedBox2D<Real>::TAlignedBox2D()
 	{
 		v0 = Coord2D(0);
@@ -911,6 +932,59 @@ namespace dyno
 	{
 		v0 = box.v0;
 		v1 = box.v1;
+	}
+
+	template<typename Real>
+	DYN_FUNC TAlignedBox2D<Real> TAlignedBox2D<Real>::merge(const TAlignedBox2D<Real>& aabb) const
+	{
+		TAlignedBox2D<Real> ret;
+		ret.v0 = v0.minimum(aabb.v0);
+		ret.v1 = v1.maximum(aabb.v1);
+
+		return ret;
+	}
+
+	template<typename Real>
+	DYN_FUNC TOrientedBox2D<Real>::TOrientedBox2D()
+	{
+		center = Coord2D(0);
+		u = Coord2D(1, 0);
+		v = Coord2D(0, 1);
+
+		extent = Coord2D(1);
+	}
+
+	template<typename Real>
+	DYN_FUNC TOrientedBox2D<Real>::TOrientedBox2D(const Coord2D c, const Coord2D u_t, const Coord2D v_t, const Coord2D ext)
+	{
+		center = c;
+		u = u_t;
+		v = v_t;
+		extent = ext;
+	}
+
+	template<typename Real>
+	DYN_FUNC TOrientedBox2D<Real>::TOrientedBox2D(const TOrientedBox2D<Real>& obb)
+	{
+		center = obb.center;
+		u = obb.u;
+		v = obb.v;
+		extent = obb.extent;
+	}
+
+	template<typename Real>
+	DYN_FUNC TAlignedBox2D<Real> TOrientedBox2D<Real>::aabb()
+	{
+		TAlignedBox2D<Real> abox;
+
+		Coord2D r_ext;
+		r_ext[0] = abs(extent[0] * u[0]) + abs(extent[1] * v[0]);
+		r_ext[1] = abs(extent[0] * u[1]) + abs(extent[1] * v[1]);
+
+		abox.v0 = center - r_ext;
+		abox.v1 = center + r_ext;
+
+		return abox;
 	}
 
 	template<typename Real>

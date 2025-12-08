@@ -22,6 +22,7 @@
 
 #include "Primitive/Primitive3D.h"
 #include "Topology/DistanceField3D.h"
+#include "Topology/AdaptiveGridSet.h"
 
 namespace dyno
 {
@@ -94,7 +95,8 @@ namespace dyno
 
 		static void countVerticeNumberForOctreeClipper(
 			DArray<uint>& num,
-			DArray<Coord>& vertices,
+			DArray<AdaptiveGridNode>& nodes,
+			std::shared_ptr<AdaptiveGridSet<TDataType>> gridSet,
 			TPlane3D<Real> plane);
 
 		static void constructTrianglesForOctreeClipper(
@@ -102,7 +104,8 @@ namespace dyno
 			DArray<Coord>& triangleVertices,
 			DArray<TopologyModule::Triangle>& triangles,
 			DArray<uint>& num,
-			DArray<Coord>& cellVertices,
+			DArray<AdaptiveGridNode>& nodes,
+			std::shared_ptr<AdaptiveGridSet<TDataType>> gridSet,
 			DArray<Real>& sdfs,
 			TPlane3D<Real> plane);
 	};

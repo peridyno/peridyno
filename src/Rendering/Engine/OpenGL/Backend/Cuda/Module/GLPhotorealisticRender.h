@@ -67,6 +67,7 @@ namespace dyno
 		VertexArray	mVAO;
 
 		GLTextureMesh mTextureMesh;
+		bool mNeedUpdateTextureMesh = false;
 
 #ifdef CUDA_BACKEND
 		std::shared_ptr<ConstructTangentSpace> mTangentSpaceConstructor;

@@ -349,6 +349,11 @@ namespace dyno
 
 		SceneGraph* mSceneGraph = nullptr;
 
+		/**
+		 * A  lock to guarantee consistency between simulation and rendering across threads
+		 */
+		std::mutex mSyncRenderAndSim;
+
 		friend class NodePort;
 	};
 }

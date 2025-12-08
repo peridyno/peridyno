@@ -61,6 +61,9 @@ namespace dyno
 		DYN_FUNC inline bool isGPU() const { return true; }
 		DYN_FUNC inline bool isEmpty() const { return mData == nullptr; }
 
+		void set(const uint id, const T value);
+		T get(const uint id);
+
 		void assign(const Array<T, DeviceType::GPU>& src);
 		void assign(const Array<T, DeviceType::CPU>& src);
 		void assign(const std::vector<T>& src);
@@ -84,7 +87,7 @@ namespace dyno
 		uint mTotalNum = 0;
 		uint mBufferNum = 0;
 	};
-	
+
 	template<typename T>
 	using DArray = Array<T, DeviceType::GPU>;
 
@@ -159,6 +162,25 @@ namespace dyno
 			this->resize((uint)src.size());
 
 		cuSafeCall(cudaMemcpy(mData, src.data(), src.size() * sizeof(T), cudaMemcpyHostToDevice));
+	}
+
+	template<typename T>
+	void Array<T, DeviceType::GPU>::set(const uint id, const T value)
+	{
+		assert(id >= 0 && id < mTotalNum);
+
+		cuSafeCall(cudaMemcpy(&mData[id], &value, sizeof(T), cudaMemcpyHostToDevice));
+	}
+
+	template<typename T>
+	T Array<T, DeviceType::GPU>::get(const uint id)
+	{
+		assert(id >= 0 && id < mTotalNum);
+
+		T value;
+		cuSafeCall(cudaMemcpy(&value, &mData[id], sizeof(T), cudaMemcpyDeviceToHost));
+
+		return value;
 	}
 
 	template<typename T>

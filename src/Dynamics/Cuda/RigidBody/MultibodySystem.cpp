@@ -187,6 +187,35 @@ namespace dyno
 	}
 
 	template<typename TDataType>
+	void MultibodySystem<TDataType>::preUpdateStates()
+	{
+		auto vehicles = this->getVehicles();
+
+		if (vehicles.size() > 0)
+		{
+			CArray<std::shared_ptr<DiscreteElements<TDataType>>> topos;
+
+			uint sizeOfRigidBodies = 0;
+			for (uint i = 0; i < vehicles.size(); i++)
+			{
+				auto vehicle = vehicles[i];
+
+				auto inTopo = vehicle->stateTopology()->getDataPtr();
+
+				topos.pushBack(inTopo);
+
+				sizeOfRigidBodies += vehicle->stateMass()->size();
+			}
+
+			auto curTopo = this->stateTopology()->getDataPtr();
+
+			curTopo->merge(topos);
+
+			topos.clear();
+		}
+	}
+
+	template<typename TDataType>
 	void MultibodySystem<TDataType>::postUpdateStates()
 	{
 		auto& vehicles = this->getVehicles();

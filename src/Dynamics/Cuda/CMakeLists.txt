@@ -9,6 +9,7 @@ option(PERIDYNO_LIBRARY_SEMIANALYTICALSCHEME "Enable binding the semi-analycial 
 
 option(PERIDYNO_LIBRARY_DUALPARTICLESYSTEM "Enable binding the dual-particle scheme library" ON)
 option(PERIDYNO_LIBRARY_MULTIPHYSICS "Enable building the multiphysics library" ON)
+option(PERIDYNO_LIBRARY_EULERFLUID "Enable binding the Euler fluid library" ON)
 
 if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
     set(LIB_DEPENDENCY Core IO Framework Topology Modeling GLRenderEngine)
@@ -50,4 +51,9 @@ endif()
 if(PERIDYNO_LIBRARY_DUALPARTICLESYSTEM)
     set(LIB_DEPENDENCY SemiAnalyticalScheme)
     build_library(DualParticleSystem LIB_DEPENDENCY)
+endif()
+
+if(PERIDYNO_LIBRARY_EULERFLUID)
+    set(LIB_DEPENDENCY Core IO Framework Topology Modeling GLRenderEngine Volume)
+    build_library(EulerFluid LIB_DEPENDENCY)
 endif()

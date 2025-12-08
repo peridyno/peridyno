@@ -34,8 +34,13 @@ namespace dyno
 		DYN_FUNC void clear();
 
 		DYN_FUNC uint size();
+		DYN_FUNC uint maxSize();
 
 		DYN_FUNC iterator insert(Pair<MKey, T> pair);
+		DYN_FUNC iterator plusInsert(Pair<MKey, T> pair);
+#ifdef CUDA_BACKEND
+		GPU_FUNC inline iterator atomicInsert(Pair<MKey, T> pair);
+#endif
 		DYN_FUNC bool empty();
 
 		DYN_FUNC void assign(Pair<MKey, T>* beg, int num, int buffer_size)

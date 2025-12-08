@@ -52,6 +52,8 @@ namespace dyno
 		double v2 = 0;
 		double v3 = 0;
 
+		bool isDouble = false;
+
 		if (template_name == std::string(typeid(Vec3f).name()))
 		{
 			FVar<Vec3f>* f = TypeInfo::cast<FVar<Vec3f>>(field);
@@ -68,10 +70,15 @@ namespace dyno
 			v1 = v[0];
 			v2 = v[1];
 			v3 = v[2];
+			isDouble = true;
 		}
 		spinner1->setRealValue(v1);
 		spinner2->setRealValue(v2);
 		spinner3->setRealValue(v3);
+
+		spinner1->setDouble(isDouble);
+		spinner2->setDouble(isDouble);
+		spinner3->setDouble(isDouble);
 
 		QObject::connect(spinner1, SIGNAL(editingFinishedWithValue(double)), this, SLOT(updateField(double)));
 		QObject::connect(spinner2, SIGNAL(editingFinishedWithValue(double)), this, SLOT(updateField(double)));

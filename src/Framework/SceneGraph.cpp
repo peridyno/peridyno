@@ -266,7 +266,7 @@ namespace dyno
 			void process(Node* node) override {
 				if (node->isVisible())
 				{
-					node->graphicsPipeline()->update();
+					node->updateGraphicsContext();
 				}
 			}
 		};
