@@ -36,6 +36,8 @@ namespace Qt
 		for (auto const c : *classMap)
 		{
 			id++;
+
+			QString str = QString::fromStdString(c.first);
 			auto obj = dyno::Object::createObject(str.toStdString());
 			std::shared_ptr<dyno::Node> node(dynamic_cast<dyno::Node*>(obj));
 
