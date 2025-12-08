@@ -2,8 +2,9 @@
 #include <memory>
 #include "AppBase.h"
 
-#include <QApplication>
 #include <RenderWindow.h>
+
+class QApplication;
 
 namespace dyno {
 

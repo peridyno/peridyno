@@ -1,4 +1,4 @@
-#include "PConsoleWidget.h"
+﻿#include "PConsoleWidget.h"
 #include "Platform.h"
 #include <QListWidget>
 #include <QDir>
@@ -63,6 +63,7 @@ namespace dyno
 		mCodeEditor->setLexer(mPythonLexer);
 
 		QsciAPIs* apis = new QsciAPIs(mPythonLexer);
+
 		apis->add(QString("import"));
 		apis->add(QString("QtPathHelper"));
 		apis->add(QString("PyPeridyno"));
@@ -74,11 +75,15 @@ namespace dyno
 		apis->add(QString("pushModule"));
 		apis->add(QString("setValue"));
 		apis->add(QString("Vector3f"));
+		 
+		if (!apis->load(QString::fromStdString(getAssetPath() + "PromptFunctionName")))
+			QMessageBox::warning(this, QString("提示"), QString("读取文件失败"));
+
 		apis->prepare();
 
 		mCodeEditor->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 		mCodeEditor->setCaretForegroundColor(QColor("#d4d4d4"));
-		
+
 		// line numbers
 		mCodeEditor->setMarginsBackgroundColor(QColor("#454545"));
 		mCodeEditor->setMarginsForegroundColor(QColor("#d4d4d4"));
@@ -87,7 +92,7 @@ namespace dyno
 
 		// auto completion
 		mCodeEditor->setAutoCompletionSource(QsciScintilla::AcsAll);
-		mCodeEditor->setAutoCompletionCaseSensitivity(true);
+		mCodeEditor->setAutoCompletionCaseSensitivity(false);
 		mCodeEditor->setAutoCompletionThreshold(1);
 
 		// indentation
@@ -292,9 +297,9 @@ namespace dyno
 		model->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
 		model->sort(0, Qt::AscendingOrder);
 
-//		QObject::connect(model, SIGNAL(directoryLoaded(QString)), SLOT(findDirectory(QString)));
+		//		QObject::connect(model, SIGNAL(directoryLoaded(QString)), SLOT(findDirectory(QString)));
 
-		// File system
+				// File system
 		treeView = new QTreeView(this);
 		treeView->setModel(model);
 		treeView->setHeaderHidden(true);	//Show tree header
@@ -308,7 +313,7 @@ namespace dyno
 
 
 		QStringList filter;
-		filter <<"*.png" << "*.jpg" << "*.bmp" << "*.obj" << "*.gltf" << "*.glb" << "*.fbx" << "*.STL" << "*.stl" << "*.xml";
+		filter << "*.png" << "*.jpg" << "*.bmp" << "*.obj" << "*.gltf" << "*.glb" << "*.fbx" << "*.STL" << "*.stl" << "*.xml";
 		auto* listModel = new CustomFileSystemModel(this);
 		listModel->setRootPath(path.c_str());
 		listModel->setFilter(QDir::Files | QDir::NoDotAndDotDot);
@@ -352,7 +357,7 @@ namespace dyno
 		newListModel->setNameFilterDisables(false);
 		newListModel->sort(0, Qt::AscendingOrder);
 
- 		listView->setModel(newListModel);
+		listView->setModel(newListModel);
 		listView->setRootIndex(newListModel->index(path));
 	}
 
