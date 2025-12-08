@@ -524,10 +524,17 @@ namespace dyno
 
 	void POpenGLWidget::updateOneFrame(int frame)
 	{
+		updateGraphicsContext();
+
 		if (!this->isScreenRecordingOn())
 			return;
 
 		saveScreen(frame);
+	}
+
+	void POpenGLWidget::resetSceneFrame()
+	{
+		updateGraphicsContext();
 	}
 
 	void POpenGLWidget::onSaveScreen(const std::string& filename)

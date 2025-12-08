@@ -255,7 +255,7 @@ namespace dyno
 		public:
 			void process(Node* node) override {
 				node->reset();
-				node->updateGraphicsContext();
+				//node->updateGraphicsContext();
 			}
 		};
 
