@@ -89,7 +89,7 @@ namespace dyno
 	public slots:
 		void updateGraphicsContext();
 		void updateGraphicsContext(Node* node);
-
+		void resetSceneFrame();
 		void onNodeUpdated(std::shared_ptr<Node> node);
 		void onModuleUpdated(std::shared_ptr<Module> node);
 		void nodeNodeRenderingKeyUpdated(std::shared_ptr<Node> node);

@@ -1,4 +1,4 @@
-#include <QtApp.h>
+#include <UbiApp.h>
 #include <SceneGraph.h>
 #include <GLRenderEngine.h>
 
@@ -60,11 +60,11 @@ std::shared_ptr<SceneGraph> creatScene()
 
 	auto multibody = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
 	jeep->connect(multibody->importVehicles());
-	jeep->varLocation()->setValue(Vec3f(0,10,-5));
+	jeep->varLocation()->setValue(Vec3f(0,13,-5));
 	std::vector<Transform3f> transforms;
 
-	int xNum = 10;
-	int zNum = 10;
+	int xNum = 1;
+	int zNum = 1;
 
 	for (size_t i = 0; i < xNum; i++)
 	{
@@ -91,7 +91,7 @@ std::shared_ptr<SceneGraph> creatScene()
 
 int main()
 {
-	QtApp window;
+	UbiApp window(GUIType::GUI_QT);
 	window.setSceneGraph(creatScene());
 	window.initialize(1366, 768);
 
