@@ -1,6 +1,9 @@
 #pragma once
-#include <QTableWidgetItem>
 #include "Field.h"
+#include "Topology/TriangleSet.h"
+#include "Module/TopologyModule.h"
+
+#include <QTableWidgetItem>
 #include <QResizeEvent>
 #include <QWheelEvent>
 #include <QScrollBar>
@@ -19,9 +22,8 @@
 #include "ViewerItem/PRealViewerWidget.h"
 
 #include "PSimulationThread.h"
-#include "Topology/TriangleSet.h"
 #include <QCloseEvent>
-#include "Framework/Module/TopologyModule.h"
+
 
 
 namespace dyno

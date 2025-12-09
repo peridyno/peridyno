@@ -32,7 +32,6 @@
 #include "Format.h"
 #include "FCallbackFunc.h"
 #include "QtGUI/Common.h"
-#include "Core/Vector.h"
 
 //C++
 #include <memory>
