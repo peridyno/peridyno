@@ -40,7 +40,7 @@ namespace dyno
 		 * @brief Reset the simulation
 		 */
 		void reset(int num);
-
+		void reset();
 		/**
 		 * @brief Continue the simulation from the current frame
 		 */

@@ -24,6 +24,20 @@
 namespace dyno
 {
 	template<typename T>
+	void XTexture2D<T>::release()
+	{
+		if (this->isValid())
+			Texture2D::release();
+		if (resource) 
+		{
+			cuSafeCall(cudaGraphicsUnregisterResource(resource));
+			resource = NULL;
+		}
+		if (buffer.size() > 0)
+			buffer.clear();
+
+	}
+	template<typename T>
 	void XTexture2D<T>::create()
 	{
 		if (typeid(T) == typeid(dyno::Vec4f)) {
@@ -211,7 +225,7 @@ namespace dyno
 
 		if (width != buffer.nx() || height != buffer.ny()) {
 			// resize texture
-			this->release();
+			Texture2D::release();
 			this->create();
 			this->resize(buffer.nx(), buffer.ny());
 

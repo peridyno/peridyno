@@ -52,6 +52,7 @@
 #include "PIOTabWidget.h"
 #include "PLogWidget.h"
 #include "PConsoleWidget.h"
+#include "PMaterialBrowser.h"
 
 #include <QAction>
 #include <QtEvents>
@@ -133,6 +134,10 @@ namespace dyno
 		mContentBrowser = new QContentBrowser;
 		m_ioTabWidget->addTab(mContentBrowser, QString("Browser"));
 		m_ioTabWidget->setTabText(m_ioTabWidget->indexOf(mContentBrowser), QApplication::translate("MainWindow", "Browser", Q_NULLPTR));
+
+		mMaterialBrowser = new PMaterialBrowser(this);
+		m_ioTabWidget->addTab(mMaterialBrowser, QString("MaterialBrowser"));
+		m_ioTabWidget->setTabText(m_ioTabWidget->indexOf(mMaterialBrowser), QApplication::translate("MainWindow", "MaterialBrowser", Q_NULLPTR));
 
 		//Create log widget
 		mLogWidget = PLogWidget::instance();

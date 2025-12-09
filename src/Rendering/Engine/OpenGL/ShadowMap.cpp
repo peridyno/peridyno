@@ -112,7 +112,7 @@ namespace dyno
 		   glm::vec4(1.0f, 1.0f, -1.0f, 1.0f),
 		   glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
 		};
-		
+
 		const glm::mat4 invProj = glm::inverse(proj);
 
 		std::array<glm::vec4, 8> corners;
@@ -124,6 +124,83 @@ namespace dyno
 		}
 
 		return corners;
+	}
+
+	glm::vec4 computePlane(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c)
+	{
+		glm::vec3 normal = glm::normalize(glm::cross(b - a, c - a));
+		float d = -glm::dot(normal, a);
+		return glm::vec4(normal, d);
+	}
+
+
+	std::array<glm::vec4, 6> getFrustumPlanes(const std::array<glm::vec4, 8>& corners)
+	{
+		std::array<glm::vec4, 6> planes;
+
+		planes[0] = computePlane(glm::vec3(corners[1]), glm::vec3(corners[3]), glm::vec3(corners[5]));
+		planes[1] = computePlane(glm::vec3(corners[0]), glm::vec3(corners[4]), glm::vec3(corners[2]));
+		planes[2] = computePlane(glm::vec3(corners[0]), glm::vec3(corners[1]), glm::vec3(corners[2]));
+		planes[3] = computePlane(glm::vec3(corners[4]), glm::vec3(corners[6]), glm::vec3(corners[5]));
+		planes[4] = computePlane(glm::vec3(corners[2]), glm::vec3(corners[3]), glm::vec3(corners[6]));
+		planes[5] = computePlane(glm::vec3(corners[0]), glm::vec3(corners[4]), glm::vec3(corners[1]));
+
+		return planes;
+	}
+
+	bool isBoxInFrustum(const Vec3f& up, const Vec3f& low, const std::array<glm::vec4, 6>& planes)
+	{
+		for (const auto& plane : planes)
+		{
+			const glm::vec3 normal(plane.x, plane.y, plane.z);
+			float w = plane.w;
+
+			glm::vec3 negativeVertex;
+			negativeVertex.x = (normal.x >= 0) ? low.x : up.x;
+			negativeVertex.y = (normal.y >= 0) ? low.y : up.y;
+			negativeVertex.z = (normal.z >= 0) ? low.z : up.z;
+
+			float dist = glm::dot(normal, negativeVertex) + w;
+
+			if (dist > 0)
+				return false; 
+		}
+		return true;
+	}
+
+
+	void ShadowMap::getMergedBoundingBoxInFrustum(const glm::mat4& proj, const std::vector<Vec3f>& up, const std::vector<Vec3f>& low, Vec3f& resultUp, Vec3f& resultLow)
+	{
+		auto frustumCorners = getFrustumCorners(proj);
+		auto planes = getFrustumPlanes(frustumCorners);
+
+		bool hasBoxInFrustum = false;
+
+		for (size_t i = 0; i < up.size(); i++)
+		{
+			Vec3f UpperBound = up[i];
+			Vec3f LowerBound = low[i];
+
+			if (isBoxInFrustum(UpperBound, LowerBound, planes))
+			{
+				if (!hasBoxInFrustum)
+				{
+					resultUp = up[i];
+					resultLow = low[i];
+					hasBoxInFrustum = true;
+				}
+				else
+				{
+					resultLow.x = glm::min(resultLow.x, low[i].x);
+					resultLow.y = glm::min(resultLow.y, low[i].y);
+					resultLow.z = glm::min(resultLow.z, low[i].z);
+
+					resultUp.x = glm::max(resultUp.x, up[i].x);
+					resultUp.y = glm::max(resultUp.y, up[i].y);
+					resultUp.z = glm::max(resultUp.z, up[i].z);
+				}
+			}
+		}
 	}
 
 	glm::mat4 getLightViewMatrix(glm::vec3 lightDir)
@@ -188,6 +265,41 @@ namespace dyno
 		return lightProj;
 	}
 
+	void GetBoundingBoxOfAllNodes(dyno::SceneGraph* scene, std::vector<Vec3f>& uppers, std::vector<Vec3f>& lowers, bool clampToSceneBounds)
+	{
+		if (!scene->isEmpty())
+		{
+			Vec3f sceneLower = scene->getLowerBound();
+			Vec3f sceneUpper = scene->getUpperBound();
+
+			for (SceneGraph::Iterator itor = scene->begin(); itor != scene->end(); itor++) {
+				auto node = itor.get();
+				if (node->isVisible())
+				{
+					if (clampToSceneBounds)
+					{
+						uppers.push_back(Vec3f(
+							node->boundingBox().upper.x > sceneUpper.x ? sceneUpper.x : node->boundingBox().upper.x,
+							node->boundingBox().upper.y > sceneUpper.y ? sceneUpper.y : node->boundingBox().upper.y,
+							node->boundingBox().upper.z > sceneUpper.z ? sceneUpper.z : node->boundingBox().upper.z
+						));
+						lowers.push_back(Vec3f(
+							node->boundingBox().lower.x < sceneLower.x ? sceneLower.x : node->boundingBox().lower.x,
+							node->boundingBox().lower.y < sceneLower.y ? sceneLower.y : node->boundingBox().lower.y,
+							node->boundingBox().lower.z < sceneLower.z ? sceneLower.z : node->boundingBox().lower.z
+						));
+					}
+					else
+					{
+						uppers.push_back(node->boundingBox().upper);
+						lowers.push_back(node->boundingBox().lower);
+					}
+				}
+			}
+
+		}
+	}
+
 	void ShadowMap::update(dyno::SceneGraph* scene, const dyno::RenderParams& rparams)
 	{
 		if (sizeUpdated)
@@ -204,6 +316,21 @@ namespace dyno
 		mFramebuffer.clearDepth(1.0);
 		mFramebuffer.clearColor(1.0, 1.0, 1.0, 1.0);
 
+		Vec3f resultUp, resultLow;
+		if (useSceneBounds) 
+		{
+			resultUp = scene->getUpperBound();
+			resultLow = scene->getLowerBound();
+		}
+		else 
+		{
+			std::vector<Vec3f> uppers;
+			std::vector<Vec3f> lowers;
+			GetBoundingBoxOfAllNodes(scene, uppers, lowers, clampToSceneBounds);
+
+			getMergedBoundingBoxInFrustum(rparams.transforms.proj, uppers, lowers, resultUp, resultLow);
+		}
+
 		if (rparams.light.mainLightShadow > 0.f	&& 
 			scene != nullptr && !scene->isEmpty())
 		{
@@ -211,8 +338,8 @@ namespace dyno
 
 			glm::mat4 lightView = getLightViewMatrix(rparams.light.mainLightDirection);
 			glm::mat4 lightProj = getLightProjMatrix(lightView, 
-				scene->getLowerBound(), 
-				scene->getUpperBound(), 
+				resultLow,
+				resultUp,
 				rparams.transforms.view, 
 				rparams.transforms.proj);
 
@@ -264,10 +391,15 @@ namespace dyno
 			struct {
 				glm::mat4	transform;
 				float		minValue;
+				//int		range;
+				//float    lightRadius;
 			} shadow;
 
 			shadow.transform = lightProj * lightView * glm::inverse(rparams.transforms.view);
 			shadow.minValue = minValue;
+			//shadow.lightRadius = mLightRadius;
+			//shadow.range = this->blurIters;
+
 			mShadowUniform.load(&shadow, sizeof(shadow));
 		}
 
@@ -307,6 +439,16 @@ namespace dyno
 	void ShadowMap::setNumBlurIterations(int iter)
 	{
 		this->blurIters = iter;
+	}
+
+	void ShadowMap::setLightRadius(float radius)
+	{
+		this->mLightRadius = radius;
+	}
+
+	float ShadowMap::getLightRadius()
+	{	
+		return this->mLightRadius;
 	}
 
 }

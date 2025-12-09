@@ -2,7 +2,7 @@
 #include "Utility.h"
 
 #include <glad/glad.h>
-
+#include "ShaderStruct.h"
 #include "surface.vert.h"
 #include "surface.frag.h"
 #include "surface.geom.h"
@@ -15,20 +15,20 @@ namespace dyno
 	{
 		this->setName("ObjMeshRenderer");
 
-		this->varMaterialIndex()->attach(std::make_shared<FCallBackFunc>(
+		this->varMaterialShapeIndex()->attach(std::make_shared<FCallBackFunc>(
 			[=]() {
-				uint idx = this->varMaterialIndex()->getValue();
-				auto inTexMesh = this->inTextureMesh()->getDataPtr();
-				if (!inTexMesh)
-					return;
-				if (inTexMesh->materials().size() > idx)
-				{
-					auto material = inTexMesh->materials()[idx];
+				uint idx = this->varMaterialShapeIndex()->getValue();
 
-					this->varAlpha()->setValue(material->alpha);
-					this->varMetallic()->setValue(material->metallic);
-					this->varRoughness()->setValue(material->roughness);
-					this->varBaseColor()->setValue(Color(material->baseColor.x, material->baseColor.y, material->baseColor.z));
+				if (idx < mTextureMesh.shapes().size())
+				{
+					auto material = mTextureMesh.shapes()[idx]->material;
+					if (material) 
+					{
+						this->varAlpha()->setValue(material->alpha);
+						this->varMetallic()->setValue(material->metallic);
+						this->varRoughness()->setValue(material->roughness);
+						this->varBaseColor()->setValue(Color(material->baseColor.x, material->baseColor.y, material->baseColor.z));
+					}
 				}
 				
 			}));
@@ -36,46 +36,40 @@ namespace dyno
 		this->varMetallic()->attach(
 			std::make_shared<FCallBackFunc>(
 				[=]() {
-					uint idx = this->varMaterialIndex()->getValue();
-					auto inTexMesh = this->inTextureMesh()->getDataPtr();
-					if (!inTexMesh)
-						return;
-					if (inTexMesh->materials().size() > idx)
+					uint idx = this->varMaterialShapeIndex()->getValue();
+
+					if (idx < mTextureMesh.shapes().size())
 					{
-						auto material = inTexMesh->materials()[idx];
-						material->metallic = this->varMetallic()->getValue();
-						mTextureMesh.materials()[idx]->metallic = material->metallic;
-					}	
+						auto material = mTextureMesh.shapes()[idx]->material;
+						if (material) 
+							material->metallic = this->varMetallic()->getValue();
+					}
 				}));
 
 		this->varRoughness()->attach(
 			std::make_shared<FCallBackFunc>(
 				[=]() {
-					uint idx = this->varMaterialIndex()->getValue();
-					auto inTexMesh = this->inTextureMesh()->getDataPtr();
-					if (!inTexMesh)
-						return;
-					if (inTexMesh->materials().size() > idx)
+					uint idx = this->varMaterialShapeIndex()->getValue();
+
+					if (idx < mTextureMesh.shapes().size())
 					{
-						auto material = inTexMesh->materials()[idx];
-						material->roughness = this->varRoughness()->getValue();
-						mTextureMesh.materials()[idx]->roughness = material->roughness;
-					}	
+						auto material = mTextureMesh.shapes()[idx]->material;
+						if (material)
+							material->roughness = this->varRoughness()->getValue();
+					}
 				}));
 
 		this->varAlpha()->attach(
 			std::make_shared<FCallBackFunc>(
 				[=]() {
-					uint idx = this->varMaterialIndex()->getValue();
-					auto inTexMesh = this->inTextureMesh()->getDataPtr();
-					if (!inTexMesh)
-						return;
-					if (inTexMesh->materials().size() > idx)
+					uint idx = this->varMaterialShapeIndex()->getValue();
+
+					if (idx < mTextureMesh.shapes().size())
 					{
-						auto material = inTexMesh->materials()[idx];
-						material->alpha = this->varAlpha()->getValue();
-						mTextureMesh.materials()[idx]->alpha = material->alpha;
-					}		
+						auto material = mTextureMesh.shapes()[idx]->material;
+						if (material)
+							material->roughness = this->varAlpha()->getValue();
+					}
 				}));
 
 #ifdef CUDA_BACKEND
@@ -155,33 +149,25 @@ namespace dyno
 	{
 		if (this->inTextureMesh()->isModified()) {
 			mTextureMesh.load(this->inTextureMesh()->constDataPtr());
-			this->varMaterialIndex()->setRange(0, mTextureMesh.materials().size() - 1);
-			mNeedUpdateTextureMesh = true;
+			this->varMaterialShapeIndex()->setRange(0,mTextureMesh.shapes().size());
 		}
 
 #ifdef CUDA_BACKEND
 		auto texMesh = this->inTextureMesh()->constDataPtr();
-		if (texMesh->materials().size() > 0)
-		{
-			mTangentSpaceConstructor->update();
 
-			if (!mTangentSpaceConstructor->outTangent()->isEmpty())
-			{
-				mTangent.load(mTangentSpaceConstructor->outTangent()->constData());
-				mBitangent.load(mTangentSpaceConstructor->outBitangent()->constData());
-			}
+		mTangentSpaceConstructor->update();
+
+		if (!mTangentSpaceConstructor->outTangent()->isEmpty())
+		{
+			mTangent.load(mTangentSpaceConstructor->outTangent()->constData());
+			mBitangent.load(mTangentSpaceConstructor->outBitangent()->constData());
 		}
+		
 #endif
 	}
 
 	void GLPhotorealisticRender::paintGL(const RenderParams& rparams)
 	{
-		struct {
-			glm::vec3 color;
-			float metallic;
-			float roughness;
-			float alpha;
-		} pbr;
 
 		mShaderProgram->use();
 
@@ -229,10 +215,23 @@ namespace dyno
 
 				// material 
 				{
+
+					PBRMaterial pbr;
+					auto color = this->varBaseColor()->getValue();
+
 					pbr.color = { mtl->baseColor.x, mtl->baseColor.y, mtl->baseColor.z };
 					pbr.metallic = mtl->metallic;
 					pbr.roughness = mtl->roughness;
 					pbr.alpha = mtl->alpha;
+
+					if(mtl->texORM.isValid())
+						pbr.useAOTex = 1;
+					if (mtl->texORM.isValid())
+					{
+						pbr.useRoughnessTex = 1;
+						pbr.useMetallicTex = 1;
+					}
+
 					mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
 					mPBRMaterialUBlock.bindBufferBase(1);
 				}
@@ -243,6 +242,8 @@ namespace dyno
 					glActiveTexture(GL_TEXTURE10);		// color
 					glBindTexture(GL_TEXTURE_2D, 0);
 					glActiveTexture(GL_TEXTURE11);		// bump map
+					glBindTexture(GL_TEXTURE_2D, 0);
+					glActiveTexture(GL_TEXTURE12);		// bump map
 					glBindTexture(GL_TEXTURE_2D, 0);
 
 					if (mtl->texColor.isValid()) {
@@ -258,6 +259,10 @@ namespace dyno
 						mtl->texBump.bind(GL_TEXTURE11);
 						mShaderProgram->setFloat("uBumpScale", mtl->bumpScale);
 					}
+					if (mtl->texORM.isValid()) 
+					{
+						mtl->texORM.bind(GL_TEXTURE12);
+					}
 				}
 			}
 			else 
@@ -271,12 +276,8 @@ namespace dyno
 
 				// material 
 				{
-					struct {
-						glm::vec3 color;
-						float metallic;
-						float roughness;
-						float alpha;
-					} pbr;
+					PBRMaterial pbr;
+
 					auto color = this->varBaseColor()->getValue();
 					pbr.color = { color.r, color.g, color.b };
 					pbr.metallic = this->varMetallic()->getValue();

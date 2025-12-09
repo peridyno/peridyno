@@ -33,9 +33,10 @@ namespace dyno
 
 	public slots:
 		void updateField(QString str);
-
+		void updateWidget();
 	private:
 		QLineEdit* fieldname;
+		FVar<std::string>* f;
 	};
 
 	class QFilePathWidget : public QFieldWidget

@@ -215,6 +215,22 @@ namespace dyno
 		notify();
 	}
 
+	void PSimulationThread::reset()
+	{
+		this->pause();
+
+		mFinished = true;
+
+		mActiveNode = nullptr;
+
+		auto scn = SceneGraphFactory::instance()->active();
+		scn->setFrameNumber(0);
+
+		//Note: should set mReset at the end
+		mReset = true;
+		notify();
+	}
+
 	void PSimulationThread::proceed(int num)
 	{
 		this->pause();

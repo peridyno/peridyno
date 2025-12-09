@@ -14,6 +14,7 @@
 #include "NodeEditor/QtNodeWidget.h"
 #include "NodeEditor/QtModuleFlowScene.h"
 #include "PPropertyWidget.h"
+#include "RenderWindow.h"
 
 namespace dyno
 {
@@ -34,7 +35,8 @@ namespace dyno
 		
 		PSettingWidget* getSettingWidget() { return settingWidget; }
 
-		void setRenderEngine(std::shared_ptr<RenderEngine> engine);
+		void setRenderEngine(RenderWindow* Window);
+		RenderWindow* getRenderWindow() { return renderWindow; }
 
 	signals:
 		void changed(SceneGraph* scn);
@@ -49,6 +51,7 @@ namespace dyno
 	private:
 
 		PSettingWidget* settingWidget = nullptr;
+		RenderWindow* renderWindow = nullptr;
 		PSettingWidget* renderSettingWidget = nullptr;
 		QDockWidget* DockerRight = nullptr;
 	};
@@ -114,7 +117,7 @@ namespace dyno
 		PRenderSetting(PSettingEditor* editor, std::string title);
 		~PRenderSetting();
 
-		void setRenderEngine(std::shared_ptr<RenderEngine> engine);
+		void setRenderEngine(RenderWindow* window);
 
 	public slots:
 		void updateData() override;
@@ -125,13 +128,15 @@ namespace dyno
 
 		void setShadowBlurIters(int iters);
 
+		//void setShadowType(int type);
 
 	private:
 		std::shared_ptr<GLRenderEngine> mRenderEngine = nullptr;
-
+		RenderWindow* mRenderWindow = nullptr;
 		QCheckBox* fxaaEnabled;
 		QComboBox* msaaSamples;
 		QComboBox* shadowMapSize;
+		//QComboBox* shadowType;
 		QSpinBox*  shadowBlurIters;
 		QLineEdit* mLineEdit = nullptr;
 	};

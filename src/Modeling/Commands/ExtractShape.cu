@@ -184,9 +184,9 @@ namespace dyno
 			cudaMemcpy(d_max, &max, sizeof(int), cudaMemcpyHostToDevice);
 			cudaMemcpy(d_min, &min, sizeof(int), cudaMemcpyHostToDevice);
 
-			cuExecute(inTexMesh->shapeIds().size(),
+			cuExecute(inTexMesh->meshDataPtr()->shapeIds().size(),
 				GetShapeVerticesRange,
-				inTexMesh->shapeIds(),
+				inTexMesh->meshDataPtr()->shapeIds(),
 				d_min,
 				d_max,
 				i
@@ -230,12 +230,6 @@ namespace dyno
 
 		int verticesOffset = 0;
 
-		auto inMaterial = inTexMesh->materials();
-		std::vector<std::shared_ptr<Material>>outMaterials;
-
-		for (auto it : inMaterial)
-			outMaterials.push_back(it);
-
 		auto inShapes = inTexMesh->shapes();
 
 		std::vector<std::shared_ptr<Shape>> outShapes;
@@ -247,36 +241,36 @@ namespace dyno
 		{
 			auto id = extractId[i];
 
-			cuExecute(inTexMesh->vertices().size(),
+			cuExecute(inTexMesh->meshDataPtr()->vertices().size(),
 				extractShapeVertices,
-				inTexMesh->vertices(),
+				inTexMesh->meshDataPtr()->vertices(),
 				d_extractVertices,
 				d_range,
 				id,
 				verticesOffset
 			);
 
-			cuExecute(inTexMesh->vertices().size(),
+			cuExecute(inTexMesh->meshDataPtr()->vertices().size(),
 				extractShapeVertices,
-				inTexMesh->normals(),
+				inTexMesh->meshDataPtr()->normals(),
 				d_extractNormals,
 				d_range,
 				id,
 				verticesOffset
 			);
 
-			cuExecute(inTexMesh->vertices().size(),
+			cuExecute(inTexMesh->meshDataPtr()->vertices().size(),
 				extractShapeVec2f,
-				inTexMesh->texCoords(),
+				inTexMesh->meshDataPtr()->texCoords(),
 				d_extractTexCoords,
 				d_range,
 				id,
 				verticesOffset
 			);
 
-			cuExecute(inTexMesh->vertices().size(),
+			cuExecute(inTexMesh->meshDataPtr()->vertices().size(),
 				extractShapeIds,
-				inTexMesh->shapeIds(),
+				inTexMesh->meshDataPtr()->shapeIds(),
 				d_extractShapeIds,
 				d_range,
 				id,
@@ -337,12 +331,11 @@ namespace dyno
 
 		}
 
-		out->vertices().assign(d_extractVertices);
-		out->normals().assign(d_extractNormals);
-		out->texCoords().assign(d_extractTexCoords);
-		out->shapeIds().assign(d_extractShapeIds);
+		out->meshDataPtr()->vertices().assign(d_extractVertices);
+		out->meshDataPtr()->normals().assign(d_extractNormals);
+		out->meshDataPtr()->texCoords().assign(d_extractTexCoords);
+		out->meshDataPtr()->shapeIds().assign(d_extractShapeIds);
 
-		out->materials() = outMaterials;
 		out->shapes() = outShapes;
 
 		d_extractVertices.clear();

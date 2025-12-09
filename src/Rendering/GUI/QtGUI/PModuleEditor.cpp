@@ -67,7 +67,13 @@ namespace dyno
 
 		connect(mToolBar->updateAction(), &QAction::triggered, 
 			[=]() {
-				emit changed(widget->getNode().get());
+				if (widget->getNode())
+					emit changed(widget->getNode().get());
+				else 
+				{
+					std::cout << "PModuleEditor::emit changed -> Invalid Node!!\n";
+					this->close();
+				}	
 			});
 
 		connect(mToolBar->reorderAction(), &QAction::triggered, moduleFlowView->mModuleFlow, &Qt::QtModuleFlowScene::reorderAllModules);

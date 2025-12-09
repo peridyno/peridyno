@@ -173,14 +173,75 @@ void ImWindow::draw(RenderWindow* app)
 				ImGui::endTitle();
 				ImGui::SameLine();
 				ImGui::ColorEdit3("Ambient Light Color", (float*)&iLight.ambientColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel);
+				
+				{
+					//Camera Light
+					ImGui::Text("Camera Light Scale");
+					ImGui::beginTitle("Camera Light Scale");
+					ImGui::SliderFloat("", &iLight.cameraLightScale, 0.0f, 15.0f, "%.2f", 0);
+					ImGui::endTitle();
+				}
 
 				ImGui::Text("Main Light");
 				ImGui::beginTitle("Main Light Scale");
-				ImGui::SliderFloat("", &iLight.mainLightScale, 0.0f, 5.0f, "%.2f", 0);
+				ImGui::SliderFloat("", &iLight.mainLightScale, 0.0f, 15.0f, "%.2f", 0);
 				ImGui::endTitle();
 				ImGui::SameLine();
 				ImGui::ColorEdit3("Main Light Color", (float*)&iLight.mainLightColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel);
 
+				ImGui::Text("Main Light Shadow Multiplier");
+				ImGui::beginTitle("Main Light Shadow Multiplier");
+				ImGui::SliderFloat("", &iLight.ShadowMultiplier, 0.0f, 1.0f, "%.2f", 0);
+				ImGui::endTitle();
+
+				ImGui::Text("Main Light Shadow Power");
+				ImGui::beginTitle("Main Light Sample Power");
+				ImGui::SliderFloat("", &iLight.SamplePower, 0.0f, 20.0f, "%.2f", 0);
+				ImGui::endTitle();
+
+
+				ImGui::Text("Main Light Shadow Offset");
+				ImGui::beginTitle("Main Light Sample Offset");
+				ImGui::SliderFloat("", &iLight.SampleOffset, 0.0f, 2.0f, "%.2f", 0);
+				ImGui::endTitle();
+
+				//Shadow Map Quality
+				{
+					const int options[] = { 1024, 2048, 4096, 8192 };
+					const char* optionNames[] = { "1024", "2048", "4096", "8192" };
+					const int optionCount = IM_ARRAYSIZE(options);
+
+					int currentIndex = 0;
+					for (int i = 0; i < optionCount; i++)
+					{
+						if (options[i] == engine->shadowQuality)
+						{
+							currentIndex = i;
+							break;
+						}
+					}
+
+					ImGui::Text("ShadowQuality");
+					ImGui::beginTitle("ShadowQuality");
+					if (ImGui::Combo("", &currentIndex, optionNames, optionCount))
+					{
+						engine->shadowQuality = options[currentIndex];
+						engine->updateShadowMapAttribute();
+					}
+					ImGui::endTitle();
+
+					if (ImGui::Checkbox("Clamp Shadow To Scene Bound", &engine->bClampToSceneBound)) 
+					{
+						engine->updateShadowMapAttribute();
+					}
+					ImGui::Spacing();
+					if(ImGui::Checkbox("Use Scene Bound For Shadow", &engine->bUseSceneBoundForShadow))
+					{
+						engine->updateShadowMapAttribute();
+					}
+					ImGui::Spacing();
+				}
+				
 				// Light Direction
 				ImGui::Text("Main Light Direction");
 				glm::vec3 tmpLightDir = iLight.mainLightDirection;
@@ -212,7 +273,9 @@ void ImWindow::draw(RenderWindow* app)
 				if (ImGui::Checkbox("Main Light Shadow", &shadow))
 					iLight.mainLightShadow = shadow ? 1.f : 0.f;
 
+
 				rparams.light = iLight;
+
 
 				ImGui::EndMenu();
 			}
@@ -233,7 +296,7 @@ void ImWindow::draw(RenderWindow* app)
 					ImGui::Separator();
 
 					ImGui::Checkbox("Draw Environment Map", &engine->bDrawEnvmap);
-					ImGui::DragFloat("Environment Scale", &engine->enmapScale, 0.01f, 0.0f, 1.0f);
+					ImGui::DragFloat("Environment Scale", &engine->enmapScale, 0.01f, 0.0f, 5.0f);
 				}
 
 				ImGui::Separator();

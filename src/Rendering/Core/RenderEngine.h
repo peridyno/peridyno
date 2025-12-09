@@ -72,6 +72,7 @@ namespace dyno
 		void setEnvmapScale(float scale) { enmapScale = scale; }
 
 		virtual void setEnvStyle(EEnvStyle style) { envStyle = style; }
+		virtual void updateShadowMapAttribute() = 0;
 
 	public:
 
@@ -92,6 +93,10 @@ namespace dyno
 		bool  showSceneBounds = false;
 
 		int envStyle = 0;
+
+		int shadowQuality = 1024;
+		bool bUseSceneBoundForShadow = false;
+		bool bClampToSceneBound = false;
 	};
 };
 

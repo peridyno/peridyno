@@ -36,8 +36,8 @@ namespace dyno {
 	{
 	public:
 		XTexture2D() {}
-		~XTexture2D() {}
-
+		~XTexture2D() { release(); }
+		virtual void release() override;
 		virtual void create() override;
 		bool isValid() const;
 
