@@ -150,6 +150,7 @@ namespace dyno
 		if (this->inTextureMesh()->isModified()) {
 			mTextureMesh.load(this->inTextureMesh()->constDataPtr());
 			this->varMaterialShapeIndex()->setRange(0,mTextureMesh.shapes().size());
+			mNeedUpdateTextureMesh = true;
 		}
 
 #ifdef CUDA_BACKEND
