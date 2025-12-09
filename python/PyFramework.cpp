@@ -1792,7 +1792,7 @@ void pybind_framework(py::module& m)
 			declare_var<dyno::TOrientedBox3D<Real>>(m, "TOrientedBox3D");
 			declare_var<dyno::FilePath>(m, "FilePath");
 			declare_var<dyno::Color>(m, "Color");
-			declare_var<dyno::RigidBody<dyno::DataType3f>>(m, "RigidBody3f");
+			//declare_var<dyno::RigidBody<dyno::DataType3f>>(m, "RigidBody3f");
 			declare_var<dyno::Quat<Real>>(m, "QuatReal");
 			declare_var<dyno::Curve>(m, "Curve");
 			declare_var<dyno::Ramp>(m, "Ramp");

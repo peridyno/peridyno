@@ -518,44 +518,6 @@ void declare_tj_soft_constraint_solver(py::module& m, std::string typestr) {
 }
 
 
-#include "RigidBody/Module/KeyDriver.h"
-template <typename TDataType>
-void declare_key_driver(py::module& m, std::string typestr) {
-	using Class = dyno::KeyDriver<TDataType>;
-	using Parent = dyno::KeyboardInputModule;
-
-	class KeyDriverTrampoline : public Class
-	{
-	public:
-		using Class::Class;
-
-		void onEvent(dyno::PKeyboardEvent event) override
-		{
-			PYBIND11_OVERRIDE(
-				void,
-				dyno::KeyDriver<TDataType>,
-				onEvent,
-				event
-			);
-		}
-	};
-
-	class KeyDriverPublicist : public Class
-	{
-	public:
-		using Class::onEvent;
-	};
-
-	std::string pyclass_name = std::string("KeyDriver") + typestr;
-	py::class_<Class, Parent, KeyDriverTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-		.def(py::init<>())
-		.def("varHingeKeyConfig", &Class::varHingeKeyConfig, py::return_value_policy::reference)
-		.def("inReset", &Class::inReset, py::return_value_policy::reference)
-		.def("inTopology", &Class::inTopology, py::return_value_policy::reference)
-		// protected
-		.def("onEvent", &KeyDriverPublicist::onEvent, py::return_value_policy::reference);
-}
-
 #include "RigidBody/RigidBodySystem.h"
 template <typename TDataType>
 void declare_rigid_body_system(py::module& m, std::string typestr) {
@@ -1142,7 +1104,6 @@ void declare_bicycle(py::module& m, std::string typestr) {
 	std::string pyclass_name = std::string("Bicycle") + typestr;
 	py::class_<Class, Parent, BicycleTrampoline, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
 		.def(py::init<>())
-		.def("outReset", &Class::outReset, py::return_value_policy::reference)
 		// protected
 		.def("resetStates", &BicyclePublicist::resetStates, py::return_value_policy::reference);
 }

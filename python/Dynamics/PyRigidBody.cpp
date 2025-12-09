@@ -107,7 +107,6 @@ void pybind_rigid_body(py::module& m) {
 	declare_car_driver<dyno::DataType3f>(m, "3f");
 	declare_contacts_union<dyno::DataType3f>(m, "3f");
 	declare_instance_transform<dyno::DataType3f>(m, "3f");
-	declare_key_driver<dyno::DataType3f>(m, "3f");
 	declare_pcg_constraint_solver<dyno::DataType3f>(m, "3f");
 	declare_pjs_constraint_solver<dyno::DataType3f>(m, "3f");
 	declare_pjsnj_constraint_solver<dyno::DataType3f>(m, "3f");

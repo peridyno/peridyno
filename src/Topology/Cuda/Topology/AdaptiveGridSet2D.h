@@ -24,10 +24,6 @@
 
 namespace dyno 
 {
-	typedef unsigned int OcIndex;
-	typedef unsigned long long int OcKey;
-	typedef unsigned short Level;
-
 #define MAX_LEVEL_2D 28
 //#define DIM 3
 

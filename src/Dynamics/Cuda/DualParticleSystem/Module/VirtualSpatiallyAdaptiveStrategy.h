@@ -28,10 +28,6 @@ namespace dyno {
 	*@Paper: Liu et al., ACM Trans Graph (TOG). 2024. (A Dual-Particle Approach for Incompressible SPH Fluids) doi.org/10.1145/3649888
 	*/
 
-	typedef unsigned short OcIndex;
-	typedef unsigned long long int OcKey;
-	typedef unsigned short Level;
-
 	template<typename TDataType>
 	class VirtualSpatiallyAdaptiveStrategy : public VirtualParticleGenerator<TDataType>
 	{

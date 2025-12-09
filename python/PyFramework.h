@@ -144,9 +144,9 @@ void declare_var(py::module& m, std::string typestr) {
 		.def("getValue", &Class::getValue)
 		.def("serialize", &Class::serialize)
 		.def("deserialize", &Class::deserialize)
-		.def("isEmpty", &Class::isEmpty)
+		.def("isEmpty", &Class::isEmpty);
 		//.def("connect", &Class::connect)
-		.def("getData", &Class::getData);
+		//.def("getData", &Class::getData);
 	//.def("constDataPtr", &Class::constDataPtr, py::return_value_policy::reference)
 	//.def("getDataPtr", &Class::getDataPtr, py::return_value_policy::reference);
 }
