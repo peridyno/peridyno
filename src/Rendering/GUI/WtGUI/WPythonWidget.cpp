@@ -9,6 +9,7 @@
 
 // python
 #include <pybind11/embed.h>
+#include <SceneGraphFactory.h>
 namespace py = pybind11;
 
 WPythonWidget::WPythonWidget()
@@ -103,18 +104,27 @@ void WPythonWidget::execute(const std::string& src)
 	py::scoped_interpreter guard{};
 
 	try {
+		
+		auto globals = py::globals();
+		py::exec("import QtPathHelper; import PyPeridyno as dyno", globals);
+
 		auto locals = py::dict();
+		locals["scn"] = mScene;
+
 		py::exec(src, py::globals(), locals);
 
-		if (locals.contains("scn"))
-		{
-			auto scene = locals["scn"].cast<std::shared_ptr<dyno::SceneGraph>>();
-			if (scene) mSignal.emit(scene);
-		}
-		else
-		{
-			Wt::WMessageBox::show("Error", "Please define 'scn = dyno.SceneGraph()'", Wt::StandardButton::Ok);
-		}
+		printf("C++");
+		printf("%d", mScene->getFrameNumber());
+
+		//if (locals.contains("scn"))
+		//{
+		//	/*auto scene = locals["scn"].cast<std::shared_ptr<dyno::SceneGraph>>();
+		//	if (scene) mSignal.emit(scene);*/
+		//}
+		//else
+		//{
+		//	Wt::WMessageBox::show("Error", "Please define 'scn = dyno.SceneGraph()'", Wt::StandardButton::Ok);
+		//}
 	}
 	catch (const std::exception& e) {
 		Wt::WMessageBox::show("Error", e.what(), Wt::StandardButton::Ok);
