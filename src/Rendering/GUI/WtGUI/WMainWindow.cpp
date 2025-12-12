@@ -66,8 +66,12 @@ void WMainWindow::setScene(std::shared_ptr<dyno::SceneGraph> scene)
 
 	// setup scene graph
 	mScene = scene;
-	mSceneCanvas->setScene(mScene);
-	controlContainer->setSceneGraph(mScene);
+	if (mScene)
+	{
+		mSceneCanvas->setScene(mScene);
+		controlContainer->setSceneGraph(mScene);
+		pythonWidget->setScene(mScene);
+	}
 }
 
 std::shared_ptr<dyno::SceneGraph> WMainWindow::getScene()
