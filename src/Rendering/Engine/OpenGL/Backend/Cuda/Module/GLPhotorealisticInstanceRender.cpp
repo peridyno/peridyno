@@ -126,6 +126,7 @@ namespace dyno
 					pbr.metallic = mtl->metallic;
 					pbr.roughness = mtl->roughness;
 					pbr.alpha = mtl->alpha;
+					pbr.EmissiveIntensity = mtl->emissiveIntensity;
 
 					if (mtl->texORM.isValid())
 						pbr.useAOTex = 1;
@@ -134,6 +135,15 @@ namespace dyno
 						pbr.useRoughnessTex = 1;
 						pbr.useMetallicTex = 1;
 					}
+					else
+					{
+						pbr.useRoughnessTex = 0;
+						pbr.useMetallicTex = 0;
+					}
+					if (mtl->texEmissiveColor.isValid())
+						pbr.useEmissiveTex = 1;
+					else
+						pbr.useEmissiveTex = 0;
 
 					mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
 					mPBRMaterialUBlock.bindBufferBase(1);

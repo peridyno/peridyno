@@ -60,6 +60,11 @@ namespace dyno
 
 		Material():MaterialManagedModule()
 		{
+			this->varAlpha()->setRange(0, 1);
+			this->varBumpScale()->setRange(0, 1);
+			this->varEmissiveIntensity()->setRange(0, 1);
+			this->varMetallic()->setRange(0, 1);
+			this->varRoughness()->setRange(0, 1);
 			initial();
 		};
 		~Material() override;
@@ -75,12 +80,14 @@ namespace dyno
 		DEF_VAR(float, Roughness,0.5, "");
 		DEF_VAR(float, Alpha,1, "");
 		DEF_VAR(float, BumpScale,1, "");
+		DEF_VAR(float, EmissiveIntensity, 0, "");
 
 		DEF_VAR_OUT(Vec3f,BaseColor,"");
 		DEF_VAR_OUT(float, Metallic, "");
 		DEF_VAR_OUT(float, Roughness, "");
 		DEF_VAR_OUT(float, Alpha, "");
 		DEF_VAR_OUT(float, BumpScale, "");
+		DEF_VAR_OUT(float, EmissiveItensity, "");
 
 		DEF_ARRAY2D_OUT(Vec4f,TexColor,DeviceType::GPU,"");
 		DEF_ARRAY2D_OUT(Vec4f, TexBump, DeviceType::GPU, "");
@@ -124,6 +131,7 @@ namespace dyno
 		DEF_VAR_IN(float, Roughness, "");
 		DEF_VAR_IN(float, Alpha, "");
 		DEF_VAR_IN(float, BumpScale, "");
+		DEF_VAR_IN(float, EmissiveItensity, "");
 
 		DEF_ARRAY2D_IN(Vec4f, TexColor, DeviceType::GPU, "");
 		DEF_ARRAY2D_IN(Vec4f, TexBump, DeviceType::GPU, "");

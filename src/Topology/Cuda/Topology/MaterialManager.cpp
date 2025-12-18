@@ -44,6 +44,7 @@ namespace dyno
 		this->outRoughness()->setValue(other->outRoughness()->getValue());
 		this->outAlpha()->setValue(other->outAlpha()->getValue());
 		this->outBumpScale()->setValue(other->outBumpScale()->getValue());
+		this->outEmissiveItensity()->setValue(other->outEmissiveItensity()->getValue());
 
 		this->outTexColor()->getDataPtr()->assign(other->outTexColor()->getData());
 		this->outTexBump()->getDataPtr()->assign(other->outTexBump()->getData());
@@ -71,7 +72,7 @@ namespace dyno
 			this->outTexColor()->allocate();
 			this->outTexORM()->allocate();
 			this->outTexEmissive()->allocate();
-			
+
 		}
 	}
 	void Material::updateVar2Out()
@@ -82,6 +83,7 @@ namespace dyno
 		this->outRoughness()->setValue(this->varRoughness()->getValue());
 		this->outAlpha()->setValue(this->varAlpha()->getValue());
 		this->outBumpScale()->setValue(this->varBumpScale()->getValue());		
+		this->outEmissiveItensity()->setValue(this->varEmissiveIntensity()->getValue());
 	}
 
 	void Material::updateImpl()
@@ -103,8 +105,9 @@ namespace dyno
 		this->inTexColor()->tagOptional(true);
 		this->inTexBump()->tagOptional(true);
 		this->inTexORM()->tagOptional(true);
+		this->inTexEmissiveColor()->tagOptional(true);
 		this->inTexAlpha()->tagOptional(true);
-
+		this->inEmissiveItensity()->tagOptional(true);
 	}
 
 	void CustomMaterial::updateImpl()
@@ -200,6 +203,8 @@ namespace dyno
 			sourceMaterial->outMetallic()->connect(this->inMetallic());
 			sourceMaterial->outRoughness()->connect(this->inRoughness());
 			sourceMaterial->outBumpScale()->connect(this->inBumpScale());
+			sourceMaterial->outEmissiveItensity()->connect(this->inEmissiveItensity());
+
 			sourceMaterial->outTexAlpha()->connect(this->inTexAlpha());
 			sourceMaterial->outTexBump()->connect(this->inTexBump());
 			sourceMaterial->outTexORM()->connect(this->inTexORM());
@@ -211,6 +216,14 @@ namespace dyno
 			this->outRoughness()->setValue(sourceMaterial->outRoughness()->getValue());
 			this->outAlpha()->setValue(sourceMaterial->outAlpha()->getValue());
 			this->outBumpScale()->setValue(sourceMaterial->outBumpScale()->getValue());
+			this->outEmissiveItensity()->setValue(sourceMaterial->outEmissiveItensity()->getValue());
+
+			this->varBaseColor()->setValue(Color(sourceMaterial->outBaseColor()->getValue().x, sourceMaterial->outBaseColor()->getValue().y, sourceMaterial->outBaseColor()->getValue().z));
+			this->varMetallic()->setValue(sourceMaterial->outMetallic()->getValue());
+			this->varRoughness()->setValue(sourceMaterial->outRoughness()->getValue());
+			this->varAlpha()->setValue(sourceMaterial->outAlpha()->getValue());
+			this->varBumpScale()->setValue(sourceMaterial->outBumpScale()->getValue());
+			this->varEmissiveIntensity()->setValue(sourceMaterial->outEmissiveItensity()->getValue());
 
 			this->outTexColor()->getDataPtr()->assign(sourceMaterial->outTexColor()->getData());
 			this->outTexBump()->getDataPtr()->assign(sourceMaterial->outTexBump()->getData());

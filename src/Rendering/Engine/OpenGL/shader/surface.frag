@@ -37,6 +37,15 @@ vec3 GetViewDir()
 	return normalize(-fs_in.position);
 }
 
+vec3 GetEmissive()
+{
+	vec3 emissive = vec3(0);
+	if(uMtl.useEmissiveTex == 1)
+		emissive = texture(uTexEmissiveColor, fs_in.texCoord.xy).rgb * uMtl.emissiveIntensity;
+
+	return emissive;
+}
+
 vec3 GetORM()
 {
 	vec3 ormTexValue = vec3(1);
@@ -251,6 +260,10 @@ vec3 Shade()
 	color *= artFactor;
 	color = ReinhardTonemap(color);
 	color = GammaCorrect(color);
+
+	vec3 EmissiveColor = GetEmissive();
+	if(EmissiveColor.r + EmissiveColor.g + EmissiveColor.b>0.05)	
+		color = color*(1 - uMtl.emissiveIntensity) + GetEmissive();
 
 	return color;
 }

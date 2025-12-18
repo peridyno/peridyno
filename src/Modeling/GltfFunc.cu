@@ -485,6 +485,8 @@ namespace dyno
 
 			auto colorTexId = material.pbrMetallicRoughness.baseColorTexture.index;
 			auto texCoord = material.pbrMetallicRoughness.baseColorTexture.texCoord;
+			auto emissiveFactor = material.emissiveFactor;
+
 			if (MaterialManager::getMaterial(name))
 			{
 				std::cout << "The material already exists: " << name << std::endl;
@@ -496,7 +498,7 @@ namespace dyno
 			mats[matId]->outAlpha()->setValue(color[3]);
 			mats[matId]->outMetallic()->setValue(metallic);
 			mats[matId]->outRoughness()->setValue(roughness);
-
+			mats[matId]->outEmissiveItensity()->setValue(emissiveFactor[0]);
 			std::string colorUri = getTexUri(textures, images, colorTexId);
 			std::shared_ptr<ImageLoader> loader = std::make_shared<ImageLoader>();
 
@@ -515,6 +517,25 @@ namespace dyno
 			{
 				if (mats[matId]->outTexColor()->getDataPtr()->size())
 					mats[matId]->outTexColor()->getDataPtr()->clear();
+			}
+			auto emissiveTexId = material.emissiveTexture.index;
+			std::string emissiveColorUri = getTexUri(textures, images, emissiveTexId);
+
+			if (!emissiveColorUri.empty())
+			{
+
+				auto root = filename.path().parent_path();
+				emissiveColorUri = (root / emissiveColorUri).string();
+
+				if (loader->loadImage(emissiveColorUri.c_str(), texture))
+				{
+					mats[matId]->outTexEmissive()->getDataPtr()->assign(texture);
+				}
+			}
+			else
+			{
+				if (mats[matId]->outTexEmissive()->getDataPtr()->size())
+					mats[matId]->outTexEmissive()->getDataPtr()->clear();
 			}
 
 			auto bumpTexId = material.normalTexture.index;

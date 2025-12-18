@@ -224,6 +224,7 @@ namespace dyno
 					pbr.metallic = mtl->metallic;
 					pbr.roughness = mtl->roughness;
 					pbr.alpha = mtl->alpha;
+					pbr.EmissiveIntensity = mtl->emissiveIntensity;
 
 					if( mtl->texORM.isValid())
 						pbr.useAOTex = 1;
@@ -232,8 +233,15 @@ namespace dyno
 						pbr.useRoughnessTex = 1;
 						pbr.useMetallicTex = 1;
 					}
+					else 
+					{
+						pbr.useRoughnessTex = 0;
+						pbr.useMetallicTex = 0;
+					}
 					if (mtl->texEmissiveColor.isValid())
 						pbr.useEmissiveTex = 1;
+					else
+						pbr.useEmissiveTex = 0;
 
 					mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
 					mPBRMaterialUBlock.bindBufferBase(1);
@@ -246,7 +254,9 @@ namespace dyno
 					glBindTexture(GL_TEXTURE_2D, 0);
 					glActiveTexture(GL_TEXTURE11);		// bump map
 					glBindTexture(GL_TEXTURE_2D, 0);
-					glActiveTexture(GL_TEXTURE12);		// bump map
+					glActiveTexture(GL_TEXTURE12);		// ORM
+					glBindTexture(GL_TEXTURE_2D, 0);
+					glActiveTexture(GL_TEXTURE13);		// Emissive
 					glBindTexture(GL_TEXTURE_2D, 0);
 
 					if (mtl->texColor.isValid()) {
@@ -265,6 +275,10 @@ namespace dyno
 					if (mtl->texORM.isValid()) 
 					{
 						mtl->texORM.bind(GL_TEXTURE12);
+					}
+					if (mtl->texEmissiveColor.isValid())
+					{
+						mtl->texEmissiveColor.bind(GL_TEXTURE13);
 					}
 				}
 			}

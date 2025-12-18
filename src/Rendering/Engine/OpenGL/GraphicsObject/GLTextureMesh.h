@@ -47,6 +47,7 @@ namespace dyno
 		float alpha = 1.0f;
 
 		float bumpScale = 1.f;
+		float emissiveIntensity = 0.0f;
 
 		// color texture
 		XTexture2D<dyno::Vec4f> texColor;

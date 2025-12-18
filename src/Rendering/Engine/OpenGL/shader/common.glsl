@@ -35,14 +35,19 @@ layout(std140, binding = 1) uniform PbrMaterial{
 
 	int useEmissiveTex;
 	int useAlphaTex;
-	int tempData;
-	int tempData2;
+	int tempInt1;
+	int tempInt2;
 
 	vec3 color;
 	float roughness;
 	float metallic;
 	float alpha;
 	float ao; 
+
+	float emissiveIntensity;
+	float tempFloat1;
+	float tempFloat2;
+	float tempFloat3;
 
 } uMtl;
 

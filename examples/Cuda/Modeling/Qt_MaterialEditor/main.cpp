@@ -42,29 +42,25 @@ int main()
 	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
 	gltf->varFileName()->setValue(std::string(getAssetPath() + "Jeep/JeepGltf/jeep.gltf"));
 
-	auto srcMaterial = MaterialManager::getMaterial("BodyMaterial");
+	auto srcMaterial = MaterialManager::getMaterial("Body1");
 	std::shared_ptr<CustomMaterial> customMaterial = NULL;
 	if (srcMaterial) 
 	{
 		customMaterial = MaterialManager::createCustomMaterial(srcMaterial);
-		gltf->graphicsPipeline()->pushModule(srcMaterial);
 
 		auto matPipeline = customMaterial->materialPipeline();
-		gltf->graphicsPipeline()->pushModule(customMaterial);
 
 		auto texCorrect = std::make_shared<ColorCorrect>();
 		srcMaterial->outTexColor()->connect(texCorrect->inTexture());
 		texCorrect->varSaturation()->setValue(0);
 		texCorrect->outTexture()->connect(customMaterial->inTexColor());
 		matPipeline->pushModule(texCorrect);
-		gltf->graphicsPipeline()->pushModule(texCorrect);
 
 		auto image = std::make_shared<ImageLoaderModule>();
 		image->varImagePath()->setValue(std::string(getAssetPath() + "Jeep/JeepGltf/jeep_body_camouflage.png"));
 		matPipeline->pushModule(image);
 
 		matPipeline->updateMaterialPipline();
-		gltf->graphicsPipeline()->pushModule(image);
 
 		auto assignMaterial = std::make_shared<AssignTextureMeshMaterial<DataType3f>>();
 		assignMaterial->varShapeIndex()->setValue(5);

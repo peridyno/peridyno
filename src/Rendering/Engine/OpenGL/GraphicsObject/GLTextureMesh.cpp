@@ -173,6 +173,7 @@ namespace dyno
 				currentShapeMtl->texORM.load(mesh->shapes()[i]->material->outTexORM()->getData());
 				currentShapeMtl->texAlpha.load(mesh->shapes()[i]->material->outTexAlpha()->getData());
 				currentShapeMtl->texEmissiveColor.load(mesh->shapes()[i]->material->outTexEmissive()->getData());
+				currentShapeMtl->emissiveIntensity = mesh->shapes()[i]->material->outEmissiveItensity()->getValue();
 
 				if(mShapes[i]->material)
 					mShapes[i]->material->release();
