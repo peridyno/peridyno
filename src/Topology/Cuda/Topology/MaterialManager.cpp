@@ -49,6 +49,7 @@ namespace dyno
 		this->outTexBump()->getDataPtr()->assign(other->outTexBump()->getData());
 		this->outTexORM()->getDataPtr()->assign(other->outTexORM()->getData());
 		this->outTexAlpha()->getDataPtr()->assign(other->outTexAlpha()->getData());
+		this->outTexEmissive()->getDataPtr()->assign(other->outTexEmissive()->getData());
 
 	}
 
@@ -58,6 +59,7 @@ namespace dyno
 		this->outTexBump()->getDataPtr()->clear();
 		this->outTexORM()->getDataPtr()->clear();
 		this->outTexAlpha()->getDataPtr()->clear();
+		this->outTexEmissive()->getDataPtr()->clear();
 	}
 	void Material::initial()
 	{
@@ -68,7 +70,8 @@ namespace dyno
 			this->outTexBump()->allocate();
 			this->outTexColor()->allocate();
 			this->outTexORM()->allocate();
-
+			this->outTexEmissive()->allocate();
+			
 		}
 	}
 	void Material::updateVar2Out()
@@ -121,6 +124,10 @@ namespace dyno
 		if (!this->inTexORM()->isEmpty())
 		{
 			this->outTexORM()->assign(this->inTexORM()->getData());
+		}
+		if (!this->inTexEmissiveColor()->isEmpty())
+		{
+			this->outTexEmissive()->assign(this->inTexEmissiveColor()->getData());
 		}
 		updateVar2Out();
 		this->updateAssigner();
@@ -197,6 +204,7 @@ namespace dyno
 			sourceMaterial->outTexBump()->connect(this->inTexBump());
 			sourceMaterial->outTexORM()->connect(this->inTexORM());
 			sourceMaterial->outTexColor()->connect(this->inTexColor());
+			sourceMaterial->outTexEmissive()->connect(this->inTexEmissiveColor());
 
 			this->outBaseColor()->setValue(sourceMaterial->outBaseColor()->getValue());
 			this->outMetallic()->setValue(sourceMaterial->outMetallic()->getValue());
@@ -207,6 +215,7 @@ namespace dyno
 			this->outTexColor()->getDataPtr()->assign(sourceMaterial->outTexColor()->getData());
 			this->outTexBump()->getDataPtr()->assign(sourceMaterial->outTexBump()->getData());
 			this->outTexORM()->getDataPtr()->assign(sourceMaterial->outTexORM()->getData());
+			this->outTexEmissive()->getDataPtr()->assign(sourceMaterial->outTexEmissive()->getData());
 			this->outTexAlpha()->getDataPtr()->assign(sourceMaterial->outTexAlpha()->getData());
 		}	
 	}

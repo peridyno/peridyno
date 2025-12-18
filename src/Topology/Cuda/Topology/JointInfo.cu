@@ -4,6 +4,7 @@
 
 namespace dyno
 {
+	IMPLEMENT_CLASS(JointInfo)
 	std::vector<int> getJointDirByJointIndex(int Index, std::map<int, std::vector<int>> jointId_joint_Dir)
 	{
 		std::vector<int> jointDir;

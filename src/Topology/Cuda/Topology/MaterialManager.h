@@ -86,7 +86,7 @@ namespace dyno
 		DEF_ARRAY2D_OUT(Vec4f, TexBump, DeviceType::GPU, "");
 		DEF_ARRAY2D_OUT(Vec4f, TexORM, DeviceType::GPU, "");
 		DEF_ARRAY2D_OUT(Vec4f, TexAlpha, DeviceType::GPU, "");
-
+		DEF_ARRAY2D_OUT(Vec4f, TexEmissive, DeviceType::GPU, "");
 
 	public:
 		
@@ -129,6 +129,7 @@ namespace dyno
 		DEF_ARRAY2D_IN(Vec4f, TexBump, DeviceType::GPU, "");
 		DEF_ARRAY2D_IN(Vec4f, TexORM, DeviceType::GPU, "");
 		DEF_ARRAY2D_IN(Vec4f, TexAlpha, DeviceType::GPU, "");
+		DEF_ARRAY2D_IN(Vec4f, TexEmissiveColor, DeviceType::GPU, "");
 
 		void initial()override;
 

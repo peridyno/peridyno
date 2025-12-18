@@ -1,4 +1,4 @@
-#include "Break_MakeTextureMesh.h"
+#include "MaterialEditModule.h"
 #include "GLVisualModule.h"
 //
 namespace dyno
@@ -766,9 +766,9 @@ __global__ void colorCorrectionKernel(
 	void ColorCorrect::initial() 
 	{
 		this->varSaturation()->setRange(0, 5);
-		this->varGamma()->setRange(0, 5);
-		this->varContrast()->setRange(0, 5);
-		this->varHUEOffset()->setRange(-20,20);
+		this->varGamma()->setRange(0, 4);
+		this->varContrast()->setRange(0.9, 1.1);
+		this->varHUEOffset()->setRange(-255,255);
 		this->varTintIntensity()->setRange(0,1);
 
 		auto IndexChange = std::make_shared<FCallBackFunc>(std::bind(&ColorCorrect::onFieldChanged, this));

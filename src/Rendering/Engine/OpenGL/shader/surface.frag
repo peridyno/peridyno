@@ -24,6 +24,7 @@ layout(location = 1) out ivec4 fragIndices;
 layout(binding = 10) uniform sampler2D uTexColor;
 layout(binding = 11) uniform sampler2D uTexBump;
 layout(binding = 12) uniform sampler2D uTexORM;
+layout(binding = 13) uniform sampler2D uTexEmissiveColor;
 
 layout(location = 4) uniform float uBumpScale = 1.0;
 
@@ -38,25 +39,27 @@ vec3 GetViewDir()
 
 vec3 GetORM()
 {
-		vec3 ormTexValue = texture(uTexORM, fs_in.texCoord.xy).rgb;
+	vec3 ormTexValue = vec3(1);
+	if(uMtl.useAOTex == 1 || uMtl.useRoughnessTex == 1 || uMtl.useMetallicTex == 1)
+		ormTexValue = texture(uTexORM, fs_in.texCoord.xy).rgb;
 
-		vec3 ormValue ;
-		if(uMtl.useAOTex == 0)
-			ormValue.x = 1.0;
-		else
-			ormValue.x = ormTexValue.x;
+	vec3 ormValue ;
+	if(uMtl.useAOTex == 0)
+		ormValue.x = 1.0;
+	else
+		ormValue.x = ormTexValue.x;
 
-		if(uMtl.useRoughnessTex == 0)
-			ormValue.y = uMtl.roughness;
-		else
-			ormValue.y = ormTexValue.y;
+	if(uMtl.useRoughnessTex == 0)
+		ormValue.y = uMtl.roughness;
+	else
+		ormValue.y = ormTexValue.y;
 
-		if(uMtl.useMetallicTex == 0)
-			ormValue.z = uMtl.metallic;
-		else
-			ormValue.z = ormTexValue.z;
+	if(uMtl.useMetallicTex == 0)
+		ormValue.z = uMtl.metallic;
+	else
+		ormValue.z = ormTexValue.z;
 
-		return ormValue;
+	return ormValue;
 
 }
 
@@ -183,7 +186,7 @@ vec3 Shade()
 
 	vec3 ORMCorrect = GammaCorrectWithGamma(ORM,2.2);
 		
-	vec3 artFactor = vec3 (0);
+	float artFactor = 1;
 
 	// for main directional light
 	{
@@ -203,14 +206,17 @@ vec3 Shade()
 
 		color += shadowFactor * radiance * brdf;
 
-		vec3 brdf_art = EvalPBR(vec3(1), 0, uRenderParams.SampleRoughness, N, V, L);
-		vec3 radiance_art = vec3(1) * uRenderParams.intensity.a;
-		artFactor = shadowFactor * radiance_art * brdf_art;
-		artFactor = artFactor + vec3(uRenderParams.SampleOffset);
-		artFactor = pow(artFactor,vec3(uRenderParams.SamplePower)) - vec3(uRenderParams.SampleOffset);
-		artFactor = GammaCorrect(artFactor);
-		artFactor = (1 - uRenderParams.ShadowMultiplier) + artFactor * uRenderParams.ShadowMultiplier;
-		artFactor = ReinhardTonemap(artFactor);
+		vec3 brdf_art = EvalPBR(vec3(1), 0, 1.0f, N, V, L);
+
+		if(uRenderParams.ShadowMultiplier > 0 && uRenderParams.ShadowBrightness < 1 && uRenderParams.ShadowContrast>0.1)
+		{
+			artFactor = shadowFactor.x * uRenderParams.ShadowContrast * brdf_art.x;
+			artFactor = pow(artFactor,uRenderParams.SamplePower);
+
+			artFactor = mix(1.0, (artFactor*(1 - uRenderParams.ShadowBrightness) + uRenderParams.ShadowBrightness), uRenderParams.ShadowMultiplier);
+			artFactor = clamp(artFactor, 0.0, 1.0);
+		}
+
 	}
 
 

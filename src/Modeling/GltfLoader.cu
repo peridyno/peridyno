@@ -110,12 +110,13 @@ namespace dyno
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&GltfLoader<TDataType>::varChanged, this));
 		auto animationCallback = std::make_shared<FCallBackFunc>(std::bind(&GltfLoader<TDataType>::varAnimation, this));
 
-		this->stateJointSet()->setDataPtr(std::make_shared<EdgeSet<DataType3f>>());
+		//this->stateJointSet()->setDataPtr(std::make_shared<EdgeSet<DataType3f>>());
+		this->varAnimationSpeed()->setRange(0.02, 10);
+		this->varImportAnimation()->attach(animationCallback);
 
 		this->varImportAnimation()->attach(callback);
-		this->varImportAnimation()->attach(animationCallback);
 		this->varFileName()->attach(callback);
-		this->varAnimationSpeed()->setRange(0.02,10);
+
 		
 		auto callbackTransform = std::make_shared<FCallBackFunc>(std::bind(&GltfLoader<TDataType>::updateTransform, this));
 
@@ -139,7 +140,7 @@ namespace dyno
 		jointPointRender->setColor(Color(1.0f, 0.0f, 0.0f));
 		jointPointRender->varPointSize()->setValue(this->varJointRadius()->getValue());
 		jointPointRender->setVisible(true);
-		this->stateJointSet()->connect(jointPointRender->inPointSet());
+		//this->stateJointSet()->connect(jointPointRender->inPointSet());
 		this->graphicsPipeline()->pushModule(jointPointRender);
 
 		jointLineRender = std::make_shared<GLWireframeVisualModule>();
@@ -147,7 +148,7 @@ namespace dyno
 		jointLineRender->setVisible(true);
 		jointLineRender->varRadius()->setValue(this->varJointRadius()->getValue() / 3);
 		jointLineRender->varRenderMode()->setCurrentKey(GLWireframeVisualModule::EEdgeMode::CYLINDER);
-		this->stateJointSet()->connect(jointLineRender->inEdgeSet());
+		//this->stateJointSet()->connect(jointLineRender->inEdgeSet());
 		this->graphicsPipeline()->pushModule(jointLineRender);
 
 		this->stateAnimation()->setDataPtr(std::make_shared<JointAnimationInfo>());
@@ -189,7 +190,7 @@ namespace dyno
 	{
 		if (this->varFileName()->isEmpty())
 			return;
-
+		
 		this->updateTransformState();
 
 		printf("!!!!!!!!!!!!!!!!!    Import GLTF   !!!!!!!!!!!!!!!!!!!!!!!!\n\n\n");
@@ -308,18 +309,18 @@ namespace dyno
 
 			}
 
-			//
-			this->stateJointSet()->getDataPtr()->setPoints(jointVertices);
-			std::vector<TopologyModule::Edge> edges;
+			////
+			//this->stateJointSet()->getDataPtr()->setPoints(jointVertices);
+			//std::vector<TopologyModule::Edge> edges;
 
-			for (size_t i = 0; i < jointNum; i++)
-			{
-				for (auto childId : joint_child[all_Joints[i]])
-				{
-					edges.push_back(TopologyModule::Edge(i, jointId_VId[childId]));
-				}
-			}
-			this->stateJointSet()->getDataPtr()->setEdges(edges);
+			//for (size_t i = 0; i < jointNum; i++)
+			//{
+			//	for (auto childId : joint_child[all_Joints[i]])
+			//	{
+			//		edges.push_back(TopologyModule::Edge(i, jointId_VId[childId]));
+			//	}
+			//}
+			//this->stateJointSet()->getDataPtr()->setEdges(edges);
 
 			jointVertices.clear();
 		}
@@ -333,8 +334,16 @@ namespace dyno
 		this->stateSkin()->getDataPtr()->initialPosition = initialPosition;
 
 		this->stateSkin()->getDataPtr()->initialNormal = initialNormal;
-
 		
+		cudaDeviceSynchronize();
+		cudaFree(0);
+		DArray<Mat4f> a;
+		auto sjds = this->stateJointsData()->getDataPtr();
+		auto sjibm = this->stateJointInverseBindMatrix()->getData();
+		auto sjwm = this->stateJointWorldMatrix()->getData();
+		a.resize(5);
+		a.reset();
+		this->stateJointsData()->getDataPtr()->mJointInverseBindMatrix.assign(this->stateJointInverseBindMatrix()->getData());
 
 		this->stateJointsData()->getDataPtr()->setGltfJointInfo(
 			this->stateJointInverseBindMatrix()->getData(),
@@ -525,14 +534,14 @@ namespace dyno
 			this->stateAnimation()->getDataPtr()->updateAnimationPose(this->stateElapsedTime()->getValue() * this->varAnimationSpeed()->getValue());
 
 
-			//update Joints
-			cuExecute(all_Joints.size(),
-				jointAnimation,
-				this->stateJointSet()->getDataPtr()->getPoints(),
-				this->stateJointsData()->getDataPtr()->mJointWorldMatrix,
-				d_joints,
-				this->stateTransform()->getValue()
-			);
+			////update Joints
+			//cuExecute(all_Joints.size(),
+			//	jointAnimation,
+			//	this->stateJointSet()->getDataPtr()->getPoints(),
+			//	this->stateJointsData()->getDataPtr()->mJointWorldMatrix,
+			//	d_joints,
+			//	this->stateTransform()->getValue()
+			//);
 			//update Points
 
 			auto& skinInfo = this->stateSkin()->getData();

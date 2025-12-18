@@ -13,9 +13,9 @@ layout(std140, binding = 0) uniform RenderParams
 	vec4 direction;
 	vec4 camera;
 	float ShadowMultiplier;
-	float SampleRoughness;
+	float ShadowBrightness;
 	float SamplePower;
-	float SampleOffset;
+	float ShadowContrast;
 	// parameters
 	int width;
 	int height;
@@ -32,6 +32,11 @@ layout(std140, binding = 1) uniform PbrMaterial{
 	int useAOTex;
 	int useRoughnessTex;
 	int useMetallicTex;
+
+	int useEmissiveTex;
+	int useAlphaTex;
+	int tempData;
+	int tempData2;
 
 	vec3 color;
 	float roughness;

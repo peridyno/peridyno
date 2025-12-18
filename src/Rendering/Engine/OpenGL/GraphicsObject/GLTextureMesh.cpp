@@ -26,6 +26,7 @@ namespace dyno
 		texBump.release();
 		texORM.release();
 		texAlpha.release();
+		texEmissiveColor.release();
 	}
 
 	void GLMaterial::updateGL()
@@ -34,6 +35,8 @@ namespace dyno
 		texBump.updateGL();
 		texORM.updateGL();
 		texAlpha.updateGL();
+		texEmissiveColor.updateGL();
+
 	}
 
 	/**
@@ -169,6 +172,8 @@ namespace dyno
 				currentShapeMtl->texBump.load(mesh->shapes()[i]->material->outTexBump()->getData());
 				currentShapeMtl->texORM.load(mesh->shapes()[i]->material->outTexORM()->getData());
 				currentShapeMtl->texAlpha.load(mesh->shapes()[i]->material->outTexAlpha()->getData());
+				currentShapeMtl->texEmissiveColor.load(mesh->shapes()[i]->material->outTexEmissive()->getData());
+
 				if(mShapes[i]->material)
 					mShapes[i]->material->release();
 				mShapes[i]->material = currentShapeMtl;

@@ -223,7 +223,7 @@ namespace dyno
 
 	void GLRenderEngine::updateShadowMapAttribute()
 	{
-		if (!mShadowMap) 
+		if (mShadowMap) 
 		{
 			mShadowMap->setSize(shadowQuality);
 			mShadowMap->clampToSceneBounds = bClampToSceneBound;

@@ -188,10 +188,15 @@ void ImWindow::draw(RenderWindow* app)
 				ImGui::endTitle();
 				ImGui::SameLine();
 				ImGui::ColorEdit3("Main Light Color", (float*)&iLight.mainLightColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel);
-
+				
 				ImGui::Text("Main Light Shadow Multiplier");
 				ImGui::beginTitle("Main Light Shadow Multiplier");
 				ImGui::SliderFloat("", &iLight.ShadowMultiplier, 0.0f, 1.0f, "%.2f", 0);
+				ImGui::endTitle();
+
+				ImGui::Text("Main Light Shadow Brightness");
+				ImGui::beginTitle("Main Light Shadow Brightness");
+				ImGui::SliderFloat("", &iLight.ShadowBrightness, 0.0f, 1.0f, "%.2f", 0);
 				ImGui::endTitle();
 
 				ImGui::Text("Main Light Shadow Power");
@@ -200,9 +205,9 @@ void ImWindow::draw(RenderWindow* app)
 				ImGui::endTitle();
 
 
-				ImGui::Text("Main Light Shadow Offset");
+				ImGui::Text("Main Light Shadow ShadowContrast");
 				ImGui::beginTitle("Main Light Sample Offset");
-				ImGui::SliderFloat("", &iLight.SampleOffset, 0.0f, 2.0f, "%.2f", 0);
+				ImGui::SliderFloat("", &iLight.ShadowContrast, 0.1f, 15.0f, "%.2f", 0);
 				ImGui::endTitle();
 
 				//Shadow Map Quality

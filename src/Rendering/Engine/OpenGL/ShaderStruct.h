@@ -10,6 +10,11 @@ namespace dyno
 		int useRoughnessTex = 0;
 		int useMetallicTex = 0;
 
+		int useEmissiveTex = 0;
+		int useAlphaTex = 0;
+		int tempData = 0;
+		int tempData2 = 0;
+
 		glm::vec3 color;
 		float roughness = 0.5;
 		float metallic = 0.0;

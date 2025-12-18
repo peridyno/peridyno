@@ -225,13 +225,15 @@ namespace dyno
 					pbr.roughness = mtl->roughness;
 					pbr.alpha = mtl->alpha;
 
-					if(mtl->texORM.isValid())
+					if( mtl->texORM.isValid())
 						pbr.useAOTex = 1;
 					if (mtl->texORM.isValid())
 					{
 						pbr.useRoughnessTex = 1;
 						pbr.useMetallicTex = 1;
 					}
+					if (mtl->texEmissiveColor.isValid())
+						pbr.useEmissiveTex = 1;
 
 					mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
 					mPBRMaterialUBlock.bindBufferBase(1);

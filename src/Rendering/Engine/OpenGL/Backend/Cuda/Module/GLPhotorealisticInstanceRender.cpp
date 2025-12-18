@@ -165,6 +165,10 @@ namespace dyno
 					{
 						mtl->texORM.bind(GL_TEXTURE12);
 					}
+					if (mtl->texEmissiveColor.isValid())
+					{
+						mtl->texEmissiveColor.bind(GL_TEXTURE13);
+					}
 				}
 			}
 			else

@@ -47,9 +47,9 @@ namespace dyno
 
 			// shadow
 			float ShadowMultiplier = 0;
-			float SampleRoughness = 1;
+			float ShadowBrightness = 0.5;
 			float SamplePower = 1;
-			float SampleOffset = 0;
+			float ShadowContrast = 7.5;
 
 		} light;
 
