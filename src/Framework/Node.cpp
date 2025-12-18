@@ -136,14 +136,14 @@ void Node::updateStates()
 
 void Node::update()
 {
-	mSyncRenderAndSim.lock();
-
 	if (!this->validateInputs()) {
 		return;
 	}
 
 	if (this->requireUpdate())
 	{
+		mSyncRenderAndSim.lock();
+
 		this->preUpdateStates();
 
 		if (mPhysicsEnabled)
@@ -170,9 +170,11 @@ void Node::update()
 		{
 			f_out->tick();
 		}
+
+		mSyncRenderAndSim.unlock();
 	}
 
-	mSyncRenderAndSim.unlock();
+
 }
 
 void Node::reset()
