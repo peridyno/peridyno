@@ -26,6 +26,73 @@
 
 namespace dyno
 {
+
+	class ColorCorrect : public MaterialManagedModule
+	{
+		DECLARE_CLASS(ColorCorrect)
+	public:
+
+		ColorCorrect();
+		ColorCorrect(std::shared_ptr<ColorCorrect> other);
+		~ColorCorrect() {};
+
+		void onFieldChanged();
+		void updateImpl() override { onFieldChanged(); };
+		std::string caption() override { return "ColorCorrect"; }
+
+		void initial();
+
+		DEF_ARRAY2D_IN(Vec4f, Texture, DeviceType::GPU, "ColorTextureOverride");
+
+		//Color Correct
+		DEF_VAR(float, Saturation, 1, "");
+		DEF_VAR(float, HUEOffset, 0, "");
+		DEF_VAR(float, Contrast, 1, "");
+		DEF_VAR(float, Gamma, 1, "");
+		DEF_VAR(Color, TintColor, Color(0.5), "");
+		DEF_VAR(float, TintIntensity, 0, "");
+		DEF_ARRAY2D_OUT(Vec4f, Texture, DeviceType::GPU, "");
+
+	protected:
+		virtual std::shared_ptr<MaterialManagedModule> clone() const override;
+		
+	};
+
+
+	template<typename TDataType>
+	class AssignTextureMeshMaterial : public ComputeModule
+	{
+		DECLARE_TCLASS(AssignTextureMeshMaterial, TDataType)
+
+	public:
+		typedef typename TDataType::Real Real;
+		typedef typename TDataType::Coord Coord;
+		typedef typename ::dyno::Transform<Real, 3> Transform;
+
+		AssignTextureMeshMaterial();
+		~AssignTextureMeshMaterial() { removeMaterialReference(); }
+
+		void updateAssign();
+		void compute() override;
+
+		std::shared_ptr<Module> getSelfPtr();
+
+		std::string caption() override { return "AssignTextureMeshMaterial"; }
+
+		//Texture
+		DEF_VAR(uint, ShapeIndex, 0, "");
+		DEF_VAR(std::string, MaterialName, "", "");
+		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "");
+		DEF_INSTANCE_OUT(TextureMesh, TextureMesh, "");
+
+	public:
+		std::shared_ptr<Material> varMat = nullptr;
+
+	protected:
+		void removeMaterialReference();
+
+	};
+
 //	class MaterialGroup : public TopologyModule
 //	{
 //	public:
@@ -283,72 +350,6 @@ namespace dyno
 //
 //
 
-	class ColorCorrect : public MaterialManagedModule
-	{
-		DECLARE_CLASS(ColorCorrect)
-	public:
-
-		ColorCorrect();
-		ColorCorrect(std::shared_ptr<ColorCorrect> other)
-		{
-			this->varSaturation()->setValue(other->varSaturation()->getValue());
-			this->varHUEOffset()->setValue(other->varHUEOffset()->getValue());
-			this->varContrast()->setValue(other->varContrast()->getValue());
-			this->varGamma()->setValue(other->varGamma()->getValue());
-			this->varTintColor()->setValue(other->varTintColor()->getValue());
-
-			other->inTexture()->getSource()->connect(this->inTexture());
-
-			if (!other->outTexture()->isEmpty())
-			{
-				if (this->outTexture()->isEmpty())
-					this->outTexture()->allocate();
-				this->outTexture()->assign(other->outTexture()->getData());
-			}
-			initial();
-		}
-		~ColorCorrect() {};
-
-		void onFieldChanged();
-		void updateImpl() override { onFieldChanged(); };
-		std::string caption() override { return "ColorCorrect"; }
-
-		void initial();
-
-		DEF_ARRAY2D_IN(Vec4f, Texture, DeviceType::GPU, "ColorTextureOverride");
-
-		//Color Correct
-		DEF_VAR(float, Saturation, 1, "");
-		DEF_VAR(float, HUEOffset, 0, "");
-		DEF_VAR(float, Contrast, 1, "");
-		DEF_VAR(float, Gamma, 1, "");
-		DEF_VAR(Color, TintColor, Color(1), "");
-		DEF_VAR(float, TintIntensity,0,"");
-		DEF_ARRAY2D_OUT(Vec4f, Texture, DeviceType::GPU,"");
-
-	protected:
-		virtual std::shared_ptr<MaterialManagedModule> clone() const override
-		{
-			std::shared_ptr<MaterialManagedModule> materialPtr = MaterialManager::getMaterialManagedModule(this->getName());
-			if (!materialPtr)
-			{
-				printf("Error: newColorCorrect::clone() Failed!! \n");
-				return nullptr;
-			}
-
-			std::shared_ptr<ColorCorrect> colorCorrect = std::dynamic_pointer_cast<ColorCorrect>(materialPtr);
-			if (!colorCorrect)
-			{
-				printf("Error: newColorCorrect::clone() Cast Failed!!  \n");
-				return nullptr;
-			}
-
-			std::shared_ptr<ColorCorrect> newColorCorrect(new ColorCorrect(colorCorrect));
-
-			return newColorCorrect;
-		}
-	};
-
 
 	/*template<typename TDataType>
 	class TempUpdate : public ComputeModule
@@ -382,69 +383,4 @@ namespace dyno
 	};*/
 
 
-	template<typename TDataType>
-	class AssignTextureMeshMaterial : public ComputeModule
-	{
-		DECLARE_TCLASS(AssignTextureMeshMaterial, TDataType)
-
-	public:
-		typedef typename TDataType::Real Real;
-		typedef typename TDataType::Coord Coord;
-		typedef typename ::dyno::Transform<Real, 3> Transform;
-
-		AssignTextureMeshMaterial();
-		~AssignTextureMeshMaterial()
-		{
-			removeMaterialReference();
-		};
-
-		void updateAssign();
-		void compute() override;
-
-		std::shared_ptr<Module> getSelfPtr()
-		{
-			std::shared_ptr<Module> foundModule = nullptr;
-			if (this->getParentNode()) 
-			{
-				const auto& modules = this->getParentNode()->getModuleList();
-
-				for (const auto& modulePtr : modules) {
-					if (modulePtr->objectId() == this->objectId()) {
-						foundModule = modulePtr;
-						break;
-					}
-				}
-
-				if (foundModule) {
-					std::cout << "found Module£¬ID = " << foundModule->objectId() << std::endl;
-
-				}
-				else {
-					std::cout << "not found Module" << std::endl;
-				}
-			}
-			
-			return foundModule;
-		}
-
-		std::string caption() override { return "AssignTextureMeshMaterial"; }
-
-		//Texture
-		DEF_VAR(uint, ShapeIndex, 0, "");
-		DEF_VAR(std::string, MaterialName, "", "");
-		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "");
-		DEF_INSTANCE_OUT(TextureMesh, TextureMesh, "");
-
-	public:
-		std::shared_ptr<Material> varMat = nullptr;
-
-	protected:
-		void removeMaterialReference()
-		{
-			auto selfPtr = getSelfPtr();
-
-			if (varMat && selfPtr)
-				varMat->removeAssigner(selfPtr);
-		}
-	};
 }

@@ -35,6 +35,9 @@ namespace dyno
 		QAction* updateAction() { return mActionUpdate; }
 		QAction* saveAction() { return mActionSave; }
 		QAction* reorderAction() { return mActionReorder; }
+		QAction* realTimeUpdateAction() { return mActionRealtime; }
+
+		void setRealtime(bool realtime) { mActionRealtime->setChecked(realtime); }
 
 	private:
 		QHBoxLayout* mLayout;
@@ -42,7 +45,7 @@ namespace dyno
 		QAction* mActionSave;
 		QAction* mActionReorder;
 		QAction* mActionUpdate;
-
+		QAction* mActionRealtime;
 
 	};
 }

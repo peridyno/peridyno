@@ -1,4 +1,4 @@
-#include <QtApp.h>
+#include <UbiApp.h>
 using namespace dyno;
 
 #include "RigidBody/initializeRigidBody.h"
@@ -16,7 +16,10 @@ using namespace dyno;
 #include "MaterialEditModule.h"
 #include "ImageLoader.h"
 #include "GLPhotorealisticInstanceRender.h"
-
+#include "GLRenderEngine.h"
+#include "RenderWindow.h"
+#include "BasicShapes/PlaneModel.h"
+#include "TextureMeshLoader.h"
 /**
  * @brief This example demonstrate how to load plugin libraries in a static way
  */
@@ -35,24 +38,33 @@ std::shared_ptr<SceneGraph> createScene()
 
 int main()
 {
-	MaterialManager::NewMaterial();
-	MaterialManager::createCustomMaterial();
 
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
+	MaterialManager::createCustomMaterial();
+	
 	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
 	gltf->varFileName()->setValue(std::string(getAssetPath() + "Jeep/JeepGltf/jeep.gltf"));
+
+	auto gltfWireframe = gltf->graphicsPipeline()->findFirstModule<GLWireframeVisualModule>();
+	if (gltfWireframe)
+	{
+		gltf->graphicsPipeline()->popModule(gltfWireframe);
+	}
 
 	auto srcMaterial = MaterialManager::getMaterial("Body1");
 	std::shared_ptr<CustomMaterial> customMaterial = NULL;
 	if (srcMaterial) 
 	{
 		customMaterial = MaterialManager::createCustomMaterial(srcMaterial);
-
+		customMaterial->varEmissiveIntensity()->setValue(1.0f);
 		auto matPipeline = customMaterial->materialPipeline();
 
 		auto texCorrect = std::make_shared<ColorCorrect>();
 		srcMaterial->outTexColor()->connect(texCorrect->inTexture());
-		texCorrect->varSaturation()->setValue(0);
+		texCorrect->varSaturation()->setValue(1.158f);
+		texCorrect->varHUEOffset()->setValue(206.557f);
+		texCorrect->varContrast()->setValue(1.021f);
+		texCorrect->varGamma()->setValue(1.936f);
 		texCorrect->outTexture()->connect(customMaterial->inTexColor());
 		matPipeline->pushModule(texCorrect);
 
@@ -72,24 +84,34 @@ int main()
 		gltf->graphicsPipeline()->pushModule(assignMaterial);
 	}
 
+	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
+	plane->varScale()->setValue(Vec3f(5.0,0.0,5.0));
+	auto planeWireframe = plane->graphicsPipeline()->findFirstModule<GLWireframeVisualModule>();
+	if (planeWireframe)
+	{
+		plane->graphicsPipeline()->popModule(planeWireframe);
+	}
 
-	
 
-
-	Modeling::initStaticPlugin();
-	RigidBody::initStaticPlugin();
-	PaticleSystem::initStaticPlugin();
-	HeightFieldLibrary::initStaticPlugin();
-	DualParticleSystem::initStaticPlugin();
-	Peridynamics::initStaticPlugin();
-	SemiAnalyticalScheme::initStaticPlugin();
-	Volume::initStaticPlugin();
-	Multiphysics::initStaticPlugin();
-	dynoIO::initStaticPlugin();
-
-	QtApp app;
+	UbiApp app(GUIType::GUI_QT);
 	app.setSceneGraph(scn);
 	app.initialize(1920, 1080);
+
+	// setup envmap
+	auto renderer = std::dynamic_pointer_cast<dyno::GLRenderEngine>(app.renderWindow()->getRenderEngine());
+	if (renderer) {
+		renderer->setEnvStyle(EEnvStyle::Studio);
+		renderer->setUseEnvmapBackground(false);
+		renderer->setEnvmapScale(3.0f);
+		renderer->showGround = false;
+			
+	}
+
+	app.renderWindow()->setShadowMultiplier(1.0f);
+	app.renderWindow()->setShadowBrightness(0.14f);
+	app.renderWindow()->setSamplePower(3.27f);
+	app.renderWindow()->setShadowContrast(3.90f);
+
 	app.mainLoop();
 
 	return 0;

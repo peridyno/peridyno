@@ -3,7 +3,390 @@
 //
 namespace dyno
 {
-//	IMPLEMENT_TCLASS(BreakTextureMesh, TDataType)
+
+
+template<typename Vec3f>
+__device__ void RGBtoHSV(const Vec3f& rgb, Vec3f& hsv)
+{
+	float r = rgb[0] / 255.0f;
+	float g = rgb[1] / 255.0f;
+	float b = rgb[2] / 255.0f;
+
+	float maxc = fmaxf(r, fmaxf(g, b));
+	float minc = fminf(r, fminf(g, b));
+	float delta = maxc - minc;
+
+	hsv[2] = maxc; // V
+
+	if (maxc == 0.0f)
+	{
+		hsv[1] = 0.0f;
+		hsv[0] = 0.0f; //
+		return;
+	}
+	else
+	{
+		hsv[1] = delta / maxc; // S
+	}
+
+	if (delta == 0.0f)
+	{
+		hsv[0] = 0.0f; //
+	}
+	else if (maxc == r)
+	{
+		hsv[0] = 60.0f * fmodf(((g - b) / delta), 6.0f);
+	}
+	else if (maxc == g)
+	{
+		hsv[0] = 60.0f * (((b - r) / delta) + 2.0f);
+	}
+	else // maxc == b
+	{
+		hsv[0] = 60.0f * (((r - g) / delta) + 4.0f);
+	}
+
+	if (hsv[0] < 0.0f)
+		hsv[0] += 360.0f;
+}
+
+__device__ float Overlay(float B, float F)
+{
+	if (B < 0.5)
+		return 2.0 * B * F;
+	else
+		return 1.0 - 2.0 * (1.0 - B) * (1.0 - F);
+}
+
+__device__ float lerp(float a, float b, float t)
+{
+	return a + t * (b - a);
+}
+
+template<typename Vec3f>
+__device__ void HSVtoRGB(const Vec3f& hsv, Vec3f& rgb)
+{
+	float H = hsv[0];
+	float S = hsv[1];
+	float V = hsv[2];
+
+	float C = V * S;
+	float X = C * (1.0f - fabsf(fmodf(H / 60.0f, 2.0f) - 1.0f));
+	float m = V - C;
+
+	float r1, g1, b1;
+
+	if (H >= 0 && H < 60)
+	{
+		r1 = C; g1 = X; b1 = 0;
+	}
+	else if (H < 120)
+	{
+		r1 = X; g1 = C; b1 = 0;
+	}
+	else if (H < 180)
+	{
+		r1 = 0; g1 = C; b1 = X;
+	}
+	else if (H < 240)
+	{
+		r1 = 0; g1 = X; b1 = C;
+	}
+	else if (H < 300)
+	{
+		r1 = X; g1 = 0; b1 = C;
+	}
+	else // H < 360
+	{
+		r1 = C; g1 = 0; b1 = X;
+	}
+
+	rgb[0] = fminf(fmaxf((r1 + m) * 255.0f, 0.0f), 255.0f);
+	rgb[1] = fminf(fmaxf((g1 + m) * 255.0f, 0.0f), 255.0f);
+	rgb[2] = fminf(fmaxf((b1 + m) * 255.0f, 0.0f), 255.0f);
+}
+
+__global__ void colorCorrectionKernel(
+	DArray2D<Vec4f> inTex,
+	DArray2D<Vec4f> outTex,
+	float saturationFactor,
+	float hueOffset,
+	float contrastFactor,
+	float gamma,
+	Vec3f tintColor,      
+	float tintIntensity 
+)
+{
+	int x = threadIdx.x + blockIdx.x * blockDim.x;
+	int y = threadIdx.y + blockIdx.y * blockDim.y;
+
+	if (x >= inTex.nx() || y >= inTex.ny())
+		return;
+
+	Vec4f rgba = inTex(x, y);
+
+	// 0~1 -> 0~255
+	Vec3f rgb = Vec3f(rgba.x * 255.0f, rgba.y * 255.0f, rgba.z * 255.0f);
+
+	Vec3f hsv;
+	RGBtoHSV(rgb, hsv);
+
+	hsv[0] += hueOffset;
+	if (hsv[0] >= 360.0f) hsv[0] -= 360.0f;
+	if (hsv[0] < 0.0f) hsv[0] += 360.0f;
+
+	hsv[1] *= saturationFactor;
+	hsv[1] = fminf(fmaxf(hsv[1], 0.0f), 1.0f);
+
+	HSVtoRGB(hsv, rgb);
+
+	float fr = (rgb[0] - 128.0f) * contrastFactor + 128.0f;
+	float fg = (rgb[1] - 128.0f) * contrastFactor + 128.0f;
+	float fb = (rgb[2] - 128.0f) * contrastFactor + 128.0f;
+
+	// Gamma校正
+	fr = 255.0f * powf(fmaxf(fr, 0.0f) / 255.0f, gamma);
+	fg = 255.0f * powf(fmaxf(fg, 0.0f) / 255.0f, gamma);
+	fb = 255.0f * powf(fmaxf(fb, 0.0f) / 255.0f, gamma);
+
+	fr = fminf(fmaxf(fr, 0.0f), 255.0f) / 255.0f;
+	fg = fminf(fmaxf(fg, 0.0f), 255.0f) / 255.0f;
+	fb = fminf(fmaxf(fb, 0.0f), 255.0f) / 255.0f;
+
+	fr = Overlay(tintColor[0], fr);
+	fg = Overlay(tintColor[1], fg);
+	fb = Overlay(tintColor[2], fb);
+
+	outTex(x, y)[0] = fr ;
+	outTex(x, y)[1] = fg ;
+	outTex(x, y)[2] = fb ;
+	outTex(x, y)[3] = rgba.w;
+}
+
+
+	IMPLEMENT_CLASS(ColorCorrect)
+	ColorCorrect::ColorCorrect()
+	{
+		initial();
+	};
+
+	ColorCorrect::ColorCorrect(std::shared_ptr<ColorCorrect> other)
+	{
+		this->varSaturation()->setValue(other->varSaturation()->getValue());
+		this->varHUEOffset()->setValue(other->varHUEOffset()->getValue());
+		this->varContrast()->setValue(other->varContrast()->getValue());
+		this->varGamma()->setValue(other->varGamma()->getValue());
+		this->varTintColor()->setValue(other->varTintColor()->getValue());
+
+		other->inTexture()->getSource()->connect(this->inTexture());
+
+		if (!other->outTexture()->isEmpty())
+		{
+			if (this->outTexture()->isEmpty())
+				this->outTexture()->allocate();
+			this->outTexture()->assign(other->outTexture()->getData());
+		}
+		initial();
+	}
+
+	void ColorCorrect::initial() 
+	{
+		this->varSaturation()->setRange(0, 5);
+		this->varGamma()->setRange(0, 4);
+		this->varContrast()->setRange(0.9, 1.1);
+		this->varHUEOffset()->setRange(0,360);
+		this->varTintIntensity()->setRange(0,1);
+
+		auto IndexChange = std::make_shared<FCallBackFunc>(std::bind(&ColorCorrect::onFieldChanged, this));
+		this->inTexture()->attach(IndexChange);
+
+		this->varSaturation()->attach(IndexChange);
+		this->varContrast()->attach(IndexChange);
+		this->varGamma()->attach(IndexChange);
+		this->varHUEOffset()->attach(IndexChange);
+		this->varTintColor()->attach(IndexChange);
+		this->varTintIntensity()->attach(IndexChange);
+		this->setName("ColorCorrect");
+	}
+
+	std::shared_ptr<MaterialManagedModule> ColorCorrect::clone() const
+	{
+		{
+			std::shared_ptr<MaterialManagedModule> materialPtr = MaterialManager::getMaterialManagedModule(this->getName());
+			if (!materialPtr)
+			{
+				printf("Error: newColorCorrect::clone() Failed!! \n");
+				return nullptr;
+			}
+
+			std::shared_ptr<ColorCorrect> colorCorrect = std::dynamic_pointer_cast<ColorCorrect>(materialPtr);
+			if (!colorCorrect)
+			{
+				printf("Error: newColorCorrect::clone() Cast Failed!!  \n");
+				return nullptr;
+			}
+
+			std::shared_ptr<ColorCorrect> newColorCorrect(new ColorCorrect(colorCorrect));
+
+			return newColorCorrect;
+		}
+	}
+
+	void ColorCorrect::onFieldChanged()
+	{
+		auto inTexture = this->inTexture()->getData();
+		if (this->outTexture()->isEmpty())
+			this->outTexture()->allocate();
+
+		auto outTexture = this->outTexture()->getDataPtr();
+		auto saturation = this->varSaturation()->getValue();
+		auto hueOffset = this->varHUEOffset()->getValue();
+		auto contrast = this->varContrast()->getValue();
+		auto gamma = this->varGamma()->getValue();
+		auto tintColor = this->varTintColor()->getValue();
+		Vec3f vec3TintColor = Vec3f(tintColor.r,tintColor.g,tintColor.b);
+		auto tintIntensity = this->varTintIntensity()->getValue();
+
+		outTexture->resize(inTexture.nx(),inTexture.ny());
+		CArray2D<Vec4f> cTex;
+		cTex.assign(inTexture);
+
+		cuExecute2D(make_uint2(unsigned int(inTexture.nx()), unsigned int(inTexture.ny())),
+			colorCorrectionKernel,
+			inTexture,
+			*outTexture,
+			saturation,
+			hueOffset,
+			contrast,
+			gamma,
+			vec3TintColor,
+			tintIntensity
+		);
+	}
+
+
+	IMPLEMENT_TCLASS(AssignTextureMeshMaterial, TDataType)
+		template<typename TDataType>
+	AssignTextureMeshMaterial<TDataType>::AssignTextureMeshMaterial()
+	{
+		auto FieldChange = std::make_shared<FCallBackFunc>(std::bind(&AssignTextureMeshMaterial<TDataType>::updateAssign, this));
+		this->varShapeIndex()->attach(FieldChange);
+		this->inTextureMesh()->attach(FieldChange);
+		this->outTextureMesh()->setDataPtr(std::make_shared<TextureMesh>());
+	}
+
+	template<typename TDataType>
+	void AssignTextureMeshMaterial<TDataType>::updateAssign()
+	{
+	
+		auto inTexMesh = this->inTextureMesh()->constDataPtr();
+		auto inShapes = inTexMesh->shapes();
+		auto outTexMesh = this->outTextureMesh()->getDataPtr();
+
+		uint index = this->varShapeIndex()->getValue() < inShapes.size() ? this->varShapeIndex()->getValue() : inShapes.size() - 1;
+		
+
+		auto newMat = MaterialManager::getMaterial(this->varMaterialName()->getValue());
+		if(newMat != varMat)
+			removeMaterialReference();
+
+		varMat = newMat;
+
+		auto inMeshData = inTexMesh->meshDataPtr();
+		outTexMesh->meshDataPtr() = inMeshData;
+		outTexMesh->shapes() = inTexMesh->shapes();
+
+		auto originalShape = inShapes[index];
+		auto replaceShape = std::make_shared<Shape>(*originalShape);
+		if (varMat) 
+		{
+			replaceShape->material = varMat;
+		
+			auto selfPtr = getSelfPtr();
+			if (selfPtr)
+				varMat->addAssigner(selfPtr);
+			
+		}
+		
+
+		outTexMesh->shapes()[index] = replaceShape;
+
+		//update visualModule
+		auto sinks = this->outTextureMesh()->getSinks();
+		for (auto it : sinks)
+		{
+			GLVisualModule* connectModule = dynamic_cast<GLVisualModule*>(it->parent());
+			if (connectModule)
+			{
+				connectModule->varForceUpdate()->setValue(true);
+				connectModule->update();
+				connectModule->varForceUpdate()->setValue(false);
+			}
+		}
+
+	}
+
+	template<typename TDataType>
+	void AssignTextureMeshMaterial<TDataType>::compute()
+	{
+		updateAssign(); 
+		
+	}
+
+	template<typename TDataType>
+	std::shared_ptr<Module> AssignTextureMeshMaterial<TDataType>::getSelfPtr()
+	{
+		{
+			std::shared_ptr<Module> foundModule = nullptr;
+			if (this->getParentNode())
+			{
+				const auto& modules = this->getParentNode()->getModuleList();
+
+				for (const auto& modulePtr : modules) {
+					if (modulePtr->objectId() == this->objectId()) {
+						foundModule = modulePtr;
+						break;
+					}
+				}
+
+				if (foundModule) {
+					std::cout << "found Module，ID = " << foundModule->objectId() << std::endl;
+
+				}
+				else {
+					std::cout << "not found Module" << std::endl;
+				}
+			}
+
+			return foundModule;
+		}
+	}
+
+	template<typename TDataType>
+	void AssignTextureMeshMaterial<TDataType>::removeMaterialReference()
+	{
+		{
+			auto selfPtr = getSelfPtr();
+
+			if (varMat && selfPtr)
+				varMat->removeAssigner(selfPtr);
+		}
+	}
+
+	DEFINE_CLASS(AssignTextureMeshMaterial);
+
+	//IMPLEMENT_TCLASS(TempUpdate, TDataType)
+	//template<typename TDataType>
+	//void TempUpdate<TDataType>::onFieldChanged()
+	//{
+	//	if (!matPipeline)
+	//		return;
+
+	//	matPipeline->updateMaterialPipline();
+	//}
+	//DEFINE_CLASS(TempUpdate);
+
+	//	IMPLEMENT_TCLASS(BreakTextureMesh, TDataType)
 //
 //	template<typename TDataType>
 //	BreakTextureMesh<TDataType>::BreakTextureMesh()
@@ -401,7 +784,7 @@ namespace dyno
 	//{
 	//}
 
-	
+
 
 //	template<typename TDataType>
 //	void TextureMeshCorrect<TDataType>::onFieldChanged()
@@ -445,459 +828,7 @@ namespace dyno
 //
 //
 
-
-//template<typename Vec3f>
-//__device__ void RGBtoHSV(const Vec3f& rgb, Vec3f& hsv)
-//{
-//	float r = rgb[0] / 255.0f;
-//	float g = rgb[1] / 255.0f;
-//	float b = rgb[2] / 255.0f;
-//
-//	float maxc = fmaxf(r, fmaxf(g, b));
-//	float minc = fminf(r, fminf(g, b));
-//	float delta = maxc - minc;
-//
-//	// 计算V
-//	hsv[2] = maxc;
-//
-//	// 计算S
-//	if (maxc == 0.0f)
-//	{
-//		hsv[1] = 0.0f;
-//		hsv[0] = 0.0f; // H无定义，设为0
-//		return;
-//	}
-//	else
-//	{
-//		hsv[1] = delta / maxc;
-//	}
-//
-//	// 计算H
-//	if (delta == 0.0f)
-//	{
-//		hsv[0] = 0.0f; // 无色相
-//	}
-//	else if (maxc == r)
-//	{
-//		hsv[0] = 60.0f * fmodf(((g - b) / delta), 6.0f);
-//	}
-//	else if (maxc == g)
-//	{
-//		hsv[0] = 60.0f * (((b - r) / delta) + 2.0f);
-//	}
-//	else // maxc == b
-//	{
-//		hsv[0] = 60.0f * (((r - g) / delta) + 4.0f);
-//	}
-//
-//	if (hsv[0] < 0.0f)
-//		hsv[0] += 360.0f;
-//}
-//
-//
-//// 辅助函数：HSV转BGR，输入H(0-360), S,V(0-1)，输出BGR 0-255
-//template<typename Vec3f>
-//__device__ void HSVtoRGB(const Vec3f& hsv, Vec3f& rgb)
-//{
-//	float H = hsv[0];
-//	float S = hsv[1];
-//	float V = hsv[2];
-//
-//	float C = V * S; // Chroma
-//	float X = C * (1.0f - fabsf(fmodf(H / 60.0f, 2.0f) - 1.0f));
-//	float m = V - C;
-//
-//	float r1, g1, b1;
-//
-//	if (H >= 0 && H < 60)
-//	{
-//		r1 = C; g1 = X; b1 = 0;
-//	}
-//	else if (H < 120)
-//	{
-//		r1 = X; g1 = C; b1 = 0;
-//	}
-//	else if (H < 180)
-//	{
-//		r1 = 0; g1 = C; b1 = X;
-//	}
-//	else if (H < 240)
-//	{
-//		r1 = 0; g1 = X; b1 = C;
-//	}
-//	else if (H < 300)
-//	{
-//		r1 = X; g1 = 0; b1 = C;
-//	}
-//	else // H < 360
-//	{
-//		r1 = C; g1 = 0; b1 = X;
-//	}
-//
-//	rgb[0] = fminf(fmaxf((r1 + m) * 255.0f, 0.0f), 255.0f); // R
-//	rgb[1] = fminf(fmaxf((g1 + m) * 255.0f, 0.0f), 255.0f); // G
-//	rgb[2] = fminf(fmaxf((b1 + m) * 255.0f, 0.0f), 255.0f); // B
-//}
-//
-//// 主核函数
-//__global__ void colorCorrectionKernel(
-//	DArray2D<Vec4f> inTex,
-//	DArray2D<Vec4f> outTex,
-//	float saturationFactor,
-//	Vec3f offset,
-//	float contrastFactor,
-//	float gamma)
-//{
-//
-//	int x = threadIdx.x + blockIdx.x * blockDim.x;
-//	int y = threadIdx.y + blockIdx.y * blockDim.y;
-//
-//	if (x >= inTex.nx() || y >= inTex.ny())
-//		return;
-//
-//	int idx = (y * inTex.nx() + x);
-//
-//	Vec4f rgba = inTex(x, y);
-//	Vec3f rgb = Vec3f(rgba.x, rgba.y, rgba.z);
-//	// 1. 转HSV调整饱和度
-//	Vec3f hsv;
-//	if (idx == 0)
-//		printf("origin rgb: %f, %f, %f\n",rgb[0], rgb[1], rgb[2]);
-//	RGBtoHSV(rgb, hsv);
-//	hsv[1] *= saturationFactor;
-//	if (hsv[1] > 1.0f) hsv[1] = 1.0f;
-//	if (hsv[1] < 0.0f) hsv[1] = 0.0f;
-//	HSVtoRGB(hsv, rgb);
-//	if (idx == 0)
-//		printf("convert rgb: %f, %f, %f\n", rgb[0], rgb[1], rgb[2]);
-//	// 2. 颜色偏移
-//	float fr = rgb[0] + offset[0];
-//	float fg = rgb[1] + offset[1];
-//	float fb = rgb[2] + offset[2];
-//
-//	// 3. 对比度调整 (color - 128)*contrast + 128
-//	fr = (fr - 128.0f) * contrastFactor + 128.0f;
-//	fg = (fg - 128.0f) * contrastFactor + 128.0f;
-//	fb = (fb - 128.0f) * contrastFactor + 128.0f;
-//
-//	// 4. Gamma校正
-//	fr = 255.0f * pow(maximum(fr, 0.0f) / 255.0f, gamma);
-//	fg = 255.0f * pow(maximum(fg, 0.0f) / 255.0f, gamma);
-//	fb = 255.0f * pow(maximum(fb, 0.0f) / 255.0f, gamma);
-//
-//	// 限制范围0-255
-//	Vec3f color = clamp(Vec3f(fr, fg, fb), Vec3f(0),Vec3f(255));
-//
-//	outTex(x, y)[0] = color[0];
-//	outTex(x, y)[1] = color[1];
-//	outTex(x, y)[2] = color[2];
-//	outTex(x, y)[3] = rgba.w;
-//
-//	if (idx == 0)
-//		printf("FINAL rgba: %f, %f, %f, %f\n", outTex(x, y)[0], outTex(x, y)[1], outTex(x, y)[2], outTex(x, y)[3]);
-//
-//}
-
 //********************************************//
-// 
-template<typename Vec3f>
-__device__ void RGBtoHSV(const Vec3f& rgb, Vec3f& hsv)
-{
-	float r = rgb[0] / 255.0f;
-	float g = rgb[1] / 255.0f;
-	float b = rgb[2] / 255.0f;
-
-	float maxc = fmaxf(r, fmaxf(g, b));
-	float minc = fminf(r, fminf(g, b));
-	float delta = maxc - minc;
-
-	hsv[2] = maxc; // V
-
-	if (maxc == 0.0f)
-	{
-		hsv[1] = 0.0f;
-		hsv[0] = 0.0f; // H无定义，设为0
-		return;
-	}
-	else
-	{
-		hsv[1] = delta / maxc; // S
-	}
-
-	if (delta == 0.0f)
-	{
-		hsv[0] = 0.0f; // 无色相
-	}
-	else if (maxc == r)
-	{
-		hsv[0] = 60.0f * fmodf(((g - b) / delta), 6.0f);
-	}
-	else if (maxc == g)
-	{
-		hsv[0] = 60.0f * (((b - r) / delta) + 2.0f);
-	}
-	else // maxc == b
-	{
-		hsv[0] = 60.0f * (((r - g) / delta) + 4.0f);
-	}
-
-	if (hsv[0] < 0.0f)
-		hsv[0] += 360.0f;
-}
-
-template<typename Vec3f>
-__device__ void HSVtoRGB(const Vec3f& hsv, Vec3f& rgb)
-{
-	float H = hsv[0];
-	float S = hsv[1];
-	float V = hsv[2];
-
-	float C = V * S;
-	float X = C * (1.0f - fabsf(fmodf(H / 60.0f, 2.0f) - 1.0f));
-	float m = V - C;
-
-	float r1, g1, b1;
-
-	if (H >= 0 && H < 60)
-	{
-		r1 = C; g1 = X; b1 = 0;
-	}
-	else if (H < 120)
-	{
-		r1 = X; g1 = C; b1 = 0;
-	}
-	else if (H < 180)
-	{
-		r1 = 0; g1 = C; b1 = X;
-	}
-	else if (H < 240)
-	{
-		r1 = 0; g1 = X; b1 = C;
-	}
-	else if (H < 300)
-	{
-		r1 = X; g1 = 0; b1 = C;
-	}
-	else // H < 360
-	{
-		r1 = C; g1 = 0; b1 = X;
-	}
-
-	rgb[0] = fminf(fmaxf((r1 + m) * 255.0f, 0.0f), 255.0f);
-	rgb[1] = fminf(fmaxf((g1 + m) * 255.0f, 0.0f), 255.0f);
-	rgb[2] = fminf(fmaxf((b1 + m) * 255.0f, 0.0f), 255.0f);
-}
-
-__global__ void colorCorrectionKernel(
-	DArray2D<Vec4f> inTex,
-	DArray2D<Vec4f> outTex,
-	float saturationFactor,
-	float hueOffset,
-	float contrastFactor,
-	float gamma,
-	Vec3f tintColor,      // 新增的Tint Color，0~1范围
-	float tintIntensity   // Tint强度，0~1范围
-)
-{
-	int x = threadIdx.x + blockIdx.x * blockDim.x;
-	int y = threadIdx.y + blockIdx.y * blockDim.y;
-
-	if (x >= inTex.nx() || y >= inTex.ny())
-		return;
-
-	Vec4f rgba = inTex(x, y);
-
-	// 0~1 -> 0~255
-	Vec3f rgb = Vec3f(rgba.x * 255.0f, rgba.y * 255.0f, rgba.z * 255.0f);
-
-	Vec3f hsv;
-	RGBtoHSV(rgb, hsv);
-
-	// 色调偏移，循环处理
-	hsv[0] += hueOffset;
-	if (hsv[0] > 1.0f) hsv[0] -= 1.0f;
-	if (hsv[0] < 0.0f) hsv[0] += 1.0f;
-
-	// 饱和度调整
-	hsv[1] *= saturationFactor;
-	hsv[1] = fminf(fmaxf(hsv[1], 0.0f), 1.0f);
-
-	HSVtoRGB(hsv, rgb);
-
-	// 叠加Tint Color，先转换tintColor到0~255范围
-	Vec3f tint255 = tintColor * 255.0f;
-
-	// 线性混合原色和Tint色，tintIntensity控制强度
-	rgb = rgb * (1.0f - tintIntensity) + tint255 * tintIntensity;
-
-	// 对比度调整
-	float fr = (rgb[0] - 128.0f) * contrastFactor + 128.0f;
-	float fg = (rgb[1] - 128.0f) * contrastFactor + 128.0f;
-	float fb = (rgb[2] - 128.0f) * contrastFactor + 128.0f;
-
-	// Gamma校正
-	fr = 255.0f * powf(fmaxf(fr, 0.0f) / 255.0f, gamma);
-	fg = 255.0f * powf(fmaxf(fg, 0.0f) / 255.0f, gamma);
-	fb = 255.0f * powf(fmaxf(fb, 0.0f) / 255.0f, gamma);
-
-	// 限制范围
-	fr = fminf(fmaxf(fr, 0.0f), 255.0f);
-	fg = fminf(fmaxf(fg, 0.0f), 255.0f);
-	fb = fminf(fmaxf(fb, 0.0f), 255.0f);
-
-	outTex(x, y)[0] = fr / 255.0f;
-	outTex(x, y)[1] = fg / 255.0f;
-	outTex(x, y)[2] = fb / 255.0f;
-	outTex(x, y)[3] = rgba.w;
-}
-
-
-//
-
-	
-
-
-	IMPLEMENT_CLASS(ColorCorrect)
-	ColorCorrect::ColorCorrect()
-	{
-		initial();
-	};
-
-	void ColorCorrect::initial() 
-	{
-		this->varSaturation()->setRange(0, 5);
-		this->varGamma()->setRange(0, 4);
-		this->varContrast()->setRange(0.9, 1.1);
-		this->varHUEOffset()->setRange(-255,255);
-		this->varTintIntensity()->setRange(0,1);
-
-		auto IndexChange = std::make_shared<FCallBackFunc>(std::bind(&ColorCorrect::onFieldChanged, this));
-		this->inTexture()->attach(IndexChange);
-
-		this->varSaturation()->attach(IndexChange);
-		this->varContrast()->attach(IndexChange);
-		this->varGamma()->attach(IndexChange);
-		this->varHUEOffset()->attach(IndexChange);
-		this->varTintColor()->attach(IndexChange);
-		this->varTintIntensity()->attach(IndexChange);
-		this->setName("ColorCorrect");
-	}
-
-	void ColorCorrect::onFieldChanged()
-	{
-		auto inTexture = this->inTexture()->getData();
-		if (this->outTexture()->isEmpty())
-			this->outTexture()->allocate();
-
-		auto outTexture = this->outTexture()->getDataPtr();
-		auto saturation = this->varSaturation()->getValue();
-		auto hueOffset = this->varHUEOffset()->getValue();
-		auto contrast = this->varContrast()->getValue();
-		auto gamma = this->varGamma()->getValue();
-		auto tintColor = this->varTintColor()->getValue();
-		Vec3f vec3TintColor = Vec3f(tintColor.r,tintColor.g,tintColor.b) * 255;
-		auto tintIntensity = this->varTintIntensity()->getValue();
-
-		outTexture->resize(inTexture.nx(),inTexture.ny());
-		CArray2D<Vec4f> cTex;
-		cTex.assign(inTexture);
-
-		cuExecute2D(make_uint2(unsigned int(inTexture.nx()), unsigned int(inTexture.ny())),
-			colorCorrectionKernel,
-			inTexture,
-			*outTexture,
-			saturation,
-			hueOffset,
-			contrast,
-			gamma,
-			vec3TintColor,
-			tintIntensity
-		);
-	}
-
-
-	IMPLEMENT_TCLASS(AssignTextureMeshMaterial, TDataType)
-		template<typename TDataType>
-	AssignTextureMeshMaterial<TDataType>::AssignTextureMeshMaterial()
-	{
-		auto FieldChange = std::make_shared<FCallBackFunc>(std::bind(&AssignTextureMeshMaterial<TDataType>::updateAssign, this));
-		this->varShapeIndex()->attach(FieldChange);
-		this->inTextureMesh()->attach(FieldChange);
-		this->outTextureMesh()->setDataPtr(std::make_shared<TextureMesh>());
-	}
-
-	template<typename TDataType>
-	void AssignTextureMeshMaterial<TDataType>::updateAssign()
-	{
-	
-		auto inTexMesh = this->inTextureMesh()->constDataPtr();
-		auto inShapes = inTexMesh->shapes();
-		auto outTexMesh = this->outTextureMesh()->getDataPtr();
-
-		uint index = this->varShapeIndex()->getValue() < inShapes.size() ? this->varShapeIndex()->getValue() : inShapes.size() - 1;
-		
-
-		auto newMat = MaterialManager::getMaterial(this->varMaterialName()->getValue());
-		if(newMat != varMat)
-			removeMaterialReference();
-
-		varMat = newMat;
-
-		auto inMeshData = inTexMesh->meshDataPtr();
-		outTexMesh->meshDataPtr() = inMeshData;
-		outTexMesh->shapes() = inTexMesh->shapes();
-
-		auto originalShape = inShapes[index];
-		auto replaceShape = std::make_shared<Shape>(*originalShape);
-		if (varMat) 
-		{
-			replaceShape->material = varMat;
-		
-			auto selfPtr = getSelfPtr();
-			if (selfPtr)
-				varMat->addAssigner(selfPtr);
-			
-		}
-		
-
-		outTexMesh->shapes()[index] = replaceShape;
-
-		//update visualModule
-		auto sinks = this->outTextureMesh()->getSinks();
-		for (auto it : sinks)
-		{
-			GLVisualModule* connectModule = dynamic_cast<GLVisualModule*>(it->parent());
-			if (connectModule)
-			{
-				connectModule->varForceUpdate()->setValue(true);
-				connectModule->update();
-				connectModule->varForceUpdate()->setValue(false);
-			}
-		}
-
-	}
-
-	template<typename TDataType>
-	void AssignTextureMeshMaterial<TDataType>::compute()
-	{
-		updateAssign(); 
-		
-	}
-
-	DEFINE_CLASS(AssignTextureMeshMaterial);
-
-	//IMPLEMENT_TCLASS(TempUpdate, TDataType)
-	//template<typename TDataType>
-	//void TempUpdate<TDataType>::onFieldChanged()
-	//{
-	//	if (!matPipeline)
-	//		return;
-
-	//	matPipeline->updateMaterialPipline();
-	//}
-	//DEFINE_CLASS(TempUpdate);
-
-
 }
 
 

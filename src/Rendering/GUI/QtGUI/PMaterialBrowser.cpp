@@ -15,7 +15,7 @@
 #include <QKeySequence>
 #include "NodeEditor/QtMaterialFlowScene.h"
 #include "NodeEditor/QtMaterialFlowWidget.h"
-
+#include <QCheckBox>
 #include "PDockWidget.h"
 #include "PMaterialEditorToolBar.h"
 #include "PSimulationThread.h"
@@ -80,6 +80,11 @@ namespace dyno
 
     }
 
+    void PMaterialEditor::setAutoUpdatePipline(int status)
+    {
+            mMaterialPipline->autoUpdate = status;
+    }
+
     PMaterialEditor::PMaterialEditor(std::shared_ptr<CustomMaterial> customMat)
     {
 
@@ -92,14 +97,15 @@ namespace dyno
         toolBarDocker->setFixedHeight(96);
         toolBarDocker->setTitleBarWidget(new QWidget());
         delete titleBar;
-
+        
+        matToolBar->setRealtime(customMat->materialPipeline()->autoUpdate);
         toolBarDocker->setWidget(matToolBar);
-
-        //toolBarDocker->setWidget(mToolBar);
 
         auto matFlowView = new Qt::QtMaterialFlowWidget(customMat, nullptr);
 
         mModuleFlowScene = matFlowView->getModuleFlowScene();
+        mMaterialPipline = customMat->materialPipeline();
+
         this->setCentralWidget(matFlowView);
 
         //Set up property dock widget
@@ -116,9 +122,14 @@ namespace dyno
         connect(matFlowView->mMaterialFlow, &Qt::QtMaterialFlowScene::nodeSelected, propertyWidget, &PPropertyWidget::showProperty);
         connect(matFlowView->mMaterialFlow, &Qt::QtMaterialFlowScene::nodeDeselected, propertyWidget, &PPropertyWidget::clearProperty);
 
+        connect(propertyWidget, &PPropertyWidget::moduleUpdated, this, &PMaterialEditor::updateMaterialPipline);
+
+
         connect(matToolBar->updateAction(), &QAction::triggered, matFlowView->mMaterialFlow, &Qt::QtMaterialFlowScene::reconstructActivePipeline);
         connect(matToolBar->reorderAction(), &QAction::triggered, matFlowView->mMaterialFlow, &Qt::QtMaterialFlowScene::reorderAllModules);
+        connect(matToolBar->realTimeUpdateAction(), &QAction::toggled, this, &PMaterialEditor::setAutoUpdatePipline);
 
+        //connect(autoUpdateCheckBox, SIGNAL(stateChanged(int)), this, SLOT(setAutoUpdatePipline(int)))
     }
 
 	PMaterialBrowser::PMaterialBrowser(QWidget* parent /*= nullptr*/)
@@ -289,6 +300,15 @@ namespace dyno
         }
 
         QWidget::keyPressEvent(event);
+    }
+
+    void PMaterialEditor::updateMaterialPipline(std::shared_ptr<Module> node)
+    {
+        if (mMaterialPipline)
+        {
+            if(mMaterialPipline->autoUpdate)
+                mMaterialPipline->update();
+        }
     }
 
 }

@@ -62,7 +62,7 @@ namespace dyno
 		{
 			this->varAlpha()->setRange(0, 1);
 			this->varBumpScale()->setRange(0, 1);
-			this->varEmissiveIntensity()->setRange(0, 1);
+			this->varEmissiveIntensity()->setRange(0, 10);
 			this->varMetallic()->setRange(0, 1);
 			this->varRoughness()->setRange(0, 1);
 			initial();
@@ -226,6 +226,9 @@ namespace dyno
 		virtual void popModule(std::shared_ptr<Module> m)override;
 
 		void updateMaterialPipline();
+
+	public:
+		bool autoUpdate = false;
 
 	protected:
 		void reconstructPipeline()override;

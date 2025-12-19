@@ -46,6 +46,22 @@ void dyno::RenderWindow::setMainLightDirection(glm::vec3 dir)
 	mRenderParams.light.mainLightDirection = -dir;
 }
 
+void dyno::RenderWindow::setShadowMultiplier(float shadowMultiplier)
+{
+	mRenderParams.light.ShadowMultiplier = shadowMultiplier;
+}
+void dyno::RenderWindow::setShadowBrightness(float shadowBrightness)
+{
+	mRenderParams.light.ShadowBrightness = shadowBrightness;
+}
+void dyno::RenderWindow::setSamplePower(float samplePower)
+{
+	mRenderParams.light.SamplePower = samplePower;
+}
+void dyno::RenderWindow::setShadowContrast(float shadowContrast)
+{
+	mRenderParams.light.ShadowContrast = shadowContrast;
+}
 
 const dyno::Selection& dyno::RenderWindow::select(int x, int y, int w, int h)
 {

@@ -64,7 +64,10 @@ namespace dyno
 
 		//Set light direction
 		void setMainLightDirection(glm::vec3 dir);
-
+		void setShadowMultiplier(float shadowMultiplier);
+		void setShadowBrightness(float shadowBrightness);
+		void setSamplePower(float samplePower);
+		void setShadowContrast(float shadowContrast);
 
 		virtual void setDefaultAnimationOption(bool op) = 0;
 

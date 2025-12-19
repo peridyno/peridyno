@@ -59,8 +59,12 @@ namespace dyno
     signals:
         void changed(Node* node);
 
+    public slots:
+        void setAutoUpdatePipline(int state);
+        void updateMaterialPipline(std::shared_ptr<Module> node);
     private:
-        Qt::QtMaterialFlowScene* mModuleFlowScene;
+        Qt::QtMaterialFlowScene* mModuleFlowScene = NULL;
+        std::shared_ptr<MaterialPipeline> mMaterialPipline = NULL;
 
     };
 
