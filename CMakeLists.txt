@@ -21,8 +21,9 @@ else()
 endif()
 
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
-	project(peridyno LANGUAGES ${SUPPORTED_LANGUAGES})  
+	project(peridyno LANGUAGES ${SUPPORTED_LANGUAGES}) 
 	include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+	
     #find_package(CUDA REQUIRED)
     # if(CUDA_FOUND)
     #     include_directories(${CUDA_INCLUDE_DIRS})
@@ -88,6 +89,8 @@ else()
 	endif()
 endif()
 
+#set a macro to indicate GPU backend
+add_compile_definitions(${GPU_BACKEND})
 
 #set output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE})
