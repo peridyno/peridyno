@@ -20,6 +20,8 @@
 
 namespace dyno
 {
+#ifndef NO_BACKEND
+
 	class ImChart : public ImWidget
 	{
 		DECLARE_CLASS(ImChart)
@@ -82,7 +84,6 @@ namespace dyno
 
 		CArray<Real> c_Value;
 		std::vector<Real>* valueVec;
-		DArray<Real> d_Value;
 
 		std::shared_ptr<Node> mNode;
 
@@ -94,4 +95,6 @@ namespace dyno
 		bool isOut = false;
 
 	};
+
+#endif
 };

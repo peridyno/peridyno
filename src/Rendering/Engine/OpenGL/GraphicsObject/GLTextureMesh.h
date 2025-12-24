@@ -21,7 +21,9 @@
 
 #include "GraphicsObject/GPUTexture.h"
 
-#include "Topology/TextureMesh.h"
+#ifdef CUDA_BACKEND
+	#include "Topology/TextureMesh.h"
+#endif // CUDA_BACKEND
 
 #include <glm/glm.hpp>
 
@@ -87,7 +89,9 @@ namespace dyno
 		void create() final;
 		void release() final;
 
+#ifdef CUDA_BACKEND
 		void load(const std::shared_ptr<TextureMesh> mesh);
+#endif
 
 		void updateGL();
 

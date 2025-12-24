@@ -51,9 +51,11 @@ namespace dyno
 		return width > 0 && height > 0;
 	}
 
-
+#ifdef NO_BACKEND
+	//TODO:
+#else
 	template<typename T>
-	void XTexture2D<T>::load(dyno::DArray2D<T> data)
+	void XTexture2D<T>::load(const dyno::DArray2D<T>& data)
 	{
 #ifdef CUDA_BACKEND
 		buffer.assign(data);
@@ -197,6 +199,7 @@ namespace dyno
 
 #endif
 	}
+#endif
 
 	template<typename T>
 	void XTexture2D<T>::updateGL()

@@ -132,6 +132,11 @@ endif()
 
 #option(PERIDYNO_LIBRARY_FRAMEWORK "Enable binding the framework library" ON)
 
+# Add mocro definitions for GUIs
+set(QT_GUI_SUPPORTED "QT_GUI_UNKNOWN")
+set(WT_GUI_SUPPORTED "WT_GUI_UNKNOWN")
+
+
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	#option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
 	#option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
@@ -167,10 +172,6 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	if(PERIDYNO_PLUGIN_ALL)
 		add_subdirectory(plugins)
 	endif()
-
-	# Add mocro definitions for GUIs
-	set(QT_GUI_SUPPORTED "QT_GUI_UNKNOWN")
-	set(WT_GUI_SUPPORTED "WT_GUI_UNKNOWN")
 
 	if(PERIDYNO_QT_GUI)
 	    add_subdirectory(external/nodeeditor)
