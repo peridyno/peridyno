@@ -44,12 +44,20 @@ namespace dyno {
 		// update OpenGL texture within GL context
 		void updateGL();
 
+#ifdef NO_BACKEND
+		void load(const dyno::CArray2D<T>& data) {};
+#else
 		// load data to into an intermediate buffer
-		void load(dyno::DArray2D<T> data);
+		void load(const dyno::DArray2D<T>& data);
+#endif
 
 	private:
 		int width  = -1;
 		int height = -1;
+
+#ifdef NO_BACKEND
+		dyno::CArray2D<T>		buffer;
+#endif
 
 #ifdef CUDA_BACKEND
 		dyno::DArray2D<T>		buffer;

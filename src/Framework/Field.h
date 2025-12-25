@@ -311,7 +311,10 @@ namespace dyno {
 		void clear();
 
 		void assign(const CArray2D<T>& vals);
+
+#ifndef NO_BACKEND
 		void assign(const DArray2D<T>& vals);
+#endif
 
 		bool isEmpty() override {
 			return this->constDataPtr() == nullptr;
@@ -327,6 +330,7 @@ namespace dyno {
 		}
 	}
 
+#ifndef NO_BACKEND
 	template<typename T, DeviceType deviceType>
 	void FArray2D<T, deviceType>::assign(const DArray2D<T>& vals)
 	{
@@ -338,6 +342,7 @@ namespace dyno {
 
 		data->assign(vals);
 	}
+#endif
 
 	template<typename T, DeviceType deviceType>
 	void FArray2D<T, deviceType>::assign(const CArray2D<T>& vals)
@@ -414,7 +419,10 @@ namespace dyno {
 		void clear();
 
 		void assign(const CArray3D<T>& vals);
+
+#ifndef NO_BACKEND
 		void assign(const DArray3D<T>& vals);
+#endif
 
 		bool isEmpty() override {
 			return this->constDataPtr() == nullptr;
@@ -430,6 +438,7 @@ namespace dyno {
 		}
 	}
 
+#ifndef NO_BACKEND
 	template<typename T, DeviceType deviceType>
 	void FArray3D<T, deviceType>::assign(const DArray3D<T>& vals)
 	{
@@ -440,6 +449,7 @@ namespace dyno {
 
 		data->assign(vals);
 	}
+#endif
 
 	template<typename T, DeviceType deviceType>
 	void FArray3D<T, deviceType>::assign(const CArray3D<T>& vals)

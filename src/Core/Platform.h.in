@@ -25,8 +25,6 @@
 #define PERIDYNO_API PERIDYNO_IMPORT
 #endif
 
-#define ${GPU_BACKEND}
-
 #if(defined(CUDA_BACKEND))
 #include <cuda_runtime.h>
 #	define DYN_FUNC __device__ __host__ 

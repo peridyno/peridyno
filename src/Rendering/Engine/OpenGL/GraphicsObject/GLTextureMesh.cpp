@@ -117,6 +117,7 @@ namespace dyno
 		mShapes.clear();
 	}
 
+#ifdef CUDA_BACKEND
 	void GLTextureMesh::load(const std::shared_ptr<TextureMesh> mesh)
 	{
 		if (mesh == nullptr)
@@ -185,6 +186,7 @@ namespace dyno
 			}		
 		}
 	}
+#endif
 
 	void GLTextureMesh::updateGL()
 	{

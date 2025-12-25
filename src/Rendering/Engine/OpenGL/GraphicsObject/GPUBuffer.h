@@ -46,9 +46,13 @@ namespace dyno
 		int  count() const;
 
 		// load data to into an intermediate buffer
-		template<typename T1>
-		void load(dyno::DArray<T1> data)
+		template<typename T1, DeviceType deviceType>
+		void load(dyno::Array<T1, deviceType> data)
 		{
+#ifdef NO_BACKEND
+			//TODO: 
+#endif
+
 #ifdef VK_BACKEND
 			this->loadVkBuffer(data.buffer(), data.bufferSize());
 #endif // VK_BACKEND
@@ -82,6 +86,10 @@ namespace dyno
 
 #endif	//VK_BACKEND
 
+
+#ifdef NO_BACKEND
+		dyno::CArray<T>	buffer;
+#endif
 
 #ifdef CUDA_BACKEND
 		dyno::DArray<T>	buffer;

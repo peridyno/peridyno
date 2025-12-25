@@ -21,8 +21,9 @@ else()
 endif()
 
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
-	project(peridyno LANGUAGES ${SUPPORTED_LANGUAGES})  
+	project(peridyno LANGUAGES ${SUPPORTED_LANGUAGES}) 
 	include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+	
     #find_package(CUDA REQUIRED)
     # if(CUDA_FOUND)
     #     include_directories(${CUDA_INCLUDE_DIRS})
@@ -88,6 +89,8 @@ else()
 	endif()
 endif()
 
+#set a macro to indicate GPU backend
+add_compile_definitions(${GPU_BACKEND})
 
 #set output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE})
@@ -132,6 +135,11 @@ endif()
 
 #option(PERIDYNO_LIBRARY_FRAMEWORK "Enable binding the framework library" ON)
 
+# Add mocro definitions for GUIs
+set(QT_GUI_SUPPORTED "QT_GUI_UNKNOWN")
+set(WT_GUI_SUPPORTED "WT_GUI_UNKNOWN")
+
+
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	#option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
 	#option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
@@ -167,10 +175,6 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	if(PERIDYNO_PLUGIN_ALL)
 		add_subdirectory(plugins)
 	endif()
-
-	# Add mocro definitions for GUIs
-	set(QT_GUI_SUPPORTED "QT_GUI_UNKNOWN")
-	set(WT_GUI_SUPPORTED "WT_GUI_UNKNOWN")
 
 	if(PERIDYNO_QT_GUI)
 	    add_subdirectory(external/nodeeditor)
