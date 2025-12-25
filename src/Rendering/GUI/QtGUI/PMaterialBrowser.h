@@ -77,7 +77,7 @@ namespace dyno
 	signals:
 
 	Q_SIGNALS:
-		void materialUpdated();
+		void materialListChanged();
 
 	public slots:
 		void createItem();
@@ -85,7 +85,7 @@ namespace dyno
         void copySelectedItems();
 
     public:
-        void onMaterialChanged(std::shared_ptr<MaterialManagedModule> mat) override;
+        void onMaterialListChanged(std::shared_ptr<MaterialManagedModule> mat) override;
 
     protected:
         void keyPressEvent(QKeyEvent* event)override;

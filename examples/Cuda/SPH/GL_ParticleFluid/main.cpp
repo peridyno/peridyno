@@ -128,7 +128,7 @@ int main()
 	}
 
 	app.renderWindow()->setShadowMultiplier(1.0f);
-	app.renderWindow()->setShadowBrightness(0.03f);
+	app.renderWindow()->setShadowBrightness(0.02f);
 	app.renderWindow()->setSamplePower(3.27f);
 	app.renderWindow()->setShadowContrast(3.90f);
 	app.renderWindow()->getRenderEngine()->shadowQuality = 2048;

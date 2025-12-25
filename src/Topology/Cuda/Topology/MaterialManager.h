@@ -216,9 +216,9 @@ namespace dyno
 
 		static std::map<std::string, int>& nameCount();
 
-		static void addObserver(MaterialManagerObserver* observer);
+		static void addMaterialListObserver(MaterialManagerObserver* observer);
 
-		static void removeObserver(MaterialManagerObserver* observer);
+		static void removeMaterialListObserver(MaterialManagerObserver* observer);
 
 		static void callMaterialManagerObservers(std::shared_ptr<Material> mat = NULL);
 
@@ -229,7 +229,7 @@ namespace dyno
 		static void traverseForward(MaterialAction& matAction);
 
 	private:
-		static std::vector<MaterialManagerObserver*> mObservers;
+		static std::vector<MaterialManagerObserver*> mMaterialListObservers;
 		static std::string addMaterial(std::shared_ptr<Material> material);
 	};
 
@@ -259,7 +259,7 @@ namespace dyno
 	class MaterialManagerObserver {
 	public:
 		virtual ~MaterialManagerObserver() = default;
-		virtual void onMaterialChanged(std::shared_ptr<MaterialManagedModule> mat) = 0;
+		virtual void onMaterialListChanged(std::shared_ptr<MaterialManagedModule> mat) = 0;
 	};
 
 	class MaterialUpdateObserver {

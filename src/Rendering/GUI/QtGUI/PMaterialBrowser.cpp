@@ -149,8 +149,8 @@ namespace dyno
 
         createItem();
 
-        MaterialManager::addObserver(this);
-        connect(this, SIGNAL(materialUpdated()), this, SLOT(createItem()));
+        MaterialManager::addMaterialListObserver(this);
+        connect(this, SIGNAL(materialListChanged()), this, SLOT(createItem()));
 
         QVBoxLayout* layout2 = new QVBoxLayout();
         layout->addLayout(layout2, 0);
@@ -193,7 +193,7 @@ namespace dyno
                 editor->show();
 
             }
-            //QObject::connect(editor, &MaterialEditor::materialUpdated, [&]() {
+            //QObject::connect(editor, &MaterialEditor::materialListChanged, [&]() {
 
             //    });
             }
@@ -286,9 +286,9 @@ namespace dyno
         parentWidget->updateGeometry();     
     }
 
-    void PMaterialBrowser::onMaterialChanged(std::shared_ptr<MaterialManagedModule> mat)
+    void PMaterialBrowser::onMaterialListChanged(std::shared_ptr<MaterialManagedModule> mat)
     {
-        emit materialUpdated();
+        emit materialListChanged();
     }
 
     void PMaterialBrowser::keyPressEvent(QKeyEvent* event)

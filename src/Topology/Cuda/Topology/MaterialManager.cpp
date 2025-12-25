@@ -4,7 +4,7 @@
 
 namespace dyno
 {
-	std::vector<MaterialManagerObserver*> dyno::MaterialManager::mObservers;
+	std::vector<MaterialManagerObserver*> dyno::MaterialManager::mMaterialListObservers;
 
 
 	std::shared_ptr<MaterialManagedModule> Material::clone() const
@@ -263,20 +263,20 @@ namespace dyno
 		return s_nameCount;
 	}
 
-	void MaterialManager::addObserver(MaterialManagerObserver* observer)
+	void MaterialManager::addMaterialListObserver(MaterialManagerObserver* observer)
 	{
-		mObservers.push_back(observer);
+		mMaterialListObservers.push_back(observer);
 	}
 
 
-	void MaterialManager::removeObserver(MaterialManagerObserver* observer)
+	void MaterialManager::removeMaterialListObserver(MaterialManagerObserver* observer)
 	{
-		mObservers.erase(std::remove(mObservers.begin(), mObservers.end(), observer), mObservers.end());
+		mMaterialListObservers.erase(std::remove(mMaterialListObservers.begin(), mMaterialListObservers.end(), observer), mMaterialListObservers.end());
 	}
 
 	void MaterialManager::callMaterialManagerObservers(std::shared_ptr<Material> mat) {
-		for (auto obs : mObservers) {
-			obs->onMaterialChanged(mat);
+		for (auto obs : mMaterialListObservers) {
+			obs->onMaterialListChanged(mat);
 		}
 	}
 
