@@ -1,6 +1,7 @@
 #include "MaterialManager.h"
 #include "DirectedAcyclicGraph.h"
 
+
 namespace dyno
 {
 	std::vector<MaterialManagerObserver*> dyno::MaterialManager::mObservers;
@@ -107,7 +108,19 @@ namespace dyno
 		this->inTexORM()->tagOptional(true);
 		this->inTexEmissiveColor()->tagOptional(true);
 		this->inTexAlpha()->tagOptional(true);
-		this->inEmissiveItensity()->tagOptional(true);
+		this->inEmissiveIntensity()->tagOptional(true);
+	}
+
+	void CustomMaterial::updateVar2Out() 
+	{
+		auto varBaseColor = this->varBaseColor()->getValue();
+		auto baseColor = this->inBaseColor()->isEmpty() ? Vec3f(varBaseColor.r, varBaseColor.g, varBaseColor.b) : this->inBaseColor()->getValue();
+		this->outBaseColor()->setValue(baseColor);
+		this->outMetallic()->setValue(this->inMetallic()->isEmpty() ? this->varMetallic()->getValue():this->inMetallic()->getValue());
+		this->outRoughness()->setValue(this->inRoughness()->isEmpty() ? this->varRoughness()->getValue() : this->inRoughness()->getValue());
+		this->outAlpha()->setValue(this->inAlpha()->isEmpty() ? this->varAlpha()->getValue() : this->inAlpha()->getValue());
+		this->outBumpScale()->setValue(this->inBumpScale()->isEmpty() ? this->varBumpScale()->getValue() : this->inBumpScale()->getValue());
+		this->outEmissiveItensity()->setValue(this->inEmissiveIntensity()->isEmpty() ? this->varEmissiveIntensity()->getValue() : this->inEmissiveIntensity()->getValue());
 	}
 
 	void CustomMaterial::updateImpl()
@@ -203,7 +216,7 @@ namespace dyno
 			sourceMaterial->outMetallic()->connect(this->inMetallic());
 			sourceMaterial->outRoughness()->connect(this->inRoughness());
 			sourceMaterial->outBumpScale()->connect(this->inBumpScale());
-			sourceMaterial->outEmissiveItensity()->connect(this->inEmissiveItensity());
+			sourceMaterial->outEmissiveItensity()->connect(this->inEmissiveIntensity());
 
 			sourceMaterial->outTexAlpha()->connect(this->inTexAlpha());
 			sourceMaterial->outTexBump()->connect(this->inTexBump());
@@ -560,6 +573,18 @@ namespace dyno
 
 	}
 
+	void MaterialManager::traverseForward(MaterialAction& matAction)
+	{
+		for (auto it : materials())
+		{
+			auto customMaterialPtr = std::dynamic_pointer_cast<CustomMaterial>(it.second);
+			if (customMaterialPtr)
+			{
+				matAction.process(customMaterialPtr);
+			}
+		}
+	}
+
 	std::string MaterialManager::pushMaterialManagedModule(std::shared_ptr<MaterialManagedModule> MatModule, bool checkName)
 	{
 		if (containsModule(MatModule))
@@ -575,6 +600,37 @@ namespace dyno
 		printAllManagedModules();
 		callMaterialManagerObservers();
 		return baseName;
+	}
+
+	void MaterialManager::onKeyboardEvent(PKeyboardEvent event)
+	{
+
+		class MatKeyboardEventAct : public MaterialAction
+		{
+		public:
+			MatKeyboardEventAct(PKeyboardEvent event) { mKeyboardEvent = event; }
+			~MatKeyboardEventAct() override {}
+
+
+			void process(std::shared_ptr<CustomMaterial> customMaterial) override
+			{
+
+				for (auto iter : customMaterial->materialPipeline()->activeModules())
+				{
+					auto m = dynamic_cast<KeyboardInputModule*>(iter.get());
+					if (m)
+					{
+						m->enqueueEvent(mKeyboardEvent);
+						m->update();
+					}
+				}
+			}
+
+			PKeyboardEvent mKeyboardEvent;
+		};
+
+		MatKeyboardEventAct eventAct(event);
+		MaterialManager::traverseForward(eventAct);
 	}
 
 	bool MaterialManager::containsMaterial(const std::shared_ptr<Material>& mat)

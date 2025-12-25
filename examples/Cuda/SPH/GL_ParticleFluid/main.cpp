@@ -116,6 +116,23 @@ int main()
 	app.setSceneGraph(createScene());
 	// window.createWindow(2048, 1152);
 	app.initialize(1024, 768);
+
+	// setup envmap
+	auto renderer = std::dynamic_pointer_cast<dyno::GLRenderEngine>(app.renderWindow()->getRenderEngine());
+	if (renderer) {
+		renderer->setEnvStyle(EEnvStyle::Studio);
+		renderer->setUseEnvmapBackground(false);
+		renderer->setEnvmapScale(2.5f);
+		renderer->showGround = true;
+
+	}
+
+	app.renderWindow()->setShadowMultiplier(1.0f);
+	app.renderWindow()->setShadowBrightness(0.02f);
+	app.renderWindow()->setSamplePower(3.27f);
+	app.renderWindow()->setShadowContrast(3.90f);
+	app.renderWindow()->getRenderEngine()->shadowQuality = 2048;
+	app.renderWindow()->getRenderEngine()->bUseSceneBoundForShadow = true;
 	app.mainLoop();
 
 	return 0;

@@ -23,6 +23,9 @@
 #include <regex>
 #include "Module/Pipeline.h"
 #include "Field/Color.h"
+#include "Module/KeyboardInputModule.h"
+#include "Module/MouseInputModule.h"
+#include "Node.h"
 #include "Module/ComputeModule.h"
 
 
@@ -33,6 +36,20 @@ namespace dyno
 	class MaterialManager;
 	class MaterialPipeline;
 	class MaterialManagerObserver;
+	class CustomMaterial;
+
+	class MaterialAction
+	{
+	public:
+		MaterialAction() {};
+		virtual ~MaterialAction() {};
+
+		virtual void start(std::shared_ptr<CustomMaterial> customMaterial) {};
+		virtual void process(std::shared_ptr<CustomMaterial> customMaterial){};
+		virtual void end(std::shared_ptr<CustomMaterial> customMaterial) {};
+	private:
+
+	};
 
 
 	class MaterialManagedModule : public Module
@@ -62,7 +79,7 @@ namespace dyno
 		{
 			this->varAlpha()->setRange(0, 1);
 			this->varBumpScale()->setRange(0, 1);
-			this->varEmissiveIntensity()->setRange(0, 10);
+			this->varEmissiveIntensity()->setRange(0, 1);
 			this->varMetallic()->setRange(0, 1);
 			this->varRoughness()->setRange(0, 1);
 			initial();
@@ -71,7 +88,7 @@ namespace dyno
 
 		virtual void initial();
 
-		void updateVar2Out();
+		virtual void updateVar2Out();
 
 		virtual void updateImpl()override;
 
@@ -131,7 +148,7 @@ namespace dyno
 		DEF_VAR_IN(float, Roughness, "");
 		DEF_VAR_IN(float, Alpha, "");
 		DEF_VAR_IN(float, BumpScale, "");
-		DEF_VAR_IN(float, EmissiveItensity, "");
+		DEF_VAR_IN(float, EmissiveIntensity, "");
 
 		DEF_ARRAY2D_IN(Vec4f, TexColor, DeviceType::GPU, "");
 		DEF_ARRAY2D_IN(Vec4f, TexBump, DeviceType::GPU, "");
@@ -140,7 +157,7 @@ namespace dyno
 		DEF_ARRAY2D_IN(Vec4f, TexEmissiveColor, DeviceType::GPU, "");
 
 		void initial()override;
-
+		virtual void updateVar2Out()override;
 	public:
 
 		virtual void updateImpl()override;
@@ -207,6 +224,10 @@ namespace dyno
 
 		static std::string pushMaterialManagedModule(std::shared_ptr<MaterialManagedModule> managedModule,bool checkName = true);
 
+		static void onKeyboardEvent(PKeyboardEvent event);
+
+		static void traverseForward(MaterialAction& matAction);
+
 	private:
 		static std::vector<MaterialManagerObserver*> mObservers;
 		static std::string addMaterial(std::shared_ptr<Material> material);
@@ -239,6 +260,12 @@ namespace dyno
 	public:
 		virtual ~MaterialManagerObserver() = default;
 		virtual void onMaterialChanged(std::shared_ptr<MaterialManagedModule> mat) = 0;
+	};
+
+	class MaterialUpdateObserver {
+	public:
+		virtual ~MaterialUpdateObserver() = default;
+		virtual void onMaterialUpdate(std::shared_ptr<Material> mat) = 0;
 	};
 
 };

@@ -68,6 +68,18 @@ int main()
 		texCorrect->outTexture()->connect(customMaterial->inTexColor());
 		matPipeline->pushModule(texCorrect);
 
+		auto breakTex = std::make_shared<BreakTexture>();
+		srcMaterial->outTexColor()->connect(breakTex->inTexture());
+		auto makeTex = std::make_shared<MakeTexture>();
+		breakTex->outR()->connect(makeTex->inR());
+		breakTex->outG()->connect(makeTex->inG());
+		breakTex->outB()->connect(makeTex->inB());
+		breakTex->outA()->connect(makeTex->inA());
+		makeTex->outTexture()->connect(customMaterial->inBaseColor());
+		matPipeline->pushModule(breakTex);
+		matPipeline->pushModule(makeTex);
+
+
 		auto image = std::make_shared<ImageLoaderModule>();
 		image->varImagePath()->setValue(std::string(getAssetPath() + "Jeep/JeepGltf/jeep_body_camouflage.png"));
 		matPipeline->pushModule(image);
@@ -82,6 +94,18 @@ int main()
 			assignMaterial->outTextureMesh()->connect(textureRender->inTextureMesh());
 		gltf->stateTextureMesh()->connect(assignMaterial->inTextureMesh());
 		gltf->graphicsPipeline()->pushModule(assignMaterial);
+
+
+		auto emissiveInput = std::make_shared<MatInput>();
+		matPipeline->pushModule(emissiveInput);
+		srcMaterial->outEmissiveItensity()->disconnect(customMaterial->inEmissiveIntensity());
+		emissiveInput->outValue()->connect(customMaterial->inEmissiveIntensity());
+
+		//auto emissiveCorrect = std::make_shared<ColorCorrect>();
+		//srcMaterial->outTexEmissive()->connect(emissiveCorrect->inTexture());
+		//emissiveInput->outValue()->connect(emissiveCorrect->inBrightness());
+		//emissiveCorrect->outTexture()->connect(customMaterial->inTexEmissiveColor());
+		//matPipeline->pushModule(emissiveCorrect);
 	}
 
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
@@ -91,6 +115,8 @@ int main()
 	{
 		plane->graphicsPipeline()->popModule(planeWireframe);
 	}
+
+
 
 
 	UbiApp app(GUIType::GUI_QT);
