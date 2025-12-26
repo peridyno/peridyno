@@ -27,6 +27,7 @@ namespace dyno
 
 		void rotateToPoint(float x, float y) override;
 		void translateToPoint(float x, float y) override;
+		void zoomToPoint(float x, float y) override;
 		void zoom(float amount) override;
 
 		void registerPoint(float x, float y) override;
@@ -72,7 +73,6 @@ namespace dyno
 		float mFocusDistMin = 0.1f;
 
 		float mSpeed = 2.0;
-		float mZoomSpeed = 1.0f;
 	};
 
 }

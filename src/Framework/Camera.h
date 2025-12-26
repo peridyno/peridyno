@@ -28,6 +28,7 @@ namespace dyno
 
 		virtual void rotateToPoint(float x, float y) = 0;
 		virtual void translateToPoint(float x, float y) = 0;
+		virtual void zoomToPoint(float x, float y) = 0;
 		virtual void zoom(float amount) = 0;
 
 		virtual void registerPoint(float x, float y) = 0;
@@ -53,6 +54,7 @@ namespace dyno
 		TRay3D<float> castRayInWorldSpace(float x, float y);
 
 		void setUnitScale(float unit) { mUnitScale = unit; }
+		void setZoomSpeed(float speed) { mZoomSpeed = speed; }
 
 		float unitScale() { return mUnitScale; }
 		
@@ -71,6 +73,7 @@ namespace dyno
 
 		//Distance unit
 		float mUnitScale = 1.0f;
+		float mZoomSpeed = 5.0f;
 	};
 
 }

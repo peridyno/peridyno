@@ -451,12 +451,10 @@ namespace dyno
 		if (action == GLFW_PRESS)
 		{
 			activeWindow->setCursorPos(xpos, ypos);
-			activeWindow->mCursorTempX = xpos;
 		}
 		else
 		{
 			activeWindow->setCursorPos(-1, -1);
-			activeWindow->mCursorTempX = -1;
 		}
 	}
 
@@ -498,12 +496,9 @@ namespace dyno
 			activeWindow->getButtonMode() == GLFW_MOD_ALT &&
 			!activeWindow->mImWindow.cameraLocked())////
 		{
-			if (activeWindow->mCursorTempX != -1)
-			{
-				camera->zoom(-0.005 * (x - activeWindow->mCursorTempX));
-				activeWindow->mCursorTempX = x;
-			}
+			camera->zoomToPoint(x, y);
 		}
+
 		activeWindow->imWindow()->mouseMoveEvent(mouseEvent);
 	}
 
@@ -524,16 +519,16 @@ namespace dyno
 		GlfwRenderWindow* activeWindow = (GlfwRenderWindow*)glfwGetWindowUserPointer(window);
 		auto camera = activeWindow->getCamera();
 
-		if (!activeWindow->mImWindow.cameraLocked())
-		{
-			int state = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL);
-			int altState = glfwGetKey(window, GLFW_KEY_LEFT_ALT);
-			//If the left control key is pressed, slow the zoom speed.
-			if (state == GLFW_PRESS && altState == GLFW_PRESS)
-				camera->zoom(-0.1 * OffsetY);
-			else if (altState == GLFW_PRESS)
-				camera->zoom(-OffsetY);
-		}
+// 		if (!activeWindow->mImWindow.cameraLocked())
+// 		{
+// 			int state = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL);
+// 			int altState = glfwGetKey(window, GLFW_KEY_LEFT_ALT);
+// 			//If the left control key is pressed, slow the zoom speed.
+// 			if (state == GLFW_PRESS && altState == GLFW_PRESS)
+// 				camera->zoom(-0.1 * OffsetY);
+// 			else if (altState == GLFW_PRESS)
+// 				camera->zoom(-OffsetY);
+// 		}
 	}
 
 	void GlfwRenderWindow::keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods)

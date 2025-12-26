@@ -105,7 +105,6 @@ namespace dyno
 		QButtonState mButtonState = QButtonState::QBUTTON_UP;
 		int			 mCursorX = -1;
 		int			 mCursorY = -1;
-		int          mtempCursorX = -1;
 		// Qt
 		QTimer timer;
 

@@ -301,11 +301,6 @@ namespace dyno
 			mImWindow.mousePressEvent(mouseEvent);
 		}
 
-		if (event->button() == Qt::RightButton)
-		{
-			mtempCursorX = event->x();
-		}
-
 		updateGraphicsContext();
 	}
 
@@ -382,8 +377,7 @@ namespace dyno
 			event->modifiers() == Qt::AltModifier &&
 			!mImWindow.cameraLocked())
 		{
-			camera->zoom(-0.005*float(event->x()-mtempCursorX));
-			mtempCursorX = event->x();
+			camera->zoomToPoint(event->x(), event->y());
 		}
 		else if (event->buttons().testFlag(Qt::MiddleButton) &&
 			mButtonState == QBUTTON_DOWN &&
@@ -417,8 +411,8 @@ namespace dyno
 
 	void POpenGLWidget::wheelEvent(QWheelEvent *event)
 	{
-		if(!mImWindow.cameraLocked())
-			this->getCamera()->zoom(-0.001*event->angleDelta().x());
+// 		if(!mImWindow.cameraLocked())
+// 			this->getCamera()->zoom(-0.001*event->angleDelta().x());
 
 		update();
 	}
