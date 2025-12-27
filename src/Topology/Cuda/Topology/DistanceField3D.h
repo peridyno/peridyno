@@ -142,6 +142,7 @@ namespace dyno {
 		DArray3D<Real> mDistances;
 	};
 
+	//The normal is the gradient of the SDF. When mInverted=false, the normal points from the inside of the model to the outside.
 	template<typename TDataType>
 	GPU_FUNC void DistanceField3D<TDataType>::getDistance(const Coord &p, Real &d, Coord &normal)
 	{
@@ -191,9 +192,9 @@ namespace dyno {
 		Real dx0z = lerp(dx00, dx01, gamma);
 		Real dx1z = lerp(dx10, dx11, gamma);
 
-		normal[0] = d0yz - d1yz;
-		normal[1] = dx0z - dx1z;
-		normal[2] = dxy0 - dxy1;
+		normal[0] = d1yz - d0yz;
+		normal[1] = dx1z - dx0z;
+		normal[2] = dxy1 - dxy0;
 
 		Real l = normal.norm();
 		if (l < 0.0001f) normal = Coord(0);
