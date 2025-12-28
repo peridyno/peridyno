@@ -31,13 +31,8 @@ namespace dyno
 		int fixedJoint_size = topo->fixedJoints().size();
 		int pointJoint_size = topo->pointJoints().size();
 
-		if (this->varFrictionEnabled()->getValue()) {
-			constraint_size += 3 * contact_size;
-		}
-		else {
-			constraint_size += contact_size;
-		}
 
+		constraint_size += 3 * contact_size;
 		constraint_size += 3 * ballAndSocketJoint_size;
 		constraint_size += 8 * sliderJoint_size;
 		constraint_size += 8 * hingeJoint_size;
@@ -264,6 +259,7 @@ namespace dyno
 					if (cacheContacts.size() != 0 && this->varwarmStartEnabled()->getValue()) {
 						RunWarmStart(
 							mContactsInLocalFrame,
+							mLambdaOld,
 							mLambda,
 							cacheContacts,
 							this->vardistThreshold()->getValue(),
@@ -287,8 +283,6 @@ namespace dyno
 					}
 					
 				}
-				
-
 				for (int j = 0; j < this->varIterationNumberForVelocitySolver()->getValue(); j++) {
 					JacobiIterationForSoftBlock(
 						mLambda,
@@ -369,12 +363,12 @@ namespace dyno
 				dt
 			);
 		}
-
+		
 		frameNum++;
 
 		if (frameNum == 500) {
 			std::ofstream outfile;
-			outfile.open("C:/Users/admin/Desktop/warmStartBrick.txt", std::ios::app);
+			outfile.open("C:/Users/admin/Desktop/kai.txt", std::ios::out | std::ios::trunc);
 
 			if (outfile.is_open()) {
 				for (const auto& item : errors) {
@@ -386,13 +380,15 @@ namespace dyno
 				std::cerr << "无法打开文件" << std::endl;
 			}
 		}
-
+		
 		cacheContacts.resize(mContactsInLocalFrame.size());
 		StoreCacheKernel(
 			mContactsInLocalFrame,
 			mLambda,
 			cacheContacts
 		);
+
+		mLambdaOld.assign(mLambda);
 	}
 	DEFINE_CLASS(TJSConstraintSolver);
 }

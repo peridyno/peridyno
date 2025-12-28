@@ -129,8 +129,11 @@ namespace dyno
 
 		DArray<CacheContact> cacheContacts;
 
+		DArray<Real> mLambdaOld;
+
 		std::vector<float> errors;
 
 		int frameNum = 0;
+
 	};
 }

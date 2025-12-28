@@ -5463,6 +5463,17 @@ namespace dyno
 		int idx1 = constraints[tId].bodyId1;
 		int idx2 = constraints[tId].bodyId2;
 
+		auto type = constraints[tId].type;
+		if (type == ConstraintType::CN_FRICTION
+			|| type == ConstraintType::CN_ANCHOR_EQUAL_2 || type == ConstraintType::CN_ANCHOR_EQUAL_3
+			|| type == ConstraintType::CN_ALLOW_ROT1D_2
+			|| type == ConstraintType::CN_ANCHOR_TRANS_2
+			|| type == ConstraintType::CN_BAN_ROT_2 || type == ConstraintType::CN_BAN_ROT_3
+			|| type == ConstraintType::CN_JOINT_NO_MOVE_2 || type == ConstraintType::CN_JOINT_NO_MOVE_3)
+		{
+			return;
+		}
+
 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_1)
 		{
 			Matrix E(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
@@ -5614,6 +5625,7 @@ namespace dyno
 					k31, k32, k33);
 			}
 		}
+
 		else
 		{
 			if (constraints[tId].isValid)
@@ -6067,6 +6079,7 @@ namespace dyno
 
 	void RunWarmStart(
 		DArray<TContactPair<float>>& newContacts,
+		DArray<Real>& lambdaOld,
 		DArray<Real>& lambda,
 		DArray<CacheContact>& cacheBuffer,
 		Real distThreshold,
@@ -6083,6 +6096,10 @@ namespace dyno
 				cacheBuffer,
 				distThreshold,
 				gamma);
+		}
+
+		if (lambdaOld.size() > 0) {
+			lambda.assign(lambdaOld, lambda.size() - newContacts.size() * 3, newContacts.size() * 3, cacheBuffer.size() * 3);
 		}
 	}
 

@@ -511,6 +511,7 @@ namespace dyno
 		float hertz
 	);
 
+
 	void warmStartLambda(
 		DArray<Vec3f>& B,
 		DArray<float>& lambda,
@@ -527,6 +528,7 @@ namespace dyno
 
 	void RunWarmStart(
 		DArray<TContactPair<float>>& newContacts,
+		DArray<Real>& lambdaOld,
 		DArray<Real>& lambda,
 		DArray<CacheContact>& cacheBuffer,
 		Real distThreshold,

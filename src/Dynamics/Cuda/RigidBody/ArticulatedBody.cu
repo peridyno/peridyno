@@ -14,7 +14,6 @@
 #include "Module/GLPhotorealisticInstanceRender.h"
 
 #include "GltfFunc.h"
-#include "helpers/tinyobj_helper.h"
 
 namespace dyno
 {
@@ -144,7 +143,11 @@ namespace dyno
 		}
 		else if (ext == ".obj")
 		{
-			loadTextureMeshFromObj(texMesh, name);
+			loadTextureMeshFromObj(texMesh, name, this->varDoTransform()->getValue());
+		}
+		else if (ext == ".xml") {
+			manualParseSceneConfig(name, mObjects, mAssets);
+			loadObjects(texMesh, mAssets, mObjects, this->varDoTransform()->getValue());
 		}
 	}
 
