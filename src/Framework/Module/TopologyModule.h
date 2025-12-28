@@ -55,10 +55,8 @@ namespace dyno
 
 	typedef int PointType;
 
-class TopologyModule : public OBase
+class TopologyModule : public Object
 {
-	DECLARE_CLASS(TopologyModule)
-
 public:
 	typedef PointType				Point;
 	typedef VectorND<PointType, 2>	Edge;
