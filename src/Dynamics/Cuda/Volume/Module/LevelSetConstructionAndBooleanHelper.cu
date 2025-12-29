@@ -523,11 +523,10 @@ namespace dyno
 		Coord point = origin + Coord(i * dx, j * dx, k * dx);
 
 		Real a;
-		Coord normal;
-		fieldA.getDistance(point, a, normal);
+		fieldA.getDistance(point, a);
 
 		Real b;
-		fieldB.getDistance(point, b, normal);
+		fieldB.getDistance(point, b);
 
 		Real iso = 0;
 

@@ -607,8 +607,7 @@ namespace dyno
 		Coord p = origin + Coord(i * h, j * h, k * h);
 
 		Real d;
-		Coord normal;
-		sdf.getDistance(p, d, normal);
+		sdf.getDistance(p, d);
 		distances(i, j, k) = d;
 	}
 

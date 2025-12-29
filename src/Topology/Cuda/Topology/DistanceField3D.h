@@ -59,6 +59,12 @@ namespace dyno {
 		 */
 		void scale(const Real s);
 
+		GPU_FUNC void getDistance(const Coord& p, Real& d)
+		{
+			Coord normal;
+			this->getDistanceAndNormal(p, d, normal);
+		}
+
 		/**
 		 * @brief Query the signed distance for p
 		 * 
@@ -66,7 +72,7 @@ namespace dyno {
 		 * @param d return the signed distance at position p
 		 * @param normal return the normal at position p, the normal is defined as the gradient of the SDF which points from negative regions to positive regions
 		 */
-		GPU_FUNC void getDistance(const Coord &p, Real &d, Coord &normal);
+		GPU_FUNC void getDistanceAndNormal(const Coord &p, Real &d, Coord &normal);
 
 		DYN_FUNC uint nx() { return mDistances.nx(); }
 
@@ -150,7 +156,7 @@ namespace dyno {
 
 	//The normal is the gradient of the SDF. When mInverted=false, the normal points from the inside of the model to the outside.
 	template<typename TDataType>
-	GPU_FUNC void DistanceField3D<TDataType>::getDistance(const Coord &p, Real &d, Coord &normal)
+	GPU_FUNC void DistanceField3D<TDataType>::getDistanceAndNormal(const Coord &p, Real &d, Coord &normal)
 	{
 		// get cell and lerp values
 		Coord fp = (p - mOrigin) / mH;

@@ -154,8 +154,7 @@ namespace dyno
 		if (pId >= points.size()) return;
 
 		Real a;
-		Coord normal;
-		inputSDF.getDistance(points[pId], a, normal);
+		inputSDF.getDistance(points[pId], a);
 
 		if (a < 0.0f)
 		{
