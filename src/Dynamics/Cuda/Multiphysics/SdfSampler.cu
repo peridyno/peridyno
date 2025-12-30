@@ -119,8 +119,7 @@ namespace dyno
 		Coord point = minPoint + Coord(i * dx, j * dx, k * dx);
 
 		Real a;
-		Coord normal;
-		inputSDF.getDistance(point, a, normal);
+		inputSDF.getDistance(point, a);
 
 		vertices[i + j * nx + k * nx * ny] = point;
 	}
