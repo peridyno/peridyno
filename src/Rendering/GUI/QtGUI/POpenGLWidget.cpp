@@ -429,7 +429,6 @@ namespace dyno
 		keyEvent.mods = mappingModifierBits(event->modifiers());
 
 		activeScene->onKeyboardEvent(keyEvent);
-		//MaterialManager::onKeyboardEvent(keyEvent);
 
 		switch (event->key())
 		{
@@ -453,7 +452,6 @@ namespace dyno
 		keyEvent.mods = mappingModifierBits(event->modifiers());
 
 		activeScene->onKeyboardEvent(keyEvent);
-		//MaterialManager::onKeyboardEvent(keyEvent);
 	}
 
 	void POpenGLWidget::onSelected(const Selection& s)

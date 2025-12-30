@@ -24,17 +24,6 @@ using namespace dyno;
  * @brief This example demonstrate how to load plugin libraries in a static way
  */
 
-std::shared_ptr<SceneGraph> createScene()
-{
-	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
-	scn->setUpperBound(Vec3f(1.5, 1, 1.5));
-	scn->setLowerBound(Vec3f(-0.5, 0, -0.5));
-
-	auto cube1 = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
-	//auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
-
-	return scn;
-}
 
 int main()
 {
@@ -96,17 +85,6 @@ int main()
 		gltf->stateTextureMesh()->connect(assignMaterial->inTextureMesh());
 		gltf->graphicsPipeline()->pushModule(assignMaterial);
 
-
-		auto emissiveInput = std::make_shared<MatInput>();
-		matPipeline->pushModule(emissiveInput);
-		breakMat->outEmissiveIntensity()->disconnect(customMaterial->inEmissiveIntensity());
-		emissiveInput->outValue()->connect(customMaterial->inEmissiveIntensity());
-
-		//auto emissiveCorrect = std::make_shared<ColorCorrect>();
-		//srcMaterial->outTexEmissive()->connect(emissiveCorrect->inTexture());
-		//emissiveInput->outValue()->connect(emissiveCorrect->inBrightness());
-		//emissiveCorrect->outTexture()->connect(customMaterial->inTexEmissiveColor());
-		//matPipeline->pushModule(emissiveCorrect);
 	}
 
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
