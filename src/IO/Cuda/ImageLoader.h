@@ -6,7 +6,7 @@
 #include "Node.h"
 #include "Module/ComputeModule.h"
 #include "Field/FilePath.h"
-#include "Topology/MaterialManager.h"
+#include "MaterialManager.h"
 
 namespace dyno {
 

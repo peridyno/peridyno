@@ -6,11 +6,10 @@
 #include <QHBoxLayout>
 #include <QListView>
 #include <QPixmap>
-#include "Topology/MaterialManager.h"
+#include "MaterialManager.h"
 #include <QStandardItemModel>
 #include "PSimulationThread.h"
 #include <QTreeView>
-#include "Topology/MaterialManager.h"
 #include <QShortcut>
 #include <QKeySequence>
 #include "NodeEditor/QtMaterialFlowScene.h"

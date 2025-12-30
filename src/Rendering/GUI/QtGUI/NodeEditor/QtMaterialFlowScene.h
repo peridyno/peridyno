@@ -2,7 +2,7 @@
 
 #include "nodes/QFlowScene"
 
-#include "Topology/MaterialManager.h"
+#include "MaterialManager.h"
 #include "QtNodeWidget.h"
 
 using dyno::Node;

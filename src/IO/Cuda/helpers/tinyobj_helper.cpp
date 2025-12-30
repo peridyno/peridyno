@@ -61,10 +61,13 @@ namespace dyno
 
 		uint mId = 0;
 		for (const auto& mtl : materials) {
-			tMats[mId] = MaterialManager::NewMaterial();
+			
+			auto newMat = std::make_shared<Material>();
+			tMats[mId] = newMat;
+			MaterialManager::createMaterialLoaderModule(newMat, mtl.name);
 
-			tMats[mId]->outBaseColor()->setValue(Vec3f(mtl.diffuse[0], mtl.diffuse[1], mtl.diffuse[2]));
-			tMats[mId]->varRoughness()->setValue(1.0f - mtl.shininess);
+			tMats[mId]->baseColor = Color(mtl.diffuse[0], mtl.diffuse[1], mtl.diffuse[2]);
+			tMats[mId]->roughness = 1.0f - mtl.shininess;
 
 			std::shared_ptr<ImageLoader> loader = std::make_shared<ImageLoader>();
 
@@ -74,7 +77,7 @@ namespace dyno
 
 				if (loader->loadImage(tex_path.c_str(), texture))
 				{
-					tMats[mId]->outTexColor()->getDataPtr()->assign(texture);
+					tMats[mId]->texColor.assign(texture);
 				}
 			}
 			if (!mtl.bump_texname.empty())
@@ -83,9 +86,9 @@ namespace dyno
 
 				if (loader->loadImage(tex_path.c_str(), texture))
 				{
-					tMats[mId]->outTexBump()->getDataPtr()->assign(texture);
+					tMats[mId]->texBump.assign(texture);
 					auto texOpt = mtl.bump_texopt;
-					tMats[mId]->outBumpScale()->setValue(texOpt.bump_multiplier);
+					tMats[mId]->bumpScale = texOpt.bump_multiplier;
 				}
 			}
 

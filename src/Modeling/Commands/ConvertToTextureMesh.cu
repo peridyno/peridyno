@@ -1,5 +1,5 @@
 #include "ConvertToTextureMesh.h"
-
+#include "MaterialManager.h"
 #include "GLPhotorealisticRender.h"
 #include "Primitive/Primitive3D.h"
 #include "MaterialFunc.h"
@@ -275,8 +275,9 @@ namespace dyno
 		auto& TargetTriangles = texMesh->shapes()[0]->vertexIndex;
 		auto& TargetPoints = texMesh->meshDataPtr()->vertices();
 		// Assign Material;
-		texMesh->shapes()[0]->material = MaterialManager::NewMaterial();
-
+		auto newMat = std::make_shared<Material>();
+		texMesh->shapes()[0]->material = newMat;
+		MaterialManager::createMaterialLoaderModule(newMat,"ConvertToTextureMaterial");
 		//set Material
 		dyno::CArray2D<dyno::Vec4f> texture(1, 1);
 
@@ -284,14 +285,14 @@ namespace dyno
 		if (diffusePath.size())
 		{
 			if (loadTexture(diffusePath.c_str(), texture))
-				texMesh->shapes()[0]->material->outTexColor()->getDataPtr()->assign(texture);
+				texMesh->shapes()[0]->material->texColor.assign(texture);
 		}
 
 		auto bumpPath = this->varNormalTexture()->getValue().string();
 		if (bumpPath.size())
 		{
 			if (loadTexture(bumpPath.c_str(), texture))
-				texMesh->shapes()[0]->material->outTexBump()->getDataPtr()->assign(texture);
+				texMesh->shapes()[0]->material->texBump.assign(texture);
 		}
 
 	}

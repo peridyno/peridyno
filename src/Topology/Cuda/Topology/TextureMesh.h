@@ -21,11 +21,40 @@
 #include "TriangleSet.h"
 #include <set>
 #include <regex>
-#include "MaterialManager.h"
+#include "Field/Color.h"
 
 namespace dyno
 {
-	
+
+	class Material : public Object
+	{
+	public:
+
+		Material(){};
+		~Material() override 
+		{
+			texColor.clear();
+			texBump.clear();
+			texORM.clear();
+			texAlpha.clear();
+			texEmissive.clear();
+		};
+
+		Color baseColor = Color::LightGray();
+		float metallic = 0;
+		float roughness = 0.5;
+		float alpha = 1;
+		float bumpScale = 1;
+		float emissiveIntensity = 0;
+
+		DArray2D<Vec4f> texColor;
+		DArray2D<Vec4f> texBump;
+		DArray2D<Vec4f> texORM;
+		DArray2D<Vec4f> texAlpha;
+		DArray2D<Vec4f> texEmissive;
+	};
+
+
 	class Shape : public Object
 	{
 	public:
@@ -59,12 +88,12 @@ namespace dyno
 	};
 
 
-	class MeshData : public Object
+	class GeometryData : public Object
 	{
 	public:
 
-		MeshData() {};
-		~MeshData() { clear(); };
+		GeometryData() {};
+		~GeometryData() { clear(); };
 		void clear() 
 		{
 			mVertices.clear();
@@ -73,7 +102,7 @@ namespace dyno
 			mShapeIds.clear();
 		}
 
-		void assign(std::shared_ptr<MeshData> dataPtr)
+		void assign(std::shared_ptr<GeometryData> dataPtr)
 		{
 			if (dataPtr) 
 			{
@@ -103,7 +132,7 @@ namespace dyno
 		TextureMesh();
 		~TextureMesh() override;
 
-		std::shared_ptr<MeshData>& meshDataPtr();
+		std::shared_ptr<GeometryData>& meshDataPtr();
 
 		std::vector<std::shared_ptr<Shape>>& shapes() { return mShapes; }
 
@@ -125,7 +154,7 @@ namespace dyno
 		);
 
 	private:
-		std::shared_ptr<MeshData> mMeshData = NULL;
+		std::shared_ptr<GeometryData> mMeshData = NULL;
 		std::vector<std::shared_ptr<Shape>> mShapes;
 	};
 

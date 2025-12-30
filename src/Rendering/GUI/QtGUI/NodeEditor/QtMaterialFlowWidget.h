@@ -15,7 +15,7 @@
 #include <QWidget>
 
 #include "QtMaterialFlowScene.h"
-#include "Topology/MaterialManager.h"
+#include "MaterialManager.h"
 
 QT_FORWARD_DECLARE_CLASS(QGridLayout)
 
@@ -29,7 +29,6 @@ namespace Qt
 		explicit QtMaterialFlowWidget(std::shared_ptr<dyno::CustomMaterial> src , QWidget *parent = nullptr );
 		~QtMaterialFlowWidget();
 
-		//void addActor(vtkActor *actor);
 		QtMaterialFlowScene* getModuleFlowScene() { return mMaterialFlow; }
 
 	signals:

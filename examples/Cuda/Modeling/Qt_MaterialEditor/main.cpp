@@ -40,8 +40,8 @@ int main()
 {
 
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
-	MaterialManager::createCustomMaterial();
-	
+
+
 	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
 	gltf->varFileName()->setValue(std::string(getAssetPath() + "Jeep/JeepGltf/jeep.gltf"));
 
@@ -51,16 +51,17 @@ int main()
 		gltf->graphicsPipeline()->popModule(gltfWireframe);
 	}
 
-	auto srcMaterial = MaterialManager::getMaterial("Body1");
+	auto srcMaterial = std::dynamic_pointer_cast<MaterialLoaderModule>(MaterialManager::getMaterialManagedModule("Body1"));
 	std::shared_ptr<CustomMaterial> customMaterial = NULL;
 	if (srcMaterial) 
 	{
-		customMaterial = MaterialManager::createCustomMaterial(srcMaterial);
+		std::shared_ptr<BreakMaterial> breakMat;
+		customMaterial = MaterialManager::createCustomMaterial(srcMaterial, breakMat, srcMaterial->getName());
 		customMaterial->varEmissiveIntensity()->setValue(1.0f);
 		auto matPipeline = customMaterial->materialPipeline();
 
 		auto texCorrect = std::make_shared<ColorCorrect>();
-		srcMaterial->outTexColor()->connect(texCorrect->inTexture());
+		breakMat->outTexColor()->connect(texCorrect->inTexture());
 		texCorrect->varSaturation()->setValue(1.158f);
 		texCorrect->varHUEOffset()->setValue(206.557f);
 		texCorrect->varContrast()->setValue(1.021f);
@@ -69,7 +70,7 @@ int main()
 		matPipeline->pushModule(texCorrect);
 
 		auto breakTex = std::make_shared<BreakTexture>();
-		srcMaterial->outTexColor()->connect(breakTex->inTexture());
+		breakMat->outTexColor()->connect(breakTex->inTexture());
 		auto makeTex = std::make_shared<MakeTexture>();
 		breakTex->outR()->connect(makeTex->inR());
 		breakTex->outG()->connect(makeTex->inG());
@@ -98,7 +99,7 @@ int main()
 
 		auto emissiveInput = std::make_shared<MatInput>();
 		matPipeline->pushModule(emissiveInput);
-		srcMaterial->outEmissiveItensity()->disconnect(customMaterial->inEmissiveIntensity());
+		breakMat->outEmissiveIntensity()->disconnect(customMaterial->inEmissiveIntensity());
 		emissiveInput->outValue()->connect(customMaterial->inEmissiveIntensity());
 
 		//auto emissiveCorrect = std::make_shared<ColorCorrect>();

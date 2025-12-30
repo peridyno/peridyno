@@ -22,7 +22,7 @@
 #include "Module/ComputeModule.h"
 #include <Field/Color.h>
 #include "Field/FilePath.h"
-#include "Topology/MaterialManager.h"
+#include "MaterialManager.h"
 
 namespace dyno
 {
@@ -110,7 +110,7 @@ namespace dyno
 		void updateAssign();
 		void compute() override;
 
-		std::shared_ptr<Module> getSelfPtr();
+		std::weak_ptr<Module> getSelfPtr();
 
 		std::string caption() override { return "AssignTextureMeshMaterial"; }
 
@@ -121,7 +121,7 @@ namespace dyno
 		DEF_INSTANCE_OUT(TextureMesh, TextureMesh, "");
 
 	public:
-		std::shared_ptr<Material> varMat = nullptr;
+		std::weak_ptr<CustomMaterial> varMat;
 
 	protected:
 		void removeMaterialReference();

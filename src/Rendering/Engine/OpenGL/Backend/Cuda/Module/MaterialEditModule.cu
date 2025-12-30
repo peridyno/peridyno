@@ -225,7 +225,8 @@ __global__ void grayscaleCorrectionKernel(
 		this->varGamma()->setValue(other->varGamma()->getValue());
 		this->varBrightness()->setValue(other->varBrightness()->getValue());
 
-		other->inGrayscaleTexture()->getSource()->connect(this->inGrayscaleTexture());
+		if(other->inGrayscaleTexture()->getSource())
+			other->inGrayscaleTexture()->getSource()->connect(this->inGrayscaleTexture());
 
 		if (!other->outGrayscaleTexture()->isEmpty())
 		{
@@ -293,7 +294,8 @@ __global__ void grayscaleCorrectionKernel(
 		this->varGamma()->setValue(other->varGamma()->getValue());
 		this->varTintColor()->setValue(other->varTintColor()->getValue());
 
-		other->inTexture()->getSource()->connect(this->inTexture());
+		if(other->inTexture()->getSource())
+			other->inTexture()->getSource()->connect(this->inTexture());
 
 		if (!other->outTexture()->isEmpty())
 		{
@@ -866,8 +868,12 @@ __global__ void grayscaleCorrectionKernel(
 		
 
 		auto newMat = MaterialManager::getMaterial(this->varMaterialName()->getValue());
-		if(newMat != varMat)
-			removeMaterialReference();
+		auto currentMat = varMat.lock();
+		if (currentMat) 
+		{
+			if (newMat != currentMat)
+				removeMaterialReference();
+		}
 
 		varMat = newMat;
 
@@ -877,13 +883,13 @@ __global__ void grayscaleCorrectionKernel(
 
 		auto originalShape = inShapes[index];
 		auto replaceShape = std::make_shared<Shape>(*originalShape);
-		if (varMat) 
+		if (newMat)
 		{
-			replaceShape->material = varMat;
+			replaceShape->material = newMat->outMaterial()->getDataPtr();
 		
-			auto selfPtr = getSelfPtr();
+			auto selfPtr = getSelfPtr().lock();
 			if (selfPtr)
-				varMat->addAssigner(selfPtr);
+				newMat->addAssigner(selfPtr);
 			
 		}
 		
@@ -913,7 +919,7 @@ __global__ void grayscaleCorrectionKernel(
 	}
 
 	template<typename TDataType>
-	std::shared_ptr<Module> AssignTextureMeshMaterial<TDataType>::getSelfPtr()
+	std::weak_ptr<Module> AssignTextureMeshMaterial<TDataType>::getSelfPtr()
 	{
 		{
 			std::shared_ptr<Module> foundModule = nullptr;
@@ -945,10 +951,10 @@ __global__ void grayscaleCorrectionKernel(
 	void AssignTextureMeshMaterial<TDataType>::removeMaterialReference()
 	{
 		{
-			auto selfPtr = getSelfPtr();
-
-			if (varMat && selfPtr)
-				varMat->removeAssigner(selfPtr);
+			auto selfPtr = getSelfPtr().lock();
+			auto matPtr = varMat.lock();
+			if (matPtr && selfPtr)
+				matPtr->removeAssigner(selfPtr);
 		}
 	}
 

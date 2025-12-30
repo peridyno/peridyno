@@ -12,10 +12,10 @@ namespace dyno
 		this->clear();
 	}
 
-	std::shared_ptr<MeshData>& TextureMesh::meshDataPtr() 
+	std::shared_ptr<GeometryData>& TextureMesh::meshDataPtr() 
 	{
 		if (!mMeshData)
-			mMeshData = std::make_shared<MeshData>();
+			mMeshData = std::make_shared<GeometryData>();
 		return mMeshData;
 	}
 

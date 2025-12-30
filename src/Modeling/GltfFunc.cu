@@ -487,18 +487,14 @@ namespace dyno
 			auto texCoord = material.pbrMetallicRoughness.baseColorTexture.texCoord;
 			auto emissiveFactor = material.emissiveFactor;
 
-			if (MaterialManager::getMaterial(name))
-			{
-				std::cout << "The material already exists: " << name << std::endl;
-				mats[matId] = MaterialManager::getMaterial(name);
-				continue;
-			}
-			mats[matId] = MaterialManager::NewMaterial(name);
-			mats[matId]->outBaseColor()->setValue(Vec3f(color[0], color[1], color[2]));
-			mats[matId]->outAlpha()->setValue(color[3]);
-			mats[matId]->outMetallic()->setValue(metallic);
-			mats[matId]->outRoughness()->setValue(roughness);
-			mats[matId]->outEmissiveItensity()->setValue(emissiveFactor[0]);
+			auto newMat = std::make_shared<Material>();
+			MaterialManager::createMaterialLoaderModule(newMat, material.name);
+			mats[matId] = newMat;
+			mats[matId]->baseColor = Color(color[0], color[1], color[2]);
+			mats[matId]->alpha = color[3];
+			mats[matId]->metallic = metallic;
+			mats[matId]->roughness = roughness;
+			mats[matId]->emissiveIntensity = emissiveFactor[0];
 			std::string colorUri = getTexUri(textures, images, colorTexId);
 			std::shared_ptr<ImageLoader> loader = std::make_shared<ImageLoader>();
 
@@ -510,13 +506,13 @@ namespace dyno
 
 				if (loader->loadImage(colorUri.c_str(), texture))
 				{
-					mats[matId]->outTexColor()->getDataPtr()->assign(texture);
+					mats[matId]->texColor.assign(texture);
 				}
 			}
 			else
 			{
-				if (mats[matId]->outTexColor()->getDataPtr()->size())
-					mats[matId]->outTexColor()->getDataPtr()->clear();
+				if (mats[matId]->texColor.size())
+					mats[matId]->texColor.clear();
 			}
 			auto emissiveTexId = material.emissiveTexture.index;
 			std::string emissiveColorUri = getTexUri(textures, images, emissiveTexId);
@@ -529,13 +525,13 @@ namespace dyno
 
 				if (loader->loadImage(emissiveColorUri.c_str(), texture))
 				{
-					mats[matId]->outTexEmissive()->getDataPtr()->assign(texture);
+					mats[matId]->texEmissive.assign(texture);
 				}
 			}
 			else
 			{
-				if (mats[matId]->outTexEmissive()->getDataPtr()->size())
-					mats[matId]->outTexEmissive()->getDataPtr()->clear();
+				if (mats[matId]->texEmissive.size())
+					mats[matId]->texEmissive.clear();
 			}
 
 			auto bumpTexId = material.normalTexture.index;
@@ -549,14 +545,14 @@ namespace dyno
 
 				if (loader->loadImage(bumpUri.c_str(), texture))
 				{
-					mats[matId]->outTexBump()->getDataPtr()->assign(texture);
-					mats[matId]->outBumpScale()->setValue(scale);
+					mats[matId]->texBump.assign(texture);
+					mats[matId]->bumpScale = scale;
 				}
 			}
 			else
 			{
-				if (mats[matId]->outTexBump()->getDataPtr()->size())
-					mats[matId]->outTexBump()->getDataPtr()->clear();
+				if (mats[matId]->texBump.size())
+					mats[matId]->texBump.clear();
 			}
 
 			auto ormTexId = material.pbrMetallicRoughness.metallicRoughnessTexture.index;
@@ -569,13 +565,13 @@ namespace dyno
 
 				if (loader->loadImage(ormUri.c_str(), texture, STBI_rgb))
 				{
-					mats[matId]->outTexORM()->getDataPtr()->assign(texture);
+					mats[matId]->texORM.assign(texture);
 				}
 			}
 			else
 			{
-				if (mats[matId]->outTexORM()->getDataPtr()->size())
-					mats[matId]->outTexORM()->getDataPtr()->clear();
+				if (mats[matId]->texORM.size())
+					mats[matId]->texORM.clear();
 			}
 		}
 

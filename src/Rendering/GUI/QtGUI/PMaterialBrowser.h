@@ -20,7 +20,7 @@
 #include <QPushButton>
 #include <QMessageBox>
 #include <QKeyEvent>
-#include "Topology/MaterialManager.h"
+#include "MaterialManager.h"
 #include "PPropertyWidget.h"
 #include <QMainWindow>
 #include "NodeEditor/QtMaterialFlowWidget.h"

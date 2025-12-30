@@ -347,19 +347,21 @@ namespace dyno
 				auto mat = currentMesh->getMaterial(i);
 
 				std::shared_ptr<Material> material = NULL;
-				if (MaterialManager::getMaterial(mat->name))
+				if (false)//MaterialManager::getMaterial(mat->name)
 				{
-					std::cout << "The material already exists: " << mat->name << std::endl;
-					material = MaterialManager::getMaterial(mat->name);
-					meshInfo->materials.push_back(material);
+					//std::cout << "The material already exists: " << mat->name << std::endl;
+					//material = MaterialManager::getMaterial(mat->name);
+					//meshInfo->materials.push_back(material);
 
-					continue;
+					//continue;
 				}
 				else 
 				{
-					material = MaterialManager::NewMaterial(mat->name);
-					material->varBaseColor()->setValue(Color(mat->getDiffuseColor().r, mat->getDiffuseColor().g, mat->getDiffuseColor().b));
-					material->varRoughness()->setValue(1);
+					auto material = std::make_shared<Material>();
+					MaterialManager::createMaterialLoaderModule(material,mat->name);
+
+					material->baseColor = Color(mat->getDiffuseColor().r, mat->getDiffuseColor().g, mat->getDiffuseColor().b);
+					material->roughness = 1;
 
 					auto extractFilename = [](std::string textureName) -> std::string {
 						if (!textureName.empty() && textureName.back() == '"') {
@@ -404,7 +406,7 @@ namespace dyno
 
 
 							if (ImageLoader::loadImage(loadPath.c_str(), textureData))// loadTexture
-								material->outTexColor()->assign(textureData);
+								material->texColor.assign(textureData);
 						}
 					}
 
@@ -437,7 +439,7 @@ namespace dyno
 							textureData[0, 0] = dyno::Vec4f(1);
 
 							if (ImageLoader::loadImage(loadPath.c_str(), textureData))//loadTexture
-								material->outTexBump()->assign(textureData);
+								material->texBump.assign(textureData);
 
 						}
 					}

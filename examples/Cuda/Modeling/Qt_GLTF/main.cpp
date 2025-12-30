@@ -13,7 +13,7 @@ using namespace dyno;
 #include "GltfLoader.h"
 
 #include <GLRenderEngine.h>
-#include "Topology/MaterialManager.h"
+#include "MaterialManager.h"
 #include "GLPhotorealisticRender.h"
 #include "ImageLoader.h"
 /**
