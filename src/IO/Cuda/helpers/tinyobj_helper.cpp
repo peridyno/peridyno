@@ -62,8 +62,19 @@ namespace dyno
 		uint mId = 0;
 		for (const auto& mtl : materials) {
 			
+
+			auto findMat = MaterialManager::getMaterialPtr(mtl.name);
+			if (findMat)
+			{
+				std::cout << "The material already exists: " << mtl.name << std::endl;
+				tMats[mId] = findMat;
+
+				continue;
+			}
+
 			auto newMat = std::make_shared<Material>();
 			tMats[mId] = newMat;
+
 			MaterialManager::createMaterialLoaderModule(newMat, mtl.name);
 
 			tMats[mId]->baseColor = Color(mtl.diffuse[0], mtl.diffuse[1], mtl.diffuse[2]);

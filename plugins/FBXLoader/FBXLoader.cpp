@@ -346,18 +346,17 @@ namespace dyno
 			{
 				auto mat = currentMesh->getMaterial(i);
 
-				std::shared_ptr<Material> material = NULL;
-				if (false)//MaterialManager::getMaterial(mat->name)
+				auto findMat = MaterialManager::getMaterialPtr(mat->name);
+				if (findMat)
 				{
-					//std::cout << "The material already exists: " << mat->name << std::endl;
-					//material = MaterialManager::getMaterial(mat->name);
-					//meshInfo->materials.push_back(material);
+					std::cout << "The material already exists: " << mat->name << std::endl;
+					meshInfo->materials.push_back(findMat);
 
-					//continue;
+					continue;
 				}
 				else 
 				{
-					auto material = std::make_shared<Material>();
+					std::shared_ptr<Material> material = std::make_shared<Material>();
 					MaterialManager::createMaterialLoaderModule(material,mat->name);
 
 					material->baseColor = Color(mat->getDiffuseColor().r, mat->getDiffuseColor().g, mat->getDiffuseColor().b);

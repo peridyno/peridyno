@@ -622,8 +622,19 @@ namespace dyno
 
 	std::shared_ptr<MaterialLoaderModule> MaterialManager::createMaterialLoaderModule(std::shared_ptr<Material> mat, std::string Name) {
 		auto loader = std::make_shared<MaterialLoaderModule>(mat,Name);
+		mMaterialLoaderModules.push_back(loader);
 		pushMaterialManagedModule(loader);
 		return loader;
+	}
+
+	std::shared_ptr<Material> MaterialManager::getMaterialPtr(std::string Name)
+	{
+		for (auto it : mMaterialLoaderModules)
+		{
+			if (it->getName() == Name)
+				return it->outMaterial()->getDataPtr();
+		}
+		return NULL;
 	}
 
 	bool MaterialManager::containsModule(const std::shared_ptr<MaterialManagedModule>& matModule)

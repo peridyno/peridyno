@@ -230,6 +230,8 @@ namespace dyno
 
 		static std::shared_ptr<MaterialLoaderModule> createMaterialLoaderModule(std::shared_ptr<Material> mat, std::string Name);		
 
+		static std::shared_ptr<Material> getMaterialPtr(std::string Name);
+
 		static std::shared_ptr<CustomMaterial> createCustomMaterial(std::string name = "Material");
 		
 		static std::shared_ptr<CustomMaterial> createCustomMaterial(const std::shared_ptr<MaterialLoaderModule>& MaterialLoaderPtr, std::shared_ptr<BreakMaterial>& BreakMaterialModule, std::string Name = "Material");

@@ -478,6 +478,16 @@ namespace dyno
 		{
 			auto material = sourceMaterials[matId];
 			auto name = material.name;
+
+			auto findMat = MaterialManager::getMaterialPtr(material.name);
+			if (findMat)
+			{
+				std::cout << "The material already exists: " << material.name << std::endl;
+				mats[matId] = findMat;
+
+				continue;
+			}
+
 			auto color = material.pbrMetallicRoughness.baseColorFactor;
 			auto roughness = material.pbrMetallicRoughness.roughnessFactor;
 

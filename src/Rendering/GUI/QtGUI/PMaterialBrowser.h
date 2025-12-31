@@ -22,6 +22,7 @@
 #include <QKeyEvent>
 #include "MaterialManager.h"
 #include "PPropertyWidget.h"
+#include <QComboBox>
 #include <QMainWindow>
 #include "NodeEditor/QtMaterialFlowWidget.h"
 
@@ -52,10 +53,6 @@ namespace dyno
     public:
         PMaterialEditor(std::shared_ptr<CustomMaterial> customMat);
 
-        //PModuleEditorToolBar* toolBar() { return mToolBar; }
-
-        //Qt::QtModuleFlowScene* moduleFlowScene() { return mModuleFlowScene; }
-
     signals:
         void changed(Node* node);
 
@@ -66,6 +63,13 @@ namespace dyno
         Qt::QtMaterialFlowScene* mModuleFlowScene = NULL;
         std::shared_ptr<MaterialPipeline> mMaterialPipline = NULL;
 
+    };
+
+    enum class MaterialBrowserFilter {
+        All,
+        MaterialLoader,
+        CustomMaterial,
+        Other
     };
 
 	class PMaterialBrowser : public QWidget, public MaterialManagerObserver
@@ -83,6 +87,7 @@ namespace dyno
 		void createItem();
         void deleteSelectedItems();
         void copySelectedItems();
+        void onFilterChanged(int index);
 
     public:
         void onMaterialListChanged(std::shared_ptr<MaterialManagedModule> mat) override;
@@ -91,9 +96,11 @@ namespace dyno
         void keyPressEvent(QKeyEvent* event)override;
 
     private:
+        QComboBox* comboBox;
         QListView* mListView;
         QStandardItemModel* mModel;
         std::vector<std::shared_ptr<MaterialManagedModule>> copiedMaterials;
+        MaterialBrowserFilter filter = MaterialBrowserFilter::All;
 	};
 }
 
