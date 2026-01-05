@@ -16,16 +16,14 @@
 
 #pragma once
 
-#include "Module/TopologyModule.h"
-#include "Primitive/Primitive3D.h"
 #include "TriangleSet.h"
-#include <set>
-#include <regex>
+
 #include "Field/Color.h"
+
+#include "Primitive/Primitive3D.h"
 
 namespace dyno
 {
-
 	class Material : public Object
 	{
 	public:
@@ -88,12 +86,12 @@ namespace dyno
 	};
 
 
-	class GeometryData : public Object
+	class Geometry : public Object
 	{
 	public:
+		Geometry() {};
+		~Geometry() { clear(); };
 
-		GeometryData() {};
-		~GeometryData() { clear(); };
 		void clear() 
 		{
 			mVertices.clear();
@@ -102,7 +100,7 @@ namespace dyno
 			mShapeIds.clear();
 		}
 
-		void assign(std::shared_ptr<GeometryData> dataPtr)
+		void assign(std::shared_ptr<Geometry> dataPtr)
 		{
 			if (dataPtr) 
 			{
@@ -123,7 +121,6 @@ namespace dyno
 		DArray<Vec3f> mNormals;
 		DArray<Vec2f> mTexCoords;
 		DArray<uint> mShapeIds;
-
 	};
 
 	class TextureMesh : public TopologyModule
@@ -132,11 +129,11 @@ namespace dyno
 		TextureMesh();
 		~TextureMesh() override;
 
-		std::shared_ptr<GeometryData>& meshDataPtr();
+		std::shared_ptr<Geometry> geometry();
 
 		std::vector<std::shared_ptr<Shape>>& shapes() { return mShapes; }
 
-		void merge(const std::shared_ptr<TextureMesh>& texMesh01, const std::shared_ptr<TextureMesh>& texMesh02);
+		void merge(const std::shared_ptr<TextureMesh> texMesh01, const std::shared_ptr<TextureMesh> texMesh02);
 
 		void clear();
 
@@ -154,7 +151,7 @@ namespace dyno
 		);
 
 	private:
-		std::shared_ptr<GeometryData> mMeshData = NULL;
+		std::shared_ptr<Geometry> mMeshData = NULL;
 		std::vector<std::shared_ptr<Shape>> mShapes;
 	};
 

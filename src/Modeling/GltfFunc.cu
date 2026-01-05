@@ -52,11 +52,11 @@ namespace dyno
 		//ToCenter
 
 		shapeTransform(initialPosition,
-			texMesh->meshDataPtr()->vertices(),
+			texMesh->geometry()->vertices(),
 			initialNormal,
-			texMesh->meshDataPtr()->normals(),
+			texMesh->geometry()->normals(),
 			d_mesh_Matrix,
-			texMesh->meshDataPtr()->shapeIds(),
+			texMesh->geometry()->shapeIds(),
 			d_shape_meshId
 		);
 
@@ -69,10 +69,10 @@ namespace dyno
 		for (uint i = 0; i < shapeNum; i++)
 		{
 			DArray<int> counter;
-			counter.resize(texMesh->meshDataPtr()->vertices().size());
+			counter.resize(texMesh->geometry()->vertices().size());
 
 			Shape_PointCounter(counter,
-				texMesh->meshDataPtr()->shapeIds(),
+				texMesh->geometry()->shapeIds(),
 				i);
 
 
@@ -87,7 +87,7 @@ namespace dyno
 
 			setupPoints(
 				targetPoints,
-				texMesh->meshDataPtr()->vertices(),
+				texMesh->geometry()->vertices(),
 				counter
 			);
 
@@ -114,14 +114,14 @@ namespace dyno
 		DArray<Vec3f> unCenterPosition;
 
 		d_ShapeCenter.assign(c_shapeCenter);	// Used to "ToCenter"
-		unCenterPosition.assign(texMesh->meshDataPtr()->vertices());
+		unCenterPosition.assign(texMesh->geometry()->vertices());
 
 		//ToCenter
 		if (true)//varUseInstanceTransform()->getValue()
 		{
 			shapeToCenter(unCenterPosition,
-				texMesh->meshDataPtr()->vertices(),
-				texMesh->meshDataPtr()->shapeIds(),
+				texMesh->geometry()->vertices(),
+				texMesh->geometry()->shapeIds(),
 				d_ShapeCenter);
 
 
@@ -285,7 +285,7 @@ namespace dyno
 
 		std::map<uint, uint> vertexId_shapeId;
 
-		texMesh->meshDataPtr()->shapeIds().resize(vertices.size());
+		texMesh->geometry()->shapeIds().resize(vertices.size());
 
 		//Import Skin;
 		{
@@ -383,7 +383,7 @@ namespace dyno
 		{
 			auto it = texMesh->shapes()[i];
 
-			updateVertexIdShape(texMesh->shapes()[i]->vertexIndex, texMesh->meshDataPtr()->shapeIds(),i, texMesh->shapes()[i]->vertexIndex.size());
+			updateVertexIdShape(texMesh->shapes()[i]->vertexIndex, texMesh->geometry()->shapeIds(),i, texMesh->shapes()[i]->vertexIndex.size());
 
 		}
 
@@ -425,14 +425,14 @@ namespace dyno
 		if (initialNormal != nullptr)
 			initialNormal->assign(normals);
 
-		texMesh->meshDataPtr()->vertices().assign(vertices);
-		texMesh->meshDataPtr()->normals().assign(normals);
+		texMesh->geometry()->vertices().assign(vertices);
+		texMesh->geometry()->normals().assign(normals);
 
 		if (d_mesh_Matrix != nullptr)
 			d_mesh_Matrix->assign(mesh_Matrix);
 
 
-		texMesh->meshDataPtr()->shapeIds().resize(texMesh->meshDataPtr()->vertices().size());
+		texMesh->geometry()->shapeIds().resize(texMesh->geometry()->vertices().size());
 
 
 
@@ -443,7 +443,7 @@ namespace dyno
 			{
 				tempTexCoord.push_back(Vec2f(uv0[0], 1 - uv0[1]));	// uv.v need flip
 			}
-			texMesh->meshDataPtr()->texCoords().assign(tempTexCoord);
+			texMesh->geometry()->texCoords().assign(tempTexCoord);
 
 
 			tempTexCoord.clear();

@@ -123,9 +123,9 @@ namespace dyno
 		if (mesh == nullptr)
 			return;
 
-		mVertices.load(mesh->meshDataPtr()->vertices());
-		mNormal.load(mesh->meshDataPtr()->normals());
-		mTexCoord.load(mesh->meshDataPtr()->texCoords());
+		mVertices.load(mesh->geometry()->vertices());
+		mNormal.load(mesh->geometry()->normals());
+		mTexCoord.load(mesh->geometry()->texCoords());
 
 		uint shapeNum = mesh->shapes().size();
 

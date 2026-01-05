@@ -1015,9 +1015,9 @@ namespace dyno
 			texCoords.insert(texCoords.end(), it->texcoords.begin(), it->texcoords.end());			
 		}
 
-		texMesh->meshDataPtr()->vertices().assign(texPoints);
-		texMesh->meshDataPtr()->normals().assign(texNormals);
-		texMesh->meshDataPtr()->texCoords().assign(texCoords);
+		texMesh->geometry()->vertices().assign(texPoints);
+		texMesh->geometry()->normals().assign(texNormals);
+		texMesh->geometry()->texCoords().assign(texCoords);
 		
 		this->stateHierarchicalScene()->getDataPtr()->updatePoint2Vertice(mPoint2Vertice,mVertice2Point);
 		
@@ -1075,10 +1075,10 @@ namespace dyno
 			verticeOffset += mesh_VerticesNum[i];
 		}
 
-		texMesh->meshDataPtr()->shapeIds().assign(shapeID);
+		texMesh->geometry()->shapeIds().assign(shapeID);
 
-		initialPosition.assign(texMesh->meshDataPtr()->vertices());
-		initialNormal.assign(texMesh->meshDataPtr()->normals());
+		initialPosition.assign(texMesh->geometry()->vertices());
+		initialNormal.assign(texMesh->geometry()->normals());
 
 		
 		std::vector<Mat4f> worldMatrix = this->stateHierarchicalScene()->getDataPtr()->getObjectWorldMatrix();
@@ -1090,11 +1090,11 @@ namespace dyno
 
 		this->stateHierarchicalScene()->getDataPtr()->shapeTransform(
 			initialPosition,
-			texMesh->meshDataPtr()->vertices(),
+			texMesh->geometry()->vertices(),
 			initialNormal,
-			texMesh->meshDataPtr()->normals(),
+			texMesh->geometry()->normals(),
 			dWorldMatrix,
-			texMesh->meshDataPtr()->shapeIds(),
+			texMesh->geometry()->shapeIds(),
 			shapeId_MeshId
 		);
 		
@@ -1114,13 +1114,13 @@ namespace dyno
 			DArray<Vec3f> d_ShapeCenter;
 
 			d_ShapeCenter.assign(initialShapeCenter);	// Used to "ToCenter"
-			unCenterPosition.assign(this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices());
+			unCenterPosition.assign(this->stateTextureMesh()->getDataPtr()->geometry()->vertices());
 			CArray<Vec3f> cshapeCenter;
 			cshapeCenter.assign(d_ShapeCenter);
 
 			this->stateHierarchicalScene()->getDataPtr()->shapeToCenter(unCenterPosition,
-				this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices(),
-				this->stateTextureMesh()->getDataPtr()->meshDataPtr()->shapeIds(),
+				this->stateTextureMesh()->getDataPtr()->geometry()->vertices(),
+				this->stateTextureMesh()->getDataPtr()->geometry()->shapeIds(),
 				d_ShapeCenter
 			);
 
@@ -1180,7 +1180,7 @@ namespace dyno
 		else
 		{
 			auto& shape = this->stateTextureMesh()->getDataPtr()->shapes();
-			auto vertices = this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices();
+			auto vertices = this->stateTextureMesh()->getDataPtr()->geometry()->vertices();
 			CArray<Vec3f> cv;
 			cv.assign(vertices);
 
@@ -1231,7 +1231,7 @@ namespace dyno
 
 			targetScene->skinAnimation(
 				targetScene->mSkinData->initialPosition,
-				this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices(),
+				this->stateTextureMesh()->getDataPtr()->geometry()->vertices(),
 				targetScene->mJointData->mJointInverseBindMatrix,
 				targetScene->mJointData->mJointWorldMatrix,
 
@@ -1253,7 +1253,7 @@ namespace dyno
 
 			targetScene->skinVerticesAnimation(
 				targetScene->mSkinData->initialNormal,
-				targetScene->mSkinData->mesh->meshDataPtr()->normals(),
+				targetScene->mSkinData->mesh->geometry()->normals(),
 				targetScene->mJointData->mJointInverseBindMatrix,
 				targetScene->mJointData->mJointWorldMatrix,
 

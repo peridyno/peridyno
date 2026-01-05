@@ -394,19 +394,19 @@ namespace dyno
 
 		}
 
-		if (this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices().size())
+		if (this->stateTextureMesh()->getDataPtr()->geometry()->vertices().size())
 		{
 			//Move by Dir
 			if (true)
 			{
-				cuExecute(this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices().size(),
+				cuExecute(this->stateTextureMesh()->getDataPtr()->geometry()->vertices().size(),
 					ShapeTransform,
 					initialPosition,
-					this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices(),
+					this->stateTextureMesh()->getDataPtr()->geometry()->vertices(),
 					initialNormal,
-					this->stateTextureMesh()->getDataPtr()->meshDataPtr()->normals(),
+					this->stateTextureMesh()->getDataPtr()->geometry()->normals(),
 					d_mesh_Matrix,
-					this->stateTextureMesh()->getDataPtr()->meshDataPtr()->shapeIds(),
+					this->stateTextureMesh()->getDataPtr()->geometry()->shapeIds(),
 					d_shape_meshId
 				);
 			}
@@ -426,13 +426,13 @@ namespace dyno
 		for (uint i = 0; i < shapeNum; i++)
 		{
 			DArray<int> counter;
-			counter.resize(this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices().size());
+			counter.resize(this->stateTextureMesh()->getDataPtr()->geometry()->vertices().size());
 
 
-			cuExecute(this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices().size(),
+			cuExecute(this->stateTextureMesh()->getDataPtr()->geometry()->vertices().size(),
 				C_Shape_PointCounter,
 				counter,
-				this->stateTextureMesh()->getDataPtr()->meshDataPtr()->shapeIds(),
+				this->stateTextureMesh()->getDataPtr()->geometry()->shapeIds(),
 				i
 			);
 
@@ -445,10 +445,10 @@ namespace dyno
 			Scan<int> scan;
 			scan.exclusive(counter.begin(), counter.size());
 
-			cuExecute(this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices().size(),
+			cuExecute(this->stateTextureMesh()->getDataPtr()->geometry()->vertices().size(),
 				C_SetupPoints,
 				targetPoints,
-				this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices(),
+				this->stateTextureMesh()->getDataPtr()->geometry()->vertices(),
 				counter
 			);
 
@@ -471,16 +471,16 @@ namespace dyno
 		}
 
 		d_ShapeCenter.assign(c_shapeCenter);	// Used to "ToCenter"
-		unCenterPosition.assign(this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices());
+		unCenterPosition.assign(this->stateTextureMesh()->getDataPtr()->geometry()->vertices());
 
 		//ToCenter
 		if (varUseInstanceTransform()->getValue())
 		{
-			cuExecute(this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices().size(),
+			cuExecute(this->stateTextureMesh()->getDataPtr()->geometry()->vertices().size(),
 				ShapeToCenter,
 				unCenterPosition,
-				this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices(),
-				this->stateTextureMesh()->getDataPtr()->meshDataPtr()->shapeIds(),
+				this->stateTextureMesh()->getDataPtr()->geometry()->vertices(),
+				this->stateTextureMesh()->getDataPtr()->geometry()->shapeIds(),
 				d_ShapeCenter
 			);
 
@@ -560,7 +560,7 @@ namespace dyno
 				Vec2u& range = skinInfo.skin_VerticeRange[i];
 
 				skinAnimation(initialPosition,
-					mesh->meshDataPtr()->vertices(),
+					mesh->geometry()->vertices(),
 					this->stateJointInverseBindMatrix()->getData(),
 					this->stateJointsData()->getDataPtr()->mJointWorldMatrix,
 
@@ -577,7 +577,7 @@ namespace dyno
 
 				skinAnimation(
 					initialNormal,
-					mesh->meshDataPtr()->normals(),
+					mesh->geometry()->normals(),
 					this->stateJointInverseBindMatrix()->getData(),
 					this->stateJointsData()->getDataPtr()->mJointWorldMatrix,
 

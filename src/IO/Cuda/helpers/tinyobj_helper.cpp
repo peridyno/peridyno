@@ -51,7 +51,7 @@ namespace dyno
 		}
 
 		shapeIds.resize(vertices.size());
-		texMesh->meshDataPtr()->shapeIds().reset();
+		texMesh->geometry()->shapeIds().reset();
 		// load texture...
 		dyno::CArray2D<dyno::Vec4f> texture(1, 1);
 		texture[0, 0] = dyno::Vec4f(1);
@@ -194,16 +194,16 @@ namespace dyno
 			sId++;
 		}
 
-		texMesh->meshDataPtr()->vertices().assign(vertices);
-		texMesh->meshDataPtr()->normals().assign(normals);
-		texMesh->meshDataPtr()->texCoords().assign(texCoords);
-		texMesh->meshDataPtr()->shapeIds().assign(shapeIds);
+		texMesh->geometry()->vertices().assign(vertices);
+		texMesh->geometry()->normals().assign(normals);
+		texMesh->geometry()->texCoords().assign(texCoords);
+		texMesh->geometry()->shapeIds().assign(shapeIds);
 
 		//A hack: for an obj file with one shape
 		if (shapes.size() == 1)
 		{
-			texMesh->meshDataPtr()->shapeIds().resize(vertices.size());
-			texMesh->meshDataPtr()->shapeIds().reset();
+			texMesh->geometry()->shapeIds().resize(vertices.size());
+			texMesh->geometry()->shapeIds().reset();
 		}
 
 		vertices.clear();

@@ -156,8 +156,8 @@ namespace dyno
 #ifdef CUDA_BACKEND
 		auto texMesh = this->inTextureMesh()->constDataPtr();
 
-		if (!texMesh->meshDataPtr()->normals().isEmpty() &&
-			!texMesh->meshDataPtr()->texCoords().isEmpty())
+		if (!texMesh->geometry()->normals().isEmpty() &&
+			!texMesh->geometry()->texCoords().isEmpty())
 		{
 			mTangentSpaceConstructor->update();
 		}

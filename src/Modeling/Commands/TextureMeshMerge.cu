@@ -104,52 +104,52 @@ namespace dyno
 	template<typename TDataType>
 	void TextureMeshMerge<TDataType>::merge(const std::shared_ptr<TextureMesh>& texMesh01, const std::shared_ptr<TextureMesh>& texMesh02, std::shared_ptr<TextureMesh>& out)
 	{
-		auto vertices01 = texMesh01->meshDataPtr()->vertices();
-		auto vertices02 = texMesh02->meshDataPtr()->vertices();
+		auto vertices01 = texMesh01->geometry()->vertices();
+		auto vertices02 = texMesh02->geometry()->vertices();
 	
-		out->meshDataPtr()->vertices().resize(vertices01.size() + vertices02.size());
+		out->geometry()->vertices().resize(vertices01.size() + vertices02.size());
 
-		cuExecute(out->meshDataPtr()->vertices().size(),
+		cuExecute(out->geometry()->vertices().size(),
 			mergeVec3f,
 			vertices01,
 			vertices02,
-			out->meshDataPtr()->vertices(),
+			out->geometry()->vertices(),
 			vertices01.size()
 		);
 
-		auto normals01 = texMesh01->meshDataPtr()->normals();
-		auto normals02 = texMesh02->meshDataPtr()->normals();
-		out->meshDataPtr()->normals().resize(normals01.size() + normals02.size());
+		auto normals01 = texMesh01->geometry()->normals();
+		auto normals02 = texMesh02->geometry()->normals();
+		out->geometry()->normals().resize(normals01.size() + normals02.size());
 
-		cuExecute(out->meshDataPtr()->normals().size(),
+		cuExecute(out->geometry()->normals().size(),
 			mergeVec3f,
 			normals01,
 			normals02,
-			out->meshDataPtr()->normals(),
+			out->geometry()->normals(),
 			normals01.size()
 		);
 
-		auto texCoords01 = texMesh01->meshDataPtr()->texCoords();
-		auto texCoords02 = texMesh02->meshDataPtr()->texCoords();
-		out->meshDataPtr()->texCoords().resize(texCoords01.size() + texCoords02.size());
+		auto texCoords01 = texMesh01->geometry()->texCoords();
+		auto texCoords02 = texMesh02->geometry()->texCoords();
+		out->geometry()->texCoords().resize(texCoords01.size() + texCoords02.size());
 
-		cuExecute(out->meshDataPtr()->texCoords().size(),
+		cuExecute(out->geometry()->texCoords().size(),
 			mergeVec2f,
 			texCoords01,
 			texCoords02,
-			out->meshDataPtr()->texCoords(),
+			out->geometry()->texCoords(),
 			texCoords01.size()
 		);
 
-		auto shapeIds01 = texMesh01->meshDataPtr()->shapeIds();
-		auto shapeIds02 = texMesh02->meshDataPtr()->shapeIds();
-		out->meshDataPtr()->shapeIds().resize(shapeIds01.size() + shapeIds02.size());
+		auto shapeIds01 = texMesh01->geometry()->shapeIds();
+		auto shapeIds02 = texMesh02->geometry()->shapeIds();
+		out->geometry()->shapeIds().resize(shapeIds01.size() + shapeIds02.size());
 
-		cuExecute(out->meshDataPtr()->texCoords().size(),
+		cuExecute(out->geometry()->texCoords().size(),
 			mergeShapeId,
 			shapeIds01,
 			shapeIds02,
-			out->meshDataPtr()->shapeIds(),
+			out->geometry()->shapeIds(),
 			shapeIds01.size(),
 			texMesh01->shapes().size()
 		);

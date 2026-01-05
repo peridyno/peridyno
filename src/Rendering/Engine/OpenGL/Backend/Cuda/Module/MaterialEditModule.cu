@@ -877,8 +877,8 @@ __global__ void grayscaleCorrectionKernel(
 
 		varMat = newMat;
 
-		auto inMeshData = inTexMesh->meshDataPtr();
-		outTexMesh->meshDataPtr() = inMeshData;
+		auto inMeshData = inTexMesh->geometry();
+		outTexMesh->geometry() = inMeshData;
 		outTexMesh->shapes() = inTexMesh->shapes();
 
 		auto originalShape = inShapes[index];
