@@ -36,6 +36,8 @@ namespace dyno
 
 		void run() override;
 
+		std::shared_ptr<SceneGraph> getCurrentScene();
+
 		/**
 		 * @brief Reset the simulation
 		 */
