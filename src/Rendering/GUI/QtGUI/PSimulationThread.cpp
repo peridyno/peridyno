@@ -197,6 +197,18 @@ namespace dyno
 		}
 	}
 
+	std::shared_ptr<SceneGraph> PSimulationThread::getCurrentScene()
+	{
+		if (mMutex.try_lock_for(mTimeOut))
+		{
+			auto scn = SceneGraphFactory::instance()->active();
+			mMutex.unlock();
+			return scn;
+		}
+		Log::sendMessage(Log::Warning, "Failed to get current scene: timeout.");
+		return nullptr;
+	}
+
 	void PSimulationThread::reset(int num)
 	{
 		this->pause();
