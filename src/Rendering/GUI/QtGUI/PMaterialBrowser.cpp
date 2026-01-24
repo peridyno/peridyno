@@ -6,11 +6,10 @@
 #include <QHBoxLayout>
 #include <QListView>
 #include <QPixmap>
-#include "Topology/MaterialManager.h"
+#include "MaterialManager.h"
 #include <QStandardItemModel>
 #include "PSimulationThread.h"
 #include <QTreeView>
-#include "Topology/MaterialManager.h"
 #include <QShortcut>
 #include <QKeySequence>
 #include "NodeEditor/QtMaterialFlowScene.h"
@@ -141,26 +140,47 @@ namespace dyno
         mListView = new QListView(this);
         mListView->setResizeMode(QListView::ResizeMode::Adjust);
 
-        auto layout = new QHBoxLayout(this);
-        layout->addWidget(mListView, 1);
+        comboBox = new QComboBox();
+        auto label = new QLabel("Filter");
+        QListView* listView = new QListView(comboBox);
+        listView->setSpacing(2); 
+        comboBox->setView(listView);
+
+        comboBox->addItem("All", static_cast<int>(MaterialBrowserFilter::All));
+        comboBox->addItem("MaterialLoader", static_cast<int>(MaterialBrowserFilter::MaterialLoader));
+        comboBox->addItem("CustomMaterial", static_cast<int>(MaterialBrowserFilter::CustomMaterial));
+        comboBox->addItem("Other", static_cast<int>(MaterialBrowserFilter::Other));
+        comboBox->setCurrentIndex(2);
+        this->filter = MaterialBrowserFilter::CustomMaterial;
+
+        connect(comboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),this, &PMaterialBrowser::onFilterChanged);
+
+        auto layout = new QVBoxLayout(this);
         layout->setContentsMargins(0, 0, 0, 0);
-        layout->setSpacing(0);
-        setLayout(layout);
+        layout->setSpacing(5);
 
         createItem();
 
         MaterialManager::addMaterialListObserver(this);
         connect(this, SIGNAL(materialListChanged()), this, SLOT(createItem()));
 
-        QVBoxLayout* layout2 = new QVBoxLayout();
-        layout->addLayout(layout2, 0);
+
 
         QPushButton* btnDelete = new QPushButton("Delete");
         QPushButton* btnCopy = new QPushButton("Copy");
+        QHBoxLayout* Toolslayout = new QHBoxLayout();
 
-        layout2->addWidget(btnDelete);
-        layout2->addWidget(btnCopy);
-        layout2->addStretch();
+        Toolslayout->addWidget(label);
+        Toolslayout->addWidget(comboBox);
+        Toolslayout->addWidget(btnDelete);
+        Toolslayout->addWidget(btnCopy);
+        Toolslayout->addStretch();
+
+        layout->addLayout(Toolslayout, 0);
+        layout->addWidget(mListView, 1);
+
+        this->setLayout(layout);
+
 
         connect(btnDelete, &QPushButton::clicked, this, &PMaterialBrowser::deleteSelectedItems);
         connect(btnCopy, &QPushButton::clicked, this, &PMaterialBrowser::copySelectedItems);
@@ -193,9 +213,7 @@ namespace dyno
                 editor->show();
 
             }
-            //QObject::connect(editor, &MaterialEditor::materialListChanged, [&]() {
 
-            //    });
             }
         );
 	}
@@ -209,14 +227,57 @@ namespace dyno
         QIcon icon(QString::fromStdString(iconPath));
         
         for (const auto& pair : matModules) {
-            if (pair.second) {  
-                auto mat = pair.second;
+            
+            if (pair.second) {
+                auto mModule = pair.second;
                 std::string name = pair.second->getName();
-                std::cout << "Material name: " << name << std::endl;
-                QStandardItem* item = new QStandardItem(icon, QString(name.c_str()));
 
-                item->setData(QVariant::fromValue(mat), Qt::UserRole + 1);
-                mModel->appendRow(item);
+                switch (filter)
+                {
+                case dyno::MaterialBrowserFilter::All:
+                {   
+                    QStandardItem* item = new QStandardItem(icon, QString(name.c_str()));
+                    item->setData(QVariant::fromValue(mModule), Qt::UserRole + 1);
+                    mModel->appendRow(item);
+                    break;
+                }
+                case dyno::MaterialBrowserFilter::MaterialLoader: 
+                {
+                    auto loaderModule = std::dynamic_pointer_cast<MaterialLoaderModule>(mModule);
+                    if (loaderModule) 
+                    {
+                        QStandardItem* item = new QStandardItem(icon, QString(name.c_str()));
+                        item->setData(QVariant::fromValue(mModule), Qt::UserRole + 1);
+                        mModel->appendRow(item);
+                    }
+                    break;
+                }
+                case dyno::MaterialBrowserFilter::CustomMaterial: 
+                {
+                    auto customMaterialModule = std::dynamic_pointer_cast<CustomMaterial>(mModule);
+                    if (customMaterialModule)
+                    {
+                        QStandardItem* item = new QStandardItem(icon, QString(name.c_str()));
+                        item->setData(QVariant::fromValue(mModule), Qt::UserRole + 1);
+                        mModel->appendRow(item);
+                    }
+                    break;
+                }
+                case dyno::MaterialBrowserFilter::Other: 
+                {
+                    if (std::dynamic_pointer_cast<MaterialLoaderModule>(mModule))
+                        break;
+                    if (std::dynamic_pointer_cast<CustomMaterial>(mModule))
+                        break;
+
+                    QStandardItem* item = new QStandardItem(icon, QString(name.c_str()));
+                    item->setData(QVariant::fromValue(mModule), Qt::UserRole + 1);
+                    mModel->appendRow(item);
+                    break;
+                }
+                default:
+                    break;
+                }
             }
         }
 
@@ -236,6 +297,14 @@ namespace dyno
 
 	}
 
+    void PMaterialBrowser::onFilterChanged(int index) {
+        QVariant data = comboBox->itemData(index);
+        if (data.isValid()) {
+            filter = static_cast<MaterialBrowserFilter>(data.toInt());
+            createItem();
+        }
+    }
+
     void PMaterialBrowser::deleteSelectedItems()
     {
         this->blockSignals(true);
@@ -246,6 +315,8 @@ namespace dyno
             QVariant var = mModel->data(index, Qt::UserRole + 1);
             std::shared_ptr<MaterialManagedModule> mat = var.value<std::shared_ptr<MaterialManagedModule>>();
             if (mat) {
+                if (std::dynamic_pointer_cast<MaterialLoaderModule>(mat))
+                    continue;
                 deleteMatModules.push_back(mat);
             }
         }

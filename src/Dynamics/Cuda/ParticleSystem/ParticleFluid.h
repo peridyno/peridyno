@@ -33,6 +33,15 @@ namespace dyno
 		ParticleFluid();
 		~ParticleFluid() override;
 
+	public:
+		DECLARE_ENUM(IncompressibilitySolver,
+			SISPH = 0,
+			DFSPH = 1,
+			PBF = 2,
+			IISPH = 3);
+
+		DEF_ENUM(IncompressibilitySolver, IncompressibilitySolver, IncompressibilitySolver::SISPH, "Select the solver type");
+
 		DEF_VAR(Real, SamplingDistance, 0.005, "Sampling distance");
 
 		DEF_VAR(Real, SmoothingLength, 1.5, "The smoothing length is preferably set to a value between 1.5 and 2.5");

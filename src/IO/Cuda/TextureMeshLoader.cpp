@@ -53,9 +53,9 @@ namespace dyno
 		if (!success)
 			return;
 
-		mInitialVertex.assign(texMesh->meshDataPtr()->vertices());
-		mInitialNormal.assign(texMesh->meshDataPtr()->normals());
-		mInitialTexCoord.assign(texMesh->meshDataPtr()->texCoords());
+		mInitialVertex.assign(texMesh->geometry()->vertices());
+		mInitialNormal.assign(texMesh->geometry()->normals());
+		mInitialTexCoord.assign(texMesh->geometry()->texCoords());
 
 		auto& shape = this->stateTextureMesh()->getDataPtr()->shapes();
 		initialShapeCenter.clear();
@@ -70,7 +70,7 @@ namespace dyno
 	void TextureMeshLoader::callbackTransform()
 	{
 		auto& shape = this->stateTextureMesh()->getDataPtr()->shapes();
-		auto vertices = this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices();
+		auto vertices = this->stateTextureMesh()->getDataPtr()->geometry()->vertices();
 		CArray<Vec3f> cv;
 		cv.assign(vertices);
 

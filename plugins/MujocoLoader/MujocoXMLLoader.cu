@@ -221,8 +221,8 @@ namespace dyno
 			}
 
 		}
-		texMesh->meshDataPtr()->vertices().assign(points);
-		texMesh->meshDataPtr()->shapeIds().assign(shapeIDs);
+		texMesh->geometry()->vertices().assign(points);
+		texMesh->geometry()->shapeIds().assign(shapeIDs);
 
 		texMesh->updateTexMeshBoundingBox();
 
@@ -235,15 +235,15 @@ namespace dyno
 			DArray<Vec3f> d_ShapeCenter;
 
 			d_ShapeCenter.assign(initialShapeCenter);	// Used to "ToCenter"
-			unCenterPosition.assign(this->stateTextureMesh()->getDataPtr()->meshDataPtr()->vertices());
+			unCenterPosition.assign(this->stateTextureMesh()->getDataPtr()->geometry()->vertices());
 			CArray<Vec3f> cshapeCenter;
 			cshapeCenter.assign(d_ShapeCenter);
 
 			HierarchicalScene helper;
 			helper.shapeToCenter(
 				unCenterPosition,
-				texMesh->meshDataPtr()->vertices(),
-				texMesh->meshDataPtr()->shapeIds(),
+				texMesh->geometry()->vertices(),
+				texMesh->geometry()->shapeIds(),
 				d_ShapeCenter
 			);
 

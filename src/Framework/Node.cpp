@@ -179,7 +179,6 @@ void Node::update()
 
 void Node::reset()
 {
-	mSyncRenderAndSim.lock();
 	if (this->validateInputs()) {
 		this->stateElapsedTime()->setValue(0.0f);
 		this->stateFrameNumber()->setValue(0);
@@ -189,7 +188,6 @@ void Node::reset()
 		//When the node is reset, call tick() to force updating all modules
 		this->tick();
 	}
-	mSyncRenderAndSim.unlock();
 }
 
 NBoundingBox Node::boundingBox()

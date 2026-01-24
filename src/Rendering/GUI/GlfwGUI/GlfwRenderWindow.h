@@ -104,8 +104,6 @@ namespace dyno {
 		bool mBackgroundToggle = true;
 		bool mBoundingboxToggle = false;
 
-		double mCursorTempX = -1.0;
-
 		std::string mWindowTitle;
 
 	private:

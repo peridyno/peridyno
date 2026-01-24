@@ -18,7 +18,7 @@
 
 #include "Module/TopologyModule.h"
 #include "Primitive/Primitive3D.h"
-#include "TriangleSet.h"
+#include "Topology/TriangleSet.h"
 #include <set>
 #include <regex>
 #include "Module/Pipeline.h"
@@ -27,6 +27,7 @@
 #include "Module/MouseInputModule.h"
 #include "Node.h"
 #include "Module/ComputeModule.h"
+#include "Topology/TextureMesh.h"
 
 
 #define MATERIAL_MANAGER_MANAGED_CLASS friend class MaterialManager;
@@ -69,29 +70,34 @@ namespace dyno
 		};
 	};
 
-	class Material : public MaterialManagedModule
+	class MaterialLoaderModule : public MaterialManagedModule
 	{
 	public:
-		DECLARE_CLASS(Material)
+		DECLARE_CLASS(MaterialLoaderModule)
 		MATERIAL_MANAGER_MANAGED_CLASS
 
-		Material():MaterialManagedModule()
+		MaterialLoaderModule():MaterialManagedModule()
+		{
+			initialVar();
+			this->outMaterial()->setDataPtr(std::make_shared<Material>());
+		};
+		MaterialLoaderModule(std::shared_ptr<Material> sourceMaterial, std::string name) 
+		{
+			this->outMaterial()->setDataPtr(sourceMaterial); 
+			this->setName(name);
+		}
+		~MaterialLoaderModule() override {};
+
+		void initialVar() 
 		{
 			this->varAlpha()->setRange(0, 1);
 			this->varBumpScale()->setRange(0, 1);
 			this->varEmissiveIntensity()->setRange(0, 1);
 			this->varMetallic()->setRange(0, 1);
 			this->varRoughness()->setRange(0, 1);
-			initial();
-		};
-		~Material() override;
+		}
 
-		virtual void initial();
-
-		virtual void updateVar2Out();
-
-		virtual void updateImpl()override;
-
+		//DEF_VAR(std::string,Name,"", "");
 		DEF_VAR(Color, BaseColor,Color(0.8), "");
 		DEF_VAR(float, Metallic,0, "");
 		DEF_VAR(float, Roughness,0.5, "");
@@ -99,51 +105,70 @@ namespace dyno
 		DEF_VAR(float, BumpScale,1, "");
 		DEF_VAR(float, EmissiveIntensity, 0, "");
 
-		DEF_VAR_OUT(Vec3f,BaseColor,"");
-		DEF_VAR_OUT(float, Metallic, "");
+		DEF_INSTANCE_OUT(Material,Material, "");
+
+
+	private:
+
+		MaterialLoaderModule(const std::string& name);
+		MaterialLoaderModule(std::shared_ptr<MaterialLoaderModule> other);
+
+	};
+
+	class BreakMaterial : public MaterialManagedModule
+	{
+		DECLARE_CLASS(BreakMaterial)
+
+	public:
+
+		BreakMaterial() { initial(); };
+		BreakMaterial(std::shared_ptr<BreakMaterial> other) ;
+		~BreakMaterial() {}
+
+		void onFieldChanged();
+		void updateImpl() override { onFieldChanged(); };
+		std::string caption() override { return "BreakMaterial"; }
+		void initial();
+		//Texture
+		DEF_INSTANCE_IN(Material, Material, "Material");
+
+		DEF_VAR_OUT(Color, Color, "");
 		DEF_VAR_OUT(float, Roughness, "");
+		DEF_VAR_OUT(float, Metallic, "");
 		DEF_VAR_OUT(float, Alpha, "");
 		DEF_VAR_OUT(float, BumpScale, "");
-		DEF_VAR_OUT(float, EmissiveItensity, "");
+		DEF_VAR_OUT(float, EmissiveIntensity, "");
 
-		DEF_ARRAY2D_OUT(Vec4f,TexColor,DeviceType::GPU,"");
+		DEF_ARRAY2D_OUT(Vec4f, TexColor, DeviceType::GPU, "");
 		DEF_ARRAY2D_OUT(Vec4f, TexBump, DeviceType::GPU, "");
 		DEF_ARRAY2D_OUT(Vec4f, TexORM, DeviceType::GPU, "");
 		DEF_ARRAY2D_OUT(Vec4f, TexAlpha, DeviceType::GPU, "");
 		DEF_ARRAY2D_OUT(Vec4f, TexEmissive, DeviceType::GPU, "");
 
-	public:
-		
-		void addAssigner(std::shared_ptr<Module> assigner);
-
-		void removeAssigner(std::shared_ptr<Module> assigner);
-
 	protected:
-		void updateAssigner();
+		virtual std::shared_ptr<MaterialManagedModule> clone() const override;
 
-		std::shared_ptr<MaterialManagedModule> clone() const;
-
-
-	private:
-
-		Material(const std::string& name);
-		Material(std::shared_ptr<Material> other);
-		std::set<std::shared_ptr<Module>> mAssigner;
 	};
 
-	class CustomMaterial : public Material
+	class CustomMaterial : public MaterialManagedModule
 	{
 	public:
 		DECLARE_CLASS(CustomMaterial)
 		MATERIAL_MANAGER_MANAGED_CLASS
-		CustomMaterial():Material() {}
-		CustomMaterial(const std::string& name) :Material() { this->mName = name; }
+		CustomMaterial();
+		CustomMaterial(const std::string& name);
+		CustomMaterial(const std::shared_ptr<MaterialLoaderModule>& MaterialLoaderPtr, std::shared_ptr<BreakMaterial>& BreakMaterialModule, std::string Name);
 
-		std::shared_ptr<Material> getBaseMaterial() const {
-			return mBaseMaterial;
-		}
+		virtual void updateImpl();
+		void updateVar2Out();
+		DEF_VAR(Color, BaseColor, Color(0.8), "");
+		DEF_VAR(float, Metallic, 0, "");
+		DEF_VAR(float, Roughness, 0.5, "");
+		DEF_VAR(float, Alpha, 1, "");
+		DEF_VAR(float, BumpScale, 1, "");
+		DEF_VAR(float, EmissiveIntensity, 0, "");
 
-		DEF_VAR_IN(Vec3f, BaseColor, "");
+		DEF_VAR_IN(Color, BaseColor, "");
 		DEF_VAR_IN(float, Metallic, "");
 		DEF_VAR_IN(float, Roughness, "");
 		DEF_VAR_IN(float, Alpha, "");
@@ -156,11 +181,37 @@ namespace dyno
 		DEF_ARRAY2D_IN(Vec4f, TexAlpha, DeviceType::GPU, "");
 		DEF_ARRAY2D_IN(Vec4f, TexEmissiveColor, DeviceType::GPU, "");
 
-		void initial()override;
-		virtual void updateVar2Out()override;
-	public:
+		DEF_INSTANCE_OUT(Material,Material,"");
 
-		virtual void updateImpl()override;
+		void initialVar()
+		{
+			this->varAlpha()->setRange(0, 1);
+			this->varBumpScale()->setRange(0, 1);
+			this->varEmissiveIntensity()->setRange(0, 1);
+			this->varMetallic()->setRange(0, 1);
+			this->varRoughness()->setRange(0, 1);
+
+			this->inAlpha()->tagOptional(true);
+			this->inBaseColor()->tagOptional(true);
+			this->inBumpScale()->tagOptional(true);
+			this->inEmissiveIntensity()->tagOptional(true);
+			this->inRoughness()->tagOptional(true);
+			this->inMetallic()->tagOptional(true);
+
+			this->inTexAlpha()->tagOptional(true);
+			this->inTexBump()->tagOptional(true);
+			this->inBaseColor()->tagOptional(true);
+			this->inTexEmissiveColor()->tagOptional(true);
+			this->inTexORM()->tagOptional(true);
+		}
+
+		void addAssigner(std::shared_ptr<Module> assigner);
+			          
+		void removeAssigner(std::shared_ptr<Module> assigner);
+		
+		void updateAssigner();
+
+	public:
 
 		std::shared_ptr<MaterialPipeline> materialPipeline();
 		std::string pushMaterialManagedModule(std::shared_ptr<MaterialManagedModule> managedModule);
@@ -168,10 +219,8 @@ namespace dyno
 
 	private:
 
-		CustomMaterial(std::shared_ptr<Material> sourceMaterial, const std::string& name = std::string("Material"));
-		std::shared_ptr<Material> mBaseMaterial;
-
 		std::shared_ptr<MaterialPipeline>	mMaterialPipeline = NULL;
+		std::set<std::shared_ptr<Module>> mAssigner;
 	};
 
 	class MaterialManager {
@@ -179,21 +228,19 @@ namespace dyno
 		MaterialManager() = delete;
 		~MaterialManager() = delete;
 
+		static std::shared_ptr<MaterialLoaderModule> createMaterialLoaderModule(std::shared_ptr<Material> mat, std::string Name);		
 
+		static std::shared_ptr<Material> getMaterialPtr(std::string Name);
 
-		static std::shared_ptr<Material> NewMaterial();
+		static std::shared_ptr<CustomMaterial> createCustomMaterial(std::string name = "Material");
+		
+		static std::shared_ptr<CustomMaterial> createCustomMaterial(const std::shared_ptr<MaterialLoaderModule>& MaterialLoaderPtr, std::shared_ptr<BreakMaterial>& BreakMaterialModule, std::string Name = "Material");
 
-		static std::shared_ptr<Material> NewMaterial(std::string name);
-
-		static std::shared_ptr<Material> NewMaterial(const Material& other);
-
-		static std::shared_ptr<CustomMaterial> createCustomMaterial(std::shared_ptr<Material> sourceMaterial = NULL, std::string name = "Material");
-
-		void rename(std::shared_ptr<Material> ptr, const std::string& name);
+		void rename(std::shared_ptr<MaterialManagedModule> ptr, const std::string& name);
 
 		static std::shared_ptr<MaterialManagedModule> copyMaterialManagedModule(std::shared_ptr<MaterialManagedModule> material);
 
-		static std::shared_ptr<Material> getMaterial(const std::string& name);
+		static std::shared_ptr<CustomMaterial> getMaterial(const std::string& name);
 
 		static std::shared_ptr<MaterialManagedModule> getMaterialManagedModule(const std::string& name);
 
@@ -202,13 +249,14 @@ namespace dyno
 		static void clear() { materials().clear(); }
 
 		static void printAllMaterials();
+		
 		static void printAllManagedModules();
 
 		static std::string generateUniqueMaterialName(const std::string& baseName);
 
-		static std::map<std::string, std::shared_ptr<Material>>& materials();
+		static std::map<std::string, std::shared_ptr<CustomMaterial>>& materials();
 
-		static bool containsMaterial(const std::shared_ptr<Material>& mat);
+		static bool containsMaterial(const std::shared_ptr<CustomMaterial>& mat);
 
 		static bool containsModule(const std::shared_ptr<MaterialManagedModule>& matModule);
 
@@ -220,7 +268,7 @@ namespace dyno
 
 		static void removeMaterialListObserver(MaterialManagerObserver* observer);
 
-		static void callMaterialManagerObservers(std::shared_ptr<Material> mat = NULL);
+		static void callMaterialManagerObservers(std::shared_ptr<MaterialManagedModule> mat = NULL);
 
 		static std::string pushMaterialManagedModule(std::shared_ptr<MaterialManagedModule> managedModule,bool checkName = true);
 
@@ -230,14 +278,16 @@ namespace dyno
 
 	private:
 		static std::vector<MaterialManagerObserver*> mMaterialListObservers;
-		static std::string addMaterial(std::shared_ptr<Material> material);
+		static std::string addMaterial(std::shared_ptr<CustomMaterial> CustomMaterial);
+
+		static std::vector<std::shared_ptr<MaterialLoaderModule>> mMaterialLoaderModules;
 	};
 
 
 	class MaterialPipeline :public Pipeline
 	{
 	public:
-		MaterialPipeline(std::shared_ptr<CustomMaterial> CustomMaterial) : Pipeline(nullptr)
+		MaterialPipeline(CustomMaterial* CustomMaterial) : Pipeline(nullptr)
 		{
 			mCustomMaterial = CustomMaterial;
 		}
@@ -253,7 +303,7 @@ namespace dyno
 
 	protected:
 		void reconstructPipeline()override;
-		std::shared_ptr<CustomMaterial> mCustomMaterial;
+		CustomMaterial* mCustomMaterial;
 	};
 
 	class MaterialManagerObserver {
@@ -262,10 +312,10 @@ namespace dyno
 		virtual void onMaterialListChanged(std::shared_ptr<MaterialManagedModule> mat) = 0;
 	};
 
-	class MaterialUpdateObserver {
-	public:
-		virtual ~MaterialUpdateObserver() = default;
-		virtual void onMaterialUpdate(std::shared_ptr<Material> mat) = 0;
-	};
+	//class MaterialUpdateObserver {
+	//public:
+	//	virtual ~MaterialUpdateObserver() = default;
+	//	virtual void onMaterialUpdate(std::shared_ptr<Material> mat) = 0;
+	//};
 
 };

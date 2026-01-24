@@ -459,46 +459,6 @@ namespace dyno
 		printf("max vol: %f; min vol: %f \n", max_vol, min_vol);
 	}
 
-
-	template<typename Real, typename Coord, typename Tetrahedron, typename TDataType>
-	__global__ void K_InitTetCenterSDF(
-		DArray<Coord> posArr,
-		DArray<Tetrahedron> tets,
-		DistanceField3D<TDataType> df,
-		DArray<Real> distanceTetCenter)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= tets.size()) return;
-
-		Coord posCenter = (posArr[tets[pId][0]] + posArr[tets[pId][1]] + posArr[tets[pId][2]] + posArr[tets[pId][3]]) / 4.0f;
-		Coord normal;
-		Real dist;
-		df.getDistance(posCenter, dist, normal);
-		distanceTetCenter[pId] = dist;
-		
-	}
-
-	template<typename Real, typename Coord, typename TDataType>
-	__global__ void K_InitTetVertexSDF(
-		DArray<Coord> posArr,
-		DistanceField3D<TDataType> df,
-		DArray<Real> distanceTetVertex)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= posArr.size()) return;
-
-		Coord posCenter = posArr[pId];
-		Coord normal;
-		Real dist;
-		df.getDistance(posCenter, dist, normal);
-		distanceTetVertex[pId] = dist;
-
-	}
-
-
-
-	
-
 	template<typename TDataType>
 	void HyperelasticBody<TDataType>::loadSDF(std::string filename, bool inverted)
 	{

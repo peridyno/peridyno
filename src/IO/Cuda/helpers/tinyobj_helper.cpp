@@ -51,7 +51,7 @@ namespace dyno
 		}
 
 		shapeIds.resize(vertices.size());
-		texMesh->meshDataPtr()->shapeIds().reset();
+		texMesh->geometry()->shapeIds().reset();
 		// load texture...
 		dyno::CArray2D<dyno::Vec4f> texture(1, 1);
 		texture[0, 0] = dyno::Vec4f(1);
@@ -61,10 +61,24 @@ namespace dyno
 
 		uint mId = 0;
 		for (const auto& mtl : materials) {
-			tMats[mId] = MaterialManager::NewMaterial();
+			
 
-			tMats[mId]->outBaseColor()->setValue(Vec3f(mtl.diffuse[0], mtl.diffuse[1], mtl.diffuse[2]));
-			tMats[mId]->varRoughness()->setValue(1.0f - mtl.shininess);
+			auto findMat = MaterialManager::getMaterialPtr(mtl.name);
+			if (findMat)
+			{
+				std::cout << "The material already exists: " << mtl.name << std::endl;
+				tMats[mId] = findMat;
+
+				continue;
+			}
+
+			auto newMat = std::make_shared<Material>();
+			tMats[mId] = newMat;
+
+			MaterialManager::createMaterialLoaderModule(newMat, mtl.name);
+
+			tMats[mId]->baseColor = Color(mtl.diffuse[0], mtl.diffuse[1], mtl.diffuse[2]);
+			tMats[mId]->roughness = 1.0f - mtl.shininess;
 
 			std::shared_ptr<ImageLoader> loader = std::make_shared<ImageLoader>();
 
@@ -74,7 +88,7 @@ namespace dyno
 
 				if (loader->loadImage(tex_path.c_str(), texture))
 				{
-					tMats[mId]->outTexColor()->getDataPtr()->assign(texture);
+					tMats[mId]->texColor.assign(texture);
 				}
 			}
 			if (!mtl.bump_texname.empty())
@@ -83,9 +97,9 @@ namespace dyno
 
 				if (loader->loadImage(tex_path.c_str(), texture))
 				{
-					tMats[mId]->outTexBump()->getDataPtr()->assign(texture);
+					tMats[mId]->texBump.assign(texture);
 					auto texOpt = mtl.bump_texopt;
-					tMats[mId]->outBumpScale()->setValue(texOpt.bump_multiplier);
+					tMats[mId]->bumpScale = texOpt.bump_multiplier;
 				}
 			}
 
@@ -180,16 +194,16 @@ namespace dyno
 			sId++;
 		}
 
-		texMesh->meshDataPtr()->vertices().assign(vertices);
-		texMesh->meshDataPtr()->normals().assign(normals);
-		texMesh->meshDataPtr()->texCoords().assign(texCoords);
-		texMesh->meshDataPtr()->shapeIds().assign(shapeIds);
+		texMesh->geometry()->vertices().assign(vertices);
+		texMesh->geometry()->normals().assign(normals);
+		texMesh->geometry()->texCoords().assign(texCoords);
+		texMesh->geometry()->shapeIds().assign(shapeIds);
 
 		//A hack: for an obj file with one shape
 		if (shapes.size() == 1)
 		{
-			texMesh->meshDataPtr()->shapeIds().resize(vertices.size());
-			texMesh->meshDataPtr()->shapeIds().reset();
+			texMesh->geometry()->shapeIds().resize(vertices.size());
+			texMesh->geometry()->shapeIds().reset();
 		}
 
 		vertices.clear();

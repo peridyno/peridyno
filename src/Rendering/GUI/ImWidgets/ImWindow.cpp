@@ -662,5 +662,6 @@ void ImWindow::drawViewManipulator(Camera* camera)
 
 bool ImWindow::cameraLocked()
 {
-	return (ImGui::IsWindowFocused(ImGuiFocusedFlags_::ImGuiFocusedFlags_AnyWindow) || mDisenableCamera);
+	return mDisenableCamera;
+	//return (ImGui::IsWindowFocused(ImGuiFocusedFlags_::ImGuiFocusedFlags_AnyWindow) || mDisenableCamera);
 }

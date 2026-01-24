@@ -16,16 +16,43 @@
 
 #pragma once
 
-#include "Module/TopologyModule.h"
-#include "Primitive/Primitive3D.h"
 #include "TriangleSet.h"
-#include <set>
-#include <regex>
-#include "MaterialManager.h"
+
+#include "Field/Color.h"
+
+#include "Primitive/Primitive3D.h"
 
 namespace dyno
 {
-	
+	class Material : public Object
+	{
+	public:
+
+		Material(){};
+		~Material() override 
+		{
+			texColor.clear();
+			texBump.clear();
+			texORM.clear();
+			texAlpha.clear();
+			texEmissive.clear();
+		};
+
+		Color baseColor = Color::LightGray();
+		float metallic = 0;
+		float roughness = 0.5;
+		float alpha = 1;
+		float bumpScale = 1;
+		float emissiveIntensity = 0;
+
+		DArray2D<Vec4f> texColor;
+		DArray2D<Vec4f> texBump;
+		DArray2D<Vec4f> texORM;
+		DArray2D<Vec4f> texAlpha;
+		DArray2D<Vec4f> texEmissive;
+	};
+
+
 	class Shape : public Object
 	{
 	public:
@@ -59,12 +86,12 @@ namespace dyno
 	};
 
 
-	class MeshData : public Object
+	class Geometry : public Object
 	{
 	public:
+		Geometry() {};
+		~Geometry() { clear(); };
 
-		MeshData() {};
-		~MeshData() { clear(); };
 		void clear() 
 		{
 			mVertices.clear();
@@ -73,7 +100,7 @@ namespace dyno
 			mShapeIds.clear();
 		}
 
-		void assign(std::shared_ptr<MeshData> dataPtr)
+		void assign(std::shared_ptr<Geometry> dataPtr)
 		{
 			if (dataPtr) 
 			{
@@ -94,7 +121,6 @@ namespace dyno
 		DArray<Vec3f> mNormals;
 		DArray<Vec2f> mTexCoords;
 		DArray<uint> mShapeIds;
-
 	};
 
 	class TextureMesh : public TopologyModule
@@ -103,11 +129,11 @@ namespace dyno
 		TextureMesh();
 		~TextureMesh() override;
 
-		std::shared_ptr<MeshData>& meshDataPtr();
+		std::shared_ptr<Geometry> geometry();
 
 		std::vector<std::shared_ptr<Shape>>& shapes() { return mShapes; }
 
-		void merge(const std::shared_ptr<TextureMesh>& texMesh01, const std::shared_ptr<TextureMesh>& texMesh02);
+		void merge(const std::shared_ptr<TextureMesh> texMesh01, const std::shared_ptr<TextureMesh> texMesh02);
 
 		void clear();
 
@@ -125,7 +151,7 @@ namespace dyno
 		);
 
 	private:
-		std::shared_ptr<MeshData> mMeshData = NULL;
+		std::shared_ptr<Geometry> mMeshData = NULL;
 		std::vector<std::shared_ptr<Shape>> mShapes;
 	};
 

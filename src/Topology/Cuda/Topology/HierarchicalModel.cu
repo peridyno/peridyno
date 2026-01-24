@@ -914,8 +914,8 @@ namespace dyno
 		}
 
 		mSkinData->mesh = texMesh;
-		mSkinData->initialPosition.assign(texMesh->meshDataPtr()->vertices());
-		mSkinData->initialNormal.assign(texMesh->meshDataPtr()->normals());
+		mSkinData->initialPosition.assign(texMesh->geometry()->vertices());
+		mSkinData->initialNormal.assign(texMesh->geometry()->normals());
 
 	}
 

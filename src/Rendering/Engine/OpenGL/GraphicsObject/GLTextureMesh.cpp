@@ -123,9 +123,9 @@ namespace dyno
 		if (mesh == nullptr)
 			return;
 
-		mVertices.load(mesh->meshDataPtr()->vertices());
-		mNormal.load(mesh->meshDataPtr()->normals());
-		mTexCoord.load(mesh->meshDataPtr()->texCoords());
+		mVertices.load(mesh->geometry()->vertices());
+		mNormal.load(mesh->geometry()->normals());
+		mTexCoord.load(mesh->geometry()->texCoords());
 
 		uint shapeNum = mesh->shapes().size();
 
@@ -165,16 +165,17 @@ namespace dyno
 			if (mesh->shapes()[i]->material != NULL) 
 			{
 				std::shared_ptr<GLMaterial> currentShapeMtl = std::make_shared<GLMaterial>();
-				currentShapeMtl->baseColor = mesh->shapes()[i]->material->outBaseColor()->getValue();
-				currentShapeMtl->roughness = mesh->shapes()[i]->material->outRoughness()->getValue();
-				currentShapeMtl->metallic = mesh->shapes()[i]->material->outMetallic()->getValue();
-				currentShapeMtl->bumpScale = mesh->shapes()[i]->material->outBumpScale()->getValue();
-				currentShapeMtl->texColor.load(mesh->shapes()[i]->material->outTexColor()->getData());
-				currentShapeMtl->texBump.load(mesh->shapes()[i]->material->outTexBump()->getData());
-				currentShapeMtl->texORM.load(mesh->shapes()[i]->material->outTexORM()->getData());
-				currentShapeMtl->texAlpha.load(mesh->shapes()[i]->material->outTexAlpha()->getData());
-				currentShapeMtl->texEmissiveColor.load(mesh->shapes()[i]->material->outTexEmissive()->getData());
-				currentShapeMtl->emissiveIntensity = mesh->shapes()[i]->material->outEmissiveItensity()->getValue();
+				currentShapeMtl->baseColor = Vec3f(mesh->shapes()[i]->material->baseColor.r, mesh->shapes()[i]->material->baseColor.g, mesh->shapes()[i]->material->baseColor.b);
+				currentShapeMtl->roughness = mesh->shapes()[i]->material->roughness;
+				currentShapeMtl->metallic = mesh->shapes()[i]->material->metallic;
+				currentShapeMtl->bumpScale = mesh->shapes()[i]->material->bumpScale;
+				currentShapeMtl->alpha = mesh->shapes()[i]->material->alpha;
+				currentShapeMtl->texColor.load(mesh->shapes()[i]->material->texColor);
+				currentShapeMtl->texBump.load(mesh->shapes()[i]->material->texBump);
+				currentShapeMtl->texORM.load(mesh->shapes()[i]->material->texORM);
+				currentShapeMtl->texAlpha.load(mesh->shapes()[i]->material->texAlpha);
+				currentShapeMtl->texEmissiveColor.load(mesh->shapes()[i]->material->texEmissive);
+				currentShapeMtl->emissiveIntensity = mesh->shapes()[i]->material->emissiveIntensity;
 
 				if(mShapes[i]->material)
 					mShapes[i]->material->release();

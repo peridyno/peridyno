@@ -1,12 +1,9 @@
 #include "Module/TopologyModule.h"
-#include "Node.h"
 
 namespace dyno
 {
-IMPLEMENT_CLASS(TopologyModule)
-
 TopologyModule::TopologyModule()
-	: OBase()
+	: Object()
 	, m_topologyChanged(true)
 {
 

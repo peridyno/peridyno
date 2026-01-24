@@ -184,9 +184,9 @@ namespace dyno
 			cudaMemcpy(d_max, &max, sizeof(int), cudaMemcpyHostToDevice);
 			cudaMemcpy(d_min, &min, sizeof(int), cudaMemcpyHostToDevice);
 
-			cuExecute(inTexMesh->meshDataPtr()->shapeIds().size(),
+			cuExecute(inTexMesh->geometry()->shapeIds().size(),
 				GetShapeVerticesRange,
-				inTexMesh->meshDataPtr()->shapeIds(),
+				inTexMesh->geometry()->shapeIds(),
 				d_min,
 				d_max,
 				i
@@ -241,36 +241,36 @@ namespace dyno
 		{
 			auto id = extractId[i];
 
-			cuExecute(inTexMesh->meshDataPtr()->vertices().size(),
+			cuExecute(inTexMesh->geometry()->vertices().size(),
 				extractShapeVertices,
-				inTexMesh->meshDataPtr()->vertices(),
+				inTexMesh->geometry()->vertices(),
 				d_extractVertices,
 				d_range,
 				id,
 				verticesOffset
 			);
 
-			cuExecute(inTexMesh->meshDataPtr()->vertices().size(),
+			cuExecute(inTexMesh->geometry()->vertices().size(),
 				extractShapeVertices,
-				inTexMesh->meshDataPtr()->normals(),
+				inTexMesh->geometry()->normals(),
 				d_extractNormals,
 				d_range,
 				id,
 				verticesOffset
 			);
 
-			cuExecute(inTexMesh->meshDataPtr()->vertices().size(),
+			cuExecute(inTexMesh->geometry()->vertices().size(),
 				extractShapeVec2f,
-				inTexMesh->meshDataPtr()->texCoords(),
+				inTexMesh->geometry()->texCoords(),
 				d_extractTexCoords,
 				d_range,
 				id,
 				verticesOffset
 			);
 
-			cuExecute(inTexMesh->meshDataPtr()->vertices().size(),
+			cuExecute(inTexMesh->geometry()->vertices().size(),
 				extractShapeIds,
-				inTexMesh->meshDataPtr()->shapeIds(),
+				inTexMesh->geometry()->shapeIds(),
 				d_extractShapeIds,
 				d_range,
 				id,
@@ -331,10 +331,10 @@ namespace dyno
 
 		}
 
-		out->meshDataPtr()->vertices().assign(d_extractVertices);
-		out->meshDataPtr()->normals().assign(d_extractNormals);
-		out->meshDataPtr()->texCoords().assign(d_extractTexCoords);
-		out->meshDataPtr()->shapeIds().assign(d_extractShapeIds);
+		out->geometry()->vertices().assign(d_extractVertices);
+		out->geometry()->normals().assign(d_extractNormals);
+		out->geometry()->texCoords().assign(d_extractTexCoords);
+		out->geometry()->shapeIds().assign(d_extractShapeIds);
 
 		out->shapes() = outShapes;
 

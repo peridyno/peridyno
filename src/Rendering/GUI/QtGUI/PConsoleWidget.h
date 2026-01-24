@@ -1,11 +1,3 @@
-/*
- * @Author: unibeam98 beyondevery@live.com
- * @Date: 2024-07-08 17:42:46
- * @LastEditors: unibeam98 beyondevery@live.com
- * @LastEditTime: 2025-11-28 22:10:23
- * @FilePath: \peridyno-web\src\Rendering\GUI\QtGUI\PConsoleWidget.h
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- */
 #ifndef QCONSOLEWIDGET_H
 #define QCONSOLEWIDGET_H
 
@@ -36,12 +28,29 @@ namespace py = pybind11;
 #include <Qsci/qsciscintilla.h>
 #include <Qsci/qscilexerpython.h>
 #include <Qsci/qsciapis.h>
+#include <qmenu.h>
 
 #endif //PERIDYNO_QT_PYTHON_CONSOLE
 
 
 namespace dyno
 {
+	class PythonOutputWidget : public QWidget
+	{
+		Q_OBJECT
+	public:
+		explicit PythonOutputWidget(QWidget* parent = nullptr);
+		void appendOutput(const QString& src);
+		void appendError(const QString& src);
+		void clear();
+
+	private slots:
+		void showContextMenu(const QPoint& pos);
+
+	private:
+		QTextEdit* mOutputView;
+	};
+
 	class PConsoleWidget : public QWidget
 	{
 		Q_OBJECT
@@ -55,6 +64,8 @@ namespace dyno
 	public Q_SLOTS:
 		void execute(const std::string& src);
 
+		void upload(const std::string& src);
+
 	private:
 		std::string getPythonErrorDetails();
 
@@ -64,11 +75,15 @@ namespace dyno
 
 	private:
 		QsciScintilla* mCodeEditor;
+		PythonOutputWidget* mOutputView;
 		QsciLexerPython* mPythonLexer;
-		QPushButton* updateButton;
+		QPushButton* executeButton;
+		QPushButton* uploadButton;
+
 
 #endif //PERIDYNO_QT_PYTHON_CONSOLE
 	};
+
 }
 
 

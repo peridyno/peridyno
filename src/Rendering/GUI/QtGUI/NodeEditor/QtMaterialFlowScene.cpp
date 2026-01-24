@@ -15,31 +15,6 @@
 #include <QLineEdit>
 #include <QtWidgets>
 
-namespace dyno
-{
-	class States : public Module
-	{
-	public:
-		States() {};
-
-		bool allowExported() override { return false; }
-		bool allowImported() override { return false; }
-
-		std::string caption() { return "States"; }
-	};
-
-	class Outputs : public Module
-	{
-	public:
-		Outputs() {};
-
-		bool allowExported() override { return false; }
-		bool allowImported() override { return false; }
-
-		std::string caption() { return "Outputs"; }
-	};
-}
-
 namespace Qt
 {
 	QPointF MatStatePos = QPointF(0.0f, 0.0f);
@@ -108,9 +83,9 @@ namespace Qt
 	{
 		mEditingEnabled = true;
 
-		auto allNodes = this->allNodes();
+		auto allMaterialModuleNodes = this->allNodes();
 
-		for  (auto node : allNodes)
+		for  (auto node : allMaterialModuleNodes)
 		{
 			auto model = dynamic_cast<QtModuleWidget*>(node->nodeDataModel());
 			if (model != nullptr)
@@ -124,9 +99,9 @@ namespace Qt
 	{
 		mEditingEnabled = false;
 
-		auto allNodes = this->allNodes();
+		auto allMaterialModuleNodes = this->allNodes();
 
-		for  (auto node : allNodes)
+		for  (auto node : allMaterialModuleNodes)
 		{
 			auto model = dynamic_cast<QtModuleWidget*>(node->nodeDataModel());
 			if (model != nullptr)
@@ -304,6 +279,8 @@ namespace Qt
 
 	void QtMaterialFlowScene::reconstructActivePipeline()
 	{
+		mMaterialPipline->updateMaterialPipline();
+		//mMaterialPipline->updateExecutionQueue();
 		mMaterialPipline->forceUpdate();
 	}
 
