@@ -194,6 +194,13 @@ namespace dyno
 			contactCount++;
 		}
 
+		DYN_FUNC void pushContactReWrite(const Vector<Real, 3>& pos, const Real& dep)
+		{
+			contacts[0].position = pos;
+			contacts[0].penetration = dep;
+			contactCount = 1;
+		}
+
 		DYN_FUNC void pushContact(const TContact<Real>& contact)
 		{
 			if (contactCount >= 8) return;

@@ -657,7 +657,7 @@ namespace dyno
 		topo->fixedJoints().assign(mHostJointsFixed);
 		topo->pointJoints().assign(mHostJointsPoint);
 
-		uint os = eleOffset.checkElementOffset(ET_CAPSULE);
+		//uint os = eleOffset.checkElementOffset(ET_CAPSULE);
 
 		cuExecute(topo->ballAndSocketJoints().size(),
 			UpdateJointIndices,

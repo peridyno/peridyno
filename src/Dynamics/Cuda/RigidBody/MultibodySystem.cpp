@@ -1,6 +1,8 @@
 #include "MultibodySystem.h"
 
 #include "Module/TJSConstraintSolver.h"
+#include "Module/TJSoftConstraintSolver.h"
+#include "Module/TJConstraintSolver.h"
 #include "Module/ContactsUnion.h"
 
 #include "Collision/NeighborElementQuery.h"
@@ -28,15 +30,19 @@ namespace dyno
 		this->animationPipeline()->clear();
 
 		auto elementQuery = std::make_shared<NeighborElementQuery<TDataType>>();
-		elementQuery->varSelfCollision()->setValue(false);
+		elementQuery->varSelfCollision()->setValue(true);
 		this->stateTopology()->connect(elementQuery->inDiscreteElements());
 		this->stateCollisionMask()->connect(elementQuery->inCollisionMask());
 		this->stateAttribute()->connect(elementQuery->inAttribute());
 		this->animationPipeline()->pushModule(elementQuery);
-
+		/*
 		auto cdBV = std::make_shared<CollistionDetectionTriangleSet<TDataType>>();
 		this->stateTopology()->connect(cdBV->inDiscreteElements());
 		this->inTriangleSet()->connect(cdBV->inTriangleSet());
+		this->animationPipeline()->pushModule(cdBV);
+		*/
+		auto cdBV = std::make_shared<CollistionDetectionBoundingBox<TDataType>>();
+		this->stateTopology()->connect(cdBV->inDiscreteElements());
 		this->animationPipeline()->pushModule(cdBV);
 
 		auto merge = std::make_shared<ContactsUnion<TDataType>>();
@@ -44,7 +50,7 @@ namespace dyno
 		cdBV->outContacts()->connect(merge->inContactsB());
 		this->animationPipeline()->pushModule(merge);
 
-		auto iterSolver = std::make_shared<TJSConstraintSolver<TDataType>>();
+		auto iterSolver = std::make_shared<TJConstraintSolver<TDataType>>();
 		this->stateTimeStep()->connect(iterSolver->inTimeStep());
 		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
 		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());

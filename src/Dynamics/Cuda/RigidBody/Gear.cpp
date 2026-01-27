@@ -86,7 +86,7 @@ namespace dyno
 		ArticulatedBody<TDataType>()
 	{
 
-		/*auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
+		auto mapper = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
 		this->stateTopology()->connect(mapper->inDiscreteElements());
 		this->graphicsPipeline()->pushModule(mapper);
 
@@ -94,7 +94,7 @@ namespace dyno
 		sRender->setColor(Color(1, 1, 0));
 		sRender->setAlpha(0.5f);
 		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
-		this->graphicsPipeline()->pushModule(sRender);*/
+		this->graphicsPipeline()->pushModule(sRender);
 	}
 
 	template<typename TDataType>

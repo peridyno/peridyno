@@ -6,10 +6,10 @@
 namespace dyno
 {
 
-    #define REAL_infinity 1.0e30
-    #define	REAL_EQUAL(a,b)  (((a < b + EPSILON) && (a > b - EPSILON)) ? true : false)
-    #define REAL_GREAT(a,b) ((a > EPSILON + b)? true: false) 
-    #define REAL_LESS(a,b) ((a + EPSILON < b)? true: false)
+#define REAL_infinity 1.0e30
+#define	REAL_EQUAL(a,b)  (((a < b + EPSILON) && (a > b - EPSILON)) ? true : false)
+#define REAL_GREAT(a,b) ((a > EPSILON + b)? true: false) 
+#define REAL_LESS(a,b) ((a + EPSILON < b)? true: false)
 
     struct ClipVertex
     {
@@ -70,30 +70,30 @@ namespace dyno
 
         return false;
     }
-    
-    
+
+
     /**
      *		Ordering of the edges
-     *					   ---2  --- 
+     *					   ---2  ---
      *				   /			 /
      *				  3			    1
      *				 /			   /
-     *				  ---   0  --- 
+     *				  ---   0  ---
      *					|			 |
-     *					10			 9	
+     *					10			 9
      *					|			 |
      *	 				 ---- 4  --- ----->x
      *				|   /       |   /
      *			   11  5		8  7
      *				| /			| /
-     *				 / --- 6 --- 
+     *				 / --- 6 ---
      *             z
      */
     template<typename Real>
     //--------------------------------------------------------------------------------------------------
     DYN_FUNC void computeReferenceEdgesAndBasis(unsigned char* out, SquareMatrix<Real, 3>* basis, Vector<Real, 3>* e, const Vector<Real, 3>& eR, const Transform<Real, 3>& rtx, Vector<Real, 3> n, int axis)
     {
-        n = rtx.rotation().transpose()*n;
+        n = rtx.rotation().transpose() * n;
 
         if (axis >= 3)
             axis -= 3;
@@ -198,7 +198,7 @@ namespace dyno
     template<typename Real>
     DYN_FUNC void computeIncidentFace(ClipVertex* out, const Transform<Real, 3>& itx, const Vector<Real, 3>& e, Vector<Real, 3> n)
     {
-        n = -itx.rotation().transpose()*n;
+        n = -itx.rotation().transpose() * n;
         Vector<Real, 3> absN = abs(n);
 
         if (absN.x > absN.y && absN.x > absN.z)
@@ -285,7 +285,7 @@ namespace dyno
             // B
             if (On(da) || On(db))
             {
-                if (InFront(db) || On(db)) 
+                if (InFront(db) || On(db))
                     out[outCount++] = b;
             }
             else if ((InFront(da) && InFront(db)))
@@ -299,13 +299,13 @@ namespace dyno
                 out[outCount++] = cv;
             }
             else if (Behind(da) && InFront(db))
-			{
-				//Remove the duplicated point in case inCount == 2
-                if (inCount > 2) { 
-                    cv.v = a.v + (b.v - a.v) * (da / (da - db)); 
-                    out[outCount++] = cv; 
+            {
+                //Remove the duplicated point in case inCount == 2
+                if (inCount > 2) {
+                    cv.v = a.v + (b.v - a.v) * (da / (da - db));
+                    out[outCount++] = cv;
                 }
-				out[outCount++] = b;
+                out[outCount++] = b;
             }
 
             a = b;
@@ -325,7 +325,7 @@ namespace dyno
         ClipVertex out[8];
 
         for (int i = 0; i < 4; ++i)
-            in[i].v = basis.transpose()*(incident[i].v - rPos);
+            in[i].v = basis.transpose() * (incident[i].v - rPos);
 
         outCount = orthographic(out, Real(1.0), e.x, 0, clipEdges[0], in, inCount);
 
@@ -362,49 +362,49 @@ namespace dyno
         return outCount;
     }
 
-	template<typename Real>
-	DYN_FUNC int clipEdgeAgainstRectangle(ClipVertex* outVerts, float* outDepths, const Vector<Real, 3>& rPos, const Vector<Real, 3>& e, unsigned char* clipEdges, const SquareMatrix<Real, 3>& basis, ClipVertex* incident)
-	{
-		int inCount = 2;
-		int outCount;
-		ClipVertex in[2];
-		ClipVertex out[2];
+    template<typename Real>
+    DYN_FUNC int clipEdgeAgainstRectangle(ClipVertex* outVerts, float* outDepths, const Vector<Real, 3>& rPos, const Vector<Real, 3>& e, unsigned char* clipEdges, const SquareMatrix<Real, 3>& basis, ClipVertex* incident)
+    {
+        int inCount = 2;
+        int outCount;
+        ClipVertex in[2];
+        ClipVertex out[2];
 
-		for (int i = 0; i < inCount; ++i)
-			in[i].v = basis.transpose() * (incident[i].v - rPos);
+        for (int i = 0; i < inCount; ++i)
+            in[i].v = basis.transpose() * (incident[i].v - rPos);
 
-		outCount = orthographic(out, Real(1.0), e.x, 0, clipEdges[0], in, inCount);
+        outCount = orthographic(out, Real(1.0), e.x, 0, clipEdges[0], in, inCount);
 
-		if (outCount == 0)
-			return 0;
+        if (outCount == 0)
+            return 0;
 
-		inCount = orthographic(in, Real(1.0), e.y, 1, clipEdges[1], out, outCount);
+        inCount = orthographic(in, Real(1.0), e.y, 1, clipEdges[1], out, outCount);
 
-		if (inCount == 0)
-			return 0;
+        if (inCount == 0)
+            return 0;
 
-		outCount = orthographic(out, Real(-1.0), e.x, 0, clipEdges[2], in, inCount);
+        outCount = orthographic(out, Real(-1.0), e.x, 0, clipEdges[2], in, inCount);
 
-		if (outCount == 0)
-			return 0;
+        if (outCount == 0)
+            return 0;
 
-		inCount = orthographic(in, Real(-1.0), e.y, 1, clipEdges[3], out, outCount);
+        inCount = orthographic(in, Real(-1.0), e.y, 1, clipEdges[3], out, outCount);
 
-		// Keep incident vertices behind the reference face
-		outCount = 0;
-		for (int i = 0; i < inCount; ++i)
-		{
-			Real d = in[i].v.z - e.z;
+        // Keep incident vertices behind the reference face
+        outCount = 0;
+        for (int i = 0; i < inCount; ++i)
+        {
+            Real d = in[i].v.z - e.z;
 
-			if (d <= Real(0.0))
-			{
-				outVerts[outCount].v = basis * in[i].v + rPos;
-				outDepths[outCount++] = d;
-			}
-		}
+            if (d <= Real(0.0))
+            {
+                outVerts[outCount].v = basis * in[i].v + rPos;
+                outDepths[outCount++] = d;
+            }
+        }
 
-		return outCount;
-	}
+        return outCount;
+    }
 
     //--------------------------------------------------------------------------------------------------
     template<typename Real>
@@ -456,7 +456,7 @@ namespace dyno
                         //   |-----A-----|
                         boundaryA = upperBoundaryA;
                         boundaryB = lowerBoundaryB;
-                        intersectionDistance = - (upperBoundaryA - lowerBoundaryB);
+                        intersectionDistance = -(upperBoundaryA - lowerBoundaryB);
                     }
                     else
                     {
@@ -464,7 +464,7 @@ namespace dyno
                         //    |-----A-----|
                         boundaryA = lowerBoundaryA;
                         boundaryB = upperBoundaryB;
-                        intersectionDistance = - (upperBoundaryB - lowerBoundaryA);
+                        intersectionDistance = -(upperBoundaryB - lowerBoundaryA);
                     }
                 }
                 else
@@ -473,7 +473,7 @@ namespace dyno
                     //   |----A----|
                     boundaryA = upperBoundaryA;
                     boundaryB = lowerBoundaryB;
-                    intersectionDistance = - (upperBoundaryA - lowerBoundaryB);
+                    intersectionDistance = -(upperBoundaryA - lowerBoundaryB);
                 }
             }
             else
@@ -484,7 +484,7 @@ namespace dyno
                     //            |----A----|
                     boundaryA = lowerBoundaryA;
                     boundaryB = upperBoundaryB;
-                    intersectionDistance = - (upperBoundaryB - lowerBoundaryA);
+                    intersectionDistance = -(upperBoundaryB - lowerBoundaryA);
                 }
                 else
                 {
@@ -497,7 +497,7 @@ namespace dyno
                         //      |---A---|
                         boundaryA = upperBoundaryA;
                         boundaryB = lowerBoundaryB;
-                        intersectionDistance = - (upperBoundaryA - lowerBoundaryB);
+                        intersectionDistance = -(upperBoundaryA - lowerBoundaryB);
                     }
                     else
                     {
@@ -505,7 +505,7 @@ namespace dyno
                         //              |---A---|
                         boundaryA = lowerBoundaryA;
                         boundaryB = upperBoundaryB;
-                        intersectionDistance = - (upperBoundaryB - lowerBoundaryA);
+                        intersectionDistance = -(upperBoundaryB - lowerBoundaryA);
                     }
                 }
             }
@@ -553,8 +553,8 @@ namespace dyno
         // SDF Calculate on Convex Hull
         // - : minimum distance
         // + : maximum distance
-        currentN = ( (currentBoundaryB < currentBoundaryA) ^ (REAL_LESS(currentDepth, 0)) ) ? -currentN : currentN;
-        if (REAL_LESS(currentDepth, 0) && REAL_GREAT(currentDepth , depth))
+        currentN = ((currentBoundaryB < currentBoundaryA) ^ (REAL_LESS(currentDepth, 0))) ? -currentN : currentN;
+        if (REAL_LESS(currentDepth, 0) && REAL_GREAT(currentDepth, depth))
         {
             depth = currentDepth;
             normal = currentN;
@@ -588,7 +588,7 @@ namespace dyno
         Vec3f pB,
         const Real rA = 0.f,
         const Real rB = 0.f // for Sphere
-        )
+    )
     {
         Vec3f N = pB - pA;
         Real D = 0;
@@ -615,7 +615,7 @@ namespace dyno
         Vec3f dirA = edgeA.direction();
         Vec3f dirB = edgeB.direction();
         Segment3D proj = edgeA.proximity(edgeB);
-		Vec3f N = dirA.cross(dirB);
+        Vec3f N = dirA.cross(dirB);
         Real D = 0;
         Real bA, bB;
         if (N.norm() > EPSILON) N /= N.norm(); else return;
@@ -632,15 +632,15 @@ namespace dyno
         ShapeB& shapeB,
         const Real radiusA,
         const Real radiusB,
-		Triangle3D tri,
+        Triangle3D tri,
         SeparationType type // [faceA or faceB]
     )
-	{
-		Vec3f N = tri.normal();
-		Real D = 0;
-		Real bA, bB;
-		if (N.norm() > EPSILON) N /= N.norm(); else return;
-		checkSignedDistanceAxis(D, bA, bB, N, shapeA, shapeB, radiusA, radiusB);
+    {
+        Vec3f N = tri.normal();
+        Real D = 0;
+        Real bA, bB;
+        if (N.norm() > EPSILON) N /= N.norm(); else return;
+        checkSignedDistanceAxis(D, bA, bB, N, shapeA, shapeB, radiusA, radiusB);
         Real bb = (type == CT_TRIA) ? bA : bB;
         Real rr = (type == CT_TRIA) ? radiusA : radiusB;
         for (int i = 0; i < 3; ++i)
@@ -666,7 +666,7 @@ namespace dyno
         checkSignedDistanceAxis(D, bA, bB, N, shapeA, shapeB, radiusA, radiusB);
         Real bb = (type == CT_RECTA) ? bA : bB;
         Real rr = (type == CT_RECTA) ? radiusA : radiusB;
-        for (int i = 0; i < 4; ++i) 
+        for (int i = 0; i < 4; ++i)
             if (!checkPointInBoundary(rect.vertex(i).origin, N, bb, rr)) return;
         sat.update(type, bA, bB, D, N, rect.center, rect.axis[0], rect.axis[1], Vec3f(rect.extent[0], rect.extent[1], 0.f));
     }
@@ -751,13 +751,13 @@ namespace dyno
     {
         Triangle3D triT = Triangle3D(triA.v[0] + transA, triA.v[1] + transA, triA.v[2] + transA);
         Segment3D segT = Segment3D(segB.v0 + transB, segB.v1 + transB);
-        
+
         int num = 0;
-		Vec3f oA = triT.v[0];
-		Vec3f nA = triT.normal();
+        Vec3f oA = triT.v[0];
+        Vec3f nA = triT.normal();
         Vec3f poly[2];
 
-		num = cgeo::intrSegWithPlane(poly, oA, nA, segT.v0, segT.v1);
+        num = cgeo::intrSegWithPlane(poly, oA, nA, segT.v0, segT.v1);
         if (num > 0) num = cgeo::intrPolyWithTri(q, num, poly, triT.v[0], triT.v[1], triT.v[2]);
 
         return num;
@@ -772,7 +772,7 @@ namespace dyno
         const Vector<Real, 3>& transB
     )
     {
-        Rectangle3D rectT = rectA; rectT.center+= transA;
+        Rectangle3D rectT = rectA; rectT.center += transA;
         Segment3D segT = Segment3D(segB.v0 + transB, segB.v1 + transB);
 
         int num = 0;
@@ -781,7 +781,7 @@ namespace dyno
         Vec3f poly[2];
 
         num = cgeo::intrSegWithPlane(poly, oA, nA, segT.v0, segT.v1);
-        if(num > 0) num = cgeo::intrPolyWithRect(q, num, poly, rectT.vertex(0).origin, rectT.vertex(1).origin, rectT.vertex(2).origin, rectT.vertex(3).origin);
+        if (num > 0) num = cgeo::intrPolyWithRect(q, num, poly, rectT.vertex(0).origin, rectT.vertex(1).origin, rectT.vertex(2).origin, rectT.vertex(3).origin);
         return num;
     }
 
@@ -793,7 +793,7 @@ namespace dyno
         const Real radiusA,
         const Real radiusB)
     {
-		Real depth = sat.depth();
+        Real depth = sat.depth();
         if (sat.type() == CT_POINT || sat.type() == CT_EDGE)
         {
             Vec3f contactPoint = sat.pointB() - m.normal * radiusB;
@@ -821,35 +821,35 @@ namespace dyno
     // return the closest point on the ray
     template<typename Real>
     DYN_FUNC inline Real rayInterRound2DHalfSeg(
-		const Vec2f rayO,       //  Ray's Origin arbitraryon 2D Material Space
-		const Vec2f rayD,       //  Ray's Direction arbitraryon 2D Material Space
-		const Real halfl,	   
+        const Vec2f rayO,       //  Ray's Origin arbitraryon 2D Material Space
+        const Vec2f rayD,       //  Ray's Direction arbitraryon 2D Material Space
+        const Real halfl,
         const Real radius)      // 2D HalfSeg Space (-halfl, 0) - (halfl,0), Normal: (0,1)
     {
-		if (REAL_LESS(rayO.y, 0.f) && REAL_LESS(rayD.y, 0.f)) return -1.f;
+        if (REAL_LESS(rayO.y, 0.f) && REAL_LESS(rayD.y, 0.f)) return -1.f;
         Real t = -1.f, para = REAL_infinity; Vec2f p;
-        // check body line 
+        // check body line
         if (!REAL_EQUAL(rayD.y, 0.f))
         {
-			t = (radius - rayO.y) / rayD.y;
+            t = (radius - rayO.y) / rayD.y;
             p = rayO + rayD * t;
             if (REAL_GREAT(t, 0.f) && REAL_LESS(t, para) && REAL_GREAT(p.x, - halfl) && REAL_LESS(p.x, +halfl)) para = t;
         }
         // check left caps
-		Real a = rayD.x * rayD.x + rayD.y * rayD.y;
+        Real a = rayD.x * rayD.x + rayD.y * rayD.y;
         Real b = 2 * ((rayO.x - halfl) * rayD.x + rayO.y * rayD.y);
-		Real c = (rayO.x - halfl) * (rayO.x - halfl) + rayO.y * rayO.y - radius * radius;
-		Real h = b * b - 4 * a * c;
-		if (REAL_GREAT(h, 0.f))
-		{
+        Real c = (rayO.x - halfl) * (rayO.x - halfl) + rayO.y * rayO.y - radius * radius;
+        Real h = b * b - 4 * a * c;
+        if (REAL_GREAT(h, 0.f))
+        {
             Real sh = sqrt(h);
-			t = (-b - sh) / (2 * a);
-			p = rayO + rayD * t;
+            t = (-b - sh) / (2 * a);
+            p = rayO + rayD * t;
             if (REAL_GREAT(t, 0.f) && REAL_LESS(t, para) && REAL_GREAT(p.y, 0.f) && REAL_LESS(p.x, -halfl)) para = t;
             t = (-b + sh) / (2 * a);
             p = rayO + rayD * t;
             if (REAL_GREAT(t, 0.f) && REAL_LESS(t, para) && REAL_GREAT(p.y, 0.f) && REAL_LESS(p.x, -halfl)) para = t;
-		}
+        }
         // check right caps
         b += 4 * halfl * rayD.x;
         c += halfl * halfl + 4 * halfl * rayD.x;
@@ -871,7 +871,7 @@ namespace dyno
     template<typename Real>
     DYN_FUNC inline Vec3f rayInterRoundSeg(
         const Vec3f rayOrigin, // on seg
-		const Vec3f rayDir, // along outside normal
+        const Vec3f rayDir, // along outside normal
         Segment3D seg,
         Real radius // radius > 0
         )
@@ -882,14 +882,14 @@ namespace dyno
         if (REAL_LESS(t, 0.f))
         {
             if (REAL_EQUAL(t, -1.f) || REAL_EQUAL((rayOrigin - seg.v0).normSquared(), 0.f)) return seg.v0 + rayDir * radius;
-			d = seg.v0 - rayOrigin;
+            d = seg.v0 - rayOrigin;
         }
-        else 
+        else
         {
             if (REAL_EQUAL(t, 1.f) || REAL_EQUAL((rayOrigin - seg.v1).normSquared(), 0.f)) return seg.v1 + rayDir * radius;
             d = seg.v1 - rayOrigin;
         }
-        
+
 
         f = d.cross(rayDir);
 
@@ -899,11 +899,11 @@ namespace dyno
 
         c = d + a;
 
-		t = c.dot(a) / rayDir.dot(a);
+        t = c.dot(a) / rayDir.dot(a);
         len2 = c.normSquared();
         if (t * t < len2)
         {
-			return rayOrigin + rayDir * t;
+            return rayOrigin + rayDir * t;
         }
 
         len2 = d.normSquared();
@@ -1149,20 +1149,20 @@ namespace dyno
         p = (center - u * extent[0] + v * extent[1] - w * extent[2]);
         t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
-		p = (center - u * extent[0] + v * extent[1] + w * extent[2]);
-		t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
+        p = (center - u * extent[0] + v * extent[1] + w * extent[2]);
+        t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
-		p = (center + u * extent[0] - v * extent[1] - w * extent[2]);
-		t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
+        p = (center + u * extent[0] - v * extent[1] - w * extent[2]);
+        t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
-		p = (center + u * extent[0] - v * extent[1] + w * extent[2]);
-		t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
+        p = (center + u * extent[0] - v * extent[1] + w * extent[2]);
+        t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
-		p = (center + u * extent[0] + v * extent[1] - w * extent[2]);
-		t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
+        p = (center + u * extent[0] + v * extent[1] - w * extent[2]);
+        t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
-		p = (center + u * extent[0] + v * extent[1] + w * extent[2]);
-		t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
+        p = (center + u * extent[0] + v * extent[1] + w * extent[2]);
+        t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
         lowerBoundary -= radius;
         upperBoundary += radius;
@@ -1258,10 +1258,10 @@ namespace dyno
     // ---------------------------------------- [Sphere - Sphere] ----------------------------------------
 
     template<typename Real>
-    DYN_FUNC void CollisionDetection<Real>::MSDF(SeparationData& sat, const Sphere3D& sphereA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB) 
+    DYN_FUNC void CollisionDetection<Real>::MSDF(SeparationData& sat, const Sphere3D& sphereA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB)
     {
         auto checkAxisP = [&](Vec3f pA, Vec3f pB) { checkAxisPoint(sat, sphereA, sphereB, radiusA, radiusB, pA, pB, sphereA.radius, sphereB.radius); };
-        
+
         // Minkowski Point-Point Normal
         // check direction of minimum distance from B's Point to A's Point
         checkAxisP(sphereA.center, sphereB.center);
@@ -1307,16 +1307,16 @@ namespace dyno
         SeparationData sat;
         // Contact normal on sphereA
         MSDF(sat, segB, sphereA, radiusB, radiusA);
-		
+
         Real depth = sat.depth();
         if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
         {
             sat.reverse();              // contact normal on segB
-            m.normal = sat.normal(); 
+            m.normal = sat.normal();
             /*
             auto setupContactOnSeg = [&]()
             {
-				Vec3f contactPoint = sat.pointB() - m.normal * (radiusB);
+                Vec3f contactPoint = sat.pointB() - m.normal * (radiusB);
                 m.pushContact(contactPoint, depth);
             };
             */
@@ -1378,8 +1378,8 @@ namespace dyno
 
         if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
         {
-			sat.reverse();              // contact normal on triB
-            m.normal = sat.normal(); 
+            sat.reverse();              // contact normal on triB
+            m.normal = sat.normal();
 
             setupContactOnTri(m, sat, sphereA, triB, radiusA, radiusB);
         }
@@ -1524,7 +1524,7 @@ namespace dyno
     DYN_FUNC void CollisionDetection<Real>::MSDF(SeparationData& sat, const Segment3D& segA, const Segment3D& segB, const Real radiusA, const Real radiusB)
     {
         auto checkAxisP = [&](Vec3f pA, Vec3f pB) { checkAxisPoint(sat, segA, segB, radiusA, radiusB, pA, pB); };
-        auto checkAxisE = [&](Segment3D edgeA, Segment3D edgeB) { checkAxisEdge(sat, segA, segB, radiusA, radiusB, edgeA, edgeB);};
+        auto checkAxisE = [&](Segment3D edgeA, Segment3D edgeB) { checkAxisEdge(sat, segA, segB, radiusA, radiusB, edgeA, edgeB); };
 
         // Minkowski Point-Point Normal
         // check direction of minimum distance from B's point to A's edge
@@ -1598,10 +1598,10 @@ namespace dyno
             m.normal = sat.normal(); // contact normal on segB
             /*
             auto setupContactOnSeg = [&]()
-			{
+            {
                 Vec3f contactPoint = sat.pointB() - m.normal * radiusB;
-				m.pushContact(contactPoint, depth);
-			};
+                m.pushContact(contactPoint, depth);
+            };
             */
 
             setupContactOnSeg(m, sat, segB, radiusA, radiusB);
@@ -1621,7 +1621,7 @@ namespace dyno
         // Minkowski Face Normal
         // tri face
         checkAxisT(triA);
-        
+
         // Minkowski Edge-Edge Normal
         // segA x segB
         checkAxisE(Segment3D(triA.v[0], triA.v[1]), segB);
@@ -1669,7 +1669,7 @@ namespace dyno
         Vec3f axisTmp;
 
         // Minkowski Face Normal
-        // 1. tri face 
+        // 1. tri face
         axisTmp = triA.normal();
         checkAxis(axisTmp);
 
@@ -1725,7 +1725,7 @@ namespace dyno
 
         if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
         {
-			sat.reverse();              // contact normal on triB
+            sat.reverse();              // contact normal on triB
             m.normal = sat.normal(); // contact normal on triB
 
             setupContactOnTri(m, sat, segA, triB, radiusA, radiusB);
@@ -1741,14 +1741,14 @@ namespace dyno
         auto checkAxisP = [&](Vec3f pA, Vec3f pB) { checkAxisPoint(sat, tetA, segB, radiusA, radiusB, pA, pB); };
         auto checkAxisE = [&](Segment3D edgeA, Segment3D edgeB) { checkAxisEdge(sat, tetA, segB, radiusA, radiusB, edgeA, edgeB); };
         auto checkAxisT = [&](Triangle3D face) { checkAxisTri(sat, tetA, segB, radiusA, radiusB, face, SeparationType::CT_TRIA); };
-        
+
         // Minkowski Face Normal
         // tet face
         checkAxisT(tetA.face(0));
         checkAxisT(tetA.face(1));
         checkAxisT(tetA.face(2));
         checkAxisT(tetA.face(3));
-        
+
         // Minkowski Edge-Edge Normal
         // tetA x segB
         checkAxisE(Segment3D(tetA.v[0], tetA.v[1]), segB);
@@ -1831,7 +1831,7 @@ namespace dyno
         Tet3D tet,
         const Real radiusA,
         const Real radiusB,
-        const Real depth, // <0 
+        const Real depth, // <0
         TManifold<Real>& m)
     {
         //Gen contact point on tet
@@ -1857,7 +1857,7 @@ namespace dyno
             // inter & prox
             auto minPQ = seg.proximity(tri);
             // -: outside
-            // +: inside 
+            // +: inside
             Real gap = (Nz.dot(minPQ.direction()) < 0) ? radiusA + radiusB : radiusB;
             setContact(minPQ, gap);
 
@@ -2012,7 +2012,7 @@ namespace dyno
             checkAxis(axisTmp);
         }
     }
-    
+
 
     template<typename Real>
     DYN_FUNC inline void setupContactOnBox(
@@ -2020,7 +2020,7 @@ namespace dyno
         OrientedBox3D box,
         const Real radiusA,
         const Real radiusB,
-        const Real depth, // <0 
+        const Real depth, // <0
         TManifold<Real>& m)
     {
         //Gen contact point on box
@@ -2137,7 +2137,7 @@ namespace dyno
         auto checkAxisP = [&](Vec3f pA, Vec3f pB) { checkAxisPoint(sat, triA, triB, radiusA, radiusB, pA, pB); };
         auto checkAxisE = [&](Segment3D edgeA, Segment3D edgeB) { checkAxisEdge(sat, triA, triB, radiusA, radiusB, edgeA, edgeB); };
         auto checkAxisT = [&](Triangle3D face, auto type) { checkAxisTri(sat, triA, triB, radiusA, radiusB, face, type); };
-        
+
         // Minkowski Face Normal
         // tri face
         checkAxisT(triA, SeparationType::CT_TRIA);
@@ -2146,13 +2146,13 @@ namespace dyno
 
         // Minkowski Edge-Edge Normal
         // triA x triB
-		for (int i = 0; i < 3; i++)
-			for (int j = 0; j < 3; j++)
-			{
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+            {
                 int ni = (i == 2) ? 0 : i + 1;
                 int nj = (j == 2) ? 0 : j + 1;
-				checkAxisE(Segment3D(triA.v[i], triA.v[ni]), Segment3D(triB.v[j], triB.v[nj]));
-			}
+                checkAxisE(Segment3D(triA.v[i], triA.v[ni]), Segment3D(triB.v[j], triB.v[nj]));
+            }
 
         // Minkowski Point-Point Normal
         for (int j = 0; j < 3; j++)
@@ -2350,7 +2350,7 @@ namespace dyno
         if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
         {
             sat.reverse();          // contact normal on tetB
-            m.normal = sat.normal(); 
+            m.normal = sat.normal();
 
             setupContactOnTet(m, sat, triA, tetB, radiusA, radiusB);
         }
@@ -2454,7 +2454,7 @@ namespace dyno
                 checkAxis(axisTmp);
             }
         }
-        
+
         // Minkowski Point-Edge Normal
         // check direction of minimum distance from B's point to A's edge
         for (int j = 0; j < 3; j++)
@@ -2527,13 +2527,13 @@ namespace dyno
 
         // Minkowski Edge-Edge Normal
         // tetA x tetB
-		for (int i = 0; i < 6; i++)
+        for (int i = 0; i < 6; i++)
             for (int j = 0; j < 6; j++)
             {
-				Segment3D edgeA = tetA.edge(i);
-				Segment3D edgeB = tetB.edge(j);
-				checkAxisE(edgeA, edgeB);
-			}
+                Segment3D edgeA = tetA.edge(i);
+                Segment3D edgeB = tetB.edge(j);
+                checkAxisE(edgeA, edgeB);
+            }
 
         // Minkowski Point-Point Normal
         // check direction of minimum distance from B's point to A's edge
@@ -2768,7 +2768,7 @@ namespace dyno
     }
 
     // ---------------------------------------- [Box - Box] ----------------------------------------
-    
+
     template<typename Real>
     DYN_FUNC void CollisionDetection<Real>::MSDF(SeparationData& sat, const OBox3D& boxA, const OBox3D& boxB, const Real radiusA, const Real radiusB)
     {
@@ -2886,7 +2886,7 @@ namespace dyno
     template<typename Real>
     DYN_FUNC void computeSupportEdge(Vector<Real, 3>& aOut, Vector<Real, 3>& bOut, const SquareMatrix<Real, 3>& rot, const Vector<Real, 3>& trans, const Vector<Real, 3>& e, Vector<Real, 3> n)
     {
-        n = rot.transpose()*n;
+        n = rot.transpose() * n;
         Vector<Real, 3> absN = abs(n);
         Vector<Real, 3> a, b;
 
@@ -3253,11 +3253,11 @@ namespace dyno
         bool overlap = true;
         //If parallel
         if (parallel)
-		{
+        {
             TLine3D<Real> line(s0.v0, s0.direction());
 
-			TPoint3D<Real> p0 = TPoint3D<Real>(s1.v0).project(line);
-			TPoint3D<Real> p1 = TPoint3D<Real>(s1.v1).project(line);
+            TPoint3D<Real> p0 = TPoint3D<Real>(s1.v0).project(line);
+            TPoint3D<Real> p1 = TPoint3D<Real>(s1.v1).project(line);
 
             Vector<Real, 3> dir = s1.v0 - p0.origin;
             Real d = dir.norm();
@@ -3266,21 +3266,21 @@ namespace dyno
             if (interpenetration >= 0)
                 return;
 
-			Real t0 = s0.parameter(p0.origin);
-			Real t1 = s0.parameter(p1.origin);
+            Real t0 = s0.parameter(p0.origin);
+            Real t1 = s0.parameter(p1.origin);
 
             auto interval = Interval<Real>(0, 1).intersect(Interval<Real>(t0, t1));
 
             if (!interval.isEmpty())
             {
-				Vector<Real, 3> clamp_p0 = s0.v0 + interval.leftLimit() * s0.direction();
-				Vector<Real, 3> clamp_p1 = s0.v0 + interval.rightLimit() * s0.direction();
+                Vector<Real, 3> clamp_p0 = s0.v0 + interval.leftLimit() * s0.direction();
+                Vector<Real, 3> clamp_p1 = s0.v0 + interval.rightLimit() * s0.direction();
 
-				m.normal = dir.normalize();
-				m.contacts[0].penetration = interpenetration;
-				m.contacts[0].position = clamp_p0 + (cap0.radius + interpenetration) * m.normal;
-				m.contacts[1].penetration = interpenetration;
-				m.contacts[1].position = clamp_p1 + (cap0.radius + interpenetration) * m.normal;
+                m.normal = dir.normalize();
+                m.contacts[0].penetration = interpenetration;
+                m.contacts[0].position = clamp_p0 + (cap0.radius + interpenetration) * m.normal;
+                m.contacts[1].penetration = interpenetration;
+                m.contacts[1].position = clamp_p1 + (cap0.radius + interpenetration) * m.normal;
                 m.contactCount = 2;
             }
             else
@@ -3288,22 +3288,22 @@ namespace dyno
                 overlap = false;
             }
         }
-       
+
         if (!parallel || (parallel && !overlap))
         {
-			// From cap0 to cap1
-			Segment3D dir = s0.proximity(s1);
+            // From cap0 to cap1
+            Segment3D dir = s0.proximity(s1);
 
-			dir = Point3D(dir.endPoint()) - Point3D(dir.startPoint());
+            dir = Point3D(dir.endPoint()) - Point3D(dir.startPoint());
 
-			Real sMax = dir.direction().norm() - r0;
-			if (sMax >= 0)
-				return;
+            Real sMax = dir.direction().norm() - r0;
+            if (sMax >= 0)
+                return;
 
-			m.normal = dir.direction().normalize();
-			m.contacts[0].penetration = sMax;
-			m.contacts[0].position = dir.v0 + (cap0.radius + sMax) * m.normal;
-			m.contactCount = 1;
+            m.normal = dir.direction().normalize();
+            m.contacts[0].penetration = sMax;
+            m.contacts[0].position = dir.v0 + (cap0.radius + sMax) * m.normal;
+            m.contactCount = 1;
         }
     }
 
@@ -3352,7 +3352,7 @@ namespace dyno
         const Vector<Real, 3> axisNormal,
         OrientedBox3D box,
         Capsule3D cap
-        )
+    )
     {
 
         //projection to axis
@@ -3362,7 +3362,7 @@ namespace dyno
         upperBoundary1 = seg.v0.dot(axisNormal) + cap.radius;
         lowerBoundary1 = glm::min(lowerBoundary1, seg.v1.dot(axisNormal) - cap.radius);
         upperBoundary1 = glm::max(upperBoundary1, seg.v1.dot(axisNormal) + cap.radius);
-        
+
 
         Vector<Real, 3> center = box.center;
         Vector<Real, 3> u = box.u;
@@ -3498,7 +3498,7 @@ namespace dyno
         {
             if (i == 0)
             {
-                
+
                 lowerBoundary2 = upperBoundary2 = tet.v[0].dot(axisNormal);
             }
             else
@@ -3508,7 +3508,7 @@ namespace dyno
             }
         }
 
-        
+
         return checkOverlapTetTri(lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2, intersectionDistance, boundary1, boundary2);
     }
 
@@ -3527,11 +3527,11 @@ namespace dyno
         // On box vertex
 
         // On box edge
-        
+
         // On box face
 
         int cnt1, cnt2;
-        Vector<Real, 3> boundaryPoints1[4]; 
+        Vector<Real, 3> boundaryPoints1[4];
         Vector<Real, 3> boundaryPoints2[8];
         cnt1 = cnt2 = 0;
 
@@ -3539,9 +3539,9 @@ namespace dyno
         Real boundaryMax = glm::max(boundary1, boundary2);
         if (abs(cap.startPoint().dot(axisNormal) - boundaryMin) < abs(depth))
             boundaryPoints1[cnt1++] = cap.startPoint();
-        if (abs(cap.endPoint().dot(axisNormal)  - boundaryMin) < abs(depth))
+        if (abs(cap.endPoint().dot(axisNormal) - boundaryMin) < abs(depth))
             boundaryPoints1[cnt1++] = cap.endPoint();
-        
+
 
         Vector<Real, 3> center = box.center;
         Vector<Real, 3> u = box.u;
@@ -3698,7 +3698,7 @@ namespace dyno
                 }
             }
         }
-        
+
     }
 
     template<typename Real>
@@ -3720,14 +3720,14 @@ namespace dyno
         for (unsigned char i = 0; i < 4; i++)
         {
             if (abs(tet.v[i].dot(axisNormal) - boundary1) < abs(sMax))
-                boundaryPoints1[cnt1 ++] = i;
+                boundaryPoints1[cnt1++] = i;
         }
 
         if (abs(cap.startPoint().dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
             ||
             abs(cap.startPoint().dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
-            boundaryPoints2[cnt2 ++] = 0;
-        
+            boundaryPoints2[cnt2++] = 0;
+
         if (abs(cap.endPoint().dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
             ||
             abs(cap.endPoint().dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
@@ -3803,7 +3803,7 @@ namespace dyno
                     }
                 }
             }
-            
+
         }
     }
 
@@ -3883,7 +3883,7 @@ namespace dyno
                 {
                     Segment3D s2(t2.v[(i + 1) % 3], t2.v[(i + 2) % 3]);
                     Segment3D dir = s1.proximity(s2);
-                    
+
                     if ((!dir.isValid()) || dir.direction().normalize().cross(axisNormal).norm() < 1e-5)
                     {
                         //printf("Yes\n");
@@ -3993,13 +3993,13 @@ namespace dyno
 
         Vector<Real, 3> boxExt = box.extent;
 
-		Matrix3D rotBox;
+        Matrix3D rotBox;
         rotBox.setCol(0, box.u);
         rotBox.setCol(1, box.v);
         rotBox.setCol(2, box.w);
 
-		// Vector from capsule to box in box's space
-		Vector<Real, 3> t = rotBox.transpose() * v;
+        // Vector from capsule to box in box's space
+        Vector<Real, 3> t = rotBox.transpose() * v;
 
         // Rotation of capsule in box's space
         Matrix3D C = rotBox.transpose() * rotCap;
@@ -4007,14 +4007,14 @@ namespace dyno
         auto centerline = cap.centerline().direction();
         Vector<Real, 3> nCapLocal = rotBox.transpose() * centerline.normalize();
 
-		bool parallel = false;
-		const float kCosTol = float(1.0e-6);
+        bool parallel = false;
+        const float kCosTol = float(1.0e-6);
         Matrix3D absC;
         for (int i = 0; i < 3; ++i)
         {
             float val = abs(nCapLocal[i]);
-			if (val <= kCosTol)
-				parallel = true;
+            if (val <= kCosTol)
+                parallel = true;
 
             for (int j = 0; j < 3; ++j)
             {
@@ -4024,63 +4024,63 @@ namespace dyno
 
         Matrix3D absC_t = absC.transpose();
 
-		// Query states
-		Real s;
-		Real bMax = -REAL_MAX;
+        // Query states
+        Real s;
+        Real bMax = -REAL_MAX;
         Real eMax = -REAL_MAX;
         Real dirMax = -REAL_MAX;
-		int bAxis = ~0;
-		int eAxis = ~0;
+        int bAxis = ~0;
+        int eAxis = ~0;
         int dirAxis = ~0;
-		Vector<Real, 3> nB;
-		Vector<Real, 3> nE;
+        Vector<Real, 3> nB;
+        Vector<Real, 3> nE;
         Vector<Real, 3> nDir;
 
         // box's x axis
         s = abs(t.x) - (box.extent.x + absC_t.col(0).dot(Vector<Real, 3>(0, capExtent, 0))) - radius;
-		if (trackFaceAxis(bAxis, bMax, nB, 0, s, rotBox.col(0)))
-			return;
+        if (trackFaceAxis(bAxis, bMax, nB, 0, s, rotBox.col(0)))
+            return;
 
         // box's y axis
-		s = abs(t.y) - (box.extent.y + absC_t.col(1).dot(Vector<Real, 3>(0, capExtent, 0))) - radius;
-		if (trackFaceAxis(bAxis, bMax, nB, 1, s, rotBox.col(1)))
+        s = abs(t.y) - (box.extent.y + absC_t.col(1).dot(Vector<Real, 3>(0, capExtent, 0))) - radius;
+        if (trackFaceAxis(bAxis, bMax, nB, 1, s, rotBox.col(1)))
             return;
 
         // box's z axis
-		s = abs(t.z) - (box.extent.z + absC_t.col(2).dot(Vector<Real, 3>(0, capExtent, 0))) - radius;
-		if (trackFaceAxis(bAxis, bMax, nB, 2, s, rotBox.col(2)))
+        s = abs(t.z) - (box.extent.z + absC_t.col(2).dot(Vector<Real, 3>(0, capExtent, 0))) - radius;
+        if (trackFaceAxis(bAxis, bMax, nB, 2, s, rotBox.col(2)))
             return;
-		
+
         if (!parallel)
         {
-			// Edge axis checks
-			float rA;
-			float rB;
+            // Edge axis checks
+            float rA;
+            float rB;
             Vector<Real, 3> eSepAxis;
 
             // Cross( box.x, centerline )
             eSepAxis = Vector<Real, 3>(Real(0), -nCapLocal.z, nCapLocal.y);
-			rA = boxExt.y * abs(nCapLocal.z) + boxExt.z * abs(nCapLocal.y);
-			rB = radius * eSepAxis.norm();
-			s = abs(t.z * nCapLocal.y - t.y * nCapLocal.z) - (rA + rB);
-			if (trackEdgeAxis(eAxis, eMax, nE, 3, s, eSepAxis))
-				return;
+            rA = boxExt.y * abs(nCapLocal.z) + boxExt.z * abs(nCapLocal.y);
+            rB = radius * eSepAxis.norm();
+            s = abs(t.z * nCapLocal.y - t.y * nCapLocal.z) - (rA + rB);
+            if (trackEdgeAxis(eAxis, eMax, nE, 3, s, eSepAxis))
+                return;
 
-			// Cross( box.y, centerline )
-			eSepAxis = Vector<Real, 3>(nCapLocal.z, Real(0), -nCapLocal.x);
-			rA = boxExt.x * abs(nCapLocal.z) + boxExt.z * abs(nCapLocal.x);
-			rB = radius * eSepAxis.norm();
-			s = abs(t.x * nCapLocal.z - t.z * nCapLocal.x) - (rA + rB);
-			if (trackEdgeAxis(eAxis, eMax, nE, 4, s, eSepAxis))
-				return;
+            // Cross( box.y, centerline )
+            eSepAxis = Vector<Real, 3>(nCapLocal.z, Real(0), -nCapLocal.x);
+            rA = boxExt.x * abs(nCapLocal.z) + boxExt.z * abs(nCapLocal.x);
+            rB = radius * eSepAxis.norm();
+            s = abs(t.x * nCapLocal.z - t.z * nCapLocal.x) - (rA + rB);
+            if (trackEdgeAxis(eAxis, eMax, nE, 4, s, eSepAxis))
+                return;
 
-			// Cross( box.z, centerline )
-			eSepAxis = Vector<Real, 3>(-nCapLocal.y, nCapLocal.x, Real(0));
-			rA = boxExt.x * abs(nCapLocal.y) + boxExt.y * abs(nCapLocal.x);
-			rB = radius * eSepAxis.norm();
-			s = abs(t.y * nCapLocal.x - t.x * nCapLocal.y) - (rA + rB);
-			if (trackEdgeAxis(eAxis, eMax, nE, 5, s, eSepAxis))
-				return;
+            // Cross( box.z, centerline )
+            eSepAxis = Vector<Real, 3>(-nCapLocal.y, nCapLocal.x, Real(0));
+            rA = boxExt.x * abs(nCapLocal.y) + boxExt.y * abs(nCapLocal.x);
+            rB = radius * eSepAxis.norm();
+            s = abs(t.y * nCapLocal.x - t.x * nCapLocal.y) - (rA + rB);
+            if (trackEdgeAxis(eAxis, eMax, nE, 5, s, eSepAxis))
+                return;
         }
 
         TSegment3D<Real> interSeg(Vector<Real, 3>(0), Vector<Real, 3>(0));
@@ -4095,52 +4095,52 @@ namespace dyno
 
             Vector<Real, 3> dirSepAxis = prox.direction();
             s = dirSepAxis.norm() * dirSepAxis.norm() - radius * dirSepAxis.norm();
-			if (trackEdgeAxis(dirAxis, dirMax, nDir, 6, s, dirSepAxis))
-				return;
-		}
+            if (trackEdgeAxis(dirAxis, dirMax, nDir, 6, s, dirSepAxis))
+                return;
+        }
 
-		// Artificial axis bias to improve frame coherence
-		const float kRelTol = float(0.95);
-		const float kAbsTol = float(0.01);
+        // Artificial axis bias to improve frame coherence
+        const float kRelTol = float(0.95);
+        const float kAbsTol = float(0.01);
         const float kAbsTol2 = float(0.00001);
-		int axis;
-		float sMax;
+        int axis;
+        float sMax;
         float ebMax = std::max(eMax, bMax);
-		Vector<Real, 3> n;
+        Vector<Real, 3> n;
 
         if (intersected)
-		{
-			axis = bAxis;
-			sMax = bMax;
-			n = nB;
+        {
+            axis = bAxis;
+            sMax = bMax;
+            n = nB;
         }
         else
         {
-			if (dirMax > ebMax + kAbsTol2)
-			{
-				axis = dirAxis;
-				sMax = dirMax;
-				n = nDir;
-			}
-			else
-			{
-				if (kRelTol * eMax > bMax + kAbsTol)
-				{
-					axis = eAxis;
-					sMax = eMax;
-					n = nE;
-				}
-				else
-				{
-					axis = bAxis;
-					sMax = bMax;
-					n = nB;
-				}
-			}
+            if (dirMax > ebMax + kAbsTol2)
+            {
+                axis = dirAxis;
+                sMax = dirMax;
+                n = nDir;
+            }
+            else
+            {
+                if (kRelTol * eMax > bMax + kAbsTol)
+                {
+                    axis = eAxis;
+                    sMax = eMax;
+                    n = nE;
+                }
+                else
+                {
+                    axis = bAxis;
+                    sMax = bMax;
+                    n = nB;
+                }
+            }
         }
 
-		if (n.dot(v) < float(0.0))
-			n = -n;
+        if (n.dot(v) < float(0.0))
+            n = -n;
 
         if (axis < 3)
         {
@@ -4152,62 +4152,62 @@ namespace dyno
 
             TSegment3D<Real> centerline_inter;
             auto num = centerline_translated.intersect(box, centerline_inter);
-            
+
             ClipVertex incident[2];
             incident[0].v = p0;
             incident[1].v = p1;
 
             Transform3D rtx(box.center, rotBox);
 
-			unsigned char clipEdges[4];
-			Matrix3D basis;
-			Vector<Real, 3> e;
-			computeReferenceEdgesAndBasis(clipEdges, &basis, &e, boxExt, rtx, n, axis);
+            unsigned char clipEdges[4];
+            Matrix3D basis;
+            Vector<Real, 3> e;
+            computeReferenceEdgesAndBasis(clipEdges, &basis, &e, boxExt, rtx, n, axis);
 
-			// Clip the incident face against the reference face side planes
-			ClipVertex out[2];
-			float depths[2];
-			int outNum;
-			outNum = clipEdgeAgainstRectangle(out, depths, rtx.translation(), e, clipEdges, basis, incident);
+            // Clip the incident face against the reference face side planes
+            ClipVertex out[2];
+            float depths[2];
+            int outNum;
+            outNum = clipEdgeAgainstRectangle(out, depths, rtx.translation(), e, clipEdges, basis, incident);
 
-			if (outNum)
-			{
-				m.contactCount = outNum;
-				m.normal = n;
+            if (outNum)
+            {
+                m.contactCount = outNum;
+                m.normal = n;
 
-				for (int i = 0; i < outNum; ++i)
-				{
+                for (int i = 0; i < outNum; ++i)
+                {
                     m.contacts[i].position = out[i].v;
-					m.contacts[i].penetration = depths[i];
-				}
-			}
+                    m.contacts[i].penetration = depths[i];
+                }
+            }
         }
         else if (axis < 6)
         {
-			n = rotBox * n;
+            n = rotBox * n;
 
-			Vector<Real, 3> PA, QA;
-			computeSupportEdge(PA, QA, rotBox, box.center, boxExt, n);
+            Vector<Real, 3> PA, QA;
+            computeSupportEdge(PA, QA, rotBox, box.center, boxExt, n);
 
             Vector<Real, 3> PB = cap.startPoint();
             Vector<Real, 3> QB = cap.endPoint();
 
-			Vector<Real, 3> CA, CB;
-			edgesContact(CA, CB, PA, QA, PB, QB);
+            Vector<Real, 3> CA, CB;
+            edgesContact(CA, CB, PA, QA, PB, QB);
 
-			m.normal = n;
-			m.contactCount = 1;
+            m.normal = n;
+            m.contactCount = 1;
 
-			m.contacts[0].penetration = sMax;
-			m.contacts[0].position = CB - radius * n;
+            m.contacts[0].penetration = sMax;
+            m.contacts[0].position = CB - radius * n;
         }
         else
         {
-			m.normal = n;
-			m.contactCount = 1;
+            m.normal = n;
+            m.contactCount = 1;
 
-			m.contacts[0].penetration = sMax;
-			m.contacts[0].position = prox.v0 - radius * n;
+            m.contacts[0].penetration = sMax;
+            m.contacts[0].position = prox.v0 - radius * n;
         }
     }
 
@@ -4215,7 +4215,7 @@ namespace dyno
     DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Capsule3D& cap, const OBox3D& box)
     {
         request(m, box, cap);
-        
+
         swapContactPair(m);
     }
 
@@ -4233,7 +4233,7 @@ namespace dyno
 
         Real boundary1, boundary2, b1, b2;
 
-    
+
 
         for (int i = 0; i < 4; i++)
         {
@@ -4301,7 +4301,7 @@ namespace dyno
         };
 
         for (int i = 0; i < 6; i++)
-            for(int j = 0; j < 3; j ++)
+            for (int j = 0; j < 3; j++)
             {
                 Vector<Real, 3> dirTet = tet.v[segmentIndex[i][0]] - tet.v[segmentIndex[i][1]];
                 Vector<Real, 3> dirTri = tri.v[triIndex[j][0]] - tri.v[triIndex[j][1]];
@@ -4477,7 +4477,7 @@ namespace dyno
             Vector<Real, 3> dirTet = tet.v[segmentIndex[i][0]] - tet.v[segmentIndex[i][1]];
             Vector<Real, 3> dirCap = cap.centerline().direction();
 
-            
+
 
             axisTmp = dirTet.cross(dirCap);
             if (axisTmp.norm() > EPSILON)
@@ -4512,7 +4512,7 @@ namespace dyno
                 }
             }
         }
-        
+
         setupContactTets(boundary1, boundary2, axis, tet, cap, -sMax, m);
 
         for (uint i = 0; i < m.contactCount; i++)
@@ -4525,7 +4525,7 @@ namespace dyno
     DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Tet3D& tet, const Capsule3D& cap)
     {
         request(m, cap, tet);
-        
+
         swapContactPair(m);
     }
 
@@ -4561,7 +4561,7 @@ namespace dyno
 
     template<typename Real>
     DYN_FUNC inline bool checkOverlap(
-        Real lowerBoundary1, 
+        Real lowerBoundary1,
         Real upperBoundary1, // A
         Real lowerBoundary2,
         Real upperBoundary2, // B
@@ -4677,7 +4677,7 @@ namespace dyno
             }
         }
 
-        /*printf(" axis = %.3lf  %.3lf  %.3lf\nlb1 = %.3lf lb2 = %.3lf\nub1 = %.3lf ub2 = %.3lf\n", 
+        /*printf(" axis = %.3lf  %.3lf  %.3lf\nlb1 = %.3lf lb2 = %.3lf\nub1 = %.3lf ub2 = %.3lf\n",
             axisNormal[0], axisNormal[1], axisNormal[2],
             lowerBoundary1, lowerBoundary2,
             upperBoundary1, upperBoundary2
@@ -4716,7 +4716,7 @@ namespace dyno
 
         for (int i = 0; i < 3; i++)
         {
-            if(i == 0)
+            if (i == 0)
                 lowerBoundary2 = upperBoundary2 = tri.v[i].dot(axisNormal);
             else
             {
@@ -4724,7 +4724,7 @@ namespace dyno
                 upperBoundary2 = glm::max(upperBoundary2, tri.v[i].dot(axisNormal));
             }
         }
-        
+
         return false;//(lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2, intersectionDistance, boundary1, boundary2);
     }
 
@@ -4763,7 +4763,7 @@ namespace dyno
         Vector<Real, 3> p;
         p = (center - u * extent[0] - v * extent[1] - w * extent[2]);
         lowerBoundary2 = upperBoundary2 = p.dot(axisNormal);
-        
+
         p = (center - u * extent[0] - v * extent[1] + w * extent[2]);
         lowerBoundary2 = glm::min(lowerBoundary2, p.dot(axisNormal));
         upperBoundary2 = glm::max(upperBoundary2, p.dot(axisNormal));
@@ -4771,11 +4771,11 @@ namespace dyno
         p = (center - u * extent[0] + v * extent[1] - w * extent[2]);
         lowerBoundary2 = glm::min(lowerBoundary2, p.dot(axisNormal));
         upperBoundary2 = glm::max(upperBoundary2, p.dot(axisNormal));
-        
+
         p = (center - u * extent[0] + v * extent[1] + w * extent[2]);
         lowerBoundary2 = glm::min(lowerBoundary2, p.dot(axisNormal));
         upperBoundary2 = glm::max(upperBoundary2, p.dot(axisNormal));
-        
+
         p = (center + u * extent[0] - v * extent[1] - w * extent[2]);
         lowerBoundary2 = glm::min(lowerBoundary2, p.dot(axisNormal));
         upperBoundary2 = glm::max(upperBoundary2, p.dot(axisNormal));
@@ -4791,7 +4791,7 @@ namespace dyno
         p = (center + u * extent[0] + v * extent[1] + w * extent[2]);
         lowerBoundary2 = glm::min(lowerBoundary2, p.dot(axisNormal));
         upperBoundary2 = glm::max(upperBoundary2, p.dot(axisNormal));
-        
+
         return checkOverlap(lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2, intersectionDistance, boundary1, boundary2);
     }
 
@@ -4810,20 +4810,20 @@ namespace dyno
         unsigned char boundaryPoints1[4], boundaryPoints2[4];
         cnt1 = cnt2 = 0;
 
-        
+
 
         for (unsigned char i = 0; i < 4; i++)
         {
             if (abs(tet1.v[i].dot(axisNormal) - boundary1) < abs(sMax))
-                boundaryPoints1[cnt1 ++] = i;
+                boundaryPoints1[cnt1++] = i;
             if (abs(tet2.v[i].dot(axisNormal) - boundary2) < abs(sMax))
-                boundaryPoints2[cnt2 ++] = i;
+                boundaryPoints2[cnt2++] = i;
         }
         //printf("cnt1 = %d, cnt2 = %d\n", cnt1, cnt2);
         if (cnt1 == 1 || cnt2 == 1)
         {
-            
-            m.normal = (boundary1 > boundary2) ? axisNormal : - axisNormal;
+
+            m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
             m.contacts[0].penetration = sMax;
             m.contacts[0].position = (cnt1 == 1) ? tet1.v[boundaryPoints1[0]] : tet2.v[boundaryPoints2[0]];
             m.contactCount = 1;
@@ -4832,7 +4832,7 @@ namespace dyno
         else if (cnt1 == 2)
         {
             Segment3D s1(tet1.v[boundaryPoints1[0]], tet1.v[boundaryPoints1[1]]);
-            
+
             if (cnt2 == 2)
             {
                 Segment3D s2(tet2.v[boundaryPoints2[0]], tet2.v[boundaryPoints2[1]]);
@@ -4850,12 +4850,12 @@ namespace dyno
                 Triangle3D t2(tet2.v[boundaryPoints2[0]], tet2.v[boundaryPoints2[1]], tet2.v[boundaryPoints2[2]]);
                 Vector<Real, 3> dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
                 Vector<Real, 3> dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
-                
+
                 if (dirTmp1.cross(axisNormal).norm() < 1e-5)
                 {
                     m.contacts[m.contactCount].penetration = sMax;
                     m.contacts[m.contactCount].position = s1.v0;
-                    m.contactCount ++;
+                    m.contactCount++;
                 }
                 if (dirTmp2.cross(axisNormal).norm() < 1e-5)
                 {
@@ -4863,7 +4863,7 @@ namespace dyno
                     m.contacts[m.contactCount].position = s1.v1;
                     m.contactCount++;
                 }
-                
+
                 for (int i = 0; i < 3; i++)
                 {
                     Segment3D s2(t2.v[(i + 1) % 3], t2.v[(i + 2) % 3]);
@@ -4874,9 +4874,9 @@ namespace dyno
                         dir.direction().normalize().cross(axisNormal).norm());*/
                     if ((!dir.isValid()) ||
                         (
-                        (dir.direction().dot(s1.direction()) < 1e-5) && (dir.direction().dot(s2.direction()) < 1e-5)
+                            (dir.direction().dot(s1.direction()) < 1e-5) && (dir.direction().dot(s2.direction()) < 1e-5)
                             ))
-                    //if(dir.norm() < 1e5)
+                        //if(dir.norm() < 1e5)
                     {
                         //printf("Yes\n");
                         if ((dir.v0 - s1.v0).norm() > 1e-5 && (dir.v0 - s1.v1).norm() > 1e-5)
@@ -4898,7 +4898,7 @@ namespace dyno
                 Segment3D s2(tet2.v[boundaryPoints2[0]], tet2.v[boundaryPoints2[1]]);
                 m.contactCount = 0;
                 m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
-                
+
                 Vector<Real, 3> dirTmp1 = Point3D(s2.v0).project(t1).origin - s2.v0;
                 Vector<Real, 3> dirTmp2 = Point3D(s2.v1).project(t1).origin - s2.v1;
                 if (dirTmp1.cross(axisNormal).norm() < 1e-5)
@@ -4914,15 +4914,15 @@ namespace dyno
                     m.contacts[m.contactCount].position = s2.v1;
                     m.contactCount++;
                 }
-                
+
                 for (int i = 0; i < 3; i++)
                 {
                     Segment3D s1(t1.v[(i + 1) % 3], t1.v[(i + 2) % 3]);
                     Segment3D dir = s2.proximity(s1);
                     if ((!dir.isValid()) ||
                         (
-                        (dir.direction().dot(s1.direction()) < 1e-5) && (dir.direction().dot(s2.direction()) < 1e-5)
-                        ))
+                            (dir.direction().dot(s1.direction()) < 1e-5) && (dir.direction().dot(s2.direction()) < 1e-5)
+                            ))
                     {
                         if ((dir.v0 - s2.v0).norm() > 1e-5 && (dir.v0 - s2.v1).norm() > 1e-5)
                         {
@@ -4955,18 +4955,18 @@ namespace dyno
                         m.contacts[m.contactCount].position = t2.v[i];
                         m.contactCount++;
                     }
-                    
+
                     for (int j = 0; j < 3; j++)
                     {
                         Segment3D s1(t1.v[(i + 1) % 3], t1.v[(i + 2) % 3]);
                         Segment3D s2(t2.v[(j + 1) % 3], t2.v[(j + 2) % 3]);
                         Segment3D dir = s1.proximity(s2);
-                        
+
 
                         if ((!dir.isValid()) ||
                             (
-                            (dir.direction().dot(s1.direction()) < 1e-5) && (dir.direction().dot(s2.direction()) < 1e-5)
-                            )
+                                (dir.direction().dot(s1.direction()) < 1e-5) && (dir.direction().dot(s2.direction()) < 1e-5)
+                                )
                             )
                         {
                             if ((dir.v0 - s1.v0).norm() > 1e-5 && (dir.v0 - s1.v1).norm() > 1e-5)
@@ -4977,7 +4977,7 @@ namespace dyno
                             }
                         }
                     }
-                    
+
                 }
 
             }
@@ -5074,22 +5074,22 @@ namespace dyno
                 //if (cnt2 != 4)
                 //	printf("?????????\n");
 
-                
-                for(int tmp_i = 1; tmp_i < 4; tmp_i ++)
+
+                for (int tmp_i = 1; tmp_i < 4; tmp_i++)
                     for (int tmp_j = tmp_i + 1; tmp_j < 4; tmp_j++)
+                    {
+                        if ((boundaryPoints2[tmp_i] - boundaryPoints2[0]).dot(boundaryPoints2[tmp_j] - boundaryPoints2[0]) < EPSILON)
                         {
-                            if ((boundaryPoints2[tmp_i] - boundaryPoints2[0]).dot(boundaryPoints2[tmp_j] - boundaryPoints2[0]) < EPSILON)
-                            {
-                                int tmp_k = 1 + 2 + 3 - tmp_i - tmp_j;
-                                Vector<Real, 3> p2 = boundaryPoints2[tmp_i];
-                                Vector<Real, 3> p3 = boundaryPoints2[tmp_j];
-                                Vector<Real, 3> p4 = boundaryPoints2[tmp_k];
-                                boundaryPoints2[1] = p2;
-                                boundaryPoints2[2] = p3;
-                                boundaryPoints2[3] = p4;
-                                break;
-                            }
+                            int tmp_k = 1 + 2 + 3 - tmp_i - tmp_j;
+                            Vector<Real, 3> p2 = boundaryPoints2[tmp_i];
+                            Vector<Real, 3> p3 = boundaryPoints2[tmp_j];
+                            Vector<Real, 3> p4 = boundaryPoints2[tmp_k];
+                            boundaryPoints2[1] = p2;
+                            boundaryPoints2[2] = p3;
+                            boundaryPoints2[3] = p4;
+                            break;
                         }
+                    }
 
                 //printf("%.3lf %.3lf %.3lf\n", boundaryPoints2[0][0], boundaryPoints2[0][1], boundaryPoints2[0][2]);
                 //printf("%.3lf %.3lf %.3lf\n", boundaryPoints2[1][0], boundaryPoints2[1][1], boundaryPoints2[1][2]);
@@ -5122,7 +5122,7 @@ namespace dyno
                 t2 = Triangle3D(boundaryPoints2[3], boundaryPoints2[1], boundaryPoints2[2]);
                 dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
                 dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
-                
+
                 /*printf("%.3lf %.3lf %.3lf\n", dirTmp1[0], dirTmp1[1], dirTmp1[2]);
                 printf("%.3lf %.3lf %.3lf\n", dirTmp2[0], dirTmp2[1], dirTmp2[2]);*/
 
@@ -5233,7 +5233,7 @@ namespace dyno
                 m.contactCount = 0;
                 m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
 
-                for(int i = 0; i < 4; i ++)
+                for (int i = 0; i < 4; i++)
                     if ((Point3D(boundaryPoints2[i]).project(t1).origin - boundaryPoints2[i]).cross(t1.normal()).norm() < 1e-4)
                     {
                         m.contacts[m.contactCount].penetration = sMax;
@@ -5260,7 +5260,7 @@ namespace dyno
                         m.contactCount++;
                         //printf("a2");
                     }
-                    
+
 
                     Segment3D s1(t1.v[(i + 1) % 3], t1.v[(i + 2) % 3]);
                     Segment3D s2(boundaryPoints2[0], boundaryPoints2[1]);
@@ -5313,7 +5313,7 @@ namespace dyno
                             //printf("c");
                         }
                     }
-                    
+
                 }
 
             }
@@ -5339,9 +5339,9 @@ namespace dyno
         // no penetration when the tets are illegal
         if (abs(tet0.volume()) < EPSILON || abs(tet1.volume()) < EPSILON)
             return;
-        
-        for(int i = 0; i < 4; i ++)
-        { 
+
+        for (int i = 0; i < 4; i++)
+        {
             //tet0 face axis i
             axisTmp = tet0.face(i).normal();
             if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, tet0, tet1) == false)
@@ -5366,7 +5366,7 @@ namespace dyno
             //tet1 face axis i
             axisTmp = tet1.face(i).normal();
             if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, tet0, tet1) == false)
-            { 
+            {
                 m.contactCount = 0;
                 return;
             }
@@ -5395,7 +5395,7 @@ namespace dyno
         2, 3
         };
 
-        for(int i = 0; i < 6; i ++)
+        for (int i = 0; i < 6; i++)
             for (int j = 0; j < 6; j++)
             {
                 Vector<Real, 3> dirTet1 = tet0.v[segmentIndex[i][0]] - tet0.v[segmentIndex[i][1]];
@@ -5414,7 +5414,7 @@ namespace dyno
                     axisTmp /= axisTmp.norm();
                 }
                 if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, tet0, tet1) == false)
-                { 
+                {
                     m.contactCount = 0;
                     return;
                 }
@@ -5559,8 +5559,8 @@ namespace dyno
         for (int i = 0; i < 6; i++)
         {
             Vector<Real, 3> dirTet = tet.v[segmentIndex[i][0]] - tet.v[segmentIndex[i][1]];
-            for(int j = 0; j < 3; j ++)
-            { 
+            for (int j = 0; j < 3; j++)
+            {
                 Vector<Real, 3> boxDir = (j == 0) ? (box.u) : ((j == 1) ? (box.v) : (box.w));
                 axisTmp = dirTet.cross(boxDir);
                 if (axisTmp.norm() > EPSILON)
@@ -5647,7 +5647,7 @@ namespace dyno
         Real r0 = sphere.radius;
 
         Point3D vproj = c0.project(tri);
-        
+
 
         Segment3D dir = vproj - c0;
         Real sMax = dir.direction().norm() - r0;
@@ -5658,8 +5658,8 @@ namespace dyno
         /*if (dir.direction().norm() < EPSILON)
             return;*/
 
-        /*if ((dir.direction().normalize().cross(tri.normal().normalize())).norm() > EPSILON)
-            return;*/
+            /*if ((dir.direction().normalize().cross(tri.normal().normalize())).norm() > EPSILON)
+                return;*/
 
         m.normal = dir.direction().normalize();
         m.contacts[0].penetration = sMax;
@@ -5672,5 +5672,365 @@ namespace dyno
     {
         request(m, sphere, tri);
         m.normal *= -1;
+    }
+
+    template<typename Real>
+    __forceinline__ DYN_FUNC bool solveLinearSystem22(
+        Real m00, Real m01,
+        Real m10, Real m11,
+        Real v0, Real v1,
+        Real& s, Real& t)
+    {
+        const Real det = fma(m00, m11, -m01 * m10);
+
+
+        if (abs(det) < Real(100) * std::numeric_limits<Real>::epsilon()) {
+            return false;
+        }
+
+
+        const Real invDet = Real(1) / det;
+
+        s = fma(m11, v0, -m01 * v1) * invDet;
+        t = fma(m00, v1, -m10 * v0) * invDet;
+
+        return true;
+    }
+
+    template<typename Real>
+    DYN_FUNC Real minimizeQuardratic1D(Real a, Real b, Real c, Real& t_min)
+    {
+        const Real t_linear = (b > Real(0)) ? Real(0) : Real(1);
+        const Real val_linear = fma(b, t_linear, c);
+
+        const Real inv2a = Real(1) / (Real(2) * a);
+        const Real t_vertex = -b * inv2a;
+
+        const Real t_clamped = std::max(Real(0), std::min(Real(1), t_vertex));
+
+        const Real val_quad = fma(fma(a, t_clamped, b), t_clamped, c);
+
+        const bool is_linear_case = (std::abs(a) < EPSILON);
+        t_min = is_linear_case ? t_linear : t_clamped;
+        return is_linear_case ? val_linear : val_quad;
+    }
+
+    template<typename Real>
+    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const MedialCone3D& cone1, const MedialCone3D& cone2)
+    {
+        m.contactCount = 0;
+
+        {
+            Segment3D s0(cone1.v[0], cone1.v[1]);
+            Segment3D s1(cone2.v[0], cone2.v[1]);
+            Real r_max1 = maximum(cone1.radius[0], cone1.radius[1]);
+            Real r_max2 = maximum(cone2.radius[0], cone2.radius[1]);
+
+            Segment3D dir = s0.proximity(s1);
+
+            dir = Point3D(dir.endPoint()) - Point3D(dir.startPoint());
+            Real seg_dist_sq = dir.lengthSquared();
+            Real radius_sum = r_max1 + r_max2;
+
+            if (seg_dist_sq >= radius_sum * radius_sum) {
+                return;
+            }
+        }
+
+        // Minimize H(s, t) for s, t in [0, 1]
+        // H(s, t) = || (P0 + s*vA) - (Q0 + t*vB) ||^2 - (r1(s) + r2(t))^2
+
+        const Vec3f vA = cone1.v[1] - cone1.v[0];
+        const Vec3f vB = cone2.v[1] - cone2.v[0];
+        const Vec3f w0 = cone1.v[0] - cone2.v[0];
+
+        const Real drA = cone1.radius[1] - cone1.radius[0];
+        const Real drB = cone2.radius[1] - cone2.radius[0];
+        const Real r0Sum = cone1.radius[0] + cone2.radius[0];
+
+        const Real vAdotvA = vA.dot(vA);
+        const Real vBdotvB = vB.dot(vB);
+        const Real vAdotvB = vA.dot(vB);
+        const Real vAdotw0 = vA.dot(w0);
+        const Real vBdotw0 = vB.dot(w0);
+
+        const Real squaredTermS = fma(-drA, drA, vAdotvA);
+        const Real squaredTermT = fma(-drB, drB, vBdotvB);
+        const Real crossTermST = fma(Real(-2), drA * drB, Real(-2) * vAdotvB);
+        const Real linearTermS = fma(Real(-2), drA * r0Sum, Real(2) * vAdotw0);
+        const Real linearTermT = fma(Real(-2), drB * r0Sum, Real(-2) * vBdotw0);
+        const Real constantTerm = fma(w0.x, w0.x, fma(w0.y, w0.y, fma(w0.z, w0.z, -r0Sum * r0Sum)));
+
+
+
+        Real min_H = constantTerm;
+        Real s_sol = 0.0f, t_sol = 0.0f;
+
+        Real s_unc, t_unc;
+        const Real A_mat = 2.0f * squaredTermS;
+        const Real B_mat = 2.0f * squaredTermT;
+        const Real C_mat = crossTermST;
+
+        if (solveLinearSystem22(A_mat, C_mat, C_mat, B_mat, -linearTermS, -linearTermT, s_unc, t_unc))
+        {
+            if (s_unc > EPSILON && s_unc < 1.0f - EPSILON && t_unc > EPSILON && t_unc < 1.0f - EPSILON)
+            {
+                Real h_unc = fma(Real(0.5), fma(linearTermS, s_unc, linearTermT * t_unc), constantTerm);
+                bool is_better = h_unc < min_H;
+                min_H = is_better ? h_unc : min_H;
+                s_sol = is_better ? s_unc : s_sol;
+                t_sol = is_better ? t_unc : t_sol;
+            }
+        }
+
+
+        Real s_bound, t_bound;
+        Real h_bound;
+
+        // H(s, 0)
+        h_bound = minimizeQuardratic1D(squaredTermS, linearTermS, constantTerm, s_bound);
+        bool is_better = h_bound < min_H;
+        min_H = is_better ? h_bound : min_H;
+        s_sol = is_better ? s_bound : s_sol;
+        t_sol = is_better ? Real(0) : t_sol;
+
+        // H(s, 1)
+        h_bound = minimizeQuardratic1D(squaredTermS, linearTermS + crossTermST, constantTerm + squaredTermT + linearTermT, s_bound);
+        is_better = h_bound < min_H;
+        min_H = is_better ? h_bound : min_H;
+        s_sol = is_better ? s_bound : s_sol;
+        t_sol = is_better ? Real(1) : t_sol;
+
+        // H(0, t)
+        h_bound = minimizeQuardratic1D(squaredTermT, linearTermT, constantTerm, t_bound);
+        is_better = h_bound < min_H;
+        min_H = is_better ? h_bound : min_H;
+        s_sol = is_better ? Real(0) : s_sol;
+        t_sol = is_better ? t_bound : t_sol;
+
+        // H(1, t)
+        h_bound = minimizeQuardratic1D(squaredTermT, linearTermT + crossTermST, constantTerm + squaredTermS + linearTermS, t_bound);
+        is_better = h_bound < min_H;
+        min_H = is_better ? h_bound : min_H;
+        s_sol = is_better ? Real(1) : s_sol;
+        t_sol = is_better ? t_bound : t_sol;
+
+
+        if (min_H <= EPSILON)
+        {
+            Vec3f p1 = cone1.v[0] + vA * s_sol;
+            Vec3f p2 = cone2.v[0] + vB * t_sol;
+            Real r1 = cone1.radius[0] + drA * s_sol;
+            Real r2 = cone2.radius[0] + drB * t_sol;
+
+            Vec3f normal = p2 - p1;
+            Real dist_sq = normal.normSquared();
+
+            if (dist_sq > EPSILON * EPSILON) {
+                normal.normalize();
+            }
+            else {
+                normal = Vec3f(0, 1, 0);
+            }
+
+            Vec3f contactPos = p2 - normal * r2;
+            Real penetrationDepth = sqrt(dist_sq) - (r1 + r2);
+
+            m.normal = normal;
+            m.pushContactReWrite(contactPos, penetrationDepth);
+        }
+    }
+
+
+    template<typename Real>
+    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const MedialSlab3D& slab, const Sphere3D& sphere, int tag)
+    {
+        m.contactCount = 0;
+
+        Vec3f positionOffset = (slab.v[0] + slab.v[1] + slab.v[2] + sphere.center) / 4.0f;
+
+        Vec3f slab_p1 = slab.v[0] - positionOffset;
+        Vec3f slab_p2 = slab.v[1] - positionOffset;
+        Vec3f slab_p3 = slab.v[2] - positionOffset;
+        Vec3f sphere_p = sphere.center - positionOffset;
+
+        Vec3f v0 = slab_p1 - sphere_p;
+        Vec3f v1 = slab_p2 - slab_p1;
+        Vec3f v2 = slab_p3 - slab_p1;
+
+        Real s0 = slab.radius[0] + sphere.radius;
+        Real s1 = slab.radius[1] - slab.radius[0];
+        Real s2 = slab.radius[2] - slab.radius[0];
+
+        Real squaredTermS = fma(-s1, s1, v1.dot(v1));
+        Real squaredTermT = fma(-s2, s2, v2.dot(v2));
+        Real crossTermST = Real(2) * fma(-s1, s2, v1.dot(v2));
+        Real linearTermS = Real(2) * fma(-s0, s1, v0.dot(v1));
+        Real linearTermT = Real(2) * fma(-s0, s2, v0.dot(v2));
+        Real constantTerm = fma(-s0, s0, v0.dot(v0));
+
+
+        Real min_H = constantTerm;
+        Real s_sol = 0, t_sol = 0;
+
+        Real s_unc = 0, t_unc = 0;
+
+        if (solveLinearSystem22(2.0f * squaredTermS, crossTermST, crossTermST, 2.0f * squaredTermT, -linearTermS, -linearTermT, s_unc, t_unc))
+        {
+            if (s_unc > EPSILON && s_unc < 1.0 - EPSILON && t_unc > EPSILON && t_unc < 1.0 - EPSILON)
+            {
+                Real h_unc = fma(s_unc, fma(s_unc, squaredTermS, fma(t_unc, crossTermST, linearTermS)),
+                    fma(t_unc, fma(t_unc, squaredTermT, linearTermT), constantTerm));
+                bool is_better = h_unc < min_H;
+                min_H = is_better ? h_unc : min_H;
+                s_sol = is_better ? s_unc : s_sol;
+                t_sol = is_better ? t_unc : t_sol;
+            }
+        }
+
+        Real s_bound, t_bound;
+        Real h_bound;
+
+        // H(0, t)
+        h_bound = minimizeQuardratic1D(squaredTermT, linearTermT, constantTerm, t_bound);
+        bool is_better_t0 = h_bound < min_H;
+        min_H = is_better_t0 ? h_bound : min_H;
+        s_sol = is_better_t0 ? s_bound : s_sol;
+        t_sol = is_better_t0 ? Real(0) : t_sol;
+
+        // H(s, 0)
+        h_bound = minimizeQuardratic1D(squaredTermS, linearTermS, constantTerm, s_bound);
+        bool is_better_s0 = h_bound < min_H;
+        min_H = is_better_s0 ? h_bound : min_H;
+        s_sol = is_better_s0 ? Real(0) : s_sol;
+        t_sol = is_better_s0 ? t_bound : t_sol;
+
+        // H(s, 1-s)
+        Real a_diag = squaredTermS + squaredTermT - crossTermST;
+        Real b_diag = -Real(2) * squaredTermT + crossTermST + linearTermS - linearTermT;
+        Real c_diag = constantTerm + squaredTermT + linearTermT;
+        h_bound = minimizeQuardratic1D(a_diag, b_diag, c_diag, s_bound);
+        bool is_better_st1 = h_bound < min_H;
+        min_H = is_better_st1 ? h_bound : min_H;
+        s_sol = is_better_st1 ? s_bound : s_sol;
+        t_sol = is_better_st1 ? Real(1) - s_bound : t_sol;
+
+        if (min_H <= EPSILON)
+        {
+            Vec3f proj1 = slab_p1 * (1.0f - s_unc - t_unc) + slab_p2 * s_unc + slab_p3 * t_unc;
+            Vec3f proj2 = sphere.center;
+            Real r_proj1 = slab.radius[0] * (1.0f - s_unc - t_unc) + slab.radius[1] * s_unc + slab.radius[2] * t_unc;
+            Real r_proj2 = sphere.radius;
+
+            if (tag == 1)
+            {
+                Vec3f normal = (proj2 - proj1);
+                normal.normalize();
+                Real dep = (proj2 - proj1).norm() - r_proj1 - r_proj2;
+                Vec3f contactPos = proj2 - normal * r_proj2 + positionOffset;
+                m.normal = normal;
+                m.pushContactReWrite(contactPos, dep);
+            }
+            else {
+                Vec3f normal = (proj1 - proj2);
+                normal.normalize();
+                Real dep = (proj1 - proj2).norm() - r_proj1 - r_proj2;
+                Vec3f contactPos = proj1 - normal * r_proj1 + positionOffset;
+                m.normal = normal;
+                m.pushContactReWrite(contactPos, dep);
+            }
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const MedialSlab3D& slab, const MedialCone3D& cone)
+    {
+        const auto slab_box = slab.aabb();
+        const auto cone_box = cone.aabb();
+
+        Sphere3D sphereOfCone0(cone.v[0], cone.radius[0]);
+        Sphere3D sphereOfCone1(cone.v[1], cone.radius[1]);
+
+        MedialCone3D coneOfSlab0(slab.v[0], slab.v[1], slab.radius[0], slab.radius[1]);
+        MedialCone3D coneOfSlab1(slab.v[1], slab.v[2], slab.radius[1], slab.radius[2]);
+        MedialCone3D coneOfSlab2(slab.v[2], slab.v[0], slab.radius[2], slab.radius[0]);
+
+
+        if (sphereOfCone0.aabb().checkOverlap(slab_box)) {
+            request(m, slab, sphereOfCone0, 1);
+        }
+        if (sphereOfCone1.aabb().checkOverlap(slab_box)) {
+            request(m, slab, sphereOfCone1, 1);
+        }
+
+        if (coneOfSlab0.aabb().checkOverlap(cone_box)) {
+            request(m, coneOfSlab0, cone);
+        }
+        if (coneOfSlab1.aabb().checkOverlap(cone_box)) {
+            request(m, coneOfSlab1, cone);
+        }
+        if (coneOfSlab2.aabb().checkOverlap(cone_box)) {
+            request(m, coneOfSlab2, cone);
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const MedialCone3D& cone, const MedialSlab3D& slab)
+    {
+        request(m, slab, cone);
+        swapContactPair(m);
+    }
+
+    template<typename Real>
+    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const MedialSlab3D& slab1, const MedialSlab3D& slab2)
+    {
+        const auto box1 = slab1.aabb();
+        const auto box2 = slab2.aabb();
+        Sphere3D sphereOfSlab0(slab1.v[0], slab1.radius[0]);
+        Sphere3D sphereOfSlab1(slab1.v[1], slab1.radius[1]);
+        Sphere3D sphereOfSlab2(slab1.v[2], slab1.radius[2]);
+
+        Sphere3D sphereOfSlab3(slab2.v[0], slab2.radius[0]);
+        Sphere3D sphereOfSlab4(slab2.v[1], slab2.radius[1]);
+        Sphere3D sphereOfSlab5(slab2.v[2], slab2.radius[2]);
+
+        MedialCone3D cones1[] = {
+        MedialCone3D(slab1.v[0], slab1.v[1], slab1.radius[0], slab1.radius[1]),
+        MedialCone3D(slab1.v[1], slab1.v[2], slab1.radius[1], slab1.radius[2]),
+        MedialCone3D(slab1.v[2], slab1.v[0], slab1.radius[2], slab1.radius[0])
+        };
+
+        MedialCone3D cones2[] = {
+            MedialCone3D(slab2.v[0], slab2.v[1], slab2.radius[0], slab2.radius[1]),
+            MedialCone3D(slab2.v[1], slab2.v[2], slab2.radius[1], slab2.radius[2]),
+            MedialCone3D(slab2.v[2], slab2.v[0], slab2.radius[2], slab2.radius[0])
+        };
+
+        // sphere - slab test
+        if (sphereOfSlab0.aabb().checkOverlap(box2)) request(m, slab2, sphereOfSlab0, 0);
+        if (sphereOfSlab1.aabb().checkOverlap(box2)) request(m, slab2, sphereOfSlab1, 0);
+        if (sphereOfSlab2.aabb().checkOverlap(box2)) request(m, slab2, sphereOfSlab2, 0);
+
+        if (sphereOfSlab3.aabb().checkOverlap(box1)) request(m, slab1, sphereOfSlab3, 1);
+        if (sphereOfSlab4.aabb().checkOverlap(box1)) request(m, slab1, sphereOfSlab4, 1);
+        if (sphereOfSlab5.aabb().checkOverlap(box1)) request(m, slab1, sphereOfSlab5, 1);
+
+        // cone - cone test
+
+        for (int i = 0; i < 3; ++i) {
+            const auto cone1_box = cones1[i].aabb();
+
+            if (!cone1_box.checkOverlap(box2)) {
+                continue;
+            }
+
+            for (int j = 0; j < 3; ++j) {
+                if (!cone1_box.checkOverlap(cones2[j].aabb())) {
+                    continue;
+                }
+
+                request(m, cones1[i], cones2[j]);
+            }
+        }
     }
 }
