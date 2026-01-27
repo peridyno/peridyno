@@ -116,6 +116,19 @@ namespace dyno
         return ret;
     }
 
+    /**
+     * @brief calculate the greatest common divisor of integer a and b
+     */
+    template <typename Integer>
+    inline DYN_FUNC Integer gcd(Integer a, Integer b) {
+		while (b != 0) {
+			int c = a % b;
+			a = b;
+			b = c;
+		}
+		return a;
+	}
+
     template <typename T>
     inline DYN_FUNC T minimum(const T& v0, const T& v1)
     {
@@ -230,6 +243,15 @@ namespace dyno
         return Vector<T, 2> {v[1], -v[0]};
     }
 
+    // Cross product of 2D vectors, signed area of the parallelogram 
+    /*
+    //       --------
+    //      /       /
+    //     v1  S   /
+    //    /       /
+    //    ---v0---
+    //      
+    */
     template <typename T>
     inline DYN_FUNC T dotperp(Vector<T, 2> const& v0, Vector<T, 2> const& v1)
     {
@@ -259,7 +281,7 @@ namespace dyno
     // return the id of lowest bit of x
     inline DYN_FUNC unsigned int lownum(unsigned int x) {return MSB(lowbit(x));}
 
-    // check big (x & 1<<y)
+    // check bit (x & 1<<y)
     inline DYN_FUNC int checkbit(unsigned int const&x, unsigned int const& y) {return (x >> y) & 1u;}
 
 }
