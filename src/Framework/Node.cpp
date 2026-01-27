@@ -142,6 +142,8 @@ void Node::update()
 
 	if (this->requireUpdate())
 	{
+		mSyncRenderAndSim.lock();
+
 		this->preUpdateStates();
 
 		if (mPhysicsEnabled)
@@ -168,7 +170,11 @@ void Node::update()
 		{
 			f_out->tick();
 		}
+
+		mSyncRenderAndSim.unlock();
 	}
+
+
 }
 
 void Node::reset()
@@ -198,7 +204,10 @@ void Node::updateGraphicsContext()
 {
 	if (mRenderingEnabled)
 	{
-		this->graphicsPipeline()->update();
+		if (mSyncRenderAndSim.try_lock()) {
+			this->graphicsPipeline()->update();
+			mSyncRenderAndSim.unlock();
+		}
 	}
 }
 

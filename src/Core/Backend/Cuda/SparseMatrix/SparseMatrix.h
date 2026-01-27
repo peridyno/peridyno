@@ -42,9 +42,15 @@ namespace dyno
 
 		void assign_cgls(CArray<VarType>& s_b, std::vector<std::map<int, VarType>>& s_matrix, std::vector<std::map<int, VarType>>& s_matrix_transposed);
 
+		void Transpose();
 	    void CGLS(int i_max, VarType threshold);
-		
-		const SparseV& X() const { return my_x; }
+		void CG(int i_max, VarType threshold);
+
+		SparseM& getMatrix() { return my_A; }
+		SparseV& getVector() { return my_b; }
+		const SparseV& getX() const { return my_x; }
+
+		void setVector(SparseV& b);
 
 	private:
 		SparseM my_A;

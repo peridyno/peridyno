@@ -31,6 +31,7 @@ namespace dyno
 
 		void rotateToPoint(float x, float y) override;
 		void translateToPoint(float x, float y) override;
+		void zoomToPoint(float x, float y) override;
 		void zoom(float amount) override;
 
 		//TODO: implement

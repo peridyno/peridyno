@@ -197,6 +197,18 @@ namespace dyno
 		}
 	}
 
+	std::shared_ptr<SceneGraph> PSimulationThread::getCurrentScene()
+	{
+		if (mMutex.try_lock_for(mTimeOut))
+		{
+			auto scn = SceneGraphFactory::instance()->active();
+			mMutex.unlock();
+			return scn;
+		}
+		Log::sendMessage(Log::Warning, "Failed to get current scene: timeout.");
+		return nullptr;
+	}
+
 	void PSimulationThread::reset(int num)
 	{
 		this->pause();
@@ -204,6 +216,22 @@ namespace dyno
 		mFinished = true;
 
 		mTotalFrame = num;
+
+		mActiveNode = nullptr;
+
+		auto scn = SceneGraphFactory::instance()->active();
+		scn->setFrameNumber(0);
+
+		//Note: should set mReset at the end
+		mReset = true;
+		notify();
+	}
+
+	void PSimulationThread::reset()
+	{
+		this->pause();
+
+		mFinished = true;
 
 		mActiveNode = nullptr;
 
@@ -255,7 +283,7 @@ namespace dyno
 		public:
 			void process(Node* node) override {
 				node->reset();
-				node->updateGraphicsContext();
+				//node->updateGraphicsContext();
 			}
 		};
 

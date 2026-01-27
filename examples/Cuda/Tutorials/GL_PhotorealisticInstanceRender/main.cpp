@@ -16,7 +16,7 @@ public:
 	void resetStates() override
 	{
 		auto mesh = this->inTextureMesh()->constDataPtr();
-		const int instanceCount = 8;
+		const int instanceCount = 1;
 		const int shapeNum = mesh->shapes().size();
 
 		std::vector<std::vector<Transform3f>> transform(shapeNum);

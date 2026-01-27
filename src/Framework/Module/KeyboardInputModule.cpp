@@ -5,7 +5,6 @@ namespace dyno
 	KeyboardInputModule::KeyboardInputModule()
 		: InputModule()
 	{
-
 	}
 
 	KeyboardInputModule::~KeyboardInputModule()
@@ -43,5 +42,4 @@ namespace dyno
 
 		return required || Module::requireUpdate();
 	}
-
 }

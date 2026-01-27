@@ -1,4 +1,4 @@
-#include "PConsoleWidget.h"
+﻿#include "PConsoleWidget.h"
 #include "Platform.h"
 #include <QListWidget>
 #include <QDir>
@@ -6,6 +6,7 @@
 #include <QHBoxLayout>
 #include <QListView>
 #include <QPixmap>
+#include <QMenu>
 #include "NodeFactory.h"
 
 #include "PSimulationThread.h"
@@ -49,7 +50,7 @@ namespace dyno
 		QWidget(parent)
 	{
 
-		QVBoxLayout* layout = new QVBoxLayout(this);
+		QHBoxLayout* layout = new QHBoxLayout(this);
 		this->setLayout(layout);
 
 #ifdef PERIDYNO_QT_PYTHON_CONSOLE
@@ -63,6 +64,7 @@ namespace dyno
 		mCodeEditor->setLexer(mPythonLexer);
 
 		QsciAPIs* apis = new QsciAPIs(mPythonLexer);
+
 		apis->add(QString("import"));
 		apis->add(QString("QtPathHelper"));
 		apis->add(QString("PyPeridyno"));
@@ -74,11 +76,15 @@ namespace dyno
 		apis->add(QString("pushModule"));
 		apis->add(QString("setValue"));
 		apis->add(QString("Vector3f"));
+		 
+		if (!apis->load(QString::fromStdString(getAssetPath() + "PromptFunctionName")))
+			QMessageBox::warning(this, QString("提示"), QString("读取文件失败"));
+
 		apis->prepare();
 
 		mCodeEditor->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 		mCodeEditor->setCaretForegroundColor(QColor("#d4d4d4"));
-		
+
 		// line numbers
 		mCodeEditor->setMarginsBackgroundColor(QColor("#454545"));
 		mCodeEditor->setMarginsForegroundColor(QColor("#d4d4d4"));
@@ -87,7 +93,7 @@ namespace dyno
 
 		// auto completion
 		mCodeEditor->setAutoCompletionSource(QsciScintilla::AcsAll);
-		mCodeEditor->setAutoCompletionCaseSensitivity(true);
+		mCodeEditor->setAutoCompletionCaseSensitivity(false);
 		mCodeEditor->setAutoCompletionThreshold(1);
 
 		// indentation
@@ -103,13 +109,30 @@ namespace dyno
 
 		layout->addWidget(mCodeEditor);
 
-		updateButton = new QPushButton("update", this);
-		layout->addWidget(updateButton);
+		QWidget* buttonArea = new QWidget(this);
 
+		QVBoxLayout* buttonLayout = new QVBoxLayout(this);
+		buttonArea->setLayout(buttonLayout);
 
-		connect(updateButton, &QPushButton::clicked, this, [this]() {
+		executeButton = new QPushButton("Execute", this);
+		uploadButton = new QPushButton("Upload", this);
+
+		buttonLayout->addWidget(executeButton);
+		buttonLayout->addWidget(uploadButton);
+
+		layout->addWidget(buttonArea);
+
+		mOutputView = new PythonOutputWidget(this);
+		layout->addWidget(mOutputView);
+
+		connect(executeButton, &QPushButton::clicked, this, [this]() {
 			const std::string& code = mCodeEditor->text().toStdString();
 			execute(code);
+			});
+
+		connect(uploadButton, &QPushButton::clicked, this, [this]() {
+			const std::string& code = mCodeEditor->text().toStdString();
+			upload(code);
 			});
 #endif
 	}
@@ -124,6 +147,60 @@ namespace dyno
 		py::scoped_interpreter guard{};
 
 		try {
+			// timestamp
+			auto now = std::chrono::system_clock::now();
+			auto time_t = std::chrono::system_clock::to_time_t(now);
+			std::stringstream timestamp_ss;
+			timestamp_ss << std::put_time(std::localtime(&time_t), "%Y-%m-%d %H:%M:%S");
+			std::string exec_timestamp = "[" + timestamp_ss.str() + "]>";
+
+			auto sys_stdout = py::module_::import("sys").attr("stdout");
+			auto sys_stderr = py::module_::import("sys").attr("stderr");
+
+			auto stringio = py::module_::import("io").attr("StringIO")();
+			auto stringio_err = py::module_::import("io").attr("StringIO")();
+
+			py::module_::import("sys").attr("stdout") = stringio;
+			py::module_::import("sys").attr("stderr") = stringio_err;
+
+			auto globals = py::globals();
+			py::exec("import QtPathHelper; import PyPeridyno as dyno", globals);
+
+			auto locals = py::dict();
+			locals["scn"] = PSimulationThread::instance()->getCurrentScene();
+
+			py::exec(src, py::globals(), locals);
+
+			py::module_::import("sys").attr("stdout") = sys_stdout;
+			py::module_::import("sys").attr("stderr") = sys_stderr;
+
+			std::string captured_output = py::str(stringio.attr("getvalue")()).cast<std::string>();
+			std::string captured_error = py::str(stringio_err.attr("getvalue")()).cast<std::string>();
+
+			std::string output = exec_timestamp + captured_output;
+
+			mOutputView->appendOutput(QString::fromStdString(output));
+
+			if (!captured_error.empty())
+			{
+				std::string output_error = exec_timestamp + captured_error;
+				mOutputView->appendError(QString::fromStdString(output_error));
+			}
+
+		}
+		catch (const std::exception& e) {
+			QMessageBox::critical(nullptr, "Error", e.what());
+		}
+	}
+
+	void PConsoleWidget::upload(const std::string& src)
+	{
+		py::scoped_interpreter guard{};
+
+		try {
+			auto globals = py::globals();
+			py::exec("import PyPeridyno as dyno", globals);
+
 			auto locals = py::dict();
 			py::exec(src, py::globals(), locals);
 
@@ -165,18 +242,18 @@ namespace dyno
 			errorMsg = "Unknown Python error";
 		}
 
-		// ����� traceback����ȡ��ջ��Ϣ
+		
 		if (traceback) {
 			py::object py_traceback = py::reinterpret_borrow<py::object>(traceback);
 
-			// ���� traceback ģ������ʽ��������Ϣ
+			
 			try {
 				py::module traceback_module = py::module::import("traceback");
 				py::object format_tb = traceback_module.attr("format_tb");
 				py::object tb_list = format_tb(py_traceback);
 				py::object formatted = traceback_module.attr("format_exception_only")(type, value);
 
-				// ��������Ĵ�����Ϣ
+				
 				std::string traceback_str;
 				for (auto item : tb_list) {
 					traceback_str += item.cast<std::string>();
@@ -190,7 +267,7 @@ namespace dyno
 				}
 			}
 			catch (...) {
-				// �����ʽ��ʧ�ܣ�ʹ�û���������Ϣ
+				
 			}
 		}
 
@@ -277,6 +354,49 @@ namespace dyno
 
 #endif // PERIDYNO_QT_PYTHON_CONSOLE
 
+	PythonOutputWidget::PythonOutputWidget(QWidget* parent)
+		: QWidget(parent), mOutputView(new QTextEdit(this))
+	{
+		mOutputView->setReadOnly(true);
+		mOutputView->setFont(QFont("Courier New", 10));
+		mOutputView->setContextMenuPolicy(Qt::NoContextMenu);
+		mOutputView->setFocusPolicy(Qt::NoFocus);
+
+		QVBoxLayout* layout = new QVBoxLayout(this);
+		layout->setContentsMargins(0, 0, 0, 0);
+		layout->addWidget(mOutputView);
+		setLayout(layout);
+
+		mOutputView->setContextMenuPolicy(Qt::CustomContextMenu);
+		connect(mOutputView, &QWidget::customContextMenuRequested, this, &PythonOutputWidget::showContextMenu);
+
+	}
+
+	void PythonOutputWidget::appendOutput(const QString& src)
+	{
+		mOutputView->append(src);
+	}
+
+	void PythonOutputWidget::appendError(const QString& src)
+	{
+		mOutputView->setTextColor(Qt::red);
+		mOutputView->append(src);
+		mOutputView->setTextColor(Qt::black);
+	}
+
+	void PythonOutputWidget::clear()
+	{
+		mOutputView->clear();
+	}
+
+	void PythonOutputWidget::showContextMenu(const QPoint& pos)
+	{
+		QMenu menu(this);
+		QAction* clearAction = menu.addAction("Clear");
+		connect(clearAction, &QAction::triggered, this, &PythonOutputWidget::clear);
+		menu.exec(mapToGlobal(pos));
+	}
+
 	QContentBrowser::QContentBrowser(QWidget* parent /*= nullptr*/)
 		: QWidget()
 	{
@@ -292,9 +412,9 @@ namespace dyno
 		model->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
 		model->sort(0, Qt::AscendingOrder);
 
-//		QObject::connect(model, SIGNAL(directoryLoaded(QString)), SLOT(findDirectory(QString)));
+		//		QObject::connect(model, SIGNAL(directoryLoaded(QString)), SLOT(findDirectory(QString)));
 
-		// File system
+				// File system
 		treeView = new QTreeView(this);
 		treeView->setModel(model);
 		treeView->setHeaderHidden(true);	//Show tree header
@@ -308,7 +428,7 @@ namespace dyno
 
 
 		QStringList filter;
-		filter <<"*.png" << "*.jpg" << "*.bmp" << "*.obj" << "*.gltf" << "*.glb" << "*.fbx" << "*.STL" << "*.stl" << "*.xml";
+		filter << "*.png" << "*.jpg" << "*.bmp" << "*.obj" << "*.gltf" << "*.glb" << "*.fbx" << "*.STL" << "*.stl" << "*.xml";
 		auto* listModel = new CustomFileSystemModel(this);
 		listModel->setRootPath(path.c_str());
 		listModel->setFilter(QDir::Files | QDir::NoDotAndDotDot);
@@ -352,7 +472,7 @@ namespace dyno
 		newListModel->setNameFilterDisables(false);
 		newListModel->sort(0, Qt::AscendingOrder);
 
- 		listView->setModel(newListModel);
+		listView->setModel(newListModel);
 		listView->setRootIndex(newListModel->index(path));
 	}
 
@@ -383,4 +503,5 @@ namespace dyno
 			}
 		}
 	}
+
 }

@@ -30,9 +30,12 @@ namespace dyno
 	template <typename VarType>
 	void SparseMatrix<VarType>::CGLS(int i_max, VarType threshold)
 	{
-		int system_size = my_b.size();
-		//printf("system size is: %d \r\n", system_size);
+		printf("SparseMatrix CGLS: %d %d %d \n", my_A.size(), my_transposedA.size(), my_b.size());
 
+		int system_size = my_b.size();
+		my_x.resize(system_size);
+		my_x.reset();
+		
 		Arithmetic<VarType>*m_arithmetic = Arithmetic<VarType>::Create(system_size);
 
 		//x_0
@@ -62,9 +65,13 @@ namespace dyno
 		while ((itor < i_max) && (delta_new > (threshold*threshold*delta_0)))
 		{
 			//compute alpha and x(i+1)
-			multiply_SM_by_vector<VarType>(my_A, my_d, my_q);
-			VarType alpha = delta_new / m_arithmetic->Dot(my_q, my_q);
+			temp1.reset();
+			multiply_SM_by_vector<VarType>(my_A, my_d, temp1);
+			multiply_SM_by_vector<VarType>(my_transposedA, temp1, my_q);
+			VarType alpha = delta_new / m_arithmetic->Dot(my_d, my_q);
 			Function2Pt::saxpy(my_x, my_d, my_x, alpha);
+			//printf("CGLS3333: %d, %f \n", itor, delta_new);
+
 			//compute r
 			if (itor % 50 == 0)
 			{
@@ -76,9 +83,7 @@ namespace dyno
 			}
 			else
 			{
-				temp1.reset();
-				multiply_SM_by_vector<VarType>(my_transposedA, my_q, temp1);
-				Function2Pt::saxpy(my_r, temp1, my_r, -alpha);
+				Function2Pt::saxpy(my_r, my_q, my_r, -alpha);
 			}
 
 			delta_old = delta_new;
@@ -88,9 +93,93 @@ namespace dyno
 
 			itor++;
 		}
-		//std::printf("the iterations of CGLS is: %d \n",itor);
+		std::printf("the iterations of CGLS is: %d \n",itor);
 		delete m_arithmetic;
-
 		x_0.clear();b_new.clear();temp1.clear();temp2.clear();my_r.clear();my_d.clear();my_q.clear();
+	}
+
+	template <typename VarType>
+	void SparseMatrix<VarType>::Transpose()
+	{
+		printf("SparseMatrix Transpose: %d \n", my_A.size());
+		//my_A is square matrix, than compute the transposed matrix
+		DArray<uint> count(my_A.size());
+		count.reset();
+		count_transposedM<VarType>(count, my_A);
+
+		my_transposedA.resize(count);
+		compute_transposedM<VarType>(my_transposedA, count, my_A);
+
+		count.clear();
+	}
+
+	template <typename VarType>
+	void SparseMatrix<VarType>::CG(int i_max, VarType threshold)
+	{
+		//printf("SparseMatrix CG: %d %d \n", my_A.size(), my_b.size());
+
+		int system_size = my_b.size();
+		my_x.resize(system_size);
+		my_x.reset();
+
+		Arithmetic<VarType>*m_arithmetic = Arithmetic<VarType>::Create(system_size);
+
+		//x_0
+		SparseV x_0(system_size);
+		x_0.reset();
+
+		int itor = 0;
+
+		VarType delta_0 = 10, delta_new = 10, delta_old = 10;
+		SparseV temp1, my_r, my_d, my_q;
+		temp1.resize(system_size); my_r.resize(system_size); my_d.resize(system_size); my_q.resize(system_size);
+		temp1.reset(); my_r.reset(); my_d.reset(); my_q.reset();
+
+		//compute r=my_b-A*x_0
+		multiply_SM_by_vector<VarType>(my_A, x_0, temp1);
+		Function2Pt::subtract(my_r, my_b, temp1);
+
+		my_d.assign(my_r);
+
+		//compute delta
+		delta_new = m_arithmetic->Dot(my_r, my_r);
+		delta_0 = delta_new;
+		while ((itor < i_max) && (delta_new > (threshold*threshold*delta_0)))
+		{
+			//compute alpha and x(i+1)
+			multiply_SM_by_vector<VarType>(my_A, my_d, my_q);
+			VarType alpha = delta_new / m_arithmetic->Dot(my_d, my_q);
+			Function2Pt::saxpy(my_x, my_d, my_x, alpha);
+			//printf("CG3333: %d, %f \n", itor, delta_new);
+
+			//compute r
+			if (itor % 50 == 0)
+			{
+				//compute r=my_b-A*x
+				temp1.reset();
+				multiply_SM_by_vector<VarType>(my_A, my_x, temp1);
+				Function2Pt::subtract(my_r, my_b, temp1);
+			}
+			else
+			{
+				Function2Pt::saxpy(my_r, my_q, my_r, -alpha);
+			}
+
+			delta_old = delta_new;
+			delta_new = m_arithmetic->Dot(my_r, my_r);
+			VarType beta = delta_new / delta_old;
+			Function2Pt::saxpy(my_d, my_d, my_r, beta);
+
+			itor++;
+		}
+		//std::printf("the iterations of CG is: %d \n", itor);
+		delete m_arithmetic;
+		x_0.clear(); temp1.clear(); my_r.clear(); my_d.clear(); my_q.clear();
+	}
+
+	template <typename VarType>
+	void SparseMatrix<VarType>::setVector(SparseV& b)
+	{
+		my_b.assign(b);
 	}
 }

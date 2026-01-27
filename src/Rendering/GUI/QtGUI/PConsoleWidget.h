@@ -6,9 +6,9 @@
 #include <QTreeView>
 #include <QListView>
 
-#include <QTextEdit.h>
-#include <QPushButton.h>
-#include <QMessageBox.h>
+#include <QTextEdit>
+#include <QPushButton>
+#include <QMessageBox>
 
 // Slots macro definition conflicts with Python
 #ifdef slots
@@ -28,17 +28,34 @@ namespace py = pybind11;
 #include <Qsci/qsciscintilla.h>
 #include <Qsci/qscilexerpython.h>
 #include <Qsci/qsciapis.h>
+#include <qmenu.h>
 
 #endif //PERIDYNO_QT_PYTHON_CONSOLE
 
 
 namespace dyno
 {
+	class PythonOutputWidget : public QWidget
+	{
+		Q_OBJECT
+	public:
+		explicit PythonOutputWidget(QWidget* parent = nullptr);
+		void appendOutput(const QString& src);
+		void appendError(const QString& src);
+		void clear();
+
+	private slots:
+		void showContextMenu(const QPoint& pos);
+
+	private:
+		QTextEdit* mOutputView;
+	};
+
 	class PConsoleWidget : public QWidget
 	{
 		Q_OBJECT
 	public:
-		explicit PConsoleWidget(QWidget *parent = nullptr);
+		explicit PConsoleWidget(QWidget* parent = nullptr);
 		~PConsoleWidget();
 
 	signals:
@@ -46,6 +63,8 @@ namespace dyno
 #ifdef PERIDYNO_QT_PYTHON_CONSOLE
 	public Q_SLOTS:
 		void execute(const std::string& src);
+
+		void upload(const std::string& src);
 
 	private:
 		std::string getPythonErrorDetails();
@@ -56,11 +75,15 @@ namespace dyno
 
 	private:
 		QsciScintilla* mCodeEditor;
+		PythonOutputWidget* mOutputView;
 		QsciLexerPython* mPythonLexer;
-		QPushButton* updateButton;
+		QPushButton* executeButton;
+		QPushButton* uploadButton;
+
 
 #endif //PERIDYNO_QT_PYTHON_CONSOLE
 	};
+
 }
 
 

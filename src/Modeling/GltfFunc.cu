@@ -2,6 +2,7 @@
 #include "GltfFunc.h"
 #include "Topology/JointInfo.h"
 #include "ImageLoader.h"
+#include <iostream>
 
 #define NULL_POSITION (-959959.9956)
 #define TINYGLTF_IMPLEMENTATION
@@ -32,8 +33,6 @@ namespace dyno
 
 		}
 		// import Scenes:
-		
-		loadGLTFMaterial(*model, texMesh,filepath);
 
 		DArray<Vec3f> initialPosition;
 		DArray<Vec3f> initialNormal;
@@ -53,11 +52,11 @@ namespace dyno
 		//ToCenter
 
 		shapeTransform(initialPosition,
-			texMesh->vertices(),
+			texMesh->geometry()->vertices(),
 			initialNormal,
-			texMesh->normals(),
+			texMesh->geometry()->normals(),
 			d_mesh_Matrix,
-			texMesh->shapeIds(),
+			texMesh->geometry()->shapeIds(),
 			d_shape_meshId
 		);
 
@@ -70,10 +69,10 @@ namespace dyno
 		for (uint i = 0; i < shapeNum; i++)
 		{
 			DArray<int> counter;
-			counter.resize(texMesh->vertices().size());
+			counter.resize(texMesh->geometry()->vertices().size());
 
 			Shape_PointCounter(counter,
-				texMesh->shapeIds(),
+				texMesh->geometry()->shapeIds(),
 				i);
 
 
@@ -88,7 +87,7 @@ namespace dyno
 
 			setupPoints(
 				targetPoints,
-				texMesh->vertices(),
+				texMesh->geometry()->vertices(),
 				counter
 			);
 
@@ -115,14 +114,14 @@ namespace dyno
 		DArray<Vec3f> unCenterPosition;
 
 		d_ShapeCenter.assign(c_shapeCenter);	// Used to "ToCenter"
-		unCenterPosition.assign(texMesh->vertices());
+		unCenterPosition.assign(texMesh->geometry()->vertices());
 
 		//ToCenter
 		if (true)//varUseInstanceTransform()->getValue()
 		{
 			shapeToCenter(unCenterPosition,
-				texMesh->vertices(),
-				texMesh->shapeIds(),
+				texMesh->geometry()->vertices(),
+				texMesh->geometry()->shapeIds(),
 				d_ShapeCenter);
 
 
@@ -166,16 +165,14 @@ namespace dyno
 			shapeNum += meshId.primitives.size();
 		}
 
+		std::vector<std::shared_ptr<Material>> reMats;
 		//materials
-		loadGLTFMaterial(model, texMesh, filepath);
+		loadGLTFMaterial(model, reMats, filepath);
 
 		//shapes
-
 		auto& reShapes = texMesh->shapes();
 		reShapes.clear();
 		reShapes.resize(shapeNum);
-
-		auto& reMats = texMesh->materials();
 
 		std::vector<Vec3f> shapeCenter;
 
@@ -195,8 +192,7 @@ namespace dyno
 				std::vector<dyno::TopologyModule::Triangle> normalIndex;
 				std::vector<dyno::TopologyModule::Triangle> texCoordIndex;
 
-				int primNum = model.meshes[mId].primitives.size();
-				
+				int primNum = model.meshes[mId].primitives.size();			
 
 				for (size_t pId = 0; pId < primNum; pId++)	//shape
 				{
@@ -289,7 +285,7 @@ namespace dyno
 
 		std::map<uint, uint> vertexId_shapeId;
 
-		texMesh->shapeIds().resize(vertices.size());
+		texMesh->geometry()->shapeIds().resize(vertices.size());
 
 		//Import Skin;
 		{
@@ -387,7 +383,7 @@ namespace dyno
 		{
 			auto it = texMesh->shapes()[i];
 
-			updateVertexIdShape(texMesh->shapes()[i]->vertexIndex, texMesh->shapeIds(),i, texMesh->shapes()[i]->vertexIndex.size());
+			updateVertexIdShape(texMesh->shapes()[i]->vertexIndex, texMesh->geometry()->shapeIds(),i, texMesh->shapes()[i]->vertexIndex.size());
 
 		}
 
@@ -429,14 +425,14 @@ namespace dyno
 		if (initialNormal != nullptr)
 			initialNormal->assign(normals);
 
-		texMesh->vertices().assign(vertices);
-		texMesh->normals().assign(normals);
+		texMesh->geometry()->vertices().assign(vertices);
+		texMesh->geometry()->normals().assign(normals);
 
 		if (d_mesh_Matrix != nullptr)
 			d_mesh_Matrix->assign(mesh_Matrix);
 
 
-		texMesh->shapeIds().resize(texMesh->vertices().size());
+		texMesh->geometry()->shapeIds().resize(texMesh->geometry()->vertices().size());
 
 
 
@@ -447,7 +443,7 @@ namespace dyno
 			{
 				tempTexCoord.push_back(Vec2f(uv0[0], 1 - uv0[1]));	// uv.v need flip
 			}
-			texMesh->texCoords().assign(tempTexCoord);
+			texMesh->geometry()->texCoords().assign(tempTexCoord);
 
 
 			tempTexCoord.clear();
@@ -461,15 +457,14 @@ namespace dyno
 
 	}
 
-	void loadGLTFMaterial(tinygltf::Model& model, std::shared_ptr<TextureMesh> texMesh, FilePath filename)
+	void loadGLTFMaterial(tinygltf::Model& model, std::vector<std::shared_ptr<Material>>& mats, FilePath filename)
 	{
 		const std::vector<tinygltf::Material>& sourceMaterials = model.materials;
 
-		auto& reMats = texMesh->materials();
-		reMats.clear();
+		mats.clear();
 		if (sourceMaterials.size()) //use materials.size()
 		{
-			reMats.resize(sourceMaterials.size());
+			mats.resize(sourceMaterials.size());
 		}
 
 
@@ -482,6 +477,17 @@ namespace dyno
 		for (int matId = 0; matId < sourceMaterials.size(); matId++)
 		{
 			auto material = sourceMaterials[matId];
+			auto name = material.name;
+
+			auto findMat = MaterialManager::getMaterialPtr(material.name);
+			if (findMat)
+			{
+				std::cout << "The material already exists: " << material.name << std::endl;
+				mats[matId] = findMat;
+
+				continue;
+			}
+
 			auto color = material.pbrMetallicRoughness.baseColorFactor;
 			auto roughness = material.pbrMetallicRoughness.roughnessFactor;
 
@@ -489,13 +495,16 @@ namespace dyno
 
 			auto colorTexId = material.pbrMetallicRoughness.baseColorTexture.index;
 			auto texCoord = material.pbrMetallicRoughness.baseColorTexture.texCoord;
+			auto emissiveFactor = material.emissiveFactor;
 
-			reMats[matId] = std::make_shared<Material>();
-			reMats[matId]->baseColor = Vec3f(color[0], color[1], color[2]);
-			reMats[matId]->alpha = color[3];
-			reMats[matId]->metallic = metallic;
-			reMats[matId]->roughness = roughness;
-
+			auto newMat = std::make_shared<Material>();
+			MaterialManager::createMaterialLoaderModule(newMat, material.name);
+			mats[matId] = newMat;
+			mats[matId]->baseColor = Color(color[0], color[1], color[2]);
+			mats[matId]->alpha = color[3];
+			mats[matId]->metallic = metallic;
+			mats[matId]->roughness = roughness;
+			mats[matId]->emissiveIntensity = emissiveFactor[0];
 			std::string colorUri = getTexUri(textures, images, colorTexId);
 			std::shared_ptr<ImageLoader> loader = std::make_shared<ImageLoader>();
 
@@ -507,13 +516,32 @@ namespace dyno
 
 				if (loader->loadImage(colorUri.c_str(), texture))
 				{
-					reMats[matId]->texColor.assign(texture);
+					mats[matId]->texColor.assign(texture);
 				}
 			}
 			else
 			{
-				if (reMats[matId]->texColor.size())
-					reMats[matId]->texColor.clear();
+				if (mats[matId]->texColor.size())
+					mats[matId]->texColor.clear();
+			}
+			auto emissiveTexId = material.emissiveTexture.index;
+			std::string emissiveColorUri = getTexUri(textures, images, emissiveTexId);
+
+			if (!emissiveColorUri.empty())
+			{
+
+				auto root = filename.path().parent_path();
+				emissiveColorUri = (root / emissiveColorUri).string();
+
+				if (loader->loadImage(emissiveColorUri.c_str(), texture))
+				{
+					mats[matId]->texEmissive.assign(texture);
+				}
+			}
+			else
+			{
+				if (mats[matId]->texEmissive.size())
+					mats[matId]->texEmissive.clear();
 			}
 
 			auto bumpTexId = material.normalTexture.index;
@@ -527,16 +555,34 @@ namespace dyno
 
 				if (loader->loadImage(bumpUri.c_str(), texture))
 				{
-					reMats[matId]->texBump.assign(texture);
-					reMats[matId]->bumpScale = scale;
+					mats[matId]->texBump.assign(texture);
+					mats[matId]->bumpScale = scale;
 				}
 			}
 			else
 			{
-				if (reMats[matId]->texBump.size())
-					reMats[matId]->texBump.clear();
+				if (mats[matId]->texBump.size())
+					mats[matId]->texBump.clear();
 			}
 
+			auto ormTexId = material.pbrMetallicRoughness.metallicRoughnessTexture.index;
+			std::string ormUri = getTexUri(textures, images, ormTexId);
+
+			if (!ormUri.empty())
+			{
+				auto root = filename.path().parent_path();
+				ormUri = (root / ormUri).string();
+
+				if (loader->loadImage(ormUri.c_str(), texture, STBI_rgb))
+				{
+					mats[matId]->texORM.assign(texture);
+				}
+			}
+			else
+			{
+				if (mats[matId]->texORM.size())
+					mats[matId]->texORM.clear();
+			}
 		}
 
 	}

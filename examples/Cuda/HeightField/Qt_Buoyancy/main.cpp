@@ -36,6 +36,7 @@
 #include <GLSurfaceVisualModule.h>
 
 #include "GltfLoader.h"
+#include <GlfwApp.h>
 
 
 using namespace std;
@@ -90,7 +91,7 @@ int main()
 {
 	HeightFieldLibrary::initStaticPlugin();
 
-	QtApp app;
+	GlfwApp app;
 
 	app.setSceneGraph(createScene());
 

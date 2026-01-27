@@ -4,7 +4,11 @@
 #include "Module/CalculateNorm.h"
 #include "Module/ParticleIntegrator.h"
 #include "Module/ImplicitViscosity.h"
+
 #include "Module/SemiImplicitDensitySolver.h"
+#include "Module/IterativeDensitySolver.h"
+#include "Module/DivergenceFreeSphSolver.h"
+#include "Module/ImplicitISPH.h"
 
 #include "ParticleSystemHelper.h"
 
@@ -47,38 +51,181 @@ namespace dyno
 		this->varSmoothingLength()->setValue(1.2);
 
 
-		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
-		this->stateTimeStep()->connect(integrator->inTimeStep());
-		this->statePosition()->connect(integrator->inPosition());
-		this->stateVelocity()->connect(integrator->inVelocity());
-		this->animationPipeline()->pushModule(integrator);
+		//declare a callback function for varSolverType();
+		auto switchIncompressibilitySolver = std::make_shared <FCallBackFunc>(
+			[&]() {
+				auto setupSISPHSolver = [=] {
+					this->animationPipeline()->clear();
 
-		auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
-		this->stateSmoothingLength()->connect(nbrQuery->inRadius());
-		this->statePosition()->connect(nbrQuery->inPosition());
-		this->animationPipeline()->pushModule(nbrQuery);
+					auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
+					this->stateTimeStep()->connect(integrator->inTimeStep());
+					this->statePosition()->connect(integrator->inPosition());
+					this->stateVelocity()->connect(integrator->inVelocity());
+					this->animationPipeline()->pushModule(integrator);
 
-		auto density = std::make_shared<SemiImplicitDensitySolver<TDataType>>();
-		this->stateSamplingDistance()->connect(density->inSamplingDistance());
-		this->stateSmoothingLength()->connect(density->inSmoothingLength());
-		this->stateTimeStep()->connect(density->inTimeStep());
-		this->statePosition()->connect(density->inPosition());
-		this->stateVelocity()->connect(density->inVelocity());
-		nbrQuery->outNeighborIds()->connect(density->inNeighborIds());
-		this->animationPipeline()->pushModule(density);
+					auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+					this->stateSmoothingLength()->connect(nbrQuery->inRadius());
+					this->statePosition()->connect(nbrQuery->inPosition());
+					this->animationPipeline()->pushModule(nbrQuery);
 
-		auto viscosity = std::make_shared<ImplicitViscosity<TDataType>>();
-		viscosity->varViscosity()->setValue(Real(1.0));
-		this->stateTimeStep()->connect(viscosity->inTimeStep());
-		this->stateSmoothingLength()->connect(viscosity->inSmoothingLength());
-		this->stateSamplingDistance()->connect(viscosity->inSamplingDistance());
-		this->statePosition()->connect(viscosity->inPosition());
-		this->stateVelocity()->connect(viscosity->inVelocity());
-		nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());
-		this->animationPipeline()->pushModule(viscosity);
+					auto density = std::make_shared<SemiImplicitDensitySolver<TDataType>>();
+					this->stateSamplingDistance()->connect(density->inSamplingDistance());
+					this->stateSmoothingLength()->connect(density->inSmoothingLength());
+					this->stateTimeStep()->connect(density->inTimeStep());
+					this->statePosition()->connect(density->inPosition());
+					this->stateVelocity()->connect(density->inVelocity());
+					nbrQuery->outNeighborIds()->connect(density->inNeighborIds());
+					this->animationPipeline()->pushModule(density);
 
-		integrator->connect(density->importModules());
-		density->connect(viscosity->importModules());
+					auto viscosity = std::make_shared<ImplicitViscosity<TDataType>>();
+					viscosity->varViscosity()->setValue(Real(1.0));
+					this->stateTimeStep()->connect(viscosity->inTimeStep());
+					this->stateSmoothingLength()->connect(viscosity->inSmoothingLength());
+					this->stateSamplingDistance()->connect(viscosity->inSamplingDistance());
+					this->statePosition()->connect(viscosity->inPosition());
+					this->stateVelocity()->connect(viscosity->inVelocity());
+					nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());
+					this->animationPipeline()->pushModule(viscosity);
+
+					integrator->connect(density->importModules());
+					density->connect(viscosity->importModules());
+					};
+
+				auto setupDFSPHSolver = [=] {
+					this->animationPipeline()->clear();
+
+					auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
+					this->stateTimeStep()->connect(integrator->inTimeStep());
+					this->statePosition()->connect(integrator->inPosition());
+					this->stateVelocity()->connect(integrator->inVelocity());
+					this->animationPipeline()->pushModule(integrator);
+
+					auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+					this->stateSmoothingLength()->connect(nbrQuery->inRadius());
+					this->statePosition()->connect(nbrQuery->inPosition());
+					this->animationPipeline()->pushModule(nbrQuery);
+
+					auto density = std::make_shared<DivergenceFreeSphSolver<DataType3f>>();
+					density->varDivergenceSolverDisabled()->setValue(true);
+					this->stateSmoothingLength()->connect(density->inSmoothingLength());
+					this->stateSamplingDistance()->connect(density->inSamplingDistance());
+					this->stateTimeStep()->connect(density->inTimeStep());
+					this->statePosition()->connect(density->inPosition());
+					this->stateVelocity()->connect(density->inVelocity());
+					nbrQuery->outNeighborIds()->connect(density->inNeighborIds());
+					this->animationPipeline()->pushModule(density);
+
+					auto viscosity = std::make_shared<ImplicitViscosity<TDataType>>();
+					viscosity->varViscosity()->setValue(Real(1.0));
+					this->stateTimeStep()->connect(viscosity->inTimeStep());
+					this->stateSmoothingLength()->connect(viscosity->inSmoothingLength());
+					this->stateSamplingDistance()->connect(viscosity->inSamplingDistance());
+					this->statePosition()->connect(viscosity->inPosition());
+					this->stateVelocity()->connect(viscosity->inVelocity());
+					nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());
+					this->animationPipeline()->pushModule(viscosity);
+
+					integrator->connect(density->importModules());
+					density->connect(viscosity->importModules());
+					};
+
+				auto setupPBFSolver = [=] {
+					this->animationPipeline()->clear();
+
+					auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
+					this->stateTimeStep()->connect(integrator->inTimeStep());
+					this->statePosition()->connect(integrator->inPosition());
+					this->stateVelocity()->connect(integrator->inVelocity());
+					this->animationPipeline()->pushModule(integrator);
+
+					auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+					this->stateSmoothingLength()->connect(nbrQuery->inRadius());
+					this->statePosition()->connect(nbrQuery->inPosition());
+					this->animationPipeline()->pushModule(nbrQuery);
+
+					auto density = std::make_shared<IterativeDensitySolver<DataType3f>>();
+					this->stateSmoothingLength()->connect(density->inSmoothingLength());
+					this->stateSamplingDistance()->connect(density->inSamplingDistance());
+					this->stateTimeStep()->connect(density->inTimeStep());
+					this->statePosition()->connect(density->inPosition());
+					this->stateVelocity()->connect(density->inVelocity());
+					nbrQuery->outNeighborIds()->connect(density->inNeighborIds());
+					this->animationPipeline()->pushModule(density);
+
+					auto viscosity = std::make_shared<ImplicitViscosity<TDataType>>();
+					viscosity->varViscosity()->setValue(Real(1.0));
+					this->stateTimeStep()->connect(viscosity->inTimeStep());
+					this->stateSmoothingLength()->connect(viscosity->inSmoothingLength());
+					this->stateSamplingDistance()->connect(viscosity->inSamplingDistance());
+					this->statePosition()->connect(viscosity->inPosition());
+					this->stateVelocity()->connect(viscosity->inVelocity());
+					nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());
+					this->animationPipeline()->pushModule(viscosity);
+
+					integrator->connect(density->importModules());
+					density->connect(viscosity->importModules());
+					};
+
+				auto setupIISPHSolver = [=] {
+					this->animationPipeline()->clear();
+
+					auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
+					this->stateTimeStep()->connect(integrator->inTimeStep());
+					this->statePosition()->connect(integrator->inPosition());
+					this->stateVelocity()->connect(integrator->inVelocity());
+					this->animationPipeline()->pushModule(integrator);
+
+					auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+					this->stateSmoothingLength()->connect(nbrQuery->inRadius());
+					this->statePosition()->connect(nbrQuery->inPosition());
+					this->animationPipeline()->pushModule(nbrQuery);
+
+					auto density = std::make_shared<ImplicitISPH<DataType3f>>();
+					this->stateSmoothingLength()->connect(density->inSmoothingLength());
+					this->stateSamplingDistance()->connect(density->inSamplingDistance());
+					this->stateTimeStep()->connect(density->inTimeStep());
+					this->statePosition()->connect(density->inPosition());
+					this->stateVelocity()->connect(density->inVelocity());
+					nbrQuery->outNeighborIds()->connect(density->inNeighborIds());
+					this->animationPipeline()->pushModule(density);
+
+					auto viscosity = std::make_shared<ImplicitViscosity<TDataType>>();
+					viscosity->varViscosity()->setValue(Real(1.0));
+					this->stateTimeStep()->connect(viscosity->inTimeStep());
+					this->stateSmoothingLength()->connect(viscosity->inSmoothingLength());
+					this->stateSamplingDistance()->connect(viscosity->inSamplingDistance());
+					this->statePosition()->connect(viscosity->inPosition());
+					this->stateVelocity()->connect(viscosity->inVelocity());
+					nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());
+					this->animationPipeline()->pushModule(viscosity);
+
+					integrator->connect(density->importModules());
+					density->connect(viscosity->importModules());
+					};
+
+				auto k = this->varIncompressibilitySolver()->currentKey();
+				switch (k)
+				{
+				case IncompressibilitySolver::SISPH:
+					setupSISPHSolver();
+					break;
+				case IncompressibilitySolver::DFSPH:
+					setupDFSPHSolver();
+					break;
+				case IncompressibilitySolver::PBF:
+					setupPBFSolver();
+					break;
+				case IncompressibilitySolver::IISPH:
+					setupIISPHSolver();
+					break;
+				default:
+					break;
+				}
+			}
+		);
+
+		this->varIncompressibilitySolver()->attach(switchIncompressibilitySolver);
+		this->varIncompressibilitySolver()->setCurrentKey(IncompressibilitySolver::SISPH);
 
 		//Setup the default render modules
 		auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();

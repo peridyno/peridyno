@@ -39,6 +39,8 @@ vec3 Shade()
 	
 	vec3 Lo = vec3(0);
 
+	float artFactor = 1;
+
 	// for main directional light
 	{
 		vec3 L = normalize(uRenderParams.direction.xyz);
@@ -55,6 +57,18 @@ vec3 Shade()
 			shadowFactor = GetShadowFactor(vPosition);
 
 		Lo += shadowFactor * radiance * brdf;
+
+		vec3 brdf_art = EvalPBR(vec3(1), 0, 1.0f, N, V, L);
+
+		if(uRenderParams.ShadowMultiplier > 0 && uRenderParams.ShadowBrightness < 1 && uRenderParams.ShadowContrast>0.1)
+		{
+			artFactor = shadowFactor.x * uRenderParams.ShadowContrast * brdf_art.x;
+			artFactor = pow(artFactor,uRenderParams.SamplePower);
+
+			artFactor = mix(1.0, (artFactor*(1 - uRenderParams.ShadowBrightness) + uRenderParams.ShadowBrightness), uRenderParams.ShadowMultiplier);
+			artFactor = clamp(artFactor, 0.0, 1.0);
+		}
+
 	}
 	
 	// for a simple camera light
@@ -69,15 +83,28 @@ vec3 Shade()
 		Lo += radiance * brdf;
 	}
 
+// IBL
+	if(true)
+	{
+		// convert to world space...
+	    mat4 invView = inverse(uRenderParams.view);
+		N = normalize(vec3(invView * vec4(N, 0))); 
+		V = normalize(vec3(invView * vec4(V, 0))); 
+		Lo += EvalPBR_IBL(vColor, uMetallic, uRoughness, N, V);
+	}
+	
 	// ambient light
-	vec3 ambient = uRenderParams.ambient.rgb * uRenderParams.ambient.a * vColor;
-
+	{
+		Lo += uRenderParams.ambient.rgb * uRenderParams.ambient.a * vColor;
+	}
+	 
 	// final color
-	vec3 color = ambient + Lo;
-	color = ReinhardTonemap(color);
-	color = GammaCorrect(color);
+	Lo *= artFactor;
 
-	return color;
+	Lo = ReinhardTonemap(Lo);
+	Lo = GammaCorrect(Lo);
+
+	return Lo;
 }
 
 void ColorPass(void)

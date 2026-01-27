@@ -13,6 +13,8 @@ class WtInteraction
 public:
 	WtInteraction(WtNode& node, WtConnection& connection, WtFlowScene& scene, connectionPointData inPoint, connectionPointData outPoint, std::shared_ptr<Node> inNode, std::shared_ptr<Node> outNode);
 
+	WtInteraction(WtNode& node, WtConnection& connection, connectionPointData inPoint, connectionPointData outPoint, std::shared_ptr<dyno::Module> inModule, std::shared_ptr<dyno::Module> outModule);
+
 	bool canConnect(PortIndex& portIndex, TypeConverter& converter);
 
 	bool tryConnect();
@@ -39,4 +41,8 @@ private:
 	std::shared_ptr<Node> _inNode;
 
 	std::shared_ptr<Node> _outNode;
+
+	std::shared_ptr<dyno::Module> _inModule;
+
+	std::shared_ptr<dyno::Module> _outModule;
 };

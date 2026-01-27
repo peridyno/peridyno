@@ -1,5 +1,10 @@
 #include "guid.hpp"
+#include <cstring>
+#ifdef _WIN32
 #include <objbase.h>
+#else
+#include <uuid/uuid.h>
+#endif // _WIN32
 
 namespace Wt
 {
@@ -60,7 +65,6 @@ namespace Wt
 		_bytes.swap(other._bytes);
 	}
 
-
 	bool Guid::isValid() const
 	{
 		Guid empty;
@@ -102,10 +106,12 @@ namespace Wt
 
 	Guid newGuid()
 	{
+		std::array<unsigned char, 16> bytes;
+#ifdef _WIN32
 		GUID newId;
 		CoCreateGuid(&newId);
 
-		std::array<unsigned char, 16> bytes =
+		bytes =
 		{
 			(unsigned char)((newId.Data1 >> 24) & 0xFF),
 			(unsigned char)((newId.Data1 >> 16) & 0xFF),
@@ -127,6 +133,13 @@ namespace Wt
 			(unsigned char)newId.Data4[6],
 			(unsigned char)newId.Data4[7]
 		};
+#else
+
+		uuid_t uuid;
+		uuid_generate(uuid);
+		std::memcpy(bytes.data(), uuid, 16);
+
+#endif // _WIN32
 
 		return Guid{ std::move(bytes) };
 	}

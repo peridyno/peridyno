@@ -2,7 +2,7 @@
 //#include "STL/Map.h"
 //#include "STL/Pair.h"
 #include "Array/ArrayMap.h"
-#include "Matrix/SparseMatrix.h"
+#include "SparseMatrix/SparseMatrix.h"
 #include <vector>
 #include <map>
 

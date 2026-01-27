@@ -95,6 +95,10 @@ bool WtModuleWidget::portCaptionVisible(PortType portType, PortIndex portIndex) 
 
 std::shared_ptr<WtNodeData> WtModuleWidget::outData(PortIndex port)
 {
+	if (output_fields.size() == 0)
+	{
+		return nullptr;
+	}
 	return std::dynamic_pointer_cast<WtNodeData>(output_fields[port]);
 }
 

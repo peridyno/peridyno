@@ -116,6 +116,19 @@ namespace dyno
         return ret;
     }
 
+    /**
+     * @brief calculate the greatest common divisor of integer a and b
+     */
+    template <typename Integer>
+    inline DYN_FUNC Integer gcd(Integer a, Integer b) {
+		while (b != 0) {
+			int c = a % b;
+			a = b;
+			b = c;
+		}
+		return a;
+	}
+
     template <typename T>
     inline DYN_FUNC T minimum(const T& v0, const T& v1)
     {
@@ -230,6 +243,15 @@ namespace dyno
         return Vector<T, 2> {v[1], -v[0]};
     }
 
+    // Cross product of 2D vectors, signed area of the parallelogram 
+    /*
+    //       --------
+    //      /       /
+    //     v1  S   /
+    //    /       /
+    //    ---v0---
+    //      
+    */
     template <typename T>
     inline DYN_FUNC T dotperp(Vector<T, 2> const& v0, Vector<T, 2> const& v1)
     {
@@ -243,7 +265,7 @@ namespace dyno
     inline DYN_FUNC unsigned int countbit(unsigned int x) { unsigned int cnt = 0; while(x) {x -= lowbit(x); cnt++;} return cnt;}
     
     // Count Leading Zeros
-    inline DYN_FUNC unsigned int __builtin_clz(unsigned int x) {
+    inline DYN_FUNC unsigned int builtin_clz(unsigned int x) {
         unsigned int r = 0;
         if (!(x & 0xFFFF0000)) r += 16, x <<= 16;
         if (!(x & 0xFF000000)) r += 8,  x <<= 8;
@@ -254,12 +276,12 @@ namespace dyno
     }
 
     // Most Significant Bit: return y for 1 << y ( assert unsigned int is 32-bits)
-    inline DYN_FUNC unsigned int MSB(unsigned int x) {return 32 - __builtin_clz(x);}    
+    inline DYN_FUNC unsigned int MSB(unsigned int x) {return 32 - builtin_clz(x);}    
 
     // return the id of lowest bit of x
     inline DYN_FUNC unsigned int lownum(unsigned int x) {return MSB(lowbit(x));}
 
-    // check big (x & 1<<y)
+    // check bit (x & 1<<y)
     inline DYN_FUNC int checkbit(unsigned int const&x, unsigned int const& y) {return (x >> y) & 1u;}
 
 }

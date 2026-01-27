@@ -146,9 +146,9 @@ namespace dyno
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodePlaced, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeInputUpdated, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
 
-		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, mOpenGLWidget, &POpenGLWidget::updateGrpahicsContext);
 		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, mOpenGLWidget, &POpenGLWidget::updateOneFrame);
 		connect(PSimulationThread::instance(), &PSimulationThread::sceneGraphChanged, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::updateNodeGraphView);
+		connect(mAnimationWidget, &PAnimationWidget::resetScene, mOpenGLWidget, &POpenGLWidget::resetSceneFrame);
 
 		connect(mPropertyWidget, &PPropertyWidget::nodeUpdated, PSimulationThread::instance(), &PSimulationThread::syncNode);
 
@@ -273,7 +273,7 @@ namespace dyno
 
 		QString caption = s.nodeDataModel()->caption();
 
-		PModuleEditor* moduleEditor = new PModuleEditor(clickedNode);
+		PModuleEditor* moduleEditor = new PModuleEditor(clickedNode, mOpenGLWidget);
 		moduleEditor->setWindowTitle("Module Editor -- " + caption);
 		moduleEditor->resize(1024, 600);
 		moduleEditor->setMinimumSize(512, 360);
@@ -283,8 +283,9 @@ namespace dyno
 		moduleEditor->setAttribute(Qt::WA_DeleteOnClose, true);
 		moduleEditor->show();
 
-		connect(moduleEditor, &PModuleEditor::changed, mOpenGLWidget, &POpenGLWidget::updateGraphicsContext);
+		connect(moduleEditor, SIGNAL(changed(Node*)), mOpenGLWidget, SLOT(updateGraphicsContext(Node*)));
 		connect(moduleEditor->moduleFlowScene(), &Qt::QtModuleFlowScene::nodeExportChanged, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::updateNodeGraphView);
+
 	}
 
 	void PMainWindow::showMessage()
@@ -364,8 +365,9 @@ namespace dyno
 				else
 					qNode->nodeGraphicsObject().setSelected(false);
 			}
-			});
+		});
 
+		connect(mPropertyWidget, &PPropertyWidget::nodeUpdated, mOpenGLWidget, &POpenGLWidget::onNodeUpdated);
 
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeSelected, [=](Qt::QtNode& n)
 			{
@@ -378,6 +380,8 @@ namespace dyno
 					mOpenGLWidget->update();
 				}
 			});
+
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeRenderingKeyChanged,mOpenGLWidget, &POpenGLWidget::nodeNodeRenderingKeyUpdated);
 
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeDeselected, [=]()
 			{
@@ -404,7 +408,7 @@ namespace dyno
 		auto scn = SceneGraphFactory::instance()->active();
 
 		mSettingEditor = new PSettingEditor(nullptr);
-		mSettingEditor->setRenderEngine(mOpenGLWidget->getRenderEngine());
+		mSettingEditor->setRenderEngine(mOpenGLWidget);
 
 	}
 

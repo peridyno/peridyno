@@ -346,92 +346,104 @@ namespace dyno
 			{
 				auto mat = currentMesh->getMaterial(i);
 
-				std::shared_ptr<Material> material = std::make_shared<Material>();
-				material->baseColor = Vec3f(mat->getDiffuseColor().r, mat->getDiffuseColor().g, mat->getDiffuseColor().b);
-				material->roughness = 1;
-
-				auto extractFilename = [](std::string textureName) -> std::string {
-					if (!textureName.empty() && textureName.back() == '"') {
-						textureName.pop_back();
-					}
-					size_t found = textureName.find_last_of('\\');
-					if (found == std::string::npos)
-						found = textureName.find_last_of('/');
-					if (found != std::string::npos) {
-						return textureName.substr(found + 1);
-					}
-					else {
-						return textureName;
-					}
-				};
-
+				auto findMat = MaterialManager::getMaterialPtr(mat->name);
+				if (findMat)
 				{
-					auto texture = mat->getTexture(ofbx::Texture::TextureType::DIFFUSE);
-					std::string textureName;
-					if (texture)
+					std::cout << "The material already exists: " << mat->name << std::endl;
+					meshInfo->materials.push_back(findMat);
+
+					continue;
+				}
+				else 
+				{
+					std::shared_ptr<Material> material = std::make_shared<Material>();
+					MaterialManager::createMaterialLoaderModule(material,mat->name);
+
+					material->baseColor = Color(mat->getDiffuseColor().r, mat->getDiffuseColor().g, mat->getDiffuseColor().b);
+					material->roughness = 1;
+
+					auto extractFilename = [](std::string textureName) -> std::string {
+						if (!textureName.empty() && textureName.back() == '"') {
+							textureName.pop_back();
+						}
+						size_t found = textureName.find_last_of('\\');
+						if (found == std::string::npos)
+							found = textureName.find_last_of('/');
+						if (found != std::string::npos) {
+							return textureName.substr(found + 1);
+						}
+						else {
+							return textureName;
+						}
+					};
+
 					{
-						auto it = texture->getFileName();
-						for (const ofbx::u8* ptr = it.begin; ptr <= it.end; ++ptr) {
-							textureName += *ptr;
+						auto texture = mat->getTexture(ofbx::Texture::TextureType::DIFFUSE);
+						std::string textureName;
+						if (texture)
+						{
+							auto it = texture->getFileName();
+							for (const ofbx::u8* ptr = it.begin; ptr <= it.end; ++ptr) {
+								textureName += *ptr;
+							}
+
 						}
 
-					}
+						if (textureName != std::string("")) {
+							textureName = extractFilename(textureName);
 
-					if (textureName!=std::string("")) {
-						textureName = extractFilename(textureName);
+							auto fbxFile = this->varFileName()->getValue();
+							size_t foundPath = fbxFile.string().find_last_of("/") < fbxFile.string().size() ? fbxFile.string().find_last_of("/") : fbxFile.string().find_last_of("\\");
 
-						auto fbxFile = this->varFileName()->getValue();
-						size_t foundPath = fbxFile.string().find_last_of("/")< fbxFile.string().size()? fbxFile.string().find_last_of("/") : fbxFile.string().find_last_of("\\");
-
-						std::string path = fbxFile.string().substr(0, foundPath);
+							std::string path = fbxFile.string().substr(0, foundPath);
 
 
-						std::string loadPath = path + std::string("/") + textureName;
+							std::string loadPath = path + std::string("/") + textureName;
 
-						dyno::CArray2D<dyno::Vec4f> textureData(1, 1);
-						textureData[0, 0] = dyno::Vec4f(1);
+							dyno::CArray2D<dyno::Vec4f> textureData(1, 1);
+							textureData[0, 0] = dyno::Vec4f(1);
 
 
-						if (ImageLoader::loadImage(loadPath.c_str(), textureData))// loadTexture
-							material->texColor.assign(textureData);
-					}
-				}
-				
-
-				{
-					auto texture = mat->getTexture(ofbx::Texture::TextureType::NORMAL);
-					std::string textureName;
-					if (texture)
-					{
-						auto it = texture->getFileName();
-						for (const ofbx::u8* ptr = it.begin; ptr <= it.end; ++ptr) {
-							textureName += *ptr;
+							if (ImageLoader::loadImage(loadPath.c_str(), textureData))// loadTexture
+								material->texColor.assign(textureData);
 						}
 					}
 
-					size_t found = textureName.find_last_of("\\");
 
-					if (textureName != std::string("")) {
-						textureName = extractFilename(textureName);
+					{
+						auto texture = mat->getTexture(ofbx::Texture::TextureType::NORMAL);
+						std::string textureName;
+						if (texture)
+						{
+							auto it = texture->getFileName();
+							for (const ofbx::u8* ptr = it.begin; ptr <= it.end; ++ptr) {
+								textureName += *ptr;
+							}
+						}
 
-						auto fbxFile = this->varFileName()->getValue();
-						size_t foundPath = fbxFile.string().find_last_of("/") < fbxFile.string().size() ? fbxFile.string().find_last_of("/") : fbxFile.string().find_last_of("\\");
+						size_t found = textureName.find_last_of("\\");
 
-						std::string path = fbxFile.string().substr(0, foundPath);
+						if (textureName != std::string("")) {
+							textureName = extractFilename(textureName);
+
+							auto fbxFile = this->varFileName()->getValue();
+							size_t foundPath = fbxFile.string().find_last_of("/") < fbxFile.string().size() ? fbxFile.string().find_last_of("/") : fbxFile.string().find_last_of("\\");
+
+							std::string path = fbxFile.string().substr(0, foundPath);
 
 
-						std::string loadPath = path + std::string("/") + textureName;
+							std::string loadPath = path + std::string("/") + textureName;
 
-						dyno::CArray2D<dyno::Vec4f> textureData(1, 1);
-						textureData[0, 0] = dyno::Vec4f(1);
+							dyno::CArray2D<dyno::Vec4f> textureData(1, 1);
+							textureData[0, 0] = dyno::Vec4f(1);
 
-						if (ImageLoader::loadImage(loadPath.c_str(), textureData))//loadTexture
-							material->texBump.assign(textureData);
+							if (ImageLoader::loadImage(loadPath.c_str(), textureData))//loadTexture
+								material->texBump.assign(textureData);
 
+						}
 					}
-				}
-
-				meshInfo->materials.push_back(material);
+					meshInfo->materials.push_back(material);
+				}			
 
 			}
 
@@ -1003,9 +1015,9 @@ namespace dyno
 			texCoords.insert(texCoords.end(), it->texcoords.begin(), it->texcoords.end());			
 		}
 
-		texMesh->vertices().assign(texPoints);
-		texMesh->normals().assign(texNormals);
-		texMesh->texCoords().assign(texCoords);
+		texMesh->geometry()->vertices().assign(texPoints);
+		texMesh->geometry()->normals().assign(texNormals);
+		texMesh->geometry()->texCoords().assign(texCoords);
 		
 		this->stateHierarchicalScene()->getDataPtr()->updatePoint2Vertice(mPoint2Vertice,mVertice2Point);
 		
@@ -1051,7 +1063,6 @@ namespace dyno
 
 				tempID++;
 
-				texMesh->materials().push_back(meshsInfo[i]->materials[j]);
 				shape->material = meshsInfo[i]->materials[j];
 
 				shapeId2MeshId.resize(texMesh->shapes().size() + 1);
@@ -1064,10 +1075,10 @@ namespace dyno
 			verticeOffset += mesh_VerticesNum[i];
 		}
 
-		texMesh->shapeIds().assign(shapeID);
+		texMesh->geometry()->shapeIds().assign(shapeID);
 
-		initialPosition.assign(texMesh->vertices());
-		initialNormal.assign(texMesh->normals());
+		initialPosition.assign(texMesh->geometry()->vertices());
+		initialNormal.assign(texMesh->geometry()->normals());
 
 		
 		std::vector<Mat4f> worldMatrix = this->stateHierarchicalScene()->getDataPtr()->getObjectWorldMatrix();
@@ -1079,11 +1090,11 @@ namespace dyno
 
 		this->stateHierarchicalScene()->getDataPtr()->shapeTransform(
 			initialPosition,
-			texMesh->vertices(),
+			texMesh->geometry()->vertices(),
 			initialNormal,
-			texMesh->normals(),
+			texMesh->geometry()->normals(),
 			dWorldMatrix,
-			texMesh->shapeIds(),
+			texMesh->geometry()->shapeIds(),
 			shapeId_MeshId
 		);
 		
@@ -1103,13 +1114,13 @@ namespace dyno
 			DArray<Vec3f> d_ShapeCenter;
 
 			d_ShapeCenter.assign(initialShapeCenter);	// Used to "ToCenter"
-			unCenterPosition.assign(this->stateTextureMesh()->getDataPtr()->vertices());
+			unCenterPosition.assign(this->stateTextureMesh()->getDataPtr()->geometry()->vertices());
 			CArray<Vec3f> cshapeCenter;
 			cshapeCenter.assign(d_ShapeCenter);
 
 			this->stateHierarchicalScene()->getDataPtr()->shapeToCenter(unCenterPosition,
-				this->stateTextureMesh()->getDataPtr()->vertices(),
-				this->stateTextureMesh()->getDataPtr()->shapeIds(),
+				this->stateTextureMesh()->getDataPtr()->geometry()->vertices(),
+				this->stateTextureMesh()->getDataPtr()->geometry()->shapeIds(),
 				d_ShapeCenter
 			);
 
@@ -1169,7 +1180,7 @@ namespace dyno
 		else
 		{
 			auto& shape = this->stateTextureMesh()->getDataPtr()->shapes();
-			auto vertices = this->stateTextureMesh()->getDataPtr()->vertices();
+			auto vertices = this->stateTextureMesh()->getDataPtr()->geometry()->vertices();
 			CArray<Vec3f> cv;
 			cv.assign(vertices);
 
@@ -1220,7 +1231,7 @@ namespace dyno
 
 			targetScene->skinAnimation(
 				targetScene->mSkinData->initialPosition,
-				this->stateTextureMesh()->getDataPtr()->vertices(),
+				this->stateTextureMesh()->getDataPtr()->geometry()->vertices(),
 				targetScene->mJointData->mJointInverseBindMatrix,
 				targetScene->mJointData->mJointWorldMatrix,
 
@@ -1242,7 +1253,7 @@ namespace dyno
 
 			targetScene->skinVerticesAnimation(
 				targetScene->mSkinData->initialNormal,
-				targetScene->mSkinData->mesh->normals(),
+				targetScene->mSkinData->mesh->geometry()->normals(),
 				targetScene->mJointData->mJointInverseBindMatrix,
 				targetScene->mJointData->mJointWorldMatrix,
 

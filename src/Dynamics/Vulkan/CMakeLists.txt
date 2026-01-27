@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
 
-cmake_minimum_required(VERSION 3.10)
-
 #foreach(LIB_NAME IN ITEMS ${LIB_NAMES})
 macro(build_library LIB_NAME LIB_DEPENDENCY)
     set(LIB_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NAME}")

@@ -7,6 +7,8 @@
 #include <string_view>
 #include <utility>
 #include <iomanip>
+#include <cstdint>
+#include <cstring> 
 
 namespace Wt
 {

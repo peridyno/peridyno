@@ -7,14 +7,17 @@
 #include <Wt/WPainter.h>
 
 #include <SceneGraph.h>
+#include "Module.h"
 
 #include "WtFlowNodeData.h"
 
 enum PortState { in, out };
 
-struct sceneConnection {
+struct connectionData {
 	std::shared_ptr<Node> exportNode;
 	std::shared_ptr<Node> inportNode;
+	std::shared_ptr<dyno::Module> exportModule;
+	std::shared_ptr<dyno::Module> inportModule;
 	connectionPointData inPoint;
 	connectionPointData outPoint;
 };
@@ -42,12 +45,20 @@ public:
 	bool checkMouseInPoints(Wt::WPointF mousePoint, WtFlowNodeData nodeData, PortState portState);
 
 	Wt::WPainterPath cubicPath(Wt::WPointF source, Wt::WPointF sink);
+
 	std::pair<Wt::WPointF, Wt::WPointF> pointsC1C2(Wt::WPointF source, Wt::WPointF sink);
+
 	void drawSketchLine(Wt::WPainter* painter, Wt::WPointF source, Wt::WPointF sink);
+
+	Wt::WPointF getPortPosition(Wt::WPointF origin, connectionPointData portData);
 
 	Wt::Signal<int>& selectNodeSignal() { return _selectNodeSignal; };
 
+	Wt::Signal<std::shared_ptr<dyno::Module>>& selectModuleSignal() { return _selectModuleSignal; }
+
 	Wt::Signal<>& updateCanvas() { return _updateCanvas; }
+
+	Wt::Signal<std::map<std::string, connectionData>>& prompt() { return _prompt; };
 
 
 protected:
@@ -68,7 +79,10 @@ protected:
 	std::shared_ptr<dyno::SceneGraph> mScene;
 
 	Wt::Signal<int> _selectNodeSignal;
+	Wt::Signal<std::shared_ptr<dyno::Module>> _selectModuleSignal;
 	Wt::Signal<> _updateCanvas;
+	Wt::Signal<std::map<std::string, connectionData>> _prompt;
+
 
 	int selectType = -1;
 	int selectedNum = 0;
@@ -78,4 +92,6 @@ protected:
 
 	connectionPointData outPoint;
 	connectionPointData inPoint;
+
+	bool isConnect = false;
 };

@@ -41,18 +41,20 @@ namespace dyno
 		layout->addWidget(spinner, 0, 1, Qt::AlignRight);
 
 
-		this->connect(spinner, SIGNAL(valueChanged(int)), this, SLOT(changeValue(int)));
+		this->connect(spinner, SIGNAL(valueChanged(int)), this, SLOT(updateField(int)));
 
 	}
 
-	void QIntegerFieldWidget::changeValue(int value)
+	void QIntegerFieldWidget::updateField(int value)
 	{
 
 		FVar<int>* f = TypeInfo::cast<FVar<int>>(field());
 		if (f == nullptr)
 			return;
 
-		f->setValue(value);
+		f->setValue(value,false);
+		emit fieldChanged();
+
 	}
 
 	QUIntegerFieldWidget::QUIntegerFieldWidget(FBase* field)
@@ -84,16 +86,17 @@ namespace dyno
 		layout->addWidget(spinner, 0, 1, Qt::AlignRight);
 		layout->setSpacing(3);
 
-		this->connect(spinner, SIGNAL(valueChanged(int)), this, SLOT(changeValue(int)));
+		this->connect(spinner, SIGNAL(valueChanged(int)), this, SLOT(updateField(int)));
 	}
 
-	void QUIntegerFieldWidget::changeValue(int value)
+	void QUIntegerFieldWidget::updateField(int value)
 	{
 		FVar<uint>* f = TypeInfo::cast<FVar<uint>>(field());
 		if (f == nullptr)
 			return;
 
-		f->setValue(value);
+		f->setValue(value,false);
+		emit fieldChanged();
 	}
 }
 

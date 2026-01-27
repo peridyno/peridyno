@@ -26,4 +26,9 @@ namespace dyno
 	template<typename VarType>
 	void multiply_SM_by_vector(DArrayMap<VarType>& matrix_a, DArray<VarType>& a, DArray<VarType>& Aa);
 
+	template<typename VarType>
+	void count_transposedM(DArray<uint>& count, DArrayMap<VarType>& matrix);
+
+	template<typename VarType>
+	void compute_transposedM(DArrayMap<VarType>& tmatrix, DArray<uint>& count, DArrayMap<VarType>& matrix);
 }  

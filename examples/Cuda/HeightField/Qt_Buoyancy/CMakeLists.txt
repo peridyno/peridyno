@@ -3,6 +3,7 @@ if(PERIDYNO_QT_GUI AND PERIDYNO_LIBRARY_HEIGHTFIELD AND PERIDYNO_LIBRARY_RIGIDBO
         HeightField
         RigidBody
         QtGUI
-        Modeling)
+        Modeling
+        GlfwGUI)
     add_example(Qt_Buoyancy HeightField LIB_DEPENDENCY)
 endif()

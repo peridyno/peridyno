@@ -81,7 +81,7 @@ namespace dyno
 		auto rot = this->varRotation()->getValue();
 		auto scale = this->varScale()->getValue();
 
-		Coord length;
+		Coord length = Vec3f(this->varLengthX()->getValue(),1,this->varLengthZ()->getValue());
 		length[0] *= scale[0];
 		length[1] = 1;
 		length[2] *= scale[2];

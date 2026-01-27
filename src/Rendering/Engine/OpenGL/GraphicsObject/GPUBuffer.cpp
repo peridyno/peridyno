@@ -196,6 +196,10 @@ void main() { vDst[uDstPitch * gl_GlobalInvocationID.x + gl_GlobalInvocationID.y
 	template<typename T>
 	void XBuffer<T>::updateGL()
 	{
+#ifdef NO_BACKEND
+		//TODO:
+#endif
+
 #ifdef CUDA_BACKEND
 		int size = buffer.size() * sizeof(T);
 		if (size == 0)
@@ -269,6 +273,11 @@ void main() { vDst[uDstPitch * gl_GlobalInvocationID.x + gl_GlobalInvocationID.y
 	template<typename T>
 	int XBuffer<T>::count() const
 	{
+#ifdef NO_BACKEND
+		return buffer.size();
+#endif // NO_BACKEND
+
+
 #ifdef VK_BACKEND
 		return srcBufferSize / sizeof(T);
 #endif

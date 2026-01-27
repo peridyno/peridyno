@@ -33,10 +33,6 @@ namespace dyno
 
 	void Module::update()
 	{
-#ifdef PYTHON
-		std::cout << "Module::update" << std::endl;
-#endif // PYTHON
-
 		if (!isInitialized())
 		{
 			bool ret = initialize();

@@ -4,7 +4,7 @@
 
 namespace dyno
 {
-	__constant__ int diff_v[27][3] =
+	static constexpr __constant__ int diff_v[27][3] =
 	{
 		0, 0, 0,
 		0, 0, 1,
@@ -36,7 +36,7 @@ namespace dyno
 	};
 
 
-	__constant__ int diff_v_33[33][3] =
+	static constexpr __constant__ int diff_v_33[33][3] =
 	{
 		0, 0, 0,
 		0, 0, 1,
@@ -75,7 +75,7 @@ namespace dyno
 	};
 
 
-	__constant__ int diff_v_125[125][3] =
+	static constexpr __constant__ int diff_v_125[125][3] =
 	{
 		-2, -2, -2,
 		-2, -2, -1,

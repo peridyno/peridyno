@@ -1,7 +1,6 @@
 #include "Vehicle.h"
 
 #include "Module/CarDriver.h"
-#include "Module/KeyDriver.h"
 
 #include "Mapping/DiscreteElementsToTriangleSet.h"
 #include "GLSurfaceVisualModule.h"
@@ -976,7 +975,53 @@ namespace dyno
 
 		//**************************************************//
 		ArticulatedBody<TDataType>::resetStates();
-		this->outReset()->setValue(true);
+
+		this->setSteeringAngle(0);
+		this->setThrust(0);
+	}
+
+	template<typename TDataType>
+	void Bicycle<TDataType>::postUpdateStates()
+	{
+		Real steeringAngle = this->stateSteeringAngle()->getValue();
+		Real thrustMag = this->stateThrust()->getValue();
+
+		this->setSteeringAngle(steeringAngle);
+		this->setThrust(thrustMag);
+	}
+
+	template<typename TDataType>
+	void Bicycle<TDataType>::setSteeringAngle(Real v)
+	{
+		auto topo = this->stateTopology()->getDataPtr();
+		auto& hinges = topo->hingeJoints();
+
+		Real steeringAngle = this->stateSteeringAngle()->getValue();
+
+		//TODO: remove the hard coding
+		uint steeringId = 2;
+
+		auto steeringHinge = hinges.get(steeringId);
+
+		steeringHinge.setRange(steeringAngle, steeringAngle);
+
+		hinges.set(steeringId, steeringHinge);
+	}
+
+	template<typename TDataType>
+	void Bicycle<TDataType>::setThrust(Real v)
+	{
+		auto topo = this->stateTopology()->getDataPtr();
+		auto& hinges = topo->hingeJoints();
+
+		Real thrustMag = this->stateThrust()->getValue();
+
+		//TODO: remove the hard coding
+		uint thrustId = 1;
+
+		auto thrustHinge = hinges.get(thrustId);
+		thrustHinge.setMoter(thrustMag);
+		hinges.set(thrustId, thrustHinge);
 	}
 
 	DEFINE_CLASS(Bicycle);

@@ -79,6 +79,9 @@ namespace dyno {
 		void assign(const Array2D<T, DeviceType::GPU>& src);
 		void assign(const Array2D<T, DeviceType::CPU>& src);
 
+		void set(const uint i, const uint j, const T value);
+		T get(const uint i, const uint j);
+
 	private:
 		uint m_nx = 0;
 		uint m_ny = 0;
@@ -136,5 +139,31 @@ namespace dyno {
 		}
 
 		cuSafeCall(cudaMemcpy2D(m_data, m_pitch, src.begin(), sizeof(T) *src.nx(), sizeof(T) * src.nx(), src.ny(), cudaMemcpyHostToDevice));
+	}
+
+	template<typename T>
+	void Array2D<T, DeviceType::GPU>::set(const uint i, const uint j, const T value)
+	{
+		assert(i < m_nx && j < m_ny && i >= 0 && j >= 0);
+		
+		char* addr = (char*)m_data;
+		addr += j * m_pitch;
+
+		cuSafeCall(cudaMemcpy(&((T*)addr)[i], &value, sizeof(T), cudaMemcpyHostToDevice));
+	}
+
+	template<typename T>
+	T Array2D<T, DeviceType::GPU>::get(const uint i, const uint j)
+	{
+		assert(i < m_nx && j < m_ny && i >= 0 && j >= 0);
+
+		char* addr = (char*)m_data;
+		addr += j * m_pitch;
+
+		T value;
+
+		cuSafeCall(cudaMemcpy(&value, &((T*)addr)[i], sizeof(T), cudaMemcpyDeviceToHost));
+
+		return value;
 	}
 }

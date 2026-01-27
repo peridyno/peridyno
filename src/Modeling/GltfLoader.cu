@@ -110,12 +110,13 @@ namespace dyno
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&GltfLoader<TDataType>::varChanged, this));
 		auto animationCallback = std::make_shared<FCallBackFunc>(std::bind(&GltfLoader<TDataType>::varAnimation, this));
 
-		this->stateJointSet()->setDataPtr(std::make_shared<EdgeSet<DataType3f>>());
+		//this->stateJointSet()->setDataPtr(std::make_shared<EdgeSet<DataType3f>>());
+		this->varAnimationSpeed()->setRange(0.02, 10);
+		this->varImportAnimation()->attach(animationCallback);
 
 		this->varImportAnimation()->attach(callback);
-		this->varImportAnimation()->attach(animationCallback);
 		this->varFileName()->attach(callback);
-		this->varAnimationSpeed()->setRange(0.02,10);
+
 		
 		auto callbackTransform = std::make_shared<FCallBackFunc>(std::bind(&GltfLoader<TDataType>::updateTransform, this));
 
@@ -139,7 +140,7 @@ namespace dyno
 		jointPointRender->setColor(Color(1.0f, 0.0f, 0.0f));
 		jointPointRender->varPointSize()->setValue(this->varJointRadius()->getValue());
 		jointPointRender->setVisible(true);
-		this->stateJointSet()->connect(jointPointRender->inPointSet());
+		//this->stateJointSet()->connect(jointPointRender->inPointSet());
 		this->graphicsPipeline()->pushModule(jointPointRender);
 
 		jointLineRender = std::make_shared<GLWireframeVisualModule>();
@@ -147,7 +148,7 @@ namespace dyno
 		jointLineRender->setVisible(true);
 		jointLineRender->varRadius()->setValue(this->varJointRadius()->getValue() / 3);
 		jointLineRender->varRenderMode()->setCurrentKey(GLWireframeVisualModule::EEdgeMode::CYLINDER);
-		this->stateJointSet()->connect(jointLineRender->inEdgeSet());
+		//this->stateJointSet()->connect(jointLineRender->inEdgeSet());
 		this->graphicsPipeline()->pushModule(jointLineRender);
 
 		this->stateAnimation()->setDataPtr(std::make_shared<JointAnimationInfo>());
@@ -189,7 +190,7 @@ namespace dyno
 	{
 		if (this->varFileName()->isEmpty())
 			return;
-
+		
 		this->updateTransformState();
 
 		printf("!!!!!!!!!!!!!!!!!    Import GLTF   !!!!!!!!!!!!!!!!!!!!!!!!\n\n\n");
@@ -308,39 +309,41 @@ namespace dyno
 
 			}
 
-			//
-			this->stateJointSet()->getDataPtr()->setPoints(jointVertices);
-			std::vector<TopologyModule::Edge> edges;
+			////
+			//this->stateJointSet()->getDataPtr()->setPoints(jointVertices);
+			//std::vector<TopologyModule::Edge> edges;
 
-			for (size_t i = 0; i < jointNum; i++)
-			{
-				for (auto childId : joint_child[all_Joints[i]])
-				{
-					edges.push_back(TopologyModule::Edge(i, jointId_VId[childId]));
-				}
-			}
-			this->stateJointSet()->getDataPtr()->setEdges(edges);
+			//for (size_t i = 0; i < jointNum; i++)
+			//{
+			//	for (auto childId : joint_child[all_Joints[i]])
+			//	{
+			//		edges.push_back(TopologyModule::Edge(i, jointId_VId[childId]));
+			//	}
+			//}
+			//this->stateJointSet()->getDataPtr()->setEdges(edges);
 
 			jointVertices.clear();
 		}
 
 		auto texMesh = this->stateTextureMesh()->getDataPtr();
-		//materials
-		loadGLTFMaterial(*newModel, texMesh, filename);
 
-		
 		loadGLTFShape(*newModel, texMesh, filename, &initialPosition,&initialNormal, &d_mesh_Matrix,&d_shape_meshId, this->stateSkin()->getDataPtr());
-		
-
-
-		
+			
 		this->stateSkin()->getDataPtr()->mesh = texMesh;
 
 		this->stateSkin()->getDataPtr()->initialPosition = initialPosition;
 
 		this->stateSkin()->getDataPtr()->initialNormal = initialNormal;
-
 		
+		cudaDeviceSynchronize();
+		cudaFree(0);
+		DArray<Mat4f> a;
+		auto sjds = this->stateJointsData()->getDataPtr();
+		auto sjibm = this->stateJointInverseBindMatrix()->getData();
+		auto sjwm = this->stateJointWorldMatrix()->getData();
+		a.resize(5);
+		a.reset();
+		this->stateJointsData()->getDataPtr()->mJointInverseBindMatrix.assign(this->stateJointInverseBindMatrix()->getData());
 
 		this->stateJointsData()->getDataPtr()->setGltfJointInfo(
 			this->stateJointInverseBindMatrix()->getData(),
@@ -379,7 +382,7 @@ namespace dyno
 	template<typename TDataType>
 	void GltfLoader<TDataType>::updateTransform()
 	{
-		if (!bool(this->stateTextureMesh()->getDataPtr()->shapes().size()))
+		if (!bool(this->stateTextureMesh()->constDataPtr()->shapes().size()))
 			return;
 		//updateModelTransformMatrix
 		this->updateTransformState();
@@ -391,19 +394,19 @@ namespace dyno
 
 		}
 
-		if (this->stateTextureMesh()->getDataPtr()->vertices().size())
+		if (this->stateTextureMesh()->getDataPtr()->geometry()->vertices().size())
 		{
 			//Move by Dir
 			if (true)
 			{
-				cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
+				cuExecute(this->stateTextureMesh()->getDataPtr()->geometry()->vertices().size(),
 					ShapeTransform,
 					initialPosition,
-					this->stateTextureMesh()->getDataPtr()->vertices(),
+					this->stateTextureMesh()->getDataPtr()->geometry()->vertices(),
 					initialNormal,
-					this->stateTextureMesh()->getDataPtr()->normals(),
+					this->stateTextureMesh()->getDataPtr()->geometry()->normals(),
 					d_mesh_Matrix,
-					this->stateTextureMesh()->getDataPtr()->shapeIds(),
+					this->stateTextureMesh()->getDataPtr()->geometry()->shapeIds(),
 					d_shape_meshId
 				);
 			}
@@ -423,13 +426,13 @@ namespace dyno
 		for (uint i = 0; i < shapeNum; i++)
 		{
 			DArray<int> counter;
-			counter.resize(this->stateTextureMesh()->getDataPtr()->vertices().size());
+			counter.resize(this->stateTextureMesh()->getDataPtr()->geometry()->vertices().size());
 
 
-			cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
+			cuExecute(this->stateTextureMesh()->getDataPtr()->geometry()->vertices().size(),
 				C_Shape_PointCounter,
 				counter,
-				this->stateTextureMesh()->getDataPtr()->shapeIds(),
+				this->stateTextureMesh()->getDataPtr()->geometry()->shapeIds(),
 				i
 			);
 
@@ -442,10 +445,10 @@ namespace dyno
 			Scan<int> scan;
 			scan.exclusive(counter.begin(), counter.size());
 
-			cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
+			cuExecute(this->stateTextureMesh()->getDataPtr()->geometry()->vertices().size(),
 				C_SetupPoints,
 				targetPoints,
-				this->stateTextureMesh()->getDataPtr()->vertices(),
+				this->stateTextureMesh()->getDataPtr()->geometry()->vertices(),
 				counter
 			);
 
@@ -468,16 +471,16 @@ namespace dyno
 		}
 
 		d_ShapeCenter.assign(c_shapeCenter);	// Used to "ToCenter"
-		unCenterPosition.assign(this->stateTextureMesh()->getDataPtr()->vertices());
+		unCenterPosition.assign(this->stateTextureMesh()->getDataPtr()->geometry()->vertices());
 
 		//ToCenter
 		if (varUseInstanceTransform()->getValue())
 		{
-			cuExecute(this->stateTextureMesh()->getDataPtr()->vertices().size(),
+			cuExecute(this->stateTextureMesh()->getDataPtr()->geometry()->vertices().size(),
 				ShapeToCenter,
 				unCenterPosition,
-				this->stateTextureMesh()->getDataPtr()->vertices(),
-				this->stateTextureMesh()->getDataPtr()->shapeIds(),
+				this->stateTextureMesh()->getDataPtr()->geometry()->vertices(),
+				this->stateTextureMesh()->getDataPtr()->geometry()->shapeIds(),
 				d_ShapeCenter
 			);
 
@@ -531,14 +534,14 @@ namespace dyno
 			this->stateAnimation()->getDataPtr()->updateAnimationPose(this->stateElapsedTime()->getValue() * this->varAnimationSpeed()->getValue());
 
 
-			//update Joints
-			cuExecute(all_Joints.size(),
-				jointAnimation,
-				this->stateJointSet()->getDataPtr()->getPoints(),
-				this->stateJointsData()->getDataPtr()->mJointWorldMatrix,
-				d_joints,
-				this->stateTransform()->getValue()
-			);
+			////update Joints
+			//cuExecute(all_Joints.size(),
+			//	jointAnimation,
+			//	this->stateJointSet()->getDataPtr()->getPoints(),
+			//	this->stateJointsData()->getDataPtr()->mJointWorldMatrix,
+			//	d_joints,
+			//	this->stateTransform()->getValue()
+			//);
 			//update Points
 
 			auto& skinInfo = this->stateSkin()->getData();
@@ -557,7 +560,7 @@ namespace dyno
 				Vec2u& range = skinInfo.skin_VerticeRange[i];
 
 				skinAnimation(initialPosition,
-					mesh->vertices(),
+					mesh->geometry()->vertices(),
 					this->stateJointInverseBindMatrix()->getData(),
 					this->stateJointsData()->getDataPtr()->mJointWorldMatrix,
 
@@ -574,7 +577,7 @@ namespace dyno
 
 				skinAnimation(
 					initialNormal,
-					mesh->normals(),
+					mesh->geometry()->normals(),
 					this->stateJointInverseBindMatrix()->getData(),
 					this->stateJointsData()->getDataPtr()->mJointWorldMatrix,
 

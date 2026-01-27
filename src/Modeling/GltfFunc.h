@@ -117,7 +117,7 @@ namespace dyno
 
 	void loadGLTFTextureMesh(std::shared_ptr<TextureMesh> texMesh, const std::string& filepath);
 
-	void loadGLTFMaterial(tinygltf::Model& model, std::shared_ptr<TextureMesh> texMesh, FilePath filename);
+	void loadGLTFMaterial(tinygltf::Model& model, std::vector<std::shared_ptr<Material>>& mats, FilePath filename);
 
 	void loadGLTFShape(
 		tinygltf::Model& model, 

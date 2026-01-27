@@ -173,14 +173,80 @@ void ImWindow::draw(RenderWindow* app)
 				ImGui::endTitle();
 				ImGui::SameLine();
 				ImGui::ColorEdit3("Ambient Light Color", (float*)&iLight.ambientColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel);
+				
+				{
+					//Camera Light
+					ImGui::Text("Camera Light Scale");
+					ImGui::beginTitle("Camera Light Scale");
+					ImGui::SliderFloat("", &iLight.cameraLightScale, 0.0f, 15.0f, "%.2f", 0);
+					ImGui::endTitle();
+				}
 
 				ImGui::Text("Main Light");
 				ImGui::beginTitle("Main Light Scale");
-				ImGui::SliderFloat("", &iLight.mainLightScale, 0.0f, 5.0f, "%.2f", 0);
+				ImGui::SliderFloat("", &iLight.mainLightScale, 0.0f, 15.0f, "%.2f", 0);
 				ImGui::endTitle();
 				ImGui::SameLine();
 				ImGui::ColorEdit3("Main Light Color", (float*)&iLight.mainLightColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoLabel);
+				
+				ImGui::Text("Main Light Shadow Multiplier");
+				ImGui::beginTitle("Main Light Shadow Multiplier");
+				ImGui::SliderFloat("", &iLight.ShadowMultiplier, 0.0f, 1.0f, "%.2f", 0);
+				ImGui::endTitle();
 
+				ImGui::Text("Main Light Shadow Brightness");
+				ImGui::beginTitle("Main Light Shadow Brightness");
+				ImGui::SliderFloat("", &iLight.ShadowBrightness, 0.0f, 1.0f, "%.2f", 0);
+				ImGui::endTitle();
+
+				ImGui::Text("Main Light Shadow Power");
+				ImGui::beginTitle("Main Light Sample Power");
+				ImGui::SliderFloat("", &iLight.SamplePower, 0.0f, 20.0f, "%.2f", 0);
+				ImGui::endTitle();
+
+
+				ImGui::Text("Main Light Shadow ShadowContrast");
+				ImGui::beginTitle("Main Light Sample Offset");
+				ImGui::SliderFloat("", &iLight.ShadowContrast, 0.1f, 15.0f, "%.2f", 0);
+				ImGui::endTitle();
+
+				//Shadow Map Quality
+				{
+					const int options[] = { 1024, 2048, 4096, 8192 };
+					const char* optionNames[] = { "1024", "2048", "4096", "8192" };
+					const int optionCount = IM_ARRAYSIZE(options);
+
+					int currentIndex = 0;
+					for (int i = 0; i < optionCount; i++)
+					{
+						if (options[i] == engine->shadowQuality)
+						{
+							currentIndex = i;
+							break;
+						}
+					}
+
+					ImGui::Text("ShadowQuality");
+					ImGui::beginTitle("ShadowQuality");
+					if (ImGui::Combo("", &currentIndex, optionNames, optionCount))
+					{
+						engine->shadowQuality = options[currentIndex];
+						engine->updateShadowMapAttribute();
+					}
+					ImGui::endTitle();
+
+					if (ImGui::Checkbox("Clamp Shadow To Scene Bound", &engine->bClampToSceneBound)) 
+					{
+						engine->updateShadowMapAttribute();
+					}
+					ImGui::Spacing();
+					if(ImGui::Checkbox("Use Scene Bound For Shadow", &engine->bUseSceneBoundForShadow))
+					{
+						engine->updateShadowMapAttribute();
+					}
+					ImGui::Spacing();
+				}
+				
 				// Light Direction
 				ImGui::Text("Main Light Direction");
 				glm::vec3 tmpLightDir = iLight.mainLightDirection;
@@ -212,7 +278,9 @@ void ImWindow::draw(RenderWindow* app)
 				if (ImGui::Checkbox("Main Light Shadow", &shadow))
 					iLight.mainLightShadow = shadow ? 1.f : 0.f;
 
+
 				rparams.light = iLight;
+
 
 				ImGui::EndMenu();
 			}
@@ -233,7 +301,7 @@ void ImWindow::draw(RenderWindow* app)
 					ImGui::Separator();
 
 					ImGui::Checkbox("Draw Environment Map", &engine->bDrawEnvmap);
-					ImGui::DragFloat("Environment Scale", &engine->enmapScale, 0.01f, 0.0f, 1.0f);
+					ImGui::DragFloat("Environment Scale", &engine->enmapScale, 0.01f, 0.0f, 5.0f);
 				}
 
 				ImGui::Separator();
@@ -265,6 +333,11 @@ void ImWindow::draw(RenderWindow* app)
 				ImGui::Spacing();
 
 				ImGui::Checkbox("Show Background", &(engine->showGround));
+				ImGui::Spacing();
+
+				ImGui::Separator();
+
+				ImGui::Checkbox("Force Render", &mForceRender);
 				ImGui::Spacing();
 
 				ImGui::Separator();
@@ -449,6 +522,11 @@ void dyno::ImWindow::setEnableViewManipulate(bool flag)
 	this->mEnableViewManipulate = flag;
 }
 
+bool dyno::ImWindow::isGuizmoDisplayed()
+{
+	return mGuizmoDisplayed;
+}
+
 void ImWindow::mouseReleaseEvent(const PMouseEvent& event)
 {
 	// reset mouse status
@@ -493,8 +571,8 @@ void dyno::ImWindow::drawNodeManipulator(std::shared_ptr<Node> n, glm::mat4 view
 {
 	// TODO: type conversion...
 	auto node = std::dynamic_pointer_cast<ParametricModel<DataType3f>>(n);
-
-	if (!node) return;
+	mGuizmoDisplayed = node ? true : false;
+	if (!mGuizmoDisplayed) return;
 
 	// get original transform
 	dyno::Vec3f t0 = node->varLocation()->getData();
@@ -584,5 +662,6 @@ void ImWindow::drawViewManipulator(Camera* camera)
 
 bool ImWindow::cameraLocked()
 {
-	return (ImGui::IsWindowFocused(ImGuiFocusedFlags_::ImGuiFocusedFlags_AnyWindow) || mDisenableCamera);
+	return mDisenableCamera;
+	//return (ImGui::IsWindowFocused(ImGuiFocusedFlags_::ImGuiFocusedFlags_AnyWindow) || mDisenableCamera);
 }

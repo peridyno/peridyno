@@ -5,7 +5,7 @@
 
 namespace dyno {
 
-    bool ImageLoader::loadImage(const char* path, CArray2D<Vec4f>& img) {
+    bool ImageLoader::loadImage(const char* path, CArray2D<Vec4f>& img, int req_comp) {
         int x, y, comp;
         stbi_set_flip_vertically_on_load(true);
 
@@ -26,5 +26,31 @@ namespace dyno {
 
         return data != nullptr;
     }
+
+    IMPLEMENT_CLASS(ImageLoaderModule)
+        ImageLoaderModule::ImageLoaderModule()
+    {
+        auto IndexChange = std::make_shared<FCallBackFunc>(std::bind(&ImageLoaderModule::onVarChanged, this));
+        this->setName(std::string("ImageLoader"));
+    }
+
+
+    void ImageLoaderModule::onVarChanged()
+    {
+        auto varFile = this->varImagePath()->getValue().string();
+        if (varFile == mFilePath)
+            return;
+        mFilePath = varFile;
+
+        CArray2D<Vec4f> c_texture;
+
+        if (this->outImage()->isEmpty())
+            this->outImage()->allocate();
+
+        ImageLoader::loadImage(mFilePath.c_str(), c_texture);
+
+        this->outImage()->getDataPtr()->assign(c_texture);
+    }
+
 
 } // namespace dyno

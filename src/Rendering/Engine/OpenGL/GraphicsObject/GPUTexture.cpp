@@ -24,6 +24,20 @@
 namespace dyno
 {
 	template<typename T>
+	void XTexture2D<T>::release()
+	{
+		if (this->isValid())
+			Texture2D::release();
+		if (resource) 
+		{
+			cuSafeCall(cudaGraphicsUnregisterResource(resource));
+			resource = NULL;
+		}
+		if (buffer.size() > 0)
+			buffer.clear();
+
+	}
+	template<typename T>
 	void XTexture2D<T>::create()
 	{
 		if (typeid(T) == typeid(dyno::Vec4f)) {
@@ -51,9 +65,11 @@ namespace dyno
 		return width > 0 && height > 0;
 	}
 
-
+#ifdef NO_BACKEND
+	//TODO:
+#else
 	template<typename T>
-	void XTexture2D<T>::load(dyno::DArray2D<T> data)
+	void XTexture2D<T>::load(const dyno::DArray2D<T>& data)
 	{
 #ifdef CUDA_BACKEND
 		buffer.assign(data);
@@ -197,6 +213,7 @@ namespace dyno
 
 #endif
 	}
+#endif
 
 	template<typename T>
 	void XTexture2D<T>::updateGL()
@@ -211,7 +228,7 @@ namespace dyno
 
 		if (width != buffer.nx() || height != buffer.ny()) {
 			// resize texture
-			this->release();
+			Texture2D::release();
 			this->create();
 			this->resize(buffer.nx(), buffer.ny());
 

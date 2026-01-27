@@ -16,23 +16,39 @@ public:
 
 	void setNode(std::shared_ptr<dyno::Node> node);
 
-	void deleteModule();
+	void addModule(std::shared_ptr<dyno::Module> new_module);
+
+	void deleteModule(std::shared_ptr<dyno::Module> delete_module);
 
 	void moveModule(WtNode& n, const Wt::WPointF& newLocation);
 
+	void showResetPipeline();
+
+	void showAnimationPipeline();
+
+	void showGraphicsPipeline();
 
 protected:
 	void paintEvent(Wt::WPaintDevice* paintDevice);
 
 	bool checkMouseInAllRect(Wt::WPointF mousePoint);
 
+	void disconnect(std::shared_ptr<Module> exportModule, std::shared_ptr<Module> inportModule, connectionPointData inPoint, connectionPointData outPoint, WtNode* inWtNode, WtNode* outWtNode);
+
 private:
 	std::shared_ptr<dyno::Node> mNode;
-	
+
 	WtModuleFlowScene* mModuleFlowScene = nullptr;
 	std::map<dyno::ObjectId, WtNode*> moduleMap;
 
+	WtNode* connectionOutNode;
+
 	std::shared_ptr<dyno::Module> mOutModule;
+	std::map<dyno::ObjectId, std::shared_ptr<dyno::Module>> allModuleMap;
+
+	PipelineType pipelineType = PipelineType::Animation;
+
+	std::shared_ptr<dyno::Module> mStates = nullptr;
 
 	int selectType = -1;
 	int selectedNum = 0;

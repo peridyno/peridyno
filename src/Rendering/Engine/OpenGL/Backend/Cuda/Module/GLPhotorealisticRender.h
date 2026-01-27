@@ -41,7 +41,7 @@ namespace dyno
 		virtual std::string caption() override;
 
 	public:
-		DEF_VAR(uint, MaterialIndex, 0, "");
+		DEF_VAR(uint, MaterialShapeIndex, 0, "");
 
 		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "");
 
@@ -67,6 +67,7 @@ namespace dyno
 		VertexArray	mVAO;
 
 		GLTextureMesh mTextureMesh;
+		bool mNeedUpdateTextureMesh = false;
 
 #ifdef CUDA_BACKEND
 		std::shared_ptr<ConstructTangentSpace> mTangentSpaceConstructor;

@@ -16,6 +16,8 @@
 #include "ObjIO/initializeObjIO.h"
 #include "ObjIO/ObjLoader.h"
 #include "RigidBody/MultibodySystem.h"
+#include <BasicShapes/CubeModel.h>
+#include <BasicShapes/PlaneModel.h>
 
 using namespace dyno;
 
@@ -24,6 +26,10 @@ std::shared_ptr<SceneGraph> createScene()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 	scn->setUpperBound(Vec3f(1.5, 1, 1.5));
 	scn->setLowerBound(Vec3f(-0.5, 0, -0.5));
+
+	//auto cube1 = scn->addNode(std::make_shared<CubeModel<DataType3f>>());
+	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
+
 	return scn;
 }
 

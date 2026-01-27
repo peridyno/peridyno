@@ -103,9 +103,9 @@ namespace dyno {
 	{
 		auto mesh = this->inTextureMesh()->constDataPtr();
 
-		auto& inVertex = mesh->vertices();
-		auto& inNormal = mesh->normals();
-		auto& inTexCoord = mesh->texCoords();
+		auto& inVertex = mesh->geometry()->vertices();
+		auto& inNormal = mesh->geometry()->normals();
+		auto& inTexCoord = mesh->geometry()->texCoords();
 		auto& inShapes =  mesh->shapes();
 
 		if (this->outNormal()->size() != inNormal.size()) {

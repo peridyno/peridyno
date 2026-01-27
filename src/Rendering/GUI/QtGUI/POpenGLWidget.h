@@ -34,6 +34,7 @@
 #include <RenderEngine.h>
 #include <RenderWindow.h>
 #include <ImWindow.h>
+#include <unordered_set>
 
 namespace dyno
 {
@@ -83,9 +84,15 @@ namespace dyno
 
 		void onSaveScreen(const std::string& filename) override;
 
+		void paintEvent(QPaintEvent* event) override;
+
 	public slots:
-		void updateGrpahicsContext();
+		void updateGraphicsContext();
 		void updateGraphicsContext(Node* node);
+		void resetSceneFrame();
+		void onNodeUpdated(std::shared_ptr<Node> node);
+		void onModuleUpdated(std::shared_ptr<Module> node);
+		void nodeNodeRenderingKeyUpdated(std::shared_ptr<Node> node);
 
 		void updateOneFrame(int frame);
 
@@ -98,7 +105,6 @@ namespace dyno
 		QButtonState mButtonState = QButtonState::QBUTTON_UP;
 		int			 mCursorX = -1;
 		int			 mCursorY = -1;
-		int          mtempCursorX = -1;
 		// Qt
 		QTimer timer;
 
@@ -106,6 +112,23 @@ namespace dyno
 
 		// 
 		ImWindow mImWindow;
+
+		static std::unordered_set<int> mPressedKeys;
+		static std::unordered_set<int> mPressedMouseButtons;
+		static bool mRreshape;
+		static bool mMouseButtonRelease;
+		static bool mScroll;
+		bool mNeedUpdate = false;
+		bool mBlockFieldUpdate = false;
+
+	private:
+		bool isAnyKeyPressed() {
+			return !mPressedKeys.empty();
+		}
+		bool isAnyMouseButtonPressed() {
+			return !mPressedMouseButtons.empty();
+		}
+
 	};
 
 }

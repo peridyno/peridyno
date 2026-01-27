@@ -3,6 +3,8 @@ if(PERIDYNO_QT_GUI AND PERIDYNO_LIBRARY_RIGIDBODY)
         RigidBody
         Modeling
         QtGUI
-        ObjIO)
+        ObjIO
+        GlfwGUI
+    )
     add_example(Qt_Bicycle RigidBody LIB_DEPENDENCY)
 endif()

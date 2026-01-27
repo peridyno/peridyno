@@ -1,6 +1,4 @@
 #include "Math/SimpleMath.h"
-#include <glm/glm.hpp>
-#include "Primitive/Primitive3D.h"
 
 namespace dyno
 {

@@ -1,5 +1,18 @@
 #include "WtModuleFlowWidget.h"
+#include "WtInteraction.h"
+#include <Wt/WMessageBox.h>
 
+namespace dyno
+{
+	class WtStates : public Module
+	{
+		DECLARE_CLASS(WtStates);
+	public:
+		WtStates() {};
+	};
+
+	IMPLEMENT_CLASS(WtStates);
+}
 
 WtModuleFlowWidget::WtModuleFlowWidget(std::shared_ptr<dyno::SceneGraph> scene)
 	: WtFlowWidget(scene)
@@ -9,7 +22,7 @@ WtModuleFlowWidget::WtModuleFlowWidget(std::shared_ptr<dyno::SceneGraph> scene)
 	this->mouseWentUp().connect(this, &WtModuleFlowWidget::onMouseWentUp);
 }
 
-WtModuleFlowWidget::~WtModuleFlowWidget(){}
+WtModuleFlowWidget::~WtModuleFlowWidget() {}
 
 void WtModuleFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 {
@@ -40,17 +53,17 @@ void WtModuleFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 				mOutModule = moduleMap.find(selectedNum)->second->getModule();
 			}
 
-
-		/*	if (outPoint.portType == PortType::In)
+			if (outPoint.portType == PortType::In)
 			{
 				auto existConnection = moduleMap[selectedNum]->getIndexConnection(outPoint.portIndex);
+
 				if (existConnection != nullptr)
 				{
 					auto outNode = existConnection->getNode(PortType::Out);
-					for (auto it = mScene->begin(); it != mScene->end(); it++)
+
+					for (auto m : moduleMap)
 					{
-						auto m = it.get();
-						auto node = moduleMap[m->objectId()];
+						auto node = m.second;
 						auto outPortIndex = existConnection->getPortIndex(PortType::Out);
 						auto exportPortsData = outNode->flowNodeData().getPointsData();
 						connectionPointData exportPointData;
@@ -65,26 +78,12 @@ void WtModuleFlowWidget::onMouseWentDown(const Wt::WMouseEvent& event)
 
 						if (node == outNode)
 						{
-							for (auto it = sceneConnections.begin(); it != sceneConnections.end(); )
-							{
-								if (it->exportNode == mOutNode && it->inportNode == m && it->inPoint.portIndex == outPoint.portIndex && it->outPoint.portIndex == exportPointData.portIndex)
-								{
-									it = sceneConnections.erase(it);
-								}
-								else
-								{
-									++it;
-								}
-							}
-
-							disconnect(m, mOutNode, outPoint, exportPointData, nodeMap[selectedNum], outNode);
+							disconnect(m.second->getModule(), mOutModule, outPoint, exportPointData, moduleMap[selectedNum], outNode);
 							sourcePoint = getPortPosition(outNode->flowNodeData().getNodeOrigin(), exportPointData);
-
 						}
 					}
-
 				}
-			}*/
+			}
 		}
 		else
 		{
@@ -116,25 +115,20 @@ void WtModuleFlowWidget::onMouseMove(const Wt::WMouseEvent& event)
 	}
 	else
 	{
-		auto mlist = mNode->getModuleList();
 		auto mousePoint = Wt::WPointF(event.widget().x, event.widget().y);
-		for (const auto& module : mlist)
+		for (auto modulePair : moduleMap)
 		{
-			if (moduleMap.find(module->objectId()) != moduleMap.end())
+			auto m = modulePair.second;
+			auto moduleData = m->flowNodeData();
+			if (checkMouseInRect(mousePoint, moduleData) && selectType != 2)
 			{
-				auto m = moduleMap[module->objectId()];
-				auto moduleData = m->flowNodeData();
-				if (checkMouseInRect(mousePoint, moduleData) && selectType != 2)
-				{
-					selectType = 1;
-					//connectionOutNode = node;
-					selectedNum = module->objectId();
-					canMoveNode = true;
-					update();
-					break;
-				}
+				selectType = 1;
+				connectionOutNode = m;
+				selectedNum = m->getModule()->objectId();
+				canMoveNode = true;
+				update();
+				break;
 			}
-			
 		}
 	}
 }
@@ -152,7 +146,7 @@ void WtModuleFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 		auto node = moduleMap[selectedNum];
 		auto nodeData = node->flowNodeData();
 
-		_selectNodeSignal.emit(selectedNum);
+		_selectModuleSignal.emit(node->getModule());
 
 		Wt::WPointF mousePoint = Wt::WPointF(event.widget().x, event.widget().y);
 		if (!checkMouseInAllRect(mousePoint) && selectType == 2)
@@ -166,11 +160,111 @@ void WtModuleFlowWidget::onMouseWentUp(const Wt::WMouseEvent& event)
 	}
 	else
 	{
-		_selectNodeSignal.emit(-1);
+		_selectModuleSignal.emit(nullptr);
 	}
 
+	if (drawLineFlag = true)
+	{
+		for (auto module : moduleMap)
+		{
+			auto node = module.second;
+			auto nodeData = node->flowNodeData();
+			if (checkMouseInPoints(mouseWentUpPosition, nodeData, PortState::in))
+			{
+				auto connectionInNode = node;
+
+				if (outPoint.portType == PortType::Out)
+				{
+					WtConnection connection(outPoint.portType, *connectionOutNode, outPoint.portIndex);
+					WtInteraction interaction(*connectionInNode, connection, inPoint, outPoint, node->getModule(), mOutModule);
+					if (interaction.tryConnect())
+					{
+						update();
+					}
+				}
+			}
+		}
+
+		if (!isConnect && mOutModule != nullptr && outPoint.portType != PortType::In)
+		{
+			auto fieldExps = mOutModule->getOutputFields();
+
+			std::map<std::string, connectionData> promptModule;
+			if (allModuleMap.empty())
+			{
+				auto moduleMap = dyno::Object::getClassMap();
+				for (auto it = moduleMap->begin(); it != moduleMap->end(); ++it)
+				{
+					auto node_obj = dyno::Object::createObject(it->second->m_className);
+					std::shared_ptr<dyno::Module> new_module(dynamic_cast<dyno::Module*>(node_obj));
+					if (new_module == nullptr)
+					{
+						continue;
+					}
+					else
+					{
+						allModuleMap.insert(std::pair<dyno::ObjectId, std::shared_ptr<dyno::Module>>(new_module->objectId(), new_module));
+					}
+				}
+			}
+
+			for (auto modulePair : allModuleMap)
+			{
+				auto module = modulePair.second;
+				if (outPoint.portShape == PortShape::Point)
+				{
+					auto fieldInps = module->getInputFields();
+					auto fieldExp = fieldExps[outPoint.portIndex];
+					int i = 0;
+					for (auto fieldInp : fieldInps)
+					{
+						if (fieldInp->getClassName() == fieldExp->getClassName())
+						{
+							std::string className = fieldInp->getClassName();
+							if (className == dyno::InstanceBase::className())
+							{
+								dyno::InstanceBase* instIn = dynamic_cast<dyno::InstanceBase*>(fieldInp);
+								dyno::InstanceBase* instOut = dynamic_cast<dyno::InstanceBase*>(fieldExp);
+
+								if (instIn != nullptr && instOut != nullptr)
+								{
+									if (instIn->canBeConnectedBy(instOut))
+									{
+										connectionData canConnectionData;
+										canConnectionData.exportModule = mOutModule;
+										canConnectionData.outPoint = outPoint;
+										canConnectionData.inportModule = module;
+										canConnectionData.inPoint.portShape = outPoint.portShape;
+										canConnectionData.inPoint.portIndex = i;
+
+										promptModule.emplace(module->caption(), canConnectionData);
+									}
+								}
+							}
+							else
+							{
+								if (fieldInp->getTemplateName() == fieldExp->getTemplateName())
+								{
+									connectionData canConnectionData;
+									canConnectionData.exportModule = mOutModule;
+									canConnectionData.outPoint = outPoint;
+									canConnectionData.inportModule = module;
+									canConnectionData.inPoint.portShape = outPoint.portShape;
+									canConnectionData.inPoint.portIndex = i;
+
+									promptModule.emplace(module->caption(), canConnectionData);
+								}
+							}
+						}
+						i++;
+					}
+				}
+			}
+			_prompt.emit(promptModule);
+		}
+	}
 	drawLineFlag = false;
-	update();
+	isConnect = false;
 }
 
 void WtModuleFlowWidget::onKeyWentDown()
@@ -178,30 +272,94 @@ void WtModuleFlowWidget::onKeyWentDown()
 	if (mNode == nullptr)
 		return;
 
-	return;
+	if (selectType > 0)
+	{
+		auto module = moduleMap[selectedNum]->getModule();
+		deleteModule(module);
+		selectType = -1;
+		selectedNum = 0;
+		updateAll();
+	}
 }
 
 void WtModuleFlowWidget::setNode(std::shared_ptr<dyno::Node> node)
 {
 	mNode = node;
+
+	mStates = std::make_shared<dyno::WtStates>();
+
+	auto& fields = node->getAllFields();
+	for (auto field : fields)
+	{
+		if (field->getFieldType() == dyno::FieldTypeEnum::State
+			|| field->getFieldType() == dyno::FieldTypeEnum::In)
+		{
+			mStates->addOutputField(field);
+		}
+	}
+
 	update();
 }
 
-void WtModuleFlowWidget::deleteModule()
+void WtModuleFlowWidget::addModule(std::shared_ptr<dyno::Module> new_module)
 {
-	
+	if (mModuleFlowScene != nullptr)
+	{
+		mModuleFlowScene->addModule(new_module);
+	}
+
+	updateAll();
+}
+
+void WtModuleFlowWidget::deleteModule(std::shared_ptr<dyno::Module> delete_module)
+{
+	if (mModuleFlowScene != nullptr)
+	{
+		auto nodeConnections = mModuleFlowScene->getConnections();
+		for (auto c : nodeConnections)
+		{
+			if (c.exportModule == delete_module || c.inportModule == delete_module)
+			{
+				Wt::WMessageBox::show("Error",
+					"<p>Please disconnect before deleting the module </p>",
+					Wt::StandardButton::Ok);
+				return;
+			}
+		}
+		mModuleFlowScene->deleteModule(delete_module);
+	}
+	updateAll();
 }
 
 void WtModuleFlowWidget::moveModule(WtNode& n, const Wt::WPointF& newLocation)
 {
-	WtModuleWidget* mw = dynamic_cast<WtModuleWidget*>(n.nodeDataModel());
-
-	auto m = mw == nullptr ? nullptr : mw->getModule();
+	auto m = n.getModule();
 
 	if (m != nullptr)
 	{
 		m->setBlockCoord(newLocation.x(), newLocation.y());
 	}
+}
+
+void WtModuleFlowWidget::showResetPipeline()
+{
+	pipelineType = PipelineType::Reset;
+	update();
+	reorderFlag = true;
+}
+
+void WtModuleFlowWidget::showAnimationPipeline()
+{
+	pipelineType = PipelineType::Animation;
+	update();
+	reorderFlag = true;
+}
+
+void WtModuleFlowWidget::showGraphicsPipeline()
+{
+	pipelineType = PipelineType::Graphics;
+	update();
+	reorderFlag = true;
 }
 
 void WtModuleFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
@@ -214,12 +372,12 @@ void WtModuleFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 	{
 		if (reorderFlag)
 		{
-			mModuleFlowScene = new WtModuleFlowScene(&painter, mNode);
+			mModuleFlowScene = new WtModuleFlowScene(&painter, mNode, pipelineType, mStates, selectType, selectedNum);
 			mModuleFlowScene->reorderAllModules();
 			reorderFlag = false;
 		}
 
-		mModuleFlowScene = new WtModuleFlowScene(&painter, mNode);
+		mModuleFlowScene = new WtModuleFlowScene(&painter, mNode, pipelineType, mStates, selectType, selectedNum);
 		moduleMap = mModuleFlowScene->getNodeMap();
 	}
 
@@ -231,26 +389,67 @@ void WtModuleFlowWidget::paintEvent(Wt::WPaintDevice* paintDevice)
 
 	if (drawLineFlag)
 	{
-		//drawSketchLine(&painter, sourcePoint, sinkPoint);
+		drawSketchLine(&painter, sourcePoint, sinkPoint);
 	}
 }
 
 bool WtModuleFlowWidget::checkMouseInAllRect(Wt::WPointF mousePoint)
 {
-	auto mlist = mNode->getModuleList();
-	for (const auto& module : mlist)
+	for (auto module : moduleMap)
 	{
-		if (moduleMap.find(module->objectId()) != moduleMap.end())
+		auto moduleData = module.second->flowNodeData();
+
+		if (checkMouseInRect(mousePoint, moduleData))
 		{
-			auto m = moduleMap[module->objectId()];
-			auto moduleData = m->flowNodeData();
-			if (checkMouseInRect(mousePoint, moduleData))
+			selectedNum = module.second->getModule()->objectId();
+			canMoveNode = true;
+			return true;
+		}
+	}
+	return false;
+}
+
+void WtModuleFlowWidget::disconnect(std::shared_ptr<Module> exportModule, std::shared_ptr<Module> inportModule, connectionPointData inPoint, connectionPointData outPoint, WtNode* inWtNode, WtNode* outWtNode)
+{
+	auto inportIndex = inPoint.portIndex;
+
+	if (inPoint.portShape == PortShape::Point)
+	{
+		auto outFieldNum = 0;
+		auto outPoints = outWtNode->flowNodeData().getPointsData();
+		for (auto point : outPoints)
+		{
+			if (point.portShape == PortShape::Point)
 			{
-				selectedNum = module->objectId();
-				canMoveNode = true;
-				return true;
+				outFieldNum = point.portIndex;
+				break;
 			}
 		}
-		return false;
+
+		auto field = exportModule->getOutputFields()[outPoint.portIndex - outFieldNum];
+
+		if (field != NULL)
+		{
+			auto node_data = inWtNode->flowNodeData();
+
+			auto points = node_data.getPointsData();
+
+			int fieldNum = 0;
+
+			for (auto point : points)
+			{
+				if (point.portType == PortType::In)
+				{
+					if (point.portShape == PortShape::Bullet || point.portShape == PortShape::Diamond)
+					{
+						fieldNum++;
+					}
+				}
+			}
+
+			auto inField = inportModule->getInputFields()[inPoint.portIndex - fieldNum];
+
+			field->disconnect(inField);
+		}
 	}
 }

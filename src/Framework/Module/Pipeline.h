@@ -29,9 +29,9 @@ namespace dyno
 		uint sizeOfDynamicModules();
 		uint sizeOfPersistentModules();
 
-		void pushModule(std::shared_ptr<Module> m);
+		virtual void pushModule(std::shared_ptr<Module> m);
 
-		void popModule(std::shared_ptr<Module> m);
+		virtual void popModule(std::shared_ptr<Module> m);
 
 		template<class TModule>
 		std::shared_ptr<TModule> createModule()
@@ -100,9 +100,12 @@ namespace dyno
 		bool requireUpdate() final;
 
 		virtual bool printDebugInfo();
+		void setModuleUpdated(bool updated);
 
+		virtual void reconstructPipeline();
+		std::list<std::shared_ptr<Module>>& ModuleList(){ return mModuleList; };
 	private:
-		void reconstructPipeline();
+
 
 	private:
 		bool mModuleUpdated = false;

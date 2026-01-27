@@ -21,7 +21,9 @@
 
 #include "GraphicsObject/GPUTexture.h"
 
-#include "Topology/TextureMesh.h"
+#ifdef CUDA_BACKEND
+	#include "Topology/TextureMesh.h"
+#endif // CUDA_BACKEND
 
 #include <glm/glm.hpp>
 
@@ -47,10 +49,14 @@ namespace dyno
 		float alpha = 1.0f;
 
 		float bumpScale = 1.f;
+		float emissiveIntensity = 0.0f;
 
 		// color texture
 		XTexture2D<dyno::Vec4f> texColor;
 		XTexture2D<dyno::Vec4f> texBump;
+		XTexture2D<dyno::Vec4f> texORM;
+		XTexture2D<dyno::Vec4f> texEmissiveColor;
+		XTexture2D<dyno::Vec4f> texAlpha;
 
 		bool mInitialized = false;
 	};
@@ -87,7 +93,9 @@ namespace dyno
 		void create() final;
 		void release() final;
 
+#ifdef CUDA_BACKEND
 		void load(const std::shared_ptr<TextureMesh> mesh);
+#endif
 
 		void updateGL();
 
@@ -96,7 +104,6 @@ namespace dyno
 		inline XBuffer<Vec2f>& texCoords() { return mTexCoord; }
 
 		inline std::vector<std::shared_ptr<GLShape>>& shapes() { return mShapes; }
-		inline std::vector<std::shared_ptr<GLMaterial>>& materials() { return mMaterials; }
 
 	private:
 		XBuffer<Vec3f> mVertices;
@@ -104,7 +111,6 @@ namespace dyno
 		XBuffer<Vec2f> mTexCoord;
 
 		std::vector<std::shared_ptr<GLShape>> mShapes;
-		std::vector<std::shared_ptr<GLMaterial>> mMaterials;
 
 		bool mInitialized = false;
 	};

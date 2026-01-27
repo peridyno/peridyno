@@ -21,9 +21,9 @@ namespace dyno
 		void mouseMoveEvent(const PMouseEvent& event);
 
 		void setEnableViewManipulate(bool flag);
-
-	public:
+		bool isGuizmoDisplayed();
 		bool cameraLocked();
+		bool forceRender() { return mForceRender; }
 
 	private:
 		void drawSelectedRegion();
@@ -47,5 +47,8 @@ namespace dyno
 
 		// whether user can change view by manipulator
 		bool mEnableViewManipulate = true;
+		bool mGuizmoDisplayed = false;
+		bool mForceRender = false;
+
 	};
 }

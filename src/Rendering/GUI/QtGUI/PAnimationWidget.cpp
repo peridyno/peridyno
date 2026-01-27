@@ -155,6 +155,7 @@ namespace dyno
 	void PAnimationWidget::resetSimulation()
 	{
 		PSimulationThread::instance()->reset(mTotalFrameSpinbox->value());
+		emit resetScene();
 
 		mStartSim->setText("");
 		mStartSim->setEnabled(true);

@@ -4,7 +4,6 @@
 #include "NodeFactory.h"
 #include "WLogWidget.h"
 
-
 #include "WParameterDataNode.h"
 #include "WSampleWidget.h"
 #include "WSaveWidget.h"
@@ -46,12 +45,13 @@ WMainWindow::WMainWindow() : WContainerWidget()
 	rightWidget = layout->addWidget(std::make_unique<Wt::WContainerWidget>(), Wt::LayoutPosition::East);
 
 	// create data model
-	mNodeDataModel = std::make_shared<WNodeDataModel>();
-	mModuleDataModel = std::make_shared<WModuleDataModel>();
 	mParameterDataNode = std::make_shared<WParameterDataNode>();
+	mPromptPanel = std::make_shared<WPromptPanel>();
 
 	mParameterDataNode->changeValue().connect(this, &WMainWindow::updateCanvas);
 	mParameterDataNode->changeValue().connect(this, &WMainWindow::updateNodeGraphics);
+
+	//mParameterDataNode->changeValue().connect(this, );
 }
 
 WMainWindow::~WMainWindow()
@@ -66,10 +66,12 @@ void WMainWindow::setScene(std::shared_ptr<dyno::SceneGraph> scene)
 
 	// setup scene graph
 	mScene = scene;
-	mSceneCanvas->setScene(mScene);
-	mNodeDataModel->setScene(mScene);
-	mModuleDataModel->setNode(NULL);
-	controlContainer->setSceneGraph(mScene);
+	if (mScene)
+	{
+		mSceneCanvas->setScene(mScene);
+		controlContainer->setSceneGraph(mScene);
+		pythonWidget->setScene(mScene);
+	}
 }
 
 std::shared_ptr<dyno::SceneGraph> WMainWindow::getScene()
@@ -105,7 +107,63 @@ void WMainWindow::onKeyWentDown(const Wt::WKeyEvent& event)
 {
 	if (event.key() == Wt::Key::Delete || event.key() == Wt::Key::Backspace)
 	{
-		mNodeFlowWidget->onKeyWentDown();
+		if (tab->currentIndex() == 0)
+		{
+			mNodeFlowWidget->onKeyWentDown();
+		}
+		else if (tab->currentIndex() == 1)
+		{
+			mModuleFlowWidget->onKeyWentDown();
+		}
+		else
+		{
+			return;
+		}
+	}
+}
+
+void WMainWindow::setInData(connectionData data, std::shared_ptr<dyno::Node> inNode, std::shared_ptr<dyno::Module> inModule)
+{
+	auto inPoint = data.inPoint;
+	auto outNode = data.exportNode;
+	auto outModule = data.exportModule;
+	auto outPoint = data.outPoint;
+
+	if (inPoint.portShape == PortShape::Diamond || inPoint.portShape == PortShape::Bullet)
+	{
+		outNode->connect(inNode->getImportNodes()[inPoint.portIndex]);
+	}
+	else if (inPoint.portShape == PortShape::Point)
+	{
+		dyno::FBase* field;
+
+		if (outNode == nullptr && outModule != nullptr)
+		{
+			field = outModule->getOutputFields()[outPoint.portIndex];
+		}
+		else
+		{
+			field = outNode->getOutputFields()[outPoint.portIndex - 1];
+		}
+
+		if (field != NULL)
+		{
+			dyno::FBase* inField;
+
+			if (outModule == nullptr)
+			{
+				inField = inNode->getInputFields()[inPoint.portIndex];
+			}
+			else
+			{
+				inField = inModule->getInputFields()[inPoint.portIndex];
+			}
+
+			if (inField != nullptr)
+			{
+				field->connect(inField);
+			}
+		}
 	}
 }
 
@@ -156,7 +214,7 @@ void WMainWindow::initRightPanel(Wt::WContainerWidget* parent)
 	tab->addTab(initLog(), "Log", Wt::ContentLoading::Lazy);
 }
 
-void WMainWindow::initAddNodePanel(Wt::WPanel* panel)
+void WMainWindow::initAddNodePanel(Wt::WPanel* panel, AddNodeType addNodeType)
 {
 	auto widget3 = panel->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
 	auto layout3 = widget3->setLayout(std::make_unique<Wt::WHBoxLayout>());
@@ -171,95 +229,113 @@ void WMainWindow::initAddNodePanel(Wt::WPanel* panel)
 		Wt::WSuggestionPopup::generateReplacerJS(nodeOptions)
 	));
 
-	auto& pages = dyno::NodeFactory::instance()->nodePages();
-	for (auto iPage = pages.begin(); iPage != pages.end(); iPage++)
-	{
-		auto& groups = iPage->second->groups();
-		{
-			for (auto iGroup = groups.begin(); iGroup != groups.end(); iGroup++)
-			{
-				auto& actions = iGroup->second->actions();
-				for (auto action : actions)
-				{
-					sp->addSuggestion(action->caption());
-				}
-			}
-		}
-	}
+	suggestFile(sp, addNodeType);
 
-	auto nodeMap = dyno::Object::getClassMap();
-	for (auto it = nodeMap->begin(); it != nodeMap->end(); ++it)
-	{
-		auto node_obj = dyno::Object::createObject(it->second->m_className);
-		std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
-		if (new_node == nullptr)
-		{
-			continue;
-		}
-		else
-		{
-			sp->addSuggestion(it->second->m_className);
-		}
-	}
 	auto name = layout3->addWidget(std::make_unique<Wt::WLineEdit>());
-	name->setPlaceholderText("node name");
+
+	addNodeType == AddNodeType::NodeType ? name->setPlaceholderText("Input Node Name") : name->setPlaceholderText("Input Module Name");
 
 	sp->forEdit(name);
 
 	auto addNodeButton = layout3->addWidget(std::make_unique<Wt::WPushButton>("Add"));
 
 	addNodeButton->clicked().connect([=] {
-		bool flag = true;
-
-		for (auto iPage = pages.begin(); iPage != pages.end(); iPage++)
+		if (addNodeType == AddNodeType::NodeType)
 		{
-			auto& groups = iPage->second->groups();
+			bool flag = true;
+
+			auto& pages = dyno::NodeFactory::instance()->nodePages();
+
+			for (auto iPage = pages.begin(); iPage != pages.end(); iPage++)
 			{
-				for (auto iGroup = groups.begin(); iGroup != groups.end(); iGroup++)
+				auto& groups = iPage->second->groups();
 				{
-					auto& actions = iGroup->second->actions();
-					for (auto action : actions)
+					for (auto iGroup = groups.begin(); iGroup != groups.end(); iGroup++)
 					{
-						if (action->caption() == name->text().toUTF8())
+						auto& actions = iGroup->second->actions();
+						for (auto action : actions)
 						{
-							auto new_node = mScene->addNode(action->action()());
-							new_node->setBlockCoord(Initial_x, Initial_y);
-							Initial_x += 20;
-							Initial_y += 20;
-							name->setText("");
-							mNodeFlowWidget->updateAll();
-							mNodeDataModel->setScene(mScene);
-							flag = false;
+							if (action->caption() == name->text().toUTF8())
+							{
+								auto new_node = mScene->addNode(action->action()());
+								new_node->setBlockCoord(Initial_x, Initial_y);
+								Initial_x += 20;
+								Initial_y += 20;
+								name->setText("");
+								mNodeFlowWidget->updateAll();
+								flag = false;
+							}
 						}
 					}
 				}
 			}
-		}
 
-		if (flag)
+			if (flag)
+			{
+				auto node_obj = dyno::Object::createObject(name->text().toUTF8());
+				std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
+				if (new_node != nullptr)
+				{
+					mScene->addNode(new_node);
+					new_node->setBlockCoord(Initial_x, Initial_y);
+					Initial_x += 10;
+					Initial_y += 10;
+					mNodeFlowWidget->updateAll();
+					name->setText("");
+				}
+			}
+		}
+		else
 		{
 			auto node_obj = dyno::Object::createObject(name->text().toUTF8());
-			std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
-			if (new_node != nullptr)
+			std::shared_ptr<dyno::Module> new_module(dynamic_cast<dyno::Module*>(node_obj));
+			if (new_module != nullptr)
 			{
-				mScene->addNode(new_node);
-				new_node->setBlockCoord(Initial_x, Initial_y);
+				mModuleFlowWidget->addModule(new_module);
+				new_module->setBlockCoord(Initial_x, Initial_y);
 				Initial_x += 10;
 				Initial_y += 10;
-				std::cout << Initial_x << std::endl;
-				std::cout << "!!!!!!!!!!!" << std::endl;
-				mNodeFlowWidget->updateAll();
-				mNodeDataModel->setScene(mScene);
+				mModuleFlowWidget->updateAll();
 				name->setText("");
 			}
-
 		}
 		});
 
 	auto reorderNodeButton = layout3->addWidget(std::make_unique<Wt::WPushButton>("Reorder"));
 
-	reorderNodeButton->clicked().connect([=] {
-		mNodeFlowWidget->reorderNode();
+	if (addNodeType == AddNodeType::NodeType)
+	{
+		reorderNodeButton->clicked().connect([=] {
+			mNodeFlowWidget->reorderNode();
+			});
+	}
+	else
+	{
+		reorderNodeButton->clicked().connect([=] {
+			mModuleFlowWidget->reorderNode();
+			});
+	}
+}
+
+void WMainWindow::initPipelinePanel(Wt::WPanel* parent)
+{
+	auto widget = parent->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
+	auto layout = widget->setLayout(std::make_unique<Wt::WHBoxLayout>());
+
+	layout->setContentsMargins(0, 0, 0, 0);
+	auto ResetButton = layout->addWidget(std::make_unique<Wt::WPushButton>("Reset"));
+	auto AnimationButton = layout->addWidget(std::make_unique<Wt::WPushButton>("Animation"));
+	auto RenderingButton = layout->addWidget(std::make_unique<Wt::WPushButton>("Rendering"));
+
+	// actions
+	ResetButton->clicked().connect([=] {
+		mModuleFlowWidget->showResetPipeline();
+		});
+	AnimationButton->clicked().connect([=] {
+		mModuleFlowWidget->showAnimationPipeline();
+		});
+	RenderingButton->clicked().connect([=] {
+		mModuleFlowWidget->showGraphicsPipeline();
 		});
 }
 
@@ -267,6 +343,7 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 {
 	nodeGraphicsWidget = std::make_unique<WNodeGraphics>();
 	initAddNodePanel(nodeGraphicsWidget->addPanel);
+
 	if (mScene)
 	{
 		auto painteContainer = nodeGraphicsWidget->nodePanel->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
@@ -276,8 +353,9 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 	}
 
 	// Parameter list
-	auto parameterWidget = nodeGraphicsWidget->layout->addWidget(std::make_unique<Wt::WContainerWidget>());;
+	auto parameterWidget = nodeGraphicsWidget->layout->addWidget(std::make_unique<Wt::WContainerWidget>());
 
+	auto promptNodeWidget = nodeGraphicsWidget->layout->addWidget(std::make_unique<Wt::WContainerWidget>());
 
 	//action for selection change
 	mNodeFlowWidget->selectNodeSignal().connect([=](int selectNum)
@@ -289,13 +367,11 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 					auto m = it.get();
 					if (m->objectId() == selectNum)
 					{
-						mModuleDataModel->setNode(m);
 						mParameterDataNode->setNode(m);
 						mParameterDataNode->createParameterPanel(parameterWidget);
 						mSceneCanvas->selectNode(m);
 						mModuleFlowWidget->setNode(m);
 						mSceneCanvas->update();
-						
 					}
 				}
 			}
@@ -306,22 +382,51 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 			this->updateCanvas();
 		});
 
+	mNodeFlowWidget->prompt().connect([=](std::map<std::string, connectionData> promptNodes)
+		{
+			mPromptPanel->createPromptPanel(promptNodeWidget, promptNodes);
+		});
+
 	if (mSceneCanvas)
 	{
 		mSceneCanvas->selectNodeSignal().connect([=](std::shared_ptr<dyno::Node> node)
 			{
-				if (node)
-				{
-					mModuleDataModel->setNode(node);
-					mParameterDataNode->setNode(node);
-					mParameterDataNode->createParameterPanel(parameterWidget);
-
+				if (node != nullptr)
 					mNodeFlowWidget->setSelectNode(node);
-				}
 			});
-
-		
 	}
+
+	mPromptPanel->addPromptNode().connect([=](connectionData addNodeData)
+		{
+			if (addNodeData.inportNode != nullptr)
+			{
+				auto node_obj = dyno::Object::createObject(addNodeData.inportNode->caption());
+				std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
+				mScene->addNode(new_node);
+				//new_node->setBlockCoord(Initial_x, Initial_y);
+
+				setInData(addNodeData, new_node, nullptr);
+
+				Initial_x += 10;
+				Initial_y += 10;
+				mNodeFlowWidget->reorderNode();
+				mNodeFlowWidget->updateAll();
+			}
+			if (addNodeData.inportModule != nullptr)
+			{
+				auto node_obj = dyno::Object::createObject(addNodeData.inportModule->caption());
+				std::shared_ptr<dyno::Module> new_node(dynamic_cast<dyno::Module*>(node_obj));
+				mModuleFlowWidget->addModule(new_node);
+				//new_node->setBlockCoord(Initial_x, Initial_y);
+
+				setInData(addNodeData, nullptr, new_node);
+
+				Initial_x += 10;
+				Initial_y += 10;
+				mModuleFlowWidget->reorderNode();
+				mModuleFlowWidget->updateAll();
+			}
+		});
 
 	return std::move(nodeGraphicsWidget);
 }
@@ -329,7 +434,9 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initNodeGraphics()
 std::unique_ptr<Wt::WWidget> WMainWindow::initModuleGraphics()
 {
 	moduleGraphicsWidget = std::make_unique<WModuleGraphics>();
-	initAddNodePanel(moduleGraphicsWidget->addPanel);
+	initAddNodePanel(moduleGraphicsWidget->addPanel, AddNodeType::ModuleType);
+	initPipelinePanel(moduleGraphicsWidget->pipelinePanel);
+
 	if (mScene)
 	{
 		auto painteContainer = moduleGraphicsWidget->modulePanel->setCentralWidget(std::make_unique<Wt::WContainerWidget>());
@@ -339,53 +446,144 @@ std::unique_ptr<Wt::WWidget> WMainWindow::initModuleGraphics()
 	}
 
 	// Parameter list
-	auto parameterWidget = moduleGraphicsWidget->layout->addWidget(std::make_unique<Wt::WContainerWidget>());;
-	
+	auto parameterWidget = moduleGraphicsWidget->layout->addWidget(std::make_unique<Wt::WContainerWidget>());
+
+	auto promptNodeWidget = moduleGraphicsWidget->layout->addWidget(std::make_unique<Wt::WContainerWidget>());
+
+	//action for selection change
+	mModuleFlowWidget->selectModuleSignal().connect([=](std::shared_ptr<dyno::Module> module)
+		{
+			if (module != nullptr)
+			{
+				mParameterDataNode->setModule(module);
+				mParameterDataNode->createParameterPanelModule(parameterWidget);
+			}
+		});
+
+	mModuleFlowWidget->prompt().connect([=](std::map<std::string, connectionData> promptModules)
+		{
+			mPromptPanel->createPromptPanel(promptNodeWidget, promptModules);
+		});
 
 	return std::move(moduleGraphicsWidget);
+}
 
+void WMainWindow::suggestFile(Wt::WSuggestionPopup* sp, AddNodeType addNodeType)
+{
+	bool fileExistsAndNotEmpty;
+	// Recreating everything each time the scene switches affects performance.
+	if (addNodeType == AddNodeType::NodeType)
+	{
+		std::string fileName = getAssetPath() + "docroot/NodeMap";
+#ifdef _WIN32
+		replace(fileName.begin(), fileName.end(), '/', '\\');
+#endif // _WIN32
+		fileExistsAndNotEmpty = std::filesystem::exists(fileName) && std::filesystem::file_size(fileName) > 0;
+		if (fileExistsAndNotEmpty)
+		{
+			std::ifstream inFile(fileName);
+			if (!inFile.is_open())
+			{
+				std::cout << "Error: Could not open file for reading: " << fileName << std::endl;
+				return;
+			}
+			std::string line;
+			while (std::getline(inFile, line)) {
+				sp->addSuggestion(line);
+			}
+			inFile.close();
+		}
+		else
+		{
+			std::ofstream outFile(fileName);
+			if (!outFile.is_open())
+			{
+				std::cout << "Error: Could not open file for writing: " << fileName << std::endl;
+				return;
+			}
+			auto& pages = dyno::NodeFactory::instance()->nodePages();
+			for (auto iPage = pages.begin(); iPage != pages.end(); iPage++)
+			{
+				auto& groups = iPage->second->groups();
+				{
+					for (auto iGroup = groups.begin(); iGroup != groups.end(); iGroup++)
+					{
+						auto& actions = iGroup->second->actions();
+						for (auto action : actions)
+						{
+							sp->addSuggestion(action->caption());
+							outFile << action->caption() << std::endl;
+						}
+					}
+				}
+			}
 
-	//auto rootWidget = std::make_unique<Wt::WContainerWidget>();
-	//auto layout = rootWidget->setLayout(std::make_unique<Wt::WVBoxLayout>());
-	//layout->setContentsMargins(0, 0, 0, 0);
-	//rootWidget->setMargin(0);
-	//rootWidget->setWidth(viewportWidth * WIDTH_SCALE);
+			auto nodeMap = dyno::Object::getClassMap();
+			for (auto it = nodeMap->begin(); it != nodeMap->end(); ++it)
+			{
+				auto node_obj = dyno::Object::createObject(it->second->m_className);
+				std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
+				if (new_node == nullptr)
+				{
+					continue;
+				}
+				else
+				{
+					sp->addSuggestion(it->second->m_className);
+					outFile << it->second->m_className << std::endl;
+				}
+			}
+			outFile.close();
+		}
+	}
+	else if (addNodeType == AddNodeType::ModuleType)
+	{
+		std::string fileName = getAssetPath() + "docroot/ModuleMap";
+#ifdef _WIN32
+		replace(fileName.begin(), fileName.end(), '/', '\\');
+#endif // _WIN32
+		fileExistsAndNotEmpty = std::filesystem::exists(fileName) && std::filesystem::file_size(fileName) > 0;
+		if (fileExistsAndNotEmpty)
+		{
+			std::ifstream inFile(fileName);
+			if (!inFile.is_open())
+			{
+				std::cout << "Error: Could not open file for reading: " << fileName << std::endl;
+				return;
+			}
+			std::string line;
+			while (std::getline(inFile, line)) {
+				sp->addSuggestion(line);
+			}
+			inFile.close();
+		}
+		else
+		{
+			std::ofstream outFile(fileName);
+			if (!outFile.is_open())
+			{
+				std::cout << "Error: Could not open file for writing: " << fileName << std::endl;
+				return;
+			}
+			auto nodeMap = dyno::Object::getClassMap();
+			for (auto it = nodeMap->begin(); it != nodeMap->end(); ++it)
+			{
+				auto node_obj = dyno::Object::createObject(it->second->m_className);
+				std::shared_ptr<dyno::Module> new_node(dynamic_cast<dyno::Module*>(node_obj));
+				if (new_node == nullptr)
+				{
+					continue;
+				}
+				else
+				{
+					sp->addSuggestion(it->second->m_className);
+					outFile << it->second->m_className << std::endl;
+				}
+			}
 
-	//// module list
-	//auto panel2 = layout->addWidget(std::make_unique<Wt::WPanel>());
-	//panel2->setTitle("Module List");
-	//panel2->setCollapsible(true);
-	//panel2->setStyleClass("scrollable-content");
-	//auto tableView = panel2->setCentralWidget(std::make_unique<Wt::WTableView>());
-
-	//tableView->setSortingEnabled(false);
-	//tableView->setSelectionMode(Wt::SelectionMode::Single);
-	//tableView->setEditTriggers(Wt::EditTrigger::None);
-	//tableView->setModel(mModuleDataModel);
-
-	//// Parameter list
-	//auto panel3 = layout->addWidget(std::make_unique<Wt::WPanel>());
-	//panel3->setTitle("Control Variable");
-	//panel3->setCollapsible(true);
-	//panel3->setStyleClass("scrollable-content");
-
-	//tableView->clicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
-	//	{
-	//		auto module = mModuleDataModel->getModule(idx);
-	//		mParameterDataNode->setModule(module);
-	//		mParameterDataNode->createParameterPanelModule(panel3);
-	//	});
-
-	//tableView->doubleClicked().connect([=](const Wt::WModelIndex& idx, const Wt::WMouseEvent& evt)
-	//	{
-	//		auto mod = mModuleDataModel->getModule(idx);
-	//		if (mod->getModuleType() == "VisualModule")
-	//		{
-	//			Wt::log("info") << mod->getName();
-	//		}
-	//	});
-
-	//return rootWidget;
+			outFile.close();
+		}
+	}
 }
 
 std::unique_ptr<Wt::WWidget> WMainWindow::initPython()

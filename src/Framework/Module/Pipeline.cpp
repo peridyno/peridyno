@@ -17,7 +17,7 @@ namespace dyno
 	Pipeline::Pipeline(Node* node)
 		: Module()
 	{
-		assert(node != nullptr);
+		//assert(node != nullptr);
 		this->setParentNode(node);
 	}
 
@@ -153,6 +153,11 @@ namespace dyno
 	bool Pipeline::printDebugInfo()
 	{
 		return true;
+	}
+
+	void Pipeline::setModuleUpdated(bool updated)
+	{
+		mModuleUpdated = updated;
 	}
 
 	FBase* Pipeline::promoteOutputToNode(FBase* base)

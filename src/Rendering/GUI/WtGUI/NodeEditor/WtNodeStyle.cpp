@@ -208,6 +208,10 @@ Wt::WColor WtConnectionStyle::normalColor(std::string typeID) const
 	{
 		return Wt::WColor(207, 174, 113);
 	}
+	else if (typeID == "FInstances")
+	{
+		return Wt::WColor(Wt::StandardColor::Red);
+	}
 	else
 	{
 		return Wt::WColor(Wt::StandardColor::Black);

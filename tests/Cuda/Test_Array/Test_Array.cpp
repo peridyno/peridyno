@@ -65,6 +65,12 @@ TEST(Array, Copy)
 
 	gArr2.resize(gArr.size());
 //	gArr2.copyFrom(gArr);
+
+	EXPECT_EQ(gArr.get(0), 1);
+	
+	gArr.set(1, 10);
+
+	EXPECT_EQ(gArr.get(1), 10);
 }
 
 TEST(Array, assign)
@@ -174,6 +180,12 @@ TEST(Array3D, Copy)
 			}
 		}
 	}
+
+	EXPECT_EQ(dArr3d.get(1, 1, 1), 13);
+
+	dArr3d.set(1, 1, 1, 15);
+
+	EXPECT_EQ(dArr3d.get(1, 1, 1), 15);
 }
 
 TEST(Array3D, assign)

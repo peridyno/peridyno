@@ -87,4 +87,94 @@ namespace dyno
 
 	template void multiply_SM_by_vector<float>(DArrayMap<float>& matrix_a, DArray<float>& a, DArray<float>& Aa);
 	template void multiply_SM_by_vector<double>(DArrayMap<double>& matrix_a, DArray<double>& a, DArray<double>& Aa);
+
+
+	template <typename VarType>
+	__global__ void count_TM(
+		DArray<uint> count,
+		DArrayMap<VarType> matrix)
+	{
+		int tx = blockIdx.x*blockDim.x + threadIdx.x;
+		if (tx >= count.size()) return;
+
+		Map<int, VarType>& map = matrix[tx];
+		if (map.size() > 0)
+		{
+			for (auto pair_v = map.begin(); pair_v != map.end(); ++pair_v)
+			{
+				int key = pair_v->first;
+				atomicAdd(&count[key], 1);
+			}
+		}
+	}
+
+	template<typename VarType>
+	void count_transposedM(DArray<uint>& count, DArrayMap<VarType>& matrix)
+	{
+		cuExecute(count.size(),
+			count_TM,
+			count,
+			matrix);
+	}
+
+	template void count_transposedM<float>(DArray<uint>& count, DArrayMap<float>& matrix);
+	template void count_transposedM<double>(DArray<uint>& count, DArrayMap<double>& matrix);
+
+
+	template <typename VarType>
+	__global__ void compute_TM_unorder(
+		DArrayMap<VarType> tmatrix,
+		DArrayMap<VarType> matrix)
+	{
+		int tx = blockIdx.x*blockDim.x + threadIdx.x;
+		if (tx >= matrix.size()) return;
+
+		Map<int, VarType>& map = matrix[tx];
+		if (map.size() > 0)
+		{
+			for (auto pair_v = map.begin(); pair_v != map.end(); ++pair_v)
+			{
+				int key = pair_v->first;
+				tmatrix[key].atomicInsert(Pair<int, VarType>(tx, pair_v->second));
+			}
+		}
+	}
+
+	template <typename VarType>
+	__global__ void compute_TM(
+		DArrayMap<VarType> tmatrix,
+		DArrayMap<VarType> matrix)
+	{
+		int tx = blockIdx.x*blockDim.x + threadIdx.x;
+		if (tx >= matrix.size()) return;
+
+		Map<int, VarType>& map = matrix[tx];
+		if (map.size() > 0)
+		{
+			for (auto pair_v = map.begin(); pair_v != map.end(); ++pair_v)
+			{
+				tmatrix[tx].insert(*pair_v);
+			}
+		}
+	}
+	template<typename VarType>
+	void compute_transposedM(DArrayMap<VarType>& tmatrix, DArray<uint>& count, DArrayMap<VarType>& matrix)
+	{
+		DArrayMap<VarType> unorder_tm;
+		unorder_tm.resize(count);
+		cuExecute(count.size(),
+			compute_TM_unorder,
+			unorder_tm,
+			matrix);
+
+		cuExecute(count.size(),
+			compute_TM,
+			tmatrix,
+			unorder_tm);
+
+		unorder_tm.clear();
+	}
+
+	template void compute_transposedM<float>(DArrayMap<float>& tmatrix, DArray<uint>& count, DArrayMap<float>& matrix);
+	template void compute_transposedM<double>(DArrayMap<double>& tmatrix, DArray<uint>& count, DArrayMap<double>& matrix);
 }

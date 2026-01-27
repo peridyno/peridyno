@@ -21,8 +21,9 @@ else()
 endif()
 
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
-	project(peridyno LANGUAGES ${SUPPORTED_LANGUAGES})  
+	project(peridyno LANGUAGES ${SUPPORTED_LANGUAGES}) 
 	include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+	
     #find_package(CUDA REQUIRED)
     # if(CUDA_FOUND)
     #     include_directories(${CUDA_INCLUDE_DIRS})
@@ -34,8 +35,8 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 
 	# define library version (update: apparently you can also do it in project()!)
 	set(PERIDYNO_LIBRARY_VERSION_MAJOR 1 CACHE STRING "peridyno major version" FORCE)
-	set(PERIDYNO_LIBRARY_VERSION_MINOR 2 CACHE STRING "peridyno minor version" FORCE)
-	set(PERIDYNO_LIBRARY_VERSION_PATCH 1 CACHE STRING "patch version of peridyno" FORCE)
+	set(PERIDYNO_LIBRARY_VERSION_MINOR 3 CACHE STRING "peridyno minor version" FORCE)
+	set(PERIDYNO_LIBRARY_VERSION_PATCH 0 CACHE STRING "patch version of peridyno" FORCE)
 	set(PERIDYNO_LIBRARY_VERSION "${PERIDYNO_LIBRARY_VERSION_MAJOR}.${PERIDYNO_LIBRARY_VERSION_MINOR}.${PERIDYNO_LIBRARY_VERSION_PATCH}" CACHE STRING "Peridyno version" FORCE)
 
 	set_property(GLOBAL PROPERTY PERIDYNO_LIBRARIES "Core;Framework;Topology")
@@ -88,6 +89,8 @@ else()
 	endif()
 endif()
 
+#set a macro to indicate GPU backend
+add_compile_definitions(${GPU_BACKEND})
 
 #set output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE})
@@ -132,6 +135,11 @@ endif()
 
 #option(PERIDYNO_LIBRARY_FRAMEWORK "Enable binding the framework library" ON)
 
+# Add mocro definitions for GUIs
+set(QT_GUI_SUPPORTED "QT_GUI_UNKNOWN")
+set(WT_GUI_SUPPORTED "WT_GUI_UNKNOWN")
+
+
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	#option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
 	#option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
@@ -158,19 +166,15 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	# VTK rendering support, off by default
 	option(PERIDYNO_PLUGIN_VTK "Enable VTK plugin for visualization" OFF)
 	# Qt GUI support, off by default
-	option(PERIDYNO_QT_GUI "Enable building Qt{5 or 6}-based applications" OFF)
+	option(PERIDYNO_QT_GUI "Enable building Qt{5 or 6}-based applications" ON)
 
 	# Wt GUI to support web applications, off by default
-	option(PERIDYNO_WT_GUI "Enable building web applications" OFF)
+	option(PERIDYNO_WT_GUI "Enable building web applications" ON)
 
 	# Add Plugin folder
 	if(PERIDYNO_PLUGIN_ALL)
 		add_subdirectory(plugins)
 	endif()
-
-	# Add mocro definitions for GUIs
-	set(QT_GUI_SUPPORTED "QT_GUI_UNKNOWN")
-	set(WT_GUI_SUPPORTED "WT_GUI_UNKNOWN")
 
 	if(PERIDYNO_QT_GUI)
 	    add_subdirectory(external/nodeeditor)
@@ -190,7 +194,6 @@ elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 	option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
 	option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
 	option(PERIDYNO_PLUGIN_ALL "Enable binding the plugin libraries" OFF)
-	option(PERIDYNO_PYTHON_BINDING "Enable python binding with pybind11" OFF)
 	
 	add_subdirectory(external/glfw-3.3.0)
 	add_subdirectory(external/glad-4.6)
@@ -329,7 +332,7 @@ elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 else()
 	option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
 	option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
-	option(PERIDYNO_PLUGIN_ALL "Enable binding the plugin libraries" OFF)
+	option(PERIDYNO_LIBRARY_PLUGIN "Enable binding the plugin libraries" OFF)
 
 	option(PERIDYNO_TESTS "Enable python binding with pybind11" OFF)
 	if(PERIDYNO_TESTS)

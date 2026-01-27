@@ -19,8 +19,8 @@
 #include <GLRenderEngine.h>
 #include "QtApp.h"
 #include "ImGuizmo.h"
-
 #include <map>
+#include "MaterialManager.h"
 
 //stb
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -28,6 +28,12 @@
 
 namespace dyno
 {
+	std::unordered_set<int> POpenGLWidget::mPressedKeys;
+	std::unordered_set<int> POpenGLWidget::mPressedMouseButtons;
+	bool POpenGLWidget::mRreshape = false;
+	bool POpenGLWidget::mMouseButtonRelease = false;
+	bool POpenGLWidget::mScroll = false;
+
 	std::map<int, PKeyboardType> KeyMap =
 	{
 		{Qt::Key_unknown, PKEY_UNKNOWN},
@@ -198,10 +204,11 @@ namespace dyno
 
 		// Draw scene		
 		mRenderEngine->draw(SceneGraphFactory::instance()->active().get(), mRenderParams);
-
+		
 		// Draw ImGui
 		if (showImGUI())
 			mImWindow.draw(this);
+
 		// Draw widgets
 // 		// TODO: maybe move into mImWindow...
 // 		for (auto widget : mWidgets)
@@ -220,6 +227,7 @@ namespace dyno
 		qreal ratio = devicePixelRatio();
 
 		this->setWindowSize(floor(w * ratio), floor(h * ratio));
+		updateGraphicsContext();
 	}
 
 	PButtonType mappingMouseButton(QMouseEvent* event)
@@ -258,6 +266,9 @@ namespace dyno
 
 	void POpenGLWidget::mousePressEvent(QMouseEvent *event)
 	{
+		mBlockFieldUpdate = true;
+
+		mPressedMouseButtons.insert(event->button());
 
 		mButtonState = QButtonState::QBUTTON_DOWN;
 		mCursorX = event->x();
@@ -290,16 +301,15 @@ namespace dyno
 			mImWindow.mousePressEvent(mouseEvent);
 		}
 
-		if (event->button() == Qt::RightButton)
-		{
-			mtempCursorX = event->x();
-		}
-
-		updateGrpahicsContext();
+		updateGraphicsContext();
 	}
 
 	void POpenGLWidget::mouseReleaseEvent(QMouseEvent *event)
 	{
+		mBlockFieldUpdate = false;
+
+		mPressedMouseButtons.erase(event->button());
+		mMouseButtonRelease = true;
 		// Object selection
 		if (this->getSelectionMode() == RenderWindow::OBJECT_MODE)
 		{
@@ -348,7 +358,7 @@ namespace dyno
 			mImWindow.mouseReleaseEvent(mouseEvent);
 		}
 
-		updateGrpahicsContext();
+		updateGraphicsContext();
 	}
 
 	void POpenGLWidget::mouseMoveEvent(QMouseEvent *event)
@@ -367,8 +377,7 @@ namespace dyno
 			event->modifiers() == Qt::AltModifier &&
 			!mImWindow.cameraLocked())
 		{
-			camera->zoom(-0.005*float(event->x()-mtempCursorX));
-			mtempCursorX = event->x();
+			camera->zoomToPoint(event->x(), event->y());
 		}
 		else if (event->buttons().testFlag(Qt::MiddleButton) &&
 			mButtonState == QBUTTON_DOWN &&
@@ -397,19 +406,21 @@ namespace dyno
 			mImWindow.mouseMoveEvent(mouseEvent);
 		}
 
-		updateGrpahicsContext();
+		updateGraphicsContext();
 	}
 
 	void POpenGLWidget::wheelEvent(QWheelEvent *event)
 	{
-		if(!mImWindow.cameraLocked())
-			this->getCamera()->zoom(-0.001*event->angleDelta().x());
+// 		if(!mImWindow.cameraLocked())
+// 			this->getCamera()->zoom(-0.001*event->angleDelta().x());
 
 		update();
 	}
 
 	void POpenGLWidget::keyPressEvent(QKeyEvent* event)
 	{
+		mPressedMouseButtons.insert(event->key());
+
 		auto activeScene = SceneGraphFactory::instance()->active();
 
 		PKeyboardEvent keyEvent;
@@ -431,6 +442,8 @@ namespace dyno
 
 	void POpenGLWidget::keyReleaseEvent(QKeyEvent* event)
 	{
+		mPressedMouseButtons.erase(event->key());
+
 		auto activeScene = SceneGraphFactory::instance()->active();
 
 		PKeyboardEvent keyEvent;
@@ -451,7 +464,7 @@ namespace dyno
 			emit this->nodeSelected(s.items[0].node);
 	}
 
-	void POpenGLWidget::updateGrpahicsContext()
+	void POpenGLWidget::updateGraphicsContext()
 	{
 		makeCurrent();
 
@@ -460,6 +473,7 @@ namespace dyno
 		SceneGraphFactory::instance()->active()->updateGraphicsContext();
 
 		PSimulationThread::instance()->stopUpdatingGraphicsContext();
+		mNeedUpdate = true;
 
 		update();
 
@@ -475,18 +489,47 @@ namespace dyno
 		node->graphicsPipeline()->forceUpdate();
 
 		PSimulationThread::instance()->stopUpdatingGraphicsContext();
+		mNeedUpdate = true;
 
 		update();
 
 		doneCurrent();
+
+
 	}
+
+	void POpenGLWidget::onNodeUpdated(std::shared_ptr<Node> node)
+	{
+		if(!mBlockFieldUpdate)
+			updateGraphicsContext(node.get());
+
+	}
+
+	void POpenGLWidget::onModuleUpdated(std::shared_ptr<Module> node)
+	{
+		if(!mBlockFieldUpdate)
+			updateGraphicsContext();
+	}
+
+	void POpenGLWidget::nodeNodeRenderingKeyUpdated(std::shared_ptr<Node> node)
+	{
+		updateGraphicsContext(node.get());
+	}
+
 
 	void POpenGLWidget::updateOneFrame(int frame)
 	{
+		updateGraphicsContext();
+
 		if (!this->isScreenRecordingOn())
 			return;
 
 		saveScreen(frame);
+	}
+
+	void POpenGLWidget::resetSceneFrame()
+	{
+		updateGraphicsContext();
 	}
 
 	void POpenGLWidget::onSaveScreen(const std::string& filename)
@@ -495,6 +538,34 @@ namespace dyno
 
 		image.save(filename.c_str());
 	}
+
+	void POpenGLWidget::paintEvent(QPaintEvent* event)
+	{
+		auto activeScene = SceneGraphFactory::instance()->active();
+		if (mImWindow.forceRender())
+		{
+			QOpenGLWidget::paintEvent(event);
+		}
+		else if (mImWindow.isGuizmoDisplayed()) 
+		{
+			QOpenGLWidget::paintEvent(event);
+		}
+		else if (mNeedUpdate)
+		{
+			QOpenGLWidget::paintEvent(event);
+			mNeedUpdate = false;
+		}
+		else if (isAnyKeyPressed() || mRreshape || isAnyMouseButtonPressed() || mScroll) 
+		{
+			QOpenGLWidget::paintEvent(event);
+		}
+		else if (mMouseButtonRelease) 
+		{
+			QOpenGLWidget::paintEvent(event);
+			mMouseButtonRelease = false;
+		}
+	}
+
 
 	void POpenGLWidget::setDefaultAnimationOption(bool op)
 	{

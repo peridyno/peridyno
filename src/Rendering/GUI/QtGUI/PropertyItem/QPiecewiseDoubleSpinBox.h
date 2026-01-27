@@ -32,7 +32,6 @@
 #include "Format.h"
 #include "FCallbackFunc.h"
 #include "QtGUI/Common.h"
-#include "Core/Vector.h"
 
 //C++
 #include <memory>
@@ -190,9 +189,9 @@ namespace dyno
 			if (fabs(this->value() - this->realValue) > (isDouble ? DBL_EPSILON : FLT_EPSILON))
 			{
 				this->setRealValue(this->value());
-				emit editingFinishedWithValue(this->realValue);
-
 			}
+			emit editingFinishedWithValue(this->realValue);
+
 		}
 
 		void triggerEditingFinished(double value)

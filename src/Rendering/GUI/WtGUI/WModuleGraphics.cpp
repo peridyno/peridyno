@@ -1,6 +1,5 @@
 #include "WModuleGraphics.h"
 
-
 WModuleGraphics::WModuleGraphics()
 {
 	layout = this->setLayout(std::make_unique<Wt::WVBoxLayout>());
@@ -9,8 +8,13 @@ WModuleGraphics::WModuleGraphics()
 
 	// add node
 	addPanel = layout->addWidget(std::make_unique<Wt::WPanel>());
-	addPanel->setTitle("Add Node");
+	addPanel->setTitle("Add Module");
 	addPanel->setCollapsible(false);
+
+	// pipeline
+	pipelinePanel = layout->addWidget(std::make_unique<Wt::WPanel>());
+	pipelinePanel->setTitle("Pipeline");
+	pipelinePanel->setCollapsible(false);
 
 	// node graphics
 	modulePanel = layout->addWidget(std::make_unique<Wt::WPanel>());

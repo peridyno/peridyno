@@ -1,6 +1,8 @@
 #include <QMap>
 #include <QDebug>
 #include <QFile>
+#include <QApplication>
+
 #include "QtApp.h"
 #include "PMainWindow.h"
 #include "POpenGLWidget.h"

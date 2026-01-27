@@ -105,4 +105,14 @@ namespace dyno
 		
 		registerPoint(xpos, ypos);
 	}
+
+	void TrackballCamera::zoomToPoint(float x, float y)
+	{
+		float tx = float(x) / float(mViewportWidth);
+
+		this->zoom(mZoomSpeed * (mRegX - tx));
+
+		registerPoint(x, y);
+	}
+
 }

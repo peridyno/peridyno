@@ -5,12 +5,16 @@
 #include <Wt/WPanel.h>
 #include <Wt/WTabWidget.h>
 
+#include <fstream>
+#include <filesystem>
+
 #include "WModuleGraphics.h"
 #include "WNodeGraphics.h"
 #include "WPythonWidget.h"
 #include "WSimulationControl.h"
 #include "WSceneDataModel.h"
 #include "WParameterDataNode.h"
+#include "WPromptPanel.h"
 
 #include "NodeEditor/WtNodeFlowWidget.h"
 #include "NodeEditor/WtModuleFlowWidget.h"
@@ -21,6 +25,8 @@ namespace dyno
 	class SceneGraphFactory;
 	class Node;
 };
+
+enum class AddNodeType { NodeType, ModuleType };
 
 class WMainWindow : public Wt::WContainerWidget
 {
@@ -35,10 +41,12 @@ public:
 	void createRightPanel();
 
 	void updateCanvas();
-	
+
 	void updateNodeGraphics();
 
 	void onKeyWentDown(const Wt::WKeyEvent& event);
+
+	void setInData(connectionData data, std::shared_ptr<dyno::Node> inNode, std::shared_ptr<dyno::Module> inModule);
 
 	WSimulationCanvas* simCanvas() { return mSceneCanvas; }
 
@@ -46,16 +54,15 @@ public:
 
 public:
 	// data models
-	std::shared_ptr<WNodeDataModel>		mNodeDataModel;
-	std::shared_ptr<WModuleDataModel>	mModuleDataModel;
 	std::shared_ptr<WParameterDataNode> mParameterDataNode;
+	std::shared_ptr<WPromptPanel> mPromptPanel;
 
 private:
 	void initNavigationBar(Wt::WBorderLayout*);
 	void initCenterContainer(Wt::WBorderLayout*);
 	void initRightPanel(Wt::WContainerWidget*);
-	void initAddNodePanel(Wt::WPanel* parent);
-
+	void initAddNodePanel(Wt::WPanel* parent, AddNodeType addNodeType = AddNodeType::NodeType);
+	void initPipelinePanel(Wt::WPanel* parent);
 
 	std::unique_ptr<Wt::WWidget> initNodeGraphics();
 	std::unique_ptr<Wt::WWidget> initPython();
@@ -63,6 +70,8 @@ private:
 	std::unique_ptr<Wt::WWidget> initSave();
 	std::unique_ptr<Wt::WWidget> initLog();
 	std::unique_ptr<Wt::WWidget> initModuleGraphics();
+
+	void suggestFile(Wt::WSuggestionPopup* sp, AddNodeType addNodeType);
 
 private:
 	int viewportHeight;
@@ -82,6 +91,8 @@ private:
 	Wt::WContainerWidget* rightWidget;
 
 	Wt::WTabWidget* tab;
+
+	std::string doubleAddNode;
 
 	int Initial_x = 0;
 	int Initial_y = 0;

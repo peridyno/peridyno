@@ -74,6 +74,8 @@ namespace dyno
 
 		inline std::string getEnvmapFilePath() { return mEnvmapFilePath; }
 
+		int  getShadowMapSize();
+		void updateShadowMapAttribute()override;
 	private:
 		void createFramebuffer();
 		void resizeFramebuffer(int w, int h, int samples);
@@ -95,6 +97,10 @@ namespace dyno
 		std::vector<RenderItem> mRenderItems;
 
 	private:
+
+		//Texture2DMultiSample	mColorCorrectTex;
+		Program* mPostProcessProgram;
+
 		// internal framebuffer
 		Framebuffer				mFramebuffer;
 		Texture2DMultiSample	mColorTex;
@@ -123,6 +129,9 @@ namespace dyno
 		// FXAA
 		bool					bEnableFXAA = false;
 		FXAA*					mFXAAFilter;
+
+		//ShadowType
+		int						mShadowType = 2;
 
 		// Envmap
 		std::string				mEnvmapFilePath = getAssetPath() + "textures/hdr/venice_dawn_1_4k.hdr";

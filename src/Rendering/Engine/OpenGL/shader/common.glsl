@@ -12,21 +12,43 @@ layout(std140, binding = 0) uniform RenderParams
 	vec4 intensity;
 	vec4 direction;
 	vec4 camera;
+	float ShadowMultiplier;
+	float ShadowBrightness;
+	float SamplePower;
+	float ShadowContrast;
 	// parameters
 	int width;
 	int height;
 	int index;
 	int mode;
 	float scale;
+
 } uRenderParams;
 
-// PBR material parameters
-layout(std140, binding = 1) uniform PbrMaterial
-{
-	vec3  color;
-	float metallic;
+
+layout(std140, binding = 1) uniform PbrMaterial{
+
+	int tintColor;
+	int useAOTex;
+	int useRoughnessTex;
+	int useMetallicTex;
+
+	int useEmissiveTex;
+	int useAlphaTex;
+	int tempInt1;
+	int tempInt2;
+
+	vec3 color;
 	float roughness;
+	float metallic;
 	float alpha;
+	float ao; 
+
+	float emissiveIntensity;
+	float tempFloat1;
+	float tempFloat2;
+	float tempFloat3;
+
 } uMtl;
 
 
@@ -39,4 +61,14 @@ vec3 GammaCorrect(vec3 v)
 {
 	float gamma = 2.2;
 	return pow(v, vec3(1.0 / gamma));
+}
+
+vec3 GammaCorrectWithGamma(vec3 v, float gamma)
+{
+	return pow(v, vec3(1.0 / gamma));
+}
+
+float getBias(vec3 normal) 
+{
+	return max(0.005 * (1.0 - dot(normal, uRenderParams.direction.xyz)), 0.001);
 }

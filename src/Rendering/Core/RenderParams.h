@@ -44,6 +44,13 @@ namespace dyno
 			// camera light
 			glm::vec3	cameraLightColor = glm::vec3(0.1f);
 			float		cameraLightScale = 1.f;
+
+			// shadow
+			float ShadowMultiplier = 0;
+			float ShadowBrightness = 0.5;
+			float SamplePower = 1;
+			float ShadowContrast = 7.5;
+
 		} light;
 
 		// image size
@@ -60,6 +67,7 @@ namespace dyno
 		int mode = 0;
 
 		float unitScale = 1.0f;
+		
 	};
 
 }

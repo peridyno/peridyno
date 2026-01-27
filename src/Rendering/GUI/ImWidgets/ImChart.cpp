@@ -6,6 +6,8 @@
 
 namespace dyno
 {
+#ifndef NO_BACKEND
+
 	IMPLEMENT_CLASS(ImChart)
 
 	ImChart::ImChart()
@@ -159,8 +161,9 @@ namespace dyno
 	{
 		if (!this->inArray()->isEmpty())
 		{
-			d_Value = this->inArray()->getData();
-			c_Value.assign(d_Value);
+#ifndef NO_BACKEND
+			c_Value.assign(this->inArray()->constData());
+#endif
 		}
 
 		if (this->varCount()->getValue() >= 1)
@@ -280,4 +283,5 @@ namespace dyno
 	
 	}
 
+#endif
 }

@@ -1,24 +1,24 @@
 [submodule "external/pybind11"]
 	path = external/pybind11
-	url = https://gitee.com/clouddon/pybind11.git
+	url = https://gitee.com/peridyno/pybind11.git
 [submodule "external/eigen"]
 	path = external/eigen
-	url = https://gitee.com/clouddon/eigen.git
+	url = https://gitee.com/peridyno/eigen.git
 [submodule "external/alembic"]
 	path = external/alembic
-	url = https://gitee.com/clouddon/alembic.git
+	url = https://gitee.com/peridyno/alembic.git
 [submodule "external/Imath"]
 	path = external/Imath
-	url = https://gitee.com/clouddon/Imath.git
+	url = https://gitee.com/peridyno/Imath.git
 [submodule "external/nodeeditor"]
 	path = external/nodeeditor
-	url = https://gitee.com/clouddon/nodeeditor.git
+	url = https://gitee.com/peridyno/nodeeditor.git
 [submodule "external/gmsh-fork"]
 	path = external/gmsh-fork
 	url = https://gitee.com/peridyno/gmsh-fork.git
 [submodule "external/tinyobjloader"]
 	path = external/tinyobjloader
-	url = https://gitee.com/bigshark151/tinyobjloader.git
+	url = https://gitee.com/peridyno/tinyobjloader.git
 [submodule "external/stb"]
 	path = external/stb
 	url = https://gitee.com/peridyno/stb.git
@@ -27,4 +27,4 @@
 	url = https://gitee.com/peridyno/data.git
 [submodule "external/qscintilla"]
 	path = external/qscintilla
-	url = https://gitee.com/unibeam/qscintilla.git
+	url = https://gitee.com/peridyno/qscintilla.git

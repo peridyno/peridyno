@@ -104,68 +104,55 @@ namespace dyno
 	template<typename TDataType>
 	void TextureMeshMerge<TDataType>::merge(const std::shared_ptr<TextureMesh>& texMesh01, const std::shared_ptr<TextureMesh>& texMesh02, std::shared_ptr<TextureMesh>& out)
 	{
-		auto vertices01 = texMesh01->vertices();
-		auto vertices02 = texMesh02->vertices();
+		auto vertices01 = texMesh01->geometry()->vertices();
+		auto vertices02 = texMesh02->geometry()->vertices();
 	
-		out->vertices().resize(vertices01.size() + vertices02.size());
+		out->geometry()->vertices().resize(vertices01.size() + vertices02.size());
 
-		cuExecute(out->vertices().size(),
+		cuExecute(out->geometry()->vertices().size(),
 			mergeVec3f,
 			vertices01,
 			vertices02,
-			out->vertices(),
+			out->geometry()->vertices(),
 			vertices01.size()
 		);
 
-		auto normals01 = texMesh01->normals();
-		auto normals02 = texMesh02->normals();
-		out->normals().resize(normals01.size() + normals02.size());
+		auto normals01 = texMesh01->geometry()->normals();
+		auto normals02 = texMesh02->geometry()->normals();
+		out->geometry()->normals().resize(normals01.size() + normals02.size());
 
-		cuExecute(out->normals().size(),
+		cuExecute(out->geometry()->normals().size(),
 			mergeVec3f,
 			normals01,
 			normals02,
-			out->normals(),
+			out->geometry()->normals(),
 			normals01.size()
 		);
 
-		auto texCoords01 = texMesh01->texCoords();
-		auto texCoords02 = texMesh02->texCoords();
-		out->texCoords().resize(texCoords01.size() + texCoords02.size());
+		auto texCoords01 = texMesh01->geometry()->texCoords();
+		auto texCoords02 = texMesh02->geometry()->texCoords();
+		out->geometry()->texCoords().resize(texCoords01.size() + texCoords02.size());
 
-		cuExecute(out->texCoords().size(),
+		cuExecute(out->geometry()->texCoords().size(),
 			mergeVec2f,
 			texCoords01,
 			texCoords02,
-			out->texCoords(),
+			out->geometry()->texCoords(),
 			texCoords01.size()
 		);
 
-		auto shapeIds01 = texMesh01->shapeIds();
-		auto shapeIds02 = texMesh02->shapeIds();
-		out->shapeIds().resize(shapeIds01.size() + shapeIds02.size());
+		auto shapeIds01 = texMesh01->geometry()->shapeIds();
+		auto shapeIds02 = texMesh02->geometry()->shapeIds();
+		out->geometry()->shapeIds().resize(shapeIds01.size() + shapeIds02.size());
 
-		cuExecute(out->texCoords().size(),
+		cuExecute(out->geometry()->texCoords().size(),
 			mergeShapeId,
 			shapeIds01,
 			shapeIds02,
-			out->shapeIds(),
+			out->geometry()->shapeIds(),
 			shapeIds01.size(),
 			texMesh01->shapes().size()
 		);
-
-
-		auto material01 = texMesh01->materials();
-		auto material02 = texMesh02->materials();
-
-		auto outMaterials = out->materials();
-		outMaterials.clear();
-
-		for (auto it : material01)
-			outMaterials.push_back(it);
-
-		for (auto it : material02)
-			outMaterials.push_back(it);
 
 
 		auto shapes01 = texMesh01->shapes();
@@ -223,10 +210,7 @@ namespace dyno
 		}
 
 		out->shapes() = outShapes;
-		out->materials() = outMaterials;
 
-
-		out->vertices();
 	}
 
 	template<typename TDataType>

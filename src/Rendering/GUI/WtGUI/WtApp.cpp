@@ -4,7 +4,6 @@
 #include <Wt/WServer.h>
 #include <Wt/WLogger.h>
 
-
 namespace dyno {
 	WtApp::WtApp(int argc /*= 0*/, char** argv /*= NULL*/)
 	{
@@ -14,7 +13,6 @@ namespace dyno {
 
 	dyno::WtApp::~WtApp()
 	{
-
 	}
 
 	void WtApp::mainLoop()
@@ -22,13 +20,15 @@ namespace dyno {
 		auto createApp = [&](const Wt::WEnvironment& env)->std::unique_ptr<Wt::WApplication> {
 			auto app = std::make_unique<WMainApp>(env);
 			return app;
-		};
+			};
 
 		try {
 			if (argc_ == 1)
 			{
 				std::string doc_root = getAssetPath() + "docroot";
+#ifdef _WIN32
 				replace(doc_root.begin(), doc_root.end(), '/', '\\');
+#endif // _WIN32
 
 				// default args
 				std::vector<std::string> args;
@@ -37,8 +37,14 @@ namespace dyno {
 				args.push_back("--docroot");
 				args.push_back(doc_root);
 				args.push_back("--config");
+#ifdef _WIN32
 				args.push_back(doc_root + "\\wt_config.xml");
 				Wt::log("warning") << doc_root + "\\wt_config.xml";
+#else
+				args.push_back(doc_root + "/wt_config.xml");
+				Wt::log("warning") << doc_root + "/wt_config.xml";
+#endif // _WIN32
+
 				Wt::WRun("", args, createApp);
 			}
 			else
@@ -47,7 +53,6 @@ namespace dyno {
 				server.addEntryPoint(Wt::EntryPointType::Application, createApp);
 				server.run();
 			}
-
 		}
 		catch (Wt::WServer::Exception& e) {
 			std::cerr << e.what() << "\n";

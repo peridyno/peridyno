@@ -42,20 +42,20 @@ namespace dyno
 
 		Real dist;
 		Coord normal;
-		df.getDistance(pos, dist, normal);
+		df.getDistanceAndNormal(pos, dist, normal);
 		// constrain particle
 		if (dist <= 0) {
 			Real olddist = -dist;
 			RandNumber rGen(pId);
 			dist = 0.0001f*rGen.Generate();
 			// reflect position
-			pos -= (olddist + dist)*normal;
+			pos += (olddist + dist)*normal;
 			// reflect velocity
 			Real vlength = vec.norm();
 			Real vec_n = vec.dot(normal);
 			Coord vec_normal = vec_n*normal;
 			Coord vec_tan = vec - vec_normal;
-			if (vec_n > 0) vec_normal = -vec_normal;
+			if (vec_n < 0) vec_normal = -vec_normal;
 			vec_normal *= (1.0f - normalFriction);
 			vec = vec_normal + vec_tan * (1.0f - tangentialFriction);
 			//vec *= pow(Real(M_E), -dt*tangentialFriction);

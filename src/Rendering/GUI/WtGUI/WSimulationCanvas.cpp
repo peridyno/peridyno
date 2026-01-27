@@ -13,7 +13,6 @@
 #include <Wt/WImage.h>
 #include <Wt/WMemoryResource.h>
 
-
 using namespace dyno;
 
 std::map<Wt::Key, PKeyboardType> WKeyMap =
@@ -160,7 +159,7 @@ WSimulationCanvas::WSimulationCanvas()
 
 	mImageData.resize(width * height * 3);	// initialize image buffer
 	mJpegEncoder = std::make_unique<ImageEncoderNV>();
-	mJpegEncoder->SetQuality(100);
+	mJpegEncoder->SetQuality(70);
 	mJpegResource = std::make_unique<Wt::WMemoryResource>("image/jpeg");
 
 	mRenderEngine = std::make_shared<dyno::GLRenderEngine>();
@@ -203,8 +202,12 @@ void WSimulationCanvas::initializeGL()
 	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
 	mContext = glfwCreateWindow(width, height, "", NULL, NULL);
+	const char* description;
+	glfwGetError(&description);
+
 	if (!mContext)
 	{
+		Wt::log("info") << "GLFW Error: " << description;
 		Wt::log("error") << "Failed to create OpenGL context!";
 		exit(-1);
 	}
@@ -237,9 +240,9 @@ void WSimulationCanvas::initializeGL()
 
 	mFramebuffer.create();
 	mFramebuffer.bind();
-	const unsigned int GL_COLOR_ATTACHMENT0 = 0x8CE0;
-	mFramebuffer.setTexture(GL_COLOR_ATTACHMENT0, &mFrameColor);	//
-	unsigned int buffers[]{ GL_COLOR_ATTACHMENT0 };
+	const unsigned int MY_GL_COLOR_ATTACHMENT0 = 0x8CE0;
+	mFramebuffer.setTexture(MY_GL_COLOR_ATTACHMENT0, &mFrameColor);	//
+	unsigned int buffers[]{ MY_GL_COLOR_ATTACHMENT0 };
 	mFramebuffer.drawBuffers(1, buffers);
 	mFramebuffer.unbind();
 

@@ -86,10 +86,12 @@ namespace dyno
 
 	}
 
-	void PSettingEditor::setRenderEngine(std::shared_ptr<RenderEngine> engine)
+	void PSettingEditor::setRenderEngine(RenderWindow* Window)
 	{
-		((PRenderSetting*)this->renderSettingWidget)->setRenderEngine(engine);
+		this->renderWindow = Window;
+		((PRenderSetting*)this->renderSettingWidget)->setRenderEngine(Window);
 	}
+
 
 	void PSettingEditor::buildSceneSettingWidget()
 	{	
@@ -209,13 +211,18 @@ namespace dyno
 		QFormLayout* layout = new QFormLayout();
 		this->getScrollLayout()->addLayout(layout, 0, 0);
 
+		mRenderWindow = editor->getRenderWindow();
+
 		fxaaEnabled = new QCheckBox(this);
 		
 		msaaSamples = new QComboBox(this);
 		msaaSamples->addItems({"Disable", "2", "4", "8"});
 
 		shadowMapSize = new QComboBox(this);
-		shadowMapSize->addItems({ "256", "512", "1024", "2048" });
+		shadowMapSize->addItems({ "256", "512", "1024", "2048", "4096" , "8192"});
+
+		//shadowType = new QComboBox(this);
+		//shadowType->addItems({ "ShadowMap", "PCF", "VSM" ,"PCSS"});
 
 		shadowBlurIters = new QSpinBox(this);
 		shadowBlurIters->setRange(0, 10);
@@ -223,6 +230,7 @@ namespace dyno
 		layout->addRow(tr("Enable FXAA"), fxaaEnabled);
 		layout->addRow(tr("MSAA Samples"), msaaSamples);
 		layout->addRow(tr("ShadowMap Size"), shadowMapSize);
+		//layout->addRow(tr("Shadow Type"), shadowType);
 		layout->addRow(tr("ShadowMap Blur"), shadowBlurIters);
 
 
@@ -274,14 +282,17 @@ namespace dyno
 
 	}
 
-	void PRenderSetting::setRenderEngine(std::shared_ptr<RenderEngine> engine) {
-		mRenderEngine = std::dynamic_pointer_cast<GLRenderEngine>(engine);
+	void PRenderSetting::setRenderEngine(RenderWindow* window) {
+		mRenderWindow = window;
+		mRenderEngine = std::dynamic_pointer_cast<GLRenderEngine>(window->getRenderEngine());
+
 		if (mRenderEngine)
 		{
 			// update values
 			fxaaEnabled->setChecked(mRenderEngine->getFXAA());
 			msaaSamples->setCurrentText(QString::number(mRenderEngine->getMSAA()));
 			shadowMapSize->setCurrentText(QString::number(mRenderEngine->getShadowMapSize()));
+
 			shadowBlurIters->setValue(mRenderEngine->getShadowBlurIters());
 			mLineEdit->setText(QString::fromStdString(mRenderEngine->getEnvmapFilePath()));
 
@@ -292,11 +303,16 @@ namespace dyno
 
 			connect(msaaSamples, SIGNAL(currentIndexChanged(int)), this, SLOT(setMSAA(int)));
 
-
 			connect(shadowMapSize, SIGNAL(currentIndexChanged(int)), this, SLOT(setShadowMapSize(int)));
 
-
 			connect(shadowBlurIters, SIGNAL(valueChanged(int)), this, SLOT(setShadowBlurIters(int)));
+
+			/*if (mRenderWindow) 
+			{
+				shadowType->setCurrentIndex(int(mRenderWindow->getRenderParams().light.mainLightShadowType.x));
+				connect(shadowType, SIGNAL(currentIndexChanged(int)), this, SLOT(setShadowType(int)));
+			}*/
+
 		}
 	}
 
@@ -322,4 +338,12 @@ namespace dyno
 	{
 		mRenderEngine->setShadowBlurIters(iters);
 	}
+
+	//void PRenderSetting::setShadowType(int type) 
+	//{
+	//	RenderParams tempParams = mRenderWindow->getRenderParams();
+	//	tempParams.light.mainLightShadowType = glm::vec4(type);
+	//	mRenderWindow->setRenderParams(tempParams);
+	//}
+
 }

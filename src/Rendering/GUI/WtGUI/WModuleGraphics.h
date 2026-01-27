@@ -5,11 +5,8 @@
 #include <Wt/WPanel.h>
 #include <Wt/WVBoxLayout.h>
 
-
-
 class WModuleGraphics : public Wt::WContainerWidget
 {
-
 public:
 	WModuleGraphics();
 	~WModuleGraphics();
@@ -17,5 +14,6 @@ public:
 public:
 	Wt::WVBoxLayout* layout;
 	Wt::WPanel* addPanel;
+	Wt::WPanel* pipelinePanel;
 	Wt::WPanel* modulePanel;
 };

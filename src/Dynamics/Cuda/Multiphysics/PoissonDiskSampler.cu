@@ -174,8 +174,7 @@ namespace dyno
 		if (pId >= posArr.size()) return;
 		Coord pos = posArr[pId];
 		Real temp_dist;
-		Coord normal;
-		df.getDistance(pos, temp_dist, normal);
+		df.getDistance(pos, temp_dist);
 		dist[pId] = temp_dist;
 
 	}

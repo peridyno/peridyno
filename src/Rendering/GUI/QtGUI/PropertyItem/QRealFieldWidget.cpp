@@ -44,6 +44,7 @@ namespace dyno
 			FVar<double>* f = TypeInfo::cast<FVar<double>>(field);
 
 			spinner->setRealValue((double)f->getValue());
+			spinner->setDouble(true);
 			slider->setValue(f->getValue());
 		}
 
@@ -77,12 +78,12 @@ namespace dyno
 		if (template_name == std::string(typeid(float).name()))
 		{
 			FVar<float>* f = TypeInfo::cast<FVar<float>>(field());
-			f->setValue((float)v,false);
+			f->setValue((float)v);
 		}
 		else if (template_name == std::string(typeid(double).name()))
 		{
 			FVar<double>* f = TypeInfo::cast<FVar<double>>(field());
-			f->setValue(v, false);
+			f->setValue(v);
 		}
 
 		emit fieldChanged();

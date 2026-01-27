@@ -1,28 +1,22 @@
+#include "AutoLayoutDAG.h"
 #include "WtModuleFlowScene.h"
 #include "WtNodeWidget.h"
 #include <DirectedAcyclicGraph.h>
-#include "AutoLayoutDAG.h"
 
-namespace dyno
-{
-	class WtStates : public Module
-	{
-		DECLARE_CLASS(WtStates);
-	public:
-		WtStates() {};
-	};
-
-	IMPLEMENT_CLASS(WtStates);
-}
+#include "Object.h"
 
 Wt::WPointF SimStatePos = Wt::WPointF(0.0f, 0.0f);
 Wt::WPointF RenStatePos = Wt::WPointF(0.0f, 0.0f);
 
-WtModuleFlowScene::WtModuleFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::Node> node)
+WtModuleFlowScene::WtModuleFlowScene(Wt::WPainter* painter, std::shared_ptr<dyno::Node> node, PipelineType pipelineType, std::shared_ptr<dyno::Module> states, int selectType, int selectNum)
 	: _painter(painter)
 	, mNode(node)
+	, mPipelineType(pipelineType)
+	, mStates(states)
+	, _selectType(selectType)
+	, _selectNum(selectNum)
 {
-	if(node != nullptr)
+	if (node != nullptr)
 		showModuleFlow(mNode);
 
 	//reorderAllModules();
@@ -66,14 +60,14 @@ void WtModuleFlowScene::disableEditing()
 
 void WtModuleFlowScene::updateModuleGraphView()
 {
-	disableEditing();
+	//disableEditing();
 
 	clearScene();
 
 	if (mNode != nullptr)
 		showModuleFlow(mNode);
 
-	enableEditing();
+	//enableEditing();
 }
 
 void WtModuleFlowScene::reorderAllModules()
@@ -175,12 +169,11 @@ void WtModuleFlowScene::reorderAllModules()
 	}
 
 	if (mActivePipeline == mNode->animationPipeline()) {
-		SimStatePos = Wt::WPointF(mStates->bx(), mStates->by());
+		//SimStatePos = Wt::WPointF(mStates->bx(), mStates->by());
 	}
 	else {
-		RenStatePos = Wt::WPointF(mStates->bx(), mStates->by());
+		//RenStatePos = Wt::WPointF(mStates->bx(), mStates->by());
 	}
-
 
 	wtNodeMapper.clear();
 	moduleMapper.clear();
@@ -195,13 +188,26 @@ void WtModuleFlowScene::showModuleFlow(std::shared_ptr<dyno::Node> node)
 	if (node == nullptr)
 		return;
 
-	auto& mlist = node->getModuleList();
+	//auto& mlist = node->getModuleList();
 
 	std::map<dyno::ObjectId, WtNode*> moduleMap;
 
 	// To show the animation pipeline
 	if (mActivePipeline == nullptr)
-		mActivePipeline = node->graphicsPipeline();
+	{
+		if (mPipelineType == PipelineType::Reset)
+		{
+			mActivePipeline = node->resetPipeline();
+		}
+		else if (mPipelineType == PipelineType::Animation)
+		{
+			mActivePipeline = node->animationPipeline();
+		}
+		else if (mPipelineType == PipelineType::Graphics)
+		{
+			mActivePipeline = node->graphicsPipeline();
+		}
+	}
 
 	auto& modules = mActivePipeline->allModules();
 
@@ -211,13 +217,18 @@ void WtModuleFlowScene::showModuleFlow(std::shared_ptr<dyno::Node> node)
 
 			auto type = std::make_unique<WtModuleWidget>(m);
 
-			auto& node = this->createNode(std::move(type), _painter, -1);
+			int sType = -1;
+			if (_selectType)
+			{
+				if (_selectNum == mId)
+					sType = _selectType;
+			}
+
+			auto& node = this->createNode(std::move(type), _painter, sType);
 
 			node.setModule(m);
 
-			moduleMap[mId] = &node;
-
-			OutNodeMap[mId] = &node;
+			moduleMap[mId] = OutNodeMap[mId] = &node;
 
 			Wt::WPointF posView(m->bx(), m->by());
 
@@ -225,23 +236,14 @@ void WtModuleFlowScene::showModuleFlow(std::shared_ptr<dyno::Node> node)
 			//this->nodePlaced(node);
 		};
 
-	//Create a dummy module to store all state variables
-	mStates = std::make_shared<dyno::WtStates>();
-
-	auto& fields = node->getAllFields();
-	for (auto field : fields)
+	////Create a dummy module to store all state variables
+	if (mStates != nullptr)
 	{
-		if (field->getFieldType() == dyno::FieldTypeEnum::State
-			|| field->getFieldType() == dyno::FieldTypeEnum::In)
-		{
-			mStates->addOutputField(field);
-		}
+		Wt::WPointF pos = mActivePipeline == node->animationPipeline() ? SimStatePos : RenStatePos;
+		mStates->setBlockCoord(pos.x(), pos.y());
+
+		addModuleWidget(mStates);
 	}
-
-	Wt::WPointF pos = mActivePipeline == node->animationPipeline() ? SimStatePos : RenStatePos;
-	mStates->setBlockCoord(pos.x(), pos.y());
-
-	addModuleWidget(mStates);
 
 	for (auto m : modules)
 	{
@@ -289,6 +291,7 @@ void WtModuleFlowScene::showModuleFlow(std::shared_ptr<dyno::Node> node)
 							{
 								auto outBlock = moduleMap[outId];
 								createConnection(*inBlock, i, *outBlock, outFieldIndex, _painter);
+								addConnection(inBlock->getModule(), outBlock->getModule());
 							}
 						}
 					}
@@ -299,6 +302,31 @@ void WtModuleFlowScene::showModuleFlow(std::shared_ptr<dyno::Node> node)
 	for (auto m : modules)
 	{
 		createModuleConnections(m.second);
+	}
+}
+
+void WtModuleFlowScene::addModule(std::shared_ptr<dyno::Module> new_module)
+{
+	if (mActivePipeline == nullptr)
+	{
+		return;
+	}
+
+	if (mEditingEnabled && new_module != nullptr)
+	{
+		mActivePipeline->pushModule(new_module);
+		new_module->setBlockCoord(20, 20);
+	}
+}
+
+void WtModuleFlowScene::deleteModule(std::shared_ptr<dyno::Module> delete_module)
+{
+	if (mActivePipeline == nullptr)
+		return;
+
+	if (mEditingEnabled && delete_module != nullptr)
+	{
+		mActivePipeline->popModule(delete_module);
 	}
 }
 
@@ -336,4 +364,12 @@ void WtModuleFlowScene::showGraphicsPipeline()
 	mActivePipeline = pipeline;
 
 	updateModuleGraphView();
+}
+
+void WtModuleFlowScene::addConnection(std::shared_ptr<dyno::Module> exportModule, std::shared_ptr<dyno::Module> inportModule)
+{
+	connectionData temp;
+	temp.exportModule = exportModule;
+	temp.inportModule = inportModule;
+	nodeConnections.push_back(temp);
 }

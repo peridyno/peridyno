@@ -54,8 +54,10 @@ namespace dyno {
 		std::vector<Vec3f> mScale;
 	};
 
+
 	class JointInfo : public OBase
 	{
+		DECLARE_CLASS(JointInfo)
 		typedef int joint;
 
 	public:

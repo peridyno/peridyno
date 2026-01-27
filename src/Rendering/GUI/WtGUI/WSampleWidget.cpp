@@ -17,15 +17,7 @@
 	};
 
 // CodimensionalPD
-class CPD_ClothDrop : public Sample {
-public: std::string name() const {
-	return "CPD_ClothDrop";
-}; std::string thumbnail() const {
-	return std::string("samples/") + "CPD_ClothDrop" + ".jpg";
-}; std::string source() const {
-	return getAssetPath() + std::string("python_web_sample/") + "CPD_ClothDrop" + ".py";
-};
-};
+DECLARE_PERIDYNO_SAMPLE(CPD_ClothDrop)
 DECLARE_PERIDYNO_SAMPLE(CPD_ClothOnTable)
 DECLARE_PERIDYNO_SAMPLE(CPD_ClothOverBall_1)
 DECLARE_PERIDYNO_SAMPLE(CPD_ClothOverBall_3)

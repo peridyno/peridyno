@@ -7,6 +7,8 @@
 #include "surface.frag.h"
 #include "surface.geom.h"
 
+#include "ShaderStruct.h"
+
 namespace dyno
 {
 	IMPLEMENT_CLASS(GLPhotorealisticInstanceRender)
@@ -41,7 +43,11 @@ namespace dyno
 
 	void GLPhotorealisticInstanceRender::updateGL()
 	{
-		mXTransformBuffer.updateGL();
+		if (mNeedUpdateInstanceTransform)
+		{
+			mXTransformBuffer.updateGL();
+			mNeedUpdateInstanceTransform = false;
+		}
 
 		GLPhotorealisticRender::updateGL();
 	}
@@ -59,6 +65,7 @@ namespace dyno
 			mLists.assign(inst->lists());
 
 			mXTransformBuffer.load(inst->elements());
+			mNeedUpdateInstanceTransform = true;
 		}
 
 		GLPhotorealisticRender::updateImpl();
@@ -66,12 +73,7 @@ namespace dyno
 
 	void GLPhotorealisticInstanceRender::paintGL(const RenderParams& rparams)
 	{
-		struct {
-			glm::vec3 color;
-			float metallic;
-			float roughness;
-			float alpha;
-		} pbr;
+
 
 		auto& vertices = mTextureMesh.vertices();
 		auto& normals = mTextureMesh.normals();
@@ -114,12 +116,38 @@ namespace dyno
 			// material 
 			if(mtl != nullptr)
 			{
-				pbr.color = { mtl->baseColor.x, mtl->baseColor.y, mtl->baseColor.z };
-				pbr.metallic = mtl->metallic;
-				pbr.roughness = mtl->roughness;
-				pbr.alpha = mtl->alpha;
-				mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
-				mPBRMaterialUBlock.bindBufferBase(1);
+				// material 
+				{
+
+					PBRMaterial pbr;
+					auto color = this->varBaseColor()->getValue();
+
+					pbr.color = { mtl->baseColor.x, mtl->baseColor.y, mtl->baseColor.z };
+					pbr.metallic = mtl->metallic;
+					pbr.roughness = mtl->roughness;
+					pbr.alpha = mtl->alpha;
+					pbr.EmissiveIntensity = mtl->emissiveIntensity;
+
+					if (mtl->texORM.isValid())
+						pbr.useAOTex = 1;
+					if (mtl->texORM.isValid())
+					{
+						pbr.useRoughnessTex = 1;
+						pbr.useMetallicTex = 1;
+					}
+					else
+					{
+						pbr.useRoughnessTex = 0;
+						pbr.useMetallicTex = 0;
+					}
+					if (mtl->texEmissiveColor.isValid())
+						pbr.useEmissiveTex = 1;
+					else
+						pbr.useEmissiveTex = 0;
+
+					mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
+					mPBRMaterialUBlock.bindBufferBase(1);
+				}
 
 				// bind textures 
 				{
@@ -127,6 +155,8 @@ namespace dyno
 					glActiveTexture(GL_TEXTURE10);		// color
 					glBindTexture(GL_TEXTURE_2D, 0);
 					glActiveTexture(GL_TEXTURE11);		// bump map
+					glBindTexture(GL_TEXTURE_2D, 0);
+					glActiveTexture(GL_TEXTURE12);		// bump map
 					glBindTexture(GL_TEXTURE_2D, 0);
 
 					if (mtl->texColor.isValid()) {
@@ -141,17 +171,32 @@ namespace dyno
 						mtl->texBump.bind(GL_TEXTURE11);
 						mShaderProgram->setFloat("uBumpScale", mtl->bumpScale);
 					}
+					if (mtl->texORM.isValid())
+					{
+						mtl->texORM.bind(GL_TEXTURE12);
+					}
+					if (mtl->texEmissiveColor.isValid())
+					{
+						mtl->texEmissiveColor.bind(GL_TEXTURE13);
+					}
 				}
 			}
 			else
 			{
-				auto color = this->varBaseColor()->getValue();
-				pbr.color = { color.r, color.g, color.b };
-				pbr.metallic = this->varMetallic()->getValue();
-				pbr.roughness = this->varRoughness()->getValue();
-				pbr.alpha = this->varAlpha()->getValue();
-				mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
-				mPBRMaterialUBlock.bindBufferBase(1);
+				// material 
+				{
+					PBRMaterial pbr;
+
+					auto color = this->varBaseColor()->getValue();
+					pbr.color = { color.r, color.g, color.b };
+					pbr.metallic = this->varMetallic()->getValue();
+					pbr.roughness = this->varRoughness()->getValue();
+					pbr.alpha = this->varAlpha()->getValue();
+
+
+					mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
+					mPBRMaterialUBlock.bindBufferBase(1);
+				}
 
 				mShaderProgram->setInt("uColorMode", 1);
 			}

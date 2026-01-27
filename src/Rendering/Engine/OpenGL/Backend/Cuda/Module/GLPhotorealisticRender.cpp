@@ -2,7 +2,7 @@
 #include "Utility.h"
 
 #include <glad/glad.h>
-
+#include "ShaderStruct.h"
 #include "surface.vert.h"
 #include "surface.frag.h"
 #include "surface.geom.h"
@@ -15,57 +15,60 @@ namespace dyno
 	{
 		this->setName("ObjMeshRenderer");
 
-		this->varMaterialIndex()->attach(std::make_shared<FCallBackFunc>(
+		this->varMaterialShapeIndex()->attach(std::make_shared<FCallBackFunc>(
 			[=]() {
-				uint idx = this->varMaterialIndex()->getValue();
+				uint idx = this->varMaterialShapeIndex()->getValue();
 
-				if (mTextureMesh.materials().size() > idx)
+				if (idx < mTextureMesh.shapes().size())
 				{
-					auto material = mTextureMesh.materials()[idx];
-
-					this->varAlpha()->setValue(material->alpha);
-					this->varMetallic()->setValue(material->metallic);
-					this->varRoughness()->setValue(material->roughness);
-					this->varBaseColor()->setValue(Color(material->baseColor.x, material->baseColor.y, material->baseColor.z));
+					auto material = mTextureMesh.shapes()[idx]->material;
+					if (material) 
+					{
+						this->varAlpha()->setValue(material->alpha);
+						this->varMetallic()->setValue(material->metallic);
+						this->varRoughness()->setValue(material->roughness);
+						this->varBaseColor()->setValue(Color(material->baseColor.x, material->baseColor.y, material->baseColor.z));
+					}
 				}
+				
 			}));
 
 		this->varMetallic()->attach(
 			std::make_shared<FCallBackFunc>(
 				[=]() {
-					uint idx = this->varMaterialIndex()->getValue();
+					uint idx = this->varMaterialShapeIndex()->getValue();
 
-					if (mTextureMesh.materials().size() > idx)
+					if (idx < mTextureMesh.shapes().size())
 					{
-						auto material = mTextureMesh.materials()[idx];
-
-						material->metallic = this->varMetallic()->getValue();
+						auto material = mTextureMesh.shapes()[idx]->material;
+						if (material) 
+							material->metallic = this->varMetallic()->getValue();
 					}
 				}));
 
 		this->varRoughness()->attach(
 			std::make_shared<FCallBackFunc>(
 				[=]() {
-					uint idx = this->varMaterialIndex()->getValue();
+					uint idx = this->varMaterialShapeIndex()->getValue();
 
-					if (mTextureMesh.materials().size() > idx)
+					if (idx < mTextureMesh.shapes().size())
 					{
-						auto material = mTextureMesh.materials()[idx];
-
-						material->roughness = this->varRoughness()->getValue();
+						auto material = mTextureMesh.shapes()[idx]->material;
+						if (material)
+							material->roughness = this->varRoughness()->getValue();
 					}
 				}));
 
 		this->varAlpha()->attach(
 			std::make_shared<FCallBackFunc>(
 				[=]() {
-					uint idx = this->varMaterialIndex()->getValue();
+					uint idx = this->varMaterialShapeIndex()->getValue();
 
-					if (mTextureMesh.materials().size() > idx)
+					if (idx < mTextureMesh.shapes().size())
 					{
-						auto material = mTextureMesh.materials()[idx];
-
-						material->roughness = this->varAlpha()->getValue();
+						auto material = mTextureMesh.shapes()[idx]->material;
+						if (material)
+							material->roughness = this->varAlpha()->getValue();
 					}
 				}));
 
@@ -127,12 +130,17 @@ namespace dyno
 
 	void GLPhotorealisticRender::updateGL()
 	{
-		mTangent.updateGL();
-		mBitangent.updateGL();
+		if (mNeedUpdateTextureMesh)
+		{
+			mTangent.updateGL();
+			mBitangent.updateGL();
 
-		mShapeTransform.updateGL();
+			mShapeTransform.updateGL();
 
-		mTextureMesh.updateGL();
+			mTextureMesh.updateGL();
+
+			mNeedUpdateTextureMesh = false;
+		}
 
 		glCheckError();
 	}
@@ -141,32 +149,29 @@ namespace dyno
 	{
 		if (this->inTextureMesh()->isModified()) {
 			mTextureMesh.load(this->inTextureMesh()->constDataPtr());
-			this->varMaterialIndex()->setRange(0, mTextureMesh.materials().size() - 1);
+			this->varMaterialShapeIndex()->setRange(0,mTextureMesh.shapes().size());
+			mNeedUpdateTextureMesh = true;
 		}
 
 #ifdef CUDA_BACKEND
 		auto texMesh = this->inTextureMesh()->constDataPtr();
-		if (texMesh->materials().size() > 0)
+
+		if (!texMesh->geometry()->normals().isEmpty() &&
+			!texMesh->geometry()->texCoords().isEmpty())
 		{
 			mTangentSpaceConstructor->update();
-
-			if (!mTangentSpaceConstructor->outTangent()->isEmpty())
-			{
-				mTangent.load(mTangentSpaceConstructor->outTangent()->constData());
-				mBitangent.load(mTangentSpaceConstructor->outBitangent()->constData());
-			}
 		}
+		if (!mTangentSpaceConstructor->outTangent()->isEmpty())
+		{
+			mTangent.load(mTangentSpaceConstructor->outTangent()->constData());
+			mBitangent.load(mTangentSpaceConstructor->outBitangent()->constData());
+		}
+		
 #endif
 	}
 
 	void GLPhotorealisticRender::paintGL(const RenderParams& rparams)
 	{
-		struct {
-			glm::vec3 color;
-			float metallic;
-			float roughness;
-			float alpha;
-		} pbr;
 
 		mShaderProgram->use();
 
@@ -214,10 +219,33 @@ namespace dyno
 
 				// material 
 				{
+
+					PBRMaterial pbr;
+					auto color = this->varBaseColor()->getValue();
+
 					pbr.color = { mtl->baseColor.x, mtl->baseColor.y, mtl->baseColor.z };
 					pbr.metallic = mtl->metallic;
 					pbr.roughness = mtl->roughness;
 					pbr.alpha = mtl->alpha;
+					pbr.EmissiveIntensity = mtl->emissiveIntensity;
+
+					if( mtl->texORM.isValid())
+						pbr.useAOTex = 1;
+					if (mtl->texORM.isValid())
+					{
+						pbr.useRoughnessTex = 1;
+						pbr.useMetallicTex = 1;
+					}
+					else 
+					{
+						pbr.useRoughnessTex = 0;
+						pbr.useMetallicTex = 0;
+					}
+					if (mtl->texEmissiveColor.isValid())
+						pbr.useEmissiveTex = 1;
+					else
+						pbr.useEmissiveTex = 0;
+
 					mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
 					mPBRMaterialUBlock.bindBufferBase(1);
 				}
@@ -228,6 +256,10 @@ namespace dyno
 					glActiveTexture(GL_TEXTURE10);		// color
 					glBindTexture(GL_TEXTURE_2D, 0);
 					glActiveTexture(GL_TEXTURE11);		// bump map
+					glBindTexture(GL_TEXTURE_2D, 0);
+					glActiveTexture(GL_TEXTURE12);		// ORM
+					glBindTexture(GL_TEXTURE_2D, 0);
+					glActiveTexture(GL_TEXTURE13);		// Emissive
 					glBindTexture(GL_TEXTURE_2D, 0);
 
 					if (mtl->texColor.isValid()) {
@@ -243,6 +275,14 @@ namespace dyno
 						mtl->texBump.bind(GL_TEXTURE11);
 						mShaderProgram->setFloat("uBumpScale", mtl->bumpScale);
 					}
+					if (mtl->texORM.isValid()) 
+					{
+						mtl->texORM.bind(GL_TEXTURE12);
+					}
+					if (mtl->texEmissiveColor.isValid())
+					{
+						mtl->texEmissiveColor.bind(GL_TEXTURE13);
+					}
 				}
 			}
 			else 
@@ -256,12 +296,8 @@ namespace dyno
 
 				// material 
 				{
-					struct {
-						glm::vec3 color;
-						float metallic;
-						float roughness;
-						float alpha;
-					} pbr;
+					PBRMaterial pbr;
+
 					auto color = this->varBaseColor()->getValue();
 					pbr.color = { color.r, color.g, color.b };
 					pbr.metallic = this->varMetallic()->getValue();

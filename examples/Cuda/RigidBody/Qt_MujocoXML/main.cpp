@@ -28,27 +28,27 @@ std::shared_ptr<SceneGraph> creatCar()
 {
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 	
-	auto mujocoG1 = scn->addNode(std::make_shared<MujocoXMLLoader<DataType3f>>());
-	mujocoG1->varFilePath()->setValue(getAssetPath() + "Mujoco/g1/g1_23dof.xml");
-	mujocoG1->varLocation()->setValue(Vec3f(-2, 0.1, 0));
+	//auto mujocoG1 = scn->addNode(std::make_shared<MujocoXMLLoader<DataType3f>>());
+	//mujocoG1->varFilePath()->setValue(getAssetPath() + "Mujoco/g1/g1_23dof.xml");
+	//mujocoG1->varLocation()->setValue(Vec3f(-2, 0.1, 0));
 
-	auto mujocoH1 = scn->addNode(std::make_shared<MujocoXMLLoader<DataType3f>>());
-	mujocoH1->varFilePath()->setValue(getAssetPath() + "Mujoco/h1/h1.xml");
-	mujocoH1->varLocation()->setValue(Vec3f(-1, 0.1, 0));
+	//auto mujocoH1 = scn->addNode(std::make_shared<MujocoXMLLoader<DataType3f>>());
+	//mujocoH1->varFilePath()->setValue(getAssetPath() + "Mujoco/h1/h1.xml");
+	//mujocoH1->varLocation()->setValue(Vec3f(-1, 0.1, 0));
 
-	auto mujocoB2 = scn->addNode(std::make_shared<MujocoXMLLoader<DataType3f>>());
-	mujocoB2->varFilePath()->setValue(getAssetPath() + "Mujoco/b2/b2.xml");
-	mujocoB2->varLocation()->setValue(Vec3f(0,0.1,0));
+	//auto mujocoB2 = scn->addNode(std::make_shared<MujocoXMLLoader<DataType3f>>());
+	//mujocoB2->varFilePath()->setValue(getAssetPath() + "Mujoco/b2/b2.xml");
+	//mujocoB2->varLocation()->setValue(Vec3f(0,0.1,0));
 
 	auto mujocoGo2 = scn->addNode(std::make_shared<MujocoXMLLoader<DataType3f>>());
 	mujocoGo2->varFilePath()->setValue(getAssetPath() + "Mujoco/go2/go2.xml");
 	mujocoGo2->varLocation()->setValue(Vec3f(1, 0.1, 0));
 
 	auto multi = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
-	mujocoB2->connect(multi->importVehicles());
+	//mujocoB2->connect(multi->importVehicles());
 	mujocoGo2->connect(multi->importVehicles());
-	mujocoH1->connect(multi->importVehicles());
-	mujocoG1->connect(multi->importVehicles());
+	//mujocoH1->connect(multi->importVehicles());
+	//mujocoG1->connect(multi->importVehicles());
 
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
 	plane->stateTriangleSet()->connect(multi->inTriangleSet());

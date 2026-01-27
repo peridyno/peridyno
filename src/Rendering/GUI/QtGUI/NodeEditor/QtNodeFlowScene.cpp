@@ -419,6 +419,8 @@ namespace Qt
 			node->setVisible(!checked);
 			node->graphicsPipeline()->enable();
 			node->graphicsPipeline()->update();
+
+			emit nodeRenderingKeyChanged(node);
 		}
 	}
 

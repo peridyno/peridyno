@@ -191,10 +191,11 @@ namespace dyno
 			float g = float(v2) / 255;
 			float b = float(v3) / 255;
 
-			f->setValue(Color(r, g, b));
+			f->setValue(Color(r, g, b),false);
 		}
 
 		colorButton->setColor(QColor(v1, v2, v3), true);
+		emit fieldChanged();
 	}
 
 	void QColorWidget::updateColorWidget(const QColor& color)
