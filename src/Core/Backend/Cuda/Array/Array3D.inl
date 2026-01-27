@@ -35,9 +35,14 @@ namespace dyno {
 
 		inline T* begin() const { return m_data; }
 
+		// Called by silling
+		inline uint64 address() const {
+			return uint64(m_data);
+		}
 		DYN_FUNC inline uint nx() const { return m_nx; }
 		DYN_FUNC inline uint ny() const { return m_ny; }
 		DYN_FUNC inline uint nz() const { return m_nz; }
+		DYN_FUNC inline uint nxy() const { return m_nxy; }
 		DYN_FUNC inline uint pitch() const { return m_pitch_x; }
 
 		DYN_FUNC inline T operator () (const int i, const int j, const int k) const
@@ -80,13 +85,12 @@ namespace dyno {
 		T get(const uint i, const uint j, const uint k);
 
 	private:
+		T* m_data = nullptr;
 		uint m_nx = 0;
-		uint m_pitch_x = 0;
-
 		uint m_ny = 0;
 		uint m_nz = 0;
 		uint m_nxy = 0;
-		T* m_data = nullptr;
+		uint m_pitch_x = 0;
 	};
 
 	template<typename T>
