@@ -97,6 +97,7 @@ namespace dyno
 #endif
 	};
 
+	template class XBuffer<float>;
 	template class XBuffer<dyno::Vec2f>;
 	template class XBuffer<dyno::Vec3f>;
 	template class XBuffer<dyno::Transform3f>;

@@ -1,5 +1,5 @@
 #include "GLTextureMesh.h"
-
+#include "CarMaterial.h"
 #include "glad/glad.h"
 
 namespace dyno
@@ -118,6 +118,22 @@ namespace dyno
 	}
 
 #ifdef CUDA_BACKEND
+	
+	void updateGLMaterial(const std::shared_ptr<Material>& source, const std::shared_ptr<GLMaterial>& glMaterial)
+	{
+		glMaterial->baseColor = Vec3f(source->baseColor.r, source->baseColor.g, source->baseColor.b);
+		glMaterial->roughness = source->roughness;
+		glMaterial->metallic = source->metallic;
+		glMaterial->bumpScale = source->bumpScale;
+		glMaterial->alpha = source->alpha;
+		glMaterial->texColor.load(source->texColor);
+		glMaterial->texBump.load(source->texBump);
+		glMaterial->texORM.load(source->texORM);
+		glMaterial->texAlpha.load(source->texAlpha);
+		glMaterial->texEmissiveColor.load(source->texEmissive);
+		glMaterial->emissiveIntensity = source->emissiveIntensity;
+	}
+
 	void GLTextureMesh::load(const std::shared_ptr<TextureMesh> mesh)
 	{
 		if (mesh == nullptr)
@@ -164,21 +180,23 @@ namespace dyno
 			//Setup the material for each shape
 			if (mesh->shapes()[i]->material != NULL) 
 			{
-				std::shared_ptr<GLMaterial> currentShapeMtl = std::make_shared<GLMaterial>();
-				currentShapeMtl->baseColor = Vec3f(mesh->shapes()[i]->material->baseColor.r, mesh->shapes()[i]->material->baseColor.g, mesh->shapes()[i]->material->baseColor.b);
-				currentShapeMtl->roughness = mesh->shapes()[i]->material->roughness;
-				currentShapeMtl->metallic = mesh->shapes()[i]->material->metallic;
-				currentShapeMtl->bumpScale = mesh->shapes()[i]->material->bumpScale;
-				currentShapeMtl->alpha = mesh->shapes()[i]->material->alpha;
-				currentShapeMtl->texColor.load(mesh->shapes()[i]->material->texColor);
-				currentShapeMtl->texBump.load(mesh->shapes()[i]->material->texBump);
-				currentShapeMtl->texORM.load(mesh->shapes()[i]->material->texORM);
-				currentShapeMtl->texAlpha.load(mesh->shapes()[i]->material->texAlpha);
-				currentShapeMtl->texEmissiveColor.load(mesh->shapes()[i]->material->texEmissive);
-				currentShapeMtl->emissiveIntensity = mesh->shapes()[i]->material->emissiveIntensity;
+				std::shared_ptr<GLMaterial> currentShapeMtl;
+				auto carMtl = std::dynamic_pointer_cast<CarMaterial> (mesh->shapes()[i]->material);
+				
+				if (carMtl)
+				{
+					auto glCarMaterial = std::make_shared<GLCarMaterial>();
+					currentShapeMtl = glCarMaterial;
+					glCarMaterial->texLightMask.load(carMtl->texLightMask);
 
-				if(mShapes[i]->material)
-					mShapes[i]->material->release();
+				}
+				else
+				{
+					currentShapeMtl = std::make_shared<GLMaterial>();
+				}
+
+				updateGLMaterial(mesh->shapes()[i]->material, currentShapeMtl);
+
 				mShapes[i]->material = currentShapeMtl;
 			}
 			else 
@@ -188,6 +206,8 @@ namespace dyno
 		}
 	}
 #endif
+
+
 
 	void GLTextureMesh::updateGL()
 	{

@@ -20,6 +20,13 @@ using namespace dyno;
 #include "RenderWindow.h"
 #include "BasicShapes/PlaneModel.h"
 #include "TextureMeshLoader.h"
+#include "GLCarInstanceRender.h"
+#include "RigidBody/Vehicle.h"
+#include "RigidBody/MultibodySystem.h"
+#include "CarMaterial.h"
+#include "LightController.h"
+#include "MaterialEditModule.h"
+#include "RigidBody/Module/InstanceTransform.h"
 /**
  * @brief This example demonstrate how to load plugin libraries in a static way
  */
@@ -31,70 +38,113 @@ int main()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 
-	auto gltf = scn->addNode(std::make_shared<GltfLoader<DataType3f>>());
-	gltf->varFileName()->setValue(std::string(getAssetPath() + "Jeep/JeepGltf/jeep.gltf"));
+	auto jeep = scn->addNode(std::make_shared<Jeep<DataType3f>>());
 
-	auto gltfWireframe = gltf->graphicsPipeline()->findFirstModule<GLWireframeVisualModule>();
+	jeep->reset();
+	std::vector<Transform3f> temp;
+	temp.push_back(Transform3f());
+	temp.push_back(Transform3f(Vec3f(-5,0,0),Mat3f::identityMatrix()));
+	jeep->varVehiclesTransform()->setValue(temp);
+	auto gltfWireframe = jeep->graphicsPipeline()->findFirstModule<GLWireframeVisualModule>();
 	if (gltfWireframe)
 	{
-		gltf->graphicsPipeline()->popModule(gltfWireframe);
+		jeep->graphicsPipeline()->popModule(gltfWireframe);
 	}
 
+	auto multiBodySystem = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
+	jeep->connect(multiBodySystem->importVehicles());
+
 	auto srcMaterial = std::dynamic_pointer_cast<MaterialLoaderModule>(MaterialManager::getMaterialManagedModule("Body1"));
-	std::shared_ptr<CustomMaterial> customMaterial = NULL;
+
 	if (srcMaterial) 
 	{
-		std::shared_ptr<BreakMaterial> breakMat;
-		customMaterial = MaterialManager::createCustomMaterial(srcMaterial, breakMat, srcMaterial->getName());
-		customMaterial->varEmissiveIntensity()->setValue(1.0f);
-		auto matPipeline = customMaterial->materialPipeline();
+		//Create Material
+		std::shared_ptr<CustomCarMaterial> carMat;
+		{
+			std::shared_ptr<BreakMaterial> breakCarMat;
+			carMat = std::make_shared<CustomCarMaterial>(srcMaterial, breakCarMat, std::string("JeepBodyMat"));
+			MaterialManager::addCustomMaterial(carMat);
+			auto carMatPipeline = carMat->materialPipeline();
 
-		auto texCorrect = std::make_shared<ColorCorrect>();
-		breakMat->outTexColor()->connect(texCorrect->inTexture());
-		texCorrect->varSaturation()->setValue(1.158f);
-		texCorrect->varHUEOffset()->setValue(206.557f);
-		texCorrect->varContrast()->setValue(1.021f);
-		texCorrect->varGamma()->setValue(1.936f);
-		texCorrect->outTexture()->connect(customMaterial->inTexColor());
-		matPipeline->pushModule(texCorrect);
+			auto headLightMask = std::make_shared<ImageLoaderModule>();
+			headLightMask->varImagePath()->setValue(std::string(getAssetPath() + "Jeep/JeepGltf/HeadLight.png"));
 
-		auto breakTex = std::make_shared<BreakTexture>();
-		breakMat->outTexColor()->connect(breakTex->inTexture());
-		auto makeTex = std::make_shared<MakeTexture>();
-		breakTex->outR()->connect(makeTex->inR());
-		breakTex->outG()->connect(makeTex->inG());
-		breakTex->outB()->connect(makeTex->inB());
-		breakTex->outA()->connect(makeTex->inA());
-		makeTex->outTexture()->connect(customMaterial->inBaseColor());
-		matPipeline->pushModule(breakTex);
-		matPipeline->pushModule(makeTex);
+			auto brakeLight = std::make_shared<ImageLoaderModule>();
+			brakeLight->varImagePath()->setValue(std::string(getAssetPath() + "Jeep/JeepGltf/BrakeLight.png"));
 
+			
+			auto makeLightTex = std::make_shared<MakeTexture>();
 
-		auto image = std::make_shared<ImageLoaderModule>();
-		image->varImagePath()->setValue(std::string(getAssetPath() + "Jeep/JeepGltf/jeep_body_camouflage.png"));
-		matPipeline->pushModule(image);
+			headLightMask->outGrayImage()->connect(makeLightTex->inR());
+			brakeLight->outGrayImage()->connect(makeLightTex->inG());
+			brakeLight->outGrayImage()->connect(makeLightTex->inB());
 
-		matPipeline->updateMaterialPipline();
+			makeLightTex->outTexture()->connect(carMat->inTexLightMask());
 
+			carMatPipeline->pushModule(headLightMask);
+			carMatPipeline->pushModule(brakeLight);
+			carMatPipeline->pushModule(makeLightTex);
+
+			auto texCorrect = std::make_shared<ColorCorrect>();
+			breakCarMat->outTexColor()->connect(texCorrect->inTexture());
+			texCorrect->varSaturation()->setValue(1.158f);
+			texCorrect->varHUEOffset()->setValue(206.557f);
+			texCorrect->varContrast()->setValue(1.021f);
+			texCorrect->varGamma()->setValue(1.936f);
+			texCorrect->outTexture()->connect(carMat->inTexColor());
+			carMatPipeline->pushModule(texCorrect);
+
+			carMatPipeline->updateMaterialPipline();
+		}
+
+		//AssignMaterial
 		auto assignMaterial = std::make_shared<AssignTextureMeshMaterial<DataType3f>>();
 		assignMaterial->varShapeIndex()->setValue(5);
-		assignMaterial->varMaterialName()->setValue(customMaterial->getName());
-		auto textureRender = gltf->graphicsPipeline()->findFirstModule<GLPhotorealisticRender>();
+		assignMaterial->varMaterialName()->setValue(carMat->getName());
+		auto textureRender = jeep->graphicsPipeline()->findFirstModule<GLPhotorealisticRender>();
 		if (textureRender)
 			assignMaterial->outTextureMesh()->connect(textureRender->inTextureMesh());
-		gltf->stateTextureMesh()->connect(assignMaterial->inTextureMesh());
-		gltf->graphicsPipeline()->pushModule(assignMaterial);
+		jeep->stateTextureMesh()->connect(assignMaterial->inTextureMesh());
+		jeep->graphicsPipeline()->pushModule(assignMaterial);
 
+		//Create CarRender
+		{
+			auto instance = jeep->graphicsPipeline()->findFirstModule<InstanceTransform<DataType3f>>();
+
+			auto carRender = std::make_shared<GLCarInstanceRender>();
+			assignMaterial->outTextureMesh()->connect(carRender->inTextureMesh());
+			instance->outInstanceTransform()->connect(carRender->inTransform());
+			jeep->graphicsPipeline()->pushModule(carRender);
+			
+
+			auto lightController = std::make_shared<LightController>();
+			jeep->stateInstanceArticulatedBodyID()->connect(lightController->inShapeVehicleID());
+			lightController->outHeadLight()->connect(carRender->inHeadLight());
+			lightController->outTurnSignal()->connect(carRender->inTurnSignal());
+			lightController->outBrakeLight()->connect(carRender->inBrakeLight());
+			lightController->outLightDirection()->connect(carRender->inRightDirection());
+
+			jeep->graphicsPipeline()->pushModule(lightController);
+
+			auto photo = jeep->graphicsPipeline()->findFirstModule<GLPhotorealisticInstanceRender>();
+			jeep->graphicsPipeline()->popModule(photo);
+
+
+
+		}
+
+
+		
 	}
 
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
-	plane->varScale()->setValue(Vec3f(5.0,0.0,5.0));
+	plane->varScale()->setValue(Vec3f(25.0,0.0,125.0));
 	auto planeWireframe = plane->graphicsPipeline()->findFirstModule<GLWireframeVisualModule>();
 	if (planeWireframe)
 	{
 		plane->graphicsPipeline()->popModule(planeWireframe);
 	}
-
+	plane->stateTriangleSet()->connect(multiBodySystem->inTriangleSet());
 
 
 
@@ -109,7 +159,7 @@ int main()
 		renderer->setUseEnvmapBackground(false);
 		renderer->setEnvmapScale(3.0f);
 		renderer->showGround = false;
-			
+		
 	}
 
 	app.renderWindow()->setShadowMultiplier(1.0f);

@@ -19,9 +19,11 @@
 
 #include "Collision/Attribute.h"
 #include "Collision/CollisionData.h"
-
+#include "Field/FilePath.h"
 #include <vector>
 #include <iostream>
+#include "Field/VehicleInfo.h"
+
 namespace dyno
 {
 	/*!
@@ -179,6 +181,8 @@ namespace dyno
 
 		DEF_VAR(Real, Slop, 0.0001, "");
 
+		DEF_VAR(SaveFilePath, SaveConfigPath, SaveFilePath("", "Peridyno Multibody Files (*.pdm)"), "");
+
 		DEF_INSTANCE_STATE(DiscreteElements<TDataType>, Topology, "Topology");
 
 		DEF_ARRAY_STATE(Real, FrictionCoefficients, DeviceType::GPU, "FrictionCoefficients of rigid bodies");
@@ -242,6 +246,27 @@ namespace dyno
 		std::vector<PointJoint> mHostJointsPoint;
 
 		std::vector<Pair<uint, uint>> mHostShape2RigidBodyMapping;
+
+	protected:
+
+		const std::vector<RigidBodyInfo>& getRigidBodyStates() { return mHostRigidBodyStates; }
+
+		const std::vector<SphereInfo>& getSpheres() { return mHostSpheres; }
+		const std::vector<BoxInfo>& getBoxes() { return mHostBoxes; }
+		const std::vector<TetInfo>& getTets() { return mHostTets; }
+		const std::vector<CapsuleInfo>& getCapsules() { return mHostCapsules; }
+
+		const std::vector<BallAndSocketJoint>& getJointsBallAndSocket() { return mHostJointsBallAndSocket; }
+		const std::vector<SliderJoint>& getJointsSlider(){ return mHostJointsSlider; }
+		const std::vector<HingeJoint>& getJointsHinge(){ return mHostJointsHinge; }
+		const std::vector<FixedJoint>& getJointsFixed() { return mHostJointsFixed; }
+		const std::vector<PointJoint>& getJointsPoint() { return mHostJointsPoint; }
+
+		const std::vector<Pair<uint, uint>>& getShape2RigidBodyMapping() { return mHostShape2RigidBodyMapping; }
+
+		virtual void saveToFile();
+
+		MultiBodyBind getMultiBodyBind();
 
 	public:
 		int m_numOfSamples;

@@ -3,407 +3,179 @@
 
 #include "Field.h"
 #include "VehicleInfo.h"
+#include "tinygltf/json.hpp"
 
 namespace dyno {
 
-	inline void replaceSpacesWithEquals(std::string& substr) {
-		for (char& c : substr) {
-			if (c == ' ') {
-				c = '='; 
-			}
-		}
-	}
+    using json = nlohmann::json;
 
-	inline void replaceEqualsWithSpaces(std::string& substr) {
-		for (char& c : substr) {
-			if (c == '=') {
-				c = ' ';
-			}
-		}
-	}
+    // to_json/from_json for Vec3
+    inline void to_json(json& j, const Vec3f& v) {
+        j = json::array({ v.x, v.y, v.z });
+    }
+    inline void from_json(const json& j, Vec3f& v) {
+        v.x = j.at(0).get<float>();
+        v.y = j.at(1).get<float>();
+        v.z = j.at(2).get<float>();
+    }
 
-	inline void convertRigidInfoToStr(std::string VarName, std::vector<VehicleRigidBodyInfo> Array, std::string& Str)
-	{
-		Str.append(VarName + " ");
-		for (int i = 0; i < Array.size(); i++)
-		{
-			auto& it = Array[i];
-			std::string tempName= it.shapeName.name;
-			replaceSpacesWithEquals(tempName);
-			Str.append(tempName + " ");	//1
-			Str.append(std::to_string(it.shapeName.rigidBodyId) + " ");		//1
-			Str.append(std::to_string(it.meshShapeId) + " ");		//1
-			Str.append(std::to_string(static_cast<int>(it.shapeType)) + " ");	//1
-			auto& t = it.transform.translation();
-			auto& r = it.transform.rotation();
-			auto& s = it.transform.scale();
-			Str.append(std::to_string(t.x) + " " + std::to_string(t.y) + " " + std::to_string(t.z) + " ");
-			Str.append(std::to_string(r(0, 0)) + " " + std::to_string(r(0, 1)) + " " + std::to_string(r(0, 2)) + " ");
-			Str.append(std::to_string(r(1, 0)) + " " + std::to_string(r(1, 1)) + " " + std::to_string(r(1, 2)) + " ");
-			Str.append(std::to_string(r(2, 0)) + " " + std::to_string(r(2, 1)) + " " + std::to_string(r(2, 2)) + " ");
-			Str.append(std::to_string(s.x) + " " + std::to_string(s.y) + " " + std::to_string(s.z) + " ");
+    // to_json/from_json for NameId
+    inline void to_json(json& j, const Name_Shape& n) {
+        j = json{ {"name", n.name}, {"rigidBodyId", n.rigidBodyId} };
+    }
 
-			Str.append(std::to_string(it.Offset.x) + " " + std::to_string(it.Offset.y) + " " + std::to_string(it.Offset.z) + " ");
-			Str.append(std::to_string(it.mHalfLength.x) + " " + std::to_string(it.mHalfLength.y) + " " + std::to_string(it.mHalfLength.z) + " ");
-			Str.append(std::to_string(it.radius) + " ");
+    inline void from_json(const json& j, Name_Shape& n) {
+        n.name = j.at("name").get<std::string>();
+        n.rigidBodyId = j.at("rigidBodyId").get<int>();
+    }
 
-			Str.append(std::to_string(it.tet[0].x) + " " + std::to_string(it.tet[0].y) + " " + std::to_string(it.tet[0].z) + " ");
-			Str.append(std::to_string(it.tet[1].x) + " " + std::to_string(it.tet[1].y) + " " + std::to_string(it.tet[1].z) + " ");
-			Str.append(std::to_string(it.tet[2].x) + " " + std::to_string(it.tet[2].y) + " " + std::to_string(it.tet[2].z) + " ");
-			Str.append(std::to_string(it.tet[3].x) + " " + std::to_string(it.tet[3].y) + " " + std::to_string(it.tet[3].z) + " ");
+    // to_json/from_json for Transform
+    inline void to_json(json& j, const Transform3f& t) {
+        j = json{
+            {"translation", t.translation()},
+            {"rotation", {
+                {t.rotation()(0,0), t.rotation()(0,1), t.rotation()(0,2)},
+                {t.rotation()(1,0), t.rotation()(1,1), t.rotation()(1,2)},
+                {t.rotation()(2,0), t.rotation()(2,1), t.rotation()(2,2)}
+            }},
+            {"scale", t.scale()}
+        };
+    }
 
-			Str.append(std::to_string(it.capsuleLength) + " ");
-			Str.append(std::to_string(static_cast<int>(it.motion)) + " ");
-			Str.append(std::to_string(it.mDensity) + " ");
-			Str.append(std::to_string(int(it.rigidGroup)) + " ");
+    inline void from_json(const json& j, Transform3f& t) {
+        t.translation() = j.at("translation").get<Vec3f>();
+        auto rot = j.at("rotation");
+        for (int i = 0; i < 3; ++i)
+            for (int k = 0; k < 3; ++k)
+                t.rotation()(i,k) = rot.at(i).at(k).get<double>();
+        t.scale() = j.at("scale").get<Vec3f>();
+    }
 
-			if (i != Array.size() - 1)
-			{
-				Str.append(" \n");
-			}
-		}
-		Str.append(" ");
-	}
+    // to_json/from_json for VehicleRigidBodyInfo
+    inline void to_json(json& j, const VehicleRigidBodyInfo& v) {
+        j = json{
+            {"shapeName", v.shapeName},
+            {"meshShapeId", v.meshShapeId},
+            {"shapeType", static_cast<int>(v.shapeType)},
+            {"translation", v.transform.translation()},
+            {"rotation", {
+                {v.transform.rotation()(0,0), v.transform.rotation()(0,1), v.transform.rotation()(0,2)},
+                {v.transform.rotation()(1,0), v.transform.rotation()(1,1), v.transform.rotation()(1,2)},
+                {v.transform.rotation()(2,0), v.transform.rotation()(2,1), v.transform.rotation()(2,2)}
+            }},
+            {"scale", v.transform.scale()},
+            {"Offset", v.Offset},
+            {"mHalfLength", v.mHalfLength},
+            {"radius", v.radius},
+            {"tet", {
+                {v.tet[0].x, v.tet[0].y, v.tet[0].z},
+                {v.tet[1].x, v.tet[1].y, v.tet[1].z},
+                {v.tet[2].x, v.tet[2].y, v.tet[2].z},
+                {v.tet[3].x, v.tet[3].y, v.tet[3].z}
+            }},
+            {"capsuleLength", v.capsuleLength},
+            {"motion", static_cast<int>(v.motion)},
+            {"mDensity", v.mDensity},
+            {"rigidGroup", v.rigidGroup}
+        };
+    }
+    inline void from_json(const json& j, VehicleRigidBodyInfo& v) {
+        v.shapeName = j.at("shapeName").get<Name_Shape>();
+        v.meshShapeId = j.at("meshShapeId").get<int>();
+        v.shapeType = static_cast<ConfigShapeType>(j.at("shapeType").get<int>());
+        v.transform.translation() = j.at("translation").get<Vec3f>();
+        auto rot = j.at("rotation");
+        for (int i = 0; i < 3; ++i)
+            for (int k = 0; k < 3; ++k)
+                v.transform.rotation()(i,k) = rot.at(i).at(k).get<double>();
+        v.transform.scale() = j.at("scale").get<Vec3f>();
+        v.Offset = j.at("Offset").get<Vec3f>();
+        v.mHalfLength = j.at("mHalfLength").get<Vec3f>();
+        v.radius = j.at("radius").get<double>();
+        auto tet = j.at("tet");
+        for (int i = 0; i < 4; ++i) {
+            v.tet[i].x = tet.at(i).at(0).get<float>();
+            v.tet[i].y = tet.at(i).at(1).get<float>();
+            v.tet[i].z = tet.at(i).at(2).get<float>();
+        }
+        v.capsuleLength = j.at("capsuleLength").get<double>();
+        v.motion = static_cast<ConfigMotionType>(j.at("motion").get<int>());
+        v.mDensity = j.at("mDensity").get<int>();
+        v.rigidGroup = j.at("rigidGroup").get<int>();
+    }
 
-	inline void convertJointInfoToStr(std::string VarName, std::vector<VehicleJointInfo> Array, std::string& Str)
-	{
-		Str.append(VarName + " ");
-		for (int i = 0; i < Array.size(); i++)
-		{
-			auto& it = Array[i];
+    // to_json/from_json for VehicleJointInfo
+    inline void to_json(json& j, const VehicleJointInfo& v) {
+        j = json{
+            {"jointType", static_cast<int>(v.mJointType)},
+            {"rigidBodyName_1", v.mRigidBodyName_1.name},
+            {"rigidBodyId_1", v.mRigidBodyName_1.rigidBodyId},
+            {"rigidBodyName_2", v.mRigidBodyName_2.name},
+            {"rigidBodyId_2", v.mRigidBodyName_2.rigidBodyId},
+            {"useMoter", v.mUseMoter},
+            {"useRange", v.mUseRange},
+            {"anchorPoint", {v.mAnchorPoint[0], v.mAnchorPoint[1], v.mAnchorPoint[2]}},
+            {"min", v.mMin},
+            {"max", v.mMax},
+            {"moter", v.mMoter},
+            {"axis", {v.mAxis[0], v.mAxis[1], v.mAxis[2]}}
+        };
+    }
 
-			Str.append(std::to_string(static_cast<int>(it.mJointType)) + " ");
-			std::string tempName = it.mRigidBodyName_1.name;
-			replaceSpacesWithEquals(tempName);
-			Str.append(tempName + " ");	//1
-			Str.append(std::to_string(it.mRigidBodyName_1.rigidBodyId) + " ");	
-			tempName = it.mRigidBodyName_2.name;
-			replaceSpacesWithEquals(tempName);
-			Str.append(tempName + " ");	//1
-			Str.append(std::to_string(it.mRigidBodyName_2.rigidBodyId) + " ");
-			Str.append(std::to_string(int(it.mUseMoter)) + " ");
-			Str.append(std::to_string(int(it.mUseRange)) + " ");
-			Str.append(std::to_string(it.mAnchorPoint[0]) + " " + std::to_string(it.mAnchorPoint[1]) + " " + std::to_string(it.mAnchorPoint[2]) + " ");
-			Str.append(std::to_string(it.mMin) + " ");
-			Str.append(std::to_string(it.mMax) + " ");
-			Str.append(std::to_string(it.mMoter) + " ");
-			Str.append(std::to_string(it.mAxis[0]) + " " + std::to_string(it.mAxis[1]) + " " + std::to_string(it.mAxis[2]) + " ");
+    inline void from_json(const json& j, VehicleJointInfo& v) {
+        v.mJointType = static_cast<ConfigJointType>(j.at("jointType").get<int>());
+        v.mRigidBodyName_1.name = j.at("rigidBodyName_1").get<std::string>();
+        v.mRigidBodyName_1.rigidBodyId = j.at("rigidBodyId_1").get<int>();
+        v.mRigidBodyName_2.name = j.at("rigidBodyName_2").get<std::string>();
+        v.mRigidBodyName_2.rigidBodyId = j.at("rigidBodyId_2").get<int>();
+        v.mUseMoter = j.at("useMoter").get<bool>();
+        v.mUseRange = j.at("useRange").get<bool>();
+        auto anchor = j.at("anchorPoint");
+        v.mAnchorPoint[0] = anchor.at(0).get<float>();
+        v.mAnchorPoint[1] = anchor.at(1).get<float>();
+        v.mAnchorPoint[2] = anchor.at(2).get<float>();
+        v.mMin = j.at("min").get<double>();
+        v.mMax = j.at("max").get<double>();
+        v.mMoter = j.at("moter").get<double>();
+        auto axis = j.at("axis");
+        v.mAxis[0] = axis.at(0).get<float>();
+        v.mAxis[1] = axis.at(1).get<float>();
+        v.mAxis[2] = axis.at(2).get<float>();
+    }
 
-			if (i != Array.size() - 1)
-			{
-				Str.append(" \n");
-			}
-		}
-		Str.append(" ");
-	}
+    // to_json/from_json for VehicleBind
+    inline void to_json(json& j, const MultiBodyBind& v) {
+        j = json{
+            {"VehicleRigidBodyInfo", v.mVehicleRigidBodyInfo},
+            {"VehicleJointInfo", v.mVehicleJointInfo}
+        };
+    }
+    inline void from_json(const json& j, MultiBodyBind& v) {
+        v.mVehicleRigidBodyInfo = j.at("VehicleRigidBodyInfo").get<std::vector<VehicleRigidBodyInfo>>();
+        v.mVehicleJointInfo = j.at("VehicleJointInfo").get<std::vector<VehicleJointInfo>>();
+    }
 
-	template<>
-	inline std::string FVar<VehicleBind>::serialize()
-	{
 
-		std::string finalText;
-		//serialize Array
-		finalText.append(std::to_string(this->getValue().mVehicleRigidBodyInfo.size()) + " ");
-		finalText.append(std::to_string(this->getValue().mVehicleJointInfo.size()) + " ");
-		finalText.append("\nVehicleRigidBodyInfo \n");
-		convertRigidInfoToStr("", this->getValue().mVehicleRigidBodyInfo, finalText);
-		finalText.append("\nVehicleJointInfo \n");
-		convertJointInfoToStr("", this->getValue().mVehicleJointInfo, finalText);
+    template<>
+    inline std::string FVar<MultiBodyBind>::serialize()
+    {
+        json j = this->getValue();
+        return j.dump(4); 
+    }
 
-		std::stringstream ss;
-		ss << finalText;
-
-		return ss.str();
-	}
-
-	template<>
-	inline bool FVar<VehicleBind>::deserialize(const std::string& str)
-	{
-		if (str.empty())
-			return false;
-
-		std::stringstream ss(str);
-		std::string substr;
-
-		auto field = std::make_shared<VehicleBind>();
-		std::vector<VehicleRigidBodyInfo> rigids;
-		std::vector<VehicleJointInfo> joints;
-
-		int dataID = 0;
-		bool isRigid = false;
-		bool isJoint = false;
-
-		int arrayID = -1;
-		int dId = -1;;
-
-		while (ss >> substr)
-		{
-			std::cout << substr << "\n";
-			if (substr == " " || substr == "\n")
-				continue;
-
-			{
-				if (!isRigid && !isJoint)
-				{
-					switch (dataID)
-					{
-					case 0:
-						if (std::isdigit(substr[0]))
-						{
-							rigids.resize(std::stoi(substr));
-						}
-
-						break;
-					case 1:
-						if (std::isdigit(substr[0]))
-						{
-							joints.resize(std::stoi(substr));
-						}
-						break;
-					default:
-						break;
-					}
-				}
-			}
-
-			{
-				if (isRigid) 
-				{
-					arrayID = dataID / 42;
-					dId = dataID % 42;
-				}
-				if (arrayID < rigids.size()&&isRigid)
-				{
-					switch (dId)
-					{
-					case 0:
-						replaceEqualsWithSpaces(substr);
-						rigids[arrayID].shapeName.name = substr;
-						break;
-					case 1:
-						rigids[arrayID].shapeName.rigidBodyId = std::stoi(substr);
-						break;
-					case 2:
-						rigids[arrayID].meshShapeId = std::stoi(substr);
-						break;
-					case 3:
-						rigids[arrayID].shapeType = static_cast<ConfigShapeType>(std::stoi(substr));
-						break;
-					case 4:
-						rigids[arrayID].transform.translation().x = std::stod(substr);
-						break;
-					case 5:
-						rigids[arrayID].transform.translation().y = std::stod(substr);
-						break;
-					case 6:
-						rigids[arrayID].transform.translation().z = std::stod(substr);
-						break;
-					case 7:
-						rigids[arrayID].transform.rotation()(0, 0) = std::stod(substr);
-						break;
-					case 8:
-						rigids[arrayID].transform.rotation()(0, 1) = std::stod(substr);
-						break;
-					case 9:
-						rigids[arrayID].transform.rotation()(0, 2) = std::stod(substr);
-						break;
-					case 10:
-						rigids[arrayID].transform.rotation()(1, 0) = std::stod(substr);
-						break;
-					case 11:
-						rigids[arrayID].transform.rotation()(1, 1) = std::stod(substr);
-						break;
-					case 12:
-						rigids[arrayID].transform.rotation()(1, 2) = std::stod(substr);
-						break;
-					case 13:
-						rigids[arrayID].transform.rotation()(2, 0) = std::stod(substr);
-						break;
-					case 14:
-						rigids[arrayID].transform.rotation()(2, 1) = std::stod(substr);
-						break;
-					case 15:
-						rigids[arrayID].transform.rotation()(2, 2) = std::stod(substr);
-						break;
-					case 16:
-						rigids[arrayID].transform.scale().x = std::stod(substr);
-						break;
-					case 17:
-						rigids[arrayID].transform.scale().y = std::stod(substr);
-						break;
-					case 18:
-						rigids[arrayID].transform.scale().z = std::stod(substr);
-						break;
-					case 19:
-						rigids[arrayID].Offset.x = std::stod(substr);
-						break;
-					case 20:
-						rigids[arrayID].Offset.y = std::stod(substr);
-						break;
-					case 21:
-						rigids[arrayID].Offset.z = std::stod(substr);
-						break;
-					case 22:
-						rigids[arrayID].mHalfLength.x = std::stod(substr);
-						break;
-					case 23:
-						rigids[arrayID].mHalfLength.y = std::stod(substr);
-						break;
-					case 24:
-						rigids[arrayID].mHalfLength.z = std::stod(substr);
-						break;
-					case 25:
-						rigids[arrayID].radius = std::stod(substr);
-						break;
-					case 26:
-						rigids[arrayID].tet[0].x = std::stod(substr);
-						break;
-					case 27:
-						rigids[arrayID].tet[0].y = std::stod(substr);
-						break;
-					case 28:
-						rigids[arrayID].tet[0].z = std::stod(substr);
-						break;
-					case 29:
-						rigids[arrayID].tet[1].x = std::stod(substr);
-						break;
-					case 30:
-						rigids[arrayID].tet[1].y = std::stod(substr);
-						break;
-					case 31:
-						rigids[arrayID].tet[1].z = std::stod(substr);
-						break;
-					case 32:
-						rigids[arrayID].tet[2].x = std::stod(substr);
-						break;
-					case 33:
-						rigids[arrayID].tet[2].y = std::stod(substr);
-						break;
-					case 34:
-						rigids[arrayID].tet[2].z = std::stod(substr);
-						break;
-					case 35:
-						rigids[arrayID].tet[3].x = std::stod(substr);
-						break;
-					case 36:
-						rigids[arrayID].tet[3].y = std::stod(substr);
-						break;
-					case 37:
-						rigids[arrayID].tet[3].z = std::stod(substr);
-						break;
-					case 38:
-						rigids[arrayID].capsuleLength = std::stod(substr);
-						break;
-					case 39:
-						rigids[arrayID].motion = static_cast<ConfigMotionType>(std::stoi(substr));
-						break;
-					case 40:
-						rigids[arrayID].mDensity = std::stoi(substr);
-						break;
-					case 41:
-						rigids[arrayID].rigidGroup = std::stoi(substr);
-						break;
-
-					default:
-						break;
-					}
-					arrayID = -1;
-					dId = -1;
-				}
-
-				if (substr == "VehicleRigidBodyInfo")
-				{
-					dataID = -1;
-					isRigid = true;
-					isJoint = false;
-				}
-				
-			}
-			
-			{
-				if (isJoint)
-				{
-					arrayID = dataID / 16;
-					dId = dataID % 16;
-				}
-
-				if (arrayID < joints.size() && isJoint)
-				{
-					switch (dId)
-					{
-					case 0:
-						joints[arrayID].mJointType = static_cast<ConfigJointType>(std::stoi(substr));
-						break;
-					case 1:
-						replaceEqualsWithSpaces(substr);
-						joints[arrayID].mRigidBodyName_1.name = substr;
-						break;
-					case 2:
-						joints[arrayID].mRigidBodyName_1.rigidBodyId = std::stoi(substr);
-						break;
-					case 3:
-						replaceEqualsWithSpaces(substr);
-						joints[arrayID].mRigidBodyName_2.name = substr;
-						break;
-					case 4:
-						joints[arrayID].mRigidBodyName_2.rigidBodyId = std::stoi(substr);
-						break;
-					case 5:
-						joints[arrayID].mUseMoter = bool(std::stoi(substr));
-						break;
-					case 6:
-						joints[arrayID].mUseRange = bool(std::stoi(substr));
-						break;
-					case 7:
-						joints[arrayID].mAnchorPoint.x = std::stod(substr);
-						break;
-					case 8:
-						joints[arrayID].mAnchorPoint.y = std::stod(substr);
-						break;
-					case 9:
-						joints[arrayID].mAnchorPoint.z = std::stod(substr);
-						break;
-					case 10:
-						joints[arrayID].mMin = std::stod(substr);
-						break;
-					case 11:
-						joints[arrayID].mMax = std::stod(substr);
-						break;
-					case 12:
-						joints[arrayID].mMoter = std::stod(substr);
-						break;
-					case 13:
-						joints[arrayID].mAxis.x = std::stod(substr);
-						break;
-					case 14:
-						joints[arrayID].mAxis.y = std::stod(substr);
-						break;
-					case 15:
-						joints[arrayID].mAxis.z = std::stod(substr);
-						break;
-
-					default:
-						break;
-					}
-				}
-
-				if (substr == "VehicleJointInfo")
-				{
-					dataID = -1;
-					isJoint = true;
-					isRigid = false;
-				}
-			}
-			
-			dataID++;
-		}
-
-		field->mVehicleRigidBodyInfo = rigids;
-		field->mVehicleJointInfo = joints;
-		this->setValue(*field);
-
-		return true;
-	}
+    template<>
+    inline bool FVar<MultiBodyBind>::deserialize(const std::string& str){
+        try {
+            json j = json::parse(str);
+            auto value = j.get<MultiBodyBind>();
+            this->setValue(value);
+            return true;
+        }
+        catch (const std::exception& e) {
+            std::cerr << "deserialize error: " << e.what() << std::endl;
+            return false;
+        }
+    }
 
 	inline void convertAnimationJointConfigToStr(Animation2JointConfig& bind, std::string& Str)
 	{

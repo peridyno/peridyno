@@ -39,7 +39,7 @@ namespace dyno
 		void create() override;
 		void release() override;
 
-		void updateGL();
+		virtual void updateGL();
 
 	public:
 		Vec3f baseColor = { 0.8f, 0.8f, 0.8f };

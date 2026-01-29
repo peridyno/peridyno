@@ -343,7 +343,7 @@ namespace dyno
 
 	private:
 		//Field
-		VehicleBind mVec;
+		MultiBodyBind mVec;
 
 		//Qt Widgets
 		QVBoxLayout* mMainLayout = nullptr;

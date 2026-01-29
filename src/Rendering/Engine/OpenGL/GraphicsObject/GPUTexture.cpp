@@ -26,13 +26,19 @@ namespace dyno
 	template<typename T>
 	void XTexture2D<T>::release()
 	{
-		if (this->isValid())
-			Texture2D::release();
-		if (resource) 
+		if (this->isValid()) 
 		{
-			cuSafeCall(cudaGraphicsUnregisterResource(resource));
-			resource = NULL;
+			if (resource)
+			{
+				cuSafeCall(cudaGraphicsUnregisterResource(resource));
+				resource = NULL;
+			}
+			Texture2D::release();
+			this->width = -1;
+			this->height = -1;
+
 		}
+			
 		if (buffer.size() > 0)
 			buffer.clear();
 

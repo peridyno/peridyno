@@ -563,7 +563,7 @@ namespace dyno
 	}
 
 
-	IMPL_FIELD_WIDGET(VehicleBind, QVehicleInfoWidget)
+	IMPL_FIELD_WIDGET(MultiBodyBind, QVehicleInfoWidget)
 
 		QVehicleInfoWidget::QVehicleInfoWidget(FBase* field)
 		: QFieldWidget(field)
@@ -673,7 +673,7 @@ namespace dyno
 		QObject::connect(addJointItembutton, SIGNAL(pressed()), this, SLOT(addJointItemWidget()));
 		QObject::connect(this, SIGNAL(vectorChange()), this, SLOT(updateField()));
 
-		FVar<VehicleBind>* f = TypeInfo::cast<FVar<VehicleBind>>(field);
+		FVar<MultiBodyBind>* f = TypeInfo::cast<FVar<MultiBodyBind>>(field);
 		if (f != nullptr)
 		{
 			mVec = f->getValue();
@@ -685,7 +685,7 @@ namespace dyno
 
 	void QVehicleInfoWidget::updateField()
 	{
-		FVar<VehicleBind>* f = TypeInfo::cast<FVar<VehicleBind>>(field());
+		FVar<MultiBodyBind>* f = TypeInfo::cast<FVar<MultiBodyBind>>(field());
 		if (f != nullptr)
 		{
 			f->setValue(mVec);

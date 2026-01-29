@@ -15,6 +15,7 @@
 
 //Module headers
 #include "RigidBody/Module/ContactsUnion.h"
+#include "Field/VehicleInfo.h"
 
 namespace dyno
 {
@@ -66,6 +67,8 @@ namespace dyno
 		merge->outContacts()->connect(iterSolver->inContacts());
 		this->animationPipeline()->pushModule(iterSolver);
 
+		auto saveCallback = std::make_shared<FCallBackFunc>(std::bind(&RigidBodySystem<TDataType>::saveToFile, this));
+		this->varSaveConfigPath()->attach(saveCallback);
 
 		this->setDt(0.016f);
 	}
@@ -670,6 +673,244 @@ namespace dyno
 			RBS_UpdateShape2RigidBodyMapping,
 			mapping,
 			topo->calculateElementOffset());
+	}
+
+	template<typename TDataType>
+	void RigidBodySystem<TDataType>::saveToFile()
+	{
+		auto Path = this->varSaveConfigPath()->getValue();
+
+		MultiBodyBind vehicleBind = getMultiBodyBind();
+
+		
+
+
+		FVar<MultiBodyBind> fvarBind(vehicleBind, "tempBind", "", FieldTypeEnum::Param, NULL);
+		auto configStr = fvarBind.serialize();
+
+		std::ofstream outFile(Path.string(), std::ios::out | std::ios::trunc);
+		if (!outFile.is_open())
+		{
+			throw std::runtime_error("Error Path : " + Path.string());
+		}
+
+		outFile << "TextureMesh File:\n" << "" << "\n\n";
+		outFile << "VehicleConfiguration:\n" << configStr << "\n\n";
+		outFile << "VehiclesTransform:\n" << "" << "\n";
+
+		outFile.close();
+	}
+
+	void initialRigidBodyConfig(
+		VehicleRigidBodyInfo& configRigid,
+		std::string Name,
+		int rigidbodyID,
+		ConfigShapeType type,
+		Vec3f center,
+		Quat<Real> rot,
+		Vec3f offset,
+		Vec3f halfLength,
+		float radius,
+		float capsuleLength,
+		float density,
+		uint bodyId,
+		BodyType bodyType,
+		std::vector<Vec3f> tet = { Vec3f(0),Vec3f(0),Vec3f(0),Vec3f(0,1,0) }
+
+	)
+	{
+		configRigid.shapeName = Name_Shape(Name + std::to_string(rigidbodyID), rigidbodyID);
+		configRigid.meshShapeId = -1;
+		configRigid.shapeType = type;
+		configRigid.transform.translation() = center;
+		configRigid.transform.rotation() = rot.toMatrix3x3();
+		configRigid.transform.scale() = Vec3f(1);
+		configRigid.Offset = offset;
+		configRigid.mHalfLength = halfLength;
+		configRigid.radius = radius;
+		configRigid.capsuleLength = capsuleLength;
+		configRigid.tet = { Vec3f(0),Vec3f(0),Vec3f(0),Vec3f(0,1,0) };
+		switch (bodyType)
+		{
+		case BodyType::Static:
+			configRigid.motion = ConfigMotionType::CMT_Static;
+			break;
+		case BodyType::Kinematic:
+			configRigid.motion = ConfigMotionType::CMT_Kinematic;
+			break;
+		case BodyType::Dynamic:
+			configRigid.motion = ConfigMotionType::CMT_Dynamic;
+			break;
+		case BodyType::NonRotatable:
+			configRigid.motion = ConfigMotionType::CMT_NonRotatable;
+			break;
+		case BodyType::NonGravitative:
+			configRigid.motion = ConfigMotionType::CMT_NonGravitative;
+			break;
+		default:
+			break;
+		}
+		configRigid.mDensity = density;
+		configRigid.rigidGroup = bodyId;
+	}
+
+	template<typename TDataType>
+	MultiBodyBind RigidBodySystem<TDataType>::getMultiBodyBind()
+	{
+		int rigidNum = getRigidBodyStates().size();
+		int jointNum = getJointsBallAndSocket().size() + getJointsSlider().size() + getJointsHinge().size() + getJointsFixed().size() + getJointsPoint().size();
+
+		MultiBodyBind config;
+		config.mVehicleRigidBodyInfo.resize(rigidNum);
+		config.mVehicleJointInfo.resize(jointNum);
+
+		for (size_t i = 0; i < getSpheres().size(); i++)
+		{
+			auto pair = getShape2RigidBodyMapping()[i];
+			uint rigidBodyId = pair.second;
+			auto sphereInfo = getSpheres()[i];
+			auto rigidInfo = getRigidBodyStates()[rigidBodyId];
+
+			VehicleRigidBodyInfo configRigid;
+			initialRigidBodyConfig(
+				configRigid,
+				"Sphere",
+				rigidBodyId,
+				ConfigShapeType::Sphere,
+				sphereInfo.center,
+				sphereInfo.rot,
+				rigidInfo.offset,
+				Vec3f(0),
+				sphereInfo.radius,
+				0,
+				rigidInfo.mass / ((4.0 / 3.0) * M_PI * sphereInfo.radius * sphereInfo.radius * sphereInfo.radius),
+				rigidInfo.bodyId,
+				rigidInfo.motionType
+				);
+
+			config.mVehicleRigidBodyInfo[rigidBodyId] = configRigid;
+
+		}
+
+		for (size_t i = 0; i < getBoxes().size(); i++)
+		{
+			auto pair = getShape2RigidBodyMapping()[getSpheres().size() + i];
+			uint rigidBodyId = pair.second;
+			auto boxInfo = getBoxes()[i];
+
+			auto rigidInfo = getRigidBodyStates()[rigidBodyId];
+
+			VehicleRigidBodyInfo configRigid;
+
+			float lx = 2.0f * boxInfo.halfLength[0];
+			float ly = 2.0f * boxInfo.halfLength[1];
+			float lz = 2.0f * boxInfo.halfLength[2];
+
+			initialRigidBodyConfig(
+				configRigid,
+				"Box",
+				rigidBodyId,
+				ConfigShapeType::Box,
+				boxInfo.center,
+				boxInfo.rot,
+				rigidInfo.offset,
+				boxInfo.halfLength,
+				0,
+				0,
+				rigidInfo.mass / (lx * ly * lz),
+				rigidInfo.bodyId,
+				rigidInfo.motionType
+			);
+
+			config.mVehicleRigidBodyInfo[rigidBodyId] = configRigid;
+
+		}
+
+		for (size_t i = 0; i < getTets().size(); i++)
+		{
+			auto pair = getShape2RigidBodyMapping()[getSpheres().size() + getBoxes().size() + i];
+			uint rigidBodyId = pair.second;
+			auto tetInfo = getTets()[i];
+
+			auto rigidInfo = getRigidBodyStates()[rigidBodyId];
+
+			Coord centroid = (tetInfo.v[0] + tetInfo.v[1] + tetInfo.v[2] + tetInfo.v[3]) / 4;
+
+			Coord v0 = tetInfo.v[0] - centroid;
+			Coord v1 = tetInfo.v[1] - centroid;
+			Coord v2 = tetInfo.v[2] - centroid;
+			Coord v3 = tetInfo.v[3] - centroid;
+
+			auto tmpMat = Mat3f(v1 - v0, v2 - v0, v3 - v0);
+
+			Real detJ = abs(tmpMat.determinant());
+			Real volume = (1.0 / 6.0) * detJ;
+			Real density = rigidInfo.mass / volume;
+
+			VehicleRigidBodyInfo configRigid;
+
+			initialRigidBodyConfig(
+				configRigid,
+				"Tet",
+				rigidBodyId,
+				ConfigShapeType::Tet,
+				Vec3f(0),
+				Quat<Real>(),
+				rigidInfo.offset,
+				Vec3f(0),
+				0,
+				0,
+				density,
+				rigidInfo.bodyId,
+				rigidInfo.motionType,
+				{tetInfo.v[0], tetInfo.v[1], tetInfo.v[2], tetInfo.v[3] }
+			);
+
+			config.mVehicleRigidBodyInfo[rigidBodyId] = configRigid;
+
+			printf("tet : rigidID - %d\n", int(rigidBodyId));
+
+		}
+
+		for (size_t i = 0; i < getCapsules().size(); i++)
+		{
+			auto pair = getShape2RigidBodyMapping()[getSpheres().size() + getBoxes().size() + getTets().size() + i];
+			uint rigidBodyId = pair.second;
+			auto capsuleInfo = getCapsules()[i];
+			auto rigidInfo = getRigidBodyStates()[rigidBodyId];
+
+			Real r = capsuleInfo.radius;
+			Real h = capsuleInfo.halfLength * 2;
+			Real density = rigidInfo.mass/ (2.0 / 3.0 * M_PI * r * r * r * 2 + M_PI * r * r * h);
+
+			VehicleRigidBodyInfo configRigid;
+
+			initialRigidBodyConfig(
+				configRigid,
+				"Capsule",
+				rigidBodyId,
+				ConfigShapeType::Capsule,
+				capsuleInfo.center,
+				capsuleInfo.rot,
+				rigidInfo.offset,
+				Vec3f(0),
+				capsuleInfo.radius,
+				capsuleInfo.halfLength,
+				density,
+				rigidInfo.bodyId,
+				rigidInfo.motionType
+			);
+
+			
+			if(config.mVehicleRigidBodyInfo[rigidBodyId].shapeName.rigidBodyId == -1)
+				config.mVehicleRigidBodyInfo[rigidBodyId] = configRigid;
+			else 
+			{
+				
+			}
+		}	
+
+		return MultiBodyBind();
 	}
 
 	DEFINE_CLASS(RigidBodySystem);

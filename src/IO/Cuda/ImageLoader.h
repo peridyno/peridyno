@@ -32,13 +32,17 @@ namespace dyno {
 		{
 			if (this->outImage()->isEmpty())
 				this->outImage()->allocate();
+			if (this->outGrayImage()->isEmpty())
+				this->outGrayImage()->allocate();
 
 			mFilePath = other->mFilePath;
 			this->varImagePath()->setValue(other->varImagePath()->getValue());
 
 			if(!other->outImage()->isEmpty())
 				this->outImage()->assign(other->outImage()->getData());
-			
+			if (!other->outGrayImage()->isEmpty())
+				this->outGrayImage()->assign(other->outGrayImage()->getData());
+
 			auto IndexChange = std::make_shared<FCallBackFunc>(std::bind(&ImageLoaderModule::onVarChanged, this));
 			this->setName(std::string("ImageLoader"));
 		}
@@ -50,7 +54,7 @@ namespace dyno {
 
 		DEF_VAR(FilePath, ImagePath, FilePath(), "");
 		DEF_ARRAY2D_OUT(Vec4f, Image, DeviceType::GPU, "");
-
+		DEF_ARRAY2D_OUT(float, GrayImage, DeviceType::GPU, "");
 	protected:
 		virtual std::shared_ptr<MaterialManagedModule> clone() const override 
 		{

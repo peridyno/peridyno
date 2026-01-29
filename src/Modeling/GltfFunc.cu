@@ -9,7 +9,7 @@
 
 namespace dyno
 {
-	void loadGLTFTextureMesh(std::shared_ptr<TextureMesh> texMesh,const std::string& filepath)
+	bool loadGLTFTextureMesh(std::shared_ptr<TextureMesh> texMesh,const std::string& filepath)
 	{
 		using namespace tinygltf;
 
@@ -21,15 +21,21 @@ namespace dyno
 
 		bool ret = loader.LoadASCIIFromFile(model, &err, &warn, filepath);
 		if (!warn.empty()) 
+		{
 			printf("Warn: %s\n", warn.c_str());
+			return false;
+		}
 		
 		if (!err.empty()) 
+		{
 			printf("Err: %s\n", err.c_str());
+			return false;
+		}
 		
 		if (!ret) 
 		{
 			printf("Failed to parse glTF\n");
-			return;
+			return false;
 
 		}
 		// import Scenes:
@@ -141,6 +147,7 @@ namespace dyno
 				reShapes[i]->boundingTransform.translation() = Vec3f(0);
 			}
 		}
+		return true;
 
 	}
 	void loadGLTFShape(tinygltf::Model& model, std::shared_ptr<TextureMesh> texMesh, const std::string& filepath, DArray<Vec3f>* initialPosition, DArray<Vec3f>* initialNormal, DArray<Mat4f>* d_mesh_Matrix,DArray<int>* d_shape_meshId, std::shared_ptr<SkinInfo> skinData )

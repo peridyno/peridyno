@@ -12,7 +12,7 @@ namespace dyno
 		this->clear();
 	}
 
-	std::shared_ptr<Geometry> TextureMesh::geometry() 
+	std::shared_ptr<Geometry>& TextureMesh::geometry() 
 	{
 		if (!mMeshData)
 			mMeshData = std::make_shared<Geometry>();

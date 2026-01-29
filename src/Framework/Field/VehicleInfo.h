@@ -17,6 +17,8 @@ namespace dyno {
 		CMT_Static = 0,
 		CMT_Kinematic = 1,
 		CMT_Dynamic = 2,
+		CMT_NonRotatable = 3,
+		CMT_NonGravitative = 4
 	};
 
 	enum ConfigShapeType
@@ -26,6 +28,7 @@ namespace dyno {
 		Capsule = 4,
 		Sphere = 8,
 		Tri = 16,
+		Compound = 32,
 		OtherShape = 999
 	};
 
@@ -107,16 +110,16 @@ namespace dyno {
 
 
 	/**
-	 * @brief The VehicleBind class is used to record information about created rigid bodies and joints.
+	 * @brief The MultiBodyBind class is used to record information about created rigid bodies and joints.
 			  Rigid bodies information is stored in mVehicleRigidBodyInfo.
 			  Toints information is stored in mVehicleJointInfo.
 	 */
-	class VehicleBind 
+	class MultiBodyBind
 	{
 	public:
-		VehicleBind() {};
-		VehicleBind(int size);
-		~VehicleBind();
+		MultiBodyBind() {};
+		MultiBodyBind(int size);
+		~MultiBodyBind();
 
 		bool isValid() {return mVehicleRigidBodyInfo.size();}
 

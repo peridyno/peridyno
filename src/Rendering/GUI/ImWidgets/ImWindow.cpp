@@ -620,7 +620,7 @@ void dyno::ImWindow::drawNodeManipulator(std::shared_ptr<Node> n, glm::mat4 view
 				node->varRotation()->setValue(r1);
 			}
 
-			node->updateGraphicsContext();
+			//node->updateGraphicsContext();
 		}
 	}
 }

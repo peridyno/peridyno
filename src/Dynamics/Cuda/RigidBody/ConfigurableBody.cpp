@@ -15,6 +15,12 @@
 //Rendering
 #include "Module/GLPhotorealisticInstanceRender.h"
 
+//IO
+#include "GltfFunc.h"
+#include "helpers/tinyobj_helper.h"
+#include "Field/VehicleInfo.inl"
+#include <fstream>
+
 namespace dyno
 {
 	//ConfigurableVehicle
@@ -69,13 +75,97 @@ namespace dyno
 		this->animationPipeline()->pushModule(iterSolver);
 
 		this->inTriangleSet()->tagOptional(true);
-		this->inTriangleSet()->tagOptional(true);
+		this->varFilePath()->tagOptional(true);
+		this->inTextureMesh()->tagOptional(true);
+
+		auto saveCallback = std::make_shared<FCallBackFunc>(std::bind(&ConfigurableBody<TDataType>::saveToFile, this));
+		this->varSaveConfigPath()->attach(saveCallback);
+
+		auto loadCallback = std::make_shared<FCallBackFunc>(std::bind(&ConfigurableBody<TDataType>::loadFromFile, this));
+		this->varLoadConfigPath()->attach(loadCallback);
+
+
+		auto updateCallback = std::make_shared<FCallBackFunc>(std::bind(&ConfigurableBody<TDataType>::updateConfig, this));
+		this->inTextureMesh()->attach(updateCallback);
+		this->varFilePath()->attach(updateCallback);
+		this->varVehicleConfiguration()->attach(updateCallback);
+
+
 	}
 
 	template<typename TDataType>
 	ConfigurableBody<TDataType>::~ConfigurableBody()
 	{
 
+	}
+
+	template<typename TDataType>
+	void ConfigurableBody<TDataType>::saveToFile()
+	{
+		auto fileStr = this->varFilePath()->serialize();
+		auto configStr = this->varVehicleConfiguration()->serialize();
+		auto instanceTransformStr = this->varVehiclesTransform()->serialize();
+
+		auto Path = this->varSaveConfigPath()->getValue();
+
+		std::ofstream outFile(Path.string(), std::ios::out | std::ios::trunc);
+		if (!outFile.is_open())
+		{
+			throw std::runtime_error("Error Path : " + Path.string());
+		}
+		MultiBodyBind vehicleBind = getMultiBodyBind();
+
+		outFile << "TextureMesh File:\n" << fileStr << "\n\n";
+		outFile << "VehicleConfiguration:\n" << configStr << "\n\n";
+		outFile << "VehiclesTransform:\n" << instanceTransformStr << "\n";
+
+		outFile.close();
+	}
+
+	template<typename TDataType>
+	void ConfigurableBody<TDataType>::loadFromFile()
+	{
+		auto Path = this->varLoadConfigPath()->getValue();
+
+		std::ifstream inFile(Path.string(), std::ios::in);
+		if (!inFile.is_open())
+		{
+			//throw std::runtime_error("Error Path : " + Path.string());
+			return;
+		}
+
+		std::stringstream buffer;
+		buffer << inFile.rdbuf();
+		std::string content = buffer.str();
+		inFile.close();
+
+
+		auto extractSection = [](const std::string& text, const std::string& sectionName) -> std::string {
+			std::string startTag = sectionName + ":";
+			size_t startPos = text.find(startTag);
+			if (startPos == std::string::npos)
+				throw std::runtime_error("Error Section: " + sectionName);
+
+			size_t lineEnd = text.find('\n', startPos);
+			if (lineEnd == std::string::npos)
+				lineEnd = text.length();
+
+			size_t contentStart = lineEnd + 1;
+
+			size_t endPos = text.find("\n\n", contentStart);
+			if (endPos == std::string::npos)
+				endPos = text.length();
+
+			return text.substr(contentStart, endPos - contentStart);
+		};
+
+		std::string fileStr = extractSection(content, "TextureMesh File");
+		std::string configStr = extractSection(content, "VehicleConfiguration");
+		std::string instanceTransformStr = extractSection(content, "VehiclesTransform");
+
+		this->inTextureMesh()->deserialize(fileStr);
+		this->varVehicleConfiguration()->deserialize(configStr);
+		this->varVehiclesTransform()->deserialize(instanceTransformStr);
 	}
 
 	template<typename TDataType>
@@ -87,6 +177,10 @@ namespace dyno
 		if (!this->inTextureMesh()->isEmpty())
 		{
 			this->stateTextureMesh()->setDataPtr(this->inTextureMesh()->constDataPtr());
+		}
+		else if (this->stateTextureMesh()->isEmpty()) 
+		{
+			ArticulatedBody<TDataType>::varChanged();
 		}
 
 		if (!this->varVehicleConfiguration()->getValue().isValid() && !bool(this->varVehiclesTransform()->getValue().size()) || this->stateTextureMesh()->isEmpty())
@@ -130,8 +224,10 @@ namespace dyno
 				auto transform = rigidInfo[i].transform;
 				Real density = rigidInfo[i].mDensity;
 
-				if (shapeId > texMesh->shapes().size() - 1)
-					continue;
+				if (shapeId >= texMesh->shapes().size()) 
+				{
+					shapeId = -1;
+				}
 
 				Vec3f up;
 				Vec3f down;
@@ -323,20 +419,17 @@ namespace dyno
 					auto& ballAndSocketJoint = this->createBallAndSocketJoint(Actors[first], Actors[second]);
 					ballAndSocketJoint.setAnchorPoint((Actors[first]->center + Actors[first]->center) / 2 + anchorOffset);
 				}
-
-				//Joint(Actor)
 			}
 		}
-
-
 
 	}
 
 	template<typename TDataType>
 	void ConfigurableBody<TDataType>::resetStates()
 	{
-		this->updateConfig();
 		/***************** Reset *************/
+		updateConfig();
+
 		ArticulatedBody<TDataType>::resetStates();
 
 		RigidBodySystem<TDataType>::postUpdateStates();

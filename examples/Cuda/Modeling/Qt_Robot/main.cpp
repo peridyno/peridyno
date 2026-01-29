@@ -40,7 +40,7 @@ int main()
 	fbx->setVisible(false);
 
 
-	VehicleBind configData;
+	MultiBodyBind configData;
 
 	Vec3f angle = Vec3f(0, 0, 90);
 	Quat<Real> q = Quat<Real>(angle[2] * M_PI / 180, angle[1] * M_PI / 180, angle[0] * M_PI / 180);

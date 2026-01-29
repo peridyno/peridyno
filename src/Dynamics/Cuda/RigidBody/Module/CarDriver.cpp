@@ -9,7 +9,7 @@ namespace dyno
 		: KeyboardInputModule()
 	{
 
-
+		this->varCacheEvent()->setValue(false);
 	}
 
 	template<typename TDataType>
@@ -31,7 +31,7 @@ namespace dyno
 			speed += 2.5;
 			if (speed >= 30)
 				speed = 30;
-			for (size_t i = 0; i < 4; i++)
+			for (size_t i = 2; i < 6; i++)
 			{
 				c_hinge[i].setMoter(speed);
 			}
@@ -41,8 +41,8 @@ namespace dyno
 		case PKeyboardType::PKEY_S:
 
 			speed -= 2.5;
-			if (speed <= -10)
-				speed = -10;
+			if (speed <= -30)
+				speed = -30;
 			for (size_t i = 0; i < 4; i++)
 			{
 				c_hinge[i].setMoter(speed);
@@ -50,8 +50,8 @@ namespace dyno
 			d_hinge.assign(c_hinge);
 
 			break;
-		case PKeyboardType::PKEY_A:
-			for (size_t i = 4; i < 6; i++)
+		case PKeyboardType::PKEY_D:
+			for (size_t i = 0; i < 2; i++)
 			{
 				if(angle <= M_PI/12)
 					angle += M_PI / 60;
@@ -59,8 +59,8 @@ namespace dyno
 			}
 			d_hinge.assign(c_hinge);
 			break;
-		case PKeyboardType::PKEY_D:
-			for (size_t i = 4; i < 6; i++)
+		case PKeyboardType::PKEY_A:
+			for (size_t i = 0; i < 2; i++)
 			{
 				if(angle >= -M_PI/12)
 					angle -= M_PI / 60;
@@ -69,7 +69,7 @@ namespace dyno
 			d_hinge.assign(c_hinge);
 			break;
 		case PKeyboardType::PKEY_Q:
-			for (size_t i = 4; i < 6; i++)
+			for (size_t i = 0; i < 2; i++)
 			{
 				angle = 0.0f;
 				c_hinge[i].setRange(angle, angle + epsilonAngle);
@@ -79,7 +79,7 @@ namespace dyno
 
 		case PKeyboardType::PKEY_E:
 			speed = 0;
-			for (size_t i = 0; i < 4; i++)
+			for (size_t i = 2; i < 6; i++)
 			{
 				c_hinge[i].setMoter(speed);
 			}

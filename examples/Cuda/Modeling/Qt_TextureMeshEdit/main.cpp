@@ -49,7 +49,7 @@ std::shared_ptr<SceneGraph> creatCar()
 
 
 	auto configCar = scn->addNode(std::make_shared<ConfigurableBody<DataType3f>>());
-	VehicleBind configData;
+	MultiBodyBind configData;
 
 	Vec3f angle = Vec3f(0, 0, 90);
 	Quat<Real> q = Quat<Real>(angle[2] * M_PI / 180, angle[1] * M_PI / 180, angle[0] * M_PI / 180);
@@ -117,7 +117,7 @@ std::shared_ptr<SceneGraph> creatCar()
 
 	auto configBlock = scn->addNode(std::make_shared<ConfigurableBody<DataType3f>>());
 
-	VehicleBind configBlockData;
+	MultiBodyBind configBlockData;
 	configBlockData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("Block1", 0), 0, Box));
 	configBlockData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("Block2", 1), 1, Box));
 	configBlockData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("Block3", 2), 2, Box));

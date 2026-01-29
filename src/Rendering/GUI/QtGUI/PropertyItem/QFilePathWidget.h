@@ -18,6 +18,7 @@
  */
 #pragma once
 #include "QFieldWidget.h"
+#include <QPushButton>
 #include "QtGUI/PPropertyWidget.h"
 
 namespace dyno
@@ -54,4 +55,23 @@ namespace dyno
 	private:
 		QLineEdit* location;
 	};
+
+	class QSaveFilePathWidget : public QFieldWidget
+	{
+		Q_OBJECT
+	public:
+		DECLARE_FIELD_WIDGET
+
+		QSaveFilePathWidget(FBase* field);
+		~QSaveFilePathWidget() override {};
+
+	public slots:
+		void updateField();
+
+	private:
+		QPushButton* saveButton;
+		std::string path;
+
+	};
+
 }

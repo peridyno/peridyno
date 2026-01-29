@@ -33,7 +33,12 @@ namespace dyno
 		ConfigurableBody();
 		~ConfigurableBody() override;
 
-		DEF_VAR(VehicleBind, VehicleConfiguration, VehicleBind(4), "");
+
+		DEF_VAR(MultiBodyBind, VehicleConfiguration, MultiBodyBind(4), "");
+
+
+		DEF_VAR(FilePath, LoadConfigPath, FilePath("", "Peridyno Multibody Files (*.pdm)"), "");
+
 
 	public:
 		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "Input TextureMesh");
@@ -42,7 +47,8 @@ namespace dyno
 
 	protected:
 		void resetStates() override;
-
+		void saveToFile() override;
+		void loadFromFile();
 		void updateConfig();
 
 	};

@@ -46,7 +46,7 @@ namespace dyno
 		mJointType = typeIn;
 	}
 
-	VehicleBind::VehicleBind(int size)
+	MultiBodyBind::MultiBodyBind(int size)
 	{
 		mVehicleRigidBodyInfo.resize(size);
 		for (int i = 0; i < mVehicleRigidBodyInfo.size(); i++)
@@ -57,7 +57,7 @@ namespace dyno
 		mVehicleJointInfo.resize(size);
 	}
 
-	VehicleBind::~VehicleBind()
+	MultiBodyBind::~MultiBodyBind()
 	{
 		mVehicleRigidBodyInfo.clear();
 		mVehicleJointInfo.clear();

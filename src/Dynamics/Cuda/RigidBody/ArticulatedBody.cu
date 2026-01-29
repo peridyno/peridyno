@@ -16,6 +16,9 @@
 #include "GltfFunc.h"
 #include "helpers/tinyobj_helper.h"
 
+#include "Field/VehicleInfo.h"
+#include <fstream>
+
 namespace dyno
 {
 	template<typename TDataType>
@@ -29,6 +32,9 @@ namespace dyno
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&ArticulatedBody<TDataType>::varChanged, this));
 		this->varFilePath()->attach(callback);
+
+		auto saveCallback = std::make_shared<FCallBackFunc>(std::bind(&ArticulatedBody<TDataType>::saveToFile, this));
+		this->varSaveConfigPath()->attach(saveCallback);
 
 		this->animationPipeline()->clear();
 
@@ -70,6 +76,7 @@ namespace dyno
 		N = texMesh->shapes().size();
 
 		CArrayList<Transform3f> tms;
+		CArrayList<uint> shapeArticalatedBodyIds;
 		CArray<uint> instanceNum(N);
 		instanceNum.reset();
 
@@ -79,8 +86,11 @@ namespace dyno
 			instanceNum[mBindingPair[i].first]++;
 		}
 
-		if (instanceNum.size() > 0)
+		if (instanceNum.size() > 0) 
+		{
 			tms.resize(instanceNum);
+			shapeArticalatedBodyIds.resize(instanceNum);
+		}
 
 		//Initialize CArrayList
 		for (uint i = 0; i < N; i++)
@@ -91,7 +101,13 @@ namespace dyno
 			}
 		}
 
+		for (size_t i = 0; i < mBindingPair.size(); i++)
+		{
+			shapeArticalatedBodyIds[mBindingPair[i].first].insert(mBindingPair[i].second);
+		}
+
 		this->stateInstanceTransform()->assign(tms);
+		this->stateInstanceArticulatedBodyID()->assign(shapeArticalatedBodyIds);
 
 		auto deTopo = this->stateTopology()->constDataPtr();
 		auto offset = deTopo->calculateElementOffset();
@@ -132,7 +148,7 @@ namespace dyno
 	template<typename TDataType>
 	void ArticulatedBody<TDataType>::varChanged()
 	{
-		std::shared_ptr<TextureMesh> texMesh = this->stateTextureMesh()->getDataPtr();
+		std::shared_ptr<TextureMesh> texMesh = this->stateTextureMesh()->constDataPtr();
 		auto filepath = this->varFilePath()->getValue();
 
 		auto ext = filepath.path().extension().string();
@@ -140,12 +156,45 @@ namespace dyno
 
 		if (ext == ".gltf")
 		{
-			loadGLTFTextureMesh(texMesh, name);
+			if(loadGLTFTextureMesh(texMesh, name))
+				this->stateTextureMesh()->getDataPtr();
 		}
 		else if (ext == ".obj")
 		{
-			loadTextureMeshFromObj(texMesh, name);
+			if(loadTextureMeshFromObj(texMesh, name))
+				this->stateTextureMesh()->getDataPtr();
+
 		}
+	}
+
+	template<typename TDataType>
+	void ArticulatedBody<TDataType>::saveToFile()
+	{
+		auto fileStr = this->varFilePath()->serialize();
+		MultiBodyBind vehicleBind;//T value, std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent
+		
+		
+		vehicleBind.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo());
+
+		FVar<MultiBodyBind> fvarBind(vehicleBind,"tempBind","", FieldTypeEnum::Param,NULL);
+		auto configStr = fvarBind.serialize();
+		auto instanceTransformStr = this->varVehiclesTransform()->serialize();
+
+		auto Path = this->varSaveConfigPath()->getValue();
+
+		std::ofstream outFile(Path.string(), std::ios::out | std::ios::trunc);
+		if (!outFile.is_open())
+		{
+			throw std::runtime_error("Error Path : " + Path.string());
+		}
+
+		outFile << "TextureMesh File:\n" << fileStr << "\n\n";
+		outFile << "VehicleConfiguration:\n" << configStr << "\n\n";
+		outFile << "VehiclesTransform:\n" << instanceTransformStr << "\n";
+
+		outFile.close();
+		
+		
 	}
 
 	template<typename TDataType>

@@ -129,7 +129,7 @@ namespace dyno
 		TextureMesh();
 		~TextureMesh() override;
 
-		std::shared_ptr<Geometry> geometry();
+		std::shared_ptr<Geometry>& geometry();
 
 		std::vector<std::shared_ptr<Shape>>& shapes() { return mShapes; }
 
