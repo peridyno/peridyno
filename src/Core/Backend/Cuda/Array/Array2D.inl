@@ -24,7 +24,7 @@ namespace dyno {
 		/*!
 		*	\brief	Should not release data here, call Release() explicitly.
 		*/
-		~Array2D() {};
+		DYN_FUNC ~Array2D() {};
 
 		void resize(uint nx, uint ny);
 
@@ -34,6 +34,10 @@ namespace dyno {
 
 		inline T* begin() const { return m_data; }
 
+		// Called by silling
+		inline uint64 address() const {
+			return uint64(m_data);
+		}
 		DYN_FUNC inline uint nx() const { return m_nx; }
 		DYN_FUNC inline uint ny() const { return m_ny; }
 		DYN_FUNC inline uint pitch() const { return m_pitch; }
@@ -83,10 +87,10 @@ namespace dyno {
 		T get(const uint i, const uint j);
 
 	private:
+		T* m_data = nullptr;
 		uint m_nx = 0;
 		uint m_ny = 0;
 		uint m_pitch = 0;
-		T* m_data = nullptr;
 	};
 
 	template<typename T>

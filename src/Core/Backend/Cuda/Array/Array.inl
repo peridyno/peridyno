@@ -29,7 +29,7 @@ namespace dyno
 		/*!
 		*	\brief	Do not release memory here, call clear() explicitly.
 		*/
-		~Array() {};
+		DYN_FUNC ~Array() {};
 
 		void resize(const uint n);
 
@@ -56,7 +56,14 @@ namespace dyno
 			return mData[id];
 		}
 
+		// Called by silling
+		inline uint64 address() const {
+			return uint64(mData);
+		}
+
 		DYN_FUNC inline uint size() const { return mTotalNum; }
+		DYN_FUNC inline uint bufferSize() const { return mBufferNum; }
+
 		DYN_FUNC inline bool isCPU() const { return false; }
 		DYN_FUNC inline bool isGPU() const { return true; }
 		DYN_FUNC inline bool isEmpty() const { return mData == nullptr; }
