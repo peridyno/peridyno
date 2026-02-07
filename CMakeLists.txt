@@ -169,7 +169,7 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	option(PERIDYNO_QT_GUI "Enable building Qt{5 or 6}-based applications" ON)
 
 	# Wt GUI to support web applications, off by default
-	option(PERIDYNO_WT_GUI "Enable building web applications" ON)
+	option(PERIDYNO_WT_GUI "Enable building web applications" OFF)
 
 	# Add Plugin folder
 	if(PERIDYNO_PLUGIN_ALL)
