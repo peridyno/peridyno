@@ -52,7 +52,7 @@ namespace dyno {
 
 		inline bool isCPU() const { return true; }
 		inline bool isGPU() const { return false; }
-		inline bool isEmpty() const { return m_maps.empty(); }
+		inline bool isEmpty() const { return m_maps.isEmpty(); }
 
 		void assign(const ArrayMap<ElementType, DeviceType::CPU>& src);
 		void assign(const ArrayMap<ElementType, DeviceType::GPU>& src);
