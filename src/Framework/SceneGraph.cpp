@@ -293,20 +293,7 @@ namespace dyno
 
 	void SceneGraph::reset()
 	{
-		class ResetNodeAct : public Action
-		{
-		public:
-			void process(Node* node) override {
-				if (node == NULL) {
-					Log::sendMessage(Log::Error, "Node is invalid!");
-					return;
-				}
-
-				node->reset();
-			}
-		};
-
-		this->traverseForward<ResetNodeAct>();
+		this->traverseForward<ResetAct>(mNodeTiming);
 
 		mElapsedTime = 0.0f;
 		mFrameNumber = 0;
@@ -316,7 +303,7 @@ namespace dyno
 
 	void SceneGraph::reset(std::shared_ptr<Node> node)
 	{
-		this->traverseForward<ResetAct>(node);
+		this->traverseForward<ResetAct>(node, mNodeTiming);
 	}
 
 	void SceneGraph::printNodeInfo(bool enabled)
