@@ -2,7 +2,6 @@
 
 #include <QRegularExpression>
 #include <QVector>
-#include <QTextCodec>
 
 namespace dyno
 {
@@ -92,8 +91,6 @@ namespace dyno
 
 	QString FormatDescription(std::string name)
 	{
-		QTextCodec* codec = QTextCodec::codecForName("GB2312");
-
 		QString desc = QString::fromStdString(name.c_str());
 
 // 		bool isChinese = qName.contains(QRegExp("[\\x4e00-\\x9fa5]+"));

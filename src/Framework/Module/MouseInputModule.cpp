@@ -15,9 +15,6 @@ namespace dyno
 	void MouseInputModule::enqueueEvent(PMouseEvent event)
 	{
 		mMutex.lock();
-#ifdef PYTHON
-		std::cout << "MouseInputModule::enqueueEvent" << std::endl;
-#endif // PYTHON
 
 		if (this->varCacheEvent()->getValue()) {
 			while (!mEventQueue.empty()) {
@@ -43,14 +40,8 @@ namespace dyno
 	void MouseInputModule::updateImpl()
 	{
 		mMutex.lock();
-#ifdef PYTHON
-		std::cout << "MouseInputModule::updateImpl" << std::endl;
-#endif // PYTHON
 		if (!mEventQueue.empty())
 		{
-#ifdef PYTHON
-			std::cout << "onEvent" << std::endl;
-#endif // PYTHON
 			onEvent(mEventQueue.front());
 
 			mEventQueue.pop_front();

@@ -13,7 +13,6 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 if (${QT_VERSION_MAJOR} EQUAL 6)
     find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS 
         Core
-        Core5Compat
         Widgets
         Gui
         OpenGL
@@ -122,7 +121,7 @@ target_link_libraries(${LIB_NAME} PUBLIC
 target_compile_definitions(${LIB_NAME} PRIVATE PERIDYNO_QTGUI_EXPORTS)
 
 if (${QT_VERSION_MAJOR} EQUAL 6)
-    target_link_libraries(${LIB_NAME} PUBLIC Qt6::Core5Compat Qt6::OpenGLWidgets)  
+    target_link_libraries(${LIB_NAME} PUBLIC Qt6::OpenGLWidgets)  
 
     option(PERIDYNO_QT_PYTHON_CONSOLE "Enable add python console with Qt" OFF)
     
