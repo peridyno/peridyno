@@ -94,7 +94,9 @@ namespace dyno
 	public:
 		PSceneSetting(PSettingEditor* editor,std::string title) 
 			:PSettingWidget(editor,title)
-		{	}
+		{
+		}
+
 		~PSceneSetting() {}
 	public slots:
 		void updateData() override;
@@ -106,6 +108,8 @@ namespace dyno
 		QVector3FieldWidget* gravityWidget = nullptr;
 		QVector3FieldWidget* lowerBoundWidget = nullptr;
 		QVector3FieldWidget* upperBoundWidget = nullptr;
+
+		QCheckBox* multithreadingEnabled;
 	};
 
 

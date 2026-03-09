@@ -17,8 +17,7 @@ namespace dyno
 {
 	QWaitCondition m_wait_condition;
 
-	PSimulationThread::PSimulationThread()
-		: 
+	PSimulationThread::PSimulationThread() : 
 		mTotalFrame(1000),
 		mReset(false),
 		mPaused(true),
@@ -27,6 +26,7 @@ namespace dyno
 		mUpdatingGraphicsContext(false),
 		mTimeOut(10000)
 	{
+		mTimer = new QTimer(this);
 	}
 
 	std::atomic<PSimulationThread*> PSimulationThread::pInstance;
@@ -45,6 +45,54 @@ namespace dyno
 		}
 
 		return ins;
+	}
+
+	void PSimulationThread::launch(bool multithreading)
+	{
+		mMultithreading = multithreading;
+		if (mMultithreading)
+		{
+			this->start();
+		}
+		else {
+			connect(mTimer, &QTimer::timeout, this, &PSimulationThread::mainEventLoop);
+			mTimer->start(1);
+		}
+	}
+
+	void PSimulationThread::abort()
+	{
+		if (mMultithreading)
+		{
+			this->stop();
+		}
+		else
+		{
+			mTimer->stop();
+			disconnect(mTimer, &QTimer::timeout, this, &PSimulationThread::mainEventLoop);
+		}
+	}
+
+	void PSimulationThread::switchThreadingMode(bool multithreading)
+	{
+		if (multithreading == mMultithreading) return;
+
+		if (multithreading)
+		{
+			mTimer->stop();
+			disconnect(mTimer, &QTimer::timeout, this, &PSimulationThread::mainEventLoop);
+
+			this->start();
+		}
+		else
+		{
+			this->stop();
+
+			connect(mTimer, &QTimer::timeout, this, &PSimulationThread::mainEventLoop);
+			mTimer->start(1);
+		}
+
+		mMultithreading = multithreading;
 	}
 
 	void PSimulationThread::pause()
@@ -80,7 +128,6 @@ namespace dyno
 			Log::sendMessage(Log::Info, "Time out");
 		}
 	}
-
 
 	void PSimulationThread::createNewScene(std::shared_ptr<SceneGraph> scn)
 	{
@@ -140,61 +187,69 @@ namespace dyno
 
 	void PSimulationThread::run()
 	{
-		for(;;)
+		while (mainEventLoop()) {};
+	}
+
+	bool PSimulationThread::mainEventLoop()
+	{
+		std::unique_lock<decltype(mMutex)> lock(mMutex);
+		auto scn = SceneGraphFactory::instance()->active();
+
+		bool has_frame = scn->getFrameNumber() < mTotalFrame;
+
+		if (mMultithreading)
 		{
-			std::unique_lock<decltype(mMutex)> lock(mMutex);
-			auto scn = SceneGraphFactory::instance()->active();
-
-			bool has_frame = scn->getFrameNumber() < mTotalFrame;
-
-			while(mRunning && (mUpdatingGraphicsContext || (!mReset && mPaused))) {
+			//For multithreading, the following code should be used to prevent program crashes when resetting the scenegraph, although the exact cause of the issue is still unclear.
+			while (mRunning && (mUpdatingGraphicsContext || (!mReset && mPaused))) {
 				mCond.wait_for(lock, 500ms);
 			}
+		}
 
-			if(!mRunning) break;
+		if (!mRunning) false;
 
-			if (mReset)
+		if (mReset)
+		{
+			if (mActiveNode == nullptr) {
+				scn->reset();
+
+				mFinished = false;
+			}
+			else {
+				scn->reset(mActiveNode);
+
+				mActiveNode = nullptr;
+			}
+
+			mReset = false;
+
+			emit oneFrameFinished(scn->getFrameNumber());
+		}
+
+		if (!mPaused) {
+			if (scn->getFrameNumber() < mTotalFrame)
 			{
-				if (mActiveNode == nullptr) {
-					scn->reset(); 
+				scn->takeOneFrame();
 
-					mFinished = false;
+				this->startUpdatingGraphicsContext();
+
+				if (mOneStep) {
+					mOneStep = false;
+					mPaused = true;
 				}
-				else {
-					scn->reset(mActiveNode);
-
-					mActiveNode = nullptr;
-				}
-
-				mReset = false;
 
 				emit oneFrameFinished(scn->getFrameNumber());
 			}
 
-			if(!mPaused) {
-				if (scn->getFrameNumber() < mTotalFrame)
-				{
-					scn->takeOneFrame();
-
-					this->startUpdatingGraphicsContext();
-
-					if (mOneStep) {
-						mOneStep = false;
-						mPaused = true;
-					}
-					
-					emit oneFrameFinished(scn->getFrameNumber());
-				}
-
-				if (scn->getFrameNumber() >= mTotalFrame)
-				{
-					mPaused = true;
-					if(!std::exchange(mFinished,true)) {
-						emit simulationFinished();
-					}
+			if (scn->getFrameNumber() >= mTotalFrame)
+			{
+				mPaused = true;
+				if (!std::exchange(mFinished, true)) {
+					emit simulationFinished();
 				}
 			}
 		}
+
+		return true;
 	}
 
 	std::shared_ptr<SceneGraph> PSimulationThread::getCurrentScene()

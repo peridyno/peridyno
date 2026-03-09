@@ -19,6 +19,7 @@
 
 #include "PDockWidget.h"
 #include "PModuleEditorToolBar.h"
+#include "PSimulationThread.h"
 
 #include "ToolBar/Group.h"
 #include "ToolBar/ToolButtonStyle.h"
@@ -179,14 +180,25 @@ namespace dyno
 		lowerBoundWidget= new QVector3FieldWidget(QString("Lower Bound"), lowerBValue);
 		upperBoundWidget = new QVector3FieldWidget(QString("Upper Bound"), upperBValue);
 
+		multithreadingEnabled = new QCheckBox(this);
+		multithreadingEnabled->setChecked(PSimulationThread::instance()->isMultithreading());
+
 		QObject::connect(gravityWidget, SIGNAL(vec3fChange(double, double, double)), this, SLOT(setGravity(double, double, double)));
 		QObject::connect(lowerBoundWidget, SIGNAL(vec3fChange(double, double, double)), this, SLOT(setLowerBound(double, double, double)));
 		QObject::connect(upperBoundWidget, SIGNAL(vec3fChange(double, double, double)), this, SLOT(setUpperBound(double, double, double)));
+
+		connect(multithreadingEnabled, &QCheckBox::toggled, [=]() {
+			PSimulationThread::instance()->switchThreadingMode(multithreadingEnabled->isChecked());
+			});
 
 		getScrollLayout()->addWidget(gravityWidget, 0, 0);
 		getScrollLayout()->addWidget(lowerBoundWidget, 1, 0);
 		getScrollLayout()->addWidget(upperBoundWidget, 2, 0);
 
+		QHBoxLayout* hLayout = new QHBoxLayout;
+		getScrollLayout()->addLayout(hLayout, 3, 0);
+		hLayout->addWidget(new QLabel("Multi-threading"));
+		hLayout->addWidget(multithreadingEnabled);
 	}
 
 	void PSceneSetting::setGravity(double v0, double v1, double v2)
