@@ -142,7 +142,7 @@ namespace dyno
 			PSimulationThread::instance()->pause();
 			mStartSim->setText("");
 			mResetSim->setEnabled(true);
-			mStartLabel->setPixmap(*mStartIcon);		//更新Label上的icon为Starticon
+			mStartLabel->setPixmap(*mStartIcon);		//update icon Starticon
 
 			mNextStep->setEnabled(true);
 			mTotalFrameSpinbox->setEnabled(true);
@@ -160,7 +160,7 @@ namespace dyno
 		mStartSim->setText("");
 		mStartSim->setEnabled(true);
 		mStartSim->setChecked(false);
-		mStartLabel->setPixmap(*mStartIcon);		//更新Label上的icon为Starticon
+		mStartLabel->setPixmap(*mStartIcon);		
 
 		mTotalFrameSpinbox->setEnabled(true);
 		mFrameSlider->setEnabled(true);
@@ -174,7 +174,7 @@ namespace dyno
 
 	void PAnimationWidget::simulationFinished()
 	{
-		mStartLabel->setPixmap(*mFinishIcon);		//更新Label上的icon为Finishicon
+		mStartLabel->setPixmap(*mFinishIcon);		//update icon Finishicon
 
 		mStartSim->setText("");
 		mStartSim->setDisabled(true);

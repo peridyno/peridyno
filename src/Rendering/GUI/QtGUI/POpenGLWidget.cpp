@@ -542,7 +542,7 @@ namespace dyno
 	void POpenGLWidget::paintEvent(QPaintEvent* event)
 	{
 		auto activeScene = SceneGraphFactory::instance()->active();
-		if (mImWindow.forceRender())
+		if (mRenderEngine->forceRender)
 		{
 			QOpenGLWidget::paintEvent(event);
 		}
