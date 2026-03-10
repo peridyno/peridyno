@@ -30,6 +30,7 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 		typedef typename ::dyno::Transform<Real, 3> Transform;
+		typedef typename TopologyModule::Triangle Triangle;
 
 		TextureMeshToTriangleSet();
 		~TextureMeshToTriangleSet() override;
