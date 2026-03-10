@@ -12,6 +12,7 @@
 #include <QLineEdit>
 #include <QIntValidator>
 #include <QDebug>
+
 namespace dyno
 {
 	PAnimationWidget::PAnimationWidget(QWidget *parent) : 
@@ -100,25 +101,21 @@ namespace dyno
 		connect(mResetSim, SIGNAL(released()), this, SLOT(resetSimulation()));
 		connect(mNextStep, SIGNAL(released()), this, SLOT(takeOneStep()));
 
-		connect(PSimulationThread::instance(), SIGNAL(simulationFinished()), this, SLOT(simulationFinished()));
-		connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished(int)), this, SLOT(updateSlider(int)));
-		connect(PSimulationThread::instance(), SIGNAL(finished()), PSimulationThread::instance(), SLOT(deleteLater()));
-
 		connect(mTotalFrameSpinbox, SIGNAL(valueChanged(int)), mFrameSlider, SLOT(maximumChanged(int)));
 		connect(mTotalFrameSpinbox, SIGNAL(valueChanged(int)), this, SLOT(totalFrameChanged(int)));
 
 		connect(mPersistent, SIGNAL(stateChanged(int)), this, SLOT(runForever(int)));
 
-		PSimulationThread::instance()->start();
+		connect(PSimulationThread::instance(), SIGNAL(simulationFinished()), this, SLOT(simulationFinished()));
+		connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished(int)), this, SLOT(updateSlider(int)));
+		connect(PSimulationThread::instance(), SIGNAL(finished()), PSimulationThread::instance(), SLOT(deleteLater()));
 
-
+		PSimulationThread::instance()->launch(false);
 	}
 
 	PAnimationWidget::~PAnimationWidget()
 	{
-		PSimulationThread::instance()->stop();
-// 		PSimulationThread::instance()->deleteLater();
-// 		PSimulationThread::instance()->wait();
+		PSimulationThread::instance()->abort();
 	}
 	
 	void PAnimationWidget::toggleSimulation()

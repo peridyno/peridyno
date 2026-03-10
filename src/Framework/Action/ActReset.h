@@ -1,15 +1,17 @@
 #pragma once
 #include "Action.h"
+#include "Timer.h"
 
 namespace dyno
 {
 	class ResetAct : public Action
 	{
 	public:
-		ResetAct();
-		virtual ~ResetAct();
+		ResetAct(bool Timing);
+
+		void process(Node* node) override;
 
 	private:
-		void process(Node* node) override;
+		bool mTiming = false;
 	};
 }

@@ -61,11 +61,8 @@ namespace dyno
 			return;
 		}
 
-		auto& enums = f->getDataPtr()->enumMap();
+		f->setCurrentKey(mComboxIndexMap[index]);
 
-		f->getDataPtr()->setCurrentKey(mComboxIndexMap[index]);
-		//To notify the field is updated
-		//f->update();
 		emit fieldChanged();
 	}
 }

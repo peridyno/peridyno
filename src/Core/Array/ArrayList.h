@@ -64,7 +64,7 @@ namespace dyno {
 
 		inline bool isCPU() const { return true; }
 		inline bool isGPU() const { return false; }
-		inline bool isEmpty() const { return mLists.empty(); }
+		inline bool isEmpty() const { return mLists.isEmpty(); }
 
 		void clear();
 

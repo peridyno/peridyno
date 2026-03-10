@@ -204,7 +204,7 @@ namespace dyno
 
 		// Draw scene		
 		mRenderEngine->draw(SceneGraphFactory::instance()->active().get(), mRenderParams);
-		
+
 		// Draw ImGui
 		if (showImGUI())
 			mImWindow.draw(this);
