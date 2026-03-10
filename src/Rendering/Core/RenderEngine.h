@@ -82,6 +82,7 @@ namespace dyno
 
 		// some render options...
 		bool  showGround = true;
+		bool  forceRender = false;
 		float planeScale = 3.f;
 		float rulerScale = 1.f;
 		glm::vec4 planeColor = { 0.3, 0.3, 0.3, 0.5 };

@@ -28,10 +28,14 @@ using namespace dyno;
 #include "MaterialEditModule.h"
 #include "RigidBody/Module/InstanceTransform.h"
 /**
- * @brief This example demonstrate how to load plugin libraries in a static way
+ * @brief This is a sample demonstrating a custom material. 
+	1.Run the simulation
+	2.press the Q key to turn the car headlights on/off.
+	3.press the A/D keys to activate the turn signals.
+	4.press the S/W keys to turn the reverse lights on/off.
  */
 
-
+#define USEMULTIBODY
 int main()
 {
 
@@ -51,8 +55,12 @@ int main()
 		jeep->graphicsPipeline()->popModule(gltfWireframe);
 	}
 
+#ifdef USEMULTIBODY
+
 	auto multiBodySystem = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
 	jeep->connect(multiBodySystem->importVehicles());
+
+#endif // USEMULTIBODY
 
 	auto srcMaterial = std::dynamic_pointer_cast<MaterialLoaderModule>(MaterialManager::getMaterialManagedModule("Body1"));
 
@@ -129,12 +137,7 @@ int main()
 			auto photo = jeep->graphicsPipeline()->findFirstModule<GLPhotorealisticInstanceRender>();
 			jeep->graphicsPipeline()->popModule(photo);
 
-
-
-		}
-
-
-		
+		}	
 	}
 
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());
@@ -144,9 +147,10 @@ int main()
 	{
 		plane->graphicsPipeline()->popModule(planeWireframe);
 	}
+
+#ifdef USEMULTIBODY
 	plane->stateTriangleSet()->connect(multiBodySystem->inTriangleSet());
-
-
+#endif // USEMULTIBODY
 
 	UbiApp app(GUIType::GUI_QT);
 	app.setSceneGraph(scn);
@@ -159,6 +163,7 @@ int main()
 		renderer->setUseEnvmapBackground(false);
 		renderer->setEnvmapScale(3.0f);
 		renderer->showGround = false;
+		renderer->forceRender = true;
 		
 	}
 

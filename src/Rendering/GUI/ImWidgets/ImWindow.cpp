@@ -337,7 +337,7 @@ void ImWindow::draw(RenderWindow* app)
 
 				ImGui::Separator();
 
-				ImGui::Checkbox("Force Render", &mForceRender);
+				ImGui::Checkbox("Force Render", &(engine->forceRender));
 				ImGui::Spacing();
 
 				ImGui::Separator();
