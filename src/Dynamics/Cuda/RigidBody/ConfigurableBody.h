@@ -34,7 +34,7 @@ namespace dyno
 		~ConfigurableBody() override;
 
 
-		DEF_VAR(MultiBodyBind, VehicleConfiguration, MultiBodyBind(4), "");
+		DEF_VAR(MultiBodyBind, Configuration, MultiBodyBind(4), "");
 
 
 		DEF_VAR(FilePath, LoadConfigPath, FilePath("", "Peridyno Multibody Files (*.pdm)"), "");

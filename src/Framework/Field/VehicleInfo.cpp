@@ -4,26 +4,9 @@
 namespace dyno 
 {
 
-	VehicleRigidBodyInfo::VehicleRigidBodyInfo(Name_Shape name, int shapeId, ConfigShapeType type, Real density) //
-	{
-		shapeName = name;
-		meshShapeId = shapeId;
-		shapeType = type;
-		mDensity = density;
-	};
-
-	VehicleRigidBodyInfo::VehicleRigidBodyInfo(Name_Shape name, int shapeId, ConfigShapeType type, Transform3f trans, Real density) //
-	{
-		shapeName = name;
-		meshShapeId = shapeId;
-		shapeType = type;
-		transform = trans;
-		mDensity = density;
-	};
-
-	VehicleJointInfo::VehicleJointInfo(
-		Name_Shape Name1,
-		Name_Shape Name2,
+	MultiBodyJointConfig::MultiBodyJointConfig(
+		NameRigidID Name1,
+		NameRigidID Name2,
 		ConfigJointType typeIn,
 		Vector<Real, 3> Axi ,
 		Vector<Real, 3> Point ,
@@ -48,19 +31,18 @@ namespace dyno
 
 	MultiBodyBind::MultiBodyBind(int size)
 	{
-		mVehicleRigidBodyInfo.resize(size);
-		for (int i = 0; i < mVehicleRigidBodyInfo.size(); i++)
+		rigidBodyConfigs.resize(size);
+		for (int i = 0; i < rigidBodyConfigs.size(); i++)
 		{
-			mVehicleRigidBodyInfo[i].shapeName = Name_Shape(std::string("Rigid") + std::to_string(i), i);
-			mVehicleRigidBodyInfo[i].meshShapeId = i;
+			rigidBodyConfigs[i].shapeName = NameRigidID(std::string("Rigid") + std::to_string(i), i);
+			rigidBodyConfigs[i].visualShapeIds.push_back(i);
 		}
-		mVehicleJointInfo.resize(size);
 	}
 
 	MultiBodyBind::~MultiBodyBind()
 	{
-		mVehicleRigidBodyInfo.clear();
-		mVehicleJointInfo.clear();
+		rigidBodyConfigs.clear();
+		jointConfigs.clear();
 	}
 
 }

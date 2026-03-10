@@ -153,6 +153,7 @@ namespace dyno
 		actor->shapeType = ET_COMPOUND;
 		actor->center = bd.position;
 		actor->rot = bd.angle;
+		mActors.push_back(actor);
 
 		return actor;
 	}
@@ -701,58 +702,115 @@ namespace dyno
 		outFile.close();
 	}
 
-	void initialRigidBodyConfig(
-		VehicleRigidBodyInfo& configRigid,
-		std::string Name,
-		int rigidbodyID,
+	void initialShapeConfig(
+		ShapeConfig& shapeRigid,
 		ConfigShapeType type,
 		Vec3f center,
 		Quat<Real> rot,
-		Vec3f offset,
 		Vec3f halfLength,
-		float radius,
-		float capsuleLength,
-		float density,
-		uint bodyId,
-		BodyType bodyType,
-		std::vector<Vec3f> tet = { Vec3f(0),Vec3f(0),Vec3f(0),Vec3f(0,1,0) }
+		Real radius,
+		Real capsuleLength,
+		Real density = 100,
+		std::vector<Vec3f> tet = std::vector<Vec3f>()
 
 	)
 	{
-		configRigid.shapeName = Name_Shape(Name + std::to_string(rigidbodyID), rigidbodyID);
-		configRigid.meshShapeId = -1;
-		configRigid.shapeType = type;
-		configRigid.transform.translation() = center;
-		configRigid.transform.rotation() = rot.toMatrix3x3();
-		configRigid.transform.scale() = Vec3f(1);
-		configRigid.Offset = offset;
-		configRigid.mHalfLength = halfLength;
-		configRigid.radius = radius;
-		configRigid.capsuleLength = capsuleLength;
-		configRigid.tet = { Vec3f(0),Vec3f(0),Vec3f(0),Vec3f(0,1,0) };
+		shapeRigid.shapeType = type;
+		shapeRigid.center = center;
+		shapeRigid.rot = rot;
+		shapeRigid.halfLength = halfLength;
+		shapeRigid.radius = radius;
+		shapeRigid.capsuleLength = capsuleLength;
+		shapeRigid.density = density;
+		shapeRigid.tet = { Vec3f(0),Vec3f(0),Vec3f(0),Vec3f(0,1,0) };
+	}
+
+	void initialRigidBodyConfig(
+		RigidBodyConfig& configRigid,
+
+		std::string name,
+		int rigidbodyID,
+		Quat<Real> angle,
+		Vector<Real, 3> linearVelocity,
+		Vector<Real, 3> angularVelocity,
+		Vector<Real, 3> position,
+		Vector<Real, 3> offset,
+		SquareMatrix<Real, 3> inertia,
+		uint bodyId,
+		Real friction,
+		Real restitution,
+		ConfigMotionType motionType,
+		ConfigShapeType shapeType,
+		ConfigCollisionMask collisionMask,
+		int configGroup = 0,
+		std::vector<int> visualShapeIds = std::vector<int>(),
+		std::vector<ShapeConfig> shapeConfigs = std::vector<ShapeConfig>()
+	)
+	{
+		configRigid.shapeName = NameRigidID(name + std::to_string(rigidbodyID), rigidbodyID);
+		configRigid.angle = angle;
+		configRigid.linearVelocity = linearVelocity;
+		configRigid.angularVelocity = angularVelocity;
+		configRigid.position = position;
+		configRigid.offset = offset;
+		configRigid.inertia = inertia;
+		configRigid.ConfigGroup = bodyId;
+		configRigid.friction = friction;
+		configRigid.restitution = restitution;
+		configRigid.motionType = motionType;
+		configRigid.shapeType = shapeType;
+		configRigid.collisionMask = collisionMask;
+		configRigid.visualShapeIds = visualShapeIds;
+		configRigid.shapeConfigs = shapeConfigs;
+		configRigid.ConfigGroup = configGroup;
+	}
+
+	ConfigMotionType ToConfigMotionType(BodyType bodyType)
+	{
 		switch (bodyType)
 		{
-		case BodyType::Static:
-			configRigid.motion = ConfigMotionType::CMT_Static;
-			break;
-		case BodyType::Kinematic:
-			configRigid.motion = ConfigMotionType::CMT_Kinematic;
-			break;
-		case BodyType::Dynamic:
-			configRigid.motion = ConfigMotionType::CMT_Dynamic;
-			break;
-		case BodyType::NonRotatable:
-			configRigid.motion = ConfigMotionType::CMT_NonRotatable;
-			break;
-		case BodyType::NonGravitative:
-			configRigid.motion = ConfigMotionType::CMT_NonGravitative;
-			break;
-		default:
-			break;
+		case Static: return CONFIG_Static;
+		case Kinematic: return CONFIG_Kinematic;
+		case Dynamic: return CONFIG_Dynamic;
+		case NonRotatable: return CONFIG_NonRotatable;
+		case NonGravitative: return CONFIG_NonGravitative;
+		default: return CONFIG_Dynamic;
 		}
-		configRigid.mDensity = density;
-		configRigid.rigidGroup = bodyId;
 	}
+
+	ConfigShapeType ToConfigShapeType(ElementType element)
+	{
+		switch (element)
+		{
+		case ET_BOX:       return CONFIG_BOX;
+		case ET_TET:       return CONFIG_TET;
+		case ET_CAPSULE:   return CONFIG_CAPSULE;
+		case ET_SPHERE:    return CONFIG_SPHERE;
+		case ET_TRI:       return CONFIG_TRI;
+		case ET_COMPOUND:  return CONFIG_COMPOUND;
+		case ET_Other:     return CONFIG_Other;
+		default:           return CONFIG_Other; // Ä¬ÈÏ·µ»Ø
+		}
+	}
+
+	ConfigCollisionMask ToConfigCollisionMask(CollisionMask mask)
+	{
+		switch (mask)
+		{
+		case CT_AllObjects:       return CONFIG_AllObjects;
+		case CT_BoxExcluded:      return CONFIG_BoxExcluded;
+		case CT_TetExcluded:      return CONFIG_TetExcluded;
+		case CT_CapsuleExcluded:  return CONFIG_CapsuleExcluded;
+		case CT_SphereExcluded:   return CONFIG_SphereExcluded;
+		case CT_BoxOnly:          return CONFIG_BoxOnly;
+		case CT_TetOnly:          return CONFIG_TetOnly;
+		case CT_CapsuleOnly:      return CONFIG_CapsuleOnly;
+		case CT_SphereOnly:       return CONFIG_SphereOnly;
+		case CT_Disabled:         return CONFIG_Disabled;
+		default:                  return CONFIG_AllObjects;
+		}
+	}
+
 
 	template<typename TDataType>
 	MultiBodyBind RigidBodySystem<TDataType>::getMultiBodyBind()
@@ -761,78 +819,95 @@ namespace dyno
 		int jointNum = getJointsBallAndSocket().size() + getJointsSlider().size() + getJointsHinge().size() + getJointsFixed().size() + getJointsPoint().size();
 
 		MultiBodyBind config;
-		config.mVehicleRigidBodyInfo.resize(rigidNum);
-		config.mVehicleJointInfo.resize(jointNum);
+		config.rigidBodyConfigs.resize(rigidNum);
+		config.jointConfigs.resize(jointNum);
+
+		for (size_t rId = 0; rId < rigidNum; rId++)
+		{
+			auto rigidInfo = getRigidBodyStates()[rId];
+			RigidBodyConfig& rigidConfig = config.rigidBodyConfigs[rId];
+
+			if (!rigidConfig.isValid())
+			{
+				initialRigidBodyConfig(
+					rigidConfig,
+					"Rigid",
+					rId,
+					rigidInfo.angle,
+					rigidInfo.linearVelocity,
+					rigidInfo.angularVelocity,
+					rigidInfo.position,
+					rigidInfo.offset,
+					rigidInfo.inertia,
+					rigidInfo.bodyId,
+					rigidInfo.friction,
+					rigidInfo.restitution,
+					ToConfigMotionType(rigidInfo.motionType),
+					ToConfigShapeType(rigidInfo.shapeType),
+					ToConfigCollisionMask(rigidInfo.collisionMask),
+					rigidInfo.bodyId
+				);
+			}
+		}
 
 		for (size_t i = 0; i < getSpheres().size(); i++)
 		{
 			auto pair = getShape2RigidBodyMapping()[i];
-			uint rigidBodyId = pair.second;
+			uint rId = pair.second;
 			auto sphereInfo = getSpheres()[i];
-			auto rigidInfo = getRigidBodyStates()[rigidBodyId];
+			auto rigidInfo = getRigidBodyStates()[rId];
 
-			VehicleRigidBodyInfo configRigid;
-			initialRigidBodyConfig(
-				configRigid,
-				"Sphere",
-				rigidBodyId,
-				ConfigShapeType::Sphere,
+			ShapeConfig sphereConfig;
+			initialShapeConfig(
+				sphereConfig,
+				ConfigShapeType::CONFIG_SPHERE,
 				sphereInfo.center,
 				sphereInfo.rot,
-				rigidInfo.offset,
 				Vec3f(0),
 				sphereInfo.radius,
 				0,
-				rigidInfo.mass / ((4.0 / 3.0) * M_PI * sphereInfo.radius * sphereInfo.radius * sphereInfo.radius),
-				rigidInfo.bodyId,
-				rigidInfo.motionType
-				);
+				rigidInfo.mass / ((4.0 / 3.0) * M_PI * sphereInfo.radius * sphereInfo.radius * sphereInfo.radius)
+			);
 
-			config.mVehicleRigidBodyInfo[rigidBodyId] = configRigid;
+			config.rigidBodyConfigs[rId].bindShapeConfig(sphereConfig);
 
 		}
 
 		for (size_t i = 0; i < getBoxes().size(); i++)
 		{
 			auto pair = getShape2RigidBodyMapping()[getSpheres().size() + i];
-			uint rigidBodyId = pair.second;
+			uint rId = pair.second;
 			auto boxInfo = getBoxes()[i];
 
-			auto rigidInfo = getRigidBodyStates()[rigidBodyId];
-
-			VehicleRigidBodyInfo configRigid;
+			auto rigidInfo = getRigidBodyStates()[rId];
 
 			float lx = 2.0f * boxInfo.halfLength[0];
 			float ly = 2.0f * boxInfo.halfLength[1];
 			float lz = 2.0f * boxInfo.halfLength[2];
 
-			initialRigidBodyConfig(
-				configRigid,
-				"Box",
-				rigidBodyId,
-				ConfigShapeType::Box,
+			ShapeConfig boxConfig;
+			initialShapeConfig(
+				boxConfig,
+				ConfigShapeType::CONFIG_BOX,
 				boxInfo.center,
 				boxInfo.rot,
-				rigidInfo.offset,
 				boxInfo.halfLength,
 				0,
 				0,
-				rigidInfo.mass / (lx * ly * lz),
-				rigidInfo.bodyId,
-				rigidInfo.motionType
+				rigidInfo.mass / (lx * ly * lz)
 			);
 
-			config.mVehicleRigidBodyInfo[rigidBodyId] = configRigid;
+			config.rigidBodyConfigs[rId].bindShapeConfig(boxConfig);
 
 		}
 
 		for (size_t i = 0; i < getTets().size(); i++)
 		{
 			auto pair = getShape2RigidBodyMapping()[getSpheres().size() + getBoxes().size() + i];
-			uint rigidBodyId = pair.second;
+			uint rId = pair.second;
 			auto tetInfo = getTets()[i];
 
-			auto rigidInfo = getRigidBodyStates()[rigidBodyId];
+			auto rigidInfo = getRigidBodyStates()[rId];
 
 			Coord centroid = (tetInfo.v[0] + tetInfo.v[1] + tetInfo.v[2] + tetInfo.v[3]) / 4;
 
@@ -847,70 +922,148 @@ namespace dyno
 			Real volume = (1.0 / 6.0) * detJ;
 			Real density = rigidInfo.mass / volume;
 
-			VehicleRigidBodyInfo configRigid;
+			std::vector<Vec3f> tet;
+			tet.push_back(tetInfo.v[0]);
+			tet.push_back(tetInfo.v[1]);
+			tet.push_back(tetInfo.v[2]);
+			tet.push_back(tetInfo.v[3]);
 
-			initialRigidBodyConfig(
-				configRigid,
-				"Tet",
-				rigidBodyId,
-				ConfigShapeType::Tet,
+			ShapeConfig tetConfig;
+			initialShapeConfig(
+				tetConfig,
+				ConfigShapeType::CONFIG_TET,
 				Vec3f(0),
 				Quat<Real>(),
-				rigidInfo.offset,
 				Vec3f(0),
 				0,
 				0,
 				density,
-				rigidInfo.bodyId,
-				rigidInfo.motionType,
-				{tetInfo.v[0], tetInfo.v[1], tetInfo.v[2], tetInfo.v[3] }
+				tet
 			);
 
-			config.mVehicleRigidBodyInfo[rigidBodyId] = configRigid;
-
-			printf("tet : rigidID - %d\n", int(rigidBodyId));
+			config.rigidBodyConfigs[rId].bindShapeConfig(tetConfig);
 
 		}
 
 		for (size_t i = 0; i < getCapsules().size(); i++)
 		{
 			auto pair = getShape2RigidBodyMapping()[getSpheres().size() + getBoxes().size() + getTets().size() + i];
-			uint rigidBodyId = pair.second;
+			uint rId = pair.second;
 			auto capsuleInfo = getCapsules()[i];
-			auto rigidInfo = getRigidBodyStates()[rigidBodyId];
+			auto rigidInfo = getRigidBodyStates()[rId];
 
 			Real r = capsuleInfo.radius;
 			Real h = capsuleInfo.halfLength * 2;
 			Real density = rigidInfo.mass/ (2.0 / 3.0 * M_PI * r * r * r * 2 + M_PI * r * r * h);
 
-			VehicleRigidBodyInfo configRigid;
-
-			initialRigidBodyConfig(
-				configRigid,
-				"Capsule",
-				rigidBodyId,
-				ConfigShapeType::Capsule,
+			ShapeConfig capsuleConfig;
+			initialShapeConfig(
+				capsuleConfig,
+				ConfigShapeType::CONFIG_CAPSULE,
 				capsuleInfo.center,
 				capsuleInfo.rot,
-				rigidInfo.offset,
 				Vec3f(0),
 				capsuleInfo.radius,
 				capsuleInfo.halfLength,
-				density,
-				rigidInfo.bodyId,
-				rigidInfo.motionType
+				density
 			);
 
-			
-			if(config.mVehicleRigidBodyInfo[rigidBodyId].shapeName.rigidBodyId == -1)
-				config.mVehicleRigidBodyInfo[rigidBodyId] = configRigid;
-			else 
-			{
-				
-			}
-		}	
+			config.rigidBodyConfigs[rId].bindShapeConfig(capsuleConfig);
 
-		return MultiBodyBind();
+		}
+
+		const std::vector<BallAndSocketJoint>& ballJoint = getJointsBallAndSocket();
+		const std::vector<SliderJoint>& sliderJoint = getJointsSlider();
+		const std::vector<HingeJoint>& hingeJoint = getJointsHinge();
+		const std::vector<FixedJoint>& fixedJoint = getJointsFixed();
+		const std::vector<PointJoint>& pointJoint = getJointsPoint();
+
+		int JointsNum = ballJoint.size() + sliderJoint.size() + hingeJoint.size() + fixedJoint.size() + pointJoint.size();
+		config.jointConfigs.resize(JointsNum);
+		int jId = 0;
+
+		for (size_t ejId = 0; ejId < ballJoint.size(); ejId++)
+		{
+
+			Vector<Real, 3> anchor_point = ballJoint[ejId].actor1->rot.rotate(ballJoint[ejId].r1);// + ballJoint[ejId].actor1->center;
+
+			config.jointConfigs[jId].mJointType = ConfigJointType::CONFIG_BallAndSocket;
+			config.jointConfigs[jId].mAnchorPoint = anchor_point;
+			config.jointConfigs[jId].mRigidBodyName_1.rigidBodyId = ballJoint[ejId].bodyId1;
+			config.jointConfigs[jId].mRigidBodyName_2.rigidBodyId = ballJoint[ejId].bodyId2;
+
+			jId++;
+		}
+
+		for (size_t ejId = 0; ejId < sliderJoint.size(); ejId++)
+		{
+			Vector<Real, 3> anchor_point = sliderJoint[ejId].actor1->rot.rotate(sliderJoint[ejId].r1);// +sliderJoint[ejId].actor1->center;
+
+			config.jointConfigs[jId].mJointType = ConfigJointType::CONFIG_Slider;
+			config.jointConfigs[jId].mAnchorPoint = anchor_point;
+			config.jointConfigs[jId].mRigidBodyName_1.rigidBodyId = sliderJoint[ejId].bodyId1;
+			config.jointConfigs[jId].mRigidBodyName_2.rigidBodyId = sliderJoint[ejId].bodyId2;
+
+			Mat3f rotMat1 = sliderJoint[ejId].actor1->rot.toMatrix3x3();
+			Vector<Real, 3> axis = rotMat1 * sliderJoint[ejId].sliderAxis;
+			config.jointConfigs[jId].mAxis = axis;
+			config.jointConfigs[jId].mUseRange = sliderJoint[ejId].useRange;
+			config.jointConfigs[jId].mMin = sliderJoint[ejId].d_min;
+			config.jointConfigs[jId].mMax = sliderJoint[ejId].d_max;
+
+			config.jointConfigs[jId].mUseMoter = sliderJoint[ejId].useMoter;
+			config.jointConfigs[jId].mMoter = sliderJoint[ejId].v_moter;
+
+			jId++;
+		}
+
+		for (size_t ejId = 0; ejId < hingeJoint.size(); ejId++)
+		{
+			Vector<Real, 3> anchor_point = hingeJoint[ejId].actor1->rot.rotate(hingeJoint[ejId].r1);// +hingeJoint[ejId].actor1->center;
+
+			config.jointConfigs[jId].mJointType = ConfigJointType::CONFIG_Hinge;
+			config.jointConfigs[jId].mAnchorPoint = anchor_point;
+			config.jointConfigs[jId].mRigidBodyName_1.rigidBodyId = hingeJoint[ejId].bodyId1;
+			config.jointConfigs[jId].mRigidBodyName_2.rigidBodyId = hingeJoint[ejId].bodyId2;
+
+			Mat3f rotMat1 = hingeJoint[ejId].actor1->rot.toMatrix3x3();
+			Vector<Real, 3> axis = rotMat1 * hingeJoint[ejId].hingeAxisBody1;
+			config.jointConfigs[jId].mAxis = axis;
+			config.jointConfigs[jId].mUseRange = hingeJoint[ejId].useRange;
+			config.jointConfigs[jId].mMin = hingeJoint[ejId].d_min;
+			config.jointConfigs[jId].mMax = hingeJoint[ejId].d_max;
+
+			config.jointConfigs[jId].mUseMoter = hingeJoint[ejId].useMoter;
+			config.jointConfigs[jId].mMoter = hingeJoint[ejId].v_moter;
+
+			jId++;
+		}
+
+		for (size_t ejId = 0; ejId < fixedJoint.size(); ejId++)
+		{
+			Vector<Real, 3> anchor_point = fixedJoint[ejId].actor1->rot.rotate(fixedJoint[ejId].r1);// +fixedJoint[ejId].actor1->center;
+
+			config.jointConfigs[jId].mJointType = ConfigJointType::CONFIG_Fixed;
+			config.jointConfigs[jId].mAnchorPoint = anchor_point;
+			config.jointConfigs[jId].mRigidBodyName_1.rigidBodyId = fixedJoint[ejId].bodyId1;
+			config.jointConfigs[jId].mRigidBodyName_2.rigidBodyId = fixedJoint[ejId].bodyId2;
+
+			config.jointConfigs[jId].q = fixedJoint[ejId].q;
+
+			jId++;
+		}
+
+		for (size_t ejId = 0; ejId < pointJoint.size(); ejId++)
+		{
+			config.jointConfigs[jId].mJointType = ConfigJointType::CONFIG_Point;
+			config.jointConfigs[jId].mAnchorPoint = pointJoint[ejId].anchorPoint - pointJoint[ejId].actor1->center;
+			config.jointConfigs[jId].mRigidBodyName_1.rigidBodyId = pointJoint[ejId].bodyId1;
+			config.jointConfigs[jId].mRigidBodyName_2.rigidBodyId = pointJoint[ejId].bodyId2;
+
+			jId++;
+		}
+
+		return config;
 	}
 
 	DEFINE_CLASS(RigidBodySystem);

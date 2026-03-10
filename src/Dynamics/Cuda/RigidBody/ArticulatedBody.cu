@@ -170,29 +170,29 @@ namespace dyno
 	template<typename TDataType>
 	void ArticulatedBody<TDataType>::saveToFile()
 	{
-		auto fileStr = this->varFilePath()->serialize();
-		MultiBodyBind vehicleBind;//T value, std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent
-		
-		
-		vehicleBind.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo());
+		//auto fileStr = this->varFilePath()->serialize();
+		//MultiBodyBind vehicleBind;//T value, std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent
+		//
+		//
+		//vehicleBind.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo());
 
-		FVar<MultiBodyBind> fvarBind(vehicleBind,"tempBind","", FieldTypeEnum::Param,NULL);
-		auto configStr = fvarBind.serialize();
-		auto instanceTransformStr = this->varVehiclesTransform()->serialize();
+		//FVar<MultiBodyBind> fvarBind(vehicleBind,"tempBind","", FieldTypeEnum::Param,NULL);
+		//auto configStr = fvarBind.serialize();
+		//auto instanceTransformStr = this->varVehiclesTransform()->serialize();
 
-		auto Path = this->varSaveConfigPath()->getValue();
+		//auto Path = this->varSaveConfigPath()->getValue();
 
-		std::ofstream outFile(Path.string(), std::ios::out | std::ios::trunc);
-		if (!outFile.is_open())
-		{
-			throw std::runtime_error("Error Path : " + Path.string());
-		}
+		//std::ofstream outFile(Path.string(), std::ios::out | std::ios::trunc);
+		//if (!outFile.is_open())
+		//{
+		//	throw std::runtime_error("Error Path : " + Path.string());
+		//}
 
-		outFile << "TextureMesh File:\n" << fileStr << "\n\n";
-		outFile << "VehicleConfiguration:\n" << configStr << "\n\n";
-		outFile << "VehiclesTransform:\n" << instanceTransformStr << "\n";
+		//outFile << "TextureMesh File:\n" << fileStr << "\n\n";
+		//outFile << "VehicleConfiguration:\n" << configStr << "\n\n";
+		//outFile << "VehiclesTransform:\n" << instanceTransformStr << "\n";
 
-		outFile.close();
+		//outFile.close();
 		
 		
 	}

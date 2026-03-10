@@ -88,7 +88,7 @@ namespace dyno
 		auto updateCallback = std::make_shared<FCallBackFunc>(std::bind(&ConfigurableBody<TDataType>::updateConfig, this));
 		this->inTextureMesh()->attach(updateCallback);
 		this->varFilePath()->attach(updateCallback);
-		this->varVehicleConfiguration()->attach(updateCallback);
+		this->varConfiguration()->attach(updateCallback);
 
 
 	}
@@ -103,7 +103,7 @@ namespace dyno
 	void ConfigurableBody<TDataType>::saveToFile()
 	{
 		auto fileStr = this->varFilePath()->serialize();
-		auto configStr = this->varVehicleConfiguration()->serialize();
+		auto configStr = this->varConfiguration()->serialize();
 		auto instanceTransformStr = this->varVehiclesTransform()->serialize();
 
 		auto Path = this->varSaveConfigPath()->getValue();
@@ -116,7 +116,7 @@ namespace dyno
 		MultiBodyBind vehicleBind = getMultiBodyBind();
 
 		outFile << "TextureMesh File:\n" << fileStr << "\n\n";
-		outFile << "VehicleConfiguration:\n" << configStr << "\n\n";
+		outFile << "Configuration:\n" << configStr << "\n\n";
 		outFile << "VehiclesTransform:\n" << instanceTransformStr << "\n";
 
 		outFile.close();
@@ -160,12 +160,58 @@ namespace dyno
 		};
 
 		std::string fileStr = extractSection(content, "TextureMesh File");
-		std::string configStr = extractSection(content, "VehicleConfiguration");
+		std::string configStr = extractSection(content, "Configuration");
 		std::string instanceTransformStr = extractSection(content, "VehiclesTransform");
 
 		this->inTextureMesh()->deserialize(fileStr);
-		this->varVehicleConfiguration()->deserialize(configStr);
+		this->varConfiguration()->deserialize(configStr);
 		this->varVehiclesTransform()->deserialize(instanceTransformStr);
+	}
+
+	ElementType ToElementType(ConfigShapeType configShape)
+	{
+		switch (configShape)
+		{
+		case CONFIG_BOX:       return ET_BOX;
+		case CONFIG_TET:       return ET_TET;
+		case CONFIG_CAPSULE:   return ET_CAPSULE;
+		case CONFIG_SPHERE:    return ET_SPHERE;
+		case CONFIG_TRI:       return ET_TRI;
+		case CONFIG_COMPOUND:  return ET_COMPOUND;
+		case CONFIG_Other:     return ET_Other;
+		default:               return ET_Other; // 默认返回
+		}
+	}
+
+	CollisionMask ToCollisionMask(ConfigCollisionMask configMask)
+	{
+		switch (configMask)
+		{
+		case CONFIG_AllObjects:      return CT_AllObjects;
+		case CONFIG_BoxExcluded:     return CT_BoxExcluded;
+		case CONFIG_TetExcluded:     return CT_TetExcluded;
+		case CONFIG_CapsuleExcluded: return CT_CapsuleExcluded;
+		case CONFIG_SphereExcluded:  return CT_SphereExcluded;
+		case CONFIG_BoxOnly:         return CT_BoxOnly;
+		case CONFIG_TetOnly:         return CT_TetOnly;
+		case CONFIG_CapsuleOnly:     return CT_CapsuleOnly;
+		case CONFIG_SphereOnly:      return CT_SphereOnly;
+		case CONFIG_Disabled:        return CT_Disabled;
+		default:                    return CT_AllObjects; // 默认返回
+		}
+	}
+
+	BodyType ToBodyType(ConfigMotionType configMotion)
+	{
+		switch (configMotion)
+		{
+		case CONFIG_Static:        return Static;
+		case CONFIG_Kinematic:     return Kinematic;
+		case CONFIG_Dynamic:       return Dynamic;
+		case CONFIG_NonRotatable:  return NonRotatable;
+		case CONFIG_NonGravitative:return NonGravitative;
+		default:                   return Dynamic; // 默认返回
+		}
 	}
 
 	template<typename TDataType>
@@ -183,14 +229,66 @@ namespace dyno
 			ArticulatedBody<TDataType>::varChanged();
 		}
 
-		if (!this->varVehicleConfiguration()->getValue().isValid() && !bool(this->varVehiclesTransform()->getValue().size()) || this->stateTextureMesh()->isEmpty())
+		if (!this->varConfiguration()->getValue().isValid() && !bool(this->varVehiclesTransform()->getValue().size()) || this->stateTextureMesh()->isEmpty())
 			return;
 
 		auto texMesh = this->stateTextureMesh()->constDataPtr();
-		const auto config = this->varVehicleConfiguration()->getValue();
+		const auto config = this->varConfiguration()->getValue();
 
-		const auto rigidInfo = config.mVehicleRigidBodyInfo;
-		const auto jointInfo = config.mVehicleJointInfo;
+		const auto rigidInfo = config.rigidBodyConfigs;
+		const auto jointInfo = config.jointConfigs;
+
+		for (size_t i = 0; i < rigidInfo.size(); i++)
+		{
+			std::cout << "ShapeName: " << rigidInfo[i].shapeName.name << "  -  " << rigidInfo[i].shapeName.rigidBodyId << "\n";
+			std::cout << "Angle: " << rigidInfo[i].angle.x << ", " << rigidInfo[i].angle.y << ", " << rigidInfo[i].angle.z << ", " << rigidInfo[i].angle.w << "\n";
+			std::cout << "linearVelocity: " << rigidInfo[i].linearVelocity.x << ", " << rigidInfo[i].linearVelocity.y << ", " << rigidInfo[i].linearVelocity.z  << "\n";
+			std::cout << "angularVelocity: " << rigidInfo[i].angularVelocity.x << ", " << rigidInfo[i].angularVelocity.y << ", " << rigidInfo[i].angularVelocity.z << "\n";
+			std::cout << "position: " << rigidInfo[i].position.x << ", " << rigidInfo[i].position.y << ", " << rigidInfo[i].position.z << "\n";
+			std::cout << "offset: " << rigidInfo[i].offset.x << ", " << rigidInfo[i].offset.y << ", " << rigidInfo[i].offset.z << "\n";
+			std::cout << "inertia: " << rigidInfo[i].inertia(0, 0) << ", " << rigidInfo[i].inertia(0, 1) << ", " << rigidInfo[i].inertia(0, 2) << "\n" << rigidInfo[i].inertia(1, 0) << ", " << rigidInfo[i].inertia(1, 1) << ", " << rigidInfo[i].inertia(1, 2) << "\n" << rigidInfo[i].inertia(2, 0) << ", " << rigidInfo[i].inertia(2, 1) << ", " << rigidInfo[i].inertia(2, 2) << "\n";
+			std::cout << "friction: " << rigidInfo[i].friction << "\n";
+			std::cout << "restitution: " << rigidInfo[i].restitution << "\n";
+			std::cout << "motionType: " << rigidInfo[i].motionType << "\n";
+			std::cout << "shapeType: " << rigidInfo[i].shapeType << "\n";
+			std::cout << "collisionMask: " << rigidInfo[i].collisionMask << "\n";
+
+			std::cout << "ConfigGroup: " << rigidInfo[i].ConfigGroup << "\n";
+			for (size_t j = 0; j < rigidInfo[i].visualShapeIds.size(); j++)
+			{
+				std::cout << "    visualShapeIds: " << rigidInfo[i].visualShapeIds[j] << "\n";
+			}
+			for (size_t j = 0; j < rigidInfo[i].shapeConfigs.size(); j++)
+			{
+				std::cout << "    shapeConfigs: " << "\n";
+				std::cout << "       capsuleLength: " << rigidInfo[i].shapeConfigs[j].capsuleLength << "\n";
+				std::cout << "       center: " << rigidInfo[i].shapeConfigs[j].center.x << ", " << rigidInfo[i].shapeConfigs[j].center.y << ", " << rigidInfo[i].shapeConfigs[j].center.z << "\n";
+				std::cout << "       density: " << rigidInfo[i].shapeConfigs[j].density << "\n";
+				std::cout << "       halfLength: " << rigidInfo[i].shapeConfigs[j].halfLength.x <<"," << rigidInfo[i].shapeConfigs[j].halfLength.y << "," << rigidInfo[i].shapeConfigs[j].halfLength.z << "\n";
+				std::cout << "       radius: " << rigidInfo[i].shapeConfigs[j].radius << "\n";
+				std::cout << "       rot: " << rigidInfo[i].shapeConfigs[j].rot.x << "," << rigidInfo[i].shapeConfigs[j].rot.y << "," << rigidInfo[i].shapeConfigs[j].rot.z << "," << rigidInfo[i].shapeConfigs[j].rot.w << "\n";
+				std::cout << "       shapeType: " << rigidInfo[i].shapeConfigs[j].shapeType << "\n";
+				//std::cout << "       shapeConfigs: " << rigidInfo[i].shapeConfigs[j].tet << "\n";
+			}
+		}
+
+		for (size_t i = 0; i < jointInfo.size(); i++)
+		{
+			std::cout << "mJointType: " << jointInfo[i].mJointType << "\n";
+			std::cout << "mRigidBodyName_1: " << jointInfo[i].mRigidBodyName_1.name << "\n";
+			std::cout << "mRigidBodyName_2: " << jointInfo[i].mRigidBodyName_2.name << "\n";
+			std::cout << "mAnchorPoint: " << jointInfo[i].mAnchorPoint.x << "," << jointInfo[i].mAnchorPoint.y << "," << jointInfo[i].mAnchorPoint.z << "\n";
+			std::cout << "mUseMoter: " << jointInfo[i].mUseMoter << "\n";
+			std::cout << "mUseRange: " << jointInfo[i].mUseRange << "\n";
+			std::cout << "mMax: " << jointInfo[i].mMax << "\n";
+			std::cout << "mMin: " << jointInfo[i].mMin << "\n";
+			std::cout << "mMoter: " << jointInfo[i].mMoter << "\n";
+			std::cout << "mAxis: " << jointInfo[i].mAxis.x << "," << jointInfo[i].mAxis.y << "," << jointInfo[i].mAxis.z << "\n";
+			std::cout << "q: " << jointInfo[i].q.x << "," << jointInfo[i].q.y << "," << jointInfo[i].q.z << ","<< jointInfo[i].q.w << "\n";
+			std::cout << "r1: " << jointInfo[i].r1.x << "," << jointInfo[i].r1.y << "," << jointInfo[i].r1.z << "\n";
+			std::cout << "r2: " << jointInfo[i].r2.x << "," << jointInfo[i].r2.y << "," << jointInfo[i].r2.z << "\n";
+			std::cout << "distance: " << jointInfo[i].distance << "\n";
+		}
 
 		// **************************** Create RigidBody  **************************** //
 		auto instances = this->varVehiclesTransform()->getValue();
@@ -198,8 +296,8 @@ namespace dyno
 		int maxGroup = 0;
 		for (size_t i = 0; i < rigidInfo.size(); i++)
 		{
-			if (rigidInfo[i].rigidGroup > maxGroup)
-				maxGroup = rigidInfo[i].rigidGroup;
+			if (rigidInfo[i].ConfigGroup > maxGroup)
+				maxGroup = rigidInfo[i].ConfigGroup;
 		}
 
 		for (size_t j = 0; j < vehicleNum; j++)
@@ -213,163 +311,173 @@ namespace dyno
 
 			for (size_t i = 0; i < rigidInfo.size(); i++)
 			{
+				std::shared_ptr<Shape> visualShapePtr = NULL;
+				int visualID = -1;
+				if (rigidInfo[i].visualShapeIds.size())
+				{
+					int validIndex = int(texMesh->shapes().size()) - 1;
+					
+					if (rigidInfo[i].visualShapeIds[0] <= validIndex && rigidInfo[i].visualShapeIds[0] >= 0)
+					{
+						visualID = rigidInfo[i].visualShapeIds[0];
+						visualShapePtr = texMesh->shapes()[visualID];
+					}
+					else
+					{
+						visualID = texMesh->shapes().size() - 1;
+					}
+				}
+
 				RigidBodyInfo rigidbody;
-				rigidbody.bodyId = j * (maxGroup + 1) + rigidInfo[i].rigidGroup;
 
-				rigidbody.offset = rigidInfo[i].Offset;
-				rigidbody.friction = this->varFrictionCoefficient()->getValue();
-
-				auto type = rigidInfo[i].shapeType;
-				auto shapeId = rigidInfo[i].meshShapeId;
-				auto transform = rigidInfo[i].transform;
-				Real density = rigidInfo[i].mDensity;
-
-				if (shapeId >= texMesh->shapes().size()) 
+				rigidbody.bodyId = j * maxGroup + rigidInfo[i].ConfigGroup;
+				rigidbody.angle = rigidInfo[i].angle * Quat<Real>(instances[j].rotation());
+				rigidbody.linearVelocity = rigidInfo[i].linearVelocity;
+				rigidbody.angularVelocity = rigidInfo[i].angularVelocity;
+				if (!visualShapePtr) 
 				{
-					shapeId = -1;
-				}
-
-				Vec3f up;
-				Vec3f down;
-				Vec3f T;
-
-				if (shapeId != -1)
-				{
-					up = texMesh->shapes()[shapeId]->boundingBox.v1;
-					down = texMesh->shapes()[shapeId]->boundingBox.v0;
-					T = texMesh->shapes()[shapeId]->boundingTransform.translation();
-				}
-				else
-				{
-
-
-				}
-
-				BoxInfo currentBox;
-				CapsuleInfo currentCapsule;
-				SphereInfo currentSphere;
-				TetInfo currentTet;
-
-				if (shapeId != -1)
-				{
-					switch (type)
+					if (std::isnan(rigidbody.position.x))
 					{
-					case dyno::Box:
-						currentBox.center = Vec3f(0.0f);
-						currentBox.halfLength = (up - down) / 2 * rigidInfo[i].mHalfLength;
-						currentBox.rot = Quat1f(transform.rotation());
-
-						rigidbody.position = Quat1f(instances[j].rotation()).rotate(T + rigidInfo[i].transform.translation()) + instances[j].translation();
-						rigidbody.angle = Quat1f(instances[j].rotation());
-						Actors[i] = this->addBox(currentBox, rigidbody, density);
-						break;
-
-					case dyno::Tet:
-						printf("Need Tet Configuration\n");
-						break;
-
-					case dyno::Capsule:
-						currentCapsule.center = Vec3f(0.0f);
-						currentCapsule.rot = Quat1f(transform.rotation());
-						currentCapsule.halfLength = (up.y - down.y) / 2 * rigidInfo[i].capsuleLength;
-						currentCapsule.radius = std::abs(up.y - down.y) / 2 * rigidInfo[i].radius;
-
-						rigidbody.position = Quat1f(instances[j].rotation()).rotate(T + rigidInfo[i].transform.translation()) + instances[j].translation();
-						rigidbody.angle = Quat1f(instances[j].rotation());
-						Actors[i] = this->addCapsule(currentCapsule, rigidbody, density);
-						break;
-
-					case dyno::Sphere:
-						currentSphere.center = Vec3f(0.0f);
-						currentSphere.rot = Quat1f(transform.rotation());
-						currentSphere.radius = std::abs(up.y - down.y) / 2 * rigidInfo[i].radius;
-
-						rigidbody.position = Quat1f(instances[j].rotation()).rotate(T + rigidInfo[i].transform.translation()) + instances[j].translation();
-						rigidbody.angle = Quat1f(instances[j].rotation());
-						Actors[i] = this->addSphere(currentSphere, rigidbody, density);
-						break;
-
-					case dyno::Tri:
-						printf("Need Tri Configuration\n");
-						Actors[i] = NULL;
-						break;
-
-					case dyno::OtherShape:
-						printf("Need OtherShape Configuration\n");
-						Actors[i] = NULL;
-						break;
-
-					default:
-						break;
+						rigidbody.position = Vec3f(0);
+					}
+					else
+						rigidbody.position = rigidInfo[i].position;
+				}
+				else 
+				{
+					if (std::isnan(rigidbody.position.x))
+					{
+						rigidbody.position = visualShapePtr->boundingTransform.translation();
+					}
+					else 
+					{
+						rigidbody.position = visualShapePtr->boundingTransform.translation() + rigidbody.position;
 					}
 				}
-				else if (shapeId == -1)
+
+				rigidbody.position = Quat<Real>(instances[j].rotation()).rotate(rigidbody.position) + instances[j].translation();
+
+				rigidbody.offset = rigidInfo[i].offset;
+				rigidbody.inertia = rigidInfo[i].inertia;
+				rigidbody.friction = rigidInfo[i].friction == -1 ? this->varFrictionCoefficient()->getValue() : rigidInfo[i].friction;
+				rigidbody.restitution = rigidInfo[i].restitution;
+				rigidbody.motionType = ToBodyType(rigidInfo[i].motionType);
+				rigidbody.shapeType = ElementType::ET_COMPOUND;
+				rigidbody.collisionMask = ToCollisionMask(rigidInfo[i].collisionMask);
+
+				Actors[i] = this->createRigidBody(rigidbody);
+
+				
+
+				for (size_t elementID = 0; elementID < rigidInfo[i].shapeConfigs.size(); elementID++)
 				{
-					switch (type)
+					auto element = rigidInfo[i].shapeConfigs[elementID];
+					Vec3f up;
+					Vec3f down;
+					Vec3f T;
+
+					if (visualShapePtr)
 					{
-					case dyno::Box:
-						currentBox.center = Vec3f(0.0f);
-						currentBox.halfLength = rigidInfo[i].mHalfLength;
-						currentBox.rot = Quat<Real>(rigidInfo[i].transform.rotation());
+						up = visualShapePtr->boundingBox.v1;
+						down = visualShapePtr->boundingBox.v0;
+						T = visualShapePtr->boundingTransform.translation();
+					}
 
-						rigidbody.position = Quat1f(instances[j].rotation()).rotate(rigidInfo[i].transform.translation()) + instances[j].translation();
-						rigidbody.angle = Quat1f(instances[j].rotation());
-						Actors[i] = this->addBox(currentBox, rigidbody, density);
+					switch (element.shapeType)
+					{
+					case CONFIG_BOX:
+					{
+						BoxInfo currentBox;
+						currentBox.center = element.center;
+						currentBox.rot = element.rot;
+						if (element.halfLength == Vector<Real, 3>(0) && visualShapePtr)
+							currentBox.halfLength = (up - down) / 2;
+						else
+							currentBox.halfLength = element.halfLength;
+
+						this->bindBox(Actors[i], currentBox, element.density);
 						break;
+					}
 
-					case dyno::Tet:
-						printf("Need Tet Configuration\n");
-						currentTet.v[0] = rigidInfo[i].tet[0];
-						currentTet.v[1] = rigidInfo[i].tet[1];
-						currentTet.v[2] = rigidInfo[i].tet[2];
-						currentTet.v[3] = rigidInfo[i].tet[3];
+					break;
+					case CONFIG_TET: 
+					{
+						TetInfo currentTet;
+						float Length = 0;
+						for (auto tet : element.tet)
+							Length += tet.norm(); 
+
+
+						if(Length == 0 )
+						{
+							std::vector<Vector<Real, 3>> v[4];
+							currentTet.v[0] = (visualShapePtr ? down : Vec3f(0));
+							currentTet.v[1] = (visualShapePtr ? Vec3f(up.x, down.y, down.z) : Vec3f(1, 0, 0));
+							currentTet.v[2] = (visualShapePtr ? Vec3f(up.x, down.y, up.z) : Vec3f(0, 1, 0));
+							currentTet.v[3] = (visualShapePtr ? Vec3f(up) : Vec3f(0, 0, 1));
+						}
+						else if(Length > 0)
+						{
+							currentTet.v[0] = element.tet[0];
+							currentTet.v[1] = element.tet[1];
+							currentTet.v[2] = element.tet[2];
+							currentTet.v[3] = element.tet[3];
+						}
+						this->bindTet(Actors[i], currentTet, element.density);
 
 						break;
+					}
+					case CONFIG_CAPSULE: 
+					{
+						CapsuleInfo currentCapsule;
+						currentCapsule.center = element.center;
+						currentCapsule.rot = element.rot;
 
-					case dyno::Capsule:
-						currentCapsule.center = Vec3f(0.0f);
-						currentCapsule.rot = Quat<Real>(rigidInfo[i].transform.rotation());
-						currentCapsule.halfLength = rigidInfo[i].capsuleLength;
-						currentCapsule.radius = rigidInfo[i].radius;
-
-						rigidbody.position = Quat1f(instances[j].rotation()).rotate(rigidInfo[i].transform.translation()) + instances[j].translation();
-						rigidbody.angle = Quat1f(instances[j].rotation());
-						Actors[i] = this->addCapsule(currentCapsule, rigidbody, density);
+						if ((element.capsuleLength == 0 && element.radius == 0) && visualShapePtr)
+						{
+							currentCapsule.halfLength = (up.y - down.y) / 2;
+							currentCapsule.radius = std::abs(up.y - down.y) / 2;
+						}
+						else 
+						{
+							currentCapsule.halfLength = element.capsuleLength;
+							currentCapsule.radius = element.radius;
+						}
+						this->bindCapsule(Actors[i], currentCapsule, element.density);
 						break;
-
-					case dyno::Sphere:
-						currentSphere.center = Vec3f(0.0f);
-						currentSphere.rot = Quat<Real>(rigidInfo[i].transform.rotation());
-						currentSphere.radius = rigidInfo[i].radius;
-
-						rigidbody.position = Quat1f(instances[j].rotation()).rotate(rigidInfo[i].transform.translation()) + instances[j].translation();
-						rigidbody.angle = Quat1f(instances[j].rotation());
-						Actors[i] = this->addSphere(currentSphere, rigidbody, density);
+					}
+					case CONFIG_SPHERE: 
+					{
+						SphereInfo currentSphere;
+						currentSphere.center = element.center;
+						currentSphere.rot = element.rot;
+						if (element.radius == 0 && visualShapePtr)
+						{
+							currentSphere.radius = std::abs(up.y - down.y) / 2;
+						}
+						else 
+						{
+							currentSphere.radius = element.radius;
+						}
+						this->bindSphere(Actors[i], currentSphere, element.density);
 						break;
-
-					case dyno::Tri:
-						printf("Need Tri Configuration\n");
-						break;
-
-					case dyno::OtherShape:
-						printf("Need OtherShape Configuration\n");
-						break;
-
+					}
 					default:
 						break;
 					}
 				}
 
-				if (shapeId != -1 && Actors[i] != NULL)
+				if (visualID != -1 && Actors[i] != NULL)
 				{
 					////bindShapetoActor
-					this->bindShape(Actors[i], Pair<uint, uint>(shapeId, j));
+					this->bindShape(Actors[i], Pair<uint, uint>(visualID, j));
 				}
 			}
 
+				
 			for (size_t i = 0; i < jointInfo.size(); i++)
 			{
-				////Actor
+				//Actor
 				auto type = jointInfo[i].mJointType;
 				int first = jointInfo[i].mRigidBodyName_1.rigidBodyId;
 				int second = jointInfo[i].mRigidBodyName_2.rigidBodyId;
@@ -383,7 +491,7 @@ namespace dyno
 					continue;
 
 
-				if (type == Hinge)
+				if (type == CONFIG_Hinge)
 				{
 					auto& joint = this->createHingeJoint(Actors[first], Actors[second]);
 					joint.setAnchorPoint(Actors[first]->center + anchorOffset);
@@ -394,7 +502,7 @@ namespace dyno
 						joint.setRange(jointInfo[i].mMin, jointInfo[i].mMax);
 
 				}
-				if (type == Slider)
+				if (type == CONFIG_Slider)
 				{
 					auto& sliderJoint = this->createSliderJoint(Actors[first], Actors[second]);
 					sliderJoint.setAnchorPoint((Actors[first]->center + Actors[first]->center) / 2 + anchorOffset);
@@ -404,17 +512,17 @@ namespace dyno
 					if (jointInfo[i].mUseRange)
 						sliderJoint.setRange(jointInfo[i].mMin, jointInfo[i].mMax);
 				}
-				if (type == Fixed)
+				if (type == CONFIG_Fixed)
 				{
 					auto& fixedJoint1 = this->createFixedJoint(Actors[first], Actors[second]);
 					fixedJoint1.setAnchorPoint((Actors[first]->center + Actors[first]->center) / 2 + anchorOffset);
 				}
-				if (type == Point)
+				if (type == CONFIG_Point)
 				{
 					auto& pointJoint = this->createPointJoint(Actors[first]);
 					pointJoint.setAnchorPoint(Actors[first]->center + anchorOffset);
 				}
-				if (type == BallAndSocket)
+				if (type == CONFIG_BallAndSocket)
 				{
 					auto& ballAndSocketJoint = this->createBallAndSocketJoint(Actors[first], Actors[second]);
 					ballAndSocketJoint.setAnchorPoint((Actors[first]->center + Actors[first]->center) / 2 + anchorOffset);
@@ -428,6 +536,7 @@ namespace dyno
 	void ConfigurableBody<TDataType>::resetStates()
 	{
 		/***************** Reset *************/
+		//loadFromFile();
 		updateConfig();
 
 		ArticulatedBody<TDataType>::resetStates();

@@ -1,8 +1,8 @@
 /**
- * Program:   Qt-based widget to Config Vehicle bindings
+ * Program:   Qt-based widget to Config MultiBody bindings
  * Module:    QVehicleInfoWidget.h
  *
- * Copyright 2023 Yuzhong Guo
+ * Copyright 2026 Yuzhong Guo
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,18 +29,141 @@
 #include "QPiecewiseDoubleSpinBox.h"
 #include "qpushbutton.h"
 #include "qspinbox.h"
-
+#include <QScrollArea>
+#include <QList>
 
 namespace dyno
 {
+	class QShapeDetail : public QWidget
+	{
+		Q_OBJECT
+	public:
+		QShapeDetail::QShapeDetail(ShapeConfig shapeData,int id);
+		//QShapeDetail::QShapeDetail();
+
+		~QShapeDetail() {}
+
+	signals:
+		/**
+		 * @brief Transmits a signal when data is updated.
+		 */
+		void shapeChange();
+		void removeShapeItem(int id);
+	public slots:
+		/**
+		 * @brief Updated when any element parameter is changed.
+		 */
+		void updateData();
+		void updateElement(int type);
+		void removeItemSlot();
+
+	public:
+
+		ShapeConfig GetShapeConfig() { return mShapeData; };
+		void SetShapeConfig(ShapeConfig v) { mShapeData = v; };
+		void hideAllWidget()
+		{
+			//Qt Widgets
+
+			mRadiusWidget->hide();
+			mCapsuleLengthWidget->hide();
+			mHalfLengthWidget->hide();
+			mTetWidget_0->hide();
+			mTetWidget_1->hide();
+			mTetWidget_2->hide();
+			mTetWidget_3->hide();
+
+		}
+	private:
+		int id = -1;
+
+		ShapeConfig mShapeData;
+		QPushButton* mDeleteButton = nullptr;
+
+		QComboBox* mTypeCombox = nullptr;
+		//Qt Widgets
+		mPiecewiseDoubleSpinBox* mDensity = nullptr;
+
+		mVec3fWidget* mCenterWidget = nullptr;
+		mVec3fWidget* mAngleWidget = nullptr;
+
+		mPiecewiseDoubleSpinBox* mRadiusWidget = nullptr;
+		mPiecewiseDoubleSpinBox* mCapsuleLengthWidget = nullptr;
+		mVec3fWidget* mHalfLengthWidget = nullptr;
+		mVec3fWidget* mTetWidget_0 = nullptr;
+		mVec3fWidget* mTetWidget_1 = nullptr;
+		mVec3fWidget* mTetWidget_2 = nullptr;
+		mVec3fWidget* mTetWidget_3 = nullptr;
+		QHBoxLayout* mMainLayout = nullptr;
+
+		QHBoxLayout* m_layout;
+		const std::vector<ConfigShapeType> mAllShapeType = {
+			CONFIG_BOX,
+			CONFIG_TET,
+			CONFIG_CAPSULE,
+			CONFIG_SPHERE,
+			CONFIG_TRI,
+			CONFIG_COMPOUND,
+			CONFIG_Other
+		};
+	};
+
+	class ShapeDetailListWidget : public QWidget
+	{
+		Q_OBJECT
+	public:
+		explicit ShapeDetailListWidget(std::vector<ShapeConfig>* shapes,QWidget* parent = nullptr);
+
+		void setContainerBgColor(const QColor& color);  
+		void setContainerBorderColor(const QColor& color);
+		void setContainerBorderWidth(int width);         
+
+
+	signals:
+		/**
+		 * @brief Transmits a signal when data is updated.
+		 */
+		void shapesChange();
+
+	public slots:
+
+		void buildShapeDetail(ShapeConfig shapeData, int id);
+		void addShapeDetail(bool t);
+		void removeLastShapeDetail();
+		bool removeShapeDetail(int index);
+		void clearAll();
+		void updateShapeListData();
+
+	private:
+
+		void initUI();
+
+		QScrollArea* m_scrollArea;       
+		QWidget* m_contentWidget;         
+		QVBoxLayout* m_contentLayout;     
+		QVBoxLayout* m_mainLayout;        
+		QPushButton* m_addBtn;            
+
+
+		QList<QShapeDetail*> m_detailList;
+		QColor m_bgColor;                 
+		QColor m_borderColor;             
+
+		int m_borderWidth;                
+
+		void updateStyleSheet();
+
+		std::vector<ShapeConfig>* mShapes;
+	};
+
 
 
 	class QRigidBodyDetail : public QWidget
 	{
 		Q_OBJECT
 	public:
-		QRigidBodyDetail(VehicleRigidBodyInfo& rigidInfo);
-		~QRigidBodyDetail(){}
+		QRigidBodyDetail(RigidBodyConfig* rigidInfo);
+		~QRigidBodyDetail() {}
 
 	signals:
 		/**
@@ -55,37 +178,171 @@ namespace dyno
 		void updateData();
 
 	private:
-		//Current rigidbody type
-		ConfigShapeType mCurrentType;
-
-		//Qt Widgets
-		mVec3fWidget* mTranslationWidget = nullptr;
-		mVec3fWidget* mRotationWidget = nullptr;
-		mVec3fWidget* mScaleWidget = nullptr;
-		mVec3fWidget* mOffsetWidget = nullptr;
-		mPiecewiseDoubleSpinBox* mRadiusWidget = nullptr;
-		mPiecewiseDoubleSpinBox* mCapsuleLengthWidget = nullptr;
-		mVec3fWidget* mHalfLengthWidget = nullptr;
-		mVec3fWidget* mTetWidget_0 = nullptr;
-		mVec3fWidget* mTetWidget_1 = nullptr;
-		mVec3fWidget* mTetWidget_2 = nullptr;
-		mVec3fWidget* mTetWidget_3 = nullptr;
-		QComboBox* mMotionWidget = nullptr;	
+		//Source data
+		RigidBodyConfig* mRigidBodyData = nullptr;
+		//Widget
+		QLineEdit* mNameInput = nullptr;
 		QSpinBox* mRigidGroup = nullptr;
 
-		//Source data
-		VehicleRigidBodyInfo* mRigidBodyData = nullptr;
-		//
-		std::vector<ConfigMotionType> mAllConfigMotionTypes = { CMT_Static,CMT_Kinematic,CMT_Dynamic };
+		QSpinBox* mVisualMeshID = nullptr;
+		mVec3fWidget* mPositionWidget = nullptr;
+		mVec3fWidget* mAngleWidget = nullptr;
+		mVec3fWidget* mOffsetWidget = nullptr;
+		QComboBox* mMotionWidget = nullptr;
+
+		mVec3fWidget* mLinearVelocity = nullptr;
+		mVec3fWidget* mAngularVelocity = nullptr;
+		
+
+		mVec3fWidget* mInertia1 = nullptr;
+		mVec3fWidget* mInertia2 = nullptr;
+		mVec3fWidget* mInertia3 = nullptr;
+
+		mPiecewiseDoubleSpinBox* mFriction = nullptr;
+		mPiecewiseDoubleSpinBox* mRestitution = nullptr;
+
+		ShapeDetailListWidget* mShapeConfigs;
+
+		QComboBox* mMask;
+
+		std::vector<ConfigMotionType> mAllConfigMotionTypes = {
+			CONFIG_Static,
+			CONFIG_Kinematic,
+			CONFIG_Dynamic,
+			CONFIG_NonRotatable,
+			CONFIG_NonGravitative
+		};
+
+		std::vector<ConfigCollisionMask> mAllConfigCollisionMasks =
+		{
+			CONFIG_AllObjects,
+			CONFIG_BoxExcluded,
+			CONFIG_TetExcluded,
+			CONFIG_CapsuleExcluded,
+			CONFIG_SphereExcluded,
+			CONFIG_BoxOnly,
+			CONFIG_TetOnly,
+			CONFIG_CapsuleOnly,
+			CONFIG_SphereOnly,
+			CONFIG_Disabled
+		};
+
 	};
+
+
+
+	class RigidBodyItemLayout : public QVBoxLayout
+	{
+		Q_OBJECT
+	public:
+		RigidBodyItemLayout(int id, const RigidBodyConfig& rigidInfo);
+		~RigidBodyItemLayout();
+
+		/**
+		 * @brief Get current RigidBodyInfo.
+		 */
+		RigidBodyConfig value();
+		/**
+		 * @brief Initialization RigidBodyInfo.
+		 */
+		void setValue(const RigidBodyConfig& v);
+
+		/**
+		 * @brief Index in the current RigidBody list.
+		 */
+		void setId(int id) { mElementIndex = id; mIndexLabel->setText(std::to_string(id).c_str()); };
+
+		/**
+		 * @brief Unique objId used to identify this Item.
+		 */
+		void setObjId(int id) { mObjID = id; };
+	
+		/**
+		 * @brief Unique objId used to identify this Item.
+		 */
+		int getObjID() { return mObjID; };
+
+		/**
+		 * @brief RigidBody Index in the current list.
+		 */
+		int getRigidID() { return mElementIndex; };
+
+		ConfigShapeType getType() {return mAllShapeType[mTypeCombox->currentIndex()];}
+
+	signals:
+		/**
+		 * @brief RigidBody Index in the current list.
+		 */
+		void removeByElementIndexId(int);
+
+		/**
+		 * @brief RigidBody Data Change.
+		 */
+		void rigidChange(int);
+
+		/**
+		 * @brief RigidBody Name Change.
+		 */
+		void nameChange(int);
+
+	public slots:
+
+		void emitRemove(){emit removeByElementIndexId(mElementIndex);}
+
+		void emitChange(int v){emit rigidChange(v);}
+
+		void emitNameChange(int v) {emit nameChange(v);}
+
+		/**
+		 * @brief Create RigidBody Detail Panel.
+		 */
+		void createRigidDetailWidget();
+
+	public:
+
+		QLineEdit* mNameInput = nullptr;
+		RigidBodyConfig mRigidInfo;
+
+	private:
+
+		// Index in the current RigidBody list.
+		int mElementIndex = -1;
+
+		// Widgets
+		QSpinBox* mShapeIDSpin = nullptr;
+		QPushButton* mAddShapeButton = nullptr;
+		QPushButton* mRemoveButton = nullptr;
+		QPushButton* mEditButton = nullptr;
+		QLabel* mIndexLabel = nullptr;
+		QComboBox* mTypeCombox = nullptr;
+		ShapeDetailListWidget* mShapeList = nullptr;
+
+		//All RigidBody types
+		const std::vector<ConfigShapeType> mAllShapeType = { 
+			CONFIG_BOX,
+			CONFIG_TET,
+			CONFIG_CAPSULE,
+			CONFIG_SPHERE,
+			CONFIG_TRI,
+			CONFIG_COMPOUND,
+			CONFIG_Other
+		};
+
+		//Unique objId used to identify this Item.
+		int mObjID = -1;
+		std::vector<QRigidBodyDetail*> mDetailWidgets;
+
+
+	};
+
 
 
 	class QJointBodyDetail : public QWidget
 	{
 		Q_OBJECT
 	public:
-		QJointBodyDetail(VehicleJointInfo& jointInfo);
-		~QJointBodyDetail(){}
+		QJointBodyDetail(MultiBodyJointConfig& jointInfo);
+		~QJointBodyDetail() {}
 
 	signals:
 		/**
@@ -108,105 +365,14 @@ namespace dyno
 		QCheckBox* mUseRangeWidget = nullptr;
 		QPiecewiseDoubleSpinBox* mMinWidget = nullptr;
 		QPiecewiseDoubleSpinBox* mMaxWidget = nullptr;
-		QToggleLabel* mNameLabel = nullptr; 
+		QToggleLabel* mNameLabel = nullptr;
 
-		VehicleJointInfo* mJointData = nullptr;
+		QCheckBox* mUseMoter = nullptr;
+		mPiecewiseDoubleSpinBox* mMoterInput = nullptr;
+
+		MultiBodyJointConfig* mJointData = nullptr;
 	};
 
-
-
-	class RigidBodyItemLayout : public QHBoxLayout
-	{
-		Q_OBJECT
-	public:
-		RigidBodyItemLayout(int id);
-		~RigidBodyItemLayout();
-
-		/**
-		 * @brief Get current RigidBodyInfo.
-		 */
-		VehicleRigidBodyInfo value();
-		/**
-		 * @brief Initialization RigidBodyInfo.
-		 */
-		void setValue(const VehicleRigidBodyInfo& v);
-
-		/**
-		 * @brief Index in the current RigidBody list.
-		 */
-		void setId(int id) { mElementIndex = id; mIndexLabel->setText(std::to_string(id).c_str()); };
-
-		/**
-		 * @brief Unique objId used to identify this Item.
-		 */
-		void setObjId(int id) { mObjID = id; };
-	
-		/**
-		 * @brief Unique objId used to identify this Item.
-		 */
-		int getObjID() { return mObjID; };
-
-		/**
-		 * @brief RigidBody Index in the current list.
-		 */
-		int getRigidID() { return mElementIndex; };
-
-		ConfigShapeType getType() {return mVecShapeType[mTypeCombox->currentIndex()];}
-
-	signals:
-		/**
-		 * @brief RigidBody Index in the current list.
-		 */
-		void removeByElementIndexId(int);
-
-		/**
-		 * @brief RigidBody Data Change.
-		 */
-		void valueChange(int);
-
-		/**
-		 * @brief RigidBody Name Change.
-		 */
-		void nameChange(int);
-
-	public slots:
-
-		void emitRemove(){emit removeByElementIndexId(mElementIndex);}
-
-		void emitChange(int v){emit valueChange(v);}
-
-		void emitNameChange(int v) {emit nameChange(v);}
-
-		/**
-		 * @brief Create RigidBody Detail Panel.
-		 */
-		void createRigidDetailWidget();
-
-	public:
-
-		QLineEdit* mNameInput = nullptr;
-		VehicleRigidBodyInfo mRigidInfo;
-
-	private:
-
-		// Index in the current RigidBody list.
-		int mElementIndex = -1;
-
-		// Widgets
-		QSpinBox* mShapeIDSpin = nullptr;
-		QPushButton* mRemoveButton = nullptr;
-		QPushButton* mOffsetButton = nullptr;
-		QLabel* mIndexLabel = nullptr;
-		QComboBox* mTypeCombox = nullptr;
-
-		//All RigidBody types
-		const std::vector<ConfigShapeType> mVecShapeType = { Box,Tet,Capsule,Sphere ,Tri, OtherShape };
-		//Unique objId used to identify this Item.
-		int mObjID = -1;
-		std::vector<QRigidBodyDetail*> mDetailWidgets;
-
-
-	};
 
 
 	class mJointItemLayout : public QHBoxLayout
@@ -219,11 +385,11 @@ namespace dyno
 		/**
 		 * @brief Get current RigidBodyInfo.
 		 */
-		VehicleJointInfo value();
+		MultiBodyJointConfig value();
 		/**
 		 * @brief Initialization RigidBodyInfo.
 		 */
-		void setValue(const VehicleJointInfo& v);
+		void setValue(const MultiBodyJointConfig& v);
 		/**
 		 * @brief Index in the current Joint list.
 		 */
@@ -263,14 +429,22 @@ namespace dyno
 		// Qt Widget
 		QComboBox* mTypeInput = nullptr;
 		QLabel* mIndex = nullptr;
-		QCheckBox* mUseMoter = nullptr;
-		QDoubleSpinBox* mMoterInput = nullptr;
+
 		QPushButton* mEditButton = nullptr;
 		QPushButton* mRemoveButton = nullptr;
 
 		// All Joint types
-		const std::vector<ConfigJointType> mVecJointType = { BallAndSocket,Slider,Hinge,Fixed,Point,OtherJoint };
-		VehicleJointInfo mJointInfo;
+		const std::vector<ConfigJointType> mAllJointType = { 
+			CONFIG_BallAndSocket,
+			CONFIG_Slider, 
+			CONFIG_Hinge, 
+			CONFIG_Fixed, 
+			CONFIG_Point, 
+			CONFIG_DistanceJoint,
+			CONFIG_OtherJoint 
+		};
+
+		MultiBodyJointConfig mJointInfo;
 		std::vector<QJointBodyDetail*> mDetailWidgets;
 	};
 
@@ -317,7 +491,7 @@ namespace dyno
 
 		void addRigidBodyItemWidget();
 
-		void addRigidBodyItemWidgetByID(int objId);
+		void addRigidBodyItemWidgetByID();
 
 		void addJointItemWidget();
 
@@ -333,9 +507,9 @@ namespace dyno
 
 		void updateJointLayoutComboxText(mJointItemLayout* itemLayout);
 
-		void createItemWidget(const VehicleRigidBodyInfo& rigidBody);
+		void buildItemWidget(const RigidBodyConfig& rigidBody);
 
-		void createJointItemWidget(const VehicleJointInfo& rigidBody);
+		void createJointItemWidget(const MultiBodyJointConfig& rigidBody);
 
 		void connectJointWidgetSignal(mJointItemLayout* itemLayout);
 
@@ -349,7 +523,7 @@ namespace dyno
 		QVBoxLayout* mMainLayout = nullptr;
 		QVBoxLayout* mRigidsLayout = nullptr;
 		QVBoxLayout* mJointsLayout = nullptr;
-		std::vector<RigidBodyItemLayout*> mRigidBodyItems;
+		QList<RigidBodyItemLayout*> mRigidBodyItems;
 		std::vector<mJointItemLayout*> mJointItems;
 
 		//QueryMap for automatic renaming

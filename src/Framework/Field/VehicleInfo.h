@@ -14,39 +14,54 @@ namespace dyno {
 
 	enum ConfigMotionType
 	{
-		CMT_Static = 0,
-		CMT_Kinematic = 1,
-		CMT_Dynamic = 2,
-		CMT_NonRotatable = 3,
-		CMT_NonGravitative = 4
+		CONFIG_Static = 0,
+		CONFIG_Kinematic = 1,
+		CONFIG_Dynamic = 2,
+		CONFIG_NonRotatable = 3,
+		CONFIG_NonGravitative = 4
 	};
 
 	enum ConfigShapeType
 	{
-		Box = 1,
-		Tet = 2,
-		Capsule = 4,
-		Sphere = 8,
-		Tri = 16,
-		Compound = 32,
-		OtherShape = 999
+		CONFIG_BOX = 1,
+		CONFIG_TET = 2,
+		CONFIG_CAPSULE = 4,
+		CONFIG_SPHERE = 8,
+		CONFIG_TRI = 16,
+		CONFIG_COMPOUND = 32,
+		CONFIG_Other = 0x80000000
 	};
 
 	enum ConfigJointType
 	{
-		BallAndSocket = 1,
-		Slider = 2,
-		Hinge = 3,
-		Fixed = 4,
-		Point = 5,
-		OtherJoint = 999
+		CONFIG_BallAndSocket = 1,
+		CONFIG_Slider = 2,
+		CONFIG_Hinge = 4,
+		CONFIG_Fixed = 8,
+		CONFIG_Point = 16,
+		CONFIG_DistanceJoint = 32,
+		CONFIG_OtherJoint = 0x80000000
 	};
 
-	struct Name_Shape 
+	enum ConfigCollisionMask
+	{
+		CONFIG_AllObjects = 0xFFFFFFFF,
+		CONFIG_BoxExcluded = 0xFFFFFFFE,
+		CONFIG_TetExcluded = 0xFFFFFFFD,
+		CONFIG_CapsuleExcluded = 0xFFFFFFFA,
+		CONFIG_SphereExcluded = 0xFFFFFFF7,
+		CONFIG_BoxOnly = 0x00000001,
+		CONFIG_TetOnly = 0x00000002,
+		CONFIG_CapsuleOnly = 0x00000004,
+		CONFIG_SphereOnly = 0x00000008,
+		CONFIG_Disabled = 0x00000000
+	};
+
+	struct NameRigidID
 	{
 		//Func
-		Name_Shape() {};
-		Name_Shape(std::string n,int Id = -1) 
+		NameRigidID() {};
+		NameRigidID(std::string n, int Id = -1)
 		{
 			name = n;
 			rigidBodyId = Id;
@@ -58,62 +73,115 @@ namespace dyno {
 
 	};
 
-	/**
-	 * @brief The Rigid body information is stored in mVehicleJointInfo.
-	 */
-	struct VehicleRigidBodyInfo 
-	{	
-		VehicleRigidBodyInfo() {};
-
-		VehicleRigidBodyInfo(Name_Shape name, int shapeId, ConfigShapeType type, Real density = 100);
-
-		VehicleRigidBodyInfo(Name_Shape name, int shapeId, ConfigShapeType type, Transform3f trans, Real density = 100);
-
-		//Shape:
-		Name_Shape shapeName = Name_Shape("");//2
-
-		int meshShapeId = -1;//1	//3
-		ConfigShapeType shapeType = ConfigShapeType::Capsule;//1	//4
-		Transform3f transform = Transform3f(Vec3f(0), Mat3f::identityMatrix(), Vec3f(1));//15	//19
-		Vec3f Offset = Vec3f(0);//3		//22
-
-		Vec3f mHalfLength = Vec3f(1);//3	//25		// if(type == Box);	
-		float radius = 1;//1	//26					//	if(type == Sphere);  if(type == Capsule);
-		std::vector<Vec3f> tet = {Vec3f(0),Vec3f(0),Vec3f(0),Vec3f(0,1,0) };//12	//38 	//	if(type == Tet);
-		float capsuleLength = 1;//1		//39			// if(type == Capsule);
-		ConfigMotionType motion = ConfigMotionType::CMT_Dynamic;//1		//40
-
-		Real mDensity = 100;//1		//41
-
-		uint rigidGroup = 0;//1		//42
-	};
-
-	/**
-	 * @brief The joint information is stored in mVehicleJointInfo.
-	 */
-	struct VehicleJointInfo
+	struct ShapeConfig
 	{
-		VehicleJointInfo() {};
-		VehicleJointInfo(Name_Shape Name1,Name_Shape Name2,ConfigJointType typeIn,Vector<Real, 3> Axi = Vec3f(1, 0, 0),Vector<Real, 3> Point = Vec3f(0),bool Moter = false,Real moter = 0,bool Range = false,Real min = 0,Real max = 0);
+		ShapeConfig() {};
 
-		ConfigJointType mJointType;	//1
-		Name_Shape mRigidBodyName_1;//2
-		Name_Shape mRigidBodyName_2;//2
-		bool mUseMoter = false;//1
-		bool mUseRange = false;//1
-		Vector<Real, 3> mAnchorPoint = Vec3f(0);//3
-		Real mMin = 0;//1
-		Real mMax = 0;//1
-		Real mMoter = 0;//1
-		Vector<Real, 3> mAxis = Vector<Real, 3>(1,0,0);//3
+		//Shape:	
+		ConfigShapeType shapeType = ConfigShapeType::CONFIG_CAPSULE;
+		Vector<Real, 3> center = Vector<Real, 3>(0);
+		Quat<Real> rot = Quat<Real>();
+		Real density = 100;
+
+		Vector<Real, 3> halfLength = Vector<Real, 3>(0);											// if(type == Box);	
+		float radius = 0;														//	if(type == Sphere);  if(type == Capsule);
+		std::vector<Vector<Real, 3>> tet = { Vector<Real, 3>(0),Vector<Real, 3>(0),Vector<Real, 3>(0),Vector<Real, 3>(0) };	//	if(type == Tet);
+		float capsuleLength = 0;												// if(type == Capsule);
+	};
+
+	struct RigidBodyConfig
+	{
+		RigidBodyConfig()
+		{
+		}
+
+
+		RigidBodyConfig(Vector<Real, 3> p, Quat<Real> q = Quat<Real>(0.0f, 0.0f, 0.0f, 1.0f))
+		{
+			position = p;
+			angle = q;
+		}
+
+		RigidBodyConfig(NameRigidID name, int visualShapeId, ConfigShapeType type, Vector<Real,3> position = Vec3f(0), Quat<Real> angle = Quat<Real>(), Real density = 100) 
+		{
+			shapeName = name;
+			visualShapeIds.push_back(visualShapeId);
+			ShapeConfig shape;
+			shape.shapeType = type;
+			shape.density = density;
+			shapeConfigs.push_back(shape);
+			this->position = position;
+			this->angle = angle;
+		}
+
+		void bindShapeConfig(
+			const ShapeConfig& shapeConfig
+		)
+		{
+			shapeConfigs.push_back(shapeConfig);
+		}
+
+		void bindVisualShapeConfig(
+			int visualShapeId
+		)
+		{
+			visualShapeIds.push_back(visualShapeId);
+		}
+
+		NameRigidID shapeName = NameRigidID("");
+		Quat<Real> angle = Quat<Real>(0.0f, 0.0f, 0.0f, 1.0f);
+		Vector<Real, 3> linearVelocity = Vector<Real, 3>(0.0f);
+		Vector<Real, 3> angularVelocity = Vector<Real, 3>(0.0f);
+		Vector<Real, 3> position = Vector<Real, 3>(std::nanf(""));
+		Vector<Real, 3> offset = Vector<Real, 3>(0.0f);
+		SquareMatrix<Real, 3> inertia = SquareMatrix<Real, 3>(0.0f);;
+		Real friction = -1.0f;
+		Real restitution = 0.0f;;
+		ConfigMotionType motionType = ConfigMotionType::CONFIG_Dynamic;
+		ConfigShapeType shapeType = ConfigShapeType::CONFIG_Other;
+		ConfigCollisionMask collisionMask = ConfigCollisionMask::CONFIG_AllObjects;
+
+		int ConfigGroup = 0;
+		std::vector<int> visualShapeIds;
+		std::vector<ShapeConfig> shapeConfigs;
+
+		bool isValid() const { return shapeConfigs.size() > 0; }
+		bool isValidPosition() const { return std::isnan(position.x * position.y * position.z); }
 	};
 
 
-	/**
-	 * @brief The MultiBodyBind class is used to record information about created rigid bodies and joints.
-			  Rigid bodies information is stored in mVehicleRigidBodyInfo.
-			  Toints information is stored in mVehicleJointInfo.
-	 */
+	struct MultiBodyJointConfig
+	{
+		MultiBodyJointConfig() {};
+		MultiBodyJointConfig(NameRigidID Name1, NameRigidID Name2, ConfigJointType typeIn, Vector<Real, 3> Axi = Vec3f(1, 0, 0), Vector<Real, 3> Point = Vec3f(0), bool Moter = false, Real moter = 0, bool Range = false, Real min = 0, Real max = 0);
+
+		ConfigJointType mJointType;	
+		NameRigidID mRigidBodyName_1;
+		NameRigidID mRigidBodyName_2;
+
+		Vector<Real, 3> mAnchorPoint = Vec3f(0);
+		bool relativeAnchorPoint = true;
+		//SliderJoint  HingeJoint
+		bool mUseMoter = false;
+		bool mUseRange = false;
+		Real mMin = 0;
+		Real mMax = 0;
+		Real mMoter = 0;
+		//HingeJoint  SliderJoint 
+		Vector<Real, 3> mAxis = Vector<Real, 3>(1, 0, 0);
+
+		//FixedJoint
+		Quat<Real> q = Quat<Real>();
+
+		//distanceJoint  BallAndSocketJoint
+		Vector<Real, 3> r1;
+		Vector<Real, 3> r2;
+
+		//distanceJoint
+		Real distance;
+	};
+
+
 	class MultiBodyBind
 	{
 	public:
@@ -121,12 +189,10 @@ namespace dyno {
 		MultiBodyBind(int size);
 		~MultiBodyBind();
 
-		bool isValid() {return mVehicleRigidBodyInfo.size();}
+		bool isValid() { return rigidBodyConfigs.size(); }
 
-		std::vector<VehicleRigidBodyInfo> mVehicleRigidBodyInfo;
-		std::vector<VehicleJointInfo> mVehicleJointInfo;
-
-
+		std::vector<RigidBodyConfig> rigidBodyConfigs;
+		std::vector<MultiBodyJointConfig> jointConfigs;
 
 	};
 
@@ -156,7 +222,7 @@ namespace dyno {
 
 	struct HingeAction
 	{
-		HingeAction(int jointId, float value) 
+		HingeAction(int jointId, float value)
 		{
 			this->joint = jointId;
 			this->value = value;

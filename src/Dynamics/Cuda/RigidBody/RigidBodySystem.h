@@ -26,6 +26,9 @@
 
 namespace dyno
 {
+	template<typename TDataType>
+	class MultiBodySaveHelper;
+
 	/*!
 	*	\class	RigidBodySystem
 	*	\brief	Implementation of a rigid body system containing a variety of rigid bodies with different shapes.
@@ -255,6 +258,7 @@ namespace dyno
 		const std::vector<BoxInfo>& getBoxes() { return mHostBoxes; }
 		const std::vector<TetInfo>& getTets() { return mHostTets; }
 		const std::vector<CapsuleInfo>& getCapsules() { return mHostCapsules; }
+		const std::vector<Pair<uint, uint>>& getShape2RigidBodyMapping() { return mHostShape2RigidBodyMapping; }
 
 		const std::vector<BallAndSocketJoint>& getJointsBallAndSocket() { return mHostJointsBallAndSocket; }
 		const std::vector<SliderJoint>& getJointsSlider(){ return mHostJointsSlider; }
@@ -262,11 +266,12 @@ namespace dyno
 		const std::vector<FixedJoint>& getJointsFixed() { return mHostJointsFixed; }
 		const std::vector<PointJoint>& getJointsPoint() { return mHostJointsPoint; }
 
-		const std::vector<Pair<uint, uint>>& getShape2RigidBodyMapping() { return mHostShape2RigidBodyMapping; }
-
 		virtual void saveToFile();
 
 		MultiBodyBind getMultiBodyBind();
+
+		template<typename TDataType>
+		friend class MultiBodySaveHelper;
 
 	public:
 		int m_numOfSamples;
@@ -280,5 +285,8 @@ namespace dyno
 
 		DArray2D<Vec3f> getSamples() { return m_deviceSamples; }
 		DArray2D<Vec3f> getNormals() { return m_deviceNormals; }
+
+	private:
+		std::vector<std::shared_ptr<PdActor>> mActors;
 	};
 }

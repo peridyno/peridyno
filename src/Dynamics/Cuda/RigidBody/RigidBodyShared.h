@@ -48,8 +48,8 @@ namespace dyno
 			friction = 1.0f;
 			restitution = 0.0f;
 			motionType = BodyType::Dynamic;
-			collisionMask = CT_AllObjects;
-			shapeType = ET_Other;
+			collisionMask = CollisionMask::CT_AllObjects;
+			shapeType = ElementType::ET_Other;
 			angle = Quat<Real>(0.0f, 0.0f, 0.0f, 1.0f);
 		}
 
@@ -65,8 +65,8 @@ namespace dyno
 			friction = 1.0f;
 			restitution = 0.0f;
 			motionType = BodyType::Dynamic;
-			collisionMask = CT_AllObjects;
-			shapeType = ET_Other;
+			collisionMask = CollisionMask::CT_AllObjects;
+			shapeType = ElementType::ET_Other;
 			angle = q;
 		}
 
