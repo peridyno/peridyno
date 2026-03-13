@@ -91,7 +91,7 @@ int main()
 {
 	HeightFieldLibrary::initStaticPlugin();
 
-	GlfwApp app;
+	QtApp app;
 
 	app.setSceneGraph(createScene());
 
