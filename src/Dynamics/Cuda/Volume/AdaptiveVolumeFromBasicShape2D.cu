@@ -323,7 +323,7 @@ namespace dyno
 
 		computeSeeds(data_count);
 
-		auto& m_agrid = this->stateAGridSet()->constDataPtr();
+		auto&& m_agrid = this->stateAGridSet()->constDataPtr();
 		Level m_levelmax = m_agrid->adaptiveGridLevelMax2D();
 		DArray<AdaptiveGridNode2D> leaves;
 		m_agrid->extractLeafs(leaves);

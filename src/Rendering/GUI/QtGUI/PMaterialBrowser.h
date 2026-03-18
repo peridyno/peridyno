@@ -4,9 +4,9 @@
 #include <QTreeView>
 #include <QListView>
 
-#include <QTextEdit.h>
-#include <QPushButton.h>
-#include <QMessageBox.h>
+#include <QTextEdit>
+#include <QPushButton>
+#include <QMessageBox>
 
 #include <QApplication>
 #include <QListView>

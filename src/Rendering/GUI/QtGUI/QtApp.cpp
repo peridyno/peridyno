@@ -17,14 +17,7 @@ namespace dyno {
     QtApp::QtApp(int argc, char **argv)
         : AppBase()
     {
-#ifdef CUDA_BACKEND
-        auto status = cudaSetDevice(0);
-		if (status != cudaSuccess) {
-			fprintf(stderr, "CUDA initialization failed!  Do you have a CUDA-capable GPU installed?");
-			exit(0);
-		}
-        cudaFree(0);
-#endif // CUDA_BACKEND
+
 
         mMainWindow = nullptr;
 
@@ -33,6 +26,15 @@ namespace dyno {
         qputenv("QT_ENABLE_HIGHDPI_SCALING", "0");
 
         mQApp = std::make_shared<QApplication>(argc, argv);
+
+        #ifdef CUDA_BACKEND
+        auto status = cudaSetDevice(0);
+		if (status != cudaSuccess) {
+			fprintf(stderr, "CUDA initialization failed!  Do you have a CUDA-capable GPU installed?");
+			exit(0);
+		}
+        cudaFree(0);
+        #endif // CUDA_BACKEND
 
         //Set default GUI style
 		QFile file(":/dyno/DarkStyle.qss");
