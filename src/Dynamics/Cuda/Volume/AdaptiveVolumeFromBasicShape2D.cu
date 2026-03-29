@@ -17,7 +17,7 @@ namespace dyno
 		this->stateAGridSet()->promoteOuput()->connect(mMSTGen->inAGridSet());
 		this->stateIncreaseMorton()->connect(mMSTGen->inpMorton());
 		this->stateFrameNumber()->connect(mMSTGen->inFrameNumber());
-		this->varLevelNum()->connect(mMSTGen->varLevelNum());
+		this->varLevelNum()->quote(mMSTGen->varLevelNum());
 		mMSTGen->varQuadType()->setCurrentKey(AdaptiveGridGenerator2D<DataType2f>::EDGE_BALANCED);
 
 		mMSTGenLocal = std::make_shared<MSTsGeneratorLocalUpdate2D<TDataType>>();
@@ -25,7 +25,7 @@ namespace dyno
 		this->stateIncreaseMorton()->connect(mMSTGenLocal->inpMorton());
 		this->stateDecreaseMorton()->connect(mMSTGenLocal->inDecreaseMorton());
 		this->stateFrameNumber()->connect(mMSTGenLocal->inFrameNumber());
-		this->varLevelNum()->connect(mMSTGenLocal->varLevelNum());
+		this->varLevelNum()->quote(mMSTGenLocal->varLevelNum());
 		mMSTGenLocal->varQuadType()->setCurrentKey(AdaptiveGridGenerator2D<DataType2f>::EDGE_BALANCED);
 	}
 

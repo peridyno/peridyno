@@ -15,7 +15,7 @@ namespace dyno
 	CodimensionalPD<TDataType>::CodimensionalPD()
 		: TriangularSystem<TDataType>()
 	{
-		this->varHorizon()->setValue(0.0085);
+		this->stateHorizon()->setValue(0.0085);
 
 		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
 		this->stateTimeStep()->connect(integrator->inTimeStep());
@@ -25,10 +25,10 @@ namespace dyno
 		this->animationPipeline()->pushModule(integrator);
 
 		auto hyperElasticity = std::make_shared<CoSemiImplicitHyperelasticitySolver<TDataType>>();
-		this->varHorizon()->connect(hyperElasticity->inHorizon());
+		this->stateHorizon()->connect(hyperElasticity->inHorizon());
 		this->stateTimeStep()->connect(hyperElasticity->inTimeStep());
-		this->varEnergyType()->connect(hyperElasticity->inEnergyType());
-		this->varEnergyModel()->connect(hyperElasticity->inEnergyModels());
+		this->stateEnergyType()->connect(hyperElasticity->inEnergyType());
+		this->stateEnergyModel()->connect(hyperElasticity->inEnergyModels());
 		this->stateRestPosition()->connect(hyperElasticity->inX());
 		this->statePosition()->connect(hyperElasticity->inY());
 		this->stateVelocity()->connect(hyperElasticity->inVelocity());
@@ -51,7 +51,7 @@ namespace dyno
 		funcs.xuModel = XuModel<Real>(hyperElasticity->getE());
 		funcs.fiberModel = FiberModel<Real>(1, 1, 1);
 
-		this->varEnergyModel()->setValue(funcs);
+		this->stateEnergyModel()->setValue(funcs);
 
 		this->setDt(0.001f);
 	}
@@ -85,56 +85,56 @@ namespace dyno
 	template<typename TDataType>
 	void CodimensionalPD<TDataType>::setEnergyModel(XuModel<Real> model)
 	{
-		this->varEnergyType()->setValue(Xuetal);
+		this->stateEnergyType()->setValue(Xuetal);
 
-		auto models = this->varEnergyModel()->getValue();
+		auto models = this->stateEnergyModel()->getValue();
 		models.xuModel = model;
 
-		this->varEnergyModel()->setValue(models);
+		this->stateEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>
 	void CodimensionalPD<TDataType>::setEnergyModel(NeoHookeanModel<Real> model)
 	{
-		this->varEnergyType()->setValue(NeoHookean);
+		this->stateEnergyType()->setValue(NeoHookean);
 
-		auto models = this->varEnergyModel()->getValue();
+		auto models = this->stateEnergyModel()->getValue();
 		models.neohookeanModel = model;
 
-		this->varEnergyModel()->setValue(models);
+		this->stateEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>
 	void CodimensionalPD<TDataType>::setEnergyModel(LinearModel<Real> model)
 	{
-		this->varEnergyType()->setValue(Linear);
+		this->stateEnergyType()->setValue(Linear);
 
-		auto models = this->varEnergyModel()->getValue();
+		auto models = this->stateEnergyModel()->getValue();
 		models.linearModel = model;
 
-		this->varEnergyModel()->setValue(models);
+		this->stateEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>
 	void CodimensionalPD<TDataType>::setEnergyModel(StVKModel<Real> model)
 	{
-		this->varEnergyType()->setValue(StVK);
+		this->stateEnergyType()->setValue(StVK);
 
-		auto models = this->varEnergyModel()->getValue();
+		auto models = this->stateEnergyModel()->getValue();
 		models.stvkModel = model;
 
-		this->varEnergyModel()->setValue(models);
+		this->stateEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>
 	void CodimensionalPD<TDataType>::setEnergyModel(FiberModel<Real> model)
 	{
-		this->varEnergyType()->setValue(Fiber);
+		this->stateEnergyType()->setValue(Fiber);
 
-		auto models = this->varEnergyModel()->getValue();
+		auto models = this->stateEnergyModel()->getValue();
 		models.fiberModel = model;
 
-		this->varEnergyModel()->setValue(models);
+		this->stateEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>
@@ -152,7 +152,7 @@ namespace dyno
 		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTriangleSet()->getDataPtr());
 		triSet->scale(s);
 
-		this->varHorizon()->setValue(s * this->varHorizon()->getData());
+		this->stateHorizon()->setValue(s * this->stateHorizon()->getData());
 
 		return true;
 	}
@@ -163,7 +163,7 @@ namespace dyno
 		auto triSet = TypeInfo::cast<TriangleSet<TDataType>>(this->stateTriangleSet()->getDataPtr());
 		triSet->scale(s);
 
-		this->varHorizon()->setValue((s[0] + s[1] + s[2]) / 3.0f * this->varHorizon()->getData());
+		this->stateHorizon()->setValue((s[0] + s[1] + s[2]) / 3.0f * this->stateHorizon()->getData());
 
 		return true;
 	}
@@ -239,7 +239,7 @@ namespace dyno
 
 	
 	
-		this->varHorizon()->setValue(1.5 * global_max);
+		this->stateHorizon()->setValue(1.5 * global_max);
 
 		printf("host attr size %d\n", host_attribute.size());
 

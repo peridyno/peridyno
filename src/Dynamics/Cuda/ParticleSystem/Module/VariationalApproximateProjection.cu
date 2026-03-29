@@ -19,7 +19,7 @@ namespace dyno
 	{
 		mDensityCalculator = std::make_shared<SummationDensity<TDataType>>();
 
-		this->varRestDensity()->connect(mDensityCalculator->varRestDensity());
+		this->varRestDensity()->quote(mDensityCalculator->varRestDensity());
 		this->inSmoothingLength()->connect(mDensityCalculator->inSmoothingLength());
 		this->inSamplingDistance()->connect(mDensityCalculator->inSamplingDistance());
 

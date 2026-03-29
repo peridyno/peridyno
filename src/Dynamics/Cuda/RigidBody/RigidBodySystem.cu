@@ -46,11 +46,11 @@ namespace dyno
 
 		auto iterSolver = std::make_shared<TJSConstraintSolver<TDataType>>();
 		this->stateTimeStep()->connect(iterSolver->inTimeStep());
-		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
-		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
-		this->varGravityValue()->connect(iterSolver->varGravityValue());
+		this->varFrictionEnabled()->quote(iterSolver->varFrictionEnabled());
+		this->varGravityEnabled()->quote(iterSolver->varGravityEnabled());
+		this->varGravityValue()->quote(iterSolver->varGravityValue());
 		//this->varFrictionCoefficient()->connect(iterSolver->varFrictionCoefficient());
-		this->varSlop()->connect(iterSolver->varSlop());
+		this->varSlop()->quote(iterSolver->varSlop());
 		this->stateMass()->connect(iterSolver->inMass());
 		
 		this->stateFrictionCoefficients()->connect(iterSolver->inFrictionCoefficients());

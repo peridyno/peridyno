@@ -95,10 +95,10 @@ std::shared_ptr<SceneGraph> createScene()
 	boundary->varNormalFriction()->setValue(1.0f);
 	boundary->varTangentialFriction()->setValue(0.8f);
 	boundary->varPlaneTangentialFriction()->setValue(0.8f);
-	semic->varCenter()->connect(boundary->varCenter());
-	semic->varRadius()->connect(boundary->varRadius());
-	semic->varDx()->connect(boundary->varDx());
-	semic->varYPlane()->connect(boundary->varYPlane());
+	semic->varCenter()->quote(boundary->varCenter());
+	semic->varRadius()->quote(boundary->varRadius());
+	semic->varDx()->quote(boundary->varDx());
+	semic->varYPlane()->quote(boundary->varYPlane());
 	boundary->varXInlet1()->setValue(-0.4f);
 	boundary->varXInlet2()->setValue(0.0f);
 	boundary->varXInlet3()->setValue(0.4f);

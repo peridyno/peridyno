@@ -241,6 +241,13 @@ std::shared_ptr<Data> allocate()									\
 \
 bool connect(DerivedField* dst)										\
 {																	\
+	bool valid = false;												\
+	valid = valid || (this->getFieldType() == FieldTypeEnum::Out && dst->getFieldType() == FieldTypeEnum::In);		\
+	valid = valid || (this->getFieldType() == FieldTypeEnum::In && dst->getFieldType() == FieldTypeEnum::In);		\
+	valid = valid || (this->getFieldType() == FieldTypeEnum::Out && dst->getFieldType() == FieldTypeEnum::Out);		\
+	valid = valid || (this->getFieldType() == FieldTypeEnum::State && dst->getFieldType() == FieldTypeEnum::In);	\
+	assert(valid == true);											\
+																	\
 	this->connectField(dst);										\
 	return true;													\
 }																	\

@@ -66,6 +66,13 @@ namespace dyno {
 
 		bool connect(FieldType* dst)
 		{
+			bool valid = false;
+			valid = valid || (this->getFieldType() == FieldTypeEnum::Out && dst->getFieldType() == FieldTypeEnum::In);
+			valid = valid || (this->getFieldType() == FieldTypeEnum::In && dst->getFieldType() == FieldTypeEnum::In);
+			valid = valid || (this->getFieldType() == FieldTypeEnum::Out && dst->getFieldType() == FieldTypeEnum::Out);
+			valid = valid || (this->getFieldType() == FieldTypeEnum::State && dst->getFieldType() == FieldTypeEnum::In);
+			assert(valid == true);
+
 			this->connectField(dst);
 			return true;
 		}
@@ -74,6 +81,17 @@ namespace dyno {
 			FieldType* derived = dynamic_cast<FieldType*>(dst);
 			if (derived == nullptr) return false;
 			return this->connect(derived);
+		}
+
+		bool quote(FBase* dst) {
+			bool valid = false;
+			valid = valid || (this->getFieldType() == FieldTypeEnum::Param && dst->getFieldType() == FieldTypeEnum::Param);
+			assert(valid == true);
+
+			FieldType* derived = dynamic_cast<FieldType*>(dst);
+			if (derived == nullptr) return false;
+
+			return this->connectField(dst);
 		}
 
 		DataType getData() {

@@ -13,7 +13,7 @@ namespace dyno
 	{
 		this->varRestDensity()->setValue(Real(1000));
 		mSummation = std::make_shared<SummationDensity<TDataType>>();
-		this->varRestDensity()->connect(mSummation->varRestDensity());
+		this->varRestDensity()->quote(mSummation->varRestDensity());
 		this->inSmoothingLength()->connect(mSummation->inSmoothingLength());
 		this->inSamplingDistance()->connect(mSummation->inSamplingDistance());
 		this->inRPosition()->connect(mSummation->inPosition());
