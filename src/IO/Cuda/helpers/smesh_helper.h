@@ -2,7 +2,7 @@
 #include <vector>
 #include <set>
 #include "Vector.h"
-#include <Module/TopologyModule.h>
+#include <Topology.h>
 
 namespace dyno{
 
@@ -20,11 +20,11 @@ namespace dyno{
 
 
 		std::vector<Vec3f> m_points;
-		std::vector<TopologyModule::Edge> m_edges;
-		std::vector<TopologyModule::Triangle> m_triangles;
-		std::vector<TopologyModule::Quad> m_quads;
-		std::vector<TopologyModule::Tetrahedron> m_tets;
-		std::vector<TopologyModule::Hexahedron> m_hexs;
+		std::vector<Topology::Edge> m_edges;
+		std::vector<Topology::Triangle> m_triangles;
+		std::vector<Topology::Quad> m_quads;
+		std::vector<Topology::Tetrahedron> m_tets;
+		std::vector<Topology::Hexahedron> m_hexs;
 	};
 
 }

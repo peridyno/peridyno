@@ -74,7 +74,7 @@ namespace dyno
 		auto polySet = this->statePolygonSet()->getDataPtr();
 
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Triangle> triangle;
+		std::vector<Topology::Triangle> triangle;
 
 		this->varScale()->setValue(Coord(scale.x, scale.y, scale.x), false);
 

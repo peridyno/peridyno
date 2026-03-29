@@ -2,7 +2,7 @@
 #include <QHeaderView>
 #include "Vector/Vector3D.h"
 #include "Vector/Vector2D.h"
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 
 namespace dyno
 {

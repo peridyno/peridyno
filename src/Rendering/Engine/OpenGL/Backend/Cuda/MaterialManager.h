@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 #include "Primitive/Primitive3D.h"
 #include "Topology/TriangleSet.h"
 #include <set>

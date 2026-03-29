@@ -35,7 +35,7 @@ namespace dyno
 
 		DEF_NODE_PORTS(TetrahedralSystem<TDataType>, TetrahedralSystem, "Tetrahedral Systems");
 
-		DEF_INSTANCE_STATE(TopologyModule, Topology, "");
+		DEF_INSTANCE_STATE(Topology, Topology, "");
 
 	protected:
 		void updateStates() override;

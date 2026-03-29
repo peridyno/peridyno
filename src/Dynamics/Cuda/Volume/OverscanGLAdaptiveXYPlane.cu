@@ -38,7 +38,7 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void ESS_CountNodes2D(
 		DArray<Coord> edge_points,
-		DArray<TopologyModule::Edge> edge,
+		DArray<Topology::Edge> edge,
 		DArray<AdaptiveGridNode> octree,
 		Real dx,
 		Level max_level,
@@ -57,10 +57,10 @@ namespace dyno
 		edge_points[4 * tId + 2] = pos + Coord(0.5 * up_dx, 0.5 * up_dx, 0.0);
 		edge_points[4 * tId + 3] = pos + Coord(0.5 * up_dx, -0.5 * up_dx, 0.0);
 
-		edge[4 * tId] = TopologyModule::Edge(4 * tId, 4 * tId + 1);
-		edge[4 * tId + 1] = TopologyModule::Edge(4 * tId + 1, 4 * tId + 2);
-		edge[4 * tId + 2] = TopologyModule::Edge(4 * tId + 2, 4 * tId + 3);
-		edge[4 * tId + 3] = TopologyModule::Edge(4 * tId + 3, 4 * tId);
+		edge[4 * tId] = Topology::Edge(4 * tId, 4 * tId + 1);
+		edge[4 * tId + 1] = Topology::Edge(4 * tId + 1, 4 * tId + 2);
+		edge[4 * tId + 2] = Topology::Edge(4 * tId + 2, 4 * tId + 3);
+		edge[4 * tId + 3] = Topology::Edge(4 * tId + 3, 4 * tId);
 	}
 
 	template<typename TDataType>
@@ -78,7 +78,7 @@ namespace dyno
 		Real dx = volumeSet->adaptiveGridDx();
 
 		DArray<Coord> edge_points(4 * node.size());
-		DArray<TopologyModule::Edge> edges(4 * node.size());
+		DArray<Topology::Edge> edges(4 * node.size());
 		cuExecute(node.size(),
 			ESS_CountNodes2D,
 			edge_points,
@@ -156,7 +156,7 @@ namespace dyno
 		Real dx = volumeSet->adaptiveGridDx();
 
 		DArray<Coord> edge_points(4 * node.size());
-		DArray<TopologyModule::Edge> edges(4 * node.size());
+		DArray<Topology::Edge> edges(4 * node.size());
 		cuExecute(node.size(),
 			ESS_CountNodes2D,
 			edge_points,

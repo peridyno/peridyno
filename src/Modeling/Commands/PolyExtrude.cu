@@ -59,7 +59,7 @@ namespace dyno
 		auto triangleSet = this->stateTriangleSet()->getDataPtr();
 		
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Triangle> triangles;
+		std::vector<Topology::Triangle> triangles;
 		extrude(vertices, triangles);
 
 		triangleSet->setPoints(vertices);
@@ -72,7 +72,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void PolyExtrude<TDataType>::extrude(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles)
+	void PolyExtrude<TDataType>::extrude(std::vector<Vec3f>& vertices, std::vector<Topology::Triangle>& triangles)
 	{
 		auto triangleSet = this->stateTriangleSet()->getDataPtr();
 		auto distance = this->varDistance()->getData();		
@@ -85,8 +85,8 @@ namespace dyno
 
 		trilist.copyFrom(this->inTriangleSet()->getData());
 
-		DArray<TopologyModule::Triangle> d_triangle = trilist.triangleIndices();
-		CArray<TopologyModule::Triangle> c_triangle;
+		DArray<Topology::Triangle> d_triangle = trilist.triangleIndices();
+		CArray<Topology::Triangle> c_triangle;
 
 		if (d_triangle.size()) 
 		{
@@ -104,8 +104,8 @@ namespace dyno
 			c_point.assign(d_point);
 		}
 
-		DArray<TopologyModule::Edge> d_edges = trilist.edgeIndices();
-		CArray<TopologyModule::Edge> c_edges;
+		DArray<Topology::Edge> d_edges = trilist.edgeIndices();
+		CArray<Topology::Edge> c_edges;
 		if (d_edges.size()) 
 		{
 			c_edges.assign(d_edges);
@@ -260,7 +260,7 @@ namespace dyno
 			map_vertexID_tNormal[i] = c_normal[i];
 		}
 
-		std::vector<TopologyModule::Edge> normalDisplay;
+		std::vector<Topology::Edge> normalDisplay;
 		std::vector<Coord> normalCoord;
 		float normalsize = 0.1f;
 		for (size_t i = 0; i < c_point.size(); i++)
@@ -270,7 +270,7 @@ namespace dyno
 			Vec3f P = Coord(c_point[i][0], c_point[i][1], c_point[i][2]);
 			Vec3f nP = P + N * normalsize;
 			normalCoord.push_back(Coord(nP[0],nP[1],nP[2]));
-			normalDisplay.push_back(TopologyModule::Edge(normalCoord.size(), normalCoord.size()-1));
+			normalDisplay.push_back(Topology::Edge(normalCoord.size(), normalCoord.size()-1));
 		}
 
 
@@ -336,7 +336,7 @@ namespace dyno
 
 
 		std::map<int, int> borderP_countInLine;
-		std::vector<TopologyModule::Edge> borderLine;
+		std::vector<Topology::Edge> borderLine;
 
 		for (int i = 0; i < tempPrimArray.size(); i++)
 		{
@@ -346,20 +346,20 @@ namespace dyno
 
 			if (one && two)
 			{
-				borderLine.push_back(TopologyModule::Edge(triangles[tempPrimArray[i]][0], triangles[tempPrimArray[i]][1]));
+				borderLine.push_back(Topology::Edge(triangles[tempPrimArray[i]][0], triangles[tempPrimArray[i]][1]));
 			}
 			if (two && three)
 			{
-				borderLine.push_back(TopologyModule::Edge(triangles[tempPrimArray[i]][1], triangles[tempPrimArray[i]][2]));
+				borderLine.push_back(Topology::Edge(triangles[tempPrimArray[i]][1], triangles[tempPrimArray[i]][2]));
 			}
 			if (three && one)
 			{
-				borderLine.push_back(TopologyModule::Edge(triangles[tempPrimArray[i]][2], triangles[tempPrimArray[i]][0]));
+				borderLine.push_back(Topology::Edge(triangles[tempPrimArray[i]][2], triangles[tempPrimArray[i]][0]));
 			}
 		}
 
 
-		std::vector<TopologyModule::Edge> tempLine = borderLine;
+		std::vector<Topology::Edge> tempLine = borderLine;
 		for (size_t i = 0; i < tempLine.size(); i++)
 		{
 			int k = tempLine.size() - i - 1;
@@ -393,8 +393,8 @@ namespace dyno
 				point_layer pt_n1 = point_layer(borderLine[i][0],k + 1);
 				point_layer pt_n2 = point_layer(borderLine[i][1],k + 1);
 
-				triangles.push_back(TopologyModule::Triangle(oriP_newP.at(pt_o1), oriP_newP.at(pt_o2), oriP_newP.at(pt_n2)));
-				triangles.push_back(TopologyModule::Triangle(oriP_newP.at(pt_o1), oriP_newP.at(pt_n2), oriP_newP.at(pt_n1)));
+				triangles.push_back(Topology::Triangle(oriP_newP.at(pt_o1), oriP_newP.at(pt_o2), oriP_newP.at(pt_n2)));
+				triangles.push_back(Topology::Triangle(oriP_newP.at(pt_o1), oriP_newP.at(pt_n2), oriP_newP.at(pt_n1)));
 			}
 		}
 

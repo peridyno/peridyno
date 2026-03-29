@@ -2,7 +2,7 @@
 #include "Node.h"
 
 #include "Module/OutputModule.h"
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 
 #include "Topology/TriangleSet.h"
 #include "TriangleMeshWriter.h"

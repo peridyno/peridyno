@@ -55,7 +55,7 @@ namespace dyno
 
 	typedef int PointType;
 
-class TopologyModule : public Object
+class Topology : public Object
 {
 public:
 	typedef PointType				Point;
@@ -85,8 +85,8 @@ public:
 	typedef VectorND<PointType, 2>	Edg2Poly;
 	
 public:
-	TopologyModule();
-	~TopologyModule() override;
+	Topology();
+	~Topology() override;
 
 	virtual int getDOF() { return 0; }
 

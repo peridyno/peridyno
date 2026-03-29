@@ -15,15 +15,15 @@ namespace dyno
 		auto plane = this->stateClipPlane()->getDataPtr();
 		auto size = this->varPlaneSize()->getData();
 
-		std::vector<TopologyModule::Triangle> triangles;
+		std::vector<Topology::Triangle> triangles;
 
 		planeVertices.push_back(Coord(0, size, size));
 		planeVertices.push_back(Coord(0, size, -size));
 		planeVertices.push_back(Coord(0, -size, -size));
 		planeVertices.push_back(Coord(0, -size, size));
 
-		triangles.push_back(TopologyModule::Triangle(0,1,2));
-		triangles.push_back(TopologyModule::Triangle(2,3,0));
+		triangles.push_back(Topology::Triangle(0,1,2));
+		triangles.push_back(Topology::Triangle(2,3,0));
 
 		plane->setPoints(planeVertices);
 		plane->setTriangles(triangles);

@@ -112,7 +112,7 @@ namespace dyno
 	__global__ void SD_BoundaryIntegral(
 		DArray<Real> rhoArr,
 		DArray<Coord> posArr,
-		DArray<TopologyModule::Triangle> Tri,
+		DArray<Topology::Triangle> Tri,
 		DArray<Coord> positionTri,
 		DArrayList<int> neighborsTri,
 		Real smoothingLength,
@@ -165,7 +165,7 @@ namespace dyno
 	void SemiAnalyticalSummationDensity<TDataType>::compute(
 		DArray<Real>& rho, 
 		DArray<Coord>& pos,
-		DArray<TopologyModule::Triangle>& Tri,
+		DArray<Topology::Triangle>& Tri,
 		DArray<Coord>& positionTri,
 		DArrayList<int>& neighbors,
 		DArrayList<int>& neighborsTri,

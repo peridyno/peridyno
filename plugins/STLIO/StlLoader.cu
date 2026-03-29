@@ -55,7 +55,7 @@ namespace dyno
 	void StlLoader<TDataType>::loadSTL(TriangleSet<TDataType>& Triangleset, std::string filename)
 	{
 		std::vector<Coord> vertList;
-		std::vector<TopologyModule::Triangle> faceList;
+		std::vector<Topology::Triangle> faceList;
 		dyno::loadStl(vertList,faceList,filename);
 
 		Triangleset.setPoints(vertList);

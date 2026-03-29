@@ -139,8 +139,8 @@ namespace dyno
 		q.normalize();
 
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Quad> quads;
-		std::vector<TopologyModule::Triangle> triangles;
+		std::vector<Topology::Quad> quads;
+		std::vector<Topology::Triangle> triangles;
 
 		Real dx = lengthX / segmentX;
 		Real dz = lengthZ / segmentZ;

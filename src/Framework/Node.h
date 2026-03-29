@@ -20,7 +20,7 @@
 #include "DeclarePort.h"
 #include "NodePort.h"
 
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 #include "Module/TopologyMapping.h"
 #include "Module/AnimationPipeline.h"
 #include "Module/GraphicsPipeline.h"

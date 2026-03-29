@@ -34,7 +34,7 @@ namespace dyno
 	__global__ void LSCB_FindNeighboringGrids(
 		DArray3D<uint> counter,
 		DArray<Coord> vertices,
-		DArray<TopologyModule::Triangle> indices,
+		DArray<Topology::Triangle> indices,
 		Coord origin,
 		Real dx)
 	{
@@ -107,7 +107,7 @@ namespace dyno
 		DArrayList<uint> triIds,
 		DArray3D<uint> counter,
 		DArray<Coord> vertices,
-		DArray<TopologyModule::Triangle> indices,
+		DArray<Topology::Triangle> indices,
 		Coord origin,
 		Real dx)
 	{
@@ -163,8 +163,8 @@ namespace dyno
 		DArray3D<GridType> gridType,
 		DArrayList<uint> triIds,
 		DArray<Coord> vertices,
-		DArray<TopologyModule::Triangle> indices,
-		DArray<TopologyModule::Edge> edges,
+		DArray<Topology::Triangle> indices,
+		DArray<Topology::Edge> edges,
 		DArray<Tri2Edg> t2e,
 		DArray<Coord> edgeN,
 		DArray<Coord> vertexN,

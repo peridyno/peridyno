@@ -69,7 +69,7 @@ namespace dyno
 
 		VertexArray				mVAO;
 		XBuffer<Vec3f>						mVertexBuffer;
-		XBuffer<TopologyModule::Edge>		mIndexBuffer;
+		XBuffer<Topology::Edge>		mIndexBuffer;
 		unsigned int	mNumEdges = 0;
 
 		Buffer		mUniformBlock;

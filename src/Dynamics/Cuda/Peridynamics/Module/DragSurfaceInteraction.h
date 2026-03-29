@@ -1,6 +1,6 @@
 #pragma once
 #include "Module/MouseInputModule.h"
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 #include "Topology/TriangleSet.h"
 
 #include "Collision/Attribute.h"
@@ -24,8 +24,8 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TopologyModule::Edge Edge;
-		typedef typename TopologyModule::Triangle Triangle;
+		typedef typename Topology::Edge Edge;
+		typedef typename Topology::Triangle Triangle;
 
 		DragSurfaceInteraction();
 		virtual ~DragSurfaceInteraction() {};

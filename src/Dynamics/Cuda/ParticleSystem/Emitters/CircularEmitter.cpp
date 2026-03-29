@@ -96,7 +96,7 @@ namespace dyno
 	void CircularEmitter<TDataType>::tranformChanged()
 	{
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Edge> edges;
+		std::vector<Topology::Edge> edges;
 
 		auto center = this->varLocation()->getData();
 		auto scale = this->varScale()->getData();
@@ -115,7 +115,7 @@ namespace dyno
 			Real z = r * cos(i * deltaTheta);
 
 			vertices.push_back(tr * Coord(x, 0, z));
-			edges.push_back(TopologyModule::Edge(i, (i + 1) % segNum));
+			edges.push_back(Topology::Edge(i, (i + 1) % segNum));
 		}
 
 		auto edgeTopo = this->stateOutline()->getDataPtr();

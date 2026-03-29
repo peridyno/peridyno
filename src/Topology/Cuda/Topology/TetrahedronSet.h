@@ -9,8 +9,8 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TopologyModule::Triangle Triangle;
-		typedef typename TopologyModule::Tetrahedron Tetrahedron;
+		typedef typename Topology::Triangle Triangle;
+		typedef typename Topology::Tetrahedron Tetrahedron;
 
 		TetrahedronSet();
 		~TetrahedronSet() override;
@@ -24,8 +24,8 @@ namespace dyno
 
 		const DArrayList<int>& vertex2Tetrahedron() { return mVer2Tet; }
 
-		const DArray<::dyno::TopologyModule::Tri2Tet>& triangle2Tetrahedron() { return mTri2Tet; }
-		const DArray<::dyno::TopologyModule::Tet2Tri>& tetrahedron2Triangle() { return mTet2Tri; }
+		const DArray<::dyno::Topology::Tri2Tet>& triangle2Tetrahedron() { return mTri2Tet; }
+		const DArray<::dyno::Topology::Tet2Tri>& tetrahedron2Triangle() { return mTet2Tri; }
 
 		void copyFrom(TetrahedronSet<TDataType>& tetSet);
 
@@ -44,7 +44,7 @@ namespace dyno
 		void requestSurfaceMeshIds(
 			DArray<int>& surfaceIds,
 			DArray<int>& towardOutside,
-			DArray<::dyno::TopologyModule::Tri2Tri>& t2t);
+			DArray<::dyno::Topology::Tri2Tri>& t2t);
 
 		void extractSurfaceMesh(TriangleSet<TDataType>& ts);
 
@@ -66,8 +66,8 @@ namespace dyno
 		DArrayList<int> mVer2Tet;
 
 		// Mapping for tetrahedron mesh
-		DArray<::dyno::TopologyModule::Tri2Tet> mTri2Tet;
-		DArray<::dyno::TopologyModule::Tet2Tri> mTet2Tri;
+		DArray<::dyno::Topology::Tri2Tet> mTri2Tet;
+		DArray<::dyno::Topology::Tet2Tri> mTet2Tri;
 	};
 }
 

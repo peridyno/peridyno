@@ -936,7 +936,7 @@ namespace dyno
 	template<typename TDataType>
 	void MarchingCubesHelper<TDataType>::constructTriangles(
 		DArray<Coord>& vertices,
-		DArray<TopologyModule::Triangle>& triangles,
+		DArray<Topology::Triangle>& triangles,
 		DArray<int>& vertNum, 
 		DArray3D<Real>& distances,
 		Coord origin,
@@ -1206,7 +1206,7 @@ namespace dyno
 	void MarchingCubesHelper<TDataType>::constructTrianglesForClipper(
 		DArray<Real>& field,
 		DArray<Coord>& vertices, 
-		DArray<TopologyModule::Triangle>& triangles, 
+		DArray<Topology::Triangle>& triangles, 
 		DArray<int>& vertNum, 
 		DistanceField3D<TDataType>& sdf, 
 		TPlane3D<Real> plane)
@@ -1268,7 +1268,7 @@ namespace dyno
 	template<typename Real, typename Coord>
 	__global__ void ConstructTrianglesForOctree(
 		DArray<Coord> triangleVertices,
-		DArray<TopologyModule::Triangle> triangles,
+		DArray<Topology::Triangle> triangles,
 		DArray<uint> vertNum,
 		DArray<Coord> cellVertices,
 		DArray<Real> sdfs,
@@ -1341,7 +1341,7 @@ namespace dyno
 			edge = triTable[cubeindex][n + 2];
 			v[2] = vertlist[edge];
 
-			triangles[radix / 3] = TopologyModule::Triangle(radix, radix + 1, radix + 2);
+			triangles[radix / 3] = Topology::Triangle(radix, radix + 1, radix + 2);
 
 			triangleVertices[radix++] = v[0];
 			triangleVertices[radix++] = v[1];
@@ -1352,7 +1352,7 @@ namespace dyno
 	template<typename TDataType>
 	void MarchingCubesHelper<TDataType>::constructTrianglesForOctree(
 		DArray<Coord>& triangleVertices,
-		DArray<TopologyModule::Triangle>& triangles,
+		DArray<Topology::Triangle>& triangles,
 		DArray<uint>& num,
 		DArray<Coord>& cellVertices,
 		DArray<Real>& sdfs,
@@ -1448,7 +1448,7 @@ namespace dyno
 	__global__ void MCH_ConstructTrianglesForOctreeClipper(
 		DArray<Real> vertSDFs,
 		DArray<Coord> triangleVertices,
-		DArray<TopologyModule::Triangle> triangles,
+		DArray<Topology::Triangle> triangles,
 		DArray<uint> vertNum,
 		DArray<AdaptiveGridNode> nodes,
 		DArray<int> node2ver,
@@ -1558,7 +1558,7 @@ namespace dyno
 				v[2] = vertlist[edge];
 				c[2] = scalar[edge];
 
-				triangles[radix / 3] = TopologyModule::Triangle(radix, radix + 1, radix + 2);
+				triangles[radix / 3] = Topology::Triangle(radix, radix + 1, radix + 2);
 
 				triangleVertices[radix] = v[0];	vertSDFs[radix] = c[0];	radix++;
 				triangleVertices[radix] = v[1];	vertSDFs[radix] = c[1];	radix++;
@@ -1571,7 +1571,7 @@ namespace dyno
 	void MarchingCubesHelper<TDataType>::constructTrianglesForOctreeClipper(
 		DArray<Real>& vertSDFs,
 		DArray<Coord>& triangleVertices, 
-		DArray<TopologyModule::Triangle>& triangles, 
+		DArray<Topology::Triangle>& triangles, 
 		DArray<uint>& num, 
 		DArray<AdaptiveGridNode>& nodes,
 		std::shared_ptr<AdaptiveGridSet<TDataType>> gridSet,

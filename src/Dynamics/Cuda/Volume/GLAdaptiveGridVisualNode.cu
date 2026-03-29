@@ -63,7 +63,7 @@ namespace dyno
 	template <typename Coord>
 	__global__ void AGVN_ComputeVertex(
 		DArray<Coord> points,
-		DArray<TopologyModule::Edge> edge,
+		DArray<Topology::Edge> edge,
 		DArray<Coord> vertex,
 		DArray<int> vertex_neighbor)
 	{
@@ -74,17 +74,17 @@ namespace dyno
 
 		int nindex;
 		nindex = vertex_neighbor[6 * tId] == EMPTY ? tId : vertex_neighbor[6 * tId];
-		edge[6 * tId] = TopologyModule::Edge(tId, nindex);
+		edge[6 * tId] = Topology::Edge(tId, nindex);
 		nindex = vertex_neighbor[6 * tId + 1] == EMPTY ? tId : vertex_neighbor[6 * tId + 1];
-		edge[6 * tId + 1] = TopologyModule::Edge(tId, nindex);
+		edge[6 * tId + 1] = Topology::Edge(tId, nindex);
 		nindex = vertex_neighbor[6 * tId + 2] == EMPTY ? tId : vertex_neighbor[6 * tId + 2];
-		edge[6 * tId + 2] = TopologyModule::Edge(tId, nindex);
+		edge[6 * tId + 2] = Topology::Edge(tId, nindex);
 		nindex = vertex_neighbor[6 * tId + 3] == EMPTY ? tId : vertex_neighbor[6 * tId + 3];
-		edge[6 * tId + 3] = TopologyModule::Edge(tId, nindex);
+		edge[6 * tId + 3] = Topology::Edge(tId, nindex);
 		nindex = vertex_neighbor[6 * tId + 4] == EMPTY ? tId : vertex_neighbor[6 * tId + 4];
-		edge[6 * tId + 4] = TopologyModule::Edge(tId, nindex);
+		edge[6 * tId + 4] = Topology::Edge(tId, nindex);
 		nindex = vertex_neighbor[6 * tId + 5] == EMPTY ? tId : vertex_neighbor[6 * tId + 5];
-		edge[6 * tId + 5] = TopologyModule::Edge(tId, nindex);
+		edge[6 * tId + 5] = Topology::Edge(tId, nindex);
 	}
 
 	template <typename Real>
@@ -114,7 +114,7 @@ namespace dyno
 		m_octree->extractVertex(vertex, vertex_neighbor, node2ver);
 
 		DArray<Coord> points_pos(vertex.size());
-		DArray<TopologyModule::Edge> edges(vertex_neighbor.size());
+		DArray<Topology::Edge> edges(vertex_neighbor.size());
 		cuExecute(vertex.size(),
 			AGVN_ComputeVertex,
 			points_pos,

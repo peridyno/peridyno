@@ -69,7 +69,7 @@ namespace dyno
 	{
 		std::unordered_map<int, std::vector<int>> vertex_to_triangles;
 
-		CArray<TopologyModule::Triangle> triangles;
+		CArray<Topology::Triangle> triangles;
 		triangles.assign(triSet->triangleIndices());
 
 		int n = triangles.size();

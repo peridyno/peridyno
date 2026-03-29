@@ -49,13 +49,13 @@ namespace dyno
 	public:
 		EarClipper();
 
-		EarClipper(std::vector<DataType3f::Coord> vts, std::vector<TopologyModule::Triangle>& outTriangles) { polyClip(vts,outTriangles); };
+		EarClipper(std::vector<DataType3f::Coord> vts, std::vector<Topology::Triangle>& outTriangles) { polyClip(vts,outTriangles); };
 
 		~EarClipper() { };
 
-		void polyClip(std::vector<DataType3f::Coord> vts, std::vector<TopologyModule::Triangle>& outTriangles);
+		void polyClip(std::vector<DataType3f::Coord> vts, std::vector<Topology::Triangle>& outTriangles);
 
-		void polyClip(DArray<Coord> vts, std::vector<TopologyModule::Triangle>& outTriangles)
+		void polyClip(DArray<Coord> vts, std::vector<Topology::Triangle>& outTriangles)
 		{ 
 			if (vts.isEmpty()) { return; }
 			CArray<Coord> c_vts;
@@ -69,7 +69,7 @@ namespace dyno
 
 			this->polyClip(vtsvector, outTriangles);
 		}
-		void polyClip(CArray<Coord> vts, std::vector<TopologyModule::Triangle>& outTriangles)
+		void polyClip(CArray<Coord> vts, std::vector<Topology::Triangle>& outTriangles)
 		{
 			if (vts.isEmpty()) { return; }
 

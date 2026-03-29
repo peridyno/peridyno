@@ -1,5 +1,5 @@
 #pragma once
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 
 #include "AnimationCurve.h"
 #include <iterator>
@@ -77,8 +77,8 @@ namespace dyno
 		std::vector<Vec3f> normals;
 		std::vector<Vec2f> texcoords;
 		std::vector<Vec3f> verticesColor;
-		std::vector<std::vector<TopologyModule::Triangle>> facegroup_triangles;
-		std::vector<std::vector<TopologyModule::Triangle>> facegroup_normalIndex;
+		std::vector<std::vector<Topology::Triangle>> facegroup_triangles;
+		std::vector<std::vector<Topology::Triangle>> facegroup_normalIndex;
 		std::vector<CArrayList<uint>> facegroup_polygons;
 
 		std::vector<std::shared_ptr<Material>> materials;

@@ -107,7 +107,7 @@ namespace dyno
 
 		////**********************************  build Normal by Cuda **********************************////
 		{
-			DArray<TopologyModule::Triangle>& d_triangles = inTriSet->triangleIndices();
+			DArray<Topology::Triangle>& d_triangles = inTriSet->triangleIndices();
 			d_points = inTriSet->getPoints();
 			d_edges.resize(d_triangles.size());
 			d_normalPt.resize(d_triangles.size() * 2);
@@ -200,7 +200,7 @@ namespace dyno
 		DArray<Coord> d_point,
 		DArray<Coord> normal_points,
 		DArray<Coord> normal,
-		DArray<TopologyModule::Edge> edges,
+		DArray<Topology::Edge> edges,
 		float length,
 		bool normallization
 		)
@@ -217,15 +217,15 @@ namespace dyno
 		normal_points[2 * pId] = d_point[pId] ;
 		normal_points[2 * pId + 1] = d_point[pId] + dirNormal;
 
-		edges[pId] = TopologyModule::Edge(2 * pId, 2 * pId + 1);
+		edges[pId] = Topology::Edge(2 * pId, 2 * pId + 1);
 	}
 
 
 	template< typename Coord>
 	__global__ void UpdateTriangleNormal(
-		DArray<TopologyModule::Triangle> d_triangles,
+		DArray<Topology::Triangle> d_triangles,
 		DArray<Coord> d_points,
-		DArray<TopologyModule::Edge> edges,
+		DArray<Topology::Edge> edges,
 		DArray<Coord> normal_points,
 		DArray<Coord> normal,
 		DArray<Coord> triangleCenter,
@@ -256,7 +256,7 @@ namespace dyno
 		normal_points[2 * pId + 1] = Coord(x, y, z) + dirNormal;
 		triangleCenter[pId] = Coord(x, y, z);
 
-		edges[pId] = TopologyModule::Edge(2 * pId, 2 * pId + 1);
+		edges[pId] = Topology::Edge(2 * pId, 2 * pId + 1);
 		normal[pId] = dirNormal.normalize();
 	}
 

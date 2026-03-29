@@ -183,16 +183,16 @@ namespace dyno
 	{
 		DYN_FUNC Info() {
 			tetId = EMPTY;
-			tIndex = TopologyModule::Triangle(EMPTY, EMPTY, EMPTY);
+			tIndex = Topology::Triangle(EMPTY, EMPTY, EMPTY);
 		}
 
-		DYN_FUNC Info(int id, TopologyModule::Triangle index) {
+		DYN_FUNC Info(int id, Topology::Triangle index) {
 			tetId = id;
 			tIndex = index;
 		};
 
 		int tetId;
-		TopologyModule::Triangle tIndex;
+		Topology::Triangle tIndex;
 	};
 
 	template<typename TKey, typename Tetrahedron>
@@ -210,10 +210,10 @@ namespace dyno
 		keys[4 * tId + 2] = TKey(tet[2], tet[3], tet[0]);
 		keys[4 * tId + 3] = TKey(tet[3], tet[0], tet[1]);
 
-		ids[4 * tId] = Info(tId, TopologyModule::Triangle(tet[0], tet[1], tet[2]));
-		ids[4 * tId + 1] = Info(tId, TopologyModule::Triangle(tet[1], tet[2], tet[3]));
-		ids[4 * tId + 2] = Info(tId, TopologyModule::Triangle(tet[2], tet[3], tet[0]));
-		ids[4 * tId + 3] = Info(tId, TopologyModule::Triangle(tet[3], tet[0], tet[1]));
+		ids[4 * tId] = Info(tId, Topology::Triangle(tet[0], tet[1], tet[2]));
+		ids[4 * tId + 1] = Info(tId, Topology::Triangle(tet[1], tet[2], tet[3]));
+		ids[4 * tId + 2] = Info(tId, Topology::Triangle(tet[2], tet[3], tet[0]));
+		ids[4 * tId + 3] = Info(tId, Topology::Triangle(tet[3], tet[0], tet[1]));
 	}
 
 	template<typename TKey>
@@ -491,9 +491,9 @@ namespace dyno
 	}
 
 	DYN_FUNC bool oppVertex(int tId, int& oppVerId0, int& oppVerId1,
-		TopologyModule::Tri2Tet& t2t,
-		TopologyModule::Tetrahedron& tetA,
-		TopologyModule::Tetrahedron& tetB)
+		Topology::Tri2Tet& t2t,
+		Topology::Tetrahedron& tetA,
+		Topology::Tetrahedron& tetB)
 	{
 		if(t2t[1] == EMPTY) return false;
 
@@ -524,12 +524,12 @@ namespace dyno
 
 	__global__ void TetSet_NeigCountEdgeNumber(
 		DArray<uint> num,
-		DArray<TopologyModule::Edge> edges)
+		DArray<Topology::Edge> edges)
 	{
 		int eId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (eId >= edges.size()) return;
 
-		TopologyModule::Edge edge = edges[eId];
+		Topology::Edge edge = edges[eId];
 
 		atomicAdd(&(num[edge[0]]), 1);
 		atomicAdd(&(num[edge[1]]), 1);
@@ -537,8 +537,8 @@ namespace dyno
 
 	__global__ void TetSet_NeigCountTriNumber(
 		DArray<uint> num,
-		DArray<TopologyModule::Tetrahedron> tets,
-		DArray<TopologyModule::Tri2Tet> tri2Tet)
+		DArray<Topology::Tetrahedron> tets,
+		DArray<Topology::Tri2Tet> tri2Tet)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= tri2Tet.size()) return;
@@ -632,12 +632,12 @@ namespace dyno
 
 	__global__ void TetSet_NeigStoreEdgeIds(
 		DArrayList<int> ids,
-		DArray<TopologyModule::Edge> edges)
+		DArray<Topology::Edge> edges)
 	{
 		int eId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (eId >= edges.size()) return;
 
-		TopologyModule::Edge edge = edges[eId];
+		Topology::Edge edge = edges[eId];
 		int v0 = edge[0];
 		int v1 = edge[1];
 
@@ -647,8 +647,8 @@ namespace dyno
 
 	__global__ void TetSet_NeigStoreTriIds(
 		DArrayList<int> ids,
-		DArray<TopologyModule::Tetrahedron> tets,
-		DArray<TopologyModule::Tri2Tet> tri2Tet)
+		DArray<Topology::Tetrahedron> tets,
+		DArray<Topology::Tri2Tet> tri2Tet)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= tri2Tet.size()) return;
@@ -732,7 +732,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void TetrahedronSet<TDataType>::requestSurfaceMeshIds(DArray<int>& surfaceIds, DArray<int>& towardOutside, DArray<::dyno::TopologyModule::Tri2Tri>& t2t)
+	void TetrahedronSet<TDataType>::requestSurfaceMeshIds(DArray<int>& surfaceIds, DArray<int>& towardOutside, DArray<::dyno::Topology::Tri2Tri>& t2t)
 	{
 		// Update {SurfaceTir, TriNormalSig, SurfaceTri2Tri}
 		auto triIndices = this->triangleIndices();

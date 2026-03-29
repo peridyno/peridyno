@@ -48,7 +48,7 @@ namespace dyno
 		CArray<Coord> cPoints;
 		cPoints.assign(mPoints);
 
-		CArray<TopologyModule::Triangle> cTriangles;
+		CArray<Topology::Triangle> cTriangles;
 		cTriangles.resize(mTriangles.size());
 		cTriangles.assign(mTriangles);
 

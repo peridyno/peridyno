@@ -135,7 +135,7 @@ namespace dyno
 
 
 			//top and bottom
-			std::vector<TopologyModule::Triangle> triangle;
+			std::vector<Topology::Triangle> triangle;
 
 			int pt_side_len = vertices.size();
 
@@ -147,13 +147,13 @@ namespace dyno
 				{
 					if (faceid != columns_i - 1)
 					{
-						triangle.push_back(TopologyModule::Triangle(columns_i + faceid + rowl * columns_i, 0 + faceid + rowl * columns_i, 1 + faceid + rowl * columns_i));
-						triangle.push_back(TopologyModule::Triangle(columns_i + 1 + faceid + rowl * columns_i, columns_i + faceid + rowl * columns_i, 1 + faceid + rowl * columns_i));
+						triangle.push_back(Topology::Triangle(columns_i + faceid + rowl * columns_i, 0 + faceid + rowl * columns_i, 1 + faceid + rowl * columns_i));
+						triangle.push_back(Topology::Triangle(columns_i + 1 + faceid + rowl * columns_i, columns_i + faceid + rowl * columns_i, 1 + faceid + rowl * columns_i));
 					}
 					else
 					{
-						triangle.push_back(TopologyModule::Triangle(1 + 2 * faceid + rowl * columns_i, 0 + faceid + rowl * columns_i, 0 + rowl * columns_i));
-						triangle.push_back(TopologyModule::Triangle(1 + faceid + rowl * columns_i, 1 + 2 * faceid + rowl * columns_i, 0 + rowl * columns_i));
+						triangle.push_back(Topology::Triangle(1 + 2 * faceid + rowl * columns_i, 0 + faceid + rowl * columns_i, 0 + rowl * columns_i));
+						triangle.push_back(Topology::Triangle(1 + faceid + rowl * columns_i, 1 + 2 * faceid + rowl * columns_i, 0 + rowl * columns_i));
 					}
 
 				}
@@ -200,7 +200,7 @@ namespace dyno
 
 
 			EarClipper<DataType3f> sab;
-			std::vector<TopologyModule::Triangle> triangleCap;
+			std::vector<Topology::Triangle> triangleCap;
 
 			sab.polyClip(capPoint, triangleCap);
 			int addnum2 = vertices.size() - capPoint.size();
@@ -209,7 +209,7 @@ namespace dyno
 			for (int i = 0; i < triangleCap.size(); i++)
 			{
 				triangle.push_back(triangleCap[i]);
-				triangle.push_back(TopologyModule::Triangle(triangleCap[i][0] + addnum2, triangleCap[i][1] + addnum2, triangleCap[i][2] + addnum2));
+				triangle.push_back(Topology::Triangle(triangleCap[i][0] + addnum2, triangleCap[i][1] + addnum2, triangleCap[i][2] + addnum2));
 			}
 
 			auto triangleSet = this->stateTriangleSet()->getDataPtr();

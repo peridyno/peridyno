@@ -70,7 +70,7 @@ namespace dyno
 	}
 
 	__global__ void ESS_CountEdges2D(
-		DArray<TopologyModule::Edge> edge,
+		DArray<Topology::Edge> edge,
 		DArray<uint> count,
 		DArrayList<int> neighbor,
 		int node_num)
@@ -79,19 +79,19 @@ namespace dyno
 		if (tId >= node_num) return;
 
 		for (int i = 0; i < neighbor[4 * tId].size(); i++)
-			edge[count[4 * tId] + i] = TopologyModule::Edge(tId, neighbor[4 * tId][i]);
+			edge[count[4 * tId] + i] = Topology::Edge(tId, neighbor[4 * tId][i]);
 		for (int i = 0; i < neighbor[4 * tId + 1].size(); i++)
-			edge[count[4 * tId + 1] + i] = TopologyModule::Edge(tId, neighbor[4 * tId + 1][i]);
+			edge[count[4 * tId + 1] + i] = Topology::Edge(tId, neighbor[4 * tId + 1][i]);
 		for (int i = 0; i < neighbor[4 * tId + 2].size(); i++)
-			edge[count[4 * tId + 2] + i] = TopologyModule::Edge(tId, neighbor[4 * tId + 2][i]);
+			edge[count[4 * tId + 2] + i] = Topology::Edge(tId, neighbor[4 * tId + 2][i]);
 		for (int i = 0; i < neighbor[4 * tId + 3].size(); i++)
-			edge[count[4 * tId + 3] + i] = TopologyModule::Edge(tId, neighbor[4 * tId + 3][i]);
+			edge[count[4 * tId + 3] + i] = Topology::Edge(tId, neighbor[4 * tId + 3][i]);
 	}
 
 	template <typename Real, typename Coord>
 	__global__ void ESS_CountNodes2D(
 		DArray<Coord> edge_points,
-		DArray<TopologyModule::Edge> edge,
+		DArray<Topology::Edge> edge,
 		DArray<AdaptiveGridNode> octree,
 		Real dx,
 		Level max_level,
@@ -110,10 +110,10 @@ namespace dyno
 		edge_points[4 * tId + 2] = pos + Coord(0.5*up_dx, 0.5*up_dx, 0.0);
 		edge_points[4 * tId + 3] = pos + Coord(0.5*up_dx, -0.5*up_dx, 0.0);
 
-		edge[4 * tId] = TopologyModule::Edge(4 * tId, 4 * tId + 1);
-		edge[4 * tId + 1] = TopologyModule::Edge(4 * tId + 1, 4 * tId + 2);
-		edge[4 * tId + 2] = TopologyModule::Edge(4 * tId + 2, 4 * tId + 3);
-		edge[4 * tId + 3] = TopologyModule::Edge(4 * tId + 3, 4 * tId);
+		edge[4 * tId] = Topology::Edge(4 * tId, 4 * tId + 1);
+		edge[4 * tId + 1] = Topology::Edge(4 * tId + 1, 4 * tId + 2);
+		edge[4 * tId + 2] = Topology::Edge(4 * tId + 2, 4 * tId + 3);
+		edge[4 * tId + 3] = Topology::Edge(4 * tId + 3, 4 * tId);
 	}
 
 	template<typename TDataType>
@@ -137,7 +137,7 @@ namespace dyno
 		//printf("GLAdaptiveXYPlaneVisualNode node num %d \n", node.size());
 
 		DArray<Coord> edge_points;
-		DArray<TopologyModule::Edge> edges;
+		DArray<Topology::Edge> edges;
 		if (this->varType()->getData() == EdgeData::Octree_Neighbor)
 		{
 			edge_points.resize(node.size());

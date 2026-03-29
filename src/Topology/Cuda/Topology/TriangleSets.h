@@ -25,7 +25,7 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TopologyModule::Triangle Triangle;
+		typedef typename Topology::Triangle Triangle;
 
 		TriangleSets();
 		~TriangleSets() override;
@@ -38,9 +38,9 @@ namespace dyno
 
 		void load(std::vector<std::shared_ptr<TriangleSet<TDataType>>>& tsArray);
 
-		void appendShape(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles);
-		void appendShape(std::vector<Vec3f>& vertices, CArray<TopologyModule::Triangle>& triangles);
-		void appendShape(DArray<Vec3f>& vertices, DArray<TopologyModule::Triangle>& triangles);
+		void appendShape(std::vector<Vec3f>& vertices, std::vector<Topology::Triangle>& triangles);
+		void appendShape(std::vector<Vec3f>& vertices, CArray<Topology::Triangle>& triangles);
+		void appendShape(DArray<Vec3f>& vertices, DArray<Topology::Triangle>& triangles);
 
 
 	private:

@@ -90,7 +90,7 @@ namespace dyno
 		if (useRamp)
 		{
 			std::vector<Coord> vertices;
-			std::vector<TopologyModule::Triangle> triangle;
+			std::vector<Topology::Triangle> triangle;
 			pointsize = floatCoordArray.size();
 
 			Coord Location;
@@ -125,7 +125,7 @@ namespace dyno
 		auto polySet = this->statePolygonSet()->getDataPtr();
 
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Triangle> triangle;
+		std::vector<Topology::Triangle> triangle;
 
 
 		Coord Location;

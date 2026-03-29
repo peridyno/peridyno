@@ -97,7 +97,7 @@ namespace dyno
 		if (VertexIn2.size() == 0) { return; }
 
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Triangle> triangle;
+		std::vector<Topology::Triangle> triangle;
 
 		//Spline
 		CArray<Coord> c_point1;
@@ -189,13 +189,13 @@ namespace dyno
 				if (faceid != lengthV2 - 1)
 				{
 
-					triangle.push_back(TopologyModule::Triangle(lengthV2 + faceid + rowl * lengthV2, 0 + faceid + rowl * lengthV2, 1 + faceid + rowl * lengthV2));
-					triangle.push_back(TopologyModule::Triangle(lengthV2 + 1 + faceid + rowl * lengthV2, lengthV2 + faceid + rowl * lengthV2, 1 + faceid + rowl * lengthV2));
+					triangle.push_back(Topology::Triangle(lengthV2 + faceid + rowl * lengthV2, 0 + faceid + rowl * lengthV2, 1 + faceid + rowl * lengthV2));
+					triangle.push_back(Topology::Triangle(lengthV2 + 1 + faceid + rowl * lengthV2, lengthV2 + faceid + rowl * lengthV2, 1 + faceid + rowl * lengthV2));
 				}
 				else
 				{
-					triangle.push_back(TopologyModule::Triangle(1 + 2 * faceid + rowl * lengthV2, 0 + faceid + rowl * lengthV2, 0 + rowl * lengthV2));
-					triangle.push_back(TopologyModule::Triangle(1 + faceid + rowl * lengthV2, 1 + 2 * faceid + rowl * lengthV2, 0 + rowl * lengthV2));
+					triangle.push_back(Topology::Triangle(1 + 2 * faceid + rowl * lengthV2, 0 + faceid + rowl * lengthV2, 0 + rowl * lengthV2));
+					triangle.push_back(Topology::Triangle(1 + faceid + rowl * lengthV2, 1 + 2 * faceid + rowl * lengthV2, 0 + rowl * lengthV2));
 				}
 			}
 
@@ -204,7 +204,7 @@ namespace dyno
 		//fill cap
 		// get triangleCap by EarClipper
 		EarClipper<DataType3f> sab;
-		std::vector<TopologyModule::Triangle> triangleCap;
+		std::vector<Topology::Triangle> triangleCap;
 
 		sab.polyClip(VertexIn2, triangleCap);
 		int addnum2 = vertices.size() - VertexIn2.size();
@@ -213,8 +213,8 @@ namespace dyno
 
 		for (int i = 0; i < triangleCap.size(); i++)
 		{
-			triangle.push_back(TopologyModule::Triangle(triangleCap[i][2], triangleCap[i][1], triangleCap[i][0]));
-			triangle.push_back(TopologyModule::Triangle(triangleCap[i][0] + addnum2, triangleCap[i][1] + addnum2, triangleCap[i][2] + addnum2));
+			triangle.push_back(Topology::Triangle(triangleCap[i][2], triangleCap[i][1], triangleCap[i][0]));
+			triangle.push_back(Topology::Triangle(triangleCap[i][0] + addnum2, triangleCap[i][1] + addnum2, triangleCap[i][2] + addnum2));
 		}
 
 		//ReverseNormal

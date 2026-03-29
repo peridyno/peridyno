@@ -24,7 +24,7 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
 		typedef typename ::dyno::TBond<TDataType> Bond;
-		typedef typename TopologyModule::Tetrahedron Tetrahedron;
+		typedef typename Topology::Tetrahedron Tetrahedron;
 		
 		HyperelasticBody();
 		~HyperelasticBody() override;

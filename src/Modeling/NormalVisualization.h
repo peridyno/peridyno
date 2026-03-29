@@ -83,7 +83,7 @@ namespace dyno
 		std::shared_ptr<GLInstanceVisualModule> glInstanceCylinder;
 		std::shared_ptr<GLInstanceVisualModule> glInstanceCone;
 		DArray<Coord> d_points;
-		DArray<TopologyModule::Edge> d_edges;
+		DArray<Topology::Edge> d_edges;
 		DArray<Coord> d_normalPt;
 		DArray<Coord> d_normal;
 		DArray<Coord> triangleCenter;

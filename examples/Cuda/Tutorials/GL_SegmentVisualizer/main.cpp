@@ -37,7 +37,7 @@ public:
 
 		auto index = [=](int i, int j, int k) ->int {return i + j * num2 + k * num2 * num2; };
 
-		std::vector<TopologyModule::Hexahedron> hex;
+		std::vector<Topology::Hexahedron> hex;
 		for (int k = 0; k < num2; k++)
 		{
 			for (int j = 0; j < num2; j++)
@@ -53,7 +53,7 @@ public:
 					int v6 = index(i + 1, j + 1, k + 1);
 					int v7 = index(i + 1, j + 1, k);
 
-					hex.push_back(TopologyModule::Hexahedron(v0, v1, v2, v3, v4, v5, v6, v7));
+					hex.push_back(Topology::Hexahedron(v0, v1, v2, v3, v4, v5, v6, v7));
 				}
 			}
 		}

@@ -24,7 +24,7 @@ namespace dyno
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
 
 		std::vector<Coord> vertList;
-		std::vector<TopologyModule::Triangle> faceList;
+		std::vector<Topology::Triangle> faceList;
 
 		triSet->setPoints(vertList);
 		triSet->setTriangles(faceList);
@@ -156,7 +156,7 @@ namespace dyno
 	void ObjLoader<TDataType>::loadObj(TriangleSet<TDataType>& Triangleset, std::string filename)
 	{
 		std::vector<Coord> vertList;
-		std::vector<TopologyModule::Triangle> faceList;
+		std::vector<Topology::Triangle> faceList;
 		dyno::loadObj(vertList,faceList,filename);
 
 		Triangleset.setPoints(vertList);

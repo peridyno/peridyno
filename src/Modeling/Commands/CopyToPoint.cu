@@ -49,9 +49,9 @@ namespace dyno
 
 
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Triangle> triangle;
+		std::vector<Topology::Triangle> triangle;
 
-		CArray<TopologyModule::Triangle> c_triangle;
+		CArray<Topology::Triangle> c_triangle;
 		CArray<Coord> c_point;
 		CArray<Coord> c_target;
 		c_point.assign(VertexIn);
@@ -119,7 +119,7 @@ namespace dyno
 				for (int j = 0; j < lengthT; j++)
 				{
 					;
-					triangle.push_back(TopologyModule::Triangle(c_triangle[j][0] + i * lengthV, c_triangle[j][1] + i  * lengthV, c_triangle[j][2] + i  * lengthV));
+					triangle.push_back(Topology::Triangle(c_triangle[j][0] + i * lengthV, c_triangle[j][1] + i  * lengthV, c_triangle[j][2] + i  * lengthV));
 
 				}
 		

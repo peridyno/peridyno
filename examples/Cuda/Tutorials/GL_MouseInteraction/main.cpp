@@ -37,7 +37,7 @@ public:
 
 	DEF_ARRAY_STATE(Transform3f, Transforms, DeviceType::GPU, "Instance transform");
 
-	DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+	DEF_INSTANCE_STATE(Topology, Topology, "Topology");
 };
 
 int main(int, char**)

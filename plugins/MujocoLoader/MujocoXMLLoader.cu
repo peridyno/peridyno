@@ -844,7 +844,7 @@ namespace dyno
 		c.vertices.insert(c.vertices.end(), b.vertices.begin(), b.vertices.end());
 		for (auto it : b.triangles)
 		{
-			b2.triangles.push_back(TopologyModule::Triangle(it[0] + offset, it[1] + offset, it[2] + offset));
+			b2.triangles.push_back(Topology::Triangle(it[0] + offset, it[1] + offset, it[2] + offset));
 		}
 		c.triangles.reserve(a.triangles.size() + b.triangles.size());
 		c.triangles.insert(c.triangles.end(), a.triangles.begin(), a.triangles.end());
@@ -869,11 +869,11 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void MujocoXMLLoader<TDataType>::offsetTriangleIndex(std::vector<TopologyModule::Triangle>& triangles, const int& offset)
+	void MujocoXMLLoader<TDataType>::offsetTriangleIndex(std::vector<Topology::Triangle>& triangles, const int& offset)
 	{
 		for (size_t i = 0; i < triangles.size(); i++)
 		{
-			triangles[i] = TopologyModule::Triangle(triangles[i][0] + offset, triangles[i][1] + offset, triangles[i][2] + offset);
+			triangles[i] = Topology::Triangle(triangles[i][0] + offset, triangles[i][1] + offset, triangles[i][2] + offset);
 
 		}
 	}

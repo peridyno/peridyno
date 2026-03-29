@@ -1,7 +1,7 @@
 #pragma once
 #include "Field.h"
 #include "Topology/TriangleSet.h"
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 
 #include <QTableWidgetItem>
 #include <QResizeEvent>
@@ -165,11 +165,11 @@ namespace dyno
 					if (field->getTemplateName() == std::string(typeid(TriangleSet<DataType3f>).name())) 
 					{
 
-						FArray<TopologyModule::Edge, DeviceType::GPU> edge;
-						std::cout<<std::string(typeid(TopologyModule::Edge).name())<<"\n";
-						std::cout << std::string(typeid(TopologyModule::Triangle).name()) << "\n";
-						std::cout << std::string(typeid(TopologyModule::Edg2Tri).name()) << "\n";
-						std::cout << std::string(typeid(TopologyModule::Tri2Edg).name()) << "\n";
+						FArray<Topology::Edge, DeviceType::GPU> edge;
+						std::cout<<std::string(typeid(Topology::Edge).name())<<"\n";
+						std::cout << std::string(typeid(Topology::Triangle).name()) << "\n";
+						std::cout << std::string(typeid(Topology::Edg2Tri).name()) << "\n";
+						std::cout << std::string(typeid(Topology::Tri2Edg).name()) << "\n";
 
 						std::vector<PDataViewerWidget*> viewers;
 						for (auto it : Name_Field)

@@ -47,9 +47,9 @@ namespace dyno
 		auto TriangleIn = this->inTriangleSetIn()->getData().triangleIndices();
 
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Triangle> triangle;
+		std::vector<Topology::Triangle> triangle;
 
-		CArray<TopologyModule::Triangle> c_triangle;
+		CArray<Topology::Triangle> c_triangle;
 		CArray<Coord> c_point;
 		c_point.assign(VertexIn);
 		c_triangle.assign(TriangleIn);
@@ -67,7 +67,7 @@ namespace dyno
 		}
 		for (int i = 0; i < lengthT; i++)
 		{
-			triangle.push_back(TopologyModule::Triangle(c_triangle[i][0], c_triangle[i][1], c_triangle[i][2]));
+			triangle.push_back(Topology::Triangle(c_triangle[i][0], c_triangle[i][1], c_triangle[i][2]));
 		}
 
 
@@ -119,7 +119,7 @@ namespace dyno
 				for (int j = 0; j < lengthT; j++)
 				{
 					;
-					triangle.push_back(TopologyModule::Triangle(c_triangle[j][0] + (i + 1) * lengthV, c_triangle[j][1] + (i + 1) * lengthV, c_triangle[j][2] + (i + 1) * lengthV));
+					triangle.push_back(Topology::Triangle(c_triangle[j][0] + (i + 1) * lengthV, c_triangle[j][1] + (i + 1) * lengthV, c_triangle[j][2] + (i + 1) * lengthV));
 
 				}
 		

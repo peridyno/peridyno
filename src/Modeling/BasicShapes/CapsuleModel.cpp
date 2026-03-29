@@ -372,11 +372,11 @@ namespace dyno
 		polySet->turnIntoTriangleSet(ts);
 
 		// Center Line
-		std::vector<TopologyModule::Edge> edges;
+		std::vector<Topology::Edge> edges;
 		vertices.clear();
 		vertices.push_back(center + q.rotate(Coord(0, + halfHeight, 0)));
 		vertices.push_back(center + q.rotate(Coord(0, - halfHeight, 0)));
-		edges.push_back(TopologyModule::Edge(0, 1));
+		edges.push_back(Topology::Edge(0, 1));
 
 		auto edgeSet = this->stateCenterLine()->getDataPtr();
 		edgeSet->setPoints(vertices);

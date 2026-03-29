@@ -501,7 +501,7 @@ namespace dyno
 
 			//Caterpillar Track Joint
 			auto edgeset = this->statecaterpillarTrack()->getDataPtr();
-			std::vector<TopologyModule::Edge> edges;
+			std::vector<Topology::Edge> edges;
 			std::vector<Vec3f> points;
 			for (int k = 0; k < caterpillarTrack_L.size(); k++)
 			{
@@ -515,9 +515,9 @@ namespace dyno
 				points.push_back(actors[start]->center);
 
 				if (k != caterpillarTrack_L.size() - 1)
-					edges.push_back(TopologyModule::Edge(k, k + 1));
+					edges.push_back(Topology::Edge(k, k + 1));
 				else
-					edges.push_back(TopologyModule::Edge(k, 0));
+					edges.push_back(Topology::Edge(k, 0));
 
 
 			}
@@ -534,9 +534,9 @@ namespace dyno
 				points.push_back(actors[start]->center);
 
 				if (k != caterpillarTrack_R.size() - 1)
-					edges.push_back(TopologyModule::Edge(k + edgeOffset, k + 1 + edgeOffset));
+					edges.push_back(Topology::Edge(k + edgeOffset, k + 1 + edgeOffset));
 				else
-					edges.push_back(TopologyModule::Edge(k + edgeOffset, 0 + edgeOffset));
+					edges.push_back(Topology::Edge(k + edgeOffset, 0 + edgeOffset));
 
 			}
 			edgeset->setPoints(points);

@@ -60,7 +60,7 @@ namespace dyno
 		std::optional<std::string> name;
 		std::optional<std::string> file;
 		std::vector<Vec3f> vertices;
-		std::vector<TopologyModule::Triangle> triangles;
+		std::vector<Topology::Triangle> triangles;
 
 	};
 
@@ -208,7 +208,7 @@ namespace dyno
 	struct Mesh
 	{
 		Mesh() {}
-		Mesh(const std::vector<Vec3f>& v, const std::vector<TopologyModule::Triangle>& t)
+		Mesh(const std::vector<Vec3f>& v, const std::vector<Topology::Triangle>& t)
 		{
 			this->vertices = v;
 			this->triangles = t;
@@ -221,7 +221,7 @@ namespace dyno
 		}
 
 		std::vector<Vec3f> vertices;
-		std::vector<TopologyModule::Triangle> triangles;
+		std::vector<Topology::Triangle> triangles;
 	};
 
 	template<typename TDataType>
@@ -234,7 +234,7 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
 
-		typedef typename TopologyModule::Triangle Triangle;
+		typedef typename Topology::Triangle Triangle;
 
 
 		MujocoXMLLoader();
@@ -403,7 +403,7 @@ namespace dyno
 		Mesh mergeMesh(const Mesh& a, const Mesh& b);
 		Mesh getMeshByName(std::string name);
 
-		void offsetTriangleIndex(std::vector<TopologyModule::Triangle>& triangles, const int& offset);
+		void offsetTriangleIndex(std::vector<Topology::Triangle>& triangles, const int& offset);
 		void offsetVertices(std::vector<Vec3f>& vertices, const Vec3f& offset);
 		void rotateVertices(std::vector<Vec3f>& vertices, Quat<Real> q);
 

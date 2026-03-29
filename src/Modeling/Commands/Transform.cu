@@ -67,12 +67,12 @@ namespace dyno
 		auto edgeSet = this->stateEdgeSet()->getDataPtr();
 
 
-		std::vector<TopologyModule::Edge> edge;
-		CArray<TopologyModule::Triangle> c_triangle;
+		std::vector<Topology::Edge> edge;
+		CArray<Topology::Triangle> c_triangle;
 		CArray<Coord> c_point;
-		CArray<TopologyModule::Edge> c_edge;
+		CArray<Topology::Edge> c_edge;
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Triangle> triangle;
+		std::vector<Topology::Triangle> triangle;
 
 		int numT;
 		int numV;
@@ -121,7 +121,7 @@ namespace dyno
 			numE = c_edge.size();
 			for (int i = 0; i < numE; i++)
 			{
-				edge.push_back(TopologyModule::Edge(c_edge[i]));
+				edge.push_back(Topology::Edge(c_edge[i]));
 			}
 		}
 
@@ -130,7 +130,7 @@ namespace dyno
 			numT = c_triangle.size();
 			for (int i = 0; i < numT; i++)
 			{
-				triangle.push_back(TopologyModule::Triangle(c_triangle[i]));
+				triangle.push_back(Topology::Triangle(c_triangle[i]));
 			}
 		}
 

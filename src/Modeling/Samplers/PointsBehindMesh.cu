@@ -413,7 +413,7 @@ namespace dyno
 
 	template< typename Coord>
 	__global__ void PtsBehindMesh_UpdateTriangleNormal(
-		DArray<TopologyModule::Triangle> d_triangles,
+		DArray<Topology::Triangle> d_triangles,
 		DArray<Coord> d_points,
 		DArray<Coord> normal,
 		float length,

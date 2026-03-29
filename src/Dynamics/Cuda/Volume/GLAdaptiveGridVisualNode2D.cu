@@ -34,7 +34,7 @@ namespace dyno
 	template<typename Coord2D, typename Coord3D>
 	__global__ void AG2DVN_CountNodes2DNeighbor(
 		DArray<Coord3D> edge_points,
-		DArray<TopologyModule::Edge> edge,
+		DArray<Topology::Edge> edge,
 		DArray<Coord2D> nodes,
 		DArrayList<int> neighbor,
 		DArray<uint> index,
@@ -51,19 +51,19 @@ namespace dyno
 			edge_points[tId] = Coord3D(0.0, nodes[tId][0], nodes[tId][1]);
 
 		for (int i = 0; i < neighbor[4 * tId].size(); i++)
-			edge[index[4 * tId] + i] = TopologyModule::Edge(tId, neighbor[4 * tId][i]);
+			edge[index[4 * tId] + i] = Topology::Edge(tId, neighbor[4 * tId][i]);
 		for (int i = 0; i < neighbor[4 * tId + 1].size(); i++)
-			edge[index[4 * tId + 1] + i] = TopologyModule::Edge(tId, neighbor[4 * tId + 1][i]);
+			edge[index[4 * tId + 1] + i] = Topology::Edge(tId, neighbor[4 * tId + 1][i]);
 		for (int i = 0; i < neighbor[4 * tId + 2].size(); i++)
-			edge[index[4 * tId + 2] + i] = TopologyModule::Edge(tId, neighbor[4 * tId + 2][i]);
+			edge[index[4 * tId + 2] + i] = Topology::Edge(tId, neighbor[4 * tId + 2][i]);
 		for (int i = 0; i < neighbor[4 * tId + 3].size(); i++)
-			edge[index[4 * tId + 3] + i] = TopologyModule::Edge(tId, neighbor[4 * tId + 3][i]);
+			edge[index[4 * tId + 3] + i] = Topology::Edge(tId, neighbor[4 * tId + 3][i]);
 	}
 
 	template <typename Real, typename Coord2D, typename Coord3D>
 	__global__ void AG2DVN_CountNodes2D(
 		DArray<Coord3D> edge_points,
-		DArray<TopologyModule::Edge> edge,
+		DArray<Topology::Edge> edge,
 		DArray<Coord2D> nodes,
 		DArray<Real> scale,
 		int ptype)
@@ -98,10 +98,10 @@ namespace dyno
 			edge_points[4 * tId + 3] = pos + Coord3D(0.0, 0.5 * up_dx, -0.5 * up_dx);
 		}
 
-		edge[4 * tId] = TopologyModule::Edge(4 * tId, 4 * tId + 1);
-		edge[4 * tId + 1] = TopologyModule::Edge(4 * tId + 1, 4 * tId + 2);
-		edge[4 * tId + 2] = TopologyModule::Edge(4 * tId + 2, 4 * tId + 3);
-		edge[4 * tId + 3] = TopologyModule::Edge(4 * tId + 3, 4 * tId);
+		edge[4 * tId] = Topology::Edge(4 * tId, 4 * tId + 1);
+		edge[4 * tId + 1] = Topology::Edge(4 * tId + 1, 4 * tId + 2);
+		edge[4 * tId + 2] = Topology::Edge(4 * tId + 2, 4 * tId + 3);
+		edge[4 * tId + 3] = Topology::Edge(4 * tId + 3, 4 * tId);
 	}
 
 	template<typename TDataType>
@@ -111,7 +111,7 @@ namespace dyno
 		auto volumeSet = this->inAdaptiveVolume()->getDataPtr();
 
 		DArray<Coord3D> edge_points;
-		DArray<TopologyModule::Edge> edges;
+		DArray<Topology::Edge> edges;
 
 		if (this->varEType()->currentKey() == EdgeType::Quadtree_Neighbor)
 		{

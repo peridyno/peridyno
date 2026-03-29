@@ -637,7 +637,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void TriangleSet<TDataType>::requestTriangle2Triangle(DArray<::dyno::TopologyModule::Tri2Tri>& t2t)
+	void TriangleSet<TDataType>::requestTriangle2Triangle(DArray<::dyno::Topology::Tri2Tri>& t2t)
 	{
 		uint triSize = mTriangleIndex.size();
 

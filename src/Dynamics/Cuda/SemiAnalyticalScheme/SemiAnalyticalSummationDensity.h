@@ -9,7 +9,7 @@ namespace dyno {
 	 * 
 	 * @tparam TDataType 
 	 */
-	typedef typename TopologyModule::Triangle Triangle;
+	typedef typename Topology::Triangle Triangle;
 
 	template<typename TDataType>
 	class SemiAnalyticalSummationDensity : public virtual ParticleApproximation<TDataType>
@@ -33,7 +33,7 @@ namespace dyno {
 		void compute(
 			DArray<Real>& rho,
 			DArray<Coord>& pos,
-			DArray<TopologyModule::Triangle>& Tri,
+			DArray<Topology::Triangle>& Tri,
 			DArray<Coord>& positionTri,
 			DArrayList<int>& neighbors,
 			DArrayList<int>& neighborsTri,

@@ -92,7 +92,7 @@ private:
 	Transform3f								transformCPU;
 	FArray<Transform3f, DeviceType::GPU>	transform;
 
-	FInstance<TopologyModule>				topology;
+	FInstance<Topology>				topology;
 
 	// bounding box of original triangle set
 	NBoundingBox							bbox;

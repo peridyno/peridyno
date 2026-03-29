@@ -206,7 +206,7 @@ namespace dyno
 		}
 
 		CArray<Coord> triPoints;
-		CArray<TopologyModule::Triangle> triIds;
+		CArray<Topology::Triangle> triIds;
 
 		triPoints.resize(triSet->getPoints().size());
 		triPoints.assign(triSet->getPoints());

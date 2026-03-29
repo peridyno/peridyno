@@ -57,8 +57,8 @@ namespace dyno
 		DEF_ARRAY_IN(Vec3f, Normal,		DeviceType::GPU, "");		
 		DEF_ARRAY_IN(Vec2f, TexCoord,	DeviceType::GPU, "");
 
-		DEF_ARRAY_IN(TopologyModule::Triangle, NormalIndex, DeviceType::GPU, "");
-		DEF_ARRAY_IN(TopologyModule::Triangle, TexCoordIndex, DeviceType::GPU, "");
+		DEF_ARRAY_IN(Topology::Triangle, NormalIndex, DeviceType::GPU, "");
+		DEF_ARRAY_IN(Topology::Triangle, TexCoordIndex, DeviceType::GPU, "");
 
 #ifdef CUDA_BACKEND
 		DEF_ARRAY2D_IN(Vec4f, ColorTexture, DeviceType::GPU, "");
@@ -86,13 +86,13 @@ namespace dyno
 
 		XBuffer<Vec3f> mVertexPosition;
 		XBuffer<Vec3f> mVertexColor;			// per-vertex color
-		XBuffer<TopologyModule::Triangle> mVertexIndex;
+		XBuffer<Topology::Triangle> mVertexIndex;
 
 		XBuffer<Vec3f> mNormal;
-		XBuffer<TopologyModule::Triangle> mNormalIndex;
+		XBuffer<Topology::Triangle> mNormalIndex;
 
 		XBuffer<Vec2f> mTexCoord;
-		XBuffer<TopologyModule::Triangle> mTexCoordIndex;
+		XBuffer<Topology::Triangle> mTexCoordIndex;
 
 #ifdef CUDA_BACKEND
 		// color texture

@@ -311,9 +311,9 @@ namespace dyno
 
 				
 
-				TopologyModule::Triangle tri;
-				std::vector<TopologyModule::Triangle> triangles;
-				std::vector<TopologyModule::Triangle> triangleNormalIndex;
+				Topology::Triangle tri;
+				std::vector<Topology::Triangle> triangles;
+				std::vector<Topology::Triangle> triangleNormalIndex;
 				for (size_t j = 0; j < polygonCount; j++)
 				{
 					auto from = currentMesh->getGeometry()->getGeometryData().getPartition(i).polygons[j].from_vertex;
@@ -1283,12 +1283,12 @@ namespace dyno
 				Vec4f p4 = nodeTransform * (worldMartix * Vec4f(0, 0, 0, 1));
 				jointPoints.push_back(Vec3f(p4.x, p4.y, p4.z));
 			}
-			std::vector<TopologyModule::Edge> jointEdges;
+			std::vector<Topology::Edge> jointEdges;
 			auto joints = targetScene->getBones();
 			for (auto j : joints)
 			{
 				if (j->parent.size())
-					jointEdges.push_back(TopologyModule::Edge(j->id, j->parent[0]->id));
+					jointEdges.push_back(Topology::Edge(j->id, j->parent[0]->id));
 			}
 			auto jointSet = this->stateJointSet()->getDataPtr();
 			jointSet->setPoints(jointPoints);

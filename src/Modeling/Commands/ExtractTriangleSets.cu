@@ -244,7 +244,7 @@ namespace dyno
 
 			thrust::exclusive_scan(thrust::device, scanMarkTri.begin(), scanMarkTri.begin() + scanMarkTri.size(), scanMarkTri.begin());
 
-			DArray<TopologyModule::Triangle> NewTriangles(newTriSize);
+			DArray<Topology::Triangle> NewTriangles(newTriSize);
 
 			DArray<int> New2OldTriIndex(newTriSize);
 

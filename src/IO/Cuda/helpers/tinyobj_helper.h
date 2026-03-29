@@ -7,6 +7,6 @@ namespace dyno
 {
 	bool loadTextureMeshFromObj(std::shared_ptr<TextureMesh> texMesh, const FilePath& fullname,bool useToCenter = true);
 
-	bool loadObj(std::vector<Vec3f>& points, std::vector<TopologyModule::Triangle>& triangles, std::string filename, bool append = false);
+	bool loadObj(std::vector<Vec3f>& points, std::vector<Topology::Triangle>& triangles, std::string filename, bool append = false);
 	
 }

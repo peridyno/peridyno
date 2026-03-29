@@ -106,7 +106,7 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TopologyModule::Triangle Triangle;
+		typedef typename Topology::Triangle Triangle;
 
 		TriangleSet();
 		~TriangleSet() override;
@@ -121,8 +121,8 @@ namespace dyno
 
 		const DArrayList<int>& vertex2Triangle() {return mVer2Tri; }
 
-		const DArray<TopologyModule::Tri2Edg>& triangle2Edge() { return mTri2Edg; }
-		const DArray<TopologyModule::Edg2Tri>& edge2Triangle() { return mEdg2Tri; }
+		const DArray<Topology::Tri2Edg>& triangle2Edge() { return mTri2Edg; }
+		const DArray<Topology::Edg2Tri>& edge2Triangle() { return mEdg2Tri; }
 
 
 		bool loadObjFile(std::string filename);
@@ -137,7 +137,7 @@ namespace dyno
 		void clear() override;
 
 	public:
-		void requestTriangle2Triangle(DArray<::dyno::TopologyModule::Tri2Tri>& t2t);
+		void requestTriangle2Triangle(DArray<::dyno::Topology::Tri2Tri>& t2t);
 
 		void requestEdgeNormals(DArray<Coord>& normals);
 
@@ -162,8 +162,8 @@ namespace dyno
 		DArrayList<int> mVer2Tri;
 
 		// Mapping between edges and triangles, automatically updated when update() is called
-		DArray<::dyno::TopologyModule::Edg2Tri> mEdg2Tri;
-		DArray<::dyno::TopologyModule::Tri2Edg> mTri2Edg;
+		DArray<::dyno::Topology::Edg2Tri> mEdg2Tri;
+		DArray<::dyno::Topology::Tri2Edg> mTri2Edg;
 	};
 }
 

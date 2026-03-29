@@ -8,8 +8,8 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TopologyModule::Quad Quad;
-		typedef typename TopologyModule::Hexahedron Hexahedron;
+		typedef typename Topology::Quad Quad;
+		typedef typename Topology::Hexahedron Hexahedron;
 
 		HexahedronSet();
 		~HexahedronSet();
@@ -20,7 +20,7 @@ namespace dyno
 		void setHexahedrons(DArray<Hexahedron>& hexahedrons);
 
 		DArray<Hexahedron>& getHexahedrons() { return m_hexahedrons; }
-		DArray<::dyno::TopologyModule::Tri2Tet>& getQua2Hex() { return quad2Hex; }
+		DArray<::dyno::Topology::Tri2Tet>& getQua2Hex() { return quad2Hex; }
 
 		DArrayList<int>& getVer2Hex();
 
@@ -32,8 +32,8 @@ namespace dyno
 		void updateQuads() override;
 
 	private:
-		DArray<::dyno::TopologyModule::Hexahedron> m_hexahedrons;
-		DArray<::dyno::TopologyModule::Quad2Hex> quad2Hex;
+		DArray<::dyno::Topology::Hexahedron> m_hexahedrons;
+		DArray<::dyno::Topology::Quad2Hex> quad2Hex;
 		DArrayList<int> m_ver2Hex;
 	};
 }

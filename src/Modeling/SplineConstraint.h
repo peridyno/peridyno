@@ -45,7 +45,7 @@ namespace dyno
 
 		//DEF_VAR(Coord, AngularVelocity, Coord(0), "");
 
-		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+		DEF_INSTANCE_STATE(Topology, Topology, "Topology");
 
 	protected:
 		void resetStates() override;

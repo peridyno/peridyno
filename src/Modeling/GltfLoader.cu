@@ -79,21 +79,21 @@ namespace dyno
 			vertices.push_back(v6);
 			vertices.push_back(v7);
 
-			std::vector<TopologyModule::Edge> edges;
-			edges.push_back(TopologyModule::Edge(0, 1));
-			edges.push_back(TopologyModule::Edge(1, 2));
-			edges.push_back(TopologyModule::Edge(2, 3));
-			edges.push_back(TopologyModule::Edge(3, 0));
+			std::vector<Topology::Edge> edges;
+			edges.push_back(Topology::Edge(0, 1));
+			edges.push_back(Topology::Edge(1, 2));
+			edges.push_back(Topology::Edge(2, 3));
+			edges.push_back(Topology::Edge(3, 0));
 
-			edges.push_back(TopologyModule::Edge(4, 5));
-			edges.push_back(TopologyModule::Edge(5, 6));
-			edges.push_back(TopologyModule::Edge(6, 7));
-			edges.push_back(TopologyModule::Edge(7, 4));
+			edges.push_back(Topology::Edge(4, 5));
+			edges.push_back(Topology::Edge(5, 6));
+			edges.push_back(Topology::Edge(6, 7));
+			edges.push_back(Topology::Edge(7, 4));
 
-			edges.push_back(TopologyModule::Edge(0, 4));
-			edges.push_back(TopologyModule::Edge(1, 5));
-			edges.push_back(TopologyModule::Edge(2, 6));
-			edges.push_back(TopologyModule::Edge(3, 7));
+			edges.push_back(Topology::Edge(0, 4));
+			edges.push_back(Topology::Edge(1, 5));
+			edges.push_back(Topology::Edge(2, 6));
+			edges.push_back(Topology::Edge(3, 7));
 
 			es.setPoints(vertices);
 			es.setEdges(edges);

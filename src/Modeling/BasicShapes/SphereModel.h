@@ -75,7 +75,7 @@ namespace dyno
 	private:
 		void varChanged();
 
-		void generateIcosahedron(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles);
+		void generateIcosahedron(std::vector<Vec3f>& vertices, std::vector<Topology::Triangle>& triangles);
 
 		void standardSphere();
 

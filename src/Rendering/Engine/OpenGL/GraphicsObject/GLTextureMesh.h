@@ -72,9 +72,9 @@ namespace dyno
 
 		void updateGL();
 
-		XBuffer<dyno::TopologyModule::Triangle>		glVertexIndex;
-		XBuffer<dyno::TopologyModule::Triangle>		glNormalIndex;
-		XBuffer<dyno::TopologyModule::Triangle>		glTexCoordIndex;
+		XBuffer<dyno::Topology::Triangle>		glVertexIndex;
+		XBuffer<dyno::Topology::Triangle>		glNormalIndex;
+		XBuffer<dyno::Topology::Triangle>		glTexCoordIndex;
 
 		glm::mat4 transform;
 

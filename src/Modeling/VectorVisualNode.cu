@@ -208,7 +208,7 @@ namespace dyno
 		DArray<Coord> d_point,
 		DArray<Coord> normal_points,
 		DArray<Coord> normal,
-		DArray<TopologyModule::Edge> edges,
+		DArray<Topology::Edge> edges,
 		float length,
 		bool normallization
 		)
@@ -225,7 +225,7 @@ namespace dyno
 		normal_points[2 * pId] = d_point[pId] ;
 		normal_points[2 * pId + 1] = d_point[pId] + dirNormal;
 
-		edges[pId] = TopologyModule::Edge(2 * pId, 2 * pId + 1);
+		edges[pId] = Topology::Edge(2 * pId, 2 * pId + 1);
 	}
 
 

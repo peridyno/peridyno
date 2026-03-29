@@ -1,6 +1,6 @@
 #pragma once
 #include "Module/OutputModule.h"
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 #include "Matrix/Transform3x3.h"
 
 #include <string>
@@ -16,7 +16,7 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename ::dyno::TopologyModule::Triangle Triangle;
+		typedef typename ::dyno::Topology::Triangle Triangle;
 		typedef typename ::dyno::Transform<Real, 3> Transform;
 		EigenValueWriter();
 		virtual ~EigenValueWriter();

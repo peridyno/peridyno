@@ -103,7 +103,7 @@ namespace dyno
 		totalIndex = lengthV;
 
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Triangle> triangle;
+		std::vector<Topology::Triangle> triangle;
 
 		Real dt = this->stateTimeStep()->getData();
 		tempLength = tempLength + CurrentVelocity * dt;
