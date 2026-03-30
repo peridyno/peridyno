@@ -16,19 +16,19 @@ namespace dyno
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
 		auto glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
-		glModule->setVisible(true);
+		glModule->varBaseColor()->setValue(Color(0.8f, 0.52f, 0.25f));
+		glModule->varVisible()->setValue(true);
 		this->stateTriangleSet()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
 
 		auto glModule2 = std::make_shared<GLPointVisualModule>();
-		glModule2->setColor(Color(1.0f, 1.0f, 1.0f));
+		glModule2->varBaseColor()->setValue(Color(1.0f, 1.0f, 1.0f));
 		glModule2->varPointSize()->setValue(0.01);
 		this->stateTriangleSet()->connect(glModule2->inPointSet());
 		this->graphicsPipeline()->pushModule(glModule2);
 
 		auto glModule3 = std::make_shared<GLWireframeVisualModule>();
-		glModule3->setColor(Color(1.0f, 1.0f, 1.0f));
+		glModule3->varBaseColor()->setValue(Color(1.0f, 1.0f, 1.0f));
 		this->stateTriangleSet()->connect(glModule3->inEdgeSet());
 		this->graphicsPipeline()->pushModule(glModule3);
 

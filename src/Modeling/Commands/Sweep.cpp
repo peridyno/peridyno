@@ -22,8 +22,8 @@ namespace dyno
 
 
 		auto glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
-		glModule->setVisible(true);
+		glModule->varBaseColor()->setValue(Color(0.8f, 0.52f, 0.25f));
+		glModule->varVisible()->setValue(true);
 		this->stateTriangleSet()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
 
@@ -70,11 +70,11 @@ namespace dyno
 	template<typename TDataType>
 	void SweepModel<TDataType>::varChanged()
 	{
-		auto center = this->varLocation()->getData();
-		auto rot = this->varRotation()->getData();
-		auto scale = this->varScale()->getData();
+		auto center = this->varLocation()->getValue();
+		auto rot = this->varRotation()->getValue();
+		auto scale = this->varScale()->getValue();
 
-		auto radius = this->varRadius()->getData();
+		auto radius = this->varRadius()->getValue();
 		
 		if (this->inSpline()->isEmpty())
 		{ 
@@ -279,13 +279,13 @@ namespace dyno
 	void SweepModel<TDataType>::displayChanged()
 	{
 		auto SurfaceModule = this->graphicsPipeline()->template findFirstModule<GLSurfaceVisualModule>();
-		SurfaceModule->setVisible(this->varDisplaySurface()->getValue());
+		SurfaceModule->varVisible()->setValue(this->varDisplaySurface()->getValue());
 
 		auto wireModule = this->graphicsPipeline()->template findFirstModule<GLWireframeVisualModule>();
-		wireModule->setVisible(this->varDisplayWireframe()->getValue());
+		wireModule->varVisible()->setValue(this->varDisplayWireframe()->getValue());
 	
 		auto pointModule = this->graphicsPipeline()->template findFirstModule<GLPointVisualModule>();
-		pointModule->setVisible(this->varDisplayPoints()->getValue());
+		pointModule->varVisible()->setValue(this->varDisplayPoints()->getValue());
 	}
 
 	DEFINE_CLASS(SweepModel);

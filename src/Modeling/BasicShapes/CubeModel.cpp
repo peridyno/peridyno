@@ -32,7 +32,7 @@ namespace dyno
 		this->varLength()->attach(callback);
 
 		auto tsRender = std::make_shared<GLSurfaceVisualModule>();
-		tsRender->setVisible(true);
+		tsRender->varVisible()->setValue(true);
 		this->stateTriangleSet()->connect(tsRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(tsRender);
 

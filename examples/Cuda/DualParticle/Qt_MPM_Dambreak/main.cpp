@@ -68,7 +68,7 @@ std::shared_ptr<SceneGraph> createScene()
 	fluid->graphicsPipeline()->pushModule(colorMapper);
 
 	auto ptRender = std::make_shared<GLPointVisualModule>();
-	ptRender->setColor(Color(1, 0, 0));
+	ptRender->varBaseColor()->setValue(Color(1, 0, 0));
 	ptRender->varPointSize()->setValue(0.0025);
 	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 
@@ -86,7 +86,7 @@ std::shared_ptr<SceneGraph> createScene()
 	fluid->graphicsPipeline()->pushModule(colorBar);
 
 	auto vpRender = std::make_shared<GLPointVisualModule>();
-	vpRender->setColor(Color(1, 1, 0));
+	vpRender->varBaseColor()->setValue(Color(1, 1, 0));
 	vpRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 	fluid->stateVirtualPointSet()->connect(vpRender->inPointSet());
 	vpRender->varPointSize()->setValue(0.0005);

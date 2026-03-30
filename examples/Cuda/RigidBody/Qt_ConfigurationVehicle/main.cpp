@@ -99,8 +99,8 @@ std::shared_ptr<SceneGraph> creatCar()
  	//configCar->graphicsPipeline()->pushModule(mapper);
  
  	//auto sRender = std::make_shared<GLSurfaceVisualModule>();
- 	//sRender->setColor(Color(0.3f, 0.5f, 0.9f));
- 	//sRender->setAlpha(0.8f);
+ 	//sRender->varBaseColor()->setValue(Color(0.3f, 0.5f, 0.9f));
+ 	//sRender->varAlpha()->setValue(0.8f);
  	//sRender->setRoughness(0.7f);
  	//sRender->setMetallic(3.0f);
  	//mapper->outTriangleSet()->connect(sRender->inTriangleSet());

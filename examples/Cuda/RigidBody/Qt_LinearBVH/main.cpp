@@ -110,8 +110,8 @@ std::shared_ptr<SceneGraph> createBoxes()
 	rigid->graphicsPipeline()->pushModule(mapper);
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Color(1, 1, 0));
-	sRender->setAlpha(0.5f);
+	sRender->varBaseColor()->setValue(Color(1, 1, 0));
+	sRender->varAlpha()->setValue(0.5f);
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
 
@@ -129,7 +129,7 @@ std::shared_ptr<SceneGraph> createBoxes()
 	rigid->graphicsPipeline()->pushModule(bvhMapper);
 
 	auto wireRender = std::make_shared<GLWireframeVisualModule>();
-	wireRender->setColor(Color(0, 0, 1));
+	wireRender->varBaseColor()->setValue(Color(0, 0, 1));
 	bvhMapper->outEdgeSet()->connect(wireRender->inEdgeSet());
 	rigid->graphicsPipeline()->pushModule(wireRender);
 

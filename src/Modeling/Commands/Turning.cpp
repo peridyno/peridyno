@@ -35,8 +35,8 @@ namespace dyno
 		this->varCurve()->attach(callback);
 
 		auto tsRender = std::make_shared<GLSurfaceVisualModule>();
-		tsRender->setColor(Color(0.8f, 0.52f, 0.25f));
-		tsRender->setVisible(true);
+		tsRender->varBaseColor()->setValue(Color(0.8f, 0.52f, 0.25f));
+		tsRender->varVisible()->setValue(true);
 		this->stateTriangleSet()->connect(tsRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(tsRender);
 

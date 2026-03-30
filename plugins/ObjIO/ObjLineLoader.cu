@@ -29,8 +29,8 @@ namespace dyno
 
 		auto wireRender = std::make_shared<GLWireframeVisualModule>();
 		
-		wireRender->setVisible(true);
-		wireRender->setColor(Color::Green());
+		wireRender->varVisible()->setValue(true);
+		wireRender->varBaseColor()->setValue(Color::Green());
 
 		this->stateEdgeSet()->connect(wireRender->inEdgeSet());
 		this->graphicsPipeline()->pushModule(wireRender);

@@ -137,15 +137,15 @@ namespace dyno
 		this->varJointRadius()->attach(callbackRender);
 
 		jointPointRender = std::make_shared<GLPointVisualModule>();
-		jointPointRender->setColor(Color(1.0f, 0.0f, 0.0f));
+		jointPointRender->varBaseColor()->setValue(Color(1.0f, 0.0f, 0.0f));
 		jointPointRender->varPointSize()->setValue(this->varJointRadius()->getValue());
-		jointPointRender->setVisible(true);
+		jointPointRender->varVisible()->setValue(true);
 		//this->stateJointSet()->connect(jointPointRender->inPointSet());
 		this->graphicsPipeline()->pushModule(jointPointRender);
 
 		jointLineRender = std::make_shared<GLWireframeVisualModule>();
 		jointLineRender->varBaseColor()->setValue(Color(0, 1, 0));
-		jointLineRender->setVisible(true);
+		jointLineRender->varVisible()->setValue(true);
 		jointLineRender->varRadius()->setValue(this->varJointRadius()->getValue() / 3);
 		jointLineRender->varRenderMode()->setCurrentKey(GLWireframeVisualModule::EEdgeMode::CYLINDER);
 		//this->stateJointSet()->connect(jointLineRender->inEdgeSet());

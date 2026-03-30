@@ -28,7 +28,7 @@ namespace dyno
 		auto wireframe = std::make_shared<GLWireframeVisualModule>();
 		this->stateEdgeSet()->connect(wireframe->inEdgeSet());
 		this->graphicsPipeline()->pushModule(wireframe);
-		wireframe->setColor(Color(1, 1, 0));
+		wireframe->varBaseColor()->setValue(Color(1, 1, 0));
 		wireframe->varLineWidth()->setValue(0.1);
 		wireframe->varRenderMode()->setCurrentKey(1);
 

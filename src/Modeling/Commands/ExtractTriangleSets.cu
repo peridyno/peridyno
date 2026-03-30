@@ -13,14 +13,14 @@ namespace dyno
 
 		auto inSurfaceRender = std::make_shared<GLSurfaceVisualModule>();
 		this->inTriangleSets()->connect(inSurfaceRender->inTriangleSet());
-		inSurfaceRender->setAlpha(0.1);
-		inSurfaceRender->setColor(Color::LightGray());
+		inSurfaceRender->varAlpha()->setValue(0.1);
+		inSurfaceRender->varBaseColor()->setValue(Color::LightGray());
 
 		this->graphicsPipeline()->pushModule(inSurfaceRender);
 
 		auto glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
-		glModule->setVisible(true);
+		glModule->varBaseColor()->setValue(Color(0.8f, 0.52f, 0.25f));
+		glModule->varVisible()->setValue(true);
 		this->stateTriangleSets()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
 

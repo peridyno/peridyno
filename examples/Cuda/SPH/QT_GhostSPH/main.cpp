@@ -83,7 +83,7 @@ std::shared_ptr<SceneGraph> createScene()
 	incompressibleFluid->connect(boundary->importParticleSystems());
 	
 	auto ptRender = std::make_shared<GLPointVisualModule>();
-	ptRender->setColor(Color(0.6, 0.5, 0.2));
+	ptRender->varBaseColor()->setValue(Color(0.6, 0.5, 0.2));
 	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 	solidPoints->statePointSet()->connect(ptRender->inPointSet());
 	solidPoints->graphicsPipeline()->pushModule(ptRender);

@@ -43,10 +43,10 @@ std::shared_ptr<SceneGraph> createScene()
 	cloth->connect(boundary->importTriangularSystems());
 
 	auto surfaceRendererCloth = std::make_shared<GLSurfaceVisualModule>();
-	surfaceRendererCloth->setColor(Color(0.4, 0.4, 1.0));
+	surfaceRendererCloth->varBaseColor()->setValue(Color(0.4, 0.4, 1.0));
 
 	auto surfaceRenderer = std::make_shared<GLSurfaceVisualModule>();
-	surfaceRenderer->setColor(Color(0.8, 0.8, 0.8));
+	surfaceRenderer->varBaseColor()->setValue(Color(0.8, 0.8, 0.8));
 	surfaceRenderer->varUseVertexNormal()->setValue(true);
 	cloth->stateTriangleSet()->connect(surfaceRendererCloth->inTriangleSet());
 	object->stateTriangleSet()->connect(surfaceRenderer->inTriangleSet());

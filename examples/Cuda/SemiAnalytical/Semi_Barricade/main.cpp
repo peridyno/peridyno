@@ -54,7 +54,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto ptRender = std::make_shared<GLPointVisualModule>();
 	ptRender->varPointSize()->setValue(0.002);
-	ptRender->setColor(Color(1, 0, 0));
+	ptRender->varBaseColor()->setValue(Color(1, 0, 0));
 	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 
 	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
@@ -76,8 +76,8 @@ std::shared_ptr<SceneGraph> createScene()
 	barricade->varLocation()->setValue(Vec3f(0.1, 0.022, 0.5));
 
 	auto sRenderf = std::make_shared<GLSurfaceVisualModule>();
-	sRenderf->setColor(Color(0.8f, 0.52f, 0.25f));
-	sRenderf->setVisible(true);
+	sRenderf->varBaseColor()->setValue(Color(0.8f, 0.52f, 0.25f));
+	sRenderf->varVisible()->setValue(true);
 	sRenderf->varUseVertexNormal()->setValue(true);	// use generated smooth normal
 	barricade->stateTriangleSet()->connect(sRenderf->inTriangleSet());
 	barricade->graphicsPipeline()->pushModule(sRenderf);

@@ -32,7 +32,7 @@ namespace dyno
 		mPlane = std::make_shared< PoissonPlane<TDataType>>();
 
 		auto wireRender = std::make_shared<GLWireframeVisualModule>();
-		wireRender->setColor(Color(0, 1, 0));
+		wireRender->varBaseColor()->setValue(Color(0, 1, 0));
 		this->stateOutline()->connect(wireRender->inEdgeSet());
 		this->graphicsPipeline()->pushModule(wireRender);
 	}

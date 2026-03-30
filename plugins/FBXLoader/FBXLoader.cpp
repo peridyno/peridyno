@@ -67,12 +67,12 @@ namespace dyno
 			this->stateJointSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
 			this->stateJointSet()->connect(ptRender->inPointSet());
 			ptRender->varPointSize()->setValue(0.002);
-			ptRender->setColor(Color::Purple3());
+			ptRender->varBaseColor()->setValue(Color::Purple3());
 
 			auto wireRender = std::make_shared<GLWireframeVisualModule>();
 			this->stateJointSet()->connect(wireRender->inEdgeSet());
 			wireRender->varRenderMode()->setCurrentKey(GLWireframeVisualModule::EEdgeMode::CYLINDER);
-			wireRender->setColor(Color::Purple());
+			wireRender->varBaseColor()->setValue(Color::Purple());
 
 			wireRender->varLineWidth()->setValue(0.002);
 			this->graphicsPipeline()->pushModule(ptRender);
@@ -85,7 +85,7 @@ namespace dyno
 
 			//this->stateShapeCenter()->connect(ptRender->inPointSet());
 			//ptRender->varPointSize()->setValue(0.01);
-			//ptRender->setColor(Color::Red());
+			//ptRender->varBaseColor()->setValue(Color::Red());
 
 			//this->graphicsPipeline()->pushModule(ptRender);
 			//ptRender->varVisible()->setValue(false);

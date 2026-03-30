@@ -57,7 +57,7 @@ namespace dyno
 				cloth->setDt(0.001f);
 
 				auto pointRenderer = std::make_shared<GLPointVisualModule>();
-				pointRenderer->setColor(Color(1, 0.2, 1));
+				pointRenderer->varBaseColor()->setValue(Color(1, 0.2, 1));
 				pointRenderer->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
 				pointRenderer->varPointSize()->setValue(0.002f);
 				cloth->stateTriangleSet()->connect(pointRenderer->inPointSet());

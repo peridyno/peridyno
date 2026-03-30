@@ -52,7 +52,7 @@ namespace dyno
 
 
 		glInstanceCylinder = std::make_shared<GLInstanceVisualModule>();
-		glInstanceCylinder->setColor(Color(0, 1, 0));
+		glInstanceCylinder->varBaseColor()->setValue(Color(0, 1, 0));
 
 		this->stateArrowCylinder()->connect(glInstanceCylinder->inTriangleSet());
 		this->stateTransformsCylinder()->connect(glInstanceCylinder->inInstanceTransform());
@@ -64,7 +64,7 @@ namespace dyno
 
 
 		glInstanceCone = std::make_shared<GLInstanceVisualModule>();
-		glInstanceCone->setColor(Color(0, 1, 0));
+		glInstanceCone->varBaseColor()->setValue(Color(0, 1, 0));
 
 		this->stateArrowCone()->connect(glInstanceCone->inTriangleSet());
 		this->stateTransformsCone()->connect(glInstanceCone->inInstanceTransform());
@@ -81,13 +81,13 @@ namespace dyno
 
 		if (this->varLineMode()->getValue() == this->Arrow)
 		{
-			glInstanceCone->setVisible(true);
-			glInstanceCylinder->setVisible(true);
+			glInstanceCone->varVisible()->setValue(true);
+			glInstanceCylinder->varVisible()->setValue(true);
 		}
 		else
 		{
-			glInstanceCone->setVisible(false);
-			glInstanceCylinder->setVisible(false);
+			glInstanceCone->varVisible()->setValue(false);
+			glInstanceCylinder->varVisible()->setValue(false);
 		}
 
 	}

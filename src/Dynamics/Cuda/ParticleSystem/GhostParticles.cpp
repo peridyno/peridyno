@@ -11,7 +11,7 @@ namespace dyno
 		: ParticleSystem<TDataType>()
 	{
 		auto ghostRender = std::make_shared<GLPointVisualModule>();
-		ghostRender->setColor(Color(1, 0.5, 0));
+		ghostRender->varBaseColor()->setValue(Color(1, 0.5, 0));
 		ghostRender->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
 
 		this->statePointSet()->connect(ghostRender->inPointSet());

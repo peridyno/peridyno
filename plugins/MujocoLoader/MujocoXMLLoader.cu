@@ -39,7 +39,7 @@ namespace dyno
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
 		auto tsRender = std::make_shared<GLSurfaceVisualModule>();
-		tsRender->setVisible(true);
+		tsRender->varVisible()->setValue(true);
 		this->stateTriangleSet()->connect(tsRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(tsRender);
 
@@ -51,8 +51,8 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(mapper);
 
 		auto sRender = std::make_shared<GLSurfaceVisualModule>();
-		sRender->setColor(Color(1, 1, 0));
-		sRender->setAlpha(0.5f);
+		sRender->varBaseColor()->setValue(Color(1, 1, 0));
+		sRender->varAlpha()->setValue(0.5f);
 		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(sRender);
 
@@ -67,7 +67,7 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(contactPointMapper);
 
 		auto pointRender = std::make_shared<GLPointVisualModule>();
-		pointRender->setColor(Color(1, 0, 0));
+		pointRender->varBaseColor()->setValue(Color(1, 0, 0));
 		pointRender->varPointSize()->setValue(0.01f);
 		contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
 		this->graphicsPipeline()->pushModule(pointRender);

@@ -26,8 +26,8 @@ namespace dyno
 		pointrender = new GLPointVisualModule;
 		std::shared_ptr<GLPointVisualModule>ptrender(pointrender);
 		
-		pointrender->setVisible(true);
-		pointrender->setColor(Color(1, 0, 0));
+		pointrender->varVisible()->setValue(true);
+		pointrender->varBaseColor()->setValue(Color(1, 0, 0));
 		pointrender->varPointSize()->setValue(this->varRadius()->getData());
 		pointrender->varPointSize()->setValue(varRadius()->getData()/100);
 

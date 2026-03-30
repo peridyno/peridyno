@@ -47,7 +47,7 @@ namespace dyno
 		this->stateTriangleCenter()->setDataPtr(std::make_shared<PointSet<TDataType>>());
 
 		glInstanceCylinder = std::make_shared<GLInstanceVisualModule>();
-		glInstanceCylinder->setColor(Color(0, 1, 0));
+		glInstanceCylinder->varBaseColor()->setValue(Color(0, 1, 0));
 
 		this->stateArrowCylinder()->connect(glInstanceCylinder->inTriangleSet());
 		this->stateTransformsCylinder()->connect(glInstanceCylinder->inInstanceTransform());
@@ -59,7 +59,7 @@ namespace dyno
 
 
 		glInstanceCone = std::make_shared<GLInstanceVisualModule>();
-		glInstanceCone->setColor(Color(0, 1, 0));
+		glInstanceCone->varBaseColor()->setValue(Color(0, 1, 0));
 
 		this->stateArrowCone()->connect(glInstanceCone->inTriangleSet());
 		this->stateTransformsCone()->connect(glInstanceCone->inInstanceTransform());

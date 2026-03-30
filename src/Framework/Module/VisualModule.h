@@ -24,7 +24,6 @@ namespace dyno
 		VisualModule();
 		virtual ~VisualModule();
 
-		void setVisible(bool bVisible);
 		bool isVisible() { return this->varVisible()->getValue(); }
 
 		std::string getModuleType() override { return "VisualModule"; }

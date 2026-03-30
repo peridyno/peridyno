@@ -56,8 +56,8 @@ std::shared_ptr<SceneGraph> createScene()
 	fish->varLocation()->setValue(Vec3f(0.0, 0.6, -0.4));
 	fish->graphicsPipeline()->clear();
 	auto sRenderf = std::make_shared<GLSurfaceVisualModule>();
-	sRenderf->setColor(Color(0.8f, 0.52f, 0.25f));
-	sRenderf->setVisible(true);
+	sRenderf->varBaseColor()->setValue(Color(0.8f, 0.52f, 0.25f));
+	sRenderf->varVisible()->setValue(true);
 	sRenderf->varUseVertexNormal()->setValue(true);	// use generated smooth normal
 	sRenderf->varMetallic()->setValue(1.0);
 	fish->stateTriangleSet()->connect(sRenderf->inTriangleSet());
@@ -77,7 +77,7 @@ std::shared_ptr<SceneGraph> createScene()
 	fluid->graphicsPipeline()->pushModule(colorMapper);
 
 	auto ptRender = std::make_shared<GLPointVisualModule>();
-	ptRender->setColor(Color(1, 0, 0));
+	ptRender->varBaseColor()->setValue(Color(1, 0, 0));
 	ptRender->varPointSize()->setValue(0.004);
 	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 
@@ -94,7 +94,7 @@ std::shared_ptr<SceneGraph> createScene()
 	//fluid->graphicsPipeline()->pushModule(colorBar);
 
 	//auto vpRender = std::make_shared<GLPointVisualModule>();
-	//vpRender->setColor(Color(1, 1, 0));
+	//vpRender->varBaseColor()->setValue(Color(1, 1, 0));
 	//vpRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 	//fluid->stateVirtualPointSet()->connect(vpRender->inPointSet());
 	//vpRender->varPointSize()->setValue(0.0005);

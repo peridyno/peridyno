@@ -55,7 +55,7 @@ int main()
 	instanceNode->graphicsPipeline()->pushModule(mouseInterator);
 
 	auto instanceRender = std::make_shared<GLInstanceVisualModule>();
-	instanceRender->setColor(Color(0, 1, 0));
+	instanceRender->varBaseColor()->setValue(Color(0, 1, 0));
 	instanceNode->stateTopology()->connect(instanceRender->inTriangleSet());
 	instanceNode->stateTransforms()->connect(instanceRender->inInstanceTransform());
 	instanceNode->graphicsPipeline()->pushModule(instanceRender);

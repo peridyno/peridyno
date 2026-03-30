@@ -16,8 +16,8 @@ namespace dyno
 		this->stateEdgeSet()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
 
 		glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
-		glModule->setVisible(true);
+		glModule->varBaseColor()->setValue(Color(0.8f, 0.52f, 0.25f));
+		glModule->varVisible()->setValue(true);
 
 		glWireModule = std::make_shared<GLWireframeVisualModule>();
 		glWireModule->varLineWidth()->setValue(1);
@@ -43,7 +43,7 @@ namespace dyno
 
 	template<typename TDataType>
 	void TransformModel<TDataType>::disableRender() {
-		glModule->setVisible(false);
+		glModule->varVisible()->setValue(false);
 	};
 
 	template<typename TDataType>

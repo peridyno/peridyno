@@ -20,7 +20,7 @@ namespace dyno
 	{
 		auto wRender = std::make_shared<GLWireframeVisualModule>();
 		this->stateGrids()->connect(wRender->inEdgeSet());
-		wRender->setColor(Color(0, 0, 0));
+		wRender->varBaseColor()->setValue(Color(0, 0, 0));
 
 		this->graphicsPipeline()->pushModule(wRender);
 	}

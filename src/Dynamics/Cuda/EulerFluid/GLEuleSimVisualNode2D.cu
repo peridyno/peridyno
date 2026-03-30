@@ -21,14 +21,14 @@ namespace dyno
 		colorMapper->varMax()->setValue(1.0f);
 
 		auto ptRender = std::make_shared<GLPointVisualModule>();
-		ptRender->setColor(Color(1, 0, 0));
+		ptRender->varBaseColor()->setValue(Color(1, 0, 0));
 		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 		ptRender->varPointSize()->setValue(0.002);
 		this->inLeafs()->connect(ptRender->inPointSet());
 		colorMapper->outColor()->connect(ptRender->inColor());
 
 		auto wRender = std::make_shared<GLWireframeVisualModule>();
-		wRender->setColor(Color(0, 0, 1));
+		wRender->varBaseColor()->setValue(Color(0, 0, 1));
 		this->stateEdgeSet()->connect(wRender->inEdgeSet());
 
 		this->graphicsPipeline()->pushModule(colorMapper);

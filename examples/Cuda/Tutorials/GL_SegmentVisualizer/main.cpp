@@ -76,14 +76,14 @@ int main(int, char**)
 
 	// wireframe rendering
 	auto edgeRender = std::make_shared<GLWireframeVisualModule>();
-	edgeRender->setColor(Color(0, 1, 0));
+	edgeRender->varBaseColor()->setValue(Color(0, 1, 0));
 	edgeRender->varRenderMode()->getDataPtr()->setCurrentKey(GLWireframeVisualModule::LINE);
 	edgeRender->varLineWidth()->setValue(2.f);
 	instanceNode->stateHexahedrons()->connect(edgeRender->inEdgeSet());
 	instanceNode->graphicsPipeline()->pushModule(edgeRender);
 
 // 	auto ptRender = std::make_shared<GLPointVisualModule>();
-// 	ptRender->setColor(Vec3f(1, 0, 0));
+// 	ptRender->varBaseColor()->setValue(Vec3f(1, 0, 0));
 // 	instanceNode->stateHexahedrons()->connect(ptRender->inPointSet());
 // 	instanceNode->graphicsPipeline()->pushModule(ptRender);
 

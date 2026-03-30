@@ -61,7 +61,7 @@ namespace dyno
 				auto fluid = std::make_shared<DualParticleFluid<DataType3f>>();
 
 				auto vpRender = std::make_shared<GLPointVisualModule>();
-				vpRender->setColor(Color(1, 1, 0));
+				vpRender->varBaseColor()->setValue(Color(1, 1, 0));
 				vpRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 				fluid->stateVirtualPointSet()->connect(vpRender->inPointSet());
 				vpRender->varPointSize()->setValue(0.0005);

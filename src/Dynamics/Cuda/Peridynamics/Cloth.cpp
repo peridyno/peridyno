@@ -54,7 +54,7 @@ namespace dyno
 		this->animationPipeline()->pushModule(elasticity);
 
 		auto pointRenderer = std::make_shared<GLPointVisualModule>();
-		pointRenderer->setColor(Color(1, 0.2, 1));
+		pointRenderer->varBaseColor()->setValue(Color(1, 0.2, 1));
 		pointRenderer->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
 		pointRenderer->varPointSize()->setValue(0.002f);
 		this->stateTriangleSet()->connect(pointRenderer->inPointSet());
