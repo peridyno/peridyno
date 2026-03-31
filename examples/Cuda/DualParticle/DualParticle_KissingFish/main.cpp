@@ -41,7 +41,7 @@ std::shared_ptr<SceneGraph> createScene()
 	ptsLoader->outPointSet()->promoteOuput()->connect(initialParticles->inPoints());
 
 	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
-	fluid->varIncompressibilitySolver()->getDataPtr()->setCurrentKey(ParticleFluid<DataType3f>::DualParticle);
+	fluid->varIncompressibilitySolver()->setCurrentKey(ParticleFluid<DataType3f>::DualParticle);
 	fluid->setDt(0.001);
 	fluid->varSmoothingLength()->setValue(2.4);
 	initialParticles->connect(fluid->importInitialStates());

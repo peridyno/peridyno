@@ -1,4 +1,4 @@
-#include "SphereModel.h"
+#include "BasicShapes/SphereModel.h"
 
 #include "Primitive/Primitive3D.h"
 
@@ -20,13 +20,12 @@ namespace dyno
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
 		this->statePolygonSet()->setDataPtr(std::make_shared<PolygonSet<TDataType>>());
-		
+
 		this->varLatitude()->setRange(2, 10000);
 		this->varLongitude()->setRange(3, 10000);
-		this->varIcosahedronStep()->setRange(0,6);
+		this->varIcosahedronStep()->setRange(0, 6);
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&SphereModel<TDataType>::varChanged, this));
-
 
 		this->varLocation()->attach(callback);
 		this->varScale()->attach(callback);
@@ -88,7 +87,7 @@ namespace dyno
 		auto AABB = box.aabb();
 		auto& v0 = AABB.v0;
 		auto& v1 = AABB.v1;
-		
+
 
 		NBoundingBox ret;
 		ret.lower = Vec3f(v0.x, v0.y, v0.z);
@@ -255,8 +254,8 @@ namespace dyno
 		for (int i = 0; i < vts.size(); i++) {
 			vts[i] = RV(vts[i] * scale * fixScale + RV(center));
 		}
-		
-		if (this->varIcosahedronStep()->getValue() >= 2) 
+
+		if (this->varIcosahedronStep()->getValue() >= 2)
 		{
 			for (int i = 0; i < (int)this->varIcosahedronStep()->getValue() - 1; i++)
 			{
@@ -270,7 +269,7 @@ namespace dyno
 		this->stateTriangleSet()->getDataPtr()->update();
 
 		this->statePolygonSet()->getDataPtr()->triangleSetToPolygonSet(this->stateTriangleSet()->getData());
-		
+
 		return;
 	}
 
@@ -287,7 +286,7 @@ namespace dyno
 		if (abs(scale.x - scale.y) < EPSILON) {
 			s = scale.z;
 		}
-		else if (abs(scale.x - scale.z) < EPSILON){
+		else if (abs(scale.x - scale.z) < EPSILON) {
 			s = scale.y;
 		}
 		else
@@ -487,9 +486,6 @@ namespace dyno
 
 		}
 	}
-
-
-
 
 	DEFINE_CLASS(SphereModel);
 }

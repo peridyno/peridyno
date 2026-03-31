@@ -83,7 +83,7 @@ std::shared_ptr<SceneGraph> createScene()
 	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
 	fluid->setDt(0.001);
 	fluid->varSmoothingLength()->setValue(2.4);
-	fluid->varIncompressibilitySolver()->getDataPtr()->setCurrentKey(ParticleFluid<DataType3f>::FissionDP);
+	fluid->varIncompressibilitySolver()->setCurrentKey(ParticleFluid<DataType3f>::FissionDP);
 	initialParticles1->connect(fluid->importInitialStates());
 	initialParticles2->connect(fluid->importInitialStates());
 	initialParticles3->connect(fluid->importInitialStates());

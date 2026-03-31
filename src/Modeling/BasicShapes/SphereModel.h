@@ -52,7 +52,7 @@ namespace dyno
 		DEF_VAR(Real, Radius, 0.5, "Sphere radius");
 
 		DECLARE_ENUM(SphereType,
-			Standard = 0,
+		Standard = 0,
 			Icosahedron = 1);
 
 		DEF_ENUM(SphereType, Type, SphereType::Standard, "Sphere type");
@@ -61,7 +61,7 @@ namespace dyno
 
 		DEF_VAR(uint, Longitude, 32, "Longitude");
 
-        DEF_VAR(uint, IcosahedronStep, 1,"Step");
+		DEF_VAR(uint, IcosahedronStep, 1, "Step");
 
 		DEF_INSTANCE_STATE(PolygonSet<TDataType>, PolygonSet, "");
 
@@ -80,9 +80,8 @@ namespace dyno
 		void standardSphere();
 
 		void icosahedronSphere();
-        
-	};
 
+	};
 
 	IMPLEMENT_TCLASS(SphereModel, TDataType);
 }

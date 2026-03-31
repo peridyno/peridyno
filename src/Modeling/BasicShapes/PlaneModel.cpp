@@ -38,7 +38,6 @@ namespace dyno
 		this->varLengthX()->attach(callback);
 		this->varLengthZ()->attach(callback);
 
-
 		auto tsRender = std::make_shared<GLSurfaceVisualModule>();
 		this->stateTriangleSet()->connect(tsRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(tsRender);
@@ -118,17 +117,17 @@ namespace dyno
 	template<typename TDataType>
 	void PlaneModel<TDataType>::varChanged()
 	{
-		auto center = this->varLocation()->getData();
-		auto rot = this->varRotation()->getData();
-		auto scale = this->varScale()->getData();
+		auto center = this->varLocation()->getValue();
+		auto rot = this->varRotation()->getValue();
+		auto scale = this->varScale()->getValue();
 
-		auto segmentX = this->varSegmentX()->getData();
-		auto segmentZ = this->varSegmentZ()->getData();
+		auto segmentX = this->varSegmentX()->getValue();
+		auto segmentZ = this->varSegmentZ()->getValue();
 
-		auto lengthX = this->varLengthX()->getData();
-		auto lengthZ = this->varLengthZ()->getData();
+		auto lengthX = this->varLengthX()->getValue();
+		auto lengthZ = this->varLengthZ()->getValue();
 
-		Vec3f length = Vec3f(lengthX,1,lengthZ);
+		Vec3f length = Vec3f(lengthX, 1, lengthZ);
 		Vec3i segments = Vec3i(segmentX, 1, segmentZ);
 
 		lengthX *= scale[0];
@@ -175,6 +174,7 @@ namespace dyno
 			{
 				x = nx * dx - lengthX / 2;
 				z = nz * dz - lengthZ / 2;
+
 				vertices.push_back(RV(Coord(x, Real(0), z)));
 			}
 		}
@@ -207,8 +207,6 @@ namespace dyno
 					quads.insert(v0);
 					quads.insert(v3);
 				}
-				
-
 				incre++;
 			}
 		}
@@ -226,6 +224,9 @@ namespace dyno
 
 		auto& qs = this->stateQuadSet()->getData();
 		polySet->extractQuadSet(qs);
+
+		TPlane3D<Real> plane(center, q.rotate(Vector<Real, 3>(0, 1, 0)));
+		this->outPlane()->setValue(plane);
 
 		vertices.clear();
 

@@ -67,7 +67,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 		auto vpGen = std::make_shared<VirtualSpatiallyAdaptiveStrategy<DataType3f>>();
 		fluid->statePosition()->connect(vpGen->inRPosition());	
-		vpGen->varCandidatePointCount()->getDataPtr()->setCurrentKey(VirtualSpatiallyAdaptiveStrategy<DataType3f>::neighbors_33);
+		vpGen->varCandidatePointCount()->setCurrentKey(VirtualSpatiallyAdaptiveStrategy<DataType3f>::neighbors_33);
 		fluid->animationPipeline()->pushModule(vpGen);
 		
 		//auto m_virtual_equal_to_Real = std::make_shared<VirtualColocationStrategy<DataType3f >>();

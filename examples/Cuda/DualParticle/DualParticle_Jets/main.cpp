@@ -45,7 +45,7 @@ std::shared_ptr<SceneGraph> createScene()
 	emitter2->varLocation()->setValue(Vec3f(-0.2f, 0.5f, -0.0f));
 
 	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
-	fluid->varIncompressibilitySolver()->getDataPtr()->setCurrentKey(ParticleFluid<DataType3f>::DualParticle);
+	fluid->varIncompressibilitySolver()->setCurrentKey(ParticleFluid<DataType3f>::DualParticle);
 	fluid->setDt(0.001);
 	fluid->varSmoothingLength()->setValue(2.4);
 	emitter->connect(fluid->importParticleEmitters());

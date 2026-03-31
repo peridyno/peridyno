@@ -3,7 +3,6 @@ using namespace dyno;
 
 #include "RigidBody/initializeRigidBody.h"
 #include "ParticleSystem/initializeParticleSystem.h"
-#include "DualParticleSystem/initializeDualParticleSystem.h"
 #include "Peridynamics/initializePeridynamics.h"
 #include "SemiAnalyticalScheme/initializeSemiAnalyticalScheme.h"
 #include "Volume/initializeVolume.h"

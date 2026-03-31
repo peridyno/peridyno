@@ -1,4 +1,4 @@
-#include "CubeModel.h"
+#include "BasicShapes/CubeModel.h"
 
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
@@ -105,14 +105,13 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void CubeModel<TDataType>::varChanged() 
+	void CubeModel<TDataType>::varChanged()
 	{
 		auto center = this->varLocation()->getValue();
 		auto rot = this->varRotation()->getValue();
 		auto scale = this->varScale()->getValue();
 
 		auto length = this->varLength()->getValue();
-
 
 		length[0] *= scale[0];
 		length[1] *= scale[1];
@@ -136,7 +135,7 @@ namespace dyno
 		uint nyz = 2 * (segments[1] + segments[2]);
 
 		std::vector<Coord> vertices;
-		//std::vector<TopologyModule::Quad> quads;
+		//std::vector<Topology::Quad> quads;
 
 		Real dx = length[0] / segments[0];
 		Real dy = length[1] / segments[1];
@@ -161,9 +160,10 @@ namespace dyno
 			counter2[incre] = 4;
 			incre++;
 		}
-		
+
 		CArrayList<uint> polygonIndices;
 		polygonIndices.resize(counter2);
+
 
 		incre = 0;
 
@@ -260,9 +260,7 @@ namespace dyno
 				quads.insert(v3);
 
 				incre++;
-
 			}
-
 			counter += nyz;
 		}
 
@@ -297,11 +295,8 @@ namespace dyno
 				quads.insert(v3);
 
 				incre++;
-
-
 			}
 		}
-
 
 		x = center[0] - length[0] / 2;
 		for (int ny = 1; ny < segments[1]; ny++)
@@ -333,8 +328,6 @@ namespace dyno
 				quads.insert(v0);
 
 				incre++;
-
-
 			}
 		}
 
