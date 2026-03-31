@@ -29,7 +29,5 @@ namespace dyno {
 
 	private:
 		DistanceField3D<TDataType> distanceField;
-
-
 	};
 }

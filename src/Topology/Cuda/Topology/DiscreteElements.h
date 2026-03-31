@@ -410,6 +410,7 @@ namespace dyno
 			{
 				this->q_init = this->actor1->rot;
 			}
+			this->q = this->q_init;
 		}
 
 		void setAnchorAngle(Quat<Real> quat) { q = quat; }

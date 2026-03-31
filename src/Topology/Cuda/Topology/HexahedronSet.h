@@ -12,29 +12,40 @@ namespace dyno
 		typedef typename Topology::Hexahedron Hexahedron;
 
 		HexahedronSet();
-		~HexahedronSet();
+		~HexahedronSet() override;
 
 		//void loadTetFile(std::string filename);
 
 		void setHexahedrons(std::vector<Hexahedron>& hexahedrons);
 		void setHexahedrons(DArray<Hexahedron>& hexahedrons);
 
-		DArray<Hexahedron>& getHexahedrons() { return m_hexahedrons; }
-		DArray<::dyno::Topology::Tri2Tet>& getQua2Hex() { return quad2Hex; }
+		// Return hexahedron indices
+		DArray<Hexahedron>& hexahedronIndices() { return mHexahedrons; }
 
-		DArrayList<int>& getVer2Hex();
+		// Return the mapping from quad to hexahedron
+		DArray<::dyno::Topology::Quad2Hex>& quad2Hexahedron() { return mQuad2Hex; }
 
-		void getVolume(DArray<Real>& volume);
+		DArrayList<int>& vertex2Hexahedron() { return mVer2Hex; }
+
+		void calculateVolume(DArray<Real>& volume);
 
 		void copyFrom(HexahedronSet<TDataType> hexSet);
 
 	protected:
 		void updateQuads() override;
 
+		void updateTopology() override;
+
 	private:
-		DArray<::dyno::Topology::Hexahedron> m_hexahedrons;
-		DArray<::dyno::Topology::Quad2Hex> quad2Hex;
-		DArrayList<int> m_ver2Hex;
+		// Automatically called when calling update()
+		void updateVertex2Hexahedron();
+
+		DArrayList<int> mVer2Hex;
+
+		DArray<::dyno::Topology::Hexahedron> mHexahedrons;
+
+		// Automatically updated when calling update()
+		DArray<::dyno::Topology::Quad2Hex> mQuad2Hex;
 	};
 }
 

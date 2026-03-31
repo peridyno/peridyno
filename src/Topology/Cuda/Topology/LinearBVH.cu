@@ -8,7 +8,7 @@
 
 #include "Timer.h"
 
-namespace dyno 
+namespace dyno
 {
 	template<typename TDataType>
 	LinearBVH<TDataType>::LinearBVH()
@@ -139,16 +139,16 @@ namespace dyno
 		DArray<AABB> sortedAABBs,
 		DArray<AABB> aabbs,
 		DArray<uint64> mortonCodes,
-		DArray<uint> sortedObjectIds) 
+		DArray<uint> sortedObjectIds)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
 		int N = sortedObjectIds.size();
 
 		if (i >= N) return;
 
-// 		printf("Num: %d \n", N);
-// 
-// 		printf("sorted morton %d: %llu \n", i, mortonCodes[i]);
+		// 		printf("Num: %d \n", N);
+		// 
+		// 		printf("sorted morton %d: %llu \n", i, mortonCodes[i]);
 
 		sortedAABBs[i + N - 1] = aabbs[sortedObjectIds[i]];
 
@@ -158,20 +158,20 @@ namespace dyno
 		auto delta = [&](int _i, int _j) -> int {
 			if (_j < 0 || _j >= N) return -1;
 			return __clzll(mortonCodes[_i] ^ mortonCodes[_j]);
-		};
+			};
 
-//		printf("Test CLZ: %d \n", __clzll(mortonCodes[1]));
+		//		printf("Test CLZ: %d \n", __clzll(mortonCodes[1]));
 
 		int d = delta(i, i + 1) - delta(i, i - 1) > 0 ? 1 : -1;
 
-// 		printf("%u %d \n", i, d);
-// 
-// 		printf("delta: %d \n", delta(0, 1));
+		// 		printf("%u %d \n", i, d);
+		// 
+		// 		printf("delta: %d \n", delta(0, 1));
 
-		// Compute upper bound for the length of the range
+				// Compute upper bound for the length of the range
 		int delta_min = delta(i, i - d);
 
-//		printf("delta_min %d %d: %d \n", i, i - d, delta_min);
+		//		printf("delta_min %d %d: %d \n", i, i - d, delta_min);
 
 		int len_max = 2;
 		while (delta(i, i + len_max * d) > delta_min)
@@ -195,39 +195,39 @@ namespace dyno
 		int delta_node = delta(i, j);
 		int s = 0;
 
-// 		if (i == 41)
-// 		{
-// 			printf("len: %d \n", len);
-// 		}
+		// 		if (i == 41)
+		// 		{
+		// 			printf("len: %d \n", len);
+		// 		}
 
 		for (int t = (len + 1) / 2; t > 0; t = t == 1 ? 0 : (t + 1) / 2)
 		{
 			if (delta(i, i + (s + t) * d) > delta_node)
 			{
 				s = s + t;
-// 				if (i == 41)
-// 				{
-// 					printf("s: %d; t: %d \n", s, t);
-// 				}
+				// 				if (i == 41)
+				// 				{
+				// 					printf("s: %d; t: %d \n", s, t);
+				// 				}
 			}
 		}
 		int gamma = i + s * d + minimum(d, (int)0);
 
-// 		printf("i-j: %d %d; Gamma: %d \n", i, j, gamma);
-// 
-// 		if (i == 41)
-// 		{
-// 			printf("21 22 23 24 dir: %d; %llu; %llu; %llu; %llu \n", d, mortonCodes[21], mortonCodes[22], mortonCodes[23], mortonCodes[24]);
-// 			printf("0 41 42 dir: %llu; %llu; %llu \n", mortonCodes[0], mortonCodes[41], mortonCodes[42]);
-// 		}
+		// 		printf("i-j: %d %d; Gamma: %d \n", i, j, gamma);
+		// 
+		// 		if (i == 41)
+		// 		{
+		// 			printf("21 22 23 24 dir: %d; %llu; %llu; %llu; %llu \n", d, mortonCodes[21], mortonCodes[22], mortonCodes[23], mortonCodes[24]);
+		// 			printf("0 41 42 dir: %llu; %llu; %llu \n", mortonCodes[0], mortonCodes[41], mortonCodes[42]);
+		// 		}
 
-		//printf("Gamma: %u \n", gamma);
+				//printf("Gamma: %u \n", gamma);
 
-		//Output child pointers
+				//Output child pointers
 		int left_idx = minimum(i, j) == gamma ? gamma + N - 1 : gamma;
 		int right_idx = maximum(i, j) == gamma + 1 ? gamma + N : gamma + 1;
 
-//		printf("i: %d, j: %d Left: %d; Right: %d; \n", i, j, left_idx, right_idx);
+		//		printf("i: %d, j: %d Left: %d; Right: %d; \n", i, j, left_idx, right_idx);
 
 		bvhNodes[i].left = left_idx;
 		bvhNodes[i].right = right_idx;
@@ -246,7 +246,7 @@ namespace dyno
 		uint N = flags.size();
 
 		if (i >= N) return;
-		
+
 		//Output AABBs of leaf nodes
 // 		auto v0 = sortedAABBs[i + N - 1].v0;
 // 		auto v1 = sortedAABBs[i + N - 1].v1;
@@ -301,7 +301,7 @@ namespace dyno
 	{
 		uint num = aabb.size();
 
-		if (mCenters.size() != num){
+		if (mCenters.size() != num) {
 			mCenters.resize(num);
 			mMortonCodes.resize(num);
 			mSortedObjectIds.resize(num);
@@ -333,17 +333,18 @@ namespace dyno
 			origin,
 			L);
 
-// 		GTimer timer;
-// 		timer.start();
+		// 		GTimer timer;
+		// 		timer.start();
+
 		thrust::sort_by_key(thrust::device, mMortonCodes.begin(), mMortonCodes.begin() + mMortonCodes.size(), mSortedObjectIds.begin());
-// 		timer.stop();
-// 		std::cout << "Sort: " << timer.getElapsedTime() << std::endl;
+		// 		timer.stop();
+		// 		std::cout << "Sort: " << timer.getElapsedTime() << std::endl;
 
 		cuExecute(mAllNodes.size(),
 			LBVH_InitialAllNodes,
 			mAllNodes);
 
-//		timer.start();
+		//		timer.start();
 		cuExecute(num,
 			LBVH_ConstructBinaryRadixTree,
 			mAllNodes,
@@ -351,21 +352,21 @@ namespace dyno
 			aabb,
 			mMortonCodes,
 			mSortedObjectIds);
-// 		timer.stop();
-// 		std::cout << "Construct: " << timer.getElapsedTime() << std::endl;
+		// 		timer.stop();
+		// 		std::cout << "Construct: " << timer.getElapsedTime() << std::endl;
 
-// 		CArray<Node> hArray;
-// 		hArray.assign(mAllNodes);
+		// 		CArray<Node> hArray;
+		// 		hArray.assign(mAllNodes);
 
-//		timer.start();
+		//		timer.start();
 		mFlags.reset();
 		cuExecute(num,
 			LBVH_CalculateBoundingBox,
 			mSortedAABBs,
 			mAllNodes,
 			mFlags);
-// 		timer.stop();
-// 		std::cout << "BoundingBox: " << timer.getElapsedTime() << std::endl;
+		// 		timer.stop();
+		// 		std::cout << "BoundingBox: " << timer.getElapsedTime() << std::endl;
 	}
 
 	template<typename TDataType>
@@ -383,7 +384,7 @@ namespace dyno
 		// Traverse nodes starting from the root.
 		uint ret = 0;
 		int idx = 0;
-		do 
+		do
 		{
 			// Check each child node for overlap.
 			int idxL = mAllNodes[idx].left;
@@ -394,14 +395,14 @@ namespace dyno
 			// Query overlaps a leaf node => report collision.
 			if (overlapL && mAllNodes[idxL].isLeaf()) {
 				int objId = mSortedObjectIds[idxL - N + 1];
-				if(objId > queryId) ret++;
+				if (objId > queryId) ret++;
 			}
-			
+
 			if (overlapR && mAllNodes[idxR].isLeaf()) {
 				int objId = mSortedObjectIds[idxR - N + 1];
 				if (objId > queryId) ret++;
 			}
-			
+
 			// Query overlaps an internal node => traverse.
 			bool traverseL = (overlapL && !mAllNodes[idxL].isLeaf());
 			bool traverseR = (overlapR && !mAllNodes[idxR].isLeaf());
@@ -447,13 +448,13 @@ namespace dyno
 			// Query overlaps a leaf node => report collision.
 			if (overlapL && mAllNodes[idxL].isLeaf()) {
 				int objId = mSortedObjectIds[idxL - N + 1];
-				if (objId > queryId) 
+				if (objId > queryId)
 					ids.insert(objId);
 			}
 
 			if (overlapR && mAllNodes[idxR].isLeaf()) {
 				int objId = mSortedObjectIds[idxR - N + 1];
-				if (objId > queryId) 
+				if (objId > queryId)
 					ids.insert(objId);
 			}
 

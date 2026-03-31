@@ -5,8 +5,6 @@
 
 namespace dyno
 {
-	IMPLEMENT_TCLASS(PointSet, TDataType)
-
 	template<typename TDataType>
 	PointSet<TDataType>::PointSet()
 		: Topology()

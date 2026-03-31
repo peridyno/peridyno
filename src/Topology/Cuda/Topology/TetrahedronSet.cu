@@ -241,27 +241,6 @@ namespace dyno
 	}
 
 
-	template<typename Tri2Tet>
-	__global__ void TetSet_CountSurfaceTri(
-		DArray<int> surfaceTri,
-		DArray<int> sfCounter,
-		DArray<Tri2Tet> tri2Tet)
-	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= tri2Tet.size()) return;
-
-		if (tri2Tet[tId][0] != EMPTY && tri2Tet[tId][1] != EMPTY)
-		{
-			surfaceTri[tId] = 0x7fffffff; // Invalid index
-			sfCounter[tId] = 0;
-		}
-		else
-		{
-			surfaceTri[tId] = tId;
-			sfCounter[tId] = 1;
-		}
-	}
-
 	template<typename Triangle, typename Tri2Tet, typename Tet2Tri, typename TKey>
 	__global__ void TetSet_SetupTriangles(
 		DArray<Triangle> triangles,
@@ -298,123 +277,6 @@ namespace dyno
 		tet2Tri[tetIds[tId].tetId][index] = shift;
 	}
 
-	template<typename Tri2Tri, typename EKey>
-	__global__ void TetSet_SetupSufraceTri2Tri(
-		DArray<Tri2Tri> surface_tri2Tri,
-		DArray<int> surface_top,
-		DArray<EKey> keys,
-		DArray<int> triIds)
-	{
-		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (tId >= keys.size()) return;
-
-		if (tId == 0 || keys[tId] != keys[tId - 1])
-		{
-			EKey key = keys[tId];
-			int surId = triIds[tId];
-			if (tId + 1 < keys.size() && keys[tId + 1] == key)
-			{
-				int nextSurId = triIds[tId + 1];
-				int sur_top = atomicAdd(&surface_top[surId], 1);
-				int next_top = atomicAdd(&surface_top[nextSurId], 1);
-				surface_tri2Tri[surId][sur_top] = nextSurId;
-				surface_tri2Tri[nextSurId][next_top] = surId;
-			}
-		}
-	}
-
-	__global__ void TetSet_SetupSurfaceTri(
-		DArray<int> true_surface_id,
-		DArray<int> surface_id)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= true_surface_id.size()) return;
-
-		true_surface_id[pId] = surface_id[pId];
-	}
-
-	template<typename Coord, typename Triangle, typename Tetrahedron, typename Tri2Tet>
-	__global__ void TetSet_SetupSurfaceNormal(
-		DArray<int> triangle_normal,
-		DArray<int> surface_id,
-		DArray<Coord> vertex_pos,
-		DArray<Triangle> triangles,
-		DArray<Tetrahedron> tetrahedrons,
-		DArray<Tri2Tet> tri2Tet)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= surface_id.size()) return;
-
-		int tId = surface_id[pId];
-		Triangle tri = triangles[tId];
-		Tetrahedron tet = tetrahedrons[tri2Tet[tId][0]];
-		int inside_id = -1;
-		for (int i = 0; i < 4; i++)
-		if(tet[i] != tri[0] && tet[i] != tri[1] && tet[i] != tri[2])
-		{
-			inside_id = tet[i];
-			break;
-		}
-
-		if(inside_id == -1)
-		{
-			printf("[Error] surface triangle %d is not belong to one tetrahedron\n", tId);
-		}
-		
-		Coord a[3] = { vertex_pos[tri[0]], vertex_pos[tri[1]], vertex_pos[tri[2]] };
-		Coord b = vertex_pos[inside_id];
-		int noraml_tri = true;
-		Coord normal = (a[1] - a[0]).cross(a[2] - a[0]);
-		normal.normalize();
-		if(normal.dot(b - a[0]) > 0.f)
-		{
-			normal = -normal;
-			noraml_tri = false;
-		}
-		triangle_normal[tId] = noraml_tri;// false means reverse
-	}
-
-	
-	template<typename Coord>
-	__global__ void TetSet_Debug(
-		DArray<Coord> vertex_pos)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= vertex_pos.size()) return;
-
-		Coord b = vertex_pos[pId];
-
-		if (b.y < 0.5)
-		{
-			printf("Error point %d is %f %f %f\n", pId, b[0], b[1], b[2]);
-		}
-	}
-
-	template<typename EKey, typename Triangle, typename Tri2Tri>
-	__global__ void TetSet_SetupEKeys(
-		DArray<EKey> keys,
-		DArray<int> ids,
-		DArray<Tri2Tri> surface_tri2Tri,
-		DArray<int> surface_id,
-		DArray<Triangle> triangles)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= surface_id.size()) return;
-
-		surface_tri2Tri[pId][0] = EMPTY;
-		surface_tri2Tri[pId][1] = EMPTY;
-		surface_tri2Tri[pId][2] = EMPTY;
-
-		int tId = surface_id[pId];
-		Triangle tri = triangles[tId];
-		keys[3 * pId    ] = EKey(tri[0], tri[1]);
-		keys[3 * pId + 1] = EKey(tri[1], tri[2]);
-		keys[3 * pId + 2] = EKey(tri[2], tri[0]);
-
-		ids[3 * pId    ] = pId;
-		ids[3 * pId + 1] = pId;
-		ids[3 * pId + 2] = pId;
-	}
 
 	template<typename Triangle, typename Tri2Tet, typename Tet2Tri, typename TKey>
 	__global__ void TetSet_CheckTriangles(
@@ -662,6 +524,76 @@ namespace dyno
 		}
 	}	
 
+	template<typename Tetrahedron>
+	__global__ void TetSet_UpdateIndexAndShapeIds(
+		DArray<Tetrahedron> indices,
+		uint indexSize,
+		uint vertexOffset,
+		uint indexOffset)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= indexSize) return;
+
+		Tetrahedron t = indices[indexOffset + tId];
+		t[0] += vertexOffset;
+		t[1] += vertexOffset;
+		t[2] += vertexOffset;
+		t[3] += vertexOffset;
+
+		indices[indexOffset + tId] = t;
+	}
+
+	template<typename TDataType>
+	std::shared_ptr<dyno::TetrahedronSet<TDataType>> 
+		TetrahedronSet<TDataType>::merge(std::vector<std::shared_ptr<TetrahedronSet<TDataType>>>& tsArray)
+	{
+		auto ret = std::make_shared<TetrahedronSet<TDataType>>();
+
+		for (auto ts : tsArray)
+			assert(ts != nullptr);
+
+		uint vNum = 0;
+		uint tNum = 0;
+		for (auto ts : tsArray)
+		{
+			vNum += ts->getPoints().size();
+			tNum += ts->tetrahedronIndices().size();
+		}
+
+		auto& vertices = ret->getPoints();
+		auto& indices = ret->tetrahedronIndices();
+
+		vertices.resize(vNum);
+		indices.resize(tNum);
+
+		uint vOffset = 0;
+		uint tOffset = 0;
+		for (auto ts : tsArray)
+		{
+			auto& vSrc = ts->getPoints();
+			auto& tSrc = ts->tetrahedronIndices();
+
+			vertices.assign(vSrc, vSrc.size(), vOffset, 0);
+			indices.assign(tSrc, tSrc.size(), tOffset, 0);
+
+			uint num = tSrc.size();
+			cuExecute(num, TetSet_UpdateIndexAndShapeIds,
+				indices,
+				num,
+				vOffset,
+				tOffset);
+
+			vOffset += vSrc.size();
+			tOffset += tSrc.size();
+		}
+
+		ret->update();
+
+		return ret;
+	}
+
+
+
 	template<typename TDataType>
 	void TetrahedronSet<TDataType>::requestPointNeighbors(DArrayList<int>& lists)
 	{
@@ -731,78 +663,323 @@ namespace dyno
 		counts.clear();
 	}
 
-	template<typename TDataType>
-	void TetrahedronSet<TDataType>::requestSurfaceMeshIds(DArray<int>& surfaceIds, DArray<int>& towardOutside, DArray<::dyno::Topology::Tri2Tri>& t2t)
+	__global__ void TetSet_CountBoundaryTriangles(
+		DArray<int> indicator,
+		DArray<Topology::Tri2Tet> tri2Tet)
 	{
-		// Update {SurfaceTir, TriNormalSig, SurfaceTri2Tri}
-		auto triIndices = this->triangleIndices();
-		int triNum = triIndices.size();
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= tri2Tet.size()) return;
 
-		DArray<int> pSurfaceTri;
-		DArray<int> sfCounter;
-		DArray<int> counter;
-		pSurfaceTri.resize(triNum);
-		sfCounter.resize(triNum);
-		sfCounter.reset();
+		if (tri2Tet[tId][0] == EMPTY || tri2Tet[tId][1] == EMPTY)
+			indicator[tId] = 1;
+		else
+			indicator[tId] = 0;
+	}
 
-		// count surface Tri
-		cuExecute(triNum, TetSet_CountSurfaceTri,
-			pSurfaceTri, sfCounter,
-			mTri2Tet);
+	__global__ void TetSet_SetupBoundaryTriangles(
+		DArray<Topology::Triangle> boundaryIndices,
+		DArray<Topology::Triangle> allIndices,
+		DArray<int> radix)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= allIndices.size()) return;
 
-		int sfTriNum = thrust::reduce(thrust::device, sfCounter.begin(), sfCounter.begin() + sfCounter.size());
-		// Sort [surface id... | 0x7fffffff... ]
-		thrust::sort(thrust::device, pSurfaceTri.begin(), pSurfaceTri.begin() + triNum);
-
-		surfaceIds.resize(sfTriNum);
-		cuExecute(sfTriNum, TetSet_SetupSurfaceTri,
-			surfaceIds,
-			pSurfaceTri);
-		// mSurfaceTri.assign(pSurfaceTri, sfTriNum);
-
-		t2t.resize(sfTriNum);
-		towardOutside.resize(triNum);
-		printf("surface triangle number: %d\n", sfTriNum);
-
-		// Surface Tri Normal (Outside)
-		cuExecute(sfTriNum, TetSet_SetupSurfaceNormal,
-			towardOutside, surfaceIds,
-			this->mCoords, triIndices, mTethedrons, mTri2Tet
-		);
-
-		// Surface Tri 2 Tri
-		// 1. Sort Surface Edge 
-
-		DArray<EKey> ekeys;
-		DArray<int> triIds;
-
-		ekeys.resize(3 * sfTriNum);
-		triIds.resize(3 * sfTriNum);
-
-		cuExecute(sfTriNum, TetSet_SetupEKeys,
-			ekeys, triIds, t2t,
-			surfaceIds, triIndices);
-
-		thrust::sort_by_key(thrust::device, ekeys.begin(), ekeys.begin() + ekeys.size(), triIds.begin());
-
-		// 2. Surface Tri 2 Tri
-		counter.resize(sfTriNum);
-		counter.reset();
-		cuExecute(ekeys.size(), TetSet_SetupSufraceTri2Tri,
-			t2t, counter,
-			ekeys, triIds);
-
-		counter.clear();
-		pSurfaceTri.clear();
-		sfCounter.clear();
-		ekeys.clear();
-		triIds.clear();
+		if (radix[tId] != radix[tId + 1])
+			boundaryIndices[radix[tId]] = allIndices[tId];
 	}
 
 	template<typename TDataType>
-	void TetrahedronSet<TDataType>::extractSurfaceMesh(TriangleSet<TDataType>& ts)
+	void TetrahedronSet<TDataType>::requestBoundaryTriangleIndices(DArray<Topology::Triangle>& indices)
 	{
+		auto& triIndices = this->triangleIndices();
 
+		DArray<int> counter(triIndices.size() + 1);
+		counter.reset();
+
+		cuExecute(triIndices.size(), TetSet_CountBoundaryTriangles,
+			counter,
+			mTri2Tet);
+
+		int boundaryTriNum = thrust::reduce(thrust::device, counter.begin(), counter.begin() + counter.size());
+		thrust::exclusive_scan(thrust::device, counter.begin(), counter.begin() + counter.size(), counter.begin());
+
+		indices.resize(boundaryTriNum);
+		cuExecute(triIndices.size(), TetSet_SetupBoundaryTriangles,
+			indices,
+			triIndices,
+			counter);
+
+		counter.clear();
+	}
+
+	__global__ void TetSet_CountBoundaryVertices(
+		DArray<int> counter,
+		DArray<Topology::Tri2Tet> tri2Tet)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= tri2Tet.size()) return;
+
+		if (tri2Tet[tId][0] == EMPTY || tri2Tet[tId][1] == EMPTY)
+			counter[tId] = 3;
+		else
+			counter[tId] = 0;
+	}
+
+	__global__ void TetSet_SetupBoundaryVertexIndices(
+		DArray<int> edgeIndices,
+		DArray<Topology::Triangle> triangles,
+		DArray<int> radix)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= triangles.size()) return;
+
+		if (radix[tId] != radix[tId + 1])
+		{
+			Topology::Triangle t = triangles[tId];
+			edgeIndices[radix[tId]] = t[0];
+			edgeIndices[radix[tId] + 1] = t[1];
+			edgeIndices[radix[tId] + 2] = t[2];
+		}
+	}
+
+	__global__ void TetSet_CountUniqueEdgeIndices(
+		DArray<int> counter,
+		DArray<int> ids)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= ids.size()) return;
+
+		if (tId == 0 || ids[tId] != ids[tId - 1])
+			counter[tId] = 1;
+		else
+			counter[tId] = 0;
+	}
+
+	__global__ void TetSet_SetupUniqueVertexIndices(
+		DArray<int> vertexIds,
+		DArray<int> ids,
+		DArray<int> radix)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= ids.size()) return;
+
+		if (tId == 0 || ids[tId] != ids[tId - 1])
+			vertexIds[radix[tId]] = ids[tId];
+	}
+
+	template<typename TDataType>
+	void TetrahedronSet<TDataType>::requestBoundaryVertexIndices(DArray<int>& indices)
+	{
+		auto& triIndices = this->triangleIndices();
+
+		DArray<int> counter(triIndices.size() + 1);
+		counter.reset();
+		//Check whether a triangle is located on the boundary
+		cuExecute(triIndices.size(), TetSet_CountBoundaryVertices,
+			counter,
+			mTri2Tet);
+
+		int boundaryVertNum = thrust::reduce(thrust::device, counter.begin(), counter.begin() + counter.size());
+		thrust::exclusive_scan(thrust::device, counter.begin(), counter.begin() + counter.size(), counter.begin());
+
+		DArray<int> vertexIndexBuffer(boundaryVertNum);
+		cuExecute(triIndices.size(), TetSet_SetupBoundaryVertexIndices,
+			vertexIndexBuffer,
+			triIndices,
+			counter);
+
+		//Remove duplicated vertex ids
+		thrust::sort_by_key(thrust::device, vertexIndexBuffer.begin(), vertexIndexBuffer.begin() + vertexIndexBuffer.size(), vertexIndexBuffer.begin());
+
+		counter.resize(boundaryVertNum);
+
+		cuExecute(vertexIndexBuffer.size(), TetSet_CountUniqueEdgeIndices,
+			counter,
+			vertexIndexBuffer);
+
+		int uniqueVertexNum = thrust::reduce(thrust::device, counter.begin(), counter.begin() + counter.size());
+		thrust::exclusive_scan(thrust::device, counter.begin(), counter.begin() + counter.size(), counter.begin());
+
+		indices.resize(uniqueVertexNum);
+		cuExecute(vertexIndexBuffer.size(), TetSet_SetupUniqueVertexIndices,
+			indices,
+			vertexIndexBuffer,
+			counter);
+
+		counter.clear();
+		vertexIndexBuffer.clear();
+	}
+
+	__global__ void TetSet_CountBoundaryEdges(
+		DArray<int> counter,
+		DArray<Topology::Tri2Tet> tri2Tet)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= tri2Tet.size()) return;
+
+		if (tri2Tet[tId][0] == EMPTY || tri2Tet[tId][1] == EMPTY)
+			counter[tId] = 3;
+		else
+			counter[tId] = 0;
+	}
+
+	__global__ void TetSet_SetupBoundaryEdgeIndices(
+		DArray<int> edgeIndices,
+		DArray<Topology::Tri2Edg> tri2edge,
+		DArray<int> radix)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= tri2edge.size()) return;
+
+		if (radix[tId] != radix[tId + 1])
+		{
+			Topology::Tri2Edg t2e = tri2edge[tId];
+			edgeIndices[radix[tId]] = t2e[0];
+			edgeIndices[radix[tId] + 1] = t2e[1];
+			edgeIndices[radix[tId] + 2] = t2e[2];
+		}
+	}
+
+	__global__ void TetSet_SetupUniqueEdgeIndices(
+		DArray<Topology::Edge> boundaryEdges,
+		DArray<Topology::Edge> allEdges,
+		DArray<int> edgeIndices,
+		DArray<int> radix)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= edgeIndices.size()) return;
+
+		if (tId == 0 || edgeIndices[tId] != edgeIndices[tId - 1])
+			boundaryEdges[radix[tId]] = allEdges[tId];
+	}
+
+	template<typename TDataType>
+	void TetrahedronSet<TDataType>::requestBoundaryEdgeIndices(DArray<Topology::Edge>& indices)
+	{
+		auto& t2e = this->triangle2Edge();
+		auto& triIndices = this->triangleIndices();
+		auto& edgeIndices = this->edgeIndices();
+
+		DArray<int> counter(triIndices.size() + 1);
+		counter.reset();
+		
+		//Check whether a triangle is located on the boundary
+		cuExecute(triIndices.size(), TetSet_CountBoundaryEdges,
+			counter,
+			mTri2Tet);
+
+		int boundaryEdgeNum = thrust::reduce(thrust::device, counter.begin(), counter.begin() + counter.size());
+		thrust::exclusive_scan(thrust::device, counter.begin(), counter.begin() + counter.size(), counter.begin());
+
+		DArray<int> edgeIndexBuffer(boundaryEdgeNum);
+		cuExecute(triIndices.size(), TetSet_SetupBoundaryEdgeIndices,
+			edgeIndexBuffer,
+			t2e,
+			counter);
+
+		//Remove duplicated edge ids
+		thrust::sort_by_key(thrust::device, edgeIndexBuffer.begin(), edgeIndexBuffer.begin() + edgeIndexBuffer.size(), edgeIndexBuffer.begin());
+
+		counter.resize(boundaryEdgeNum);
+
+		cuExecute(edgeIndexBuffer.size(), TetSet_CountUniqueEdgeIndices,
+			counter,
+			edgeIndexBuffer);
+
+		int uniqueEdgeNum = thrust::reduce(thrust::device, counter.begin(), counter.begin() + counter.size());
+		thrust::exclusive_scan(thrust::device, counter.begin(), counter.begin() + counter.size(), counter.begin());
+
+		indices.resize(uniqueEdgeNum);
+		cuExecute(edgeIndexBuffer.size(), TetSet_SetupUniqueEdgeIndices,
+			indices,
+			edgeIndices,
+			edgeIndexBuffer,
+			counter);
+
+		counter.clear();
+		edgeIndexBuffer.clear();
+	}
+
+	template<typename Coord>
+	__global__ void TetSet_ExtractBoundaryVertices(
+		DArray<Coord> triVertices,	//output
+		DArray<int> tet2triMapper,	//output
+		DArray<Coord> tetVertices,
+		DArray<int> vertexIdsOnBoundary)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= vertexIdsOnBoundary.size()) return;
+
+		triVertices[tId] = tetVertices[vertexIdsOnBoundary[tId]];
+		tet2triMapper[vertexIdsOnBoundary[tId]] = tId;
+	}
+
+	__global__ void TetSet_UpdateBoundaryTriangleIndices(
+		DArray<Topology::Triangle> indices,
+		DArray<int> tet2triMapper)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= indices.size()) return;
+
+		Topology::Triangle t = indices[tId];
+
+		indices[tId] = Topology::Triangle(tet2triMapper[t[0]], tet2triMapper[t[1]], tet2triMapper[t[2]]);
+	}
+
+	template<typename TDataType>
+	void TetrahedronSet<TDataType>::extractSurfaceMesh(TriangleSet<TDataType>& ts, DArray<int>& indices)
+	{
+		auto& tetVertices = this->getPoints();
+		auto& triVertices = ts.getPoints();
+		auto& triIndices = ts.triangleIndices();
+
+		DArray<int> tet2triVertexMapper;
+		this->requestBoundaryVertexIndices(indices);
+
+		this->requestBoundaryTriangleIndices(triIndices);
+
+		triVertices.resize(indices.size());
+		tet2triVertexMapper.resize(tetVertices.size());
+		cuExecute(indices.size(), TetSet_ExtractBoundaryVertices,
+			triVertices,
+			tet2triVertexMapper,
+			tetVertices,
+			indices);
+
+		cuExecute(triIndices.size(), TetSet_UpdateBoundaryTriangleIndices,
+			triIndices,
+			tet2triVertexMapper);
+
+		ts.update();
+
+		tet2triVertexMapper.clear();
+	}
+
+	template<typename Coord>
+	__global__ void TetSet_UpdateSurfaceMeshVertices(
+		DArray<Coord> vertsOnBoundary,
+		DArray<Coord> vertsOnTet,
+		DArray<int> idMapper)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= idMapper.size()) return;
+
+		vertsOnBoundary[tId] = vertsOnTet[idMapper[tId]];
+	}
+
+
+	template<typename TDataType>
+	void TetrahedronSet<TDataType>::updateSurfaceMesh(TriangleSet<TDataType>& ts, DArray<int>& indices)
+	{
+		auto& tet_verts = this->getPoints();
+		auto& tri_verts = ts.getPoints();
+
+		assert(tri_verts.size() == indices.size());
+
+		cuExecute(indices.size(), TetSet_UpdateSurfaceMeshVertices,
+			tri_verts,
+			tet_verts,
+			indices);
 	}
 
 	template<typename TDataType>
@@ -918,6 +1095,56 @@ namespace dyno
 		mVer2Tet.assign(tetSet.mVer2Tet);
 
 		TriangleSet<TDataType>::copyFrom(tetSet);
+	}
+	template<typename TDataType>
+	std::shared_ptr<TetrahedronSet<TDataType>> TetrahedronSet<TDataType>::merge(TetrahedronSet<TDataType>& tetSet)
+	{
+		auto ret = std::make_shared<TetrahedronSet<TDataType>>();
+
+		auto& vertices = ret->getPoints();
+		auto& indices = ret->tetrahedronIndices();
+
+		uint vNum0 = PointSet<TDataType>::mCoords.size();
+		uint vNum1 = tetSet.getPoints().size();
+
+		uint tNum0 = mTethedrons.size();
+		uint tNum1 = tetSet.tetrahedronIndices().size();
+
+		vertices.resize(vNum0 + vNum1);
+		indices.resize(tNum0 + tNum1);
+
+		vertices.assign(PointSet<TDataType>::mCoords, vNum0, 0, 0);
+		vertices.assign(tetSet.getPoints(), vNum1, vNum0, 0);
+
+		indices.assign(mTethedrons, tNum0, 0, 0);
+		indices.assign(tetSet.tetrahedronIndices(), tNum1, tNum0, 0);
+
+		cuExecute(tNum1,
+			TetSet_UpdateIndex,
+			indices,
+			vNum0,
+			tNum0);
+
+		return ret;
+	}
+
+
+	template<typename Tetrahedron>
+	__global__ void TetSet_UpdateIndex(
+		DArray<Tetrahedron> indices,
+		uint vertexOffset,
+		uint indexOffset)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= indices.size() - indexOffset) return;
+
+		Tetrahedron t = indices[indexOffset + tId];
+		t[0] += vertexOffset;
+		t[1] += vertexOffset;
+		t[2] += vertexOffset;
+		t[3] += vertexOffset;
+
+		indices[indexOffset + tId] = t;
 	}
 
 	template<typename TDataType>

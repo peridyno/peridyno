@@ -7,12 +7,17 @@
  * 
  * @copyright Copyright (c) 2019
  * 
+ * 
+ * History:
+ *
+ * 2025-06-09: support initialization from capsule, cone and cylinder
  */
+
 #pragma once
 
-#include <string>
-#include "Platform.h"
 #include "Array/Array3D.h"
+
+#include "Primitive/Primitive3D.h"
 
 namespace dyno {
 
@@ -89,17 +94,24 @@ namespace dyno {
 		 */
 		void loadSDF(std::string filename, bool inverted = false);
 
+		void loadAABB(Coord lo, Coord hi, bool inverted = false);
+
 		/**
 		 * @brief load signed distance field from a Box (lo, hi)
 		 * 
 		 * @param inverted indicated whether the signed distance field should be positive in outside. default: +[---]+
 		 */
-		void loadBox(Coord& lo, Coord& hi, bool inverted = false);
+		void loadBox(TOrientedBox3D<Real> obb, bool inverted = false);
 
-		void loadCylinder(Coord& center, Real radius, Real height, int axis, bool inverted = false);
+		void loadCylinder(TCylinder3D<Real> cylinder, bool inverted = false);
 
-		void loadSphere(Coord& center, Real radius, bool inverted = false);
+		void loadSphere(TSphere3D<Real> sphere, bool inverted = false);
 
+		void loadCapsule(TCapsule3D<Real> capsule, bool inverted = false);
+
+		void loadCone(TCone3D<Real> cone, bool inverted = false);
+
+	public:
 		void setSpace(const Coord p0, const Coord p1, Real h);
 
 		inline Coord lowerBound() { return mOrigin; }
