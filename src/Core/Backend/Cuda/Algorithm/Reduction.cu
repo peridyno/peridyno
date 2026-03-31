@@ -118,6 +118,8 @@ namespace dyno {
 	template<typename T>
 	T Reduction<T>::accumulate(const T* val, const uint num)
 	{
+		if (num == 0) return 0;
+
 		if (num != m_num)
 			allocAuxiliaryArray(num);
 
