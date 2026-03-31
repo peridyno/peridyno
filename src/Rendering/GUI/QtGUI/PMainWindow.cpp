@@ -389,6 +389,17 @@ namespace dyno
 				mOpenGLWidget->update();
 			});
 
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeVisibilityChanged, [=](Qt::QtNode& n)
+			{
+				auto model = n.nodeDataModel();
+				auto widget = dynamic_cast<Qt::QtNodeWidget*>(model);
+
+				if (widget != nullptr)
+				{
+					mOpenGLWidget->updateGraphicsContext(widget->getNode().get());
+				}
+			});
+
 		connect(mAnimationWidget, &PAnimationWidget::simulationStarted, [=]()
 			{
 				mOpenGLWidget->setFocus();

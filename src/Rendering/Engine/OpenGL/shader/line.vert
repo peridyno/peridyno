@@ -15,6 +15,7 @@ layout(location = 0) out VertexData
 
 layout(location = 0) uniform int  uEdgeMode;
 layout(location = 2) uniform vec3 uBaseColor;
+layout(location = 3) uniform vec3 uEndColor;
 
 void main(void) {
 
@@ -24,7 +25,7 @@ void main(void) {
 
 	vs_out.color = uBaseColor;
 
-	gl_Position = uRenderParams.proj * cameraPos;  
+	gl_Position = uRenderParams.proj * cameraPos;
 	
 	// add a small offset to z so lines are drawn overlay on surface
 	if (uEdgeMode==0) gl_Position.z -= 0.00003;
