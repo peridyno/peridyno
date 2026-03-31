@@ -94,7 +94,7 @@ public:
 	inline void tagAsUnchanged() { m_topologyChanged = false; }
 	inline bool isTopologyChanged() { return m_topologyChanged; }
 
-	//std::string getModuleType() override { return "TopologyModule"; }
+	//std::string getModuleType() override { return "Topology"; }
 
 	void update();
 	virtual NBoundingBox getTopologyBoundingBox() { return NBoundingBox(); };

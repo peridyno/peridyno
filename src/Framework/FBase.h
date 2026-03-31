@@ -162,6 +162,11 @@ public:
 	void attach(std::shared_ptr<FCallBackFunc> func);
 	void detach(std::shared_ptr<FCallBackFunc> func);
 
+	/**
+	 * @brief Clear all callback functions
+	 */
+	void detachAll();
+
 protected:
 	void setSource(FBase* source);
 

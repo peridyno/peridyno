@@ -308,6 +308,11 @@ namespace dyno
 		}
 	}
 
+	void FBase::detachAll()
+	{
+		mCallbackFunc.clear();
+	}
+
 	bool FBase::isModified()
 	{
 		if (this->inputPolicy() == FInputPolicy::One)

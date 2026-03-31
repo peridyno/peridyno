@@ -2,8 +2,6 @@
 #include "Node.h"
 #include "SceneGraph.h"
 
-//#define PYTHON
-
 namespace dyno
 {
 	Module::Module(std::string name)
@@ -33,6 +31,10 @@ namespace dyno
 
 	void Module::update()
 	{
+		if (!this->validateInputs()) {
+			return;
+		}
+
 		if (!isInitialized())
 		{
 			bool ret = initialize();
@@ -41,10 +43,6 @@ namespace dyno
 		}
 
 		this->updateStarted();
-
-		if (!this->validateInputs()) {
-			return;
-		}
 
 		if (this->requireUpdate()) {
 			//pre processing
@@ -89,20 +87,27 @@ namespace dyno
 
 	bool Module::isInputComplete()
 	{
+		auto scn = this->getSceneGraph();
+
+		bool verbose = scn == nullptr ? true : scn->isVerbose();
+
 		//If any input field is empty, return false;
 		for (auto f_in : fields_input)
 		{
 			if (!f_in->isOptional() && f_in->isEmpty())
 			{
-				Node* par = this->getParentNode();
-				if (par != nullptr && par->getSceneGraph() != nullptr && par->getSceneGraph()->isValidationInfoPrintable())
+				if (verbose)
 				{
-					std::string errMsg = std::string("The input field ") + f_in->getObjectName() +
-						std::string(" in Module ") + this->getClassInfo()->getClassName() + std::string(" is not set!");
+					Node* par = this->getParentNode();
+					if (par != nullptr && par->getSceneGraph() != nullptr && par->getSceneGraph()->isValidationInfoPrintable())
+					{
+						std::string errMsg = std::string("The input field ") + f_in->getObjectName() +
+							std::string(" in Module ") + this->getClassInfo()->getClassName() + std::string(" is not set!");
 
-					Log::sendMessage(Log::Error, errMsg);
+						Log::sendMessage(Log::Error, errMsg);
+					}
 				}
-
+				
 				return false;
 			}
 		}
@@ -112,10 +117,14 @@ namespace dyno
 
 	bool Module::isOutputCompete()
 	{
+		auto scn = this->getSceneGraph();
+
+		bool verbose = scn == nullptr ? true : scn->isVerbose();
+
 		//If any output field is empty, return false;
 		for (auto f_out : fields_output)
 		{
-			if (f_out->isEmpty())
+			if (f_out->isEmpty() && verbose)
 			{
 				Node* par = this->getParentNode();
 				if (par != nullptr && par->getSceneGraph() != nullptr && par->getSceneGraph()->isValidationInfoPrintable())
@@ -242,7 +251,7 @@ namespace dyno
 	Node* Module::getParentNode()
 	{
 		if (m_node == NULL) {
-			Log::sendMessage(Log::Error, "Parent node is not set!");
+			//Log::sendMessage(Log::Error, "Parent node is not set!");
 		}
 
 		return m_node;

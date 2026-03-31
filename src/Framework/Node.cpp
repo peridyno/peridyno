@@ -613,7 +613,7 @@ bool Node::addNodePort(NodePort* port)
 // 	getContext()->enable();
 // }
 
-// void Node::setTopologyModule(std::shared_ptr<TopologyModule> topology)
+// void Node::setTopologyModule(std::shared_ptr<Topology> topology)
 // {
 // 	if (m_topology != nullptr)
 // 	{
