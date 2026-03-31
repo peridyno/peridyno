@@ -42,11 +42,14 @@ namespace dyno {
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
+		typedef typename TDataType::Matrix Matrix;
 
 		VirtualFissionFusionStrategy();
 		~VirtualFissionFusionStrategy() override;
 
 		void constrain() override;
+		
+		void thinFeatureCompute();
 
 		void fissionJudger();		
 
@@ -56,15 +59,23 @@ namespace dyno {
 
 		void mergeVirtualParticles();
 
+		DEF_VAR(Real, RestDensity, 1000, "Reference density");
+
+		DEF_VAR(Real, ThinFeatureThreshold, 0.01f, "Determine whether a particle is located in a thin-layer");
+
+		DEF_VAR(Real, TransitionRegionThreshold, 0.001, "");
+
+		DEF_VAR(Real, MinDist, 0.002, "");
+
+		DEF_VAR(bool, deleteRepeatPoints, true, "");
+
 		DEF_VAR_IN(Real, TimeStep, "Time Step");
 
 		DEF_VAR_IN(Real, SmoothingLength, "Smoothing Length");
 
 		DEF_VAR_IN(Real, SamplingDistance, "Particle sampling distance");
 
-		DEF_VAR(Real, RestDensity, 1000, "Reference density");
-
-		DEF_ARRAY_OUT(Real, Density, DeviceType::GPU, "Final particle density");
+		DEF_VAR_IN(uint, FrameNumber, "Frame Number");
 
 		DEF_ARRAY_IN(Coord, RPosition, DeviceType::GPU, "Input real particle position");
 
@@ -72,22 +83,10 @@ namespace dyno {
 
 		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "Neighboring particles' ids");
 
-		DEF_ARRAY_IN(bool, ThinSheet, DeviceType::GPU, "");
+		DEF_ARRAY_OUT(Real, Density, DeviceType::GPU, "Final particle density");
 
-		DEF_ARRAY_IN(Real, ThinFeature, DeviceType::GPU, "");
-
-		DEF_VAR(Real, TransitionRegionThreshold, 0.001, "");
-
-		DEF_VAR_IN(uint, FrameNumber, "");
-
-		DEF_VAR(Real, MinDist, 0.002, "");
-
-		DEF_ARRAY_OUT(Coord, CandidateVirtualPoints, DeviceType::GPU, "");
-
-		DEF_ARRAY_OUT(bool, VirtualPointType, DeviceType::GPU, "");
-
-		DEF_VAR(bool, deleteRepeatPoints, true, "");
-
+		//DEF_ARRAY_OUT(bool, VirtualPointType, DeviceType::GPU, "");
+	
 		DECLARE_ENUM(CandidatePointCount,
 		neighbors_8 = 8,
 			neighbors_27 = 27,
@@ -122,8 +121,6 @@ namespace dyno {
 
 		DArray<uint> mPreParticleStates;			/*@brief Particle in previrous frame*/
 
-		DArray<Coord> mVirtualPoints;		/*@brief Virtual Particles*/
-
 		DArray<Coord> mAnchorPoints;
 
 		DArray<uint32_t> mAnchorPointCodes;
@@ -144,13 +141,15 @@ namespace dyno {
 
 		DArray<Coord> mFussionVirtualParticles;
 
-		
+		DArray<Coord> mEigens;
+
+		DArray<bool> mThinSheets;
+
 		Coord origin;
 
 		uint FissionVirtualNum;
 
 		uint FussionVirtualNum;
-
 
 		DArray<uint> fissions;
 

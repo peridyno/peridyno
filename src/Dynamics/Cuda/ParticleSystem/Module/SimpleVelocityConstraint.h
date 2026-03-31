@@ -42,6 +42,8 @@ namespace dyno {
 	class SimpleVelocityConstraint : public ConstraintModule
 	{
 
+		DECLARE_TCLASS(SimpleVelocityConstraint, TDataType)
+
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -51,6 +53,34 @@ namespace dyno {
 
 		void constrain() override;
 		bool initialize();
+
+	public:
+
+		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "");
+
+		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "Input real particle position");
+
+		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "Input particle velocity");
+
+		DEF_ARRAY_IN(Coord, Normal, DeviceType::GPU, "Input particle velocity");
+
+		DEF_ARRAY_IN(Attribute, Attribute, DeviceType::GPU, "Input particle velocity");
+
+		DEF_VAR_IN(Real, SmoothingLength, "");
+
+		DEF_VAR(Real, RestDensity, Real(1000), "Reference density");
+
+		DEF_VAR_IN(Real, SamplingDistance, "");
+
+		DEF_VAR_IN(Real, TimeStep, "");
+
+		DEF_VAR(Real, Viscosity, Real(5000.0), "Initial Viscosity Value");
+
+		DEF_VAR(bool, SimpleIterationEnable, true, "");
+
+		DEF_VAR(int, SimpleIteration, 5, "SIMPLE Iteration Count");
+
+	private:
 
 		bool resizeVector();
 		void initialAttributes();
@@ -77,12 +107,6 @@ namespace dyno {
 			return true;
 		};
 
-		bool SIMPLE_IterNumSet(int i) {
-			SIMPLE_IterNum = i;
-			return true;
-		};
-
-
 		bool SetCross(Real visT, Real mag, Real k1, Real n1)
 		{
 			CrossVisCeil = visT;
@@ -98,34 +122,6 @@ namespace dyno {
 			IsCrossReady = true;
 			return IsCrossReady;
 		};
-
-
-
-	public:
-
-		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "");
-
-		DEF_ARRAY_IN(Coord, Position, DeviceType::GPU, "Input real particle position");
-
-		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "Input particle velocity");
-
-		DEF_ARRAY_IN(Coord, Normal, DeviceType::GPU, "Input particle velocity");
-
-		DEF_ARRAY_IN(Attribute, Attribute, DeviceType::GPU, "Input particle velocity");
-
-		DEF_VAR_IN(Real, SmoothingLength, "");
-
-		DEF_VAR(Real, RestDensity, Real(1000), "Reference density");
-
-		DEF_VAR_IN(Real, SamplingDistance, "");
-
-		DEF_VAR_IN(Real, TimeStep, "");
-
-		DEF_VAR(Real, Viscosity, Real(5000.0), "Initial Viscosity Value");
-
-		DEF_VAR(bool, SimpleIterationEnable, true, "");
-
-	private:
 
 		DArray<Real> m_viscosity;
 		Real Cross_N;
@@ -187,5 +183,5 @@ namespace dyno {
 
 	};
 
-
+	IMPLEMENT_TCLASS(SimpleVelocityConstraint, TDataType)
 }

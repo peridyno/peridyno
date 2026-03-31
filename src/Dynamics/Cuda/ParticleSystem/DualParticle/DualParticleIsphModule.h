@@ -21,7 +21,6 @@
 #include "Algorithm/Functional.h"
 #include "Algorithm/Arithmetic.h"
 #include "Collision/Attribute.h"
-#include "VirtualParticleShiftingStrategy.h"
 #include "ParticleSystem/Module/Kernel.h"
 #include <sstream>
 #include <iostream>
@@ -36,7 +35,7 @@ namespace dyno {
 	*@Brief : Dual particle SPH solver to model free surface flow.
 	*@Note  : 1. This solver does not contain the virtual particle generator; 2. The graphic memory of the NVDIA GPU should be larger than 4GB.
 	*@Paper1: Liu et al., ACM Trans Graph (TOG). 2024. A Dual-Particle Approach for Incompressible SPH Fluids. doi.org/10.1145/3649888
-	*@Paper2£ºLiu et al., Pacific Graphics 2025 (Conference Track). An Adaptive Particle Fission-Fusion Approach for Dual-Particle SPH Fluid.  https://diglib.eg.org/handle/10.2312/pg20251269
+	*@Paper2: Liu et al., Pacific Graphics 2025 (Conference Track). An Adaptive Particle Fission-Fusion Approach for Dual-Particle SPH Fluid.  https://diglib.eg.org/handle/10.2312/pg20251269
 	*/
 
 	template<typename TDataType>
@@ -57,9 +56,9 @@ namespace dyno {
 
 		DEF_VAR(Real, RestDensity, Real(1000), "Reference density");
 
-		DEF_VAR(Real, SamplingDistance, Real(0.005), "");
+		DEF_VAR_IN(Real, SamplingDistance, "");
 
-		DEF_VAR(Real, SmoothingLength, Real(0.0125), "Smoothing length in most cases");
+		DEF_VAR_IN(Real, SmoothingLength, "Smoothing length in most cases");
 	
 		DEF_VAR_IN(Real, TimeStep, "Time Step");
 
@@ -122,8 +121,8 @@ namespace dyno {
 
 		DEF_VAR(Real, ResidualThreshold, 0.0001f, "Convergence threshold for the pressure Poisson Equation");
 
-		DEF_VAR(bool, WarmStart, true, "");
 
+		DEF_VAR(bool, WarmStart, true, "");
 	private:
 
 		bool initializeImpl() override;
@@ -144,9 +143,10 @@ namespace dyno {
 		DArray<Real> m_r;
 		DArray<Real> m_p;
 		DArray<Real> m_pressure;
+		DArray<Real> m_RealPressure;
 		DArray<Coord> m_Gp;
 		DArray<Coord> m_GpNearSolid;
-		DArray<Real> m_RealPressure;
+
 		DArray<Real> m_Aii;
 
 		CubicKernel<Real> kernel;
@@ -167,13 +167,6 @@ namespace dyno {
 		/// Fluid density on virtual particle.
 		std::shared_ptr<SummationDensity<TDataType>> m_vr_summation;
 
-		//std::ofstream outfile_iter;
-		//std::ofstream outfile_virtualNumber;
-		//std::ofstream outfile_density;
-
-		//DArray<bool> m_solidVirtualPaticleFlag;
-		//DArray<Real> m_RealVolumeEst;
-		//DArray<Real> m_VirtualVolumeEst;
 
 	};
 }

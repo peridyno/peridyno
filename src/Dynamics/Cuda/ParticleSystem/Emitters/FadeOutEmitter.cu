@@ -1,4 +1,4 @@
-#include "PoissonEmitter.h"
+#include "FadeOutEmitter.h"
 #include "GLWireframeVisualModule.h"
 
 #include <time.h>
@@ -8,7 +8,7 @@
 namespace dyno
 {
 	template<typename TDataType>
-	PoissonEmitter<TDataType>::PoissonEmitter()
+	FadeOutEmitter<TDataType>::FadeOutEmitter()
 		: ParticleEmitter<TDataType>()
 	{
 		srand(time(0));
@@ -16,11 +16,9 @@ namespace dyno
 		this->varWidth()->setRange(0.01, 10.0f);
 		this->varHeight()->setRange(0.01, 10.0f);
 
-		this->varSamplingDistance()->setValue(0.008f);
-
 		this->stateOutline()->setDataPtr(std::make_shared<EdgeSet<TDataType>>());
 
-		auto callback = std::make_shared<FCallBackFunc>(std::bind(&PoissonEmitter<TDataType>::tranformChanged, this));
+		auto callback = std::make_shared<FCallBackFunc>(std::bind(&FadeOutEmitter<TDataType>::tranformChanged, this));
 
 		this->varLocation()->attach(callback);
 		this->varScale()->attach(callback);
@@ -29,8 +27,6 @@ namespace dyno
 		this->varWidth()->attach(callback);
 		this->varHeight()->attach(callback);
 
-		mPlane = std::make_shared< PoissonPlane<TDataType>>();
-
 		auto wireRender = std::make_shared<GLWireframeVisualModule>();
 		wireRender->varBaseColor()->setValue(Color(0, 1, 0));
 		this->stateOutline()->connect(wireRender->inEdgeSet());
@@ -38,30 +34,15 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	PoissonEmitter<TDataType>::~PoissonEmitter()
+	FadeOutEmitter<TDataType>::~FadeOutEmitter()
 	{
 	}
 
-	
-
 	template<typename TDataType>
-	void PoissonEmitter<TDataType>::generateParticles()
+	void FadeOutEmitter<TDataType>::generateParticles()
 	{
-		mCounter++;
-		uint delayStart = this->varDelayStart()->getValue();	
-		//std::cout << delayStart << ", " << mCounter << std::endl;
-		if (delayStart > mCounter)
-		{
-			std::cout << mCounter << std::endl;
-			this->mPosition.reset();
-			this->mVelocity.reset();
-			return;
-		}
 
-
-		//std::cout << mPlane->getPoints().size() << std::endl;
-
-		std::vector<Vec2f> temp_points = mPlane->getPoints();
+		frame_++;
 
 		auto sampling_distance = this->varSamplingDistance()->getData();
 
@@ -73,57 +54,80 @@ namespace dyno
 
 		auto quat = this->computeQuaternion();
 
+		uint f_num = this->stateFrameNumber()->getValue();
+
+		my_time_ = this->getDt() * (Real)(f_num);
+
+
+		if (my_time_ * this->varMovingVelocity()->getData()[2] < 0.2)
+		{
+			my_position = my_time_ * this->varMovingVelocity()->getData();
+		}
+
+		std::cout <<"My pos:"  << my_position << std::endl;
+
+		//std::cout <<  "!!!!!!! - Frame:" << this->stateFrameNumber()->getValue() << "My Time:" << my_time_ << "My Position:" << my_position << std::endl;
+
 		Transform<Real, 3> tr(center, quat.toMatrix3x3(), scale);
 
 		std::vector<Coord> pos_list;
 		std::vector<Coord> vel_list;
 
-		Coord v0 = this->varVelocityMagnitude()->getData()*quat.rotate(Vec3f(0, -1, 0));
+		Coord v0 = this->varVelocityMagnitude()->getData() * quat.rotate(Vec3f(0, -1, 0));
 
 		auto w = 0.5 * this->varWidth()->getData();
 		auto h = 0.5 * this->varHeight()->getData();
 
-		//mPlane->varUpper()->setValue(Vec2f(w, h));
-		//mPlane->varLower()->setValue(Vec2f(-w, -h));
-		//mPlane->compute();
-		//mPlane->varSamplingDistance()->setValue(this->varSamplingDistance()->getValue());
+		
+		Real radius = std::max(w, h)*2.0;
+	
+		Real a = (Real)(this->varFadeOutEnd()->getData() - this->varFadeOutBegin()->getData());
+		Real b = (Real)((Real)(this->varFadeOutEnd()->getData()) - (Real)(frame_));
+		b = b < 0 ? 0 : b;
+		Real t = (b / a) * radius;
 
-		if (this->varEmitterShape()->getData() == EmitterShape::Round)
-		{
-			Real radius = w < h ? w : h;
+		Coord movingCenter_ = my_position + center;
 
-			mPlane->varUpper()->setValue(Vec2f(radius, radius));
-			mPlane->varLower()->setValue(Vec2f(-radius, -radius));
-			mPlane->compute();
-			mPlane->varSamplingDistance()->setValue(this->varSamplingDistance()->getValue());
+		std::cout << "Emitter MMM: " << t << " My Position " << my_position << std::endl;
 
+		if (frame_ < this->varFadeOutBegin()->getData()) {
 
-			for (int i = 0; i < temp_points.size(); i++)
+			for (Real x = -w; x <= w; x += sampling_distance)
 			{
-				if (sqrt(temp_points[i][0] * temp_points[i][0] + temp_points[i][1] * temp_points[i][1]) < radius)
+				for (Real z = -h; z <= h; z += sampling_distance)
 				{
-					Coord pos_temp = Coord(temp_points[i][0], 0.0, temp_points[i][1]);
-					pos_list.push_back(tr * pos_temp);
-					vel_list.push_back(v0);
+					Coord p = Coord(x, 0, z);
+					{
+						pos_list.push_back(tr * p + my_position);
+						vel_list.push_back(v0);
+					}
 				}
 			}
 		}
-
-		else
+		else //if(frame_ < this->varFadeOutEnd()->getData())
 		{
-			mPlane->varUpper()->setValue(Vec2f(w, h));
-			mPlane->varLower()->setValue(Vec2f(-w, -h));
-			mPlane->compute();
-			mPlane->varSamplingDistance()->setValue(this->varSamplingDistance()->getValue());
-
-
-			for (int i = 0; i < temp_points.size(); i++)
+			for (Real x = -w; x <= w; x += sampling_distance)
 			{
-				Coord pos_temp = Coord(temp_points[i][0], 0.0, temp_points[i][1]);
-				pos_list.push_back(tr * pos_temp);
-				vel_list.push_back(v0);
+				for (Real z = -h; z <= h; z += sampling_distance)
+				{
+					Coord p = Coord(x, 0, z);
+					Coord pos_ = tr * p + my_position;
+					if (t < 0.010) t = 0.010;
+					//if ((pos_ - center).norm() < t)
+					if ((pos_ - movingCenter_).norm() < t)
+					{
+						
+						{
+							pos_list.push_back(pos_);
+							vel_list.push_back(v0);
+						}
+					}
+
+
+				}
 			}
 		}
+	
 
 		if (pos_list.size() > 0)
 		{
@@ -138,9 +142,9 @@ namespace dyno
 		pos_list.clear();
 		vel_list.clear();
 	}
-	
+
 	template<typename TDataType>
-	void PoissonEmitter<TDataType>::tranformChanged()
+	void FadeOutEmitter<TDataType>::tranformChanged()
 	{
 		std::vector<Coord> vertices;
 		std::vector<Topology::Edge> edges;
@@ -179,12 +183,18 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void PoissonEmitter<TDataType>::resetStates()
+	void FadeOutEmitter<TDataType>::resetStates()
 	{
-		tranformChanged();
-		mCounter = 0;
+		ParticleEmitter<TDataType>::resetStates();
 
+		frame_ = 0;
+
+		my_time_ = 0.0f;
+
+		my_position = Coord(0.0);
+
+		tranformChanged();
 	}
 
-	DEFINE_CLASS(PoissonEmitter);
+	DEFINE_CLASS(FadeOutEmitter);
 }

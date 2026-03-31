@@ -1,5 +1,6 @@
 #include "VirtualFissionFusionStrategy.h"
 #include "Node.h"
+#include "Matrix/MatrixFunc.h"
 #include <thrust/sort.h>
 
 namespace dyno
@@ -19,21 +20,16 @@ namespace dyno
 		this->inRPosition()->connect(mSummation->inPosition());
 		this->inNeighborIds()->connect(mSummation->inNeighborIds());
 		mSummation->outDensity()->connect(this->outDensity());
-
-		this->outCandidateVirtualPoints()->allocate();
-
 	}
 
 	template<typename TDataType>
 	VirtualFissionFusionStrategy<TDataType>::~VirtualFissionFusionStrategy()
 	{
-
 		mFissionParticles.clear();
 		mFussionParticles.clear();
 		mDivergence.clear();					
 		mCurrentParticleStates.clear();		
 		mPreParticleStates.clear();			
-		mVirtualPoints.clear();		
 		mAnchorPoints.clear();
 		mAnchorPointCodes.clear();
 		mNonRepeatedCount.clear();
@@ -45,6 +41,8 @@ namespace dyno
 		fissions.clear();
 		fussions.clear();
 		ArrayPointer.clear();
+		mEigens.clear();
+		mThinSheets.clear();
 	}
 
 	template <typename Real, typename Coord>
@@ -82,9 +80,7 @@ namespace dyno
 			}
 		}
 		divergences[pId] = div * mass / densities[pId];
-
 	}
-
 
 	template <typename Real, typename Coord>
 	__global__ void GridFission_StateJudge(
@@ -92,9 +88,9 @@ namespace dyno
 		DArray<Real> divergences,
 		DArray<Real> densities,
 		DArray<bool> thinSheets,
-		DArray<Real> thinFeatures,
 		DArray<Coord> positions,
 		DArray<uint> PreStates,
+		Real RestDensity,
 		int Criteria,
 		Real transition,
 		Real mass,
@@ -107,8 +103,7 @@ namespace dyno
 		if (Criteria == 0)
 		{
 			Real theta = transition;
-			if (densities[pId] > 990) theta = 100 * transition;
-
+			if (densities[pId] > 0.99 * RestDensity) theta = 100.0 * transition;
 			if ((divergences[pId] < theta) && (divergences[pId] >= 0.0f))
 			{
 				//Unclear 
@@ -129,7 +124,6 @@ namespace dyno
 		{
 			if (thinSheets[pId])
 			{
-				//printf("%d - %f", pId, thinFeatures[pId]);
 				particleStates[pId] = 2;
 			}
 			else {
@@ -144,8 +138,7 @@ namespace dyno
 			}
 			else {
 				Real theta = transition;
-				if (densities[pId] > 990) theta = 100 * transition;
-
+				if (densities[pId] > 0.99 * RestDensity) theta = 100.0 * transition;
 				if ((divergences[pId] < theta) && (divergences[pId] >= 0.0f))
 				{
 					//Unclear 
@@ -195,7 +188,6 @@ namespace dyno
 
 	}
 
-
 	__global__ void GridFission_intArrayReset(
 		DArray<uint> arr,
 		uint value
@@ -224,7 +216,6 @@ namespace dyno
 		}
 	}
 
-
 	template <typename Coord>
 	__global__ void GridFission_FissionAndFusionCounter
 	(
@@ -249,7 +240,6 @@ namespace dyno
 		}
 		else
 		{
-			//printf("@Error:: Particle State is unclear!!!", pId);
 			fussions[pId] = 1;
 		}
 	}
@@ -274,29 +264,6 @@ namespace dyno
 		}
 	}
 
-	//template <typename Coord>
-	//__global__ void GridFission_CheckState
-	//(
-	//	DArray<Coord> PickedParticles,
-	//	DArray<uint> PickedParticleIds,
-	//	DArray<Coord> particles,
-	//	DArray<uint> flags
-	//)
-	//{
-	//	int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-	//	if (pId >= PickedParticles.size()) return;
-	//	if (flags[PickedParticleIds[pId]] != 1)
-	//	{
-	//		printf("ERROR!!!!!!!!!  %d, - o_ids %d, flag %d \r\n", pId, PickedParticleIds[pId], flags[PickedParticleIds[pId]]);
-	//	}
-	//	if (PickedParticles[pId] != particles[PickedParticleIds[pId]])
-	//	{
-	//		uint oid = PickedParticleIds[pId];
-	//		printf("ERROR!!!!!!!!!  %d - n(%f %f %f), o(%f %f %f) \r\n", pId,
-	//			PickedParticles[pId][0], PickedParticles[pId][1], PickedParticles[pId][2],
-	//			particles[oid][0], particles[oid][1], particles[oid][2]);
-	//	}
-	//}
 
 	/*
 	*@brief	Virtual particles' candinate points
@@ -332,7 +299,6 @@ namespace dyno
 
 	}
 
-
 	/*
 	*@brief	Virtual particles' candinate points
 	*		Every particle has 27 neighbors.
@@ -350,18 +316,13 @@ namespace dyno
 		if (id >= pos.size()) return;
 
 		Coord pos_ref = pos[id] - origin + dh / 2;
-		Coord a(0);
-
-		a[0] = (Real)((int)(floor(pos_ref[0] / dh))) * dh;
-		a[1] = (Real)((int)(floor(pos_ref[1] / dh))) * dh;
-		a[2] = (Real)((int)(floor(pos_ref[2] / dh))) * dh;
-
 
 		for (int i = 0; i < 27; i++)
 		{
-			anchorPoint[id * 27 + i] = Coord(a[0] + dh * Real(diff_v[i][0]),
-				a[1] + dh * Real(diff_v[i][1]),
-				a[2] + dh * Real(diff_v[i][2])
+			anchorPoint[id * 27 + i] = Coord(
+				(Real)((int)(floor(pos_ref[0] / dh))) * dh + dh * Real(diff_v[i][0]),
+				(Real)((int)(floor(pos_ref[1] / dh))) * dh + dh * Real(diff_v[i][1]),
+				(Real)((int)(floor(pos_ref[2] / dh))) * dh + dh * Real(diff_v[i][2])
 			);
 		}
 
@@ -425,17 +386,15 @@ namespace dyno
 		a[1] = (Real)((int)(floor(pos_ref[1] / dh))) * dh;
 		a[2] = (Real)((int)(floor(pos_ref[2] / dh))) * dh;
 
-
 		for (int i = 0; i < 125; i++)
 		{
-			anchorPoint[id * 125 + i] = Coord(a[0] + dh * Real(diff_v_125[i][0]),
+			anchorPoint[id * 125 + i] = Coord(
+				a[0] + dh * Real(diff_v_125[i][0]),
 				a[1] + dh * Real(diff_v_125[i][1]),
 				a[2] + dh * Real(diff_v_125[i][2])
 			);
 		}
-
 	}
-
 
 	/*
 	*@brief	Positions(3-dimension) convert to Morton Codes
@@ -461,22 +420,18 @@ namespace dyno
 
 		uint32_t  key = 0;
 
-
 		xi = (xi | (xi << 16)) & 0x030000FF;
 		xi = (xi | (xi << 8)) & 0x0300F00F;
 		xi = (xi | (xi << 4)) & 0x030C30C3;
 		xi = (xi | (xi << 2)) & 0x09249249;
-
 		yi = (yi | (yi << 16)) & 0x030000FF;
 		yi = (yi | (yi << 8)) & 0x0300F00F;
 		yi = (yi | (yi << 4)) & 0x030C30C3;
 		yi = (yi | (yi << 2)) & 0x09249249;
-
 		zi = (zi | (zi << 16)) & 0x030000FF;
 		zi = (zi | (zi << 8)) & 0x0300F00F;
 		zi = (zi | (zi << 4)) & 0x030C30C3;
 		zi = (zi | (zi << 2)) & 0x09249249;
-
 		key = xi | (yi << 1) | (zi << 2);
 
 		mortonCode[id] = key;
@@ -494,7 +449,6 @@ namespace dyno
 		int id = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (id >= morton.size()) return;
 
-
 		if (id == 0 || morton[id] != morton[id - 1])
 		{
 			counter[id] = 1;
@@ -502,7 +456,6 @@ namespace dyno
 		else
 			counter[id] = 0;
 	}
-
 
 	/*
 	*@brief	Morton Codes convert to Positions(3-dimension)
@@ -517,7 +470,6 @@ namespace dyno
 	{
 		int id = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (id >= mortonCode.size()) return;
-
 
 		uint32_t key = mortonCode[id];
 
@@ -566,7 +518,7 @@ namespace dyno
 		}
 	}
 
-	template< typename Coord>
+	template<typename Coord>
 	__global__ void GridFission_CopyToVpos(
 		DArray<Coord> vpos,
 		Coord origin
@@ -577,33 +529,95 @@ namespace dyno
 		vpos[id] = vpos[id] + origin;
 	}
 
-	__global__ void GridFission_VirtualTypeSet(
-		DArray<bool> types,
-		uint fussionNum
-	)
+	//__global__ void GridFission_VirtualTypeSet(
+	//	DArray<bool> types,
+	//	uint fussionNum
+	//)
+	//{
+	//	int id = threadIdx.x + (blockIdx.x * blockDim.x);
+	//	if (id >= types.size()) return;
+	//	if (id < fussionNum)
+	//	{
+	//		types[id] = true;
+	//	}
+	//	else
+	//	{
+	//		types[id] = false;
+	//	}
+	//}
+
+	template <typename Real, typename Coord, typename Matrix>
+	__global__ void GridFission_ThinSheetJudge(
+		DArray<bool> thinSheetFlag,
+		DArray<Coord> Eigens,
+		DArray<Coord> posArr,
+		DArrayList<int> neighbors,
+		Real threshold,
+		Real rho_0,
+		Real smoothingLength,
+		Matrix mat)
 	{
-		int id = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (id >= types.size()) return;
-		if (id < fussionNum)
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= posArr.size()) return;
+
+		List<int>& list_i = neighbors[pId];
+		int nbSize = list_i.size();
+
+		Real total_weight = 0.0f;
+		Matrix tm(0.0f);
+		Real wij = 1.0f;
+
+		for (int ne = 0; ne < nbSize; ne++)
 		{
-			types[id] = true;
+			int j = list_i[ne];
+			Coord& X_j = posArr[j];
+			Coord& X_i = posArr[pId];
+			Coord xij = (X_j - X_i) / smoothingLength;
+			Real rij = (X_j - X_i).norm();
+
+			if ((rij > EPSILON) || (pId != j))
+			{
+				//Real wij = weight(rij, smoothingLength, scale);
+				total_weight += wij;
+
+				tm(0, 0) += xij[0] * xij[0] * wij;	tm(0, 1) += xij[0] * xij[1] * wij;	tm(0, 2) += xij[0] * xij[2] * wij;
+				tm(1, 0) += xij[1] * xij[0] * wij;	tm(1, 1) += xij[1] * xij[1] * wij;	tm(1, 2) += xij[1] * xij[2] * wij;
+				tm(2, 0) += xij[2] * xij[0] * wij;	tm(2, 1) += xij[2] * xij[1] * wij;	tm(2, 2) += xij[2] * xij[2] * wij;
+			}
+		}
+
+		if (total_weight > EPSILON)
+		{
+			tm *= (1.0 / total_weight);
 		}
 		else
 		{
-			types[id] = false;
+			tm = Matrix::identityMatrix();
+		}
+
+
+		Matrix R, U, D, V;
+		polarDecomposition(tm, R, U, D, V);
+
+		Eigens[pId][0] = D(0, 0);
+		Eigens[pId][1] = D(1, 1);
+		Eigens[pId][2] = D(2, 2);
+
+		Coord& Eigen_i = Eigens[pId];
+
+		if ((Eigen_i[0] < threshold) || (Eigen_i[1] < threshold) || (Eigen_i[2] < threshold))
+		{
+			thinSheetFlag[pId] = true;
+		}
+		else
+		{
+			thinSheetFlag[pId] = false;
 		}
 	}
-
-
 
 	template<typename TDataType>
 	void VirtualFissionFusionStrategy<TDataType>::resizeArrays(int num)
 	{
-		if (this->outVirtualParticles()->isEmpty())
-		{
-			this->outVirtualParticles()->allocate();
-		}
-
 		if (num != this->outVirtualParticles()->size())
 		{
 			this->outVirtualParticles()->resize(num);
@@ -620,9 +634,34 @@ namespace dyno
 		{
 			mCurrentParticleStates.resize(num);
 		}
+		if (mEigens.size() == !num)
+		{
+			mEigens.resize(num);
+		}
+		if (mThinSheets.size() == !num)
+		{
+			mThinSheets.resize(num);
+		}
+	}
 
-
-
+	/*
+	* @brief	Determine a particle whether locate in a thin-layer of a fluid.
+	*			Output: DArray<bool> mThinSheets
+	*/
+	template<typename TDataType>
+	void VirtualFissionFusionStrategy<TDataType>::thinFeatureCompute()
+	{
+		cuExecute(this->inRPosition()->size(),
+			GridFission_ThinSheetJudge,
+			mThinSheets,
+			mEigens,
+			this->inRPosition()->getData(),
+			this->inNeighborIds()->getData(),
+			this->varTransitionRegionThreshold()->getValue(),
+			this->varRestDensity()->getValue(),
+			this->inSmoothingLength()->getValue(),
+			Matrix(0.0f)
+		);
 	}
 
 	/*
@@ -677,10 +716,11 @@ namespace dyno
 			mCurrentParticleStates,
 			mDivergence,
 			this->outDensity()->getData(),
-			this->inThinSheet()->getData(),
-			this->inThinFeature()->getData(),
+			mThinSheets, //this->inThinSheet()->getData(),
+			//this->inThinFeature()->getData(),
 			this->inRPosition()->getData(),
 			mPreParticleStates,
+			this->varRestDensity()->getValue(),
 			this->varStretchedRegionCriteria()->getDataPtr()->currentKey(),
 			this->varTransitionRegionThreshold()->getData(),
 			mass,
@@ -698,8 +738,6 @@ namespace dyno
 			h
 		);
 	}
-
-
 
 	/*
 	* @brief	Particle positions is divided into two groupus (separate arrays): 1. Fission particles; 2. Fussion particles.
@@ -732,17 +770,14 @@ namespace dyno
 		fission_counter = uint_rnum_reduce.accumulate(fissions.begin(), fissions.size());
 		fussion_counter = uint_rnum_reduce.accumulate(fussions.begin(), fussions.size());
 
-		std::cout << "*DUAL-ISPH::Fission-Fusion Strategy::";
-		std::cout <<  "Fission-" << fission_counter << " + Fussion-" << fussion_counter << std::endl;
+		std::cout << "*DUAL-ISPH::Fission-Fusion Strategy::" <<  "Fission-" << fission_counter << " + Fussion-" << fussion_counter << std::endl;
 
 		mFissionParticles.resize(fission_counter);
 		mFissionParticleIds.resize(fission_counter);
-
 		mFussionParticles.resize(fussion_counter);
 		mFussionParticleIds.resize(fussion_counter);
 
 		thrust::exclusive_scan(thrust::device, fissions.begin(), fissions.begin() + fissions.size(), ArrayPointer.begin());
-
 		cuExecute(r_num, GridFission_PickUpParticles,
 			mFissionParticles,
 			mFissionParticleIds,
@@ -752,39 +787,13 @@ namespace dyno
 		);
 
 		thrust::exclusive_scan(thrust::device, fussions.begin(), fussions.begin() + fussions.size(), ArrayPointer.begin());
-
 		cuExecute(r_num, GridFission_PickUpParticles,
 			mFussionParticles,
 			mFussionParticleIds,
 			this->inRPosition()->getData(),
 			ArrayPointer,
 			fussions
-		);
-		
-		if (false)
-		{
-			/*
-			*@brief debug!
-			*/
-
-			//cuExecute(mFissionParticles.size(),
-			//	GridFission_CheckState,
-			//	mFissionParticles,
-			//	mFissionParticleIds,
-			//	this->inRPosition()->getData(),
-			//	fissions
-			//);
-
-
-			//cuExecute(mFissionParticles.size(),
-			//	GridFission_CheckState,
-			//	mFussionParticles,
-			//	mFussionParticleIds,
-			//	this->inRPosition()->getData(),
-			//	fussions
-			//);
-		}
-	
+		);	
 	};
 
 	/*
@@ -837,7 +846,6 @@ namespace dyno
 				origin,
 				gridSize
 			);
-
 		}
 		else if (this->varCandidatePointCount()->getValue() == CandidatePointCount::neighbors_27) {
 			cuExecute(fission_num,
@@ -898,8 +906,7 @@ namespace dyno
 			mAnchorPointCodes,
 			mNonRepeatedCount
 		);
-
-		cuSynchronize();
+		//cuSynchronize();
 
 		mFissionVirtualParicles.resize(mCandidateCodes.size());
 
@@ -915,7 +922,6 @@ namespace dyno
 			mFissionVirtualParicles,
 			origin
 		);
-
 	};
 
 	/*
@@ -931,31 +937,28 @@ namespace dyno
 		uint fussionVirtualCount = mFussionVirtualParticles.size();
 		uint fissionVirtualCount = mFissionVirtualParicles.size();
 
-		mVirtualPoints.resize(fussionVirtualCount + fissionVirtualCount);
+		this->outVirtualParticles()->resize(fussionVirtualCount + fissionVirtualCount);
+		auto& t_VirtualPoints = this->outVirtualParticles()->getData();
 
-		mVirtualPoints.assign(mFussionVirtualParticles, mFussionVirtualParticles.size(), 0, 0);
-		mVirtualPoints.assign(mFissionVirtualParicles, mFissionVirtualParicles.size(), mFussionVirtualParticles.size(), 0);
+		t_VirtualPoints.assign(mFussionVirtualParticles, mFussionVirtualParticles.size(), 0, 0);
+		t_VirtualPoints.assign(mFissionVirtualParicles, mFissionVirtualParicles.size(), mFussionVirtualParticles.size(), 0);
 
-		this->outVirtualParticles()->getData().assign(mVirtualPoints);
-		this->outCandidateVirtualPoints()->assign(mVirtualPoints);
-
-		if (this->outVirtualPointType()->size() != mVirtualPoints.size())
-		{
-			this->outVirtualPointType()->resize(mVirtualPoints.size());
-		}
-
-		cuExecute(mVirtualPoints.size(),
-			GridFission_VirtualTypeSet,
-			this->outVirtualPointType()->getData(),
-			fussionVirtualCount);
+		//if (this->outVirtualPointType()->size() != t_VirtualPoints.size())
+		//{
+		//	this->outVirtualPointType()->resize(t_VirtualPoints.size());
+		//}
+		//cuExecute(t_VirtualPoints.size(),
+		//	GridFission_VirtualTypeSet,
+		//	this->outVirtualPointType()->getData(),
+		//	fussionVirtualCount);
 	};
 
 	template<typename TDataType>
 	void VirtualFissionFusionStrategy<TDataType>::constrain()
 	{
-		int r_num = this->inRPosition()->size();
+		this->resizeArrays(this->inRPosition()->size());
 
-		this->resizeArrays(r_num);
+		this->thinFeatureCompute();
 		
 		this->fissionJudger();
 

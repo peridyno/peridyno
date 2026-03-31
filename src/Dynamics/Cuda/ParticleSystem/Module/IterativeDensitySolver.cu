@@ -182,7 +182,7 @@ namespace dyno
 	void IterativeDensitySolver<TDataType>::compute()
 	{
 		int num = this->inPosition()->size();
-
+		
 		if (mPositionOld.size() != this->inPosition()->size())
 			mPositionOld.resize(this->inPosition()->size());
 

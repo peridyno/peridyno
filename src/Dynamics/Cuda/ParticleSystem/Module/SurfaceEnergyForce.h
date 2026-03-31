@@ -33,7 +33,7 @@ namespace dyno {
 		SurfaceEnergyForce();
 		~SurfaceEnergyForce() override;
 		
-		DEF_VAR(Real, Kappa, Real(1), "Surface tension coefficient");
+		DEF_VAR(Real, Kappa, Real(0.01), "Surface tension coefficient");
 
 		DEF_VAR(Real, RestDensity, Real(1000), "Rest density");
 

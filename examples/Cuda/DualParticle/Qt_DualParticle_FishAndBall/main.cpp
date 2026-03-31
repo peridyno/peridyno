@@ -2,7 +2,7 @@
 #include <SceneGraph.h>
 
 ///Particle fluid solver
-#include <DualParticleSystem/DualParticleFluid.h>
+#include <ParticleSystem/ParticleFluid.h>
 #include <ParticleSystem/MakeParticleSystem.h>
 #include <ParticleSystem/Emitters/PoissonEmitter.h>
 
@@ -37,9 +37,10 @@ std::shared_ptr<SceneGraph> createScene()
 	auto initialParticles = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f >>());
 	ptsLoader->outPointSet()->promoteOuput()->connect(initialParticles->inPoints());
 
-	auto fluid = scn->addNode(std::make_shared<DualParticleFluid<DataType3f>>(
-		DualParticleFluid<DataType3f>::FissionFusionStrategy));
-
+	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
+	fluid->varIncompressibilitySolver()->getDataPtr()->setCurrentKey(ParticleFluid<DataType3f>::DualParticle);
+	fluid->setDt(0.001);
+	fluid->varSmoothingLength()->setValue(2.4);
 	initialParticles->connect(fluid->importInitialStates());
 
 	auto ball = scn->addNode(std::make_shared<SphereModel<DataType3f>>());
@@ -81,19 +82,11 @@ std::shared_ptr<SceneGraph> createScene()
 	// add the widget to app
 	fluid->graphicsPipeline()->pushModule(colorBar);
 
-	auto vpRender = std::make_shared<GLPointVisualModule>();
-	vpRender->varBaseColor()->setValue(Color(1, 1, 0));
-	vpRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-	fluid->stateVirtualPointSet()->connect(vpRender->inPointSet());
-	vpRender->varPointSize()->setValue(0.0005);
-	fluid->graphicsPipeline()->pushModule(vpRender);
-
 	return scn;
 }
 
 int main()
 {
-
 	QtApp window;
 	window.setSceneGraph(createScene());
 	window.initialize(1024, 768);

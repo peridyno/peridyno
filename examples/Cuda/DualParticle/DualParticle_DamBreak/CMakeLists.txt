@@ -3,5 +3,5 @@ if(PERIDYNO_LIBRARY_DUALPARTICLESYSTEM)
         ParticleSystem 
         Multiphysics
         UbiGUI)
-    add_example(DualParticle_4Box DualParticle LIB_DEPENDENCY)
+    add_example(DualParticle_DamBreak DualParticle LIB_DEPENDENCY)
 endif()

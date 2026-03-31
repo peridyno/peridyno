@@ -66,7 +66,7 @@ namespace dyno {
 		DEF_ARRAY_IN(Coord, Other, DeviceType::GPU, "Particle position");
 
 		/**
-		 * @brief Neighboring particles
+		 * @brief Neighboring particles. if ids is -1, it means the particle is not a neighbor
 		 *
 		 */
 		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "Neighboring particles' ids");

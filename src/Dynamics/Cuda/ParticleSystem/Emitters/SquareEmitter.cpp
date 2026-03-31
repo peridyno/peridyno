@@ -41,14 +41,16 @@ namespace dyno
 	template<typename TDataType>
 	void SquareEmitter<TDataType>::generateParticles()
 	{
-		auto sampling_distance = this->varSamplingDistance()->getData();
+		auto sampling_distance = this->varSamplingDistance()->getValue();
 
 		if (sampling_distance < EPSILON)
 			sampling_distance = Real(0.005);
 
-		auto center = this->varLocation()->getData();
-		auto scale = this->varScale()->getData();
-
+		auto center = this->varLocation()->getValue();
+		auto scale = this->varScale()->getValue();
+		auto framenum = this->stateFrameNumber()->getData();
+		auto stopframe = this->varStopFrame()->getData();
+		auto beginframe = this->varBeginFrame()->getData();
 		auto quat = this->computeQuaternion();
 
 		Transform<Real, 3> tr(center, quat.toMatrix3x3(), scale);
@@ -56,20 +58,22 @@ namespace dyno
 		std::vector<Coord> pos_list;
 		std::vector<Coord> vel_list;
 
-		Coord v0 = this->varVelocityMagnitude()->getData()*quat.rotate(Vec3f(0, -1, 0));
+		Coord v0 = this->varVelocityMagnitude()->getValue() * quat.rotate(Vec3f(0, -1, 0));
 
-		auto w = 0.5 * this->varWidth()->getData();
-		auto h = 0.5 * this->varHeight()->getData();
-
-		for (Real x = -w; x <= w; x += sampling_distance)
+		auto w = 0.5 * this->varWidth()->getValue();
+		auto h = 0.5 * this->varHeight()->getValue();
+		if (framenum < stopframe && framenum > beginframe)
 		{
-			for (Real z = -h; z <= h; z += sampling_distance)
+			for (Real x = -w; x <= w; x += sampling_distance)
 			{
-				Coord p = Coord(x, 0, z);
-				//if (rand() % 5 == 0)
+				for (Real z = -h; z <= h; z += sampling_distance)
 				{
-					pos_list.push_back(tr * p);
-					vel_list.push_back(v0);
+					Coord p = Coord(x, 0, z);
+					//if (rand() % 5 == 0)
+					{
+						pos_list.push_back(tr * p);
+						vel_list.push_back(v0);
+					}
 				}
 			}
 		}
@@ -87,20 +91,20 @@ namespace dyno
 		pos_list.clear();
 		vel_list.clear();
 	}
-	
+
 	template<typename TDataType>
 	void SquareEmitter<TDataType>::tranformChanged()
 	{
 		std::vector<Coord> vertices;
 		std::vector<Topology::Edge> edges;
 
-		auto center = this->varLocation()->getData();
-		auto scale = this->varScale()->getData();
+		auto center = this->varLocation()->getValue();
+		auto scale = this->varScale()->getValue();
 
 		auto quat = this->computeQuaternion();
 
-		auto w = this->varWidth()->getData();
-		auto h = this->varHeight()->getData();
+		auto w = this->varWidth()->getValue();
+		auto h = this->varHeight()->getValue();
 
 		Transform<Real, 3> tr(Coord(0), quat.toMatrix3x3(), scale);
 

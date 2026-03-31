@@ -3,8 +3,8 @@ if(PERIDYNO_LIBRARY_DUALPARTICLESYSTEM)
         Core 
         Framework 
         IO          
-        DualParticleSystem 
-        GlfwGUI
+        ParticleSystem 
+        UbiGUI
         GLRenderEngine)
     add_example(DualParticle_Fountain DualParticle LIB_DEPENDENCY)
 endif()

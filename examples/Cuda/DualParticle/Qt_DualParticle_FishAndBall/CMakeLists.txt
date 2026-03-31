@@ -4,7 +4,7 @@ if(PERIDYNO_LIBRARY_DUALPARTICLESYSTEM AND PERIDYNO_QT_GUI)
         Framework 
         IO          
         QtGUI
-        DualParticleSystem 
+        ParticleSystem 
         SemiAnalyticalScheme
         ParticleSystem
         GLRenderEngine)

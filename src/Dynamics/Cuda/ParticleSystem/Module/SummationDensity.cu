@@ -73,11 +73,13 @@ namespace dyno
 		for (int ne = 0; ne < nbSize; ne++)
 		{
 			int j = list_i[ne];
+			if (j == -1) continue;
 			r = (pos_i - posArr[j]).norm();
 			rho_i += mass * weight(r, smoothingLength, scale);
 		}
-
 		rhoArr[pId] = rho_i;
+		// printf("[SD %d], rho_i: %f,  mass: %f, nbSize: %d\n", pId, rhoArr[pId], mass, nbSize);
+
 	}
 
 	template<typename Real, typename Coord, typename Kernel>
@@ -102,6 +104,7 @@ namespace dyno
 		for (int ne = 0; ne < nbSize; ne++)
 		{
 			int j = list_i[ne];
+			if (j == -1) continue;
 			r = (pos_i - posQueried[j]).norm();
 			rho_i += mass * weight(r, smoothingLength, scale);
 		}
@@ -111,7 +114,7 @@ namespace dyno
 
 	template<typename TDataType>
 	void SummationDensity<TDataType>::compute(
-		DArray<Real>& rho, 
+		DArray<Real>& rho,
 		DArray<Coord>& pos,
 		DArrayList<int>& neighbors,
 		Real smoothingLength,
@@ -127,7 +130,13 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void SummationDensity<TDataType>::compute(DArray<Real>& rho, DArray<Coord>& pos, DArray<Coord>& posQueried, DArrayList<int>& neighbors, Real smoothingLength, Real mass)
+	void SummationDensity<TDataType>::compute(
+		DArray<Real>& rho, 
+		DArray<Coord>& pos, 
+		DArray<Coord>& posQueried, 
+		DArrayList<int>& neighbors, 
+		Real smoothingLength, 
+		Real mass)
 	{
 		cuZerothOrder(rho.size(), this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
 			SD_ComputeDensity,
@@ -145,7 +154,7 @@ namespace dyno
 		Real rho_0 = this->varRestDensity()->getData();
 		Real d = this->inSamplingDistance()->getData();
 
-		m_particle_mass = d * d*d*rho_0;
+		m_particle_mass = d * d * d * rho_0;
 	}
 
 	DEFINE_CLASS(SummationDensity);

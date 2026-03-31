@@ -25,30 +25,30 @@ namespace dyno
 		this->inParticleAttribute()->tagOptional(true);
 		this->inBoundaryNorm()->tagOptional(true);
 		
-		this->varSamplingDistance()->setValue(Real(0.005));
+		//this->varSamplingDistance()->setValue(Real(0.005));
 		this->varRestDensity()->setValue(Real(1000));
-		this->varSmoothingLength()->setValue(Real(    0.0125));
+		//this->varSmoothingLength()->setValue(Real(    0.0125));
 		//this->varPpeSmoothingLength()->setValue(Real( 0.0125));
 
 		m_summation = std::make_shared<SummationDensity<TDataType>>();
-		this->varRestDensity()->connect(m_summation->varRestDensity());
-		this->varSmoothingLength()->connect(m_summation->inSmoothingLength());
-		this->varSamplingDistance()->connect(m_summation->inSamplingDistance());
+		this->varRestDensity()->quote(m_summation->varRestDensity());
+		this->inSmoothingLength()->connect(m_summation->inSmoothingLength());
+		this->inSamplingDistance()->connect(m_summation->inSamplingDistance());
 		this->inRPosition()->connect(m_summation->inPosition());
 		this->inNeighborIds()->connect(m_summation->inNeighborIds());
 
 		m_vr_summation = std::make_shared<SummationDensity<TDataType>>();
-		this->varRestDensity()->connect(m_vr_summation->varRestDensity());
-		this->varSmoothingLength()->connect(m_vr_summation->inSmoothingLength());
-		this->varSamplingDistance()->connect(m_vr_summation->inSamplingDistance());
+		this->varRestDensity()->quote(m_vr_summation->varRestDensity());
+		this->inSmoothingLength()->connect(m_vr_summation->inSmoothingLength());
+		this->inSamplingDistance()->connect(m_vr_summation->inSamplingDistance());
 		this->inVPosition()->connect(m_vr_summation->inPosition());
 		this->inRPosition()->connect(m_vr_summation->inOther());
 		this->inVRNeighborIds()->connect(m_vr_summation->inNeighborIds());
 
 		m_vv_summation = std::make_shared<SummationDensity<TDataType>>();
-		this->varRestDensity()->connect(m_vv_summation->varRestDensity());
-		this->varSmoothingLength()->connect(m_vv_summation->inSmoothingLength());
-		this->varSamplingDistance()->connect(m_vv_summation->inSamplingDistance());
+		this->varRestDensity()->quote(m_vv_summation->varRestDensity());
+		this->inSmoothingLength()->connect(m_vv_summation->inSmoothingLength());
+		this->inSamplingDistance()->connect(m_vv_summation->inSamplingDistance());
 		this->inVPosition()->connect(m_vv_summation->inPosition());
 		this->inVVNeighborIds()->connect(m_vv_summation->inNeighborIds());
 
@@ -1243,7 +1243,7 @@ namespace dyno
 
 		auto & m_virtualSolidFlag = this->outVirtualBool()->getData();
 		Real dt = this->inTimeStep()->getData();
-		Real h = this->varSmoothingLength()->getData();
+		Real h = this->inSmoothingLength()->getData();
 
 		if (this->inParticleAttribute()->isEmpty() 
 			|| this->inParticleAttribute()->size() != num

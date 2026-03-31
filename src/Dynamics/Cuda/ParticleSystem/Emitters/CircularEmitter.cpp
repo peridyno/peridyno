@@ -36,7 +36,7 @@ namespace dyno
 	{
 		this->mPosition.clear();
 	}
-	
+
 
 	template<typename TDataType>
 	void CircularEmitter<TDataType>::generateParticles()
@@ -50,7 +50,9 @@ namespace dyno
 		auto quat = this->computeQuaternion();
 
 		auto r = this->varRadius()->getData();
-
+		auto framenum = this->stateFrameNumber()->getData();
+		auto stopframe = this->varStopFrame()->getData();
+		auto beginframe = this->varBeginFrame()->getData();
 		std::vector<Coord> pos_list;
 		std::vector<Coord> vel_list;
 
@@ -65,16 +67,19 @@ namespace dyno
 		Real invA2 = Real(1) / (a * a);
 		Real invB2 = Real(1) / (b * b);
 
-		for (Real x = -a; x <= a; x += sampling_distance)
+		if (framenum < stopframe && framenum > beginframe)
 		{
-			for (Real z = -b; z <= b; z += sampling_distance)
+			for (Real x = -a; x <= a; x += sampling_distance)
 			{
-				if ((x * x * invA2 + z * z * invB2) < 1)// && rand() % 5 == 0)
+				for (Real z = -b; z <= b; z += sampling_distance)
 				{
-					Coord p = Coord(x / scale.x, 0, z / scale.z);
+					if ((x * x * invA2 + z * z * invB2) < 1)// && rand() % 5 == 0)
+					{
+						Coord p = Coord(x / scale.x, 0, z / scale.z);
 
-					pos_list.push_back(tr * p);
-					vel_list.push_back(v0);
+						pos_list.push_back(tr * p);
+						vel_list.push_back(v0);
+					}
 				}
 			}
 		}

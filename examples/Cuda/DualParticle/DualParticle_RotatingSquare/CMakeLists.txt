@@ -1,6 +1,6 @@
 if(PERIDYNO_LIBRARY_DUALPARTICLESYSTEM)
     set(LIB_DEPENDENCY     
-        DualParticleSystem 
+        ParticleSystem 
         Multiphysics
         GlfwGUI
         )

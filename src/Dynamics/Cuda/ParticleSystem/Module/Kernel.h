@@ -91,6 +91,7 @@ namespace dyno {
 			}
 		}
 
+		// Integral of f(x)*r^2: 1/(4*M_PI) * (1 - 20 * q^3 + 45 * q^4 - 36 * q^5 + 10 * q^6)
 		DYN_FUNC static inline Real integral(const Real r, const Real h, Real scale)
 		{
 			const Real q = r / h;
@@ -98,7 +99,7 @@ namespace dyno {
 			else {
 				const Real qq = q * q;
 				const Real hh = h * h;
-				return -15.0f / ((Real)M_PI * hh) * (q - Real(1.5) * qq + q * qq - Real(0.25) * qq * qq - Real(0.25)) * scale;
+				return scale / ((Real)M_PI * 4) * (Real(1) - 20 * qq * q + 45 * qq * qq - 36 * q * qq * qq + 10 * qq * qq * qq);
 			}
 		}
 	};
@@ -112,12 +113,12 @@ namespace dyno {
 
 		DYN_FUNC inline Real Weight(const Real r, const Real h) override
 		{
-			return Real(1);
+			return ConstantKernel<Real>::weight(r, h, this->m_scale);
 		}
 
 		DYN_FUNC inline Real Gradient(const Real r, const Real h) override
 		{
-			return Real(0);
+			return ConstantKernel<Real>::gradient(r, h, this->m_scale);
 		}
 
 		DYN_FUNC static inline Real weight(const Real r, const Real h, Real scale)
@@ -136,7 +137,6 @@ namespace dyno {
 		}
 
 	};
-
 
 	template<typename Real>
 	class SmoothKernel : public Kernel<Real>
@@ -173,7 +173,9 @@ namespace dyno {
 			const Real q = r / h;
 			if (q > 1.0f) return 0.0f;
 			else {
-				return scale * (1.0f - q * q);
+				const Real hh = h * h;
+				const Real alpha = 15.0f / (8.0f * (Real)M_PI * hh * h);
+				return scale * alpha * (1.0f - q * q);
 			}
 		}
 
@@ -184,8 +186,8 @@ namespace dyno {
 			else {
 				const Real hh = h * h;
 				const Real dd = Real(1) - q * q;
-				const Real alpha = 1.0f;// (Real) 945.0f / (32.0f * (Real)M_PI * hh *h);
-				return -alpha * dd* scale;
+				const Real alpha = 15.0f / (8.0f * (Real)M_PI * hh * h);
+				return -2.0f * scale * alpha * q;
 			}
 		}
 
@@ -195,12 +197,13 @@ namespace dyno {
 			const Real q = r / h;
 			if (q > Real(1)) return Real(0);
 			else {
+				const Real qq = q * q;
+				const Real q4 = qq * qq;
 				const Real hh = h * h;
-				return 1.0 / (hh * h) * (Real(2) / 3 - q + q * q / Real(3));
+				return scale / (8 * M_PI) * (Real(2) - Real(5) * q * qq + Real(3) * q4 * q);
 			}
 		}
 	};
-
 
 	//spiky kernel
 	template<typename Real>

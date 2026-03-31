@@ -15,7 +15,7 @@
  */
 #pragma once
 #include "Module/ConstraintModule.h"
-
+#include "Collision/Attribute.h"
 namespace dyno 
 {
 	/**
@@ -41,6 +41,7 @@ namespace dyno
 		* @brief Particle velocity
 		*/
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
+		DEF_ARRAY_IN(Attribute, Attribute, DeviceType::GPU, "Vertex attributes");
 
 	protected:
 		void constrain() override;
