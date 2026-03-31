@@ -189,17 +189,8 @@ namespace dyno
 		{
 			ProjectedPoint3D<Real> p3d;
 
-			TOrientedBox3D<Real> obb(Coord(0), Quat1f(), Coord(0.5));
-			TPoint3D<Real> point(gx);
-			Real exact_dist = point.distance(obb);
-
 			bool valid = calculateSignedDistance2TriangleSetFromNormal(p3d, gx, vertices, edges, indices, t2e, edgeN, vertexN, list);
 			//bool valid = calculateSignedDistance2TriangleSet(p3d, gx, vertices, indices, list);
-
-			// 			if (abs(p3d.signed_distance - exact_dist) >= EPSILON)
-			// 			{
-			// 				printf("Error: %f %f %f; approximate: %f; exact: %f \n", gx.x, gx.y, gx.z, p3d.signed_distance, exact_dist);
-			// 			}
 
 			if (valid) {
 				phi(i, j, k) = p3d.signed_distance;
@@ -314,7 +305,204 @@ namespace dyno
 		counter1d.clear();
 		neighbors.clear();
 	}
+	
+	template<typename Real, typename Coord, typename Tri2Edg>
+	__global__ void LSCB_InitializeSDFFromIntersectedTriangles(
+		DArray3D<Real> phi,
+		DArray3D<int> closestId,
+		DArray3D<GridType> gridType,
+		DArrayList<uint> triIds,
+		DArrayList<uint> triIdBuffer,
+		DArray<uint> shapeIds,
+		DArray<Coord> vertices,
+		DArray<Topology::Triangle> indices,
+		DArray<Topology::Edge> edges,
+		DArray<Tri2Edg> t2e,
+		DArray<Coord> edgeN,
+		DArray<Coord> vertexN,
+		Coord origin,
+		Real dx)
+	{
+		int i = threadIdx.x + (blockIdx.x * blockDim.x);
+		int j = threadIdx.y + (blockIdx.y * blockDim.y);
+		int k = threadIdx.z + (blockIdx.z * blockDim.z);
 
+		uint nx = phi.nx();
+		uint ny = phi.ny();
+		uint nz = phi.nz();
+
+		if (i >= nx || j >= ny || k >= nz) return;
+
+		Coord gx(i * dx + origin[0], j * dx + origin[1], k * dx + origin[2]);
+
+		auto& list = triIds[phi.index(i, j, k)];
+		auto& listBuffer = triIdBuffer[phi.index(i, j, k)];
+		listBuffer.clear();
+
+		uint N = list.size();
+
+		if (N > 0)
+		{
+			//declare a function to swap two values
+			auto swap_ids = [](uint& a, uint& b)
+				{
+					uint c(a); a = b; b = c;
+				};
+
+			//sort ids in list
+			for (uint s = 0; s < N; s++)
+			{
+				for (uint t = 0; t < N - s - 1; t++)
+				{
+					if (shapeIds[list[t]] > shapeIds[list[t + 1]]) swap_ids(list[t], list[t + 1]);
+				}
+			}
+
+			uint idxBase = 0;
+			phi(i, j, k) = REAL_MAX;
+			for (uint s = 0; s < N;)
+			{
+				uint idx = idxBase;
+				while (idx < N && shapeIds[list[idx]] == shapeIds[list[idxBase]])
+				{
+					listBuffer.insert(list[idx]);
+					idx++;
+				}
+
+				idxBase = idx;
+				s = idx;
+
+				if (listBuffer.size() > 0)
+				{
+					//calculate minimum of distances
+					ProjectedPoint3D<Real> p3d;
+
+					bool valid = calculateSignedDistance2TriangleSetFromNormal(p3d, gx, vertices, edges, indices, t2e, edgeN, vertexN, listBuffer);
+
+					if (valid && p3d.signed_distance < phi(i, j, k)) {
+						phi(i, j, k) = p3d.signed_distance;
+						closestId(i, j, k) = p3d.id;
+						//For union operation, tag points with positive SDF as Accepted and negative SDF as Tentative, others remain as Infinite
+						gridType(i, j, k) = p3d.signed_distance < 0 ? GridType::Tentative : GridType::Accepted;
+					}
+
+					listBuffer.clear();
+				}
+			}
+		}
+	}
+
+	template<typename TDataType>
+	void LevelSetConstructionAndBooleanHelper<TDataType>::initialFromTriangles(
+		std::shared_ptr<TriangleSets<TDataType>> triSet,
+		Real dx,
+		uint padding,
+		DistanceField3D<TDataType>& sdf,
+		Coord& origin,
+		DArray3D<GridType>& gridType,
+		DArray3D<int>& closestTriId)
+	{
+		DArray<Coord> edgeNormal, vertexNormal;
+		triSet->requestEdgeNormals(edgeNormal);
+		triSet->requestVertexNormals(vertexNormal);
+
+		auto& tri2edg = triSet->triangle2Edge();
+
+		auto& vertices = triSet->getPoints();
+		auto& edges = triSet->edgeIndices();
+		auto& triangles = triSet->triangleIndices();
+		auto& shapeIds = triSet->shapeIds();
+
+		Reduction<Coord> reduce;
+		Coord min_box = reduce.minimum(vertices.begin(), vertices.size());
+		Coord max_box = reduce.maximum(vertices.begin(), vertices.size());
+
+		int min_i = std::floor(min_box[0] / dx) - padding;
+		int min_j = std::floor(min_box[1] / dx) - padding;
+		int min_k = std::floor(min_box[2] / dx) - padding;
+
+		int max_i = std::ceil(max_box[0] / dx) + padding;
+		int max_j = std::ceil(max_box[1] / dx) + padding;
+		int max_k = std::ceil(max_box[2] / dx) + padding;
+
+		// Use a background grid that is aligned with an interval of N times dx
+		min_box = Coord(min_i * dx, min_j * dx, min_k * dx);
+		max_box = Coord(max_i * dx, max_j * dx, max_k * dx);
+
+		origin = min_box;
+
+		sdf.setSpace(min_box, max_box, dx);
+		auto& phi = sdf.distances();
+
+		int ni = phi.nx();
+		int nj = phi.ny();
+		int nk = phi.nz();
+
+		//initialize distances near the mesh
+		DArray3D<uint> counter3d(ni, nj, nk);
+		DArray<uint> counter1d(ni * nj * nk);
+		counter3d.reset();
+
+		gridType.resize(ni, nj, nk);
+		closestTriId.resize(ni, nj, nk);
+
+		cuExecute3D(make_uint3(ni, nj, nk),
+			LSCB_AssignInifity,
+			phi,
+			closestTriId,
+			gridType);
+
+		cuExecute(triangles.size(),
+			LSCB_FindNeighboringGrids,
+			counter3d,
+			vertices,
+			triangles,
+			origin,
+			dx);
+
+		cuExecute3D(make_uint3(ni, nj, nk),
+			LSCB_Array3D_To_Array1d,
+			counter1d,
+			counter3d);
+
+		DArrayList<uint> neighbors;
+		DArrayList<uint> neighborsBuffer;
+		neighbors.resize(counter1d);
+		neighborsBuffer.resize(counter1d);
+
+		cuExecute(triangles.size(),
+			LSCB_StoreTriangleIds,
+			neighbors,
+			counter3d,
+			vertices,
+			triangles,
+			origin,
+			dx);
+
+		cuExecute3D(make_uint3(ni, nj, nk),
+			LSCB_InitializeSDFFromIntersectedTriangles,
+			phi,
+			closestTriId,
+			gridType,
+			neighbors,
+			neighborsBuffer,
+			shapeIds,
+			vertices,
+			triangles,
+			edges,
+			tri2edg,
+			edgeNormal,
+			vertexNormal,
+			origin,
+			dx);
+
+		edgeNormal.clear();
+		vertexNormal.clear();
+		counter3d.clear();
+		counter1d.clear();
+		neighbors.clear();
+		neighborsBuffer.clear();
+	}
 
 #define IndexInside( i, N ) \
     ((i) >= 0 && i < N)

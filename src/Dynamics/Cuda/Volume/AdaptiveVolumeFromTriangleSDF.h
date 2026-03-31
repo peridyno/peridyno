@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Xiaowei He
+ * Copyright 2025 Lixin Ren
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,39 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
-#include "Volume.h"
-#include "BasicShapes/BasicShape.h"
 
-namespace dyno
+#pragma once
+#include "AdaptiveVolumeFromTriangle.h"
+#include "Module/VolumeMacros.h"
+
+namespace dyno 
 {
+
 	template<typename TDataType>
-	class BasicShapeToVolume : public Volume<TDataType>
+	class AdaptiveVolumeFromTriangleSDF : public AdaptiveVolumeFromTriangle<TDataType>
 	{
-		DECLARE_TCLASS(BasicShapeToVolume, TDataType)
+		DECLARE_TCLASS(AdaptiveVolumeFromTriangleSDF, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		BasicShapeToVolume();
-		~BasicShapeToVolume() override;
+		AdaptiveVolumeFromTriangleSDF();
+		~AdaptiveVolumeFromTriangleSDF();
 
-	public:
-		DEF_VAR(bool, Inerted, false, "");
-
-		DEF_VAR(Real, GridSpacing, 0.05f, "The grid spacing used in discretizing the basic shape");
-
-		DEF_VAR(uint, Padding, 5, "");
-
-	public:
-		DEF_NODE_PORT(BasicShape<TDataType>, Shape, "");
-
-	protected:
 		void resetStates() override;
-
-		bool validateInputs() override;
+		void updateStates() override;
 
 	private:
-		void convert();
+		void initialSDF();
+
+		void computeSDF();
+
+		DArray<GridType> m_GridType;
+		DArray<AdaptiveGridNode> m_nodes;
+		DArray<int> m_vertex_neighbor, m_node2ver;
+
 	};
 }

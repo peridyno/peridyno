@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Xiaowei He
+ * Copyright 2023 Lixin Ren
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,39 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
-#include "Volume.h"
-#include "BasicShapes/BasicShape.h"
 
-namespace dyno
+#pragma once
+#include "Volume/AdaptiveVolume.h"
+
+
+namespace dyno 
 {
+
 	template<typename TDataType>
-	class BasicShapeToVolume : public Volume<TDataType>
+	class AdaptiveVolumeFromTriangle : public AdaptiveVolume<TDataType>
 	{
-		DECLARE_TCLASS(BasicShapeToVolume, TDataType)
+		DECLARE_TCLASS(AdaptiveVolumeFromTriangle, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		BasicShapeToVolume();
-		~BasicShapeToVolume() override;
+		AdaptiveVolumeFromTriangle() {};
+		~AdaptiveVolumeFromTriangle() override {};
 
-	public:
-		DEF_VAR(bool, Inerted, false, "");
+		void load(std::string filename);
 
-		DEF_VAR(Real, GridSpacing, 0.05f, "The grid spacing used in discretizing the basic shape");
-
-		DEF_VAR(uint, Padding, 5, "");
-
-	public:
-		DEF_NODE_PORT(BasicShape<TDataType>, Shape, "");
-
-	protected:
 		void resetStates() override;
+		void updateStates() override;
 
-		bool validateInputs() override;
+	public:
+		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "The triangles of closed surface");
+		DEF_VAR(int, AABBPadding, 0, "Padding of each triangle`s AABB");
+		DEF_VAR(Coord, ForwardVector, Coord(0), "The distance and direction of topology move");
+		DEF_VAR_STATE(bool, DynamicState, false, "");
 
 	private:
-		void convert();
+		void initParameter();
+		void computeSeeds();
 	};
 }
