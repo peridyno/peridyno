@@ -71,7 +71,6 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(clRender);
 		
 		auto esRender = std::make_shared<GLWireframeVisualModule>();
-		esRender->varBaseColor()->setValue(Color(0, 0, 0));
 		exES->outEdgeSet()->connect(esRender->inEdgeSet());
 		this->graphicsPipeline()->pushModule(esRender);
 
