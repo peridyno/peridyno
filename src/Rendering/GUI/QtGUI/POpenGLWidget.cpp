@@ -281,8 +281,7 @@ namespace dyno
 
 			auto activeScene = SceneGraphFactory::instance()->active();
 
-			if (activeScene->getWorkMode() == SceneGraph::EDIT_MODE)
-			{
+			if (activeScene->getWorkMode() == SceneGraph::EDIT_MODE) {
 				activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
 			}
 			else
@@ -339,7 +338,11 @@ namespace dyno
 
 			auto activeScene = SceneGraphFactory::instance()->active();
 
-			activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
+			if (activeScene->getWorkMode() == SceneGraph::EDIT_MODE) {
+				activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
+			}
+			else
+				activeScene->onMouseEvent(mouseEvent);
 
 			mImWindow.mouseReleaseEvent(mouseEvent);
 		}
@@ -386,7 +389,11 @@ namespace dyno
 
 			auto activeScene = SceneGraphFactory::instance()->active();
 
-			activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
+			if (activeScene->getWorkMode() == SceneGraph::EDIT_MODE) {
+				activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
+			}
+			else
+				activeScene->onMouseEvent(mouseEvent);
 
 			//To draw a selected region
 			mImWindow.mouseMoveEvent(mouseEvent);
