@@ -21,6 +21,8 @@
 
 #include "Object.h"
 
+#include <glad/glad.h>
+
 namespace dyno
 {
 	/*
@@ -32,7 +34,7 @@ namespace dyno
 		virtual void create() = 0;
 		virtual void release() = 0;
 
-		virtual bool isValid() const { return id != 0xFFFFFFFF; }
+		virtual bool isValid() const { return id != GL_INVALID_INDEX; }
 
 	protected:
 		GraphicsObject() = default;
@@ -43,7 +45,7 @@ namespace dyno
 		GraphicsObject& operator = (const GraphicsObject&) = delete;
 
 	public:
-		unsigned int id = 0xFFFFFFFF;	// GL_INVALID_INDEX
+		unsigned int id = GL_INVALID_INDEX;	// GL_INVALID_INDEX
 	};
 
 	// helper functions

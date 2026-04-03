@@ -18,9 +18,7 @@ namespace dyno
 
 	GLVisualModule::~GLVisualModule()
 	{
-		if (isGLInitialized) {
-			printf("Warning: %s not released!\n", getName().c_str());
-		}
+		this->release();
 	}
 
 	void GLVisualModule::updateImpl()

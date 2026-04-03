@@ -38,7 +38,6 @@ namespace dyno
 
 	public:
 		GLWireframeVisualModule();
-		~GLWireframeVisualModule() override;
 
 		std::string caption() override;
 
@@ -71,7 +70,7 @@ namespace dyno
 		Program*	mShaderProgram;
 
 		VertexArray				mVAO;
-		XBuffer<Vec3f>						mVertexBuffer;
+		XBuffer<Vec3f>			mVertexBuffer;
 		XBuffer<Topology::Edge>		mIndexBuffer;
 		unsigned int	mNumEdges = 0;
 

@@ -18,11 +18,6 @@ namespace dyno
         this->varDigitScale()->setRange(0.0001f, 0.1f);
     }
 
-    GLDigitNumVisualModule::~GLDigitNumVisualModule()
-    {
-        this->releaseGL();
-    }
-
     bool GLDigitNumVisualModule::initializeGL()
     {
         mPosition.create(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);

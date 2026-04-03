@@ -1,7 +1,9 @@
 #include "VirtualFissionFusionStrategy.h"
+
+#include <thrust/sort.h>
+
 #include "Node.h"
 #include "Matrix/MatrixFunc.h"
-#include <thrust/sort.h>
 
 namespace dyno
 {

@@ -99,8 +99,9 @@ namespace dyno
 	signals:
 		void nodeSelected(std::shared_ptr<Node> node);
 
-
 	private:
+		//Force rendering
+		void flush();
 
 		QButtonState mButtonState = QButtonState::QBUTTON_UP;
 		int			 mCursorX = -1;
@@ -113,22 +114,7 @@ namespace dyno
 		// 
 		ImWindow mImWindow;
 
-		static std::unordered_set<int> mPressedKeys;
-		static std::unordered_set<int> mPressedMouseButtons;
-		static bool mRreshape;
-		static bool mMouseButtonRelease;
-		static bool mScroll;
 		bool mNeedUpdate = false;
-		bool mBlockFieldUpdate = false;
-
-	private:
-		bool isAnyKeyPressed() {
-			return !mPressedKeys.empty();
-		}
-		bool isAnyMouseButtonPressed() {
-			return !mPressedMouseButtons.empty();
-		}
-
 	};
 
 }

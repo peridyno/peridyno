@@ -144,11 +144,11 @@ namespace dyno
 		connect(mIoDockerWidget->contentBrowser(), &QContentBrowser::nodeCreated, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::createQtNode);
 
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodePlaced, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeDeleted, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeInputUpdated, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
 
 		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, mOpenGLWidget, &POpenGLWidget::updateOneFrame);
 		connect(PSimulationThread::instance(), &PSimulationThread::sceneGraphChanged, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::updateNodeGraphView);
-		connect(mAnimationWidget, &PAnimationWidget::resetScene, mOpenGLWidget, &POpenGLWidget::resetSceneFrame);
 
 		connect(mPropertyWidget, &PPropertyWidget::nodeUpdated, PSimulationThread::instance(), &PSimulationThread::syncNode);
 
@@ -366,8 +366,6 @@ namespace dyno
 					qNode->nodeGraphicsObject().setSelected(false);
 			}
 		});
-
-		connect(mPropertyWidget, &PPropertyWidget::nodeUpdated, mOpenGLWidget, &POpenGLWidget::onNodeUpdated);
 
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeSelected, [=](Qt::QtNode& n)
 			{

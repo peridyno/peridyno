@@ -13,7 +13,6 @@ namespace dyno
 		DECLARE_CLASS(GLDigitNumVisualModule)
 	public:
 		GLDigitNumVisualModule();
-		~GLDigitNumVisualModule();
 
 		DEF_VAR(Real, DigitScale, 0.005f, "Scale of rendered digit numbers");
 		DEF_VAR(Vec2f, DigitOffset, Vec2f(1.0f), "Offset: Num-Vertex");

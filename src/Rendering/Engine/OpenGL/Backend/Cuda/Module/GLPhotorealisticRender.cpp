@@ -78,13 +78,9 @@ namespace dyno
 #endif
 	}
 
-	GLPhotorealisticRender::~GLPhotorealisticRender()
-	{
-	}
-
 	std::string GLPhotorealisticRender::caption()
 	{
-		return "Photorealistic Render";
+		return "GLPhotorealisticRender";
 	}
 
 	bool GLPhotorealisticRender::initializeGL()

@@ -203,10 +203,11 @@ void arrow()
 	const float a = coneRadiusRatio * uRadius;
 	const float b = coneLenRatio * len;
 
-	const float fSectors = nSectors;
+	const uint arrowSectors = 5;
+	const float fSectors = arrowSectors;
 	const float sectorStep = 2 * M_PI / fSectors;
 
-	for (int i = 0; i < nSectors; i++) {
+	for (int i = 0; i < arrowSectors; i++) {
 
 		float x0 = cos(i * sectorStep);
 		float y0 = sin(i * sectorStep);

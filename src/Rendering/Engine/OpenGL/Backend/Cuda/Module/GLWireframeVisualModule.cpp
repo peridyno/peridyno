@@ -22,19 +22,9 @@ namespace dyno
 		this->varRadius()->setRange(0.001, 0.01);
 	}
 
-	GLWireframeVisualModule::~GLWireframeVisualModule()
-	{
-// 		edges.clear();
-// 		vertices.clear();
-
-// 		mVertexBuffer.release();
-// 		mIndexBuffer.release();
-	}
-
-
 	std::string GLWireframeVisualModule::caption()
 	{
-		return "Wireframe Visual Module";
+		return "GLWireframeVisualModule";
 	}
 
 	bool GLWireframeVisualModule::initializeGL()
@@ -133,7 +123,7 @@ namespace dyno
 			mShaderProgram->setInt("uEdgeMode", 0);
 			// draw as lines
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			glLineWidth(this->varLineWidth()->getData());
+			glLineWidth(this->varLineWidth()->getValue());
 		}
 		else if((this->varRenderMode()->currentKey() == EEdgeMode::CYLINDER))
 		{
