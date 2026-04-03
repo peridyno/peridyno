@@ -19,22 +19,22 @@ namespace dyno
 		this->inTopology()->connect(edgeInteractor->inInitialEdgeSet());
 		this->inTopology()->connect(pointInteractor->inInitialPointSet());
 
-		this->varFloodAngle()->connect(surfaceInteractor->varFloodAngle());
-		this->varToggleFlood()->connect(surfaceInteractor->varToggleFlood());
-		this->varToggleVisibleFilter()->connect(surfaceInteractor->varToggleVisibleFilter());
+		this->varFloodAngle()->quote(surfaceInteractor->varFloodAngle());
+		this->varToggleFlood()->quote(surfaceInteractor->varToggleFlood());
+		this->varToggleVisibleFilter()->quote(surfaceInteractor->varToggleVisibleFilter());
 
-		this->varToggleIndexOutput()->connect(surfaceInteractor->varToggleIndexOutput());
-		this->varToggleIndexOutput()->connect(edgeInteractor->varToggleIndexOutput());
-		this->varToggleIndexOutput()->connect(pointInteractor->varToggleIndexOutput());
+		this->varToggleIndexOutput()->quote(surfaceInteractor->varToggleIndexOutput());
+		this->varToggleIndexOutput()->quote(edgeInteractor->varToggleIndexOutput());
+		this->varToggleIndexOutput()->quote(pointInteractor->varToggleIndexOutput());
 
-		this->varInteractionRadius()->connect(edgeInteractor->varInteractionRadius());
-		this->varInteractionRadius()->connect(pointInteractor->varInteractionRadius());
+		this->varInteractionRadius()->quote(edgeInteractor->varInteractionRadius());
+		this->varInteractionRadius()->quote(pointInteractor->varInteractionRadius());
 
-		this->stateTriQuadIndex()->connect(surfaceInteractor->outTriangleIndex());
-		this->stateEdgeIndex()->connect(edgeInteractor->outEdgeIndex());
-		this->statePointIndex()->connect(pointInteractor->outPointIndex());
+// 		this->stateTriQuadIndex()->connect(surfaceInteractor->outTriangleIndex());
+// 		this->stateEdgeIndex()->connect(edgeInteractor->outEdgeIndex());
+// 		this->statePointIndex()->connect(pointInteractor->outPointIndex());
 
-		this->stateSur2PointIndex()->connect(surfaceInteractor->outSur2PointIndex());
+//		this->stateSur2PointIndex()->connect(surfaceInteractor->outSur2PointIndex());
 
 		this->surfaceInteractor = surfaceInteractor;
 		this->edgeInteractor = edgeInteractor;
