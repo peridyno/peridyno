@@ -68,12 +68,18 @@ namespace dyno {
 
 		GPU_FUNC inline T operator [] (const uint id) const
 		{
-			return m_data[id];
+			uint i = id % m_nx;
+			uint j = id / m_nx;
+
+			return (*this)(i, j);
 		}
 
 		GPU_FUNC inline T& operator [] (const uint id)
 		{
-			return m_data[id];
+			uint i = id % m_nx;
+			uint j = id / m_nx;
+
+			return (*this)(i, j);
 		}
 
 		DYN_FUNC inline uint size() const { return m_nx * m_ny; }
