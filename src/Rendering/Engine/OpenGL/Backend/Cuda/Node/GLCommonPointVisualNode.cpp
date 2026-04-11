@@ -21,7 +21,6 @@ namespace dyno
 	template<typename TDataType>
 	GLCommonPointVisualNode<TDataType>::~GLCommonPointVisualNode()
 	{
-		printf("GLCommonPointVisualNode released \n");
 	}
 
 	template<typename TDataType>

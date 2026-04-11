@@ -17,7 +17,6 @@ namespace dyno
 	template<typename TDataType>
 	GLSurfaceVisualNode<TDataType>::~GLSurfaceVisualNode()
 	{
-		printf("GLSurfaceVisualNode released \n");
 	}
 
 	template<typename TDataType>

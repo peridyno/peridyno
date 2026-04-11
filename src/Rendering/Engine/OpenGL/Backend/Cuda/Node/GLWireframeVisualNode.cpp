@@ -17,7 +17,6 @@ namespace dyno
 	template<typename TDataType>
 	GLWireframeVisualNode<TDataType>::~GLWireframeVisualNode()
 	{
-		printf("GLWireframeVisualNode released \n");
 	}
 
 	template<typename TDataType>

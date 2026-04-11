@@ -46,7 +46,6 @@ namespace dyno
 	template<typename TDataType>
 	GLAdaptiveXYPlaneVisualNode<TDataType>::~GLAdaptiveXYPlaneVisualNode()
 	{
-		printf("GLAdaptiveXYPlaneVisualNode released \n");
 	}
 
 	template <typename Coord>

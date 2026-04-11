@@ -39,7 +39,6 @@ namespace dyno
 	template<typename TDataType>
 	GLEuleSimVisualNode2D<TDataType>::~GLEuleSimVisualNode2D()
 	{
-		printf("GLEuleSimVisualNode released \n");
 	}
 
 	template <typename Real, typename Coord>

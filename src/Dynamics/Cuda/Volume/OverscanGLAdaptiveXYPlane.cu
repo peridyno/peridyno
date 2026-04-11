@@ -30,7 +30,6 @@ namespace dyno
 	template<typename TDataType>
 	OverscanGLAdaptiveXYPlane<TDataType>::~OverscanGLAdaptiveXYPlane()
 	{
-		printf("OverscanGLAdaptiveXYPlane released \n");
 	}
 
 
