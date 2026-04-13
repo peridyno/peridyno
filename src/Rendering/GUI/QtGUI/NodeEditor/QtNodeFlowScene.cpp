@@ -50,7 +50,7 @@ namespace Qt
 					return dat;
 					};
 
-				QString category = dyno::FormatBlockCaptionName(node->getNodeType());
+				QString category = dyno::FormatCategoryName(node->getNodeType());
 				ret->registerModel<QtNodeWidget>(category, creator);
 			}
 		}

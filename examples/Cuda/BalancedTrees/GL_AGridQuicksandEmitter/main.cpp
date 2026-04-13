@@ -5,7 +5,7 @@
 
 #include "ConstrainParticleEmitterZAxis.h"
 
-#include "BasicShapes/CircleModel2D.h"
+#include "BasicShapes2D/CircleModel2D.h"
 #include "Volume/AdaptiveVolumeFromBasicShape2D.h"
 #include "Volume/GLAdaptiveGridVisualNode2D.h"
 #include "EulerFluid/GLEuleSimVisualNode2D.h"
@@ -165,7 +165,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto circle = scn->addNode(std::make_shared<CircleModel2D<DataType3f>>());
 	circle->varRadius()->setValue(0.9f);
-	circle->varCenter2D()->setValue(Vec2f(0.0, 0.9));
+	circle->varCenter()->setValue(Vec2f(0.0, 0.9));
 
 	auto AGrid = scn->addNode(std::make_shared<AdaptiveVolumeFromBasicShape2D<DataType3f>>());
 	circle->connect(AGrid->importShapes());

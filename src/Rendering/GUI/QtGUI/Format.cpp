@@ -100,6 +100,11 @@ namespace dyno
 		return ret;
 	}
 
+	QString FormatCategoryName(std::string name)
+	{
+		return QString::fromStdString(name);
+	}
+
 	QString FormatDescription(std::string name)
 	{
 		QString desc = QString::fromStdString(name.c_str());

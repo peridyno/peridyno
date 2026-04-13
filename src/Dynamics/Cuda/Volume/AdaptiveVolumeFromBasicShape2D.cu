@@ -2,8 +2,8 @@
 #include "STL/Stack.h"
 #include <thrust/sort.h>
 
-#include "BasicShapes/CircleModel2D.h"
-#include "BasicShapes/RectangleModel2D.h"
+#include "BasicShapes2D/CircleModel2D.h"
+#include "BasicShapes2D/RectangleModel2D.h"
 
 namespace dyno
 {
@@ -49,7 +49,7 @@ namespace dyno
 			{
 				auto circleModel = dynamic_cast<CircleModel2D<TDataType>*>(shapes[i]);
 
-				auto box = circleModel->outCircle()->getData();
+				auto box = circleModel->stateCircle()->getData();
 				auto aabb = box.aabb();
 				printf("circle aabb %f %f , %f; \n", box.center[0], box.center[1], box.radius);
 				aabb_box = aabb_box.merge(aabb);
@@ -58,7 +58,7 @@ namespace dyno
 			{
 				auto rectangleModel = dynamic_cast<RectangleModel2D<TDataType>*>(shapes[i]);
 
-				auto box = rectangleModel->outRectangle()->getData();
+				auto box = rectangleModel->stateRectangle()->getData();
 				auto aabb = box.aabb();
 				aabb_box = aabb_box.merge(aabb);
 			}
@@ -218,7 +218,7 @@ namespace dyno
 			if (type == BasicShapeType2D::CIRCLE)
 			{
 				auto circleModel = dynamic_cast<CircleModel2D<TDataType>*>(shapes[i]);
-				Coord2D center = circleModel->varCenter2D()->getValue();
+				Coord2D center = circleModel->varCenter()->getValue();
 				Real radius = circleModel->varRadius()->getValue();
 
 				circleSeeds(marker, center, radius);
@@ -226,7 +226,7 @@ namespace dyno
 			else if (type == BasicShapeType2D::RECTANGLE)
 			{
 				auto rectangleModel = dynamic_cast<RectangleModel2D<TDataType>*>(shapes[i]);
-				auto box = rectangleModel->outRectangle()->getData();
+				auto box = rectangleModel->stateRectangle()->getData();
 
 				rectangleSeeds(marker, box);
 			}

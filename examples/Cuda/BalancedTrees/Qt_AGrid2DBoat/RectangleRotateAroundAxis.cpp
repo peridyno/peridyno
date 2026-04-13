@@ -24,7 +24,9 @@ namespace dyno
 		//Adjust the size of the bounding box
 		m_center = (m_alignedBox.v0 + m_alignedBox.v1) / 2;
 		Coord3D m_length = m_alignedBox.v1 - m_alignedBox.v0;
-		this->varLength()->setValue(Coord3D(m_length[0], 0.0f, m_length[2]));
+		this->varWidth()->setValue(m_length[0]);
+		this->varHeight()->setValue(m_length[2]);
+		//this->varLength()->setValue(Coord3D(m_length[0], 0.0f, m_length[2]));
 		this->varLocation()->setValue(Coord3D(m_center[0], 0.0f, m_center[2]));
 
 		Real m_angle = this->varInitialAngle()->getData();
@@ -40,8 +42,10 @@ namespace dyno
 		Quat<Real> q = this->computeQuaternion();
 		q.normalize();
 
-		Coord3D length = this->varLength()->getData();
-		Coord3D center = q.rotate(Coord3D(m_center[0] + this->varRotationRadius()->getData(), 0.0f, m_center[2]- length[2] * 1.5f / 2.0f));
+		Real w = this->varWidth()->getValue();
+		Real h = this->varHeight()->getValue();
+		//Coord3D length = this->varLength()->getData();
+		Coord3D center = q.rotate(Coord3D(m_center[0] + this->varRotationRadius()->getData(), 0.0f, m_center[2]- this->varHeight()->getValue() * 1.5f / 2.0f));
 		Coord3D u_axis = q.rotate(Coord3D(1, 0, 0));
 		Coord3D w_axis = q.rotate(Coord3D(0, 0, 1));
 
@@ -49,9 +53,9 @@ namespace dyno
 		retangle.center = Coord2D(center[0], center[2]);
 		retangle.u = Coord2D(u_axis[0], u_axis[2]);
 		retangle.v = Coord2D(w_axis[0], w_axis[2]);
-		retangle.extent = Coord2D(length[0] * 3.5f / 2.0f, length[2] * 2.5f / 2.0f);
+		retangle.extent = Coord2D(w * 3.5f / 2.0f, h * 2.5f / 2.0f);
 
-		this->outRectangle()->setValue(retangle);
+		this->stateRectangle()->setValue(retangle);
 	}
 
 
