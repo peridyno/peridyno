@@ -38,13 +38,13 @@ namespace Qt
 			id++;
 
 			QString str = QString::fromStdString(c.first);
-			auto obj = dyno::Object::createObject(str.toStdString());
+			auto obj = dyno::Object::createObjectByName(str.toStdString());
 			std::shared_ptr<dyno::Node> node(dynamic_cast<dyno::Node*>(obj));
 
 			if (node != nullptr)
 			{
 				QtDataModelRegistry::RegistryItemCreator creator = [str]() {
-					auto node_obj = dyno::Object::createObject(str.toStdString());
+					auto node_obj = dyno::Object::createObjectByName(str.toStdString());
 					std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
 					auto dat = std::make_unique<QtNodeWidget>(std::move(new_node));
 					return dat;
@@ -297,7 +297,7 @@ namespace Qt
 	void QtNodeFlowScene::addNodeByString(std::string NodeName) {
 		std::cout << NodeName << std::endl;
 
-		auto node_obj = dyno::Object::createObject(NodeName);
+		auto node_obj = dyno::Object::createObjectByName(NodeName);
 		std::shared_ptr<dyno::Node> new_node(dynamic_cast<dyno::Node*>(node_obj));
 		auto dat = std::make_unique<QtNodeWidget>(std::move(new_node));
 

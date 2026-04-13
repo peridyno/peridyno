@@ -40,13 +40,13 @@ namespace Qt
 			id++;
 
 			QString str = QString::fromStdString(c.first);
-			dyno::Object* obj = dyno::Object::createObject(str.toStdString());
+			dyno::Object* obj = dyno::Object::createObjectByName(str.toStdString());
 			std::shared_ptr<dyno::Module> module(dynamic_cast<dyno::Module*>(obj));
 
 			if (module != nullptr)
 			{
 				QtDataModelRegistry::RegistryItemCreator creator = [str]() {
-					auto new_obj = dyno::Object::createObject(str.toStdString());
+					auto new_obj = dyno::Object::createObjectByName(str.toStdString());
 					std::shared_ptr<dyno::Module> new_module(dynamic_cast<dyno::Module*>(new_obj));
 					auto dat = std::make_unique<QtModuleWidget>(new_module);
 					return dat; 
