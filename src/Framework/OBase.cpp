@@ -55,8 +55,9 @@ namespace dyno {
 		}
 		else
 		{
-			std::cout << "Data field " << name
-				<< " already exists in this class !"
+			std::cout << "Field " << name
+				<< " conflicts with existing fields in "
+				<< data->parent()->getClassInfo()->getClassName()
 				<< std::endl;
 			return false;
 		}
@@ -76,8 +77,9 @@ namespace dyno {
 		{
 			if (data != getField(name))
 			{
-				std::cout << "Field name " << name
-					<< " conflicts with existing fields!"
+				std::cout << "Field " << name
+					<< " conflicts with existing fields in "
+					<< data->parent()->getClassInfo()->getClassName()
 					<< std::endl;
 				return false;
 			}

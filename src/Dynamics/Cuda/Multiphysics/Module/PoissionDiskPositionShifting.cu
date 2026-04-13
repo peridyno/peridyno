@@ -169,7 +169,7 @@ namespace dyno
 	void PoissionDiskPositionShifting<TDataType>::updatePosition()
 	{
 		int num = this->inPosition()->size();
-		Real dt = this->inDelta()->getValue();
+		Real dt = this->varDelta()->getValue();
 		auto& inPos = this->inPosition()->getData();
 
 		if (mPosOld.size() != num)

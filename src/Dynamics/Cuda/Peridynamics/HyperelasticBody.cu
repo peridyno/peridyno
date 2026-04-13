@@ -42,8 +42,8 @@ namespace dyno
 		auto hyperElasticity = std::make_shared<SemiImplicitHyperelasticitySolver<TDataType>>();
 		horizon->outFloating()->connect(hyperElasticity->inHorizon());
 		this->stateTimeStep()->connect(hyperElasticity->inTimeStep());
-		this->varEnergyType()->connect(hyperElasticity->inEnergyType());
-		this->varEnergyModel()->connect(hyperElasticity->inEnergyModels());
+ 		this->stateEnergyType()->connect(hyperElasticity->inEnergyType());
+ 		this->stateEnergyModel()->connect(hyperElasticity->inEnergyModels());
 		this->stateRestPosition()->connect(hyperElasticity->inX());
 		this->statePosition()->connect(hyperElasticity->inY());
 		this->stateVelocity()->connect(hyperElasticity->inVelocity());
@@ -51,7 +51,7 @@ namespace dyno
 		this->stateBonds()->connect(hyperElasticity->inBonds());
 		this->stateAttribute()->connect(hyperElasticity->inAttribute());
 		this->stateVolumePair()->connect(hyperElasticity->inVolumePair());
-		this->varAlphaComputed()->connect(hyperElasticity->varIsAlphaComputed());
+		this->varAlphaComputed()->quote(hyperElasticity->varIsAlphaComputed());
 		this->animationPipeline()->pushModule(hyperElasticity);
 		//弹性能量，求解超弹性时需要访问的状态变量，不需要更新
 		EnergyModels<Real> funcs;
@@ -59,7 +59,7 @@ namespace dyno
 		funcs.neohookeanModel = NeoHookeanModel<Real>(48000000, 12000000);
 		funcs.stvkModel = StVKModel<Real>(48000000, 12000000);
 		funcs.xuModel = XuModel<Real>(12000000);
-		this->varEnergyModel()->setValue(funcs);
+		this->stateEnergyModel()->setValue(funcs);
 
 
 
@@ -89,42 +89,42 @@ namespace dyno
 	template<typename TDataType>
 	void HyperelasticBody<TDataType>::setEnergyModel(XuModel<Real> model)
 	{
-		this->varEnergyType()->setValue(Xuetal);
-		auto models = this->varEnergyModel()->getValue();
+		this->stateEnergyType()->setValue(Xuetal);
+		auto models = this->stateEnergyModel()->getValue();
 		models.xuModel = model;
 
-		this->varEnergyModel()->setValue(models);
+		this->stateEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>
 	void HyperelasticBody<TDataType>::setEnergyModel(NeoHookeanModel<Real> model)
 	{
-		this->varEnergyType()->setValue(NeoHookean);
-		auto models = this->varEnergyModel()->getValue();
+		this->stateEnergyType()->setValue(NeoHookean);
+		auto models = this->stateEnergyModel()->getValue();
 		models.neohookeanModel = model;
 
-		this->varEnergyModel()->setValue(models);
+		this->stateEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>
 	void HyperelasticBody<TDataType>::setEnergyModel(LinearModel<Real> model)
 	{
-		this->varEnergyType()->setValue(Linear);
-		auto models = this->varEnergyModel()->getValue();
+		this->stateEnergyType()->setValue(Linear);
+		auto models = this->stateEnergyModel()->getValue();
 		models.linearModel = model;
 
-		this->varEnergyModel()->setValue(models);
+		this->stateEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>
 	void HyperelasticBody<TDataType>::setEnergyModel(StVKModel<Real> model)
 	{
-		this->varEnergyType()->setValue(StVK);
+		this->stateEnergyType()->setValue(StVK);
 
-		auto models = this->varEnergyModel()->getValue();
+		auto models = this->stateEnergyModel()->getValue();
 		models.stvkModel = model;
 
-		this->varEnergyModel()->setValue(models);
+		this->stateEnergyModel()->setValue(models);
 	}
 
 	template<typename TDataType>

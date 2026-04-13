@@ -7,7 +7,7 @@ namespace dyno
 	MakeGhostParticles<TDataType>::MakeGhostParticles()
 		: GhostParticles<TDataType>()
 	{
-		this->stateNormal()->promoteInput();
+		//this->stateNormal()->promoteInput();
 	}
 
 	template<typename TDataType>
