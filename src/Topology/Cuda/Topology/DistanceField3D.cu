@@ -3,181 +3,8 @@
 #include "Vector.h"
 #include "DataTypes.h"
 
-namespace dyno{
-
-	template <typename Coord>
-	__device__  float DistanceToPlane(const Coord &p, const Coord &o, const Coord &n) {
-		return fabs((p - o, n).length());
-	}
-
-	template <typename Coord>
-	__device__  Real DistanceToSegment(Coord& pos, Coord& lo, Coord& hi)
-	{
-		typedef typename Coord::VarType Real;
-		Coord seg = hi - lo;
-		Coord edge1 = pos - lo;
-		Coord edge2 = pos - hi;
-		if (edge1.dot(seg) < 0.0f)
-		{
-			return edge1.norm();
-		}
-		if (edge2.dot(-seg) < 0.0f)
-		{
-			return edge2.norm();
-		}
-		Real length1 = edge1.dot(edge1);
-		seg.normalize();
-		Real length2 = edge1.dot(seg);
-		return std::sqrt(length1 - length2*length2);
-	}
-
-	template <typename Coord>
-	__device__  Real DistanceToSqure(Coord& pos, Coord& lo, Coord& hi, int axis)
-	{
-		typedef typename Coord::VarType Real;
-		Coord n;
-		Coord corner1, corner2, corner3, corner4;
-		Coord loCorner, hiCorner, p;
-		switch (axis)
-		{
-		case 0:
-			corner1 = Coord(lo[0], lo[1], lo[2]);
-			corner2 = Coord(lo[0], hi[1], lo[2]);
-			corner3 = Coord(lo[0], hi[1], hi[2]);
-			corner4 = Coord(lo[0], lo[1], hi[2]);
-			n = Coord(1.0, 0.0, 0.0);
-
-			loCorner = Coord(lo[1], lo[2], 0.0);
-			hiCorner = Coord(hi[1], hi[2], 0.0);
-			p = Coord(pos[1], pos[2], 0.0f);
-			break;
-		case 1:
-			corner1 = Coord(lo[0], lo[1], lo[2]);
-			corner2 = Coord(lo[0], lo[1], hi[2]);
-			corner3 = Coord(hi[0], lo[1], hi[2]);
-			corner4 = Coord(hi[0], lo[1], lo[2]);
-			n = Coord(0.0f, 1.0f, 0.0f);
-
-			loCorner = Coord(lo[0], lo[2], 0.0f);
-			hiCorner = Coord(hi[0], hi[2], 0.0f);
-			p = Coord(pos[0], pos[2], 0.0f);
-			break;
-		case 2:
-			corner1 = Coord(lo[0], lo[1], lo[2]);
-			corner2 = Coord(hi[0], lo[1], lo[2]);
-			corner3 = Coord(hi[0], hi[1], lo[2]);
-			corner4 = Coord(lo[0], hi[1], lo[2]);
-			n = Coord(0.0f, 0.0f, 1.0f);
-
-			loCorner = Coord(lo[0], lo[1], 0.0);
-			hiCorner = Coord(hi[0], hi[1], 0.0);
-			p = Coord(pos[0], pos[1], 0.0f);
-			break;
-		}
-
-		Real dist1 = DistanceToSegment(pos, corner1, corner2);
-		Real dist2 = DistanceToSegment(pos, corner2, corner3);
-		Real dist3 = DistanceToSegment(pos, corner3, corner4);
-		Real dist4 = DistanceToSegment(pos, corner4, corner1);
-		Real dist5 = abs(n.dot(pos - corner1));
-		if (p[0] < hiCorner[0] && p[0] > loCorner[0] && p[1] < hiCorner[1] && p[1] > loCorner[1])
-			return dist5;
-		else
-			return min(min(dist1, dist2), min(dist3, dist4));
-	}
-
-	template <typename Coord>
-	__device__  Real DistanceToBox(Coord& pos, Coord& lo, Coord& hi)
-	{
-		typedef typename Coord::VarType Real;
-		Coord corner0(lo[0], lo[1], lo[2]);
-		Coord corner1(hi[0], lo[1], lo[2]);
-		Coord corner2(hi[0], hi[1], lo[2]);
-		Coord corner3(lo[0], hi[1], lo[2]);
-		Coord corner4(lo[0], lo[1], hi[2]);
-		Coord corner5(hi[0], lo[1], hi[2]);
-		Coord corner6(hi[0], hi[1], hi[2]);
-		Coord corner7(lo[0], hi[1], hi[2]);
-		Real dist0 = (pos - corner0).norm();
-		Real dist1 = (pos - corner1).norm();
-		Real dist2 = (pos - corner2).norm();
-		Real dist3 = (pos - corner3).norm();
-		Real dist4 = (pos - corner4).norm();
-		Real dist5 = (pos - corner5).norm();
-		Real dist6 = (pos - corner6).norm();
-		Real dist7 = (pos - corner7).norm();
-		if (pos[0] < hi[0] && pos[0] > lo[0] && pos[1] < hi[1] && pos[1] > lo[1] && pos[2] < hi[2] && pos[2] > lo[2])
-		{
-			Real distx = min(abs(pos[0] - hi[0]), abs(pos[0] - lo[0]));
-			Real disty = min(abs(pos[1] - hi[1]), abs(pos[1] - lo[1]));
-			Real distz = min(abs(pos[2] - hi[2]), abs(pos[2] - lo[2]));
-			Real mindist = min(distx, disty);
-			mindist = min(mindist, distz);
-			return mindist;
-		}
-		else
-		{
-			Real distx1 = DistanceToSqure(pos, corner0, corner7, 0);
-			Real distx2 = DistanceToSqure(pos, corner1, corner6, 0);
-			Real disty1 = DistanceToSqure(pos, corner0, corner5, 1);
-			Real disty2 = DistanceToSqure(pos, corner3, corner6, 1);
-			Real distz1 = DistanceToSqure(pos, corner0, corner2, 2);
-			Real distz2 = DistanceToSqure(pos, corner4, corner6, 2);
-			return -min(min(min(distx1, distx2), min(disty1, disty2)), min(distz1, distz2));
-		}
-	}
-
-	template <typename Real, typename Coord>
-	__device__  Real DistanceToCylinder(Coord& pos, Coord& center, Real radius, Real height, int axis)
-	{
-		Real distR;
-		Real distH;
-		switch (axis)
-		{
-		case 0:
-			distH = abs(pos[0] - center[0]);
-			distR = Coord(0.0, pos[1] - center[1], pos[2] - center[2]).norm();
-			break;
-		case 1:
-			distH = abs(pos[1] - center[1]);
-			distR = Coord(pos[0] - center[0], 0.0, pos[2] - center[2]).norm();
-			break;
-		case 2:
-			distH = abs(pos[2] - center[2]);
-			distR = Coord(pos[0] - center[0], pos[1] - center[1], 0.0).norm();
-			break;
-		}
-
-		Real halfH = height / 2.0f;
-		if (distH <= halfH && distR <= radius)
-		{
-			return -min(halfH - distH, radius - distR);
-		}
-		else if (distH > halfH && distR <= radius)
-		{
-			return distH - halfH;
-		}
-		else if (distH <= halfH && distR > radius)
-		{
-			return distR - radius;
-		}
-		else
-		{
-// 			Real l1 = distR - radius;
-// 			Real l2 = distH - halfH;
-//			return sqrt(l1*l1 + l2*l2);
-			return Vector<Real, 2>(distR - radius, distH - halfH).norm();
-		}
-
-
-	}
-
-	template <typename Real, typename Coord>
-	__device__  Real DistanceToSphere(Coord& pos, Coord& center, Real radius)
-	{
-		return (pos - center).length() - radius;
-	}
-
+namespace dyno
+{
 	template<typename TDataType>
 	DistanceField3D<TDataType>::DistanceField3D()
 	{
@@ -263,7 +90,12 @@ namespace dyno{
 	}
 
 	template <typename Real, typename Coord>
-	__global__ void K_DistanceFieldToBox(DArray3D<Real> distance, Coord start, Real h, Coord lo, Coord hi, bool inverted)
+	__global__ void D3D_InitializeFromBox(
+		DArray3D<Real> distance,
+		TOrientedBox3D<Real> obb,
+		Coord start, 
+		Real h, 
+		bool inverted)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
 		int j = threadIdx.y + (blockIdx.y * blockDim.y);
@@ -273,25 +105,52 @@ namespace dyno{
 		if (j >= distance.ny()) return;
 		if (k >= distance.nz()) return;
 
-		int sign = inverted ? 1.0f : -1.0f;
-		Coord p = start + Coord(i, j, k) * h;
+		Real sign = inverted ? -1.0f : 1.0f;
 
-		distance(i, j, k) = sign*DistanceToBox(p, lo, hi);
+		TPoint3D<Real> p(start + Coord(i, j, k) * h);
+
+		distance(i, j, k) = sign*p.distance(obb);
 	}
 
 	template<typename TDataType>
-	void DistanceField3D<TDataType>::loadBox(Coord& lo, Coord& hi, bool inverted)
+	void dyno::DistanceField3D<TDataType>::loadAABB(Coord lo, Coord hi, bool inverted /*= false*/)
 	{
 		mInverted = inverted;
 
-		dim3 blockSize = make_uint3(4, 4, 4);
-		dim3 gridDims = cudaGridSize3D(make_uint3(mDistances.nx(), mDistances.ny(), mDistances.nz()), blockSize);
+		TOrientedBox3D<Real> obb;
+		obb.center = 0.5 * (lo + hi);
+		obb.extent = 0.5 * (hi - lo);
 
-		K_DistanceFieldToBox << <gridDims, blockSize >> >(mDistances, mOrigin, mH, lo, hi, inverted);
+		cuExecute3D(make_uint3(mDistances.nx(), mDistances.ny(), mDistances.nz()),
+			D3D_InitializeFromBox,
+			mDistances,
+			obb,
+			mOrigin,
+			mH,
+			inverted);
+	}
+
+	template<typename TDataType>
+	void DistanceField3D<TDataType>::loadBox(TOrientedBox3D<Real> obb, bool inverted)
+	{
+		mInverted = inverted;
+
+		cuExecute3D(make_uint3(mDistances.nx(), mDistances.ny(), mDistances.nz()),
+			D3D_InitializeFromBox,
+			mDistances,
+			obb,
+			mOrigin,
+			mH,
+			inverted);
 	}
 
 	template <typename Real, typename Coord>
-	__global__ void K_DistanceFieldToCylinder(DArray3D<Real> distance, Coord start, Real h, Coord center, Real radius, Real height, int axis, bool inverted)
+	__global__ void D3D_InitializeFromCylinder(
+		DArray3D<Real> distance, 
+		TCylinder3D<Real> cylinder,
+		Coord start, 
+		Real h, 
+		bool inverted)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
 		int j = threadIdx.y + (blockIdx.y * blockDim.y);
@@ -301,26 +160,34 @@ namespace dyno{
 		if (j >= distance.ny()) return;
 		if (k >= distance.nz()) return;
 
-		int sign = inverted ? -1.0f : 1.0f;
+		Real sign = inverted ? -1.0f : 1.0f;
 
-		Coord p = start + Coord(i, j, k)*h;
+		TPoint3D<Real> p(start + Coord(i, j, k) * h);
 
-		distance(i, j, k) = sign*DistanceToCylinder(p, center, radius, height, axis);
+		distance(i, j, k) = sign* p.distance(cylinder);
 	}
 
 	template<typename TDataType>
-	void DistanceField3D<TDataType>::loadCylinder(Coord& center, Real radius, Real height, int axis, bool inverted)
+	void DistanceField3D<TDataType>::loadCylinder(TCylinder3D<Real> cylinder, bool inverted)
 	{
 		mInverted = inverted;
 
-		dim3 blockSize = make_uint3(8, 8, 8);
-		dim3 gridDims = cudaGridSize3D(make_uint3(mDistances.nx(), mDistances.ny(), mDistances.nz()), blockSize);
-
-		K_DistanceFieldToCylinder << <gridDims, blockSize >> >(mDistances, mOrigin, mH, center, radius, height, axis, inverted);
+		cuExecute3D(make_uint3(mDistances.nx(), mDistances.ny(), mDistances.nz()),
+			D3D_InitializeFromCylinder,
+			mDistances,
+			cylinder,
+			mOrigin,
+			mH,
+			inverted);
 	}
 
 	template <typename Real, typename Coord>
-	__global__ void K_DistanceFieldToSphere(DArray3D<Real> distance, Coord start, Real h, Coord center, Real radius, bool inverted)
+	__global__ void D3D_InitializeFromSphere(
+		DArray3D<Real> distance, 
+		TSphere3D<Real> sphere,
+		Coord start, 
+		Real h, 
+		bool inverted)
 	{
 		int i = threadIdx.x + (blockIdx.x * blockDim.x);
 		int j = threadIdx.y + (blockIdx.y * blockDim.y);
@@ -330,24 +197,99 @@ namespace dyno{
 		if (j >= distance.ny()) return;
 		if (k >= distance.nz()) return;
 
-		int sign = inverted ? -1.0f : 1.0f;
+		Real sign = inverted ? -1.0f : 1.0f;
 
-		Coord p = start + Coord(i, j, k) * h;
+		TPoint3D<Real> p(start + Coord(i, j, k) * h);
 
-		Coord dir = p - center;
-
-		distance(i, j, k) = sign*(dir.norm()-radius);
+		distance(i, j, k) = sign * p.distance(sphere);
 	}
 
 	template<typename TDataType>
-	void DistanceField3D<TDataType>::loadSphere(Coord& center, Real radius, bool inverted)
+	void DistanceField3D<TDataType>::loadSphere(TSphere3D<Real> sphere, bool inverted)
 	{
 		mInverted = inverted;
 
-		dim3 blockSize = make_uint3(8, 8, 8);
-		dim3 gridDims = cudaGridSize3D(make_uint3(mDistances.nx(), mDistances.ny(), mDistances.nz()), blockSize);
+		cuExecute3D(make_uint3(mDistances.nx(), mDistances.ny(), mDistances.nz()),
+			D3D_InitializeFromSphere,
+			mDistances, 
+			sphere, 
+			mOrigin, 
+			mH, 
+			inverted);
+	}
 
-		K_DistanceFieldToSphere << <gridDims, blockSize >> >(mDistances, mOrigin, mH, center, radius, inverted);
+	template <typename Real, typename Coord>
+	__global__ void D3D_InitializeFromCapsule(
+		DArray3D<Real> distance, 
+		TCapsule3D<Real> capsule,
+		Coord start, 
+		Real h,
+		bool inverted)
+	{
+		int i = threadIdx.x + (blockIdx.x * blockDim.x);
+		int j = threadIdx.y + (blockIdx.y * blockDim.y);
+		int k = threadIdx.z + (blockIdx.z * blockDim.z);
+
+		if (i >= distance.nx()) return;
+		if (j >= distance.ny()) return;
+		if (k >= distance.nz()) return;
+
+		Real sign = inverted ? -1.0f : 1.0f;
+
+		TPoint3D<Real> p(start + Coord(i, j, k) * h);
+
+		distance(i, j, k) = sign * p.distance(capsule);
+	}
+
+	template<typename TDataType>
+	void DistanceField3D<TDataType>::loadCapsule(TCapsule3D<Real> capsule, bool inverted /*= false*/)
+	{
+		mInverted = inverted;
+
+		cuExecute3D(make_uint3(mDistances.nx(), mDistances.ny(), mDistances.nz()),
+			D3D_InitializeFromCapsule,
+			mDistances,
+			capsule,
+			mOrigin, 
+			mH,
+			inverted);
+	}
+
+	template <typename Real, typename Coord>
+	__global__ void D3D_InitializeFromCone(
+		DArray3D<Real> distance,
+		TCone3D<Real> cone,
+		Coord start,
+		Real h,
+		bool inverted)
+	{
+		int i = threadIdx.x + (blockIdx.x * blockDim.x);
+		int j = threadIdx.y + (blockIdx.y * blockDim.y);
+		int k = threadIdx.z + (blockIdx.z * blockDim.z);
+
+		if (i >= distance.nx()) return;
+		if (j >= distance.ny()) return;
+		if (k >= distance.nz()) return;
+
+		Real sign = inverted ? -1.0f : 1.0f;
+
+		TPoint3D<Real> p(start + Coord(i, j, k) * h);
+
+		distance(i, j, k) = sign * p.distance(cone);
+	}
+
+	template<typename TDataType>
+	void DistanceField3D<TDataType>::loadCone(TCone3D<Real> cone, bool inverted /*= false*/)
+	{
+		mInverted = inverted;
+
+		cuExecute3D(make_uint3(mDistances.nx(), mDistances.ny(), mDistances.nz()),
+			D3D_InitializeFromCone,
+			mDistances,
+			cone,
+			mOrigin,
+			mH,
+			inverted);
 	}
 
 	template<typename TDataType>

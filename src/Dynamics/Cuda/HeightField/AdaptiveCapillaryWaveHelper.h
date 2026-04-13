@@ -9,9 +9,9 @@ namespace dyno {
 	{
 	public:
 		typedef typename TDataType::Real Real;
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord3D;
-		typedef typename Vector<Real, 4> Coord4D;
+		typedef typename dyno::Vector<Real, 2> Coord2D;
+		typedef typename dyno::Vector<Real, 3> Coord3D;
+		typedef typename dyno::Vector<Real, 4> Coord4D;
 
 		static void ACWHelper_OneWaveStepVersion1(
 			DArray<Coord4D>& grid_next,

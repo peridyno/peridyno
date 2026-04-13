@@ -11,7 +11,7 @@ namespace dyno
 
 	template<typename TDataType>
 	HeightField<TDataType>::HeightField()
-		: TopologyModule()
+		: Topology()
 	{
 		mDisplacement.resize(128, 128);
 		mDisplacement.reset();

@@ -29,7 +29,7 @@ namespace dyno
 		DArray<Coord> particle_position_previous,
 		DArray<Coord> triangle_vertex,
 		DArray<Coord> triangle_vertex_previous,
-		DArray<TopologyModule::Triangle> triangle_index,
+		DArray<Topology::Triangle> triangle_index,
 		DArrayList<int> triangle_neighbors,
 		Real friction_normal,
 		Real friction_tangent,

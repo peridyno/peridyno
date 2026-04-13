@@ -22,7 +22,7 @@
 
 namespace dyno {
 	/**
-	 * @brief this class implements a GPU-based fast marching method to do boolean between two distance fields.
+	 * @brief this class implements a GPU-based fast marching method to do boolean between two level sets.
 	 */
 	template<typename TDataType>
 	class FastMarchingMethodGPU : public ComputeModule
@@ -55,7 +55,6 @@ namespace dyno {
 		void compute() override;
 
 	private:
-		DArray3D<GridType> mGridType;
-		DArray3D<bool> mOutside;
+
 	};
 }

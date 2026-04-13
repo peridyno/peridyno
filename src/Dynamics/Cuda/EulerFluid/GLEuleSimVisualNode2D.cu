@@ -21,14 +21,14 @@ namespace dyno
 		colorMapper->varMax()->setValue(1.0f);
 
 		auto ptRender = std::make_shared<GLPointVisualModule>();
-		ptRender->setColor(Color(1, 0, 0));
+		ptRender->varBaseColor()->setValue(Color(1, 0, 0));
 		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 		ptRender->varPointSize()->setValue(0.002);
 		this->inLeafs()->connect(ptRender->inPointSet());
 		colorMapper->outColor()->connect(ptRender->inColor());
 
 		auto wRender = std::make_shared<GLWireframeVisualModule>();
-		wRender->setColor(Color(0, 0, 1));
+		wRender->varBaseColor()->setValue(Color(0, 0, 1));
 		this->stateEdgeSet()->connect(wRender->inEdgeSet());
 
 		this->graphicsPipeline()->pushModule(colorMapper);
@@ -45,7 +45,7 @@ namespace dyno
 	template <typename Real, typename Coord>
 	__global__ void SO_CountEdge2D(
 		DArray<Coord> edge_pos,
-		DArray<TopologyModule::Edge> edge_edge,
+		DArray<Topology::Edge> edge_edge,
 		DArray<Coord> pos,
 		DArray<Coord> velocity,
 		Real scale)
@@ -55,7 +55,7 @@ namespace dyno
 
 		edge_pos[tId] = pos[tId];
 		edge_pos[(tId + pos.size())] = pos[tId] + scale * velocity[tId];
-		edge_edge[tId] = TopologyModule::Edge(tId, (tId + pos.size()));
+		edge_edge[tId] = Topology::Edge(tId, (tId + pos.size()));
 
 		//Real vl= velocity[tId].norm();
 		//if (scale * vl > 0.036f)
@@ -76,7 +76,7 @@ namespace dyno
 		Real edge_scale = 0.3f;
 		DArray<Coord> edge_pos(2 * points_pos.size());
 		edge_pos.reset();
-		DArray<TopologyModule::Edge> edge_edge(points_pos.size());
+		DArray<Topology::Edge> edge_edge(points_pos.size());
 		edge_edge.reset();
 		cuExecute(points_pos.size(),
 			SO_CountEdge2D,

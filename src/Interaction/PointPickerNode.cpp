@@ -15,25 +15,25 @@ namespace dyno
 
 		this->inTopology()->connect(pointInteractor->inInitialPointSet());
 
-		this->varInteractionRadius()->connect(pointInteractor->varInteractionRadius());
+		this->varInteractionRadius()->quote(pointInteractor->varInteractionRadius());
 
-		this->statePointIndex()->connect(pointInteractor->outPointIndex());
+		//this->statePointIndex()->connect(pointInteractor->outPointIndex());
 
-		this->varToggleIndexOutput()->connect(pointInteractor->varToggleIndexOutput());
+		this->varToggleIndexOutput()->quote(pointInteractor->varToggleIndexOutput());
 
 		this->pointInteractor = pointInteractor;
 
 		this->graphicsPipeline()->pushModule(pointInteractor);
 
 		auto pointRender1 = std::make_shared<GLPointVisualModule>();
-		this->varPointSelectedSize()->connect(pointRender1->varPointSize());
-		pointRender1->setColor(Color(1.0f, 0.0f, 0.0f));
+		this->varPointSelectedSize()->quote(pointRender1->varPointSize());
+		pointRender1->varBaseColor()->setValue(Color(1.0f, 0.0f, 0.0f));
 		this->pointInteractor->outSelectedPointSet()->connect(pointRender1->inPointSet());
 		this->graphicsPipeline()->pushModule(pointRender1);
 
 		auto pointRender2 = std::make_shared<GLPointVisualModule>();
-		this->varPointOtherSize()->connect(pointRender2->varPointSize());
-		pointRender2->setColor(Color(0.0f, 0.0f, 1.0f));
+		this->varPointOtherSize()->quote(pointRender2->varPointSize());
+		pointRender2->varBaseColor()->setValue(Color(0.0f, 0.0f, 1.0f));
 		this->pointInteractor->outOtherPointSet()->connect(pointRender2->inPointSet());
 		this->graphicsPipeline()->pushModule(pointRender2);
 

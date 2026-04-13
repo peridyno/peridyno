@@ -28,12 +28,6 @@
 
 namespace dyno
 {
-	std::unordered_set<int> POpenGLWidget::mPressedKeys;
-	std::unordered_set<int> POpenGLWidget::mPressedMouseButtons;
-	bool POpenGLWidget::mRreshape = false;
-	bool POpenGLWidget::mMouseButtonRelease = false;
-	bool POpenGLWidget::mScroll = false;
-
 	std::map<int, PKeyboardType> KeyMap =
 	{
 		{Qt::Key_unknown, PKEY_UNKNOWN},
@@ -266,10 +260,6 @@ namespace dyno
 
 	void POpenGLWidget::mousePressEvent(QMouseEvent *event)
 	{
-		mBlockFieldUpdate = true;
-
-		mPressedMouseButtons.insert(event->button());
-
 		mButtonState = QButtonState::QBUTTON_DOWN;
 		mCursorX = event->x();
 		mCursorY = event->y();
@@ -291,8 +281,7 @@ namespace dyno
 
 			auto activeScene = SceneGraphFactory::instance()->active();
 
-			if (activeScene->getWorkMode() == SceneGraph::EDIT_MODE)
-			{
+			if (activeScene->getWorkMode() == SceneGraph::EDIT_MODE) {
 				activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
 			}
 			else
@@ -306,10 +295,6 @@ namespace dyno
 
 	void POpenGLWidget::mouseReleaseEvent(QMouseEvent *event)
 	{
-		mBlockFieldUpdate = false;
-
-		mPressedMouseButtons.erase(event->button());
-		mMouseButtonRelease = true;
 		// Object selection
 		if (this->getSelectionMode() == RenderWindow::OBJECT_MODE)
 		{
@@ -353,7 +338,11 @@ namespace dyno
 
 			auto activeScene = SceneGraphFactory::instance()->active();
 
-			activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
+			if (activeScene->getWorkMode() == SceneGraph::EDIT_MODE) {
+				activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
+			}
+			else
+				activeScene->onMouseEvent(mouseEvent);
 
 			mImWindow.mouseReleaseEvent(mouseEvent);
 		}
@@ -400,7 +389,11 @@ namespace dyno
 
 			auto activeScene = SceneGraphFactory::instance()->active();
 
-			activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
+			if (activeScene->getWorkMode() == SceneGraph::EDIT_MODE) {
+				activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
+			}
+			else
+				activeScene->onMouseEvent(mouseEvent);
 
 			//To draw a selected region
 			mImWindow.mouseMoveEvent(mouseEvent);
@@ -419,8 +412,6 @@ namespace dyno
 
 	void POpenGLWidget::keyPressEvent(QKeyEvent* event)
 	{
-		mPressedMouseButtons.insert(event->key());
-
 		auto activeScene = SceneGraphFactory::instance()->active();
 
 		PKeyboardEvent keyEvent;
@@ -442,8 +433,6 @@ namespace dyno
 
 	void POpenGLWidget::keyReleaseEvent(QKeyEvent* event)
 	{
-		mPressedMouseButtons.erase(event->key());
-
 		auto activeScene = SceneGraphFactory::instance()->active();
 
 		PKeyboardEvent keyEvent;
@@ -473,9 +462,8 @@ namespace dyno
 		SceneGraphFactory::instance()->active()->updateGraphicsContext();
 
 		PSimulationThread::instance()->stopUpdatingGraphicsContext();
-		mNeedUpdate = true;
-
-		update();
+		
+		flush();
 
 		doneCurrent();
 	}
@@ -489,26 +477,20 @@ namespace dyno
 		node->graphicsPipeline()->forceUpdate();
 
 		PSimulationThread::instance()->stopUpdatingGraphicsContext();
-		mNeedUpdate = true;
-
-		update();
+		
+		flush();
 
 		doneCurrent();
-
-
 	}
 
 	void POpenGLWidget::onNodeUpdated(std::shared_ptr<Node> node)
 	{
-		if(!mBlockFieldUpdate)
-			updateGraphicsContext(node.get());
-
+		updateGraphicsContext(node.get());
 	}
 
 	void POpenGLWidget::onModuleUpdated(std::shared_ptr<Module> node)
 	{
-		if(!mBlockFieldUpdate)
-			updateGraphicsContext();
+		updateGraphicsContext();
 	}
 
 	void POpenGLWidget::nodeNodeRenderingKeyUpdated(std::shared_ptr<Node> node)
@@ -527,6 +509,13 @@ namespace dyno
 		saveScreen(frame);
 	}
 
+	void POpenGLWidget::flush()
+	{
+		mNeedUpdate = true;
+
+		update();
+	}
+
 	void POpenGLWidget::resetSceneFrame()
 	{
 		updateGraphicsContext();
@@ -541,12 +530,7 @@ namespace dyno
 
 	void POpenGLWidget::paintEvent(QPaintEvent* event)
 	{
-		auto activeScene = SceneGraphFactory::instance()->active();
-		if (mRenderEngine->forceRender)
-		{
-			QOpenGLWidget::paintEvent(event);
-		}
-		else if (mImWindow.isGuizmoDisplayed()) 
+		if (mImWindow.forceRender())
 		{
 			QOpenGLWidget::paintEvent(event);
 		}
@@ -555,17 +539,7 @@ namespace dyno
 			QOpenGLWidget::paintEvent(event);
 			mNeedUpdate = false;
 		}
-		else if (isAnyKeyPressed() || mRreshape || isAnyMouseButtonPressed() || mScroll) 
-		{
-			QOpenGLWidget::paintEvent(event);
-		}
-		else if (mMouseButtonRelease) 
-		{
-			QOpenGLWidget::paintEvent(event);
-			mMouseButtonRelease = false;
-		}
 	}
-
 
 	void POpenGLWidget::setDefaultAnimationOption(bool op)
 	{

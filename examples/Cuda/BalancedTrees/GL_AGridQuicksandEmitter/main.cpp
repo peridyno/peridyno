@@ -115,8 +115,8 @@ std::shared_ptr<SceneGraph> createScene()
 	fluid->animationPipeline()->pushModule(boundary);
 
 	auto eboundary = std::make_shared<StaticBoundaryEmitter<DataType3f>>();
-	emitter->varLocation()->connect(eboundary->varLocation());
-	emitter->varWidth()->connect(eboundary->varXWidth());
+	emitter->varLocation()->quote(eboundary->varLocation());
+	emitter->varWidth()->quote(eboundary->varXWidth());
 	eboundary->varYHigh()->setValue(0.04f);
 	fluid->stateVelocity()->connect(eboundary->inVelocity());
 	fluid->statePosition()->connect(eboundary->inPosition());

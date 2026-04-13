@@ -1,5 +1,5 @@
 #pragma once
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 #include "Primitive/Primitive3D.h"
 
 #include "STL/Pair.h"
@@ -410,6 +410,7 @@ namespace dyno
 			{
 				this->q_init = this->actor1->rot;
 			}
+			this->q = this->q_init;
 		}
 
 		void setAnchorAngle(Quat<Real> quat) { q = quat; }
@@ -504,7 +505,7 @@ namespace dyno
 	 * Discrete elements will arranged in the order of sphere, box, tet, capsule, triangle
 	 */
 	template<typename TDataType>
-	class DiscreteElements : public TopologyModule
+	class DiscreteElements : public Topology
 	{
 		DECLARE_TCLASS(DiscreteElements, TDataType)
 	public:
@@ -576,11 +577,11 @@ namespace dyno
 		DArray<DistanceJoint>& distanceJoints() { return mDistanceJoints; };
 
 		void setTetBodyId(DArray<int>& body_id);
-		void setTetElementId(DArray<TopologyModule::Tetrahedron>& element_id);
+		void setTetElementId(DArray<Topology::Tetrahedron>& element_id);
 
 		DArray<Real>&		getTetSDF() { return m_tet_sdf; }
 		DArray<int>&		getTetBodyMapping() { return m_tet_body_mapping; }
-		DArray<TopologyModule::Tetrahedron>& getTetElementMapping() { return m_tet_element_id; }
+		DArray<Topology::Tetrahedron>& getTetElementMapping() { return m_tet_element_id; }
 
 		void copyFrom(DiscreteElements<TDataType>& de);
 
@@ -629,7 +630,7 @@ namespace dyno
 
 		DArray<Real> m_tet_sdf;
 		DArray<int> m_tet_body_mapping;
-		DArray<TopologyModule::Tetrahedron> m_tet_element_id;
+		DArray<Topology::Tetrahedron> m_tet_element_id;
 	};
 }
 

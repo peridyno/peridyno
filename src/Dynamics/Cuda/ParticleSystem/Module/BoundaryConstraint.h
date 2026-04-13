@@ -8,7 +8,7 @@ namespace dyno {
 	template<typename TDataType>
 	class BoundaryConstraint : public ConstraintModule
 	{
-		//DECLARE_TCLASS(BoundaryConstraint, TDataType)
+		
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -22,11 +22,6 @@ namespace dyno {
 
 		void constrain(DArray<Coord>& position, DArray<Coord>& velocity, DistanceField3D<TDataType>& sdf, Real dt);
 
-		void load(std::string filename, bool inverted = false);
-		void setCube(Coord lo, Coord hi, Real distance, bool inverted = false);
-		void setSphere(Coord center, Real r, Real distance, bool inverted = false);
-		void setCylinder(Coord center, Real r, Real height, Real distance, int axis, bool inverted = false);
-
 	public:
 		DeviceArrayField<Coord> m_position;
 		DeviceArrayField<Coord> m_velocity;
@@ -36,4 +31,5 @@ namespace dyno {
 
 		std::shared_ptr<DistanceField3D<TDataType>> m_cSDF;
 	};
+
 }

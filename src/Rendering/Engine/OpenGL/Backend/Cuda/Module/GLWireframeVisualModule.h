@@ -33,11 +33,11 @@ namespace dyno
 		// render as lines or cylinder
 		DECLARE_ENUM(EEdgeMode,
 			LINE = 0,
-			CYLINDER = 1);
+			CYLINDER = 1,
+			ARROW = 2);
 
 	public:
 		GLWireframeVisualModule();
-		~GLWireframeVisualModule() override;
 
 		std::string caption() override;
 
@@ -52,6 +52,8 @@ namespace dyno
 		
 		DEF_VAR(float, Radius, 0.003f, "Cylinder radius");
 		DEF_VAR(float, LineWidth, 1.f, "Line width");
+
+		DEF_VAR(Color, EndColor, Color(0.8f, 0.8f, 0.8f), "");
 
 		DEF_ENUM(EEdgeMode, RenderMode, EEdgeMode::LINE, "");
 
@@ -68,8 +70,8 @@ namespace dyno
 		Program*	mShaderProgram;
 
 		VertexArray				mVAO;
-		XBuffer<Vec3f>						mVertexBuffer;
-		XBuffer<TopologyModule::Edge>		mIndexBuffer;
+		XBuffer<Vec3f>			mVertexBuffer;
+		XBuffer<Topology::Edge>		mIndexBuffer;
 		unsigned int	mNumEdges = 0;
 
 		Buffer		mUniformBlock;

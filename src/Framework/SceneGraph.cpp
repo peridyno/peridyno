@@ -2,7 +2,6 @@
 //#include "Action/ActDraw.h"
 #include "Action/ActReset.h"
 #include "Action/ActNodeInfo.h"
-#include "Action/ActPostProcessing.h"
 
 #include "Module/VisualModule.h"
 
@@ -56,6 +55,11 @@ namespace dyno
 	void SceneGraph::setAsynchronousSimulation(bool b)
 	{
 		mAsynchronousSimulation = b;
+	}
+	
+	void SceneGraph::setVerboseMode(bool b)
+	{
+		mVerboseMode = b;
 	}
 
 	void SceneGraph::setGravity(Vec3f g)
@@ -116,7 +120,7 @@ namespace dyno
 					name << std::setw(40) << node->getClassInfo()->getClassName();
 					ss << std::setprecision(10) << timer.getElapsedTime();
 
-					std::string info = "Node: \t" + name.str() + ": \t " + ss.str() + "ms \n";
+					std::string info = "Node update: \t" + name.str() + ": \t " + ss.str() + "ms \n";
 					Log::sendMessage(Log::Info, info);
 				}
 			}
@@ -244,8 +248,6 @@ namespace dyno
 				this->advance(interval - t);
 			}
 		}
-
-		this->traverseForward<PostProcessing>();
 
 		this->traverseForward<AssignFrameNumberAct>(mFrameNumber);
 

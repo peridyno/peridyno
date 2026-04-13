@@ -193,6 +193,7 @@ namespace dyno
 
 	void GlfwRenderWindow::mainLoop()
 	{
+	
 		auto activeScene = SceneGraphFactory::instance()->active();
 
 		activeScene->reset();
@@ -207,6 +208,9 @@ namespace dyno
 				{
 					saveScreen(activeScene->getFrameNumber());
 				}
+
+				auto cam = getCamera();
+				std::cout << "Eye " << cam->getEyePos() << " Target " << cam->getTargetPos() << std::endl;
 
 				activeScene->takeOneFrame();
 			}

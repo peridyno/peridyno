@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-
-
-
 #pragma once
 #include "Module/ConstraintModule.h"
 #include "Topology/TriangleSet.h"

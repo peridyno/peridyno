@@ -9,6 +9,12 @@
 #include "Module/IterativeDensitySolver.h"
 #include "Module/DivergenceFreeSphSolver.h"
 #include "Module/ImplicitISPH.h"
+#include "Module/VariationalApproximateProjection.h"
+#include "DualParticle/DualParticleIsphModule.h"
+#include "DualParticle/VirtualSpatiallyAdaptiveStrategy.h"
+#include "DualParticle/VirtualFissionFusionStrategy.h"
+#include "DualParticle/VirtualColocationStrategy.h"
+
 
 #include "ParticleSystemHelper.h"
 
@@ -47,7 +53,7 @@ namespace dyno
 
 		this->varSamplingDistance()->attach(callback);
 		this->varSmoothingLength()->attach(callback);
-
+		
 		this->varSmoothingLength()->setValue(1.2);
 
 
@@ -169,6 +175,8 @@ namespace dyno
 				auto setupIISPHSolver = [=] {
 					this->animationPipeline()->clear();
 
+					this->varSmoothingLength()->setValue(1.5);
+
 					auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
 					this->stateTimeStep()->connect(integrator->inTimeStep());
 					this->statePosition()->connect(integrator->inPosition());
@@ -202,6 +210,245 @@ namespace dyno
 					integrator->connect(density->importModules());
 					density->connect(viscosity->importModules());
 					};
+				auto setupDPSolver = [=] {
+					this->animationPipeline()->clear();
+
+					this->varSmoothingLength()->setValue(2.4);
+
+					auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+					this->stateSmoothingLength()->connect(nbrQuery->inRadius());
+					this->statePosition()->connect(nbrQuery->inPosition());
+					this->animationPipeline()->pushModule(nbrQuery);
+
+					auto vpGen = std::make_shared<VirtualSpatiallyAdaptiveStrategy<TDataType>>();
+					this->statePosition()->connect(vpGen->inRPosition());
+					vpGen->varSamplingDistance()->setValue(Real(0.005));		/**Virtual particle radius*/
+					vpGen->varCandidatePointCount()->getDataPtr()->setCurrentKey(VirtualSpatiallyAdaptiveStrategy<TDataType>::neighbors_33);
+					this->animationPipeline()->pushModule(vpGen);
+
+					auto rv_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+					this->stateSmoothingLength()->connect(rv_nbrQuery->inRadius());
+					this->statePosition()->connect(rv_nbrQuery->inOther());
+					vpGen->outVirtualParticles()->connect(rv_nbrQuery->inPosition());
+					this->animationPipeline()->pushModule(rv_nbrQuery);
+
+					auto vr_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+					this->stateSmoothingLength()->connect(vr_nbrQuery->inRadius());
+					this->statePosition()->connect(vr_nbrQuery->inPosition());
+					vpGen->outVirtualParticles()->connect(vr_nbrQuery->inOther());
+					this->animationPipeline()->pushModule(vr_nbrQuery);
+
+					auto vv_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+					this->stateSmoothingLength()->connect(vv_nbrQuery->inRadius());
+					vpGen->outVirtualParticles()->connect(vv_nbrQuery->inPosition());
+					this->animationPipeline()->pushModule(vv_nbrQuery);
+
+					auto m_dualIsph = std::make_shared<DualParticleIsphModule<TDataType>>();
+					this->stateSmoothingLength()->connect(m_dualIsph->inSmoothingLength());
+					this->stateSamplingDistance()->connect(m_dualIsph->inSamplingDistance());
+					this->stateTimeStep()->connect(m_dualIsph->inTimeStep());
+					this->statePosition()->connect(m_dualIsph->inRPosition());
+					vpGen->outVirtualParticles()->connect(m_dualIsph->inVPosition());
+					this->stateVelocity()->connect(m_dualIsph->inVelocity());
+					m_dualIsph->varResidualThreshold()->setValue(0.001f);
+					nbrQuery->outNeighborIds()->connect(m_dualIsph->inNeighborIds());
+					rv_nbrQuery->outNeighborIds()->connect(m_dualIsph->inRVNeighborIds());
+					vr_nbrQuery->outNeighborIds()->connect(m_dualIsph->inVRNeighborIds());
+					vv_nbrQuery->outNeighborIds()->connect(m_dualIsph->inVVNeighborIds());
+					m_dualIsph->varWarmStart()->setValue(true);
+					this->animationPipeline()->pushModule(m_dualIsph);
+
+					auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
+					this->stateTimeStep()->connect(integrator->inTimeStep());
+					this->statePosition()->connect(integrator->inPosition());
+					this->stateVelocity()->connect(integrator->inVelocity());
+					this->animationPipeline()->pushModule(integrator);
+
+					auto m_visModule = std::make_shared<ImplicitViscosity<TDataType>>();
+					m_visModule->varViscosity()->setValue(Real(0.5));
+					this->stateTimeStep()->connect(m_visModule->inTimeStep());
+					this->stateSamplingDistance()->connect(m_visModule->inSamplingDistance());
+					this->stateSmoothingLength()->connect(m_visModule->inSmoothingLength());
+					this->stateTimeStep()->connect(m_visModule->inTimeStep());
+					this->statePosition()->connect(m_visModule->inPosition());
+					this->stateVelocity()->connect(m_visModule->inVelocity());
+					nbrQuery->outNeighborIds()->connect(m_visModule->inNeighborIds());
+					this->animationPipeline()->pushModule(m_visModule);
+				};
+				auto setupFissionDPSolver = [=] {
+					this->animationPipeline()->clear();
+
+					this->varSmoothingLength()->setValue(2.4);
+
+					auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+					this->stateSmoothingLength()->connect(nbrQuery->inRadius());
+					this->statePosition()->connect(nbrQuery->inPosition());
+					this->animationPipeline()->pushModule(nbrQuery);
+
+					auto vpGen = std::make_shared<VirtualFissionFusionStrategy<TDataType>>();
+					vpGen->varTransitionRegionThreshold()->setValue(0.01);
+					this->statePosition()->connect(vpGen->inRPosition());
+					this->stateVelocity()->connect(vpGen->inRVelocity());
+					nbrQuery->outNeighborIds()->connect(vpGen->inNeighborIds());
+					this->stateSmoothingLength()->connect(vpGen->inSmoothingLength());
+					this->stateSamplingDistance()->connect(vpGen->inSamplingDistance());
+					this->stateFrameNumber()->connect(vpGen->inFrameNumber());
+					this->stateTimeStep()->connect(vpGen->inTimeStep());
+					this->animationPipeline()->pushModule(vpGen);
+					vpGen->varMinDist()->setValue(0.002);
+					this->animationPipeline()->pushModule(vpGen);
+
+					auto rv_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+					this->stateSmoothingLength()->connect(rv_nbrQuery->inRadius());
+					this->statePosition()->connect(rv_nbrQuery->inOther());
+					vpGen->outVirtualParticles()->connect(rv_nbrQuery->inPosition());
+					this->animationPipeline()->pushModule(rv_nbrQuery);
+
+					auto vr_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+					this->stateSmoothingLength()->connect(vr_nbrQuery->inRadius());
+					this->statePosition()->connect(vr_nbrQuery->inPosition());
+					vpGen->outVirtualParticles()->connect(vr_nbrQuery->inOther());
+					this->animationPipeline()->pushModule(vr_nbrQuery);
+
+					auto vv_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+					this->stateSmoothingLength()->connect(vv_nbrQuery->inRadius());
+					vpGen->outVirtualParticles()->connect(vv_nbrQuery->inPosition());
+					this->animationPipeline()->pushModule(vv_nbrQuery);
+
+					auto m_dualIsph = std::make_shared<DualParticleIsphModule<TDataType>>();
+					this->stateSmoothingLength()->connect(m_dualIsph->inSmoothingLength());
+					this->stateSamplingDistance()->connect(m_dualIsph->inSamplingDistance());
+					this->stateTimeStep()->connect(m_dualIsph->inTimeStep());
+					this->statePosition()->connect(m_dualIsph->inRPosition());
+					vpGen->outVirtualParticles()->connect(m_dualIsph->inVPosition());
+					this->stateVelocity()->connect(m_dualIsph->inVelocity());
+					m_dualIsph->varResidualThreshold()->setValue(0.001f);
+					nbrQuery->outNeighborIds()->connect(m_dualIsph->inNeighborIds());
+					rv_nbrQuery->outNeighborIds()->connect(m_dualIsph->inRVNeighborIds());
+					vr_nbrQuery->outNeighborIds()->connect(m_dualIsph->inVRNeighborIds());
+					vv_nbrQuery->outNeighborIds()->connect(m_dualIsph->inVVNeighborIds());
+					m_dualIsph->varWarmStart()->setValue(true);
+					this->animationPipeline()->pushModule(m_dualIsph);
+
+					auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
+					this->stateTimeStep()->connect(integrator->inTimeStep());
+					this->statePosition()->connect(integrator->inPosition());
+					this->stateVelocity()->connect(integrator->inVelocity());
+					this->animationPipeline()->pushModule(integrator);
+
+					auto m_visModule = std::make_shared<ImplicitViscosity<TDataType>>();
+					m_visModule->varViscosity()->setValue(Real(0.5));
+					this->stateTimeStep()->connect(m_visModule->inTimeStep());
+					this->stateSamplingDistance()->connect(m_visModule->inSamplingDistance());
+					this->stateSmoothingLength()->connect(m_visModule->inSmoothingLength());
+					this->stateTimeStep()->connect(m_visModule->inTimeStep());
+					this->statePosition()->connect(m_visModule->inPosition());
+					this->stateVelocity()->connect(m_visModule->inVelocity());
+					nbrQuery->outNeighborIds()->connect(m_visModule->inNeighborIds());
+					this->animationPipeline()->pushModule(m_visModule);
+				};
+				auto setupVSSPHSolver = [=] {
+					this->animationPipeline()->clear();
+
+					this->varSmoothingLength()->setValue(2.4);
+
+					auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
+					this->stateTimeStep()->connect(integrator->inTimeStep());
+					this->statePosition()->connect(integrator->inPosition());
+					this->stateVelocity()->connect(integrator->inVelocity());
+					this->animationPipeline()->pushModule(integrator);
+
+					auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+					this->stateSmoothingLength()->connect(nbrQuery->inRadius());
+					this->statePosition()->connect(nbrQuery->inPosition());
+					this->animationPipeline()->pushModule(nbrQuery);
+
+					auto isph = std::make_shared<VariationalApproximateProjection<DataType3f>>();
+					this->stateSmoothingLength()->connect(isph->inSmoothingLength());
+					this->stateSamplingDistance()->connect(isph->inSamplingDistance());
+					this->stateTimeStep()->connect(isph->inTimeStep());
+					this->statePosition()->connect(isph->inPosition());
+					this->stateVelocity()->connect(isph->inVelocity());
+					nbrQuery->outNeighborIds()->connect(isph->inNeighborIds());
+					this->animationPipeline()->pushModule(isph);
+
+					auto viscosity = std::make_shared<ImplicitViscosity<TDataType>>();
+					viscosity->varViscosity()->setValue(Real(1.0));
+					this->stateTimeStep()->connect(viscosity->inTimeStep());
+					this->stateSmoothingLength()->connect(viscosity->inSmoothingLength());
+					this->stateSamplingDistance()->connect(viscosity->inSamplingDistance());
+					this->statePosition()->connect(viscosity->inPosition());
+					this->stateVelocity()->connect(viscosity->inVelocity());
+					nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());
+					this->animationPipeline()->pushModule(viscosity);
+
+					integrator->connect(isph->importModules());
+					isph->connect(viscosity->importModules());
+				};
+				auto setupISPHSolver = [=] {
+					this->animationPipeline()->clear();
+
+					this->varSmoothingLength()->setValue(2.4);
+
+					auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+					this->stateSmoothingLength()->connect(nbrQuery->inRadius());
+					this->statePosition()->connect(nbrQuery->inPosition());
+					this->animationPipeline()->pushModule(nbrQuery);
+
+					auto vpGen = std::make_shared<VirtualColocationStrategy<TDataType>>();
+					this->statePosition()->connect(vpGen->inRPosition());
+					this->animationPipeline()->pushModule(vpGen);
+
+					auto rv_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+					this->stateSmoothingLength()->connect(rv_nbrQuery->inRadius());
+					this->statePosition()->connect(rv_nbrQuery->inOther());
+					vpGen->outVirtualParticles()->connect(rv_nbrQuery->inPosition());
+					this->animationPipeline()->pushModule(rv_nbrQuery);
+
+					auto vr_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+					this->stateSmoothingLength()->connect(vr_nbrQuery->inRadius());
+					this->statePosition()->connect(vr_nbrQuery->inPosition());
+					vpGen->outVirtualParticles()->connect(vr_nbrQuery->inOther());
+					this->animationPipeline()->pushModule(vr_nbrQuery);
+
+					auto vv_nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
+					this->stateSmoothingLength()->connect(vv_nbrQuery->inRadius());
+					vpGen->outVirtualParticles()->connect(vv_nbrQuery->inPosition());
+					this->animationPipeline()->pushModule(vv_nbrQuery);
+
+					auto m_dualIsph = std::make_shared<DualParticleIsphModule<TDataType>>();
+					this->stateSmoothingLength()->connect(m_dualIsph->inSmoothingLength());
+					this->stateSamplingDistance()->connect(m_dualIsph->inSamplingDistance());
+					this->stateTimeStep()->connect(m_dualIsph->inTimeStep());
+					this->statePosition()->connect(m_dualIsph->inRPosition());
+					vpGen->outVirtualParticles()->connect(m_dualIsph->inVPosition());
+					this->stateVelocity()->connect(m_dualIsph->inVelocity());
+					m_dualIsph->varResidualThreshold()->setValue(0.001f);
+					nbrQuery->outNeighborIds()->connect(m_dualIsph->inNeighborIds());
+					rv_nbrQuery->outNeighborIds()->connect(m_dualIsph->inRVNeighborIds());
+					vr_nbrQuery->outNeighborIds()->connect(m_dualIsph->inVRNeighborIds());
+					vv_nbrQuery->outNeighborIds()->connect(m_dualIsph->inVVNeighborIds());
+					m_dualIsph->varWarmStart()->setValue(true);
+					this->animationPipeline()->pushModule(m_dualIsph);
+
+					auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
+					this->stateTimeStep()->connect(integrator->inTimeStep());
+					this->statePosition()->connect(integrator->inPosition());
+					this->stateVelocity()->connect(integrator->inVelocity());
+					this->animationPipeline()->pushModule(integrator);
+
+					auto m_visModule = std::make_shared<ImplicitViscosity<TDataType>>();
+					m_visModule->varViscosity()->setValue(Real(0.5));
+					this->stateTimeStep()->connect(m_visModule->inTimeStep());
+					this->stateSamplingDistance()->connect(m_visModule->inSamplingDistance());
+					this->stateSmoothingLength()->connect(m_visModule->inSmoothingLength());
+					this->stateTimeStep()->connect(m_visModule->inTimeStep());
+					this->statePosition()->connect(m_visModule->inPosition());
+					this->stateVelocity()->connect(m_visModule->inVelocity());
+					nbrQuery->outNeighborIds()->connect(m_visModule->inNeighborIds());
+					this->animationPipeline()->pushModule(m_visModule);
+				};
+
 
 				auto k = this->varIncompressibilitySolver()->currentKey();
 				switch (k)
@@ -217,6 +464,18 @@ namespace dyno
 					break;
 				case IncompressibilitySolver::IISPH:
 					setupIISPHSolver();
+					break;
+				case IncompressibilitySolver::DualParticle:
+					setupDPSolver();
+					break;
+				case IncompressibilitySolver::FissionDP:
+					setupFissionDPSolver();
+					break;
+				case IncompressibilitySolver::VSSPH:
+					setupVSSPHSolver();
+					break;
+				case IncompressibilitySolver::ISPH:
+					setupISPHSolver();
 					break;
 				default:
 					break;
@@ -239,7 +498,7 @@ namespace dyno
 
 		auto ptRender = std::make_shared<GLPointVisualModule>();
 		ptRender->varPointSize()->setValue(0.0035f);
-		ptRender->setColor(Color(1, 0, 0));
+		ptRender->varBaseColor()->setValue(Color(1, 0, 0));
 		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 
 		this->statePointSet()->connect(ptRender->inPointSet());

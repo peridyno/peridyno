@@ -67,7 +67,7 @@ namespace dyno
 
 		DArray<Coord> vertices(totalVNum);
 
-		DArray<TopologyModule::Triangle> triangles(totalVNum / 3);
+		DArray<Topology::Triangle> triangles(totalVNum / 3);
 
 		MarchingCubesHelper<TDataType>::constructTrianglesForClipper(
 			this->stateField()->getData(),

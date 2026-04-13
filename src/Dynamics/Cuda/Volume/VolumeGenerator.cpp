@@ -20,8 +20,8 @@ namespace dyno
 
 		this->inTriangleSet()->connect(fsm->inTriangleSet());
 		fsm->outLevelSet()->connect(this->outLevelSet());
-		this->varSpacing()->connect(fsm->varSpacing());
-		this->varPadding()->connect(fsm->varPadding());
+		this->varSpacing()->quote(fsm->varSpacing());
+		this->varPadding()->quote(fsm->varPadding());
 
 		this->resetPipeline()->pushModule(fsm);
 

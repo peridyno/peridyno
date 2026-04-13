@@ -22,7 +22,7 @@ namespace dyno {
 		this->inNeighborIds()->connect(mCalculateDensity->inNeighborIds());
 		this->inNeighborTriIds()->connect(mCalculateDensity->inNeighborTriIds());
 		this->inTriangleSet()->connect(mCalculateDensity->inTriangleSet());
-		this->varRestDensity()->connect(mCalculateDensity->varRestDensity());
+		this->varRestDensity()->quote(mCalculateDensity->varRestDensity());
 	};
 
 	template<typename TDataType>

@@ -30,8 +30,8 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		//typedef typename TDataType::Coord Coord;
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord;
+		typedef typename dyno::Vector<Real, 2> Coord2D;
+		typedef typename dyno::Vector<Real, 3> Coord;
 
 
 		EulerianSimSplitting2D();

@@ -811,8 +811,10 @@ namespace dyno {
 
 		level = SO_ComputeLevel(box, h_min, level_max);
 
-		int grid_size = (int)pow(Real(2), int(level));
-		Real h = h_min * pow(Real(2), level_max - level);
+		//int grid_size = (int)pow(Real(2), int(level));
+		//Real h = h_min * pow(Real(2), level_max - level);
+		int grid_size = (1 << level);
+		Real h = h_min * (1 << (level_max - level));
 
 		// 		nx_lo = clamp(int(floor(lo_rel[0] / h)), 0, grid_size - 1);
 		// 		ny_lo = clamp(int(floor(lo_rel[1] / h)), 0, grid_size - 1);
@@ -867,8 +869,10 @@ namespace dyno {
 		Coord lo_rel = box.v0 - origin;
 		Coord hi_rel = box.v1 - origin;
 
-		int grid_size = (int)pow(Real(2), int(level));
-		Real h = h_min * pow(Real(2), level_max - level);
+		//int grid_size = (int)pow(Real(2), int(level));
+		//Real h = h_min * pow(Real(2), level_max - level);
+		int grid_size = (1 << level);
+		Real h = h_min * (1 << (level_max - level));
 
 		nx_lo = (int)floor(lo_rel[0] / h);
 		ny_lo = (int)floor(lo_rel[1] / h);

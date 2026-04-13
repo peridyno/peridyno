@@ -52,10 +52,10 @@ std::shared_ptr<SceneGraph> creatBricks()
 	rigid->graphicsPipeline()->pushModule(mapper);
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Color(0.3f, 0.5f, 0.9f));
-	sRender->setAlpha(0.8f);
-	sRender->setRoughness(0.7f);
-	sRender->setMetallic(3.0f);
+	sRender->varBaseColor()->setValue(Color(0.3f, 0.5f, 0.9f));
+	sRender->varAlpha()->setValue(0.8f);
+	sRender->varRoughness()->setValue(0.7f);
+	sRender->varMetallic()->setValue(3.0f);
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
 	//TODO: to enable using internal modules inside a node
@@ -71,7 +71,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 	rigid->graphicsPipeline()->pushModule(contactMapper);
 
 	auto wireRender = std::make_shared<GLWireframeVisualModule>();
-	wireRender->setColor(Color(0, 0, 1));
+	wireRender->varBaseColor()->setValue(Color(0, 0, 1));
 	contactMapper->outEdgeSet()->connect(wireRender->inEdgeSet());
 	rigid->graphicsPipeline()->pushModule(wireRender);
 
@@ -81,7 +81,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 	rigid->graphicsPipeline()->pushModule(contactPointMapper);
 
 	auto pointRender = std::make_shared<GLPointVisualModule>();
-	pointRender->setColor(Color(1, 0, 0));
+	pointRender->varBaseColor()->setValue(Color(1, 0, 0));
 	pointRender->varPointSize()->setValue(0.0003f);
 	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
 	rigid->graphicsPipeline()->pushModule(pointRender);
@@ -97,7 +97,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 // 	rigid->graphicsPipeline()->pushModule(anchorPointMapper);
 // 
 // 	auto pointRender2 = std::make_shared<GLPointVisualModule>();
-// 	pointRender2->setColor(Color(1, 0, 0));
+// 	pointRender2->varBaseColor()->setValue(Color(1, 0, 0));
 // 	pointRender2->varPointSize()->setValue(0.002f);
 // 	anchorPointMapper->outPointSet()->connect(pointRender2->inPointSet());
 // 	rigid->graphicsPipeline()->pushModule(pointRender2);

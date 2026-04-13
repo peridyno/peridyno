@@ -37,7 +37,7 @@ namespace dyno
 		);
 
 		GLPointVisualModule();
-		~GLPointVisualModule();
+		~GLPointVisualModule() override {};
 
 		void setColorMapMode(ColorMapMode mode);
 

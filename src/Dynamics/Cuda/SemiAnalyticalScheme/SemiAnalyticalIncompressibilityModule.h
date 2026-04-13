@@ -7,7 +7,7 @@
  */
 #pragma once
 #include "Module/ConstraintModule.h"
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 #include "Module/TopologyMapping.h"
 #include "Algorithm/Arithmetic.h"
 
@@ -30,7 +30,7 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real          Real;
 		typedef typename TDataType::Coord         Coord;
-		typedef typename TopologyModule::Triangle Triangle;
+		typedef typename Topology::Triangle Triangle;
 
 		SemiAnalyticalIncompressibilityModule();
 		~SemiAnalyticalIncompressibilityModule() override;

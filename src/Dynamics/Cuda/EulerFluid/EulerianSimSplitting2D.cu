@@ -1016,7 +1016,7 @@ namespace dyno
 			ESS_BodyForce2D,
 			m_velocity,
 			m_identifier,
-			gravity,
+			this->gravity,
 			dt);
 		//printf("body force is ok!  %d  \n", m_identifier.size());
 	}

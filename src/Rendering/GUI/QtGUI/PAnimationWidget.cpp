@@ -110,7 +110,7 @@ namespace dyno
 		connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished(int)), this, SLOT(updateSlider(int)));
 		connect(PSimulationThread::instance(), SIGNAL(finished()), PSimulationThread::instance(), SLOT(deleteLater()));
 
-		PSimulationThread::instance()->launch(false);
+		PSimulationThread::instance()->launch(true);
 	}
 
 	PAnimationWidget::~PAnimationWidget()

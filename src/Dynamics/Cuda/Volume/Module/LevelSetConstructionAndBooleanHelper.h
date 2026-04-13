@@ -21,6 +21,7 @@
 
 #include "Topology/LevelSet.h"
 #include "Topology/TriangleSet.h"
+#include "Topology/TriangleSets.h"
 #include "Collision/Distance3D.h"
 #include "VolumeMacros.h"
 namespace dyno
@@ -36,6 +37,15 @@ namespace dyno
 
 		static void initialFromTriangle(
 			std::shared_ptr<TriangleSet<TDataType>> triSet,
+			Real dx,
+			uint padding,
+			DistanceField3D<TDataType>& sdf,
+			Coord& origin,
+			DArray3D<GridType>& gridType,
+			DArray3D<int>& closestTriId);
+
+		static void initialFromTriangles(
+			std::shared_ptr<TriangleSets<TDataType>> triSet,
 			Real dx,
 			uint padding,
 			DistanceField3D<TDataType>& sdf,

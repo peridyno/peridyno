@@ -600,6 +600,70 @@ namespace dyno
 		return bInside == true ? -d : d;
 	}
 
+	//
+	template<typename Real>
+	DYN_FUNC Real TPoint3D<Real>::distance(const TCylinder3D<Real>& cylinder) const
+	{
+		auto p = origin - cylinder.center;
+		auto rotInv = cylinder.rotation.inverse();
+
+		auto pLocal = rotInv.rotate(p);
+
+		Real x = Vector<Real, 2>(pLocal.x, pLocal.z).norm();
+		Real y = abs(pLocal.y);
+
+		Real halfH = cylinder.height / 2.0f;
+
+		Real deltaR = x - cylinder.radius;
+		Real deltaH = y - halfH;
+		
+		if (deltaR < 0 && deltaH < 0)
+		{
+			return deltaH <= deltaR ? deltaR : deltaH;
+		}
+		else if (deltaR >= 0 && deltaH < 0)
+		{
+			return deltaR;
+		}
+		else if (deltaR < 0 && deltaH >= 0)
+		{
+			return deltaH;
+		}
+		else
+		{
+			return Vector<Real, 2>(deltaR, deltaH).norm();
+		}
+	}
+
+	//
+	template<typename Real>
+	DYN_FUNC Real TPoint3D<Real>::distance(const TCone3D<Real>& cone) const
+	{
+		auto p = origin - cone.center;
+		auto rotInv = cone.rotation.inverse();
+
+		auto pLocal = rotInv.rotate(p);
+
+		Real x = Vector<Real, 2>(pLocal.x, pLocal.z).norm();
+		Real y = pLocal.y;
+
+		auto equationOfLine = [](Real x, Real y, Real a, Real b, Real c) -> float 
+		{
+			return a * x + b * y + c;
+		};
+
+		TSegment3D<Real> seg0(Coord3D(0), Coord3D(cone.radius, 0, 0));
+		TSegment3D<Real> seg1(Coord3D(0, cone.height, 0), Coord3D(cone.radius, 0, 0));
+
+		Real d0 = TPoint3D<Real>(Coord3D(x, y, 0)).distance(seg0);
+		Real d1 = TPoint3D<Real>(Coord3D(x, y, 0)).distance(seg1);
+
+		bool inside0 = y > 0;
+		bool inside1 = equationOfLine(x, y, cone.height, cone.radius, -cone.height * cone.radius) < 0;
+
+		return inside0 && inside1 ? -minimum(d0, d1) : minimum(d0, d1);
+	}
+
 	template<typename Real>
 	DYN_FUNC Real TPoint3D<Real>::distanceSquared(const TPoint3D& pt) const
 	{
@@ -726,7 +790,8 @@ namespace dyno
 			return false;
 		}
 
-		return abs((origin - plane.origin).dot(plane.normal)) < REAL_EPSILON;
+		//return abs((origin - plane.origin).dot(plane.normal)) < REAL_EPSILON;
+		return (origin - plane.origin).dot(plane.normal) < REAL_EPSILON;
 	}
 
 	template<typename Real>
@@ -3248,18 +3313,16 @@ namespace dyno
 		radius = Real(0.5);
 
 		rotation = Quat<Real>();
-		scale = Coord3D(1);
 	}
 
 	template<typename Real>
-	DYN_FUNC TCylinder3D<Real>::TCylinder3D(const Coord3D& c, const Real& h, const Real& r, const Quat<Real>& rot, const Coord3D& s)
+	DYN_FUNC TCylinder3D<Real>::TCylinder3D(const Coord3D& c, const Real& h, const Real& r, const Quat<Real>& rot)
 	{
 		center = c;
 		height = h;
 		radius = r;
 
 		rotation = rot;
-		scale = s;
 	}
 
 	template<typename Real>
@@ -3270,7 +3333,6 @@ namespace dyno
 		radius = cylinder.radius;
 
 		rotation = cylinder.rotation;
-		scale = cylinder.scale;
 	}
 
 	//***********************  Cone3D  **************************
@@ -3282,19 +3344,17 @@ namespace dyno
 		radius = Real(0.5);
 
 		rotation = Quat<Real>();
-		scale = Coord3D(1);
 	}
 
 
 	template<typename Real>
-	DYN_FUNC TCone3D<Real>::TCone3D(const Coord3D& c, const Real& h, const Real& r, const Quat<Real>& rot, const Coord3D& s)
+	DYN_FUNC TCone3D<Real>::TCone3D(const Coord3D& c, const Real& h, const Real& r, const Quat<Real>& rot)
 	{
 		center = c;
 		height = h;
 		radius = r;
 
 		rotation = rot;
-		scale = s;
 	}
 
 	template<typename Real>
@@ -3305,7 +3365,6 @@ namespace dyno
 		radius = cone.radius;
 
 		rotation = cone.rotation;
-		scale = cone.scale;
 	}
 
 	template<typename Real>
@@ -3378,6 +3437,51 @@ namespace dyno
 		Coord3D v1 = endPoint();
 		abox.v0 = minimum(v0, v1) - radius;
 		abox.v1 = maximum(v0, v1) + radius;
+		return abox;
+	}
+
+	template<typename Real>
+	DYN_FUNC TAlignedBox3D<Real> TCylinder3D<Real>::aabb() const
+	{
+		TAlignedBox3D<Real> abox;
+
+		Coord3D u = rotation.rotate(Coord3D(1, 0, 0));
+		Coord3D v = rotation.rotate(Coord3D(0, 1, 0));
+		Coord3D w = rotation.rotate(Coord3D(0, 0, 1));
+
+		Coord3D extent(radius, 0.5 * height, radius);
+
+		Coord3D r_ext;
+		r_ext[0] = abs(extent[0] * u[0]) + abs(extent[1] * v[0]) + abs(extent[2] * w[0]);
+		r_ext[1] = abs(extent[0] * u[1]) + abs(extent[1] * v[1]) + abs(extent[2] * w[1]);
+		r_ext[2] = abs(extent[0] * u[2]) + abs(extent[1] * v[2]) + abs(extent[2] * w[2]);
+
+		abox.v0 = center - r_ext;
+		abox.v1 = center + r_ext;
+
+		return abox;
+	}
+
+	//------------
+	template<typename Real>
+	DYN_FUNC TAlignedBox3D<Real> TCone3D<Real>::aabb() const
+	{
+		TAlignedBox3D<Real> abox;
+		
+		Coord3D u = rotation.rotate(Coord3D(1, 0, 0));
+		Coord3D v = rotation.rotate(Coord3D(0, 1, 0));
+		Coord3D w = rotation.rotate(Coord3D(0, 0, 1));
+
+		Coord3D extent(radius, 0.5 * height, radius);
+
+		Coord3D r_ext;
+		r_ext[0] = abs(extent[0] * u[0]) + abs(extent[1] * v[0]) + abs(extent[2] * w[0]);
+		r_ext[1] = abs(extent[0] * u[1]) + abs(extent[1] * v[1]) + abs(extent[2] * w[1]);
+		r_ext[2] = abs(extent[0] * u[2]) + abs(extent[1] * v[2]) + abs(extent[2] * w[2]);
+
+		abox.v0 = center + 0.5 * height * v - r_ext;
+		abox.v1 = center + 0.5 * height * v + r_ext;
+
 		return abox;
 	}
 
@@ -3926,6 +4030,13 @@ namespace dyno
 	}
 
 	template<typename Real>
+	DYN_FUNC TAlignedBox3D<Real>::TAlignedBox3D(const Coord3D& p)
+	{
+		v0 = p;
+		v1 = p;
+	}
+
+	template<typename Real>
 	DYN_FUNC TAlignedBox3D<Real>::TAlignedBox3D(const TAlignedBox3D& box)
 	{
 		v0 = box.v0;
@@ -3996,6 +4107,21 @@ namespace dyno
 		return ret;
 	}
 
+	template<typename Real>
+	DYN_FUNC TAlignedBox3D<Real> TAlignedBox3D<Real>::merge(const Vector<Real, 3>& point)
+	{
+		v0 = v0.minimum(point);
+		v1 = v1.maximum(point);
+
+		return *this;
+	}
+
+	template<typename Real>
+	DYN_FUNC TAlignedBox3D<Real> TAlignedBox3D<Real>::enlarge(const Real thickness) {
+		v0.x -= thickness; v0.y -= thickness; v0.z -= thickness;
+		v1.x += thickness; v1.y += thickness; v1.z += thickness;
+		return *this;
+	}
 
 	template<typename Real>
 	DYN_FUNC bool TAlignedBox3D<Real>::meshInsert(const TTriangle3D<Real>& tri) const

@@ -1,7 +1,7 @@
 namespace dyno
 {
 	template<typename Real, typename Coord, DeviceType deviceType, typename IndexType>
-	DYN_FUNC bool calculateSignedDistance2TriangleSet(ProjectedPoint3D<Real>& p3d, Coord point, Array<Coord, deviceType>& vertices, Array<TopologyModule::Triangle, deviceType>& indices, List<IndexType>& list, Real dHat)
+	DYN_FUNC bool calculateSignedDistance2TriangleSet(ProjectedPoint3D<Real>& p3d, Coord point, Array<Coord, deviceType>& vertices, Array<Topology::Triangle, deviceType>& indices, List<IndexType>& list, Real dHat)
 	{
 		//This value is important, if the result is wrong, first check eps
 		Real eps = 16 * EPSILON;
@@ -13,7 +13,7 @@ namespace dyno
 		TPoint3D<Real> pi = TPoint3D<Real>(point);
 		for (uint j = 0; j < list.size(); j++)
 		{
-			TopologyModule::Triangle index = indices[list[j]];
+			Topology::Triangle index = indices[list[j]];
 			TTriangle3D<Real> tj(vertices[index[0]], vertices[index[1]], vertices[index[2]]);
 
 			Coord nj = tj.normal();
@@ -36,7 +36,7 @@ namespace dyno
 			{
 				typename TTriangle3D<Real>::Param tParam;
 
-				TopologyModule::Triangle index_min = indices[p3d.id];
+				Topology::Triangle index_min = indices[p3d.id];
 				TTriangle3D<Real> t_min(vertices[index_min[0]], vertices[index_min[1]], vertices[index_min[2]]);
 
 				TPlane3D<Real> plane_j(tj.v[0], tj.normal());
@@ -62,7 +62,7 @@ namespace dyno
 		//Calculate the normal
 		if (validate)
 		{
-			TopologyModule::Triangle index = indices[p3d.id];
+			Topology::Triangle index = indices[p3d.id];
 			TTriangle3D<Real> tri(vertices[index[0]], vertices[index[1]], vertices[index[2]]);
 
 			Coord n = pi.origin - p3d.point;
@@ -80,7 +80,7 @@ namespace dyno
 
 
 	template<typename Real, typename Coord, DeviceType deviceType, typename IndexType>
-	DYN_FUNC bool calculateDistance2TriangleSet(ProjectedPoint3D<Real>& p3d, Coord point, Array<Coord, deviceType>& vertices, Array<TopologyModule::Triangle, deviceType>& indices, List<IndexType>& list, Real dHat)
+	DYN_FUNC bool calculateDistance2TriangleSet(ProjectedPoint3D<Real>& p3d, Coord point, Array<Coord, deviceType>& vertices, Array<Topology::Triangle, deviceType>& indices, List<IndexType>& list, Real dHat)
 	{
 		p3d.signed_distance = REAL_MAX;
 
@@ -89,7 +89,7 @@ namespace dyno
 		TPoint3D<Real> pi = TPoint3D<Real>(point);
 		for (uint j = 0; j < list.size(); j++)
 		{
-			TopologyModule::Triangle index = indices[list[j]];
+			Topology::Triangle index = indices[list[j]];
 			TTriangle3D<Real> tj(vertices[index[0]], vertices[index[1]], vertices[index[2]]);
 
 			Coord nj = tj.normal();
@@ -111,7 +111,7 @@ namespace dyno
 		//Calculate the normal
 		if (validate)
 		{
-			TopologyModule::Triangle index = indices[p3d.id];
+			Topology::Triangle index = indices[p3d.id];
 			TTriangle3D<Real> tri(vertices[index[0]], vertices[index[1]], vertices[index[2]]);
 
 			Coord n = pi.origin - p3d.point;
@@ -129,9 +129,9 @@ namespace dyno
 		Coord& pobject,
 		Coord& pnormal,
 		Array<Coord, deviceType>& surf_points,
-		Array<TopologyModule::Edge, deviceType>& edge,
-		Array<TopologyModule::Triangle, deviceType>& surf_triangles,
-		Array<TopologyModule::Tri2Edg, deviceType>& t2e,
+		Array<Topology::Edge, deviceType>& edge,
+		Array<Topology::Triangle, deviceType>& surf_triangles,
+		Array<Topology::Tri2Edg, deviceType>& t2e,
 		Array<Coord, deviceType>& edgeN,
 		Array<Coord, deviceType>& vertexN,
 		Coord ppos,
@@ -390,9 +390,9 @@ namespace dyno
 		ProjectedPoint3D<Real>& p3d,
 		Coord point,
 		Array<Coord, deviceType>& vertices,
-		Array<TopologyModule::Edge, deviceType>& edges,
-		Array<TopologyModule::Triangle, deviceType>& triangles,
-		Array<TopologyModule::Tri2Edg, deviceType>& t2e,
+		Array<Topology::Edge, deviceType>& edges,
+		Array<Topology::Triangle, deviceType>& triangles,
+		Array<Topology::Tri2Edg, deviceType>& t2e,
 		Array<Coord, deviceType>& edgeNormal,
 		Array<Coord, deviceType>& vertexNormal,
 		List<IndexType>& list,

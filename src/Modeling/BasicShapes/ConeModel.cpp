@@ -33,7 +33,7 @@ namespace dyno
 		this->varHeight()->attach(callback);
 
 		auto tsRender = std::make_shared<GLSurfaceVisualModule>();
-		tsRender->setVisible(true);
+		tsRender->varVisible()->setValue(true);
 		this->stateTriangleSet()->connect(tsRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(tsRender);
 
@@ -42,7 +42,6 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(exES);
 
 		auto esRender = std::make_shared<GLWireframeVisualModule>();
-		esRender->varBaseColor()->setValue(Color(0, 0, 0));
 		exES->outEdgeSet()->connect(esRender->inEdgeSet());
 		this->graphicsPipeline()->pushModule(esRender);
 
@@ -71,7 +70,7 @@ namespace dyno
 
 
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Triangle> triangle;
+		std::vector<Topology::Triangle> triangle;
 
 		this->varScale()->setValue(Coord(scale.x, scale.y, scale.x), false);
 

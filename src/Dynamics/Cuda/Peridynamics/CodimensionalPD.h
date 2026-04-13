@@ -38,11 +38,11 @@ namespace dyno
 		void setEnergyModel(FiberModel<Real> model);
 
 	public:
-		DEF_VAR(Real, Horizon, 0.01, "Horizon");
+		DEF_VAR_STATE(Real, Horizon, 0.01, "Horizon");
 
-		DEF_VAR(EnergyType, EnergyType, Xuetal, "");
+		DEF_VAR_STATE(EnergyType, EnergyType, Xuetal, "");
 
-		DEF_VAR(EnergyModels<Real>, EnergyModel, EnergyModels<Real>(), "");
+		DEF_VAR_STATE(EnergyModels<Real>, EnergyModel, EnergyModels<Real>(), "");
 
 		DEF_ARRAY_STATE(Coord, RestPosition, DeviceType::GPU, "");
 		

@@ -11,8 +11,9 @@ namespace dyno
 		: Node()
 	{
 		auto pRender = std::make_shared<GLPointVisualModule>();
-		this->varColor()->connect(pRender->varBaseColor());
-		this->varPointSize()->connect(pRender->varPointSize());
+		this->varColor()->quote(pRender->varBaseColor());
+		this->varPointSize()->quote(pRender->varPointSize());
+
 		this->inPointSet()->connect(pRender->inPointSet());
 		this->graphicsPipeline()->pushModule(pRender);
 	}

@@ -44,7 +44,7 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
 
-		typedef typename TopologyModule::Triangle Triangle;
+		typedef typename Topology::Triangle Triangle;
 		
 
 		typedef unsigned char byte;

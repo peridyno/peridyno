@@ -118,13 +118,13 @@ namespace dyno
 
 		//auto wireRender = std::make_shared<GLWireframeVisualModule>();
 		//convertModule->outTriangleSet()->connect(wireRender->inEdgeSet());
-		//wireRender->setColor(Color::Black());
+		//wireRender->varBaseColor()->setValue(Color::Black());
 		//wireRender->setVisible(false);
 
 		auto surfaceRender = std::make_shared<GLSurfaceVisualModule>();
 		convertModule->outTriangleSet()->connect(surfaceRender->inTriangleSet());
-		surfaceRender->setAlpha(0.1);
-		surfaceRender->setColor(Color::LightGray());
+		surfaceRender->varAlpha()->setValue(0.1);
+		surfaceRender->varBaseColor()->setValue(Color::LightGray());
 
 		//this->graphicsPipeline()->pushModule(wireRender);
 

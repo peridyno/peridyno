@@ -110,7 +110,8 @@ namespace dyno
 
 		int exp = (int)std::ceil(std::log2(float(n)));
 
-		int bound = (int)std::pow(2, exp);
+		//int bound = (int)std::pow(2, exp);
+		int bound = (1 << exp);
 
 		if (n > mBufferNum || n <= mBufferNum / 2) {
 			clear();

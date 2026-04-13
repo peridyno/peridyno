@@ -23,7 +23,7 @@ namespace dyno
 		this->varV3()->attach(callback);
 
 		auto tsRender = std::make_shared<GLSurfaceVisualModule>();
-		tsRender->setVisible(true);
+		tsRender->varVisible()->setValue(true);
 		this->stateTetSet()->connect(tsRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(tsRender);
 
@@ -79,14 +79,14 @@ namespace dyno
 		this->outTet()->setValue(tet);
 
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Tetrahedron> tets;
+		std::vector<Topology::Tetrahedron> tets;
 
 		vertices.push_back(tet.v[0]);
 		vertices.push_back(tet.v[1]);
 		vertices.push_back(tet.v[2]);
 		vertices.push_back(tet.v[3]);
 
-		tets.push_back(TopologyModule::Tetrahedron(0, 1, 2, 3));
+		tets.push_back(Topology::Tetrahedron(0, 1, 2, 3));
 
 		auto ts = this->stateTetSet()->getDataPtr();
 		ts->setPoints(vertices);

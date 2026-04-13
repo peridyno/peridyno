@@ -21,12 +21,12 @@ namespace dyno
 
 	__global__ void K_CountNumber(
 		DArray<uint> num,
-		DArray<TopologyModule::Edge> edges)
+		DArray<Topology::Edge> edges)
 	{
 		int eId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (eId >= edges.size()) return;
 
-		TopologyModule::Edge edge = edges[eId];
+		Topology::Edge edge = edges[eId];
 
 		atomicAdd(&(num[edge[0]]), 1);
 		atomicAdd(&(num[edge[1]]), 1);
@@ -34,12 +34,12 @@ namespace dyno
 
 	__global__ void K_StoreIds(
 		DArrayList<int> ids,
-		DArray<TopologyModule::Edge> edges)
+		DArray<Topology::Edge> edges)
 	{
 		int eId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (eId >= edges.size()) return;
 
-		TopologyModule::Edge edge = edges[eId];
+		Topology::Edge edge = edges[eId];
 		int v0 = edge[0];
 		int v1 = edge[1];
 

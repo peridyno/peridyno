@@ -17,8 +17,8 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(mapper);
 
 		auto sRender = std::make_shared<GLSurfaceVisualModule>();
-		sRender->setColor(Color(1, 1, 0));
-		sRender->setAlpha(0.5f);
+		sRender->varBaseColor()->setValue(Color(1, 1, 0));
+		sRender->varAlpha()->setValue(0.5f);
 		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(sRender);
 	}

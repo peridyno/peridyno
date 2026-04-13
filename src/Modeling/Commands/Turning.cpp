@@ -35,8 +35,8 @@ namespace dyno
 		this->varCurve()->attach(callback);
 
 		auto tsRender = std::make_shared<GLSurfaceVisualModule>();
-		tsRender->setColor(Color(0.8f, 0.52f, 0.25f));
-		tsRender->setVisible(true);
+		tsRender->varBaseColor()->setValue(Color(0.8f, 0.52f, 0.25f));
+		tsRender->varVisible()->setValue(true);
 		this->stateTriangleSet()->connect(tsRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(tsRender);
 
@@ -90,7 +90,7 @@ namespace dyno
 		if (useRamp)
 		{
 			std::vector<Coord> vertices;
-			std::vector<TopologyModule::Triangle> triangle;
+			std::vector<Topology::Triangle> triangle;
 			pointsize = floatCoordArray.size();
 
 			Coord Location;
@@ -125,7 +125,7 @@ namespace dyno
 		auto polySet = this->statePolygonSet()->getDataPtr();
 
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Triangle> triangle;
+		std::vector<Topology::Triangle> triangle;
 
 
 		Coord Location;

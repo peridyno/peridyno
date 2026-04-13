@@ -116,9 +116,9 @@ namespace dyno
 			// only load triangle mesh...
 			const auto& mesh = shape.mesh;
 			tShapes[sId] = std::make_shared<Shape>();
-			std::vector<TopologyModule::Triangle> vertexIndex;
-			std::vector<TopologyModule::Triangle> normalIndex;
-			std::vector<TopologyModule::Triangle> texCoordIndex;
+			std::vector<Topology::Triangle> vertexIndex;
+			std::vector<Topology::Triangle> normalIndex;
+			std::vector<Topology::Triangle> texCoordIndex;
 
 			if (mesh.material_ids.size() > 0 && mesh.material_ids[0] >= 0)
 			{
@@ -214,7 +214,7 @@ namespace dyno
 	}
 
 
-	bool loadObj(std::vector<Vec3f>& points, std::vector<TopologyModule::Triangle>& triangles, std::string filename, bool append)
+	bool loadObj(std::vector<Vec3f>& points, std::vector<Topology::Triangle>& triangles, std::string filename, bool append)
 	{
 		if (!append)
 		{
@@ -254,7 +254,7 @@ namespace dyno
 			{
 				//std::cout << myshape[i].mesh.indices[s].vertex_index <<"  " << std::endl;
 
-				triangles.push_back(TopologyModule::Triangle(myshape[i].mesh.indices[3 * s].vertex_index + offset, myshape[i].mesh.indices[3 * s + 1].vertex_index + offset, myshape[i].mesh.indices[3 * s + 2].vertex_index + offset));
+				triangles.push_back(Topology::Triangle(myshape[i].mesh.indices[3 * s].vertex_index + offset, myshape[i].mesh.indices[3 * s + 1].vertex_index + offset, myshape[i].mesh.indices[3 * s + 2].vertex_index + offset));
 			}
 		}
 		std::cout << "************************    Loading completed    **********************" << std::endl << std::endl;

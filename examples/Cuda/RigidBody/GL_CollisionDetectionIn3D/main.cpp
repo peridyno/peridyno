@@ -320,7 +320,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	rigid->graphicsPipeline()->pushModule(mapper);
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setAlpha(0.8f);
+	sRender->varAlpha()->setValue(0.8f);
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
 
@@ -338,7 +338,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	rigid->graphicsPipeline()->pushModule(contactMapper);
 
 	auto wireRender = std::make_shared<GLWireframeVisualModule>();
-	wireRender->setColor(Color(0, 0, 1));
+	wireRender->varBaseColor()->setValue(Color(0, 0, 1));
 	contactMapper->outEdgeSet()->connect(wireRender->inEdgeSet());
 	rigid->graphicsPipeline()->pushModule(wireRender);
 
@@ -348,7 +348,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	rigid->graphicsPipeline()->pushModule(contactPointMapper);
 
 	auto pointRender = std::make_shared<GLPointVisualModule>();
-	pointRender->setColor(Color(1, 0, 0));
+	pointRender->varBaseColor()->setValue(Color(1, 0, 0));
 	pointRender->varPointSize()->setValue(0.01f);
 	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
 	rigid->graphicsPipeline()->pushModule(pointRender);
@@ -365,7 +365,7 @@ std::shared_ptr<SceneGraph> creatScene()
 	rigid->graphicsPipeline()->pushModule(boundaryContactsMapper);
 
 	auto boundaryContactsRender = std::make_shared<GLPointVisualModule>();
-	boundaryContactsRender->setColor(Color(0, 1, 0));
+	boundaryContactsRender->varBaseColor()->setValue(Color(0, 1, 0));
 	boundaryContactsRender->varPointSize()->setValue(0.01f);
 	boundaryContactsMapper->outPointSet()->connect(boundaryContactsRender->inPointSet());
 	rigid->graphicsPipeline()->pushModule(boundaryContactsRender);

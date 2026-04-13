@@ -42,6 +42,8 @@ namespace dyno
 	public:
 		DEF_VAR(Real, VelocityMagnitude, 1, "Emitter Velocity");
 		DEF_VAR(Real, SamplingDistance, 0.005, "Emitter Sampling Distance");
+		DEF_VAR(uint, StopFrame, 10000, "Emitter Stopping Frame");
+		DEF_VAR(uint, BeginFrame, 0, "Emitter Beginning Frame");
 
 		DEF_VAR(Real, Spacing, Real(1), "A variable to control the particle generation frequency");
 

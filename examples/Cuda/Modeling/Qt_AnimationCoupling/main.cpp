@@ -198,7 +198,7 @@ std::shared_ptr<SceneGraph> creatScene()
 
 
 	auto glSurface = cubeBoundary->graphicsPipeline()->findFirstModule<GLSurfaceVisualModule>();
-	glSurface->setVisible(false);
+	glSurface->varVisible()->setValue(false);
 
 	auto cube2vol = scn->addNode(std::make_shared<BasicShapeToVolume<DataType3f>>());
 	cube2vol->varGridSpacing()->setValue(0.1f);

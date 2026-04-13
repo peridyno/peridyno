@@ -22,8 +22,8 @@ namespace dyno
 
 
 		auto glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
-		glModule->setVisible(true);
+		glModule->varBaseColor()->setValue(Color(0.8f, 0.52f, 0.25f));
+		glModule->varVisible()->setValue(true);
 		this->stateTriangleSet()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
 
@@ -70,11 +70,11 @@ namespace dyno
 	template<typename TDataType>
 	void SweepModel<TDataType>::varChanged()
 	{
-		auto center = this->varLocation()->getData();
-		auto rot = this->varRotation()->getData();
-		auto scale = this->varScale()->getData();
+		auto center = this->varLocation()->getValue();
+		auto rot = this->varRotation()->getValue();
+		auto scale = this->varScale()->getValue();
 
-		auto radius = this->varRadius()->getData();
+		auto radius = this->varRadius()->getValue();
 		
 		if (this->inSpline()->isEmpty())
 		{ 
@@ -97,7 +97,7 @@ namespace dyno
 		if (VertexIn2.size() == 0) { return; }
 
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Triangle> triangle;
+		std::vector<Topology::Triangle> triangle;
 
 		//Spline
 		CArray<Coord> c_point1;
@@ -189,13 +189,13 @@ namespace dyno
 				if (faceid != lengthV2 - 1)
 				{
 
-					triangle.push_back(TopologyModule::Triangle(lengthV2 + faceid + rowl * lengthV2, 0 + faceid + rowl * lengthV2, 1 + faceid + rowl * lengthV2));
-					triangle.push_back(TopologyModule::Triangle(lengthV2 + 1 + faceid + rowl * lengthV2, lengthV2 + faceid + rowl * lengthV2, 1 + faceid + rowl * lengthV2));
+					triangle.push_back(Topology::Triangle(lengthV2 + faceid + rowl * lengthV2, 0 + faceid + rowl * lengthV2, 1 + faceid + rowl * lengthV2));
+					triangle.push_back(Topology::Triangle(lengthV2 + 1 + faceid + rowl * lengthV2, lengthV2 + faceid + rowl * lengthV2, 1 + faceid + rowl * lengthV2));
 				}
 				else
 				{
-					triangle.push_back(TopologyModule::Triangle(1 + 2 * faceid + rowl * lengthV2, 0 + faceid + rowl * lengthV2, 0 + rowl * lengthV2));
-					triangle.push_back(TopologyModule::Triangle(1 + faceid + rowl * lengthV2, 1 + 2 * faceid + rowl * lengthV2, 0 + rowl * lengthV2));
+					triangle.push_back(Topology::Triangle(1 + 2 * faceid + rowl * lengthV2, 0 + faceid + rowl * lengthV2, 0 + rowl * lengthV2));
+					triangle.push_back(Topology::Triangle(1 + faceid + rowl * lengthV2, 1 + 2 * faceid + rowl * lengthV2, 0 + rowl * lengthV2));
 				}
 			}
 
@@ -204,7 +204,7 @@ namespace dyno
 		//fill cap
 		// get triangleCap by EarClipper
 		EarClipper<DataType3f> sab;
-		std::vector<TopologyModule::Triangle> triangleCap;
+		std::vector<Topology::Triangle> triangleCap;
 
 		sab.polyClip(VertexIn2, triangleCap);
 		int addnum2 = vertices.size() - VertexIn2.size();
@@ -213,8 +213,8 @@ namespace dyno
 
 		for (int i = 0; i < triangleCap.size(); i++)
 		{
-			triangle.push_back(TopologyModule::Triangle(triangleCap[i][2], triangleCap[i][1], triangleCap[i][0]));
-			triangle.push_back(TopologyModule::Triangle(triangleCap[i][0] + addnum2, triangleCap[i][1] + addnum2, triangleCap[i][2] + addnum2));
+			triangle.push_back(Topology::Triangle(triangleCap[i][2], triangleCap[i][1], triangleCap[i][0]));
+			triangle.push_back(Topology::Triangle(triangleCap[i][0] + addnum2, triangleCap[i][1] + addnum2, triangleCap[i][2] + addnum2));
 		}
 
 		//ReverseNormal
@@ -279,13 +279,13 @@ namespace dyno
 	void SweepModel<TDataType>::displayChanged()
 	{
 		auto SurfaceModule = this->graphicsPipeline()->template findFirstModule<GLSurfaceVisualModule>();
-		SurfaceModule->setVisible(this->varDisplaySurface()->getValue());
+		SurfaceModule->varVisible()->setValue(this->varDisplaySurface()->getValue());
 
 		auto wireModule = this->graphicsPipeline()->template findFirstModule<GLWireframeVisualModule>();
-		wireModule->setVisible(this->varDisplayWireframe()->getValue());
+		wireModule->varVisible()->setValue(this->varDisplayWireframe()->getValue());
 	
 		auto pointModule = this->graphicsPipeline()->template findFirstModule<GLPointVisualModule>();
-		pointModule->setVisible(this->varDisplayPoints()->getValue());
+		pointModule->varVisible()->setValue(this->varDisplayPoints()->getValue());
 	}
 
 	DEFINE_CLASS(SweepModel);

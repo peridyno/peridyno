@@ -35,7 +35,6 @@ namespace dyno
 		DECLARE_CLASS(GLPhotorealisticRender)
 	public:
 		GLPhotorealisticRender();
-		~GLPhotorealisticRender() override;
 
 	public:
 		virtual std::string caption() override;

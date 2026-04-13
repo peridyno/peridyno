@@ -2,10 +2,10 @@
 #include <SceneGraph.h>
 
 ///Particle fluid solver
-#include <DualParticleSystem/DualParticleFluid.h>
-#include <DualParticleSystem/GhostDualParticleFluid.h>
+#include <ParticleSystem/ParticleFluid.h>
 #include <ParticleSystem/Emitters/SquareEmitter.h>
 #include <ParticleSystem/MakeParticleSystem.h>
+#include <ParticleSystem/DualParticle/VirtualFissionFusionStrategy.h>
 
 ///Particle Sampling
 #include <BasicShapes/CubeModel.h>
@@ -80,17 +80,20 @@ std::shared_ptr<SceneGraph> createScene()
 	auto initialParticles4 = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f>>());
 	sampler4->statePointSet()->promoteOuput()->connect(initialParticles4->inPoints());
 
-	auto fluid = scn->addNode(std::make_shared<DualParticleFluid<DataType3f>>(DualParticleFluid<DataType3f>::FissionFusionStrategy));
+	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
+	fluid->setDt(0.001);
+	fluid->varSmoothingLength()->setValue(2.4);
+	fluid->varIncompressibilitySolver()->setCurrentKey(ParticleFluid<DataType3f>::FissionDP);
 	initialParticles1->connect(fluid->importInitialStates());
 	initialParticles2->connect(fluid->importInitialStates());
 	initialParticles3->connect(fluid->importInitialStates());
 	initialParticles4->connect(fluid->importInitialStates());
 	fluid->graphicsPipeline()->clear();
 
-	auto feature = fluid->animationPipeline()->findFirstModule<ThinFeature<DataType3f>>();
+	auto feature = fluid->animationPipeline()->findFirstModule<VirtualFissionFusionStrategy<DataType3f>>();
 	if (feature != nullptr)
 	{
-		feature->varThreshold()->setValue(0.15);
+		feature->varThinFeatureThreshold()->setValue(0.15);
 	}
 
 	//Create a boundary
@@ -109,38 +112,22 @@ std::shared_ptr<SceneGraph> createScene()
 
 	fluid->connect(container->importParticleSystems());
 
-	//auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
-	//fluid->stateVelocity()->connect(calculateNorm->inVec());
-	//fluid->graphicsPipeline()->pushModule(calculateNorm);
+	auto calculateNorm = std::make_shared<CalculateNorm<DataType3f>>();
+	fluid->stateVelocity()->connect(calculateNorm->inVec());
+	fluid->graphicsPipeline()->pushModule(calculateNorm);
 
-	//auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
-	//colorMapper->varMax()->setValue(5.0f);
-	//calculateNorm->outNorm()->connect(colorMapper->inScalar());
-	//fluid->graphicsPipeline()->pushModule(colorMapper);
+	auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
+	colorMapper->varMax()->setValue(5.0f);
+	calculateNorm->outNorm()->connect(colorMapper->inScalar());
+	fluid->graphicsPipeline()->pushModule(colorMapper);
 
 	auto ptRender = std::make_shared<GLPointVisualModule>();
-	ptRender->setColor(Color(0.14, 0.9, 0.92));
+	ptRender->varBaseColor()->setValue(Color(0.14, 0.9, 0.92));
 	ptRender->varPointSize()->setValue(0.0018f);
 	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 	fluid->statePointSet()->connect(ptRender->inPointSet());
-	//colorMapper->outColor()->connect(ptRender->inColor());
+	colorMapper->outColor()->connect(ptRender->inColor());
 	fluid->graphicsPipeline()->pushModule(ptRender);
-
-	// A simple color bar widget for node
-	//auto colorBar = std::make_shared<ImColorbar>();
-	//colorBar->varMax()->setValue(1.0f);
-	//colorBar->varFieldName()->setValue("Velocity");
-	//calculateNorm->outNorm()->connect(colorBar->inScalar());
-	// 
-	// add the widget to app
-	//fluid->graphicsPipeline()->pushModule(colorBar);
-
-	//auto vpRender = std::make_shared<GLPointVisualModule>();
-	//vpRender->setColor(Color(1, 1, 0));
-	//vpRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-	//fluid->stateVirtualPointSet()->connect(vpRender->inPointSet());
-	//vpRender->varPointSize()->setValue(0.0005);
-	//fluid->graphicsPipeline()->pushModule(vpRender);
 
 	return scn;
 }

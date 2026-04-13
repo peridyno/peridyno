@@ -61,13 +61,13 @@ namespace dyno
 
 				//auto pointrender = std::make_shared<GLPointVisualModule>();
 				//pointrender->setVisible(true);
-				//pointrender->setColor(Vec3f(1, 0, 0));
+				//pointrender->varBaseColor()->setValue(Vec3f(1, 0, 0));
 				//node->stateTopology()->connect(pointrender->inPointSet());
 				//node->graphicsPipeline()->pushModule(pointrender);
 
 				//auto wirerender = std::make_shared<GLWireframeVisualModule>();
 				//wirerender->setVisible(true);
-				//wirerender->setColor(Vec3f(0, 1, 0));
+				//wirerender->varBaseColor()->setValue(Vec3f(0, 1, 0));
 				//node->stateTopology()->connect(wirerender->inEdgeSet());
 				//node->graphicsPipeline()->pushModule(wirerender);
 
@@ -90,8 +90,8 @@ namespace dyno
 				auto node = std::make_shared<ObjExporter<DataType3f>>();
 
 				auto module = std::make_shared<GLSurfaceVisualModule>();
-				module->setColor(Color(0.8, 0.52, 0.25));
-				module->setVisible(true);
+				module->varBaseColor()->setValue(Color(0.8, 0.52, 0.25));
+				module->varVisible()->setValue(true);
 				//node->stateTopology()->connect(module->inTriangleSet());
 				node->graphicsPipeline()->pushModule(module);
 
@@ -106,8 +106,8 @@ namespace dyno
 				auto node = std::make_shared<PlyExporter<DataType3f>>();
 
 				auto module = std::make_shared<GLSurfaceVisualModule>();
-				module->setColor(Color(0.8, 0.52, 0.25));
-				module->setVisible(true);
+				module->varBaseColor()->setValue(Color(0.8, 0.52, 0.25));
+				module->varVisible()->setValue(true);
 				node->graphicsPipeline()->pushModule(module);
 
 				return node;

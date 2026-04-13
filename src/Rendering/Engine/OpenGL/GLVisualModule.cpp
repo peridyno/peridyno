@@ -18,9 +18,7 @@ namespace dyno
 
 	GLVisualModule::~GLVisualModule()
 	{
-		if (isGLInitialized) {
-			printf("Warning: %s not released!\n", getName().c_str());
-		}
+		this->release();
 	}
 
 	void GLVisualModule::updateImpl()
@@ -51,26 +49,6 @@ namespace dyno
 		}
 
 		return true;
-	}
-
-	void GLVisualModule::setColor(const Color& color)
-	{
-		this->varBaseColor()->setValue(color);
-	}
-
-	void GLVisualModule::setMetallic(float m)
-	{
-		this->varMetallic()->setValue(m);
-	}
-
-	void GLVisualModule::setRoughness(float r)
-	{
-		this->varRoughness()->setValue(r);
-	}
-
-	void GLVisualModule::setAlpha(float alpha)
-	{
-		this->varAlpha()->setValue(alpha);
 	}
 
 	bool GLVisualModule::isTransparent() const

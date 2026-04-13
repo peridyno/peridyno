@@ -23,7 +23,7 @@ namespace dyno
 
 		auto pointRenderer = std::make_shared<GLPointVisualModule>();
 		pointRenderer->varPointSize()->setValue(0.005);
-		pointRenderer->setColor(Color::Burlywood());
+		pointRenderer->varBaseColor()->setValue(Color::Burlywood());
 		pointRenderer->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
 		this->statePointSet()->connect(pointRenderer->inPointSet());
 		this->stateVelocity()->connect(pointRenderer->inColor());

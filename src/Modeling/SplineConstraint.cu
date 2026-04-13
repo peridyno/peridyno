@@ -21,8 +21,8 @@ namespace dyno
 
 		auto module = std::make_shared<GLSurfaceVisualModule>();
 
-		module->setColor(Color(0.8, 0.52, 0.25));
-		module->setVisible(true);
+		module->varBaseColor()->setValue(Color(0.8, 0.52, 0.25));
+		module->varVisible()->setValue(true);
 		this->stateTopology()->connect(module->inTriangleSet());
 		this->graphicsPipeline()->pushModule(module);
 	}
@@ -103,7 +103,7 @@ namespace dyno
 		totalIndex = lengthV;
 
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Triangle> triangle;
+		std::vector<Topology::Triangle> triangle;
 
 		Real dt = this->stateTimeStep()->getData();
 		tempLength = tempLength + CurrentVelocity * dt;

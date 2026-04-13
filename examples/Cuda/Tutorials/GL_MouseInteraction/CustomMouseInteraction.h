@@ -1,6 +1,6 @@
 #pragma once
 #include "Module/MouseInputModule.h"
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 
 namespace dyno
 {
@@ -10,7 +10,7 @@ namespace dyno
 		CustomMouseInteraction() {};
 		virtual ~CustomMouseInteraction() {};
 
-		DEF_INSTANCE_IN(TopologyModule, Topology, "");
+		DEF_INSTANCE_IN(Topology, Topology, "");
 
 	protected:
 		void onEvent(PMouseEvent event) override;

@@ -31,6 +31,7 @@ namespace dyno
 	void Scan<T>::exclusive(DArray<T>& output, DArray<T>& input, bool bcao)
 	{
 		assert(input.size() == output.size());
+		if (input.size() == 0) return;
 
 		if (input.size() > SCAN_ELEMENTS_PER_BLOCK) {
 			scanLargeDeviceArray(output.begin(), input.begin(), input.size(), bcao, 0);
@@ -43,11 +44,13 @@ namespace dyno
 	template<typename T>
 	void Scan<T>::exclusive(DArray<T>& data, bool bcao /*= true*/)
 	{
+		if (data.size() == 0) return;
+
 		if (m_buffer.size() != data.size())
 		{
 			m_buffer.resize(data.size());
 		}
-		
+
 		m_buffer.assign(data);
 		this->exclusive(data, m_buffer, bcao);
 	}
@@ -55,6 +58,8 @@ namespace dyno
 	template<typename T>
 	void Scan<T>::exclusive(T* data, size_t length, bool bcao /*= true*/)
 	{
+		if (length == 0) return;
+
 		if (m_buffer.size() != length)
 		{
 			m_buffer.resize(length);
@@ -68,6 +73,8 @@ namespace dyno
 	template<typename T>
 	void Scan<T>::exclusive(T* output, const T* input, size_t length, bool bcao /*= true*/)
 	{
+		if (length == 0) return;
+
 		if (length > SCAN_ELEMENTS_PER_BLOCK) {
 			scanLargeDeviceArray(output, input, length, bcao, 0);
 		}

@@ -1,4 +1,4 @@
-#include "CylinderModel.h"
+#include "BasicShapes/CylinderModel.h"
 
 #include "GLSurfaceVisualModule.h"
 #include "GLWireframeVisualModule.h"
@@ -42,7 +42,6 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(exES);
 
 		auto esRender = std::make_shared<GLWireframeVisualModule>();
-		esRender->varBaseColor()->setValue(Color(0, 0, 0));
 		exES->outEdgeSet()->connect(esRender->inEdgeSet());
 		this->graphicsPipeline()->pushModule(esRender);
 
@@ -58,7 +57,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void CylinderModel<TDataType>::varChanged() 
+	void CylinderModel<TDataType>::varChanged()
 	{
 		auto center = this->varLocation()->getValue();
 		auto rot = this->varRotation()->getValue();
@@ -74,12 +73,11 @@ namespace dyno
 		auto polySet = this->statePolygonSet()->getDataPtr();
 
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Triangle> triangle;
+		std::vector<Topology::Triangle> triangle;
 
 		this->varScale()->setValue(Coord(scale.x, scale.y, scale.x), false);
 
 		scale = this->varScale()->getValue();
-
 
 		Coord Location;
 		Real angle = M_PI / 180 * 360 / columns;
@@ -164,9 +162,9 @@ namespace dyno
 
 		//side;
 		incre = 0;
-		for (uint i = 0; i < columns ; i++)
+		for (uint i = 0; i < columns; i++)
 		{
-			for (uint j = 0; j < row ; j++)
+			for (uint j = 0; j < row; j++)
 			{
 				auto& index = polygonIndices[incre];
 
@@ -186,7 +184,7 @@ namespace dyno
 		}
 
 		//Top
-		if (end_segment > 0) 
+		if (end_segment > 0)
 		{
 			uint sidePtNum = columns * row;
 			for (uint i = 0; i < columns; i++)
@@ -256,7 +254,7 @@ namespace dyno
 			}
 
 			//TriangleButtom
-			if (end_segment == 1) 
+			if (end_segment == 1)
 			{
 				buttomPtNum = 0;
 			}
@@ -274,8 +272,6 @@ namespace dyno
 				incre++;
 			}
 		}
-		
-
 
 		//TransformModel
 
@@ -297,12 +293,10 @@ namespace dyno
 
 		TCylinder3D<Real> cylinder;
 		cylinder.center = center;
-		cylinder.height = height;
-		cylinder.radius = radius;
-		cylinder.scale = scale;
+		cylinder.height = height * scale.y;
+		cylinder.radius = radius * scale.x;
 		cylinder.rotation = q;
 		this->outCylinder()->setValue(cylinder);
-
 
 		polySet->setPoints(vertices);
 		polySet->setPolygons(polygonIndices);
@@ -314,9 +308,6 @@ namespace dyno
 		polySet->turnIntoTriangleSet(ts);
 
 		vertices.clear();
-
-
-
 
 	}
 

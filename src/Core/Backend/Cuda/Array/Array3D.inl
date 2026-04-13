@@ -61,12 +61,24 @@ namespace dyno {
 
 		DYN_FUNC inline T operator [] (const int id) const
 		{
-			return m_data[id];
+			uint xy = m_nx * m_ny;
+			uint k = id / xy;
+			uint mod = id % xy;
+			uint j = mod / m_nx;
+			uint i = mod % m_nx;
+
+			return (*this)(i, j, k);
 		}
 
 		DYN_FUNC inline T& operator [] (const int id)
 		{
-			return m_data[id];
+			uint xy = m_nx * m_ny;
+			uint k = id / xy;
+			uint mod = id % xy;
+			uint j = mod / m_nx;
+			uint i = mod % m_nx;
+
+			return (*this)(i, j, k);
 		}
 
 		DYN_FUNC inline size_t index(const uint i, const uint j, const uint k) const

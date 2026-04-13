@@ -53,11 +53,12 @@ endif()
 #To resolve the error: Target "..." INTERFACE_INCLUDE_DIRECTORIES property contains path: "..." which is prefixed in the build directory.
 #    target_include_directories(${LIB_NAME} PUBLIC ${PERIDYNO_INCLUDE_PATH}) # for generated files
 target_include_directories(${LIB_NAME} PUBLIC 
-    $<BUILD_INTERFACE:${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}>
+    ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
     $<BUILD_INTERFACE:${PERIDYNO_ROOT}/src/${LIB_NAME}>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}>
     $<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/${LIB_NAME}>)
 
 target_link_libraries(${LIB_NAME} Core Framework Topology GLRenderEngine)
+target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-lineinfo>)
 
 peridyno_install(${LIB_NAME})

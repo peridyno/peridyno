@@ -8,7 +8,7 @@ namespace dyno
 
 	template<typename TDataType>
 	DiscreteElements<TDataType>::DiscreteElements()
-		: TopologyModule()
+		: Topology()
 	{
 	}
 
@@ -116,7 +116,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void DiscreteElements<TDataType>::setTetElementId(DArray<TopologyModule::Tetrahedron>& element_id)
+	void DiscreteElements<TDataType>::setTetElementId(DArray<Topology::Tetrahedron>& element_id)
 	{
 		m_tet_element_id.assign(element_id);
 	}

@@ -35,6 +35,8 @@ namespace dyno
 
 		DEF_VAR(Real, GridSpacing, 0.05f, "The grid spacing used in discretizing the basic shape");
 
+		DEF_VAR(uint, Padding, 5, "");
+
 	public:
 		DEF_NODE_PORT(BasicShape<TDataType>, Shape, "");
 

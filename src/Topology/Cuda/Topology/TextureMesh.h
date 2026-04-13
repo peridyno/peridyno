@@ -74,9 +74,9 @@ namespace dyno
 			texCoordIndex.clear();
 			material = nullptr;
 		}
-		DArray<TopologyModule::Triangle> vertexIndex;
-		DArray<TopologyModule::Triangle> normalIndex;
-		DArray<TopologyModule::Triangle> texCoordIndex;
+		DArray<Topology::Triangle> vertexIndex;
+		DArray<Topology::Triangle> normalIndex;
+		DArray<Topology::Triangle> texCoordIndex;
 
 		TAlignedBox3D<Real> boundingBox;
 		Transform3f boundingTransform;
@@ -123,7 +123,7 @@ namespace dyno
 		DArray<uint> mShapeIds;
 	};
 
-	class TextureMesh : public TopologyModule
+	class TextureMesh : public Topology
 	{
 	public:
 		TextureMesh();

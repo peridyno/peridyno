@@ -144,6 +144,7 @@ namespace dyno
 		connect(mIoDockerWidget->contentBrowser(), &QContentBrowser::nodeCreated, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::createQtNode);
 
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodePlaced, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeDeleted, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeInputUpdated, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
 
 		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, mOpenGLWidget, &POpenGLWidget::updateOneFrame);
@@ -366,8 +367,6 @@ namespace dyno
 			}
 		});
 
-		connect(mPropertyWidget, &PPropertyWidget::nodeUpdated, mOpenGLWidget, &POpenGLWidget::onNodeUpdated);
-
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeSelected, [=](Qt::QtNode& n)
 			{
 				auto model = n.nodeDataModel();
@@ -386,6 +385,17 @@ namespace dyno
 			{
 				mOpenGLWidget->select(nullptr);
 				mOpenGLWidget->update();
+			});
+
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeVisibilityChanged, [=](Qt::QtNode& n)
+			{
+				auto model = n.nodeDataModel();
+				auto widget = dynamic_cast<Qt::QtNodeWidget*>(model);
+
+				if (widget != nullptr)
+				{
+					mOpenGLWidget->updateGraphicsContext(widget->getNode().get());
+				}
 			});
 
 		connect(mAnimationWidget, &PAnimationWidget::simulationStarted, [=]()

@@ -1,7 +1,7 @@
 #pragma once
 #include "Node.h"
 #include "Topology/TriangleSet.h"
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 
 #include "Module/SurfaceInteraction.h"
 #include "Module/EdgeInteraction.h"

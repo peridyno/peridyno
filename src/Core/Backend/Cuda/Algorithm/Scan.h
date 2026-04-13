@@ -17,7 +17,7 @@ namespace dyno
 
 		void exclusive(DArray<T>& output, DArray<T>& input, bool bcao = true);
 		void exclusive(DArray<T>& data, bool bcao = true);
-
+		// bcao: memory-bank conflict avoidance optimization
 	private:
 		void scanLargeDeviceArray(T*d_out, const T*d_in, size_t length, bool bcao, size_t level);
 		void scanSmallDeviceArray(T*d_out, const T*d_in, size_t length, bool bcao);

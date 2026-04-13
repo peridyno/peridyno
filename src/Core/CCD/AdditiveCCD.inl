@@ -1,14 +1,8 @@
 #include "Vector.h"
-
+#include "Math/SimpleMath.h"
 namespace dyno
 {
-	#define REAL_infinity 1.0e30
-	#define	REAL_EQUAL(a,b)  (((a < b + EPSILON) && (a > b - EPSILON)) ? true : false)
-	#define REAL_GREAT(a,b) ((a > EPSILON + b)? true: false) 
-	#define REAL_LESS(a,b) ((a + EPSILON < b)? true: false) 
 	#define MAX_ITE (500) 
-
-	
 
 	template<typename T>
 	DYN_FUNC T getPoint2SegmentDistance( const Vector<T,3> &p, const Vector<T,3>& v0, const Vector<T,3>& v1){
@@ -39,8 +33,8 @@ namespace dyno
 		auto d0 = (p - v0).cross(v1 - v0);
 		auto d1 = (p - v1).cross(v2 - v1);
 		auto d2 = (p - v2).cross(v0 - v2);
-		return (REAL_LESS(d0.dot(n),0.0) && REAL_LESS(d1.dot(n),0.0) && REAL_LESS(d2.dot(n),0.0)) || 
-			(REAL_GREAT(d0.dot(n), 0.0) && REAL_GREAT(d1.dot(n), 0.0) && REAL_GREAT(d2.dot(n), 0.0));
+		return (isless(d0.dot(n),0.0) && isless(d1.dot(n),0.0) && isless(d2.dot(n),0.0)) || 
+			(isgreat(d0.dot(n), 0.0) && isgreat(d1.dot(n), 0.0) && isgreat(d2.dot(n), 0.0));
 	}
 
 	template<typename T>
@@ -92,10 +86,10 @@ namespace dyno
 		T s = a01 * b1 - a11 * b0;
 		T t = a01 * b0 - a00 * b1;
 		if (s + t <= det) {
-			if (REAL_LESS(s, 0.0)) {
-				if (REAL_LESS(t, 0.0)) {
+			if (isless(s, 0.0)) {
+				if (isless(t, 0.0)) {
 					//region 4
-					if (REAL_LESS(b0,0.0)){
+					if (isless(b0,0.0)){
 						t = 0.0;
 						if (-b0 >= a00){
 							s = 1.0;
@@ -106,10 +100,10 @@ namespace dyno
 					}
 					else{
 						s = 0.0;
-						if (REAL_GREAT(b1,0.0)||REAL_EQUAL(b1,0.0)){
+						if (isgreat(b1,0.0)||iseq(b1,0.0)){
 							t = 0.0;
 						}
-						else if (REAL_GREAT(-b1,a11)|| REAL_EQUAL(-b1,a11)){
+						else if (isgreat(-b1,a11)|| iseq(-b1,a11)){
 							t = 1.0;
 						}
 						else{
@@ -120,10 +114,10 @@ namespace dyno
 				else {
 					//region 3
 					s = 0.0;
-					if (REAL_GREAT(b1,0.0)||REAL_EQUAL(b1,0.0)){
+					if (isgreat(b1,0.0)||iseq(b1,0.0)){
 						t = 0.0;
 					}
-					else if (REAL_GREAT(-b1,a11)||REAL_EQUAL(-b1,a11)){
+					else if (isgreat(-b1,a11)||iseq(-b1,a11)){
 						t = 1.0;
 					}
 					else{
@@ -131,13 +125,13 @@ namespace dyno
 					}
 				}
 			}
-			else if (REAL_LESS(t, 0.0)) {
+			else if (isless(t, 0.0)) {
 				//region 5
 				t = 0.0;
-				if (REAL_GREAT(b0,0.0)||REAL_EQUAL(b0,0.0)){
+				if (isgreat(b0,0.0)||iseq(b0,0.0)){
 					s = 0.0;
 				}
-				else if (REAL_GREAT(-b0,a00)||REAL_EQUAL(-b0,a00)){
+				else if (isgreat(-b0,a00)||iseq(-b0,a00)){
 					s = 1.0;
 				}
 				else{
@@ -152,14 +146,14 @@ namespace dyno
 		}
 		else {
 			T tmp0 = 0.0; T tmp1 = 0.0; T numer = 0.0; T denom = 0.0;
-			if (REAL_LESS(s, 0.0)) {
+			if (isless(s, 0.0)) {
 					//region 2
 				tmp0 = a01 + b0;
 				tmp1 = a11 + b1;
-				if (REAL_GREAT(tmp1,tmp0)){
+				if (isgreat(tmp1,tmp0)){
 					numer = tmp1 - tmp0;
 					denom = a00 - 2.0 * a01 + a11;
-					if (REAL_GREAT(numer,denom)||REAL_EQUAL(numer,denom)){
+					if (isgreat(numer,denom)||iseq(numer,denom)){
 						s = 1.0;
 						t = 0.0;
 					}
@@ -171,10 +165,10 @@ namespace dyno
 				else
 				{
 					s = 0.0;
-					if (REAL_LESS(tmp1,0.0)||REAL_EQUAL(tmp1,0.0)){
+					if (isless(tmp1,0.0)||iseq(tmp1,0.0)){
 						t = 1.0;
 					}
-					else if (REAL_GREAT(b1,0.0)||REAL_EQUAL(b1,0.0)){
+					else if (isgreat(b1,0.0)||iseq(b1,0.0)){
 						t = 0.0;
 					}
 					else{
@@ -182,14 +176,14 @@ namespace dyno
 					}
 				}
 			}
-			else if (REAL_LESS(t, 0.0)) {
+			else if (isless(t, 0.0)) {
 					//region 6
 				tmp0 = a01 + b1;
 				tmp1 = a00 + b0;
-				if (REAL_GREAT(tmp1,tmp0)){
+				if (isgreat(tmp1,tmp0)){
 					numer = tmp1 - tmp0;
 					denom = a00 - 2.0 * a01 + a11;
-					if (REAL_GREAT(numer,denom)||REAL_EQUAL(numer,denom)){
+					if (isgreat(numer,denom)||iseq(numer,denom)){
 						t = 1.0;
 						s = 0.0;
 					}
@@ -201,10 +195,10 @@ namespace dyno
 				}
 				else{
 					t = 1.0;
-					if (REAL_LESS(tmp1,0.0)||REAL_EQUAL(tmp1,0.0)){
+					if (isless(tmp1,0.0)||iseq(tmp1,0.0)){
 						s = 1.0;
 					}
-					else if (REAL_GREAT(b0,0.0)||REAL_EQUAL(b0,0.0)){
+					else if (isgreat(b0,0.0)||iseq(b0,0.0)){
 						s = 0.0;
 					}
 					else{
@@ -215,13 +209,13 @@ namespace dyno
 			else {
 				//region 1
 				numer = a11 + b1 - a01 - b0;
-				if (REAL_LESS(numer,0.0)||REAL_EQUAL(numer,0.0)){
+				if (isless(numer,0.0)||iseq(numer,0.0)){
 					s = 0.0;
 					t = 1.0;
 				}
 				else{
 					denom = a00 - 2.0 * a01 + a11;
-					if (REAL_GREAT(numer,denom)||REAL_EQUAL(numer,denom)){
+					if (isgreat(numer,denom)||iseq(numer,denom)){
 						s = 1.0;
 						t = 0.0;
 					}
@@ -266,23 +260,23 @@ namespace dyno
 		T det = a * c - b * b;
 		T s, t, nd, bmd, bte, ctd, bpe, ate, btd;
 
-		if (REAL_GREAT(det, 0.0)) {
+		if (isgreat(det, 0.0)) {
 			bte = b * e;
 			ctd = c * d;
-			if (REAL_LESS(bte, ctd) || REAL_EQUAL(bte, ctd)) { //s<=0
+			if (isless(bte, ctd) || iseq(bte, ctd)) { //s<=0
 				s = 0.0;
-				if (REAL_LESS(e, 0.0) || REAL_EQUAL(e, 0.0)) {//t<=0
+				if (isless(e, 0.0) || iseq(e, 0.0)) {//t<=0
 					//reigen 6
 					t = 0.0;
 					nd = -d;
-					if (REAL_GREAT(nd, a) || REAL_EQUAL(nd, a)) {
+					if (isgreat(nd, a) || iseq(nd, a)) {
 						s = 1.0;
 					}
-					else if (REAL_GREAT(nd, 0.0)) {
+					else if (isgreat(nd, 0.0)) {
 						s = nd / a;
 					}
 				}
-				else if (REAL_LESS(e, c))//0<t<1
+				else if (isless(e, c))//0<t<1
 				{
 					//reigon 5
 					t = e / c;
@@ -291,31 +285,31 @@ namespace dyno
 					//reigon 4
 					t = 1.0;
 					bmd = b - d;
-					if (REAL_GREAT(bmd, a) || REAL_EQUAL(bmd, a)) {
+					if (isgreat(bmd, a) || iseq(bmd, a)) {
 						s = 1.0;
 					}
-					else if (REAL_GREAT(bmd, 0.0)) {
+					else if (isgreat(bmd, 0.0)) {
 						s = bmd / a;
 					}
 				}
 			}
 			else { //s>0
 				s = bte - ctd;
-				if (REAL_GREAT(s, det) || REAL_EQUAL(s, det)) { //s>=1
+				if (isgreat(s, det) || iseq(s, det)) { //s>=1
 					s = 1;
 					bpe = b + e;
-					if (REAL_LESS(bpe, 0.0)||REAL_EQUAL(bpe,0.0)) { //t<=0
+					if (isless(bpe, 0.0)||iseq(bpe,0.0)) { //t<=0
 						//reigon 8
 						t = 0.0;
 						nd = -d;
-						if (REAL_LESS(nd, 0.0) || REAL_EQUAL(nd, 0.0)) {
+						if (isless(nd, 0.0) || iseq(nd, 0.0)) {
 							s = 0.0;
 						}
-						else if (REAL_LESS(nd, a)) {
+						else if (isless(nd, a)) {
 							s = nd / a;
 						}
 					}
-					else if (REAL_LESS(bpe, c)) {//0<t<1
+					else if (isless(bpe, c)) {//0<t<1
 						//reigon 1
 						t = bpe / c;
 					}
@@ -323,10 +317,10 @@ namespace dyno
 						//reigon 2
 						t = 1.0;
 						bmd = b - d;
-						if (REAL_LESS(bmd, 0.0) || REAL_EQUAL(bmd, 0.0)) {
+						if (isless(bmd, 0.0) || iseq(bmd, 0.0)) {
 							s = 0.0;
 						}
-						else if (REAL_LESS(bmd, a)) {
+						else if (isless(bmd, a)) {
 							s = bmd / a;
 						}
 
@@ -335,14 +329,14 @@ namespace dyno
 				else { //0<s<1
 					ate = a * e;
 					btd = b * d;
-					if (REAL_LESS(ate, btd) || REAL_EQUAL(ate, btd)) { //t<0
+					if (isless(ate, btd) || iseq(ate, btd)) { //t<0
 						//reigon 7
 						t = 0.0;
 						nd = -d;
-						if (REAL_LESS(nd, 0.0) || REAL_EQUAL(nd, 0.0)) {
+						if (isless(nd, 0.0) || iseq(nd, 0.0)) {
 							s = 0.0;
 						}
-						else if(REAL_GREAT(nd,a)||REAL_EQUAL(nd,a)){
+						else if(isgreat(nd,a)||iseq(nd,a)){
 							s = 1.0;
 						}
 						else {
@@ -351,14 +345,14 @@ namespace dyno
 					}
 					else {//t >0
 						t = ate - btd;
-						if (REAL_GREAT(t, det) || REAL_EQUAL(t, det)) {
+						if (isgreat(t, det) || iseq(t, det)) {
 							//region 3
 							t = 1.0;
 							bmd = b - d;
-							if (REAL_LESS(bmd, 0.0) || REAL_EQUAL(bmd, 0.0)) {
+							if (isless(bmd, 0.0) || iseq(bmd, 0.0)) {
 								s = 0.0;
 							}
-							else if (REAL_GREAT(bmd, a) || REAL_EQUAL(bmd, a)) {
+							else if (isgreat(bmd, a) || iseq(bmd, a)) {
 								s = 1.0;
 							}else{
 								s = bmd / a;
@@ -377,17 +371,17 @@ namespace dyno
 		else {
 		//parallel
 		
-			if (REAL_LESS(e,0.0)||REAL_EQUAL(e,0.0))  // t <= 0
+			if (isless(e,0.0)||iseq(e,0.0))  // t <= 0
 			{
 				// Now solve a*s - b*t + d = 0 for t = 0 (s = -d/a).
 				t = 0.0;
 				nd = -d;
-				if (REAL_LESS(nd, 0.0) || REAL_EQUAL(nd, 0.0))  // s <= 0
+				if (isless(nd, 0.0) || iseq(nd, 0.0))  // s <= 0
 				{
 					// region 6
 					s = 0.0;
 				}
-				else if (REAL_GREAT(nd,a)||REAL_EQUAL(nd,a))  // s >= 1
+				else if (isgreat(nd,a)||iseq(nd,a))  // s >= 1
 				{
 					// region 8
 					s = 1.0;
@@ -398,17 +392,17 @@ namespace dyno
 					s = nd / a;
 				}
 			}
-			else if (REAL_GREAT(e,c)||REAL_EQUAL(e,c))  // t >= 1
+			else if (isgreat(e,c)||iseq(e,c))  // t >= 1
 			{
 				// Now solve a*s - b*t + d = 0 for t = 1 (s = (b-d)/a).
 				t = 1.0;
 				bmd = b - d;
-				if (REAL_LESS(bmd,0.0)||REAL_EQUAL(bmd,0.0))  // s <= 0
+				if (isless(bmd,0.0)||iseq(bmd,0.0))  // s <= 0
 				{
 					// region 4
 					s = 0.0;
 				}
-				else if (REAL_GREAT(bmd,a)||REAL_EQUAL(bmd,a))  // s >= 1
+				else if (isgreat(bmd,a)||iseq(bmd,a))  // s >= 1
 				{
 					// region 2
 					s = 1.0;
@@ -509,7 +503,7 @@ namespace dyno
 			if (time > 0.0 && ((dsqr - glm::pow(this->xi * invL, 2)) / (glm::sqrt(dsqr) + this->xi * invL) <= g))
 				break;
 			time += tL;
-			if (REAL_GREAT(time, this->tc))
+			if (isgreat(time, this->tc))
 				return false;
 			++ite;
 			/*if (tL <= 0.0)
@@ -587,7 +581,7 @@ namespace dyno
 			if (time >0.0 && r<g)
 				break;
 			time += tL;
-			if (REAL_GREAT(time, this->tc))
+			if (isgreat(time, this->tc))
 				return false;
 
 			++ite;
@@ -714,7 +708,7 @@ namespace dyno
 		q[2] = invL * t.v[2];
                                                                      
 		//VF
-		Real D = REAL_infinity;
+		Real D = REAL_INF;
 
 		for (int st = 0; st < 3; st++)
 		{

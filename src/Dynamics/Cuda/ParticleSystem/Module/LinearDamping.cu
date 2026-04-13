@@ -8,6 +8,7 @@ namespace dyno
 	LinearDamping<TDataType>::LinearDamping()
 		: ConstraintModule()
 	{
+		this->inAttribute()->tagOptional(true);
 	}
 
 	template<typename TDataType>
@@ -22,8 +23,19 @@ namespace dyno
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= vel.size()) return;
-		
 		vel[pId] *= coefficient;
+	}
+
+	template <typename Real, typename Coord, typename Attribute>
+	__global__ void LP_Damping(
+		DArray<Coord> vel,
+		DArray<Attribute> attr,
+		Real coefficient)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= vel.size()) return;
+		if (attr[pId].isDynamic())
+			vel[pId] *= coefficient;
 	}
 
 	template<typename TDataType>
@@ -33,10 +45,21 @@ namespace dyno
 		auto& vels = this->inVelocity()->getData();
 
 		int num = vels.size();
-		cuExecute(num,
-			LP_Damping,
-			vels,
-			coef);
+		if (this->inAttribute()->isEmpty())
+		{
+			cuExecute(num,
+				LP_Damping,
+				vels,
+				coef);
+		}
+		else
+		{
+  			cuExecute(num,
+				LP_Damping,
+				vels,
+				this->inAttribute()->getData(),
+				coef);
+		}
 	}
 
 	DEFINE_CLASS(LinearDamping);

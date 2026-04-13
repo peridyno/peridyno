@@ -1,12 +1,12 @@
 #pragma once
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 
 #include "Array/Array2D.h"
 
 namespace dyno
 {
 	template<typename TDataType>
-	class HeightField : public TopologyModule
+	class HeightField : public Topology
 	{
 		DECLARE_TCLASS(PointSet, TDataType)
 	public:

@@ -13,7 +13,7 @@ namespace dyno
 	template<typename Coord, typename AABB>
 	__global__ void BBSS_SetupEdgeSet(
 		DArray<Coord> vertices,
-		DArray<TopologyModule::Edge> edges,
+		DArray<Topology::Edge> edges,
 		DArray<AABB> aabbs)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
@@ -41,18 +41,18 @@ namespace dyno
 		vertices[id6] = Coord(v1.x, v1.y, v1.z);
 		vertices[id7] = Coord(v1.x, v1.y, v0.z);
 
-		edges[12 * tId] = TopologyModule::Edge(id0, id1);
-		edges[12 * tId + 1] = TopologyModule::Edge(id1, id2);
-		edges[12 * tId + 2] = TopologyModule::Edge(id2, id3);
-		edges[12 * tId + 3] = TopologyModule::Edge(id3, id0);
-		edges[12 * tId + 4] = TopologyModule::Edge(id0, id4);
-		edges[12 * tId + 5] = TopologyModule::Edge(id1, id5);
-		edges[12 * tId + 6] = TopologyModule::Edge(id2, id6);
-		edges[12 * tId + 7] = TopologyModule::Edge(id3, id7);
-		edges[12 * tId + 8] = TopologyModule::Edge(id4, id5);
-		edges[12 * tId + 9] = TopologyModule::Edge(id5, id6);
-		edges[12 * tId + 10] = TopologyModule::Edge(id6, id7);
-		edges[12 * tId + 11] = TopologyModule::Edge(id7, id4);
+		edges[12 * tId] = Topology::Edge(id0, id1);
+		edges[12 * tId + 1] = Topology::Edge(id1, id2);
+		edges[12 * tId + 2] = Topology::Edge(id2, id3);
+		edges[12 * tId + 3] = Topology::Edge(id3, id0);
+		edges[12 * tId + 4] = Topology::Edge(id0, id4);
+		edges[12 * tId + 5] = Topology::Edge(id1, id5);
+		edges[12 * tId + 6] = Topology::Edge(id2, id6);
+		edges[12 * tId + 7] = Topology::Edge(id3, id7);
+		edges[12 * tId + 8] = Topology::Edge(id4, id5);
+		edges[12 * tId + 9] = Topology::Edge(id5, id6);
+		edges[12 * tId + 10] = Topology::Edge(id6, id7);
+		edges[12 * tId + 11] = Topology::Edge(id7, id4);
 	}
 
 	template<typename TDataType>

@@ -401,13 +401,11 @@ namespace dyno
 		atomicAdd(&residual[pId], aiiSymArr[pId] * pressure[pId]);
 		Real con1 = 1.0f;// PARAMS.mass / PARAMS.restDensity / PARAMS.restDensity;
 
-		//int nbSize = neighbor.getNeighborSize(pId);
 		List<int>& list_i = neighbor[pId];
 		int nbSize = list_i.size();
 		for (int ne = 0; ne < nbSize; ne++)
 		{
 			int j = list_i[ne];
-			//int j = neighbor.getElement(pId, ne);
 
 			Real r = (pos_i - position[j]).norm();
 
@@ -448,8 +446,6 @@ namespace dyno
 		{
 			Coord pos_i = position[pId];
 			Real p_i = pressure[pId];
-
-			//int nbSize = neighbor.getNeighborSize(pId);
 
 			Real total_weight = 0.0f;
 
@@ -553,8 +549,6 @@ namespace dyno
 			atomicAdd(&P_dv[pId][2], dv_i[2]);
 		}
 	}
-
-
 
 	template <typename Real>
 	__global__ void UpdatePressure(
@@ -679,8 +673,6 @@ namespace dyno
 		v_y[3 * pId] = Avi[0];
 		v_y[3 * pId + 1] = Avi[1];
 		v_y[3 * pId + 2] = Avi[2];
-
-
 	}
 
 
@@ -824,6 +816,7 @@ namespace dyno
 		, m_airPressure(Real(0))
 		, m_reduce(NULL)
 		, m_arithmetic(NULL)
+		, m_arithmetic_v(NULL)
 	{
 		this->inSmoothingLength()->setValue(Real(0.0125));
 		this->varRestDensity()->setValue(Real(1000));
@@ -844,6 +837,18 @@ namespace dyno
 	template<typename TDataType>
 	SimpleVelocityConstraint<TDataType>::~SimpleVelocityConstraint()
 	{
+		
+		P_dv.clear();
+		velOld.clear();
+		velBuf.clear();
+		m_deltaPressure.clear();
+		m_pressBuf.clear();
+		m_crossViscosity.clear();
+		v_y.clear();
+		v_r.clear();
+		v_p.clear();
+		v_pv.clear();
+		m_VelocityReal.clear();
 		m_alpha.clear();
 		m_Aii.clear();
 		m_AiiFluid.clear();
@@ -851,12 +856,9 @@ namespace dyno
 		m_pressure.clear();
 		m_divergence.clear();
 		m_bSurface.clear();
-
 		m_y.clear();
 		m_r.clear();
 		m_p.clear();
-
-		m_pressure.clear();
 
 		if (m_reduce)
 		{
@@ -865,6 +867,10 @@ namespace dyno
 		if (m_arithmetic)
 		{
 			delete m_arithmetic;
+		}
+		if (m_arithmetic_v)
+		{
+			delete m_arithmetic_v;
 		}
 	};
 
@@ -883,8 +889,6 @@ namespace dyno
 			resizeVector();
 		}
 
-		cuSynchronize();
-
 		auto& m_position = this->inPosition()->getData();
 		auto& m_velocity = this->inVelocity()->getData();
 		auto& m_neighborhood = this->inNeighborIds()->getData();
@@ -893,7 +897,6 @@ namespace dyno
 		auto m_smoothingLength = this->inSmoothingLength()->getValue();
 		auto m_restDensity = this->varRestDensity()->getValue();
 
-		//Real dt = getParent()->getDt();
 		Real dt = this->inTimeStep()->getData();
 
 		int num = this->inPosition()->size();
@@ -901,7 +904,6 @@ namespace dyno
 
 
 		m_alpha.reset();
-		//compute alpha_i = sigma w_j and A_i = sigma w_ij / r_ij / r_ij
 		SIMPLE_ComputeAlpha << <pDims, BLOCK_SIZE >> > (
 			m_alpha,
 			m_position,
@@ -964,20 +966,21 @@ namespace dyno
 		}
 
 
-		int totalIter = 0;
-
 		m_pressure.reset();
-
 		velOld.assign(m_velocity);
-
 		Real Old_temp = 0;
 
 		if (this->varSimpleIterationEnable()->getValue() == false)
 		{
 			SIMPLE_IterNum = 1;
 		}
+		else {
+			SIMPLE_IterNum = this->varSimpleIteration()->getData();
+		}
 
 		//SIMPLE Algorithm / Outer Iterations
+
+		int totalIter = 0;
 		while (totalIter < SIMPLE_IterNum)
 		{
 			printf("Iteration : %d *****", totalIter);
@@ -1219,20 +1222,15 @@ namespace dyno
 		m_pressure.resize(num);
 		m_divergence.resize(num);
 		m_bSurface.resize(num);
-
-
 		m_y.resize(num);
 		m_r.resize(num);
 		m_p.resize(num);
-
 		v_y.resize(3 * num);
 		v_r.resize(3 * num);
 		v_p.resize(3 * num);
 		v_pv.resize(num);
 		m_VelocityReal.resize(3 * num);
-
 		m_pressure.resize(num);
-
 		P_dv.resize(num);
 		velOld.resize(num);
 		velBuf.resize(num);
@@ -1241,15 +1239,11 @@ namespace dyno
 		m_pressBuf.resize(num);
 		m_crossViscosity.resize(num);
 
-
 		m_reduce = Reduction<float>::Create(num);
 		m_arithmetic = Arithmetic<float>::Create(num);
 		m_arithmetic_v = Arithmetic<float>::Create(3 * num);
 
-		visValueSet();
-
-		initialAttributes();
-
+		this->visValueSet();
 		return true;
 	}
 
@@ -1272,7 +1266,6 @@ namespace dyno
 		auto& m_normal = this->inNormal()->getData();
 
 		resizeVector();
-
 
 		uint pDims = cudaGridSize(this->inPosition()->size(), BLOCK_SIZE);
 
@@ -1301,8 +1294,6 @@ namespace dyno
 			m_smoothingLength);
 
 		m_maxA = m_reduce->maximum(m_AiiFluid.begin(), m_AiiFluid.size());
-
-
 
 		std::cout << "Max alpha: " << m_maxAlpha << std::endl;
 		std::cout << "Max A: " << m_maxA << std::endl;

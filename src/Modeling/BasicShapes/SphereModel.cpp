@@ -1,4 +1,4 @@
-#include "SphereModel.h"
+#include "BasicShapes/SphereModel.h"
 
 #include "Primitive/Primitive3D.h"
 
@@ -20,13 +20,12 @@ namespace dyno
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
 		this->statePolygonSet()->setDataPtr(std::make_shared<PolygonSet<TDataType>>());
-		
+
 		this->varLatitude()->setRange(2, 10000);
 		this->varLongitude()->setRange(3, 10000);
-		this->varIcosahedronStep()->setRange(0,6);
+		this->varIcosahedronStep()->setRange(0, 6);
 
 		auto callback = std::make_shared<FCallBackFunc>(std::bind(&SphereModel<TDataType>::varChanged, this));
-
 
 		this->varLocation()->attach(callback);
 		this->varScale()->attach(callback);
@@ -45,7 +44,6 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(exES);
 
 		auto esRender = std::make_shared<GLWireframeVisualModule>();
-		esRender->varBaseColor()->setValue(Color(0, 0, 0));
 		exES->outEdgeSet()->connect(esRender->inEdgeSet());
 		this->graphicsPipeline()->pushModule(esRender);
 
@@ -88,7 +86,7 @@ namespace dyno
 		auto AABB = box.aabb();
 		auto& v0 = AABB.v0;
 		auto& v1 = AABB.v1;
-		
+
 
 		NBoundingBox ret;
 		ret.lower = Vec3f(v0.x, v0.y, v0.z);
@@ -239,7 +237,7 @@ namespace dyno
 	void SphereModel<TDataType>::icosahedronSphere()
 	{
 		std::vector<Vec3f> vts;
-		std::vector<TopologyModule::Triangle> trs;
+		std::vector<Topology::Triangle> trs;
 
 		generateIcosahedron(vts, trs);
 		float fixScale = this->varIcosahedronStep()->getValue() >= 2 ? 1.08 : 1;
@@ -255,8 +253,8 @@ namespace dyno
 		for (int i = 0; i < vts.size(); i++) {
 			vts[i] = RV(vts[i] * scale * fixScale + RV(center));
 		}
-		
-		if (this->varIcosahedronStep()->getValue() >= 2) 
+
+		if (this->varIcosahedronStep()->getValue() >= 2)
 		{
 			for (int i = 0; i < (int)this->varIcosahedronStep()->getValue() - 1; i++)
 			{
@@ -270,7 +268,7 @@ namespace dyno
 		this->stateTriangleSet()->getDataPtr()->update();
 
 		this->statePolygonSet()->getDataPtr()->triangleSetToPolygonSet(this->stateTriangleSet()->getData());
-		
+
 		return;
 	}
 
@@ -287,7 +285,7 @@ namespace dyno
 		if (abs(scale.x - scale.y) < EPSILON) {
 			s = scale.z;
 		}
-		else if (abs(scale.x - scale.z) < EPSILON){
+		else if (abs(scale.x - scale.z) < EPSILON) {
 			s = scale.y;
 		}
 		else
@@ -324,7 +322,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void SphereModel<TDataType>::generateIcosahedron(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles) 
+	void SphereModel<TDataType>::generateIcosahedron(std::vector<Vec3f>& vertices, std::vector<Topology::Triangle>& triangles) 
 	{
 		auto radius = this->varRadius()->getValue() * 2;
 
@@ -339,10 +337,10 @@ namespace dyno
 			};
 
 			triangles = {
-				TopologyModule::Triangle(0, 11, 5), TopologyModule::Triangle(0, 5, 1), TopologyModule::Triangle(0, 1, 7), TopologyModule::Triangle(0, 7, 10), TopologyModule::Triangle(0, 10, 11),
-				TopologyModule::Triangle(1, 5, 9), TopologyModule::Triangle(5, 11, 4), TopologyModule::Triangle(11, 10, 2), TopologyModule::Triangle(10, 7, 6), TopologyModule::Triangle(7, 1, 8),
-				TopologyModule::Triangle(3, 9, 4), TopologyModule::Triangle(3, 4, 2), TopologyModule::Triangle(3, 2, 6), TopologyModule::Triangle(3, 6, 8), TopologyModule::Triangle(3, 8, 9),
-				TopologyModule::Triangle(4, 9, 5), TopologyModule::Triangle(2, 4, 11), TopologyModule::Triangle(6, 2, 10), TopologyModule::Triangle(8, 6, 7), TopologyModule::Triangle(9, 8, 1)
+				Topology::Triangle(0, 11, 5), Topology::Triangle(0, 5, 1), Topology::Triangle(0, 1, 7), Topology::Triangle(0, 7, 10), Topology::Triangle(0, 10, 11),
+				Topology::Triangle(1, 5, 9), Topology::Triangle(5, 11, 4), Topology::Triangle(11, 10, 2), Topology::Triangle(10, 7, 6), Topology::Triangle(7, 1, 8),
+				Topology::Triangle(3, 9, 4), Topology::Triangle(3, 4, 2), Topology::Triangle(3, 2, 6), Topology::Triangle(3, 6, 8), Topology::Triangle(3, 8, 9),
+				Topology::Triangle(4, 9, 5), Topology::Triangle(2, 4, 11), Topology::Triangle(6, 2, 10), Topology::Triangle(8, 6, 7), Topology::Triangle(9, 8, 1)
 			};
 
 			for (auto& v : vertices) {
@@ -399,97 +397,94 @@ namespace dyno
 
 			triangles =
 			{
-				TopologyModule::Triangle(3, 1, 2),
-				TopologyModule::Triangle(5,2 ,4),
-				TopologyModule::Triangle(6, 3, 5),
-				TopologyModule::Triangle(3, 2, 5),
-				TopologyModule::Triangle(7, 1, 3),
-				TopologyModule::Triangle(8, 3, 6),
-				TopologyModule::Triangle(9, 7, 8),
-				TopologyModule::Triangle(7, 3, 8),
-				TopologyModule::Triangle(10, 1, 7),
-				TopologyModule::Triangle(11, 7, 9),
-				TopologyModule::Triangle(12, 10, 11),
-				TopologyModule::Triangle(10, 7, 11),
-				TopologyModule::Triangle(13, 1, 10),
-				TopologyModule::Triangle(14, 10, 12),
-				TopologyModule::Triangle(15, 13, 14),
-				TopologyModule::Triangle(13, 10, 14),
-				TopologyModule::Triangle(2 ,1, 13),
-				TopologyModule::Triangle(16, 13, 15),
-				TopologyModule::Triangle(4 ,2, 16),
-				TopologyModule::Triangle(2 ,13, 16),
-				TopologyModule::Triangle(17, 4, 16),
-				TopologyModule::Triangle(18, 16, 15),
-				TopologyModule::Triangle(19, 17, 18),
-				TopologyModule::Triangle(17, 16, 18),
-				TopologyModule::Triangle(20, 15, 14),
-				TopologyModule::Triangle(21, 14, 12),
-				TopologyModule::Triangle(22, 20, 21),
-				TopologyModule::Triangle(20, 14, 21),
-				TopologyModule::Triangle(23, 12, 11),
-				TopologyModule::Triangle(24, 11, 9),
-				TopologyModule::Triangle(25, 23, 24),
-				TopologyModule::Triangle(23, 11, 24),
-				TopologyModule::Triangle(26, 9, 8),
-				TopologyModule::Triangle(27, 8, 6),
-				TopologyModule::Triangle(28, 26, 27),
-				TopologyModule::Triangle(26, 8, 27),
-				TopologyModule::Triangle(29, 6, 5),
-				TopologyModule::Triangle(30, 5, 4),
-				TopologyModule::Triangle(31, 29, 30),
-				TopologyModule::Triangle(29, 5, 30),
-				TopologyModule::Triangle(30, 4, 17),
-				TopologyModule::Triangle(32, 17, 19),
-				TopologyModule::Triangle(31, 30, 32),
-				TopologyModule::Triangle(30, 17, 32),
-				TopologyModule::Triangle(18, 15, 20),
-				TopologyModule::Triangle(33, 20, 22),
-				TopologyModule::Triangle(19, 18, 33),
-				TopologyModule::Triangle(18, 20, 33),
-				TopologyModule::Triangle(21, 12, 23),
-				TopologyModule::Triangle(34, 23, 25),
-				TopologyModule::Triangle(22, 21, 34),
-				TopologyModule::Triangle(21, 23, 34),
-				TopologyModule::Triangle(24, 9, 26),
-				TopologyModule::Triangle(35, 26, 28),
-				TopologyModule::Triangle(25, 24, 35),
-				TopologyModule::Triangle(24, 26, 35),
-				TopologyModule::Triangle(27, 6, 29),
-				TopologyModule::Triangle(36, 29, 31),
-				TopologyModule::Triangle(28, 27, 36),
-				TopologyModule::Triangle(27, 29, 36),
-				TopologyModule::Triangle(39, 37, 38),
-				TopologyModule::Triangle(32, 38, 31),
-				TopologyModule::Triangle(19, 39, 32),
-				TopologyModule::Triangle(39, 38, 32),
-				TopologyModule::Triangle(38, 37, 40),
-				TopologyModule::Triangle(36, 40, 28),
-				TopologyModule::Triangle(31, 38, 36),
-				TopologyModule::Triangle(38, 40, 36),
-				TopologyModule::Triangle(40, 37, 41),
-				TopologyModule::Triangle(35, 41, 25),
-				TopologyModule::Triangle(28, 40, 35),
-				TopologyModule::Triangle(40, 41, 35),
-				TopologyModule::Triangle(41, 37, 42),
-				TopologyModule::Triangle(34, 42, 22),
-				TopologyModule::Triangle(25, 41, 34),
-				TopologyModule::Triangle(41, 42, 34),
-				TopologyModule::Triangle(42, 37, 39),
-				TopologyModule::Triangle(33, 39, 19),
-				TopologyModule::Triangle(22, 42, 33),
-				TopologyModule::Triangle(42, 39, 33)
+				Topology::Triangle(3, 1, 2),
+				Topology::Triangle(5,2 ,4),
+				Topology::Triangle(6, 3, 5),
+				Topology::Triangle(3, 2, 5),
+				Topology::Triangle(7, 1, 3),
+				Topology::Triangle(8, 3, 6),
+				Topology::Triangle(9, 7, 8),
+				Topology::Triangle(7, 3, 8),
+				Topology::Triangle(10, 1, 7),
+				Topology::Triangle(11, 7, 9),
+				Topology::Triangle(12, 10, 11),
+				Topology::Triangle(10, 7, 11),
+				Topology::Triangle(13, 1, 10),
+				Topology::Triangle(14, 10, 12),
+				Topology::Triangle(15, 13, 14),
+				Topology::Triangle(13, 10, 14),
+				Topology::Triangle(2 ,1, 13),
+				Topology::Triangle(16, 13, 15),
+				Topology::Triangle(4 ,2, 16),
+				Topology::Triangle(2 ,13, 16),
+				Topology::Triangle(17, 4, 16),
+				Topology::Triangle(18, 16, 15),
+				Topology::Triangle(19, 17, 18),
+				Topology::Triangle(17, 16, 18),
+				Topology::Triangle(20, 15, 14),
+				Topology::Triangle(21, 14, 12),
+				Topology::Triangle(22, 20, 21),
+				Topology::Triangle(20, 14, 21),
+				Topology::Triangle(23, 12, 11),
+				Topology::Triangle(24, 11, 9),
+				Topology::Triangle(25, 23, 24),
+				Topology::Triangle(23, 11, 24),
+				Topology::Triangle(26, 9, 8),
+				Topology::Triangle(27, 8, 6),
+				Topology::Triangle(28, 26, 27),
+				Topology::Triangle(26, 8, 27),
+				Topology::Triangle(29, 6, 5),
+				Topology::Triangle(30, 5, 4),
+				Topology::Triangle(31, 29, 30),
+				Topology::Triangle(29, 5, 30),
+				Topology::Triangle(30, 4, 17),
+				Topology::Triangle(32, 17, 19),
+				Topology::Triangle(31, 30, 32),
+				Topology::Triangle(30, 17, 32),
+				Topology::Triangle(18, 15, 20),
+				Topology::Triangle(33, 20, 22),
+				Topology::Triangle(19, 18, 33),
+				Topology::Triangle(18, 20, 33),
+				Topology::Triangle(21, 12, 23),
+				Topology::Triangle(34, 23, 25),
+				Topology::Triangle(22, 21, 34),
+				Topology::Triangle(21, 23, 34),
+				Topology::Triangle(24, 9, 26),
+				Topology::Triangle(35, 26, 28),
+				Topology::Triangle(25, 24, 35),
+				Topology::Triangle(24, 26, 35),
+				Topology::Triangle(27, 6, 29),
+				Topology::Triangle(36, 29, 31),
+				Topology::Triangle(28, 27, 36),
+				Topology::Triangle(27, 29, 36),
+				Topology::Triangle(39, 37, 38),
+				Topology::Triangle(32, 38, 31),
+				Topology::Triangle(19, 39, 32),
+				Topology::Triangle(39, 38, 32),
+				Topology::Triangle(38, 37, 40),
+				Topology::Triangle(36, 40, 28),
+				Topology::Triangle(31, 38, 36),
+				Topology::Triangle(38, 40, 36),
+				Topology::Triangle(40, 37, 41),
+				Topology::Triangle(35, 41, 25),
+				Topology::Triangle(28, 40, 35),
+				Topology::Triangle(40, 41, 35),
+				Topology::Triangle(41, 37, 42),
+				Topology::Triangle(34, 42, 22),
+				Topology::Triangle(25, 41, 34),
+				Topology::Triangle(41, 42, 34),
+				Topology::Triangle(42, 37, 39),
+				Topology::Triangle(33, 39, 19),
+				Topology::Triangle(22, 42, 33),
+				Topology::Triangle(42, 39, 33)
 			};
 			for (size_t i = 0; i < triangles.size(); i++)
 			{
-				triangles[i] = TopologyModule::Triangle(triangles[i][0] - 1, triangles[i][1] - 1, triangles[i][2] - 1);
+				triangles[i] = Topology::Triangle(triangles[i][0] - 1, triangles[i][1] - 1, triangles[i][2] - 1);
 			}
 
 		}
 	}
-
-
-
 
 	DEFINE_CLASS(SphereModel);
 }

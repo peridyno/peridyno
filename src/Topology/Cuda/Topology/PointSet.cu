@@ -5,11 +5,9 @@
 
 namespace dyno
 {
-	IMPLEMENT_TCLASS(PointSet, TDataType)
-
 	template<typename TDataType>
 	PointSet<TDataType>::PointSet()
-		: TopologyModule()
+		: Topology()
 	{
 		//this->setUpdateAlways(true);
 	}

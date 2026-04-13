@@ -3,7 +3,7 @@
 namespace dyno
 {
 	TextureMesh::TextureMesh()
-		: TopologyModule()
+		: Topology()
 	{
 	}
 

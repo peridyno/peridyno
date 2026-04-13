@@ -188,7 +188,7 @@ std::shared_ptr<SceneGraph> createScene()
 	sand->graphicsPipeline()->pushModule(mapper);
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Color(0.8, 0.8, 0.8));
+	sRender->varBaseColor()->setValue(Color(0.8, 0.8, 0.8));
 	sRender->varUseVertexNormal()->setValue(true);
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	sand->graphicsPipeline()->pushModule(sRender);

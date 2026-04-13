@@ -11,9 +11,4 @@ namespace dyno
 	VisualModule::~VisualModule()
 	{
 	}
-
-	void VisualModule::setVisible(bool bVisible)
-	{
-		this->varVisible()->setValue(bVisible);
-	}
 }

@@ -15,15 +15,15 @@ namespace dyno
 		auto plane = this->stateClipPlane()->getDataPtr();
 		auto size = this->varPlaneSize()->getData();
 
-		std::vector<TopologyModule::Triangle> triangles;
+		std::vector<Topology::Triangle> triangles;
 
 		planeVertices.push_back(Coord(0, size, size));
 		planeVertices.push_back(Coord(0, size, -size));
 		planeVertices.push_back(Coord(0, -size, -size));
 		planeVertices.push_back(Coord(0, -size, size));
 
-		triangles.push_back(TopologyModule::Triangle(0,1,2));
-		triangles.push_back(TopologyModule::Triangle(2,3,0));
+		triangles.push_back(Topology::Triangle(0,1,2));
+		triangles.push_back(Topology::Triangle(2,3,0));
 
 		plane->setPoints(planeVertices);
 		plane->setTriangles(triangles);
@@ -31,11 +31,11 @@ namespace dyno
 		surface = std::make_shared<GLSurfaceVisualModule>();
 		glpoint = std::make_shared<GLPointVisualModule>();
 
-		surface->setAlpha(0.4);
-		surface->setColor(Color(0,0,0));
+		surface->varAlpha()->setValue(0.4);
+		surface->varBaseColor()->setValue(Color(0,0,0));
 		this->stateClipPlane()->connect(surface->inTriangleSet());
 ;
-		glpoint->setColor(this->varPointColor()->getData());
+		glpoint->varBaseColor()->setValue(this->varPointColor()->getData());
 		glpoint->varPointSize()->setValue(this->varPointSize()->getData());
 		this->statePointSet()->connect(glpoint->inPointSet());
 
@@ -52,7 +52,7 @@ namespace dyno
 		transformPlane();
 		clip();
 		showPlane();
-		glpoint->setColor(this->varPointColor()->getData());
+		glpoint->varBaseColor()->setValue(this->varPointColor()->getData());
 
 	}
 
@@ -144,7 +144,7 @@ namespace dyno
 	template<typename TDataType>
 	void PointClip<TDataType>::showPlane()
 	{
-		surface->setVisible(this->varShowPlane()->getData());
+		surface->varVisible()->setValue(this->varShowPlane()->getData());
 	}
 	DEFINE_CLASS(PointClip);
 }

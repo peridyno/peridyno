@@ -15,7 +15,7 @@
  */
 #pragma once
 #include "TopologyConstants.h"
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 
 namespace dyno
 {
@@ -26,9 +26,8 @@ namespace dyno
 	 */
 
 	template<typename TDataType>
-	class PointSet : public TopologyModule
+	class PointSet : public Topology
 	{
-		DECLARE_TCLASS(PointSet, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

@@ -21,10 +21,10 @@ namespace dyno
 		this->varRotation()->attach(callback);
 
 		auto EnvelopeRender = std::make_shared<GLSurfaceVisualModule>();
-		EnvelopeRender->setColor(Color(0.8f, 0.8f, 0.8f));
+		EnvelopeRender->varBaseColor()->setValue(Color(0.8f, 0.8f, 0.8f));
 		this->stateEnvelope()->promoteOuput()->connect(EnvelopeRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(EnvelopeRender);
-		EnvelopeRender->setVisible(false);
+		EnvelopeRender->varVisible()->setValue(false);
 
 
 		auto texMeshRender = std::make_shared<GLPhotorealisticInstanceRender>();

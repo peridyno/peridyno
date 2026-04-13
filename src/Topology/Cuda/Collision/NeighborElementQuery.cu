@@ -142,7 +142,7 @@ namespace dyno
 		DArray<Tet3D> tets,
 		DArray<Real> tets_sdf,
 		DArray<int> tet_body_ids,
-		DArray<TopologyModule::Tetrahedron> tet_element_ids,
+		DArray<Topology::Tetrahedron> tet_element_ids,
 		DArray<Capsule3D> caps,
 		DArray<Triangle3D> triangles,
 		DArray<Attribute> attribute,

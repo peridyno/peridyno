@@ -5,7 +5,7 @@ the output file format: obj
 
 #pragma once
 #include "Module/OutputModule.h"
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 
 #include "Topology/TriangleSet.h"
 
@@ -22,7 +22,7 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TopologyModule::Triangle Triangle;
+		typedef typename Topology::Triangle Triangle;
 
 
 		DECLARE_ENUM(OutputType,
@@ -40,7 +40,7 @@ namespace dyno
 
 	public:
 
-		DEF_INSTANCE_IN(TopologyModule, Topology, "Input TriangleSet");
+		DEF_INSTANCE_IN(Topology, Topology, "Input TriangleSet");
 		DEF_ENUM(OutputType, OutputType, OutputType::TriangleMesh, "OutputType")
 
 

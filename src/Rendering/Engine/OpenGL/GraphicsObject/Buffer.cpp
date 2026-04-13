@@ -25,8 +25,10 @@ namespace dyno
 
 	void Buffer::release()
 	{
-		glDeleteBuffers(1, &id);
-		glCheckError();
+		if (id != GL_INVALID_INDEX) {
+			glDeleteBuffers(1, &id);
+			glCheckError();
+		}
 
 		// reset object id
 		id = GL_INVALID_INDEX;

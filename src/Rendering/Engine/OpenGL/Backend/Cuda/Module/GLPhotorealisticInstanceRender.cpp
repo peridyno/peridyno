@@ -18,14 +18,9 @@ namespace dyno
 	{
 	}
 
-	GLPhotorealisticInstanceRender::~GLPhotorealisticInstanceRender()
-	{
-	
-	}
-
 	std::string GLPhotorealisticInstanceRender::caption()
 	{
-		return "Photorealistic Instance Render";
+		return "GLPhotorealisticInstanceRender";
 	}
 
 	bool GLPhotorealisticInstanceRender::initializeGL()
@@ -37,6 +32,8 @@ namespace dyno
 
 	void GLPhotorealisticInstanceRender::releaseGL()
 	{
+		mOffset.clear();
+		
 		mXTransformBuffer.release();
 		GLPhotorealisticRender::releaseGL();
 	}

@@ -17,7 +17,7 @@
 
 #include "Topology/AdaptiveGridSet2D.h"
 #include "TopologyConstants.h"
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 #include "Primitive/Primitive3D.h"
 #include "Vector.h"
 
@@ -145,7 +145,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	class AdaptiveGridSet : public TopologyModule
+	class AdaptiveGridSet : public Topology
 	{
 		DECLARE_TCLASS(AdaptiveGridSet, TDataType)
 	public:

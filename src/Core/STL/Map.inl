@@ -70,6 +70,13 @@ namespace dyno
 	}
 
 #ifdef CUDA_BACKEND
+
+    #ifdef __CUDA_ARCH__
+        #define MAP_ATOMIC_ADD(ptr, val) atomicAdd(ptr, val)
+    #else
+        #define MAP_ATOMIC_ADD(ptr, val) __sync_fetch_and_add(ptr, val)
+    #endif
+
 	template <typename MKey, typename T>
 	DYN_FUNC Pair<MKey, T>* Map<MKey, T>::atomicInsert(Pair<MKey, T> pair)
 	{
@@ -77,7 +84,8 @@ namespace dyno
 		if (m_size >= this->m_maxSize) return nullptr;
 
 		const uint one = 1;
-		int index = atomicAdd(&(this->m_size), one);
+		//int index = atomicAdd(&(this->m_size), one);
+		int index = MAP_ATOMIC_ADD(&(this->m_size), one);
 
 		this->m_pairs[index] = pair;
 

@@ -53,7 +53,6 @@ namespace dyno
 
 		//ColorDialog.setWindowIcon(GetIcon("color--pencil"));
 		colorDialog.setCurrentColor(mColor);
-		colorDialog.adjustSize();
 		colorDialog.exec();
 
 		disconnect(&colorDialog, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(onColorChanged(const QColor&)));
@@ -153,9 +152,9 @@ namespace dyno
 			FVar<Color>* f = TypeInfo::cast<FVar<Color>>(field);
 			auto v = f->getValue();
 
-			int r = int(v.r * 255) % 255;
-			int g = int(v.g * 255) % 255;
-			int b = int(v.b * 255) % 255;
+			int r = int(clamp(v.r, 0.f, 1.f) * 255) % 256;
+			int g = int(clamp(v.g, 0.f, 1.f) * 255) % 256;
+			int b = int(clamp(v.b, 0.f, 1.f) * 255) % 256;
 
 			spinner1->setValue(r);
 			spinner2->setValue(g);

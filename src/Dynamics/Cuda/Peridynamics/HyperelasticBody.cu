@@ -217,7 +217,7 @@ namespace dyno
 		}
 
 		CArray<Coord> tetPoints;
-		CArray<TopologyModule::Tetrahedron> tetIds;
+		CArray<Topology::Tetrahedron> tetIds;
 		
 		tetPoints.resize(tetSet->getPoints().size());
 		tetPoints.assign(tetSet->getPoints());

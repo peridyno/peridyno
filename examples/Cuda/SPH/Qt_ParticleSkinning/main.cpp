@@ -77,7 +77,7 @@ std::shared_ptr<SceneGraph> createScene()
 	marchingCubes->varGridSpacing()->setValue(0.005f);
 
 	auto surfaceRenderer = std::make_shared<GLSurfaceVisualModule>();
-	surfaceRenderer->setColor(Color(0.1f, 0.1f, 0.9f));
+	surfaceRenderer->varBaseColor()->setValue(Color(0.1f, 0.1f, 0.9f));
 	marchingCubes->stateTriangleSet()->connect(surfaceRenderer->inTriangleSet());
 	surfaceRenderer->varAlpha()->setValue(0.3f);
 	surfaceRenderer->varMetallic()->setValue(0.5f);

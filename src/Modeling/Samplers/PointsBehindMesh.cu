@@ -26,7 +26,7 @@ namespace dyno
 
 
 		//auto tsRender = std::make_shared<GLSurfaceVisualModule>();
-		//tsRender->setColor(Color(0.1f, 0.12f, 0.25f));
+		//tsRender->varBaseColor()->setValue(Color(0.1f, 0.12f, 0.25f));
 		//tsRender->varAlpha()->setValue(0.5);
 		//tsRender->setVisible(true);
 		//this->statePlane()->connect(tsRender->inTriangleSet());
@@ -38,7 +38,7 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(esRender);
 
 		auto ptRender = std::make_shared<GLPointVisualModule>();
-		ptRender->setColor(Color(0, 0.5, 1));
+		ptRender->varBaseColor()->setValue(Color(0, 0.5, 1));
 		ptRender->varPointSize()->setValue(0.005f);
 		ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 		this->statePointSet()->connect(ptRender->inPointSet());
@@ -413,7 +413,7 @@ namespace dyno
 
 	template< typename Coord>
 	__global__ void PtsBehindMesh_UpdateTriangleNormal(
-		DArray<TopologyModule::Triangle> d_triangles,
+		DArray<Topology::Triangle> d_triangles,
 		DArray<Coord> d_points,
 		DArray<Coord> normal,
 		float length,

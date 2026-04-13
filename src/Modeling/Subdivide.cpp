@@ -9,9 +9,9 @@ namespace dyno
 {
 
     template<typename TDataType>
-    void Subdivide<TDataType>::loopSubdivide(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles) {
+    void Subdivide<TDataType>::loopSubdivide(std::vector<Vec3f>& vertices, std::vector<Topology::Triangle>& triangles) {
         Map<EKey, uint> middlePointIndexCache;
-        std::vector<TopologyModule::Triangle> newTriangles;
+        std::vector<Topology::Triangle> newTriangles;
         std::vector<Vec3f> newVertices;
         TriangleSet<DataType3f> triSet;
 
@@ -20,11 +20,11 @@ namespace dyno
         triSet.setTriangles(triangles);
         triSet.update();
        
-        CArray<TopologyModule::Edg2Tri> c_Edg2Tri;
+        CArray<Topology::Edg2Tri> c_Edg2Tri;
         c_Edg2Tri.assign(triSet.edge2Triangle());
-        CArray<TopologyModule::Tri2Edg> c_Tri2Edg;
+        CArray<Topology::Tri2Edg> c_Tri2Edg;
         c_Tri2Edg.assign(triSet.triangle2Edge());
-        CArray<TopologyModule::Edge> c_Edge;
+        CArray<Topology::Edge> c_Edge;
         c_Edge.assign(triSet.edgeIndices());
         CArrayList<int> c_ver2edge;
         c_ver2edge.assign(triSet.vertex2Edge());
@@ -87,7 +87,7 @@ namespace dyno
 
         auto updateOldPoints = [&]() {
 
-            auto getEdgeOtherPoint = [&](int vId, TopologyModule::Edge edge) {
+            auto getEdgeOtherPoint = [&](int vId, Topology::Edge edge) {
                 if (edge[0] != vId && edge[1] != vId)
                 {
                     printf("Error getEdgeOtherPoint!!!!\ninput vId: %d\nedge vId: %d, %d \n", vId, edge[0], edge[1]);
@@ -157,10 +157,10 @@ namespace dyno
             int v1 = triangles[i][1];
             int v2 = triangles[i][2];
 
-            newTriangles[4 * i] = TopologyModule::Triangle(v01, v1, v12);
-            newTriangles[4 * i + 1] = TopologyModule::Triangle(v12, v2, v20);
-            newTriangles[4 * i + 2] = TopologyModule::Triangle(v20, v0, v01);
-            newTriangles[4 * i + 3] = TopologyModule::Triangle(v01, v12, v20);
+            newTriangles[4 * i] = Topology::Triangle(v01, v1, v12);
+            newTriangles[4 * i + 1] = Topology::Triangle(v12, v2, v20);
+            newTriangles[4 * i + 2] = Topology::Triangle(v20, v0, v01);
+            newTriangles[4 * i + 3] = Topology::Triangle(v01, v12, v20);
         }
         triangles = newTriangles;
     }
@@ -204,10 +204,10 @@ namespace dyno
         auto inTri = this->inInTriangleSet()->constDataPtr();
 
         std::vector<Vec3f> vts;
-        std::vector<TopologyModule::Triangle> tris;
+        std::vector<Topology::Triangle> tris;
 
         CArray<Vec3f> c_v;
-        CArray<TopologyModule::Triangle> c_t;
+        CArray<Topology::Triangle> c_t;
 
         c_v.assign(inTri->getPoints());
         c_t.assign(inTri->triangleIndices());
