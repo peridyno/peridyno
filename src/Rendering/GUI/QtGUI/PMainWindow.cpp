@@ -146,11 +146,15 @@ namespace dyno
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodePlaced, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeDeleted, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeInputUpdated, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
+		
+		//Trigger repaint when a node is selected or deselected
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeSelected, [&]() {mOpenGLWidget->flush(); });
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeDeselected, [&]() {mOpenGLWidget->flush(); });
 
 		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, mOpenGLWidget, &POpenGLWidget::updateOneFrame);
 		connect(PSimulationThread::instance(), &PSimulationThread::sceneGraphChanged, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::updateNodeGraphView);
 
-		connect(mPropertyWidget, &PPropertyWidget::nodeUpdated, PSimulationThread::instance(), &PSimulationThread::resetNode);
+		connect(mPropertyWidget, &PPropertyWidget::nodeUpdated, mOpenGLWidget, &POpenGLWidget::onNodeUpdated);
 
 		connect(mToolBar, &PMainToolBar::logActTriggered, mIoDockerWidget, &PIODockWidget::toggleLogging);
 		

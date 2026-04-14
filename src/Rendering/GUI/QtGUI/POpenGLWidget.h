@@ -89,20 +89,24 @@ namespace dyno
 	public slots:
 		void updateGraphicsContext();
 		void updateGraphicsContext(Node* node);
-		void resetSceneFrame();
+
+		//Force node->reset() and repaint
 		void onNodeUpdated(std::shared_ptr<Node> node);
+
+		//Force repaint
 		void onModuleUpdated(std::shared_ptr<Module> node);
 		void nodeNodeRenderingKeyUpdated(std::shared_ptr<Node> node);
 
+		void resetSceneFrame();
 		void updateOneFrame(int frame);
+
+		//Force repaint
+		void flush();
 
 	signals:
 		void nodeSelected(std::shared_ptr<Node> node);
 
 	private:
-		//Force rendering
-		void flush();
-
 		QButtonState mButtonState = QButtonState::QBUTTON_UP;
 		int			 mCursorX = -1;
 		int			 mCursorY = -1;
