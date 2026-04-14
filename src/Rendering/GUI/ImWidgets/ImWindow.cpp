@@ -80,6 +80,11 @@ void ImWindow::draw(RenderWindow* app)
 
 	int viewType = (int)camera->viewportType();
 
+	if (viewType == Camera::Free) {
+		mTargetPos = camera->getTargetPos();
+		mEyePos = camera->getEyePos();
+	}
+
 	// Initialize ImGuizmo frame
 	ImGuizmo::BeginFrame();
 	ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
@@ -158,14 +163,15 @@ void ImWindow::draw(RenderWindow* app)
 				ImGui::Separator();
 
 				if (ImGui::RadioButton("Free", &viewType, 6)) {
-					camera->setEyePos(eyePos);
+					camera->setEyePos(mEyePos);
+					camera->setTargetPos(mTargetPos);
 					camera->setViewportType(Camera::Free);
 				}
 
 				ImGui::Separator();
 
 				float distanceUnit = camera->unitScale();
-				if (ImGui::SliderFloat("DistanceUnit", &distanceUnit, 0.01f, 100.0f))
+				if (ImGui::DragFloat("DistanceUnit", &distanceUnit, 0.01f, 100.0f))
 					camera->setUnitScale(distanceUnit);
 
 				ImGui::EndMenu();

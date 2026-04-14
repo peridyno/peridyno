@@ -50,5 +50,8 @@ namespace dyno
 		bool mGuizmoDisplayed = false;
 		bool mForceRender = true;
 
+		// used for camera recovery
+		Vec3f mTargetPos;
+		Vec3f mEyePos;
 	};
 }
