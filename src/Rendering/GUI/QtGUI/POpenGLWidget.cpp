@@ -195,6 +195,7 @@ namespace dyno
 		mRenderParams.transforms.view = mCamera->getViewMat();
 		mRenderParams.transforms.proj = mCamera->getProjMat();
 		mRenderParams.unitScale = mCamera->unitScale();
+		mRenderParams.groundPlaneAxis = (int)mCamera->viewportType();
 
 		// Draw scene		
 		mRenderEngine->draw(SceneGraphFactory::instance()->active().get(), mRenderParams);

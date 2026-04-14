@@ -48,7 +48,7 @@ namespace dyno
 		// whether user can change view by manipulator
 		bool mEnableViewManipulate = true;
 		bool mGuizmoDisplayed = false;
-		bool mForceRender = false;
+		bool mForceRender = true;
 
 	};
 }

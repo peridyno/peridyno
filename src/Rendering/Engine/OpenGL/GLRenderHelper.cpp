@@ -90,6 +90,7 @@ namespace dyno
 			mProgram->setFloat("uRulerScale", rulerScale);
 			mProgram->setVec4("uPlaneColor", planeColor);
 			mProgram->setVec4("uRulerColor", rulerColor);
+			mProgram->setInt("uAxis", rparams.groundPlaneAxis);
 
 			mPlane->draw();
 
@@ -250,7 +251,7 @@ namespace dyno
 		if (mBackgroundRenderer) delete mBackgroundRenderer;
 	}
 
-	void GLRenderHelper::drawGround(const RenderParams& rparams, 
+	void GLRenderHelper::drawGround(const RenderParams& rparams,
 		float planeScale, float rulerScale,
 		dyno::Vec4f planeColor, dyno::Vec4f rulerColor)
 	{
