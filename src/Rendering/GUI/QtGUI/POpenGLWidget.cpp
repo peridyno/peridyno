@@ -5,6 +5,7 @@
 
 #include <SceneGraph.h>
 #include <OrbitCamera.h>
+#include "Action.h"
 
 //Qt
 #include <QMouseEvent>
@@ -480,8 +481,21 @@ namespace dyno
 
 	void POpenGLWidget::onNodeUpdated(std::shared_ptr<Node> node)
 	{
-		node->reset();
-		updateGraphicsContext(node.get());
+		auto scn = SceneGraphFactory::instance()->active();
+
+		//When a node is updated, its descendants will be updated according to isAutoSync()
+		class AutoSyncAct : public Action
+		{
+		public:
+			void process(Node* node) override {
+				node->reset();
+				node->updateGraphicsContext();
+			}
+		};
+
+		scn->traverseForwardWithAutoSync<AutoSyncAct>(node);
+
+		flush();
 	}
 
 	void POpenGLWidget::onModuleUpdated(std::shared_ptr<Module> node)
