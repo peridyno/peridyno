@@ -195,22 +195,16 @@ namespace dyno
 		mRenderParams.transforms.view = mCamera->getViewMat();
 		mRenderParams.transforms.proj = mCamera->getProjMat();
 		mRenderParams.unitScale = mCamera->unitScale();
+		mRenderParams.groundPlaneAxis = (int)mCamera->viewportType();
 
 		// Draw scene		
 		mRenderEngine->draw(SceneGraphFactory::instance()->active().get(), mRenderParams);
 
 		// Draw ImGui
-		if (showImGUI())
+		if (showImGUI()) {
 			mImWindow.draw(this);
-
-		// Draw widgets
-// 		// TODO: maybe move into mImWindow...
-// 		for (auto widget : mWidgets)
-// 		{
-// 			widget->update();
-// 			widget->paint();
-// 		}
-
+		}
+			
 		ImGui::Render();
 		// Do QtImgui Render After Glfw Render
 		QtImGui::render();
@@ -453,9 +447,10 @@ namespace dyno
 			emit this->nodeSelected(s.items[0].node);
 	}
 
+	//TODO: makeCurrent() and doneCurrent are not necessary any more?
 	void POpenGLWidget::updateGraphicsContext()
 	{
-		makeCurrent();
+//		makeCurrent();
 
 		PSimulationThread::instance()->startUpdatingGraphicsContext();
 
@@ -465,12 +460,12 @@ namespace dyno
 		
 		flush();
 
-		doneCurrent();
+//		doneCurrent();
 	}
 
 	void POpenGLWidget::updateGraphicsContext(Node* node)
 	{
-		makeCurrent();
+//		makeCurrent();
 
 		PSimulationThread::instance()->startUpdatingGraphicsContext();
 
@@ -480,11 +475,12 @@ namespace dyno
 		
 		flush();
 
-		doneCurrent();
+//		doneCurrent();
 	}
 
 	void POpenGLWidget::onNodeUpdated(std::shared_ptr<Node> node)
 	{
+		node->reset();
 		updateGraphicsContext(node.get());
 	}
 
@@ -495,6 +491,7 @@ namespace dyno
 
 	void POpenGLWidget::nodeNodeRenderingKeyUpdated(std::shared_ptr<Node> node)
 	{
+		node->reset();
 		updateGraphicsContext(node.get());
 	}
 

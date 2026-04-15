@@ -394,7 +394,7 @@ namespace dyno
 			float unitScale = rparams.unitScale;
 			// only draw to color buffer, so we can pick through
 			mFramebuffer.drawBuffers(1, attachments);
-			mRenderHelper->drawGround(params, 
+			mRenderHelper->drawGround(params,
 				this->planeScale * unitScale, this->rulerScale * unitScale,
 				Vec4f(this->planeColor.r, this->planeColor.g, this->planeColor.b, this->planeColor.a),
 				Vec4f(this->rulerColor.r, this->rulerColor.g, this->rulerColor.b, this->rulerColor.a));

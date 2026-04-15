@@ -10,6 +10,8 @@ namespace dyno
 
 	QString FormatBlockCaptionName(std::string name);
 
+	QString FormatCategoryName(std::string name);
+
 	QString FormatDescription(std::string name);
 }
 

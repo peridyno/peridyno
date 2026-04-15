@@ -17,31 +17,38 @@
 #pragma once
 #include "BasicShape2D.h"
 
+#include "Topology/EdgeSet.h"
+
 namespace dyno
 {
 	template<typename TDataType>
-	class CircleModel2D : public BasicShape2D<TDataType>
+	class RectangleModel2D : public BasicShape2D<TDataType>
 	{
-		DECLARE_TCLASS(CircleModel2D, TDataType);
+		DECLARE_TCLASS(RectangleModel2D, TDataType);
 
 	public:
 		typedef typename TDataType::Real Real;
-		//typedef typename TDataType::Coord Coord2D;
 		typedef typename dyno::Vector<Real, 2> Coord2D;
+		typedef typename dyno::Vector<Real, 3> Coord3D;
 
-		CircleModel2D();
+		RectangleModel2D();
 
-		BasicShapeType2D getShapeType() override { return BasicShapeType2D::CIRCLE; }
+		BasicShapeType2D getShapeType() override { return BasicShapeType2D::RECTANGLE; }
 
-		DEF_VAR(Real, Radius, 0.5, "Circle radius");
-		DEF_VAR(Coord2D, Center2D, Real(1), "Circle center");
+		DEF_VAR(Real, Width, Real(2.0), "Rectangle width");
 
-		DEF_VAR_OUT(TCircle2D<Real>, Circle, "");
+		DEF_VAR(Real, Height, Real(2.0), "Rectangle height");
+
+		DEF_INSTANCE_STATE(EdgeSet<TDataType>, EdgeSet, "");
+
+		DEF_VAR_STATE(TOrientedBox2D<Real>, Rectangle, TOrientedBox2D < Real>(), "");
 
 	protected:
 		void resetStates() override;
 
+	private:
+		void varChanged();
 	};
 
-	IMPLEMENT_TCLASS(CircleModel2D, TDataType);
+	IMPLEMENT_TCLASS(RectangleModel2D, TDataType);
 }

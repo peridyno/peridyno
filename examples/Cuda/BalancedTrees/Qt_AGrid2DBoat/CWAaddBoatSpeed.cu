@@ -187,10 +187,11 @@ namespace dyno
 			Quat<Real> q = shapes[i]->computeQuaternion();
 			q.normalize();
 
-			Coord3D length = shapes[i]->varLength()->getData();
+			Real width = shapes[i]->varWidth()->getValue();
+			Real height = shapes[i]->varHeight()->getValue();
 			Coord3D center = shapes[i]->varLocation()->getData();
 
-			center = q.rotate(Coord3D(center[0] + shapes[i]->varRotationRadius()->getData(), 0.0f, center[2] - length[2] * 0.1f));
+			center = q.rotate(Coord3D(center[0] + shapes[i]->varRotationRadius()->getData(), 0.0f, center[2] - height * 0.1f));
 			Coord3D u_axis = q.rotate(Coord3D(1, 0, 0));
 			Coord3D w_axis = q.rotate(Coord3D(0, 0, 1));
 
@@ -198,7 +199,7 @@ namespace dyno
 			retangle.center = Coord2D(center[0], center[2]);
 			retangle.u = Coord2D(u_axis[0], u_axis[2]);
 			retangle.v = Coord2D(w_axis[0], w_axis[2]);
-			retangle.extent = Coord2D(length[0] * 0.9f, length[2] * 0.8f);
+			retangle.extent = Coord2D(width * 0.9f, height * 0.8f);
 
 			Real linear_v = (shapes[i]->varRotationRadius()->getData()) * 3.14 / (shapes[i]->varFrequency()->getData());
 			cuExecute(pos.size(),

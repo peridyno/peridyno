@@ -27,7 +27,6 @@ namespace dyno
 	template<typename TDataType>
 	GLAdaptiveGridVisualNode2D<TDataType>::~GLAdaptiveGridVisualNode2D()
 	{
-		printf("GLAdaptiveXYPlaneVisualNode released \n");
 	}
 
 	template<typename Coord2D, typename Coord3D>

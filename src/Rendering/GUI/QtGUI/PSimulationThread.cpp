@@ -311,8 +311,10 @@ namespace dyno
 
 	void PSimulationThread::resetNode(std::shared_ptr<Node> node)
 	{
-		auto scn = SceneGraphFactory::instance()->active();
-		scn->reset(node);
+		if (node != nullptr) {
+			mActiveNode = node;
+			mReset = true;
+		}
 
 		notify();
 	}
@@ -322,29 +324,10 @@ namespace dyno
 		auto model = node.nodeDataModel();
 		auto widget = dynamic_cast<Qt::QtNodeWidget*>(model);
 
-		if (widget != nullptr)
-		{
+		if (widget != nullptr) {
 			mActiveNode = widget->getNode();
 			mReset = true;
 		}
-	}
-
-	void PSimulationThread::syncNode(std::shared_ptr<Node> node)
-	{
-		auto scn = SceneGraphFactory::instance()->active();
-
-		class SyncNodeAct : public Action
-		{
-		public:
-			void process(Node* node) override {
-				node->reset();
-				//node->updateGraphicsContext();
-			}
-		};
-
-		scn->traverseForwardWithAutoSync<SyncNodeAct>(node);
-
-		notify();
 	}
 
 	void PSimulationThread::startUpdatingGraphicsContext()

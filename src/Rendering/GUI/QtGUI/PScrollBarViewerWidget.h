@@ -191,14 +191,11 @@ namespace dyno
 							temp->setTableScrollBar(verticalScrollBar);
 						}
 
-
 						connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, this, &PScrollBarViewerWidget::updateInstanceField);
 						for (auto wid : viewers)
 						{
 							connect(this, &PScrollBarViewerWidget::updateInstanceWidgets, wid, &PDataViewerWidget::updateDataTable);
 						}
-
-
 					}
 					//EdgeSet
 				}

@@ -19,10 +19,7 @@ using namespace dyno;
 
 int main()
 {
-
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
-
-
 
 	Modeling::initStaticPlugin();
 	RigidBody::initStaticPlugin();

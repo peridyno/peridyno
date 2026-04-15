@@ -66,6 +66,15 @@ namespace dyno
 		// 2 = Transparency
 		int mode = 0;
 
+		// ground plane axis
+		// 0 - x
+		// 1 - y
+		// 2 - z
+		// 3 - (-x)
+		// 4 - (-y)
+		// 5 - (-z)
+		int groundPlaneAxis = 1;
+
 		float unitScale = 1.0f;
 		
 	};

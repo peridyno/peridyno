@@ -15,7 +15,7 @@
  */
 
 #pragma once
-#include "BasicShapes/RectangleModel2D.h"
+#include "BasicShapes2D/RectangleModel2D.h"
 #include "Topology/TextureMesh.h"
 #include "Topology/TriangleSet.h"
 

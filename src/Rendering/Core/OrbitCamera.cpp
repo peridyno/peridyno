@@ -232,6 +232,9 @@ namespace dyno
 	
 
 	void OrbitCamera::rotateToPoint(float x, float y) {
+		if (this->viewportType() != Camera::Free)
+			return;
+
 		float tx = float(x) / float(mViewportWidth);
 		float ty = float(mViewportHeight - y) / float(mViewportHeight);
 

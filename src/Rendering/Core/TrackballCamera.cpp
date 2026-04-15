@@ -67,6 +67,9 @@ namespace dyno
 	}
 
 	void TrackballCamera::rotateToPoint(float xpos, float ypos) {
+		if (this->viewportType() != Camera::Free)
+			return;
+
 		float x = float(xpos) / float(mViewportWidth) - 0.5f;
 		float y = float(mViewportHeight - ypos) / float(mViewportHeight) - 0.5f;
 

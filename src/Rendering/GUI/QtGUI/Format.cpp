@@ -17,10 +17,15 @@ namespace dyno
 			return qName;
 		}
 
+		//remove the "*_" prefix
+		QRegularExpression prefix("_(.+)");
+		QRegularExpressionMatch prefix_match = prefix.match(qName);
+
+		QString subtitle = prefix_match.hasMatch() ? prefix_match.captured(1) : qName;
+
 		//Otherwise, slit the name by the space
 		QRegularExpression regexp("[A-Z][^A-Z]*");
-		QRegularExpressionMatchIterator match = regexp.globalMatch(qName);
-		QVector<QString> vec;
+		QRegularExpressionMatchIterator match = regexp.globalMatch(subtitle);
 
 		QString ret;
 		while (match.hasNext())
@@ -43,8 +48,14 @@ namespace dyno
 			return qName;
 		}
 
+		//remove the "*_" prefix
+		QRegularExpression prefix("_(.+)");
+		QRegularExpressionMatch prefix_match = prefix.match(qName);
+
+		QString subtitle = prefix_match.hasMatch() ? prefix_match.captured(1) : qName;
+
 		QRegularExpression regexp0("[A-Za-z()]*");
-		QRegularExpressionMatchIterator match0 = regexp0.globalMatch(qName);
+		QRegularExpressionMatchIterator match0 = regexp0.globalMatch(subtitle);
 
 		QString subStr = match0.hasNext() ? match0.next().captured() : QString("Port");
 
@@ -87,6 +98,11 @@ namespace dyno
 		}
 
 		return ret;
+	}
+
+	QString FormatCategoryName(std::string name)
+	{
+		return QString::fromStdString(name);
 	}
 
 	QString FormatDescription(std::string name)

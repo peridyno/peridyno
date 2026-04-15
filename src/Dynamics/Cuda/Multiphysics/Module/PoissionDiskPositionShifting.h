@@ -23,7 +23,7 @@ namespace dyno {
 		~PoissionDiskPositionShifting() override;
 
 	public:
-		DEF_VAR_IN(Real, Delta, "");
+		DEF_VAR(Real, Delta, Real(1), "");
 
 		/**
 		 * @brief Particle positions

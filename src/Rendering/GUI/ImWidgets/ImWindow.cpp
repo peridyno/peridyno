@@ -78,6 +78,12 @@ void ImWindow::draw(RenderWindow* app)
 	float menu_y = 0.f;
 	ImGuiIO& io = ImGui::GetIO();
 
+	int viewType = (int)camera->viewportType();
+
+	if (viewType == Camera::Free) {
+		mTargetPos = camera->getTargetPos();
+		mEyePos = camera->getEyePos();
+	}
 
 	// Initialize ImGuizmo frame
 	ImGuizmo::BeginFrame();
@@ -122,36 +128,50 @@ void ImWindow::draw(RenderWindow* app)
 				Vec3f eyePos = camera->getEyePos();
 				float distance = (tarPos - eyePos).norm();
 
-				if (ImGui::MenuItem("Top", "")) {
+				if (ImGui::RadioButton("Top", &viewType, 1)) {
 					camera->setEyePos(Vec3f(tarPos.x, tarPos.y + distance, tarPos.z));
+					camera->setViewportType(Camera::Top);
 				}
 
-				if (ImGui::MenuItem("Bottom", "")) {
+				if (ImGui::RadioButton("Bottom", &viewType, 4)) {
 					camera->setEyePos(Vec3f(tarPos.x, tarPos.y - distance, tarPos.z));
+					camera->setViewportType(Camera::Bottom);
 				}
 
 				ImGui::Separator();
-				if (ImGui::MenuItem("Left", "")) {
+				if (ImGui::RadioButton("Left", &viewType, 3)) {
 					camera->setEyePos(Vec3f(tarPos.x - distance, tarPos.y, tarPos.z));
+					camera->setViewportType(Camera::Left);
 				}
 
-				if (ImGui::MenuItem("Right", "")) {
+				if (ImGui::RadioButton("Right", &viewType, 0)) {
 					camera->setEyePos(Vec3f(tarPos.x + distance, tarPos.y, tarPos.z));
+					camera->setViewportType(Camera::Right);
 				}
 
 				ImGui::Separator();
-				if (ImGui::MenuItem("Front", "")) {
+				if (ImGui::RadioButton("Front", &viewType, 2)) {
 					camera->setEyePos(Vec3f(tarPos.x, tarPos.y, tarPos.z + distance));
+					camera->setViewportType(Camera::Front);
 				}
 
-				if (ImGui::MenuItem("Back", "")) {
+				if (ImGui::RadioButton("Back", &viewType, 5)) {
 					camera->setEyePos(Vec3f(tarPos.x, tarPos.y, tarPos.z - distance));
+					camera->setViewportType(Camera::Back);
+				}
+
+				ImGui::Separator();
+
+				if (ImGui::RadioButton("Free", &viewType, 6)) {
+					camera->setEyePos(mEyePos);
+					camera->setTargetPos(mTargetPos);
+					camera->setViewportType(Camera::Free);
 				}
 
 				ImGui::Separator();
 
 				float distanceUnit = camera->unitScale();
-				if (ImGui::SliderFloat("DistanceUnit", &distanceUnit, 0.01f, 100.0f))
+				if (ImGui::DragFloat("DistanceUnit", &distanceUnit, 0.01f, 100.0f))
 					camera->setUnitScale(distanceUnit);
 
 				ImGui::EndMenu();

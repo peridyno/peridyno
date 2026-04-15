@@ -19,7 +19,7 @@
 #include "AdaptiveVolume2D.h"
 #include "Module/MSTsGenerator2D.h"
 #include "Module/MSTsGeneratorLocalUpdate2D.h"
-#include "BasicShapes/BasicShape2D.h"
+#include "BasicShapes2D/BasicShape2D.h"
 
 namespace dyno {
 

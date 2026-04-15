@@ -85,8 +85,6 @@ namespace dyno
 		void resetNode(std::shared_ptr<Node> node);
 		void resetQtNode(Qt::QtNode& node);
 
-		void syncNode(std::shared_ptr<Node> node);
-
 	private:
 		void run() override;
 
