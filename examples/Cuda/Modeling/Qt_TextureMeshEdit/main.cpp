@@ -54,12 +54,12 @@ std::shared_ptr<SceneGraph> creatCar()
 	Vec3f angle = Vec3f(0, 0, 90);
 	Quat<Real> q = Quat<Real>(angle[2] * M_PI / 180, angle[1] * M_PI / 180, angle[0] * M_PI / 180);
 	;
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("LF", 0), 0, ConfigShapeType::CONFIG_CAPSULE));//
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("LB", 1), 1, ConfigShapeType::CONFIG_CAPSULE));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("RF", 2), 2, ConfigShapeType::CONFIG_CAPSULE));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("RB", 3), 3, ConfigShapeType::CONFIG_CAPSULE));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("BackWheel", 4), 4, ConfigShapeType::CONFIG_BOX));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("Body", 5), 5, ConfigShapeType::CONFIG_BOX));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("LF", 0), 0, ConfigShapeType::CONFIG_CAPSULE,100));//
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("LB", 1), 1, ConfigShapeType::CONFIG_CAPSULE, 100));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("RF", 2), 2, ConfigShapeType::CONFIG_CAPSULE, 100));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("RB", 3), 3, ConfigShapeType::CONFIG_CAPSULE, 100));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("BackWheel", 4), 4, ConfigShapeType::CONFIG_BOX, 100));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("Body", 5), 5, ConfigShapeType::CONFIG_BOX, 100));
 
 
 	for (size_t i = 0; i < 4; i++)

@@ -102,7 +102,7 @@ namespace dyno {
 			angle = q;
 		}
 
-		RigidBodyConfig(NameRigidID name, int visualShapeId, ConfigShapeType type, Vector<Real,3> position = Vec3f(0), Quat<Real> angle = Quat<Real>(), Real density = 100) 
+		RigidBodyConfig(NameRigidID name, int visualShapeId, ConfigShapeType type, Vector<Real,3> position , Quat<Real> angle = Quat<Real>(), Real density = 100) 
 		{
 			shapeName = name;
 			visualShapeIds.push_back(visualShapeId);
@@ -187,7 +187,7 @@ namespace dyno {
 
 		//distanceJoint  BallAndSocketJoint
 		Vector<Real, 3> r1;
-		Vector<Real, 3> r2;
+		Vector<Real, 3> r2;//FVar<Vec3f>
 
 		//distanceJoint
 		Real distance;
