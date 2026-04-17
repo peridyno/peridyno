@@ -23,7 +23,8 @@ namespace dyno
 
 	ShadowMap::~ShadowMap()
 	{
-
+		delete mQuad;
+		delete mBlurProgram;
 	}
 
 	void ShadowMap::initialize()
@@ -89,10 +90,9 @@ namespace dyno
 		mShadowUniform.release();
 
 		mQuad->release();
-		delete mQuad;
 
 		mBlurProgram->release();
-		delete mBlurProgram;
+
 	}
 
 

@@ -9,6 +9,7 @@
 #include <QTextEdit>
 #include <QPushButton>
 #include <QMessageBox>
+#include <memory>
 
 // Slots macro definition conflicts with Python
 #ifdef slots

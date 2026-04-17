@@ -42,6 +42,10 @@ namespace dyno
 	{
 		delete mShadowMap;
 		delete mEnvmap;
+		delete mScreenQuad;
+		delete mBlendProgram;
+		delete mRenderHelper;
+		delete mFXAAFilter;
 	}
 
 	void GLRenderEngine::initialize()
@@ -100,14 +104,9 @@ namespace dyno
 		mLinkedListBuffer.release();
 		mHeadIndexTex.release();
 		mBlendProgram->release();
-		delete mBlendProgram;
 
 		// release other objects
 		mScreenQuad->release();
-		delete mScreenQuad;
-
-		delete mRenderHelper;
-		delete mFXAAFilter;
 
 	}
 

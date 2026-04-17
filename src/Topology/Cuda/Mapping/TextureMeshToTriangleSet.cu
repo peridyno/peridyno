@@ -177,7 +177,7 @@ namespace dyno
 
 			offset += num;
 		}
-		DArray<TopologyModule::Triangle> srcIndices;
+		DArray<Topology::Triangle> srcIndices;
 		srcIndices.assign(indices);
 
 		if (!this->inTransform()->isEmpty())

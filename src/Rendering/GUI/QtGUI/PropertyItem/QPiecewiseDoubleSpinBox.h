@@ -274,14 +274,15 @@ namespace dyno
 		{
 			this->setContentsMargins(0, 0, 0, 0);
 			layout = new QHBoxLayout;
-
+			layout->setContentsMargins(0, 0, 0, 0);
 			nameLabel = new QToggleLabel(name.c_str());
 			nameLabel->setMinimumWidth(90);
+			nameLabel->setContentsMargins(0, 0, 0, 0);
 
 			this->setLayout(layout);
 
 			spinBox = new QPiecewiseDoubleSpinBox(parent);
-			
+			spinBox->setContentsMargins(0, 0, 0, 0);
 			spinBox->setRealValue(value);
 			spinBox->setRange(-99999999, 99999999);
 
@@ -306,6 +307,12 @@ namespace dyno
 			return spinBox->getRealValue();
 		};
 
+		void setValue(double v)
+		{
+			spinBox->setValue(v);
+			spinBox->setRealValue(v);
+		};
+
 		void setLabelMinimumWidth(int max)
 		{
 			nameLabel->setMinimumWidth(max);
@@ -322,6 +329,8 @@ namespace dyno
 
 	public:
 		QHBoxLayout* getLayout() { return layout; }
+		QPiecewiseDoubleSpinBox* getDoubleSpinBox() { return spinBox; }
+
 	protected:
 
 	private:

@@ -24,7 +24,10 @@ namespace dyno
 
 	void Texture::release()
 	{
-		glDeleteTextures(1, &id);
+		if (id != GL_INVALID_INDEX) {
+			glDeleteTextures(1, &id);
+			glCheckError();
+		}
 		// reset object id
 		id = GL_INVALID_INDEX;
 	}

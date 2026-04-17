@@ -48,5 +48,7 @@ namespace dyno
 		bool mEnableViewManipulate = true;
 		bool mGuizmoDisplayed = false;
 
+		Vec3f mTargetPos;
+		Vec3f mEyePos;
 	};
 }

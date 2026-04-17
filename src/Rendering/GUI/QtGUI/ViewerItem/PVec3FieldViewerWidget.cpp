@@ -419,35 +419,35 @@ namespace dyno
 			}
 
 
-			if (dataPtr == NULL)
-				return;
-
-			//BuildDataTable
-			uint rowId = first;
-			uint rowTarget = 0;
-			for (size_t i = first; i <= last; i++)
+			if (dataPtr != NULL) 
 			{
-				auto it = (*dataPtr)[i];
 
-				for (size_t j = 0; j < it.size(); j++)
+				//BuildDataTable
+				uint rowId = first;
+				uint rowTarget = 0;
+				for (size_t i = first; i <= last; i++)
 				{
-					auto trans = it[j];
+					auto it = (*dataPtr)[i];
 
-					QString value;
-					for (size_t i = 0; i < 3; i++)
+					for (size_t j = 0; j < it.size(); j++)
 					{
-						value.append(QString::number(trans[i]) + ", ");
+						auto trans = it[j];
+
+						QString value;
+						for (size_t i = 0; i < 3; i++)
+						{
+							value.append(QString::number(trans[i]) + ", ");
+
+						}
+						addItemToPosition(value, rowTarget, j, QString::number(rowId), QString("[") + QString::number(j) + QString("]"), true, rowsHeight);
+
+						value.clear();
 
 					}
-					addItemToPosition(value, rowTarget, j, QString::number(rowId), QString("[") + QString::number(j) + QString("]"), true, rowsHeight);
 
-					value.clear();
-
+					rowId++;
+					rowTarget++;
 				}
-
-
-				rowId++;
-				rowTarget++;
 			}
 
 		}
@@ -477,36 +477,37 @@ namespace dyno
 			}
 
 
-			if (dataPtr == NULL)
-				return;
-
-			//BuildDataTable
-			uint rowId = first;
-			uint rowTarget = 0;
-			for (size_t i = first; i <= last; i++)
+			if (dataPtr != NULL) 
 			{
-				auto it = (*dataPtr)[i];
-
-				for (size_t j = 0; j < it.size(); j++)
+				//BuildDataTable
+				uint rowId = first;
+				uint rowTarget = 0;
+				for (size_t i = first; i <= last; i++)
 				{
-					auto trans = it[j];
+					auto it = (*dataPtr)[i];
 
-					QString value;
-					for (size_t i = 0; i < 3; i++)
+					for (size_t j = 0; j < it.size(); j++)
 					{
-						value.append(QString::number(trans[i]) + ", ");
+						auto trans = it[j];
+
+						QString value;
+						for (size_t i = 0; i < 3; i++)
+						{
+							value.append(QString::number(trans[i]) + ", ");
+
+						}
+						addItemToPosition(value, rowTarget, j, QString::number(rowId), QString("[") + QString::number(j) + QString("]"), true, rowsHeight);
+
+						value.clear();
 
 					}
-					addItemToPosition(value, rowTarget, j, QString::number(rowId), QString("[") + QString::number(j) + QString("]"), true, rowsHeight);
 
-					value.clear();
 
+					rowId++;
+					rowTarget++;
 				}
-
-
-				rowId++;
-				rowTarget++;
 			}
+			
 		}
 		
 		{
@@ -532,36 +533,36 @@ namespace dyno
 			}
 
 
-			if (dataPtr == NULL)
-				return;
-
-			//BuildDataTable
-			uint rowId = first;
-			uint rowTarget = 0;
-			for (size_t i = first; i <= last; i++)
+			if (dataPtr != NULL) 
 			{
-				auto it = (*dataPtr)[i];
-
-				for (size_t j = 0; j < it.size(); j++)
+				//BuildDataTable
+				uint rowId = first;
+				uint rowTarget = 0;
+				for (size_t i = first; i <= last; i++)
 				{
-					auto trans = it[j];
+					auto it = (*dataPtr)[i];
 
-					QString value;
-					for (size_t i = 0; i < 3; i++)
+					for (size_t j = 0; j < it.size(); j++)
 					{
-						value.append(QString::number(trans[i]) + ", ");
+						auto trans = it[j];
+
+						QString value;
+						for (size_t i = 0; i < 3; i++)
+						{
+							value.append(QString::number(trans[i]) + ", ");
+
+						}
+						addItemToPosition(value, rowTarget, j, QString::number(rowId), QString("[") + QString::number(j) + QString("]"), true, rowsHeight);
+
+						value.clear();
 
 					}
-					addItemToPosition(value, rowTarget, j, QString::number(rowId), QString("[") + QString::number(j) + QString("]"), true, rowsHeight);
 
-					value.clear();
-
+					rowId++;
+					rowTarget++;
 				}
-
-
-				rowId++;
-				rowTarget++;
 			}
+
 		}
 
 
@@ -588,36 +589,36 @@ namespace dyno
 			}
 
 
-			if (dataPtr == NULL)
-				return;
-
-			//BuildDataTable
-			uint rowId = first;
-			uint rowTarget = 0;
-			for (size_t i = first; i <= last; i++)
+			if (dataPtr != NULL)
 			{
-				auto it = (*dataPtr)[i];
-
-				for (size_t j = 0; j < it.size(); j++)
+				//BuildDataTable
+				uint rowId = first;
+				uint rowTarget = 0;
+				for (size_t i = first; i <= last; i++)
 				{
-					auto trans = it[j];
+					auto it = (*dataPtr)[i];
 
-					QString value;
-					for (size_t i = 0; i < 3; i++)
+					for (size_t j = 0; j < it.size(); j++)
 					{
-						value.append(QString::number(trans[i]) + ", ");
+						auto trans = it[j];
+
+						QString value;
+						for (size_t i = 0; i < 3; i++)
+						{
+							value.append(QString::number(trans[i]) + ", ");
+
+						}
+						addItemToPosition(value, rowTarget, j, QString::number(rowId), QString("[") + QString::number(j) + QString("]"), true, rowsHeight);
+
+						value.clear();
 
 					}
-					addItemToPosition(value, rowTarget, j, QString::number(rowId), QString("[") + QString::number(j) + QString("]"), true, rowsHeight);
 
-					value.clear();
-
+					rowId++;
+					rowTarget++;
 				}
-
-
-				rowId++;
-				rowTarget++;
 			}
+			
 		}
 
 		{
@@ -643,36 +644,36 @@ namespace dyno
 			}
 
 
-			if (dataPtr == NULL)
-				return;
-
-			//BuildDataTable
-			uint rowId = first;
-			uint rowTarget = 0;
-			for (size_t i = first; i <= last; i++)
+			if (dataPtr != NULL)
 			{
-				auto it = (*dataPtr)[i];
-
-				for (size_t j = 0; j < it.size(); j++)
+				//BuildDataTable
+				uint rowId = first;
+				uint rowTarget = 0;
+				for (size_t i = first; i <= last; i++)
 				{
-					auto trans = it[j];
+					auto it = (*dataPtr)[i];
 
-					QString value;
-					for (size_t i = 0; i < 3; i++)
+					for (size_t j = 0; j < it.size(); j++)
 					{
-						value.append(QString::number(trans[i]) + ", ");
+						auto trans = it[j];
+
+						QString value;
+						for (size_t i = 0; i < 3; i++)
+						{
+							value.append(QString::number(trans[i]) + ", ");
+
+						}
+						addItemToPosition(value, rowTarget, j, QString::number(rowId), QString("[") + QString::number(j) + QString("]"), true, rowsHeight);
+
+						value.clear();
 
 					}
-					addItemToPosition(value, rowTarget, j, QString::number(rowId), QString("[") + QString::number(j) + QString("]"), true, rowsHeight);
 
-					value.clear();
-
+					rowId++;
+					rowTarget++;
 				}
-
-
-				rowId++;
-				rowTarget++;
 			}
+		
 		}
 
 	}
