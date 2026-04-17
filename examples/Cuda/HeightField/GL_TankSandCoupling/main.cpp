@@ -44,48 +44,49 @@ std::shared_ptr<ConfigurableBody<DataType3f>> getTank(std::shared_ptr<SceneGraph
 	Vec3f angle = Vec3f(0, 0, 90);
 	Quat<Real> q = Quat<Real>(angle[2] * M_PI / 180, angle[1] * M_PI / 180, angle[0] * M_PI / 180);
 	;
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("Main", 0), 0, Box));//
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("Head", 1), 1, Box));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("L0", 2), 2, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("L1", 3), 3, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("L2", 4), 4, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("L3", 5), 5, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("L4", 6), 6, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("L5", 7), 7, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("L6", 8), 8, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("R0", 9), 9, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("R1", 10), 10, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("R2", 11), 11, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("R3", 12), 12, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("R4", 13), 13, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("R5", 14), 14, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("R6", 15), 15, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("Main", 0), 0, ConfigShapeType::CONFIG_BOX));//
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("Head", 1), 1, ConfigShapeType::CONFIG_BOX));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L0", 2), 2, ConfigShapeType::CONFIG_CAPSULE));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L1", 3), 3, ConfigShapeType::CONFIG_CAPSULE));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L2", 4), 4, ConfigShapeType::CONFIG_CAPSULE));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L3", 5), 5, ConfigShapeType::CONFIG_CAPSULE));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L4", 6), 6, ConfigShapeType::CONFIG_CAPSULE ));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L5", 7), 7, ConfigShapeType::CONFIG_CAPSULE ));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L6", 8), 8, ConfigShapeType::CONFIG_CAPSULE ));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R0", 9), 9, ConfigShapeType::CONFIG_CAPSULE ));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R1", 10), 10, ConfigShapeType::CONFIG_CAPSULE ));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R2", 11), 11, ConfigShapeType::CONFIG_CAPSULE ));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R3", 12), 12, ConfigShapeType::CONFIG_CAPSULE ));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R4", 13), 13, ConfigShapeType::CONFIG_CAPSULE ));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R5", 14), 14, ConfigShapeType::CONFIG_CAPSULE ));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R6", 15), 15, ConfigShapeType::CONFIG_CAPSULE ));
 
-	for (size_t i = 0; i < configData.mVehicleRigidBodyInfo.size(); i++)
+	for (size_t i = 0; i < configData.rigidBodyConfigs.size(); i++)
 	{
-		configData.mVehicleRigidBodyInfo[i].capsuleLength = 0.3;
+		configData.rigidBodyConfigs[i].shapeConfigs[0].capsuleLength = 0.3;
+		configData.rigidBodyConfigs[i].shapeConfigs[0].rot = q;
 	}
 	float speed = 5.5;
 
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("L0", 2), Name_Shape("Main", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("L1", 3), Name_Shape("Main", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("L2", 4), Name_Shape("Main", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("L3", 5), Name_Shape("Main", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("L4", 6), Name_Shape("Main", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("L5", 7), Name_Shape("Main", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("L6", 8), Name_Shape("Main", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L0", 2), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L1", 3), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L2", 4), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L3", 5), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L4", 6), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L5", 7), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L6", 8), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
 
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("R0", 9), Name_Shape("Main", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("R1", 10), Name_Shape("Main", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("R2", 11), Name_Shape("Main", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("R3", 12), Name_Shape("Main", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("R4", 13), Name_Shape("Main", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("R5", 14), Name_Shape("Main", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("R6", 15), Name_Shape("Main", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R0", 9), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R1", 10), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R2", 11), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R3", 12), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R4", 13), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R5", 14), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R6", 15), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
 
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("Head", 1), Name_Shape("Main", 0), Fixed, Vec3f(1, 0, 0), Vec3f(0), false, 0));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("Head", 1), NameRigidID("Main", 0), ConfigJointType::CONFIG_Fixed, Vec3f(1, 0, 0), Vec3f(0), false, 0));
 
-	vehicle->varVehicleConfiguration()->setValue(configData);
+	vehicle->varConfiguration()->setValue(configData);
 
 	vehicle->varRotation()->setValue(Vec3f(0, 0, 0));
 
@@ -113,33 +114,34 @@ std::shared_ptr<ConfigurableBody<DataType3f>> getVehicle(std::shared_ptr<SceneGr
 	Vec3f angle = Vec3f(0, 0, 90);
 	Quat<Real> q = Quat<Real>(angle[2] * M_PI / 180, angle[1] * M_PI / 180, angle[0] * M_PI / 180);
 	;
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("Body", 0), 0, Box));//
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("L1", 1), 1, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("L2", 2), 2, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("L3", 3), 3, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("L4", 4), 4, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("R1", 5), 5, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("R2", 6), 6, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("R3", 7), 7, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("R4", 8), 8, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("Body", 0), 0, ConfigShapeType::CONFIG_BOX));//
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L1", 1), 1, ConfigShapeType::CONFIG_CAPSULE ));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L2", 2), 2, ConfigShapeType::CONFIG_CAPSULE ));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L3", 3), 3, ConfigShapeType::CONFIG_CAPSULE ));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L4", 4), 4, ConfigShapeType::CONFIG_CAPSULE ));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R1", 5), 5, ConfigShapeType::CONFIG_CAPSULE ));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R2", 6), 6, ConfigShapeType::CONFIG_CAPSULE ));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R3", 7), 7, ConfigShapeType::CONFIG_CAPSULE ));
+	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R4", 8), 8, ConfigShapeType::CONFIG_CAPSULE ));
 
-	for (size_t i = 0; i < configData.mVehicleRigidBodyInfo.size(); i++)
+	for (size_t i = 0; i < configData.rigidBodyConfigs.size(); i++)
 	{
-		configData.mVehicleRigidBodyInfo[i].capsuleLength = 0.3;
+		configData.rigidBodyConfigs[i].shapeConfigs[0].capsuleLength = 0.3;
+		configData.rigidBodyConfigs[i].shapeConfigs[0].rot = q;
 	}
 	float speed = 5.5;
 
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("L1", 1), Name_Shape("Body", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("L2", 2), Name_Shape("Body", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("L3", 3), Name_Shape("Body", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("L4", 4), Name_Shape("Body", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L1", 1), NameRigidID("Body", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L2", 2), NameRigidID("Body", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L3", 3), NameRigidID("Body", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L4", 4), NameRigidID("Body", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
 
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("R1", 5), Name_Shape("Main", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("R2", 6), Name_Shape("Main", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("R3", 7), Name_Shape("Main", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("R4", 8), Name_Shape("Main", 0), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R1", 5), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R2", 6), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R3", 7), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R4", 8), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
 
-	vehicle->varVehicleConfiguration()->setValue(configData);
+	vehicle->varConfiguration()->setValue(configData);
 	vehicle->varRotation()->setValue(Vec3f(0, 0, 0));
 
 	std::vector<Transform3f> vehicleTransforms;

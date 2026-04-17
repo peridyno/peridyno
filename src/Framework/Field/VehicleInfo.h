@@ -114,6 +114,18 @@ namespace dyno {
 			this->angle = angle;
 		}
 
+		RigidBodyConfig(NameRigidID name, int visualShapeId, ConfigShapeType type, Real density = 100)
+		{
+			shapeName = name;
+			visualShapeIds.push_back(visualShapeId);
+			ShapeConfig shape;
+			shape.shapeType = type;
+			shape.density = density;
+			shapeConfigs.push_back(shape);
+			this->position = position;
+			this->angle = angle;
+		}
+
 		void bindShapeConfig(
 			const ShapeConfig& shapeConfig
 		)

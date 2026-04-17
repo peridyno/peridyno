@@ -75,34 +75,30 @@ int main()
 	std::string Hand_L = std::string("Model::Hand_L");
 
 
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Hip, 0), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Hip), Box, Transform3f(), 100));//
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Trochanter_R, 1), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Trochanter_R), Box, Transform3f(), 100));//
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Thigh_R, 2), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Thigh_R), Box, Transform3f(), 100));//
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Shank_R, 3), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Shank_R), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Foot_R, 4), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Foot_R), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Trochanter_L, 5), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Trochanter_L), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Thigh_L, 6), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Thigh_L), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Shank_L, 7), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Shank_L), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Foot_L, 8), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Foot_L), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Spine, 9), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Spine), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Body, 10), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Body), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Neck, 11), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Neck), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Head, 12), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Head), Box, Transform3f(), 100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Shoulder_R, 13), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Shoulder_R), Box, Transform3f(), 20));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(UpperArm_R, 14), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(UpperArm_R), Box, Transform3f(), 40));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(LowerArm_R, 15), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(LowerArm_R), Box, Transform3f(), 40));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Wrist_R, 16), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Wrist_R), Box, Transform3f(), 10));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Hand_R, 17), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Hand_R), Box, Transform3f(), 10));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Shoulder_L, 18), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Shoulder_L), Box, Transform3f(), 20));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(UpperArm_L, 19), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(UpperArm_L), Box, Transform3f(), 40));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(LowerArm_L, 20), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(LowerArm_L), Box, Transform3f(), 40));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Wrist_L, 21), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Wrist_L), Box, Transform3f(), 10));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(Hand_L, 22), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Hand_L), Box, Transform3f(), 10));
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Hip, 0), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Hip), CONFIG_BOX,100));//
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Trochanter_R, 1), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Trochanter_R), CONFIG_BOX, 100));//
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Thigh_R, 2), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Thigh_R), CONFIG_BOX, 100));//
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Shank_R, 3), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Shank_R), CONFIG_BOX, 100));
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Foot_R, 4), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Foot_R), CONFIG_BOX, 100));
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Trochanter_L, 5), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Trochanter_L), CONFIG_BOX, 100));
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Thigh_L, 6), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Thigh_L), CONFIG_BOX, 100));
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Shank_L, 7), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Shank_L), CONFIG_BOX, 100));
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Foot_L, 8), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Foot_L), CONFIG_BOX, 100));
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Spine, 9), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Spine), CONFIG_BOX,  100));
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Body, 10), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Body), CONFIG_BOX,  100));
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Neck, 11), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Neck), CONFIG_BOX,  100));
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Head, 12), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Head), CONFIG_BOX,  100));
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Shoulder_R, 13), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Shoulder_R), CONFIG_BOX,  20));
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(UpperArm_R, 14), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(UpperArm_R), CONFIG_BOX,  40));
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(LowerArm_R, 15), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(LowerArm_R), CONFIG_BOX,  40));
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Wrist_R, 16), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Wrist_R), CONFIG_BOX,  10));
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Hand_R, 17), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Hand_R), CONFIG_BOX,  10));
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Shoulder_L, 18), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Shoulder_L), CONFIG_BOX,  20));
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(UpperArm_L, 19), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(UpperArm_L), CONFIG_BOX,  40));
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(LowerArm_L, 20), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(LowerArm_L), CONFIG_BOX,  40));
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Wrist_L, 21), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Wrist_L), CONFIG_BOX,  10));
+	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Hand_L, 22), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Hand_L), CONFIG_BOX,  10));
 
-	for (size_t i = 0; i < configData.mVehicleRigidBodyInfo.size(); i++)
-	{
-		configData.mVehicleRigidBodyInfo[i].radius = 0.2;
-	}
 
 	Vec3f offset = Vec3f(0, 0, 0);
 	Vec3f shankOffset = Vec3f(0, 0.25, 0);
@@ -113,37 +109,37 @@ int main()
 
 	Vec3f axis = Vec3f(1,0,0);
 
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Trochanter_R, 1), Name_Shape(Hip, 0), Hinge, axis, offset, true, 0,true,-90,90));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Trochanter_L, 5), Name_Shape(Hip, 0), Hinge, axis, offset, true, 0, true, -90, 90));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Shank_R, 3), Name_Shape(Thigh_R, 2), Hinge, axis, shankOffset, true, 0, true, -90, 90));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Shank_L, 7), Name_Shape(Thigh_L, 6), Hinge, axis, shankOffset, true, 0, true, -90, 90));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Foot_R, 4), Name_Shape(Shank_R, 3), Hinge, axis, footOffset, true, 0, true, -90, 90));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Foot_L, 8), Name_Shape(Shank_L, 7), Hinge, axis, footOffset, true, 0, true, -90, 90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Trochanter_R, 1), NameRigidID(Hip, 0), CONFIG_Hinge, axis, offset, true, 0,true,-90,90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Trochanter_L, 5), NameRigidID(Hip, 0), CONFIG_Hinge, axis, offset, true, 0, true, -90, 90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Shank_R, 3), NameRigidID(Thigh_R, 2), CONFIG_Hinge, axis, shankOffset, true, 0, true, -90, 90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Shank_L, 7), NameRigidID(Thigh_L, 6), CONFIG_Hinge, axis, shankOffset, true, 0, true, -90, 90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Foot_R, 4), NameRigidID(Shank_R, 3), CONFIG_Hinge, axis, footOffset, true, 0, true, -90, 90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Foot_L, 8), NameRigidID(Shank_L, 7), CONFIG_Hinge, axis, footOffset, true, 0, true, -90, 90));
 
 
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Thigh_R, 2), Name_Shape(Trochanter_R, 1), Fixed, axis, thighOffset, true, 0, true, -90, 90));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Thigh_L, 6), Name_Shape(Trochanter_L, 5), Fixed, axis, thighOffset, true, 0, true, -90, 90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Thigh_R, 2), NameRigidID(Trochanter_R, 1), CONFIG_Fixed, axis, thighOffset, true, 0, true, -90, 90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Thigh_L, 6), NameRigidID(Trochanter_L, 5), CONFIG_Fixed, axis, thighOffset, true, 0, true, -90, 90));
 
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Spine, 9), Name_Shape(Hip, 0), Fixed, Vec3f(0, 1, 0), offset, true, 0, true, -90, 90));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Body, 10), Name_Shape(Spine, 9), Fixed, Vec3f(1, 0, 0), bodyOffset, true, 0, true, -90, 90));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Neck, 11), Name_Shape(Body, 10), Fixed, Vec3f(1, 0, 0), offset, true, 0, true, -90, 90));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Head, 12), Name_Shape(Neck, 11), Fixed, Vec3f(1, 0, 0), offset, true, 0, true, -90, 90));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Shoulder_R, 13), Name_Shape(Body, 10), Fixed, Vec3f(1, 0, 0), offset, true, 0, true, -90, 90));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Shoulder_L, 18), Name_Shape(Body, 10), Fixed, Vec3f(1, 0, 0), offset, true, 0, true, -90, 90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Spine, 9), NameRigidID(Hip, 0), CONFIG_Fixed, Vec3f(0, 1, 0), offset, true, 0, true, -90, 90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Body, 10), NameRigidID(Spine, 9), CONFIG_Fixed, Vec3f(1, 0, 0), bodyOffset, true, 0, true, -90, 90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Neck, 11), NameRigidID(Body, 10), CONFIG_Fixed, Vec3f(1, 0, 0), offset, true, 0, true, -90, 90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Head, 12), NameRigidID(Neck, 11), CONFIG_Fixed, Vec3f(1, 0, 0), offset, true, 0, true, -90, 90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Shoulder_R, 13), NameRigidID(Body, 10), CONFIG_Fixed, Vec3f(1, 0, 0), offset, true, 0, true, -90, 90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Shoulder_L, 18), NameRigidID(Body, 10), CONFIG_Fixed, Vec3f(1, 0, 0), offset, true, 0, true, -90, 90));
 	
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(UpperArm_R, 14), Name_Shape(Shoulder_R, 13), Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(UpperArm_L, 19), Name_Shape(Shoulder_L, 18), Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(UpperArm_R, 14), NameRigidID(Shoulder_R, 13), CONFIG_Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(UpperArm_L, 19), NameRigidID(Shoulder_L, 18), CONFIG_Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
 
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(LowerArm_R, 15), Name_Shape(UpperArm_R, 14), Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(LowerArm_L, 20), Name_Shape(UpperArm_L, 19), Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(LowerArm_R, 15), NameRigidID(UpperArm_R, 14), CONFIG_Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(LowerArm_L, 20), NameRigidID(UpperArm_L, 19), CONFIG_Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
 
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Wrist_R, 16), Name_Shape(LowerArm_R, 15), Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Wrist_L, 21), Name_Shape(LowerArm_L, 20), Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Wrist_R, 16), NameRigidID(LowerArm_R, 15), CONFIG_Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Wrist_L, 21), NameRigidID(LowerArm_L, 20), CONFIG_Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
 	
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Hand_R, 17), Name_Shape(Wrist_R, 16), Fixed, Vec3f(1, 0, 0), handOffset, true, 0, true, -90, 90));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(Hand_L, 22), Name_Shape(Wrist_L, 21), Fixed, Vec3f(1, 0, 0), -handOffset, true, 0, true, -90, 90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Hand_R, 17), NameRigidID(Wrist_R, 16), CONFIG_Fixed, Vec3f(1, 0, 0), handOffset, true, 0, true, -90, 90));
+	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Hand_L, 22), NameRigidID(Wrist_L, 21), CONFIG_Fixed, Vec3f(1, 0, 0), -handOffset, true, 0, true, -90, 90));
 
-	robot->varVehicleConfiguration()->setValue(configData);
+	robot->varConfiguration()->setValue(configData);
 
 	robot->varGravityValue()->setValue(0);
 	

@@ -433,16 +433,19 @@ namespace dyno
 						currentCapsule.center = element.center;
 						currentCapsule.rot = element.rot;
 
-						if ((element.capsuleLength == 0 && element.radius == 0) && visualShapePtr)
-						{
-							currentCapsule.halfLength = (up.y - down.y) / 2;
-							currentCapsule.radius = std::abs(up.y - down.y) / 2;
-						}
-						else 
+						if (element.capsuleLength != 0 && element.radius != 0)
 						{
 							currentCapsule.halfLength = element.capsuleLength;
 							currentCapsule.radius = element.radius;
 						}
+						else 
+						{
+							if (element.capsuleLength == 0 && visualShapePtr)
+								currentCapsule.halfLength = (up.y - down.y) / 2;
+							if (element.radius == 0 && visualShapePtr)
+								currentCapsule.radius = std::abs(up.y - down.y) / 2;
+						}
+
 						this->bindCapsule(Actors[i], currentCapsule, element.density);
 						break;
 					}
