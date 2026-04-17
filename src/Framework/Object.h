@@ -78,7 +78,7 @@ const ClassInfo* name::getClassInfo() const \
     {return name::ms_classinfo;}
 
 #define IMPLEMENT_CLASS(name)            \
-IMPLEMENT_CLASS_COMMON(name, name::createObject) \
+IMPLEMENT_CLASS_COMMON(name, std::bind(&name::createObject)) \
 Object* name::createObject()                   \
     { return new name;}
 
@@ -102,7 +102,7 @@ const ClassInfo* name<T1>::getClassInfo() const \
     {return &name<T1>::ms_classinfo;}
 
 #define IMPLEMENT_TCLASS(name, T1)            \
-IMPLEMENT_CLASS_COMMON_1(name, T1, name<T1>::createObject) \
+IMPLEMENT_CLASS_COMMON_1(name, T1, std::bind(&name<T1>::createObject)) \
 							\
 template<typename T1>		\
 Object* name<T1>::createObject()                   \

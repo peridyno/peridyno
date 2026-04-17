@@ -109,7 +109,6 @@ namespace dyno {
 	using DArray3D = Array3D<T, DeviceType::GPU>;
 
 	typedef DArray3D<float>	Grid1f;
-	typedef DArray3D<float3> Grid3f;
 	typedef DArray3D<bool> Grid1b;
 
 
