@@ -38,7 +38,7 @@ namespace dyno
 	{
 		Q_OBJECT
 	public:
-		QShapeDetail::QShapeDetail(ShapeConfig shapeData,int id);
+		QShapeDetail(ShapeConfig shapeData,int id);
 		//QShapeDetail::QShapeDetail();
 
 		~QShapeDetail() {}
