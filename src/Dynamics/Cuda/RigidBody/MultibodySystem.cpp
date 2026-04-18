@@ -1,6 +1,7 @@
 #include "MultibodySystem.h"
 
 #include "Module/TJSConstraintSolver.h"
+#include "Module/PJSConstraintSolver.h"
 #include "Module/TJSoftConstraintSolver.h"
 #include "Module/TJConstraintSolver.h"
 #include "Module/ContactsUnion.h"
@@ -50,13 +51,23 @@ namespace dyno
 		cdBV->outContacts()->connect(merge->inContactsB());
 		this->animationPipeline()->pushModule(merge);
 
-		auto iterSolver = std::make_shared<TJConstraintSolver<TDataType>>();
+		auto iterSolver = std::make_shared<TJSConstraintSolver<TDataType>>();
 		this->stateTimeStep()->connect(iterSolver->inTimeStep());
 		this->varFrictionEnabled()->connect(iterSolver->varFrictionEnabled());
 		this->varGravityEnabled()->connect(iterSolver->varGravityEnabled());
 		this->varGravityValue()->connect(iterSolver->varGravityValue());
 		this->varFrictionCoefficient()->setValue(20.0f);
 		this->varSlop()->connect(iterSolver->varSlop());
+		this->varSolverSubStepping()->connect(iterSolver->varSubStepping());
+		this->varSolverIterationNumber()->connect(iterSolver->varIterationNumberForVelocitySolver());
+		this->varSolverLinearDamping()->connect(iterSolver->varLinearDamping());
+		this->varSolverAngularDamping()->connect(iterSolver->varAngularDamping());
+		this->varSolverHertz()->connect(iterSolver->varHertz());
+		this->varSolverDampingRatio()->connect(iterSolver->varDampingRatio());
+		this->varContactReductionEnabled()->connect(iterSolver->varContactReductionEnabled());
+		this->varMaxReducedContactsPerPair()->connect(iterSolver->varMaxReducedContactsPerPair());
+		this->varContactReductionDistance()->connect(iterSolver->varContactReductionDistance());
+		this->varContactReductionNormalCosThreshold()->connect(iterSolver->varContactReductionNormalCosThreshold());
 		this->stateMass()->connect(iterSolver->inMass());
 		this->stateCenter()->connect(iterSolver->inCenter());
 		this->stateVelocity()->connect(iterSolver->inVelocity());

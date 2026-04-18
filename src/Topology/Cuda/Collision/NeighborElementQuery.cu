@@ -441,12 +441,40 @@ namespace dyno
 
 			CollisionDetection<Real>::request(manifold, cone1, cone2);
 		}
+		else if (eleType_i == ET_BOX && eleType_j == ET_MEDIALCONE && checkCollision(mask_i, mask_j, ET_BOX, ET_MEDIALCONE))
+		{
+			auto box = boxes[ids.bodyId1 - elementOffset.boxIndex()];
+			auto cone = cones[ids.bodyId2 - elementOffset.medialConeIndex()];
+
+			CollisionDetection<Real>::request(manifold, box, cone);
+		}
+		else if (eleType_i == ET_MEDIALCONE && eleType_j == ET_BOX && checkCollision(mask_i, mask_j, ET_MEDIALCONE, ET_BOX))
+		{
+			auto cone = cones[ids.bodyId1 - elementOffset.medialConeIndex()];
+			auto box = boxes[ids.bodyId2 - elementOffset.boxIndex()];
+
+			CollisionDetection<Real>::request(manifold, cone, box);
+		}
 		else if (eleType_i == ET_MEDIALCONE && eleType_j == ET_MEDIALSLAB && checkCollision(mask_i, mask_j, ET_MEDIALCONE, ET_MEDIALSLAB))			//medial-cone-slab
 		{
 			auto cone = cones[ids.bodyId1 - elementOffset.medialConeIndex()];
 			auto slab = slabs[ids.bodyId2 - elementOffset.medialSlabIndex()];
 
 			CollisionDetection<Real>::request(manifold, cone, slab);
+		}
+		else if (eleType_i == ET_BOX && eleType_j == ET_MEDIALSLAB && checkCollision(mask_i, mask_j, ET_BOX, ET_MEDIALSLAB))
+		{
+			auto box = boxes[ids.bodyId1 - elementOffset.boxIndex()];
+			auto slab = slabs[ids.bodyId2 - elementOffset.medialSlabIndex()];
+
+			CollisionDetection<Real>::request(manifold, box, slab);
+		}
+		else if (eleType_i == ET_MEDIALSLAB && eleType_j == ET_BOX && checkCollision(mask_i, mask_j, ET_MEDIALSLAB, ET_BOX))
+		{
+			auto slab = slabs[ids.bodyId1 - elementOffset.medialSlabIndex()];
+			auto box = boxes[ids.bodyId2 - elementOffset.boxIndex()];
+
+			CollisionDetection<Real>::request(manifold, slab, box);
 		}
 		else if (eleType_i == ET_MEDIALSLAB && eleType_j == ET_MEDIALCONE && checkCollision(mask_i, mask_j, ET_MEDIALSLAB, ET_MEDIALCONE))			//medial-slab-cone
 		{
@@ -613,6 +641,9 @@ namespace dyno
 
 		int totalSize = mReduce.accumulate(count.begin(), count.size());
 
+		printf("[NeighborElementQuery] Broad-phase candidate pairs = %d (lists=%d)\n",
+			totalSize, (int)contactList.size());
+
 		if (totalSize <= 0) {
 			this->outContacts()->clear();
 			return;
@@ -758,6 +789,8 @@ namespace dyno
 		contactNumCpy.assign(contactNum);
 
 		int sum = mReduce.accumulate(contactNum.begin(), contactNum.size());
+
+		printf("[NeighborElementQuery] Narrow-phase contact points = %d\n", sum);
 
 		auto& contacts = this->outContacts()->getData();
 		mScan.exclusive(contactNum, true);

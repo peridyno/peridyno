@@ -215,8 +215,14 @@ namespace dyno
         //=========================================
         DYN_FUNC static void request(Manifold& m, const MedialCone3D& medialcone1, const MedialCone3D& medialcone2);
 
+        DYN_FUNC static void request(Manifold& m, const OBox3D& box, const MedialCone3D& medialcone);
+        DYN_FUNC static void request(Manifold& m, const MedialCone3D& medialcone, const OBox3D& box);
+
         // contact pos : tag = 0: on slab | tag = 1: on sphere
         DYN_FUNC static void request(Manifold& m, const MedialSlab3D& medialslab, const Sphere3D& sphere, int tag);
+
+        DYN_FUNC static void request(Manifold& m, const OBox3D& box, const MedialSlab3D& medialslab);
+        DYN_FUNC static void request(Manifold& m, const MedialSlab3D& medialslab, const OBox3D& box);
 
         DYN_FUNC static void request(Manifold& m, const MedialSlab3D& medialslab, const MedialCone3D& medialcone);
 

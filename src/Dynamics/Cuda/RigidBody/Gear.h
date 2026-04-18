@@ -43,7 +43,7 @@ namespace dyno
 
 		MatBody();
 		~MatBody() override;
-		void loadMa(std::string file_path, int objectId);
+		bool loadMa(std::string file_path, int objectId);
 		void setXMLPath(std::string file_path)
 		{
 			this->mXmlPath = file_path;

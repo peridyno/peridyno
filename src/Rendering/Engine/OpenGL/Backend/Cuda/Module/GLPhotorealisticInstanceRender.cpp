@@ -125,7 +125,7 @@ namespace dyno
 					pbr.color = { mtl->baseColor.x, mtl->baseColor.y, mtl->baseColor.z };
 					pbr.metallic = mtl->metallic;
 					pbr.roughness = mtl->roughness;
-					pbr.alpha = mtl->alpha;
+					pbr.alpha = this->varAlpha()->getValue() < 1.0f ? this->varAlpha()->getValue() : mtl->alpha;
 					pbr.EmissiveIntensity = mtl->emissiveIntensity;
 
 					if (mtl->texORM.isValid())

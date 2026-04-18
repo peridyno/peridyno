@@ -123,5 +123,6 @@ namespace dyno
 		DArray<Matrix> mK_3;
 
 		DArray<Real> mErrors;
+
 	};
 }

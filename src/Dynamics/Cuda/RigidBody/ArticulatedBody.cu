@@ -30,7 +30,7 @@ namespace dyno
 		this->varFilePath()->attach(callback);
 
 		this->animationPipeline()->clear();
-
+		
 		auto transformer = std::make_shared<InstanceTransform<DataType3f>>();
 		this->stateCenter()->connect(transformer->inCenter());
 		this->stateRotationMatrix()->connect(transformer->inRotationMatrix());
@@ -38,13 +38,15 @@ namespace dyno
 		this->stateBindingTag()->connect(transformer->inBindingTag());
 		this->stateInstanceTransform()->connect(transformer->inInstanceTransform());
 		this->graphicsPipeline()->pushModule(transformer);
-
+		/*
 		auto prRender = std::make_shared<GLPhotorealisticInstanceRender>();
 		this->stateTextureMesh()->connect(prRender->inTextureMesh());
 		transformer->outInstanceTransform()->connect(prRender->inTransform());
 		this->graphicsPipeline()->pushModule(prRender);
-
+		*/
 		this->setForceUpdate(true);
+		
+		
 	}
 
 	template<typename TDataType>
@@ -90,8 +92,6 @@ namespace dyno
 			}
 		}
 
-		this->stateInstanceTransform()->assign(tms);
-
 		auto deTopo = this->stateTopology()->constDataPtr();
 		auto offset = deTopo->calculateElementOffset();
 
@@ -106,11 +106,14 @@ namespace dyno
 		{
 			uint rId = mActors[i]->idx;
 			uint sId = mBindingPair[i].first;
-			bindingPair[rId] = Pair<uint, uint>(sId, instanceCount[sId]);
+			uint instanceId = instanceCount[sId];
+			bindingPair[rId] = Pair<uint, uint>(sId, instanceId);
 			tags[rId] = 1;
+			tms[sId][instanceId] = Transform3f(Coord(0), Mat3f::identityMatrix(), mBindingScale[i]);
 			instanceCount[sId]++;
 		}
 
+		this->stateInstanceTransform()->assign(tms);
 		this->stateBindingPair()->assign(bindingPair);
 		this->stateBindingTag()->assign(tags);
 
@@ -139,14 +142,20 @@ namespace dyno
 
 		if (ext == ".gltf")
 		{
+			mObjects.clear();
+			mAssets.clear();
+			mJoints.clear();
 			loadGLTFTextureMesh(texMesh, name);
 		}
 		else if (ext == ".obj")
 		{
+			mObjects.clear();
+			mAssets.clear();
+			mJoints.clear();
 			loadTextureMeshFromObj(texMesh, name, this->varDoTransform()->getValue());
 		}
 		else if (ext == ".xml") {
-			manualParseSceneConfig(name, mObjects, mAssets);
+			manualParseSceneConfig(name, mObjects, mAssets, &mJoints);
 			loadObjects(texMesh, mAssets, mObjects, this->varDoTransform()->getValue());
 		}
 	}
@@ -217,16 +226,18 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void ArticulatedBody<TDataType>::bindShape(std::shared_ptr<PdActor> actor, Pair<uint, uint> shapeId)
+	void ArticulatedBody<TDataType>::bindShape(std::shared_ptr<PdActor> actor, Pair<uint, uint> shapeId, const Vec3f& scale)
 	{
 		mActors.push_back(actor);
 		mBindingPair.push_back(shapeId);
+		mBindingScale.push_back(scale);
 	}
 
 	template<typename TDataType>
 	void ArticulatedBody<TDataType>::clearVechicle()
 	{
 		mBindingPair.clear();
+		mBindingScale.clear();
 		mActors.clear();
 	}
 

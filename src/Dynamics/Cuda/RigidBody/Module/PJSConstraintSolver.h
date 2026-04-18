@@ -122,10 +122,15 @@ namespace dyno
 		DArray<Matrix> mK_3;	
 
 		std::vector<float> errors;
+		std::vector<float> d_means;
+
+		std::vector<float> d_maxs;
 		int cnt = 0;
 
 		DArray<Real> mErrors;
 		DArray<Real> mA;
+
+		int frameNum = 0;
 
 	};
 }

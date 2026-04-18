@@ -41,7 +41,7 @@ namespace dyno
 		~ArticulatedBody() override;
 
 		//Bind rigid body to a shape in TextureMesh
-		void bindShape(std::shared_ptr<PdActor> actor, Pair<uint, uint> shapeId);
+		void bindShape(std::shared_ptr<PdActor> actor, Pair<uint, uint> shapeId, const Vec3f& scale = Vec3f(1.0f));
 
 	public:
 		DEF_VAR(FilePath, FilePath, "", "");
@@ -94,8 +94,10 @@ namespace dyno
 	public:
 		std::vector<SceneObject> mObjects;
 		std::vector<Asset> mAssets;
+		std::vector<SceneJoint> mJoints;
 	private:
 		std::vector<Pair<uint, uint>> mBindingPair;
+		std::vector<Vec3f> mBindingScale;
 
 		std::vector<std::shared_ptr<PdActor>> mActors;
 

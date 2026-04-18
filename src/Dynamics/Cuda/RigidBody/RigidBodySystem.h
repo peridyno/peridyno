@@ -191,6 +191,26 @@ namespace dyno
 
 		DEF_VAR(Real, Slop, 0.0001, "");
 
+		DEF_VAR(uint, SolverSubStepping, 10, "Number of TJS solver substeps");
+
+		DEF_VAR(uint, SolverIterationNumber, 30, "Number of TJS velocity solver iterations");
+
+		DEF_VAR(Real, SolverLinearDamping, 0.1, "Linear damping used by the TJS solver");
+
+		DEF_VAR(Real, SolverAngularDamping, 0.1, "Angular damping used by the TJS solver");
+
+		DEF_VAR(Real, SolverHertz, 300, "TJS contact stiffness in Hertz");
+
+		DEF_VAR(Real, SolverDampingRatio, 1.0, "TJS contact damping ratio");
+
+		DEF_VAR(bool, ContactReductionEnabled, true, "A toggle to reduce redundant contacts per body pair");
+
+		DEF_VAR(uint, MaxReducedContactsPerPair, 4, "Maximum reduced contacts kept for each body pair");
+
+		DEF_VAR(Real, ContactReductionDistance, 0.01, "Minimum local-space distance between reduced contacts");
+
+		DEF_VAR(Real, ContactReductionNormalCosThreshold, 0.95, "Normal similarity threshold used by contact reduction");
+
 		DEF_INSTANCE_STATE(DiscreteElements<TDataType>, Topology, "Topology");
 
 		DEF_ARRAY_STATE(Real, FrictionCoefficients, DeviceType::GPU, "FrictionCoefficients of rigid bodies");

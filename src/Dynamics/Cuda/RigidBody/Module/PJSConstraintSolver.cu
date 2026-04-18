@@ -473,6 +473,17 @@ namespace dyno
 
 		auto topo = this->inDiscreteElements()->constDataPtr();
 
+		errors.push_back(calculateAverageVelocityMagnitude(this->inVelocity()->getData()));
+
+		float d_mean, d_max;
+
+		calculatePenetration(this->inContacts()->getData(), d_mean, d_max);
+
+		d_means.push_back(d_mean);
+
+		d_maxs.push_back(d_max);
+
+
 		mImpulseC.resize(bodyNum * 2);
 		mImpulseExt.resize(bodyNum * 2);
 		mImpulseC.reset();
@@ -504,7 +515,6 @@ namespace dyno
 		{
 			int contact_size = this->inContacts()->size();
 			initializeJacobian(dt);
-			errors.push_back(checkOutErrors(mErrors));
 			int constraint_size = mVelocityConstraints.size();
 
 
@@ -538,7 +548,6 @@ namespace dyno
 			);
 
 			
-			errors.push_back(norm);
 
 			updateVelocity(
 				this->inAttribute()->getData(),
@@ -613,6 +622,50 @@ namespace dyno
 				this->inInitialInertia()->getData(),
 				dt
 			);
+		}
+
+
+		frameNum++;
+
+		if (frameNum == 1000) {
+			std::ofstream outfile;
+			outfile.open("C:/Users/admin/Desktop/PJS_S2_rms_v.txt", std::ios::out | std::ios::trunc);
+
+			if (outfile.is_open()) {
+				for (const auto& item : errors) {
+					outfile << item << "\n";
+				}
+				outfile.close();
+			}
+			else {
+				std::cerr << "errors" << std::endl;
+			}
+
+			std::ofstream outfile2;
+			outfile2.open("C:/Users/admin/Desktop/PJS_S2_d_means.txt", std::ios::out | std::ios::trunc);
+
+			if (outfile2.is_open()) {
+				for (const auto& item : d_means) {
+					outfile2 << item << "\n";
+				}
+				outfile2.close();
+			}
+			else {
+				std::cerr << "errors" << std::endl;
+			}
+
+			std::ofstream outfile3;
+			outfile3.open("C:/Users/admin/Desktop/PJS_S2_d_maxs.txt", std::ios::out | std::ios::trunc);
+
+			if (outfile3.is_open()) {
+				for (const auto& item : d_maxs) {
+					outfile3 << item << "\n";
+				}
+				outfile3.close();
+			}
+			else {
+				std::cerr << "errors" << std::endl;
+			}
 		}
 
 

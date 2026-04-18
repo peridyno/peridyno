@@ -73,6 +73,14 @@ namespace dyno
 
 		DEF_VAR(Real, distThreshold, 0.01, "");
 
+		DEF_VAR(bool, ContactReductionEnabled, true, "");
+
+		DEF_VAR(uint, MaxReducedContactsPerPair, 4, "");
+
+		DEF_VAR(Real, ContactReductionDistance, 0.01, "");
+
+		DEF_VAR(Real, ContactReductionNormalCosThreshold, 0.95, "");
+
 	public:
 		DEF_VAR_IN(Real, TimeStep, "Time step size");
 
@@ -105,7 +113,7 @@ namespace dyno
 		void constrain() override;
 
 	private:
-		void initializeJacobian(Real dt, bool resetLambda);
+		void initializeJacobian(Real dt, bool resetLambda, DArray<ContactPair> contactsInLocalFrame, bool hasFriction);
 
 	private:
 		DArray<Coord> mJ;
@@ -118,6 +126,7 @@ namespace dyno
 		DArray<Real> mLambda;
 
 		DArray<ContactPair> mContactsInLocalFrame;
+		DArray<ContactPair> mReducedContacts;
 
 		DArray<Constraint> mVelocityConstraints;
 
@@ -131,7 +140,13 @@ namespace dyno
 
 		DArray<Real> mLambdaOld;
 
+		int mPrevContactLambdaCount = 0;
+
 		std::vector<float> errors;
+
+		std::vector<float> d_means;
+
+		std::vector<float> d_maxs;
 
 		int frameNum = 0;
 

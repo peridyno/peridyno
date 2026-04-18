@@ -18,10 +18,11 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void TJSConstraintSolver<TDataType>::initializeJacobian(Real dt, bool resetLambda)
+	void TJSConstraintSolver<TDataType>::initializeJacobian(Real dt, bool resetLambda, DArray<ContactPair> contactsInLocalFrame, bool hasFriction)
 	{
 		int constraint_size = 0;
-		int contact_size = this->inContacts()->size();
+		int contact_size = contactsInLocalFrame.size();
+		int contact_constraint_size = hasFriction ? 3 * contact_size : contact_size;
 
 		auto topo = this->inDiscreteElements()->constDataPtr();
 
@@ -31,8 +32,7 @@ namespace dyno
 		int fixedJoint_size = topo->fixedJoints().size();
 		int pointJoint_size = topo->pointJoints().size();
 
-
-		constraint_size += 3 * contact_size;
+		constraint_size += contact_constraint_size;
 		constraint_size += 3 * ballAndSocketJoint_size;
 		constraint_size += 8 * sliderJoint_size;
 		constraint_size += 8 * hingeJoint_size;
@@ -46,19 +46,15 @@ namespace dyno
 
 		if (contact_size != 0)
 		{
-			auto& contacts = this->inContacts()->getData();
 			setUpContactAndFrictionConstraintsBlock(
 				mVelocityConstraints,
-				mContactsInLocalFrame,
+				contactsInLocalFrame,
 				this->inCenter()->getData(),
-				this->inRotationMatrix()->getData()
+				this->inRotationMatrix()->getData(),
+				hasFriction
 			);
 
-			current_index += contact_size;
-			if (this->varFrictionEnabled()->getData())
-			{
-				current_index += 2 * contact_size;
-			}
+			current_index += contact_constraint_size;
 		}
 
 		if (ballAndSocketJoint_size != 0)
@@ -172,7 +168,8 @@ namespace dyno
 			this->inMass()->getData(),
 			mK_1,
 			mK_2,
-			mK_3
+			mK_3,
+			hasFriction
 		);
 
 		calculateEtaVectorForPJSoft(
@@ -197,9 +194,21 @@ namespace dyno
 	void TJSConstraintSolver<TDataType>::constrain()
 	{
 		uint bodyNum = this->inCenter()->size();
+		const bool hasFriction = this->varFrictionEnabled()->getData();
+		const int contactConstraintStride = hasFriction ? 3 : 1;
 
 		auto topo = this->inDiscreteElements()->constDataPtr();
-		
+
+		errors.push_back(calculateAverageVelocityMagnitude(this->inVelocity()->getData()));
+
+		float d_mean, d_max;
+
+		calculatePenetration(this->inContacts()->getData(), d_mean, d_max);
+
+		d_means.push_back(d_mean);
+
+		d_maxs.push_back(d_max);
+
 		if (mImpulseC.size() != bodyNum * 2) {
 			mImpulseC.resize(bodyNum * 2);
 			mImpulseExt.resize(bodyNum * 2);
@@ -221,6 +230,25 @@ namespace dyno
 				this->inRotationMatrix()->getData()
 			);
 
+			DArray<ContactPair>* solverContactsPtr = &mContactsInLocalFrame;
+			if (this->varContactReductionEnabled()->getValue() && mContactsInLocalFrame.size() > 0) {
+				reduceContacts(
+					mReducedContacts,
+					mContactsInLocalFrame,
+					this->varMaxReducedContactsPerPair()->getValue(),
+					this->varContactReductionDistance()->getValue(),
+					this->varContactReductionNormalCosThreshold()->getValue()
+				);
+				if (mReducedContacts.size() > 0) {
+					solverContactsPtr = &mReducedContacts;
+				}
+			}
+			else {
+				mReducedContacts.resize(0);
+			}
+
+			auto& solverContacts = *solverContactsPtr;
+
 			if (mContactNumber.size() != bodyNum) {
 				mContactNumber.resize(bodyNum);
 			}
@@ -228,7 +256,7 @@ namespace dyno
 			mContactNumber.reset();
 
 			calculateContactPoints(
-				this->inContacts()->getData(),
+				solverContacts,
 				mContactNumber);
 
 			Real dh = dt / this->varSubStepping()->getValue();
@@ -255,21 +283,23 @@ namespace dyno
 				mImpulseC.reset();
 				
 				if (i == 0) {
-					initializeJacobian(dh, true);
-					if (cacheContacts.size() != 0 && this->varwarmStartEnabled()->getValue()) {
+					initializeJacobian(dh, true, solverContacts, hasFriction);
+					if (this->varwarmStartEnabled()->getValue() && (cacheContacts.size() != 0 || mLambdaOld.size() != 0)) {
 						RunWarmStart(
-							mContactsInLocalFrame,
+							solverContacts,
 							mLambdaOld,
 							mLambda,
 							cacheContacts,
 							this->vardistThreshold()->getValue(),
-							this->varGamma()->getValue()
+							this->varGamma()->getValue(),
+							contactConstraintStride,
+							mPrevContactLambdaCount
 						);
 					}
 				}
 				else {
 					if (this->varwarmStartEnabled()->getValue()) {
-						initializeJacobian(dh, false);
+						initializeJacobian(dh, false, solverContacts, hasFriction);
 						warmStartLambda(
 							mB,
 							mLambda,
@@ -279,7 +309,7 @@ namespace dyno
 						);
 					}
 					else {
-						initializeJacobian(dh, true);
+						initializeJacobian(dh, true, solverContacts, hasFriction);
 					}
 					
 				}
@@ -300,11 +330,11 @@ namespace dyno
 						this->varGravityValue()->getValue(),
 						dh,
 						this->varDampingRatio()->getValue(),
-						this->varHertz()->getValue()
+						this->varHertz()->getValue(),
+						hasFriction
 					);
 				}
 
-				errors.push_back(checkOutError(mJ, mImpulseC, mVelocityConstraints, mEta));
 
 				updateVelocity(
 					this->inAttribute()->getData(),
@@ -366,9 +396,9 @@ namespace dyno
 		
 		frameNum++;
 
-		if (frameNum == 500) {
+		if (frameNum == 1000) {
 			std::ofstream outfile;
-			outfile.open("C:/Users/admin/Desktop/kai.txt", std::ios::out | std::ios::trunc);
+			outfile.open("C:/Users/admin/Desktop/TJS_S2_rms_v.txt", std::ios::out | std::ios::trunc);
 
 			if (outfile.is_open()) {
 				for (const auto& item : errors) {
@@ -377,17 +407,51 @@ namespace dyno
 				outfile.close();
 			}
 			else {
-				std::cerr << "无法打开文件" << std::endl;
+				std::cerr << "errors" << std::endl;
+			}
+
+			std::ofstream outfile2;
+			outfile2.open("C:/Users/admin/Desktop/TJS_S2_d_means.txt", std::ios::out | std::ios::trunc);
+
+			if (outfile2.is_open()) {
+				for (const auto& item : d_means) {
+					outfile2 << item << "\n";
+				}
+				outfile2.close();
+			}
+			else {
+				std::cerr << "errors" << std::endl;
+			}
+
+			std::ofstream outfile3;
+			outfile3.open("C:/Users/admin/Desktop/TJS_S2_d_maxs.txt", std::ios::out | std::ios::trunc);
+
+			if (outfile3.is_open()) {
+				for (const auto& item : d_maxs) {
+					outfile3 << item << "\n";
+				}
+				outfile3.close();
+			}
+			else {
+				std::cerr << "errors" << std::endl;
 			}
 		}
 		
-		cacheContacts.resize(mContactsInLocalFrame.size());
+		DArray<ContactPair>* cachedContactsPtr = &mContactsInLocalFrame;
+		if (this->varContactReductionEnabled()->getValue() && mReducedContacts.size() > 0) {
+			cachedContactsPtr = &mReducedContacts;
+		}
+		auto& cachedContacts = *cachedContactsPtr;
+
+		cacheContacts.resize(cachedContacts.size());
 		StoreCacheKernel(
-			mContactsInLocalFrame,
+			cachedContacts,
 			mLambda,
-			cacheContacts
+			cacheContacts,
+			contactConstraintStride
 		);
 
+		mPrevContactLambdaCount = cachedContacts.size() * contactConstraintStride;
 		mLambdaOld.assign(mLambda);
 	}
 	DEFINE_CLASS(TJSConstraintSolver);
