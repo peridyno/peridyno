@@ -3,6 +3,7 @@
 //Framework
 #include "Module.h"
 #include "Node.h"
+#include "Tuple.h"
 #include "SceneGraph.h"
 
 //Node editor
@@ -14,6 +15,7 @@
 #include <QVBoxLayout>
 #include <QScrollArea>
 #include <QGridLayout>
+#include <QRadioButton>
 
 #include "PropertyItem/QStateFieldWidget.h"
 
@@ -131,6 +133,15 @@ namespace dyno
 						propertyNum[0]++;
 					}
 				}
+				else if (var->getClassName() == std::string("FTuple"))
+				{
+					auto tuple = dynamic_cast<FTuple*> (var);
+					if (tuple != nullptr)
+					{
+						addTupleFieldWidget(tuple, mPropertyLayout[0], propertyNum[0]);
+						propertyNum[0]++;
+					}
+				}
 			}
 		}
 
@@ -245,6 +256,15 @@ namespace dyno
 					{
 						this->addScalarFieldWidget(var, mPropertyLayout[0], propertyNum[0]);
 						propertyNum[0]++;
+					}
+					else if (var->getClassName() == std::string("FTuple"))
+					{
+						auto tuple = dynamic_cast<FTuple*> (var);
+						if (tuple != nullptr)
+						{
+							addTupleFieldWidget(tuple, mPropertyLayout[0], propertyNum[0]);
+							propertyNum[0]++;
+						}
 					}
 				}
 				else if (var->getFieldType() == FieldTypeEnum::State) {
@@ -371,6 +391,51 @@ namespace dyno
 		{
 			std::cout <<(field->getObjectName());
 		}
+	}
+
+	void PPropertyWidget::addTupleFieldWidget(FTuple* tuple, QGridLayout* layout, int j)
+	{
+		QString name = FormatFieldWidgetName(tuple->getObjectName());
+		name = QString("[ ") + name + QString("]");
+		QGroupBox* groupBox = new QGroupBox(name);
+		groupBox->setStyleSheet(R"(
+					QGroupBox {
+						margin-top: 12px;
+						border: 2px solid #454545;
+					}
+					QGroupBox::title {
+						subcontrol-origin: margin;
+						subcontrol-position:top center;
+					}
+				)");
+
+		QGridLayout* vbox = new QGridLayout;
+
+		for (size_t i = 0; i < tuple->size(); i++)
+		{
+			auto field = tuple->get(i);
+			QWidget* fw = createFieldWidget(field);
+
+			fw->setStyleSheet(R"(
+					QGroupBox {
+					margin-top: 4px;
+					border: 1px solid #454545;
+				}
+				)");
+
+			if (fw != nullptr) {
+				this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
+				vbox->addWidget(fw, i, 0);
+
+				//Hide the item if the field is not active in default
+				if (!field->isActive())
+					fw->setVisible(false);
+			}
+		}
+
+		groupBox->setLayout(vbox);
+
+		layout->addWidget(groupBox, j, 0);
 	}
 
 	void PPropertyWidget::addArrayFieldWidget(FBase* field)
