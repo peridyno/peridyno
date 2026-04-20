@@ -23,8 +23,8 @@ namespace dyno {
 		void constrain(DArray<Coord>& position, DArray<Coord>& velocity, DistanceField3D<TDataType>& sdf, Real dt);
 
 	public:
-		DeviceArrayField<Coord> m_position;
-		DeviceArrayField<Coord> m_velocity;
+		FDArray<Coord> m_position;
+		FDArray<Coord> m_velocity;
 
 		DEF_VAR(Real, TangentialFriction, Real(0.95), "Tangential friction");
 		DEF_VAR(Real, NormalFriction, Real(0), "Normal friction");

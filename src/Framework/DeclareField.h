@@ -51,15 +51,16 @@ private:									\
 public:									\
 	inline FInstance<T>* out##name() {return &out_##name;}
 
-// #define DEF_INSTANCE_IO(T, name, desc) \
-// private:									\
-// 	FInstance<T> io_##name = FInstance<T>(std::string(#name), desc, FieldTypeEnum::IO, this);			\
-// public:									\
-// 	inline FInstance<T>* io##name() {return &io_##name;}
 
 /**
 *	Macro definition for input/output of type Array
 */
+#define DEF_ARRAY_VAR(T, name, desc)	\
+private:								\
+	FCArray<T> var_##name = FCArray<T>(std::string("var_") + std::string(#name), desc, FieldTypeEnum::Param, this);	\
+public:									\
+	inline FCArray<T>* var##name##s() {return &var_##name;}
+
 #define DEF_ARRAY_IN(T, name, device, desc) \
 private:									\
 	FArray<T, device> in_##name = FArray<T, device>(std::string("in_") + std::string(#name), desc, FieldTypeEnum::In, this);	\
