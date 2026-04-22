@@ -83,6 +83,7 @@ namespace dyno
 
 		static QWidget* createFieldWidget(FBase* field);
 
+		bool createArrayWidget(FBase* field);
 
 		static std::map<std::string, FieldWidgetMeta> tempGetMeta() { return sFieldWidgetMeta; };
 	private:

@@ -147,12 +147,9 @@ namespace dyno
 			return qstr;
 		}
 		
-		void focusOutEvent(QFocusEvent* event) override
-		{
-			interpretText(); 
-			onEditingFinished();
-			QDoubleSpinBox::focusOutEvent(event);
-		}
+		void focusOutEvent(QFocusEvent* event) override;
+
+		void focusInEvent(QFocusEvent* event) override;
 
 		virtual double valueFromText(const QString& text) const override 
 		{
@@ -191,7 +188,6 @@ namespace dyno
 				this->setRealValue(this->value());
 			}
 			emit editingFinishedWithValue(this->realValue);
-
 		}
 
 		void triggerEditingFinished(double value)

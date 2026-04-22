@@ -18,6 +18,7 @@
 #include <QRadioButton>
 
 #include "PropertyItem/QStateFieldWidget.h"
+#include "PropertyItem/QArrayVar.h"
 
 namespace dyno
 {
@@ -266,6 +267,18 @@ namespace dyno
 							propertyNum[0]++;
 						}
 					}
+					else if (var->getClassName() == std::string("FArray")) 
+					{
+						//if (dynamic_cast<FCArray<Vec3f>*> (var))
+						//{
+						//	auto aw = new ArrayWidget<Vec3f>(dynamic_cast<FCArray<Vec3f>*> (var));
+						//	mPropertyLayout[0]->addWidget(aw);
+						//	propertyNum[0]++;
+						//}
+
+						if (createArrayWidget(var))
+							propertyNum[0]++;
+					}
 				}
 				else if (var->getFieldType() == FieldTypeEnum::State) {
 					this->addStateFieldWidget(var);
@@ -450,4 +463,33 @@ namespace dyno
 		connect(widget, &QStateFieldWidget::stateUpdated, this, &PPropertyWidget::stateFieldUpdated);
 		mPropertyLayout[1]->addWidget(widget);
 	}
+
+	bool PPropertyWidget::createArrayWidget(FBase* field)
+	{
+		if (dynamic_cast<FCArray<Vec3f>*> (field))
+		{
+			auto aw = new ArrayWidget<Vec3f>(dynamic_cast<FCArray<Vec3f>*> (field));
+			mPropertyLayout[0]->addWidget(aw);
+			return true;
+		}
+		else if (dynamic_cast<FCArray<int>*> (field))
+		{
+			auto aw = new ArrayWidget<int>(dynamic_cast<FCArray<int>*> (field));
+			mPropertyLayout[0]->addWidget(aw);
+			return true;
+		}
+		else if (dynamic_cast<FCArray<float>*> (field))
+		{
+			auto aw = new ArrayWidget<float>(dynamic_cast<FCArray<float>*> (field));
+			mPropertyLayout[0]->addWidget(aw);
+			return true;
+		}
+
+
+		return false;
+	}
+
+
 }
+
+
