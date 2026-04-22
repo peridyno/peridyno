@@ -18,7 +18,7 @@
 #include <QRadioButton>
 
 #include "PropertyItem/QStateFieldWidget.h"
-#include "PropertyItem/QArrayVar.h"
+#include "PropertyItem/QArrayWidget.h"
 
 namespace dyno
 {
