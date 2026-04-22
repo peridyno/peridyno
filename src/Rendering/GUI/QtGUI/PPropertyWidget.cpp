@@ -466,21 +466,51 @@ namespace dyno
 
 	bool PPropertyWidget::createArrayWidget(FBase* field)
 	{
-		if (dynamic_cast<FCArray<Vec3f>*> (field))
+		if (auto f = dynamic_cast<FCArray<Vec3f>*> (field))
 		{
-			auto aw = new ArrayWidget<Vec3f>(dynamic_cast<FCArray<Vec3f>*> (field));
+			auto aw = new ArrayWidget<Vec3f>(f);
 			mPropertyLayout[0]->addWidget(aw);
 			return true;
 		}
-		else if (dynamic_cast<FCArray<int>*> (field))
+		else if (auto f = dynamic_cast<FCArray<Vec3d>*> (field))
 		{
-			auto aw = new ArrayWidget<int>(dynamic_cast<FCArray<int>*> (field));
+			auto aw = new ArrayWidget<Vec3d>(f);
 			mPropertyLayout[0]->addWidget(aw);
 			return true;
 		}
-		else if (dynamic_cast<FCArray<float>*> (field))
+		else if (auto f = dynamic_cast<FCArray<int>*> (field))
 		{
-			auto aw = new ArrayWidget<float>(dynamic_cast<FCArray<float>*> (field));
+			auto aw = new ArrayWidget<int>(f);
+			mPropertyLayout[0]->addWidget(aw);
+			return true;
+		}
+		else if (auto f = dynamic_cast<FCArray<uint>*> (field))
+		{
+			auto aw = new ArrayWidget<uint>(f);
+			mPropertyLayout[0]->addWidget(aw);
+			return true;
+		}
+		else if (auto f = dynamic_cast<FCArray<float>*> (field))
+		{
+			auto aw = new ArrayWidget<float>(f);
+			mPropertyLayout[0]->addWidget(aw);
+			return true;
+		}
+		else if (auto f = dynamic_cast<FCArray<double>*> (field))
+		{
+			auto aw = new ArrayWidget<double>(f);
+			mPropertyLayout[0]->addWidget(aw);
+			return true;
+		}
+		else if (auto f = dynamic_cast<FCArray<Transform3f>*> (field))
+		{
+			auto aw = new ArrayWidget<Transform3f>(f);
+			mPropertyLayout[0]->addWidget(aw);
+			return true;
+		}
+		else if (auto f = dynamic_cast<FCArray<Transform3d>*> (field))
+		{
+			auto aw = new ArrayWidget<Transform3d>(f);
 			mPropertyLayout[0]->addWidget(aw);
 			return true;
 		}

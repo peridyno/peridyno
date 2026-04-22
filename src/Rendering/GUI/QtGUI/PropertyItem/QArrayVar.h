@@ -1,7 +1,6 @@
 /**
- * Program:   Qt-based widget to visualize Vec3f or Vec3d
- * Module:    QVector3FieldWidget.h
- *
+ * Program:  
+ * Module:    
  * Copyright 2023 Yuzhong Guo
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,6 +31,7 @@
 #include "QVector3FieldWidget.h"
 #include <typeinfo>
 #include <memory>
+#include "LockerButton.h"
 
 namespace dyno
 {
@@ -41,7 +41,53 @@ namespace dyno
         Q_OBJECT
     public:
 
-        ArrayWidgetBase(FBase* t) : QFieldWidget(t) {};
+        ArrayWidgetBase(FBase* t) : QFieldWidget(t) 
+        {
+            QString name = FormatFieldWidgetName(t->getObjectName());
+            name = QString("[ ") + name + QString("]");
+            this->setTitle(name);
+            this->setStyleSheet(R"(
+					QGroupBox {
+						margin-top: 12px;
+						border: 2px solid #454545;
+					}
+					QGroupBox::title {
+						subcontrol-origin: margin;
+						subcontrol-position:top center;
+					}
+				)");
+            auto button = new LockerButton;
+            button->setContentsMargins(8, 0, 0, 0);
+            button->SetTextLabel(QString("[ ") + FormatFieldWidgetName(t->getObjectName()) + QString(" Elements") + QString("]"));
+            button->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_right_pressed.png").c_str()));
+            button->GetTextHandle()->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+            button->GetImageHandle()->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+
+            auto mainlayout = new QVBoxLayout;
+            setLayout(mainlayout);
+
+            auto elementWidget = new QWidget;
+            layout = new QVBoxLayout;
+            layout->setSpacing(0);
+            elementWidget->setLayout(layout);
+            mainlayout->addWidget(button);
+            mainlayout->addWidget(elementWidget);
+            elementWidget->setVisible(false);
+
+            connect(button, &LockerButton::clicked, [this, button, elementWidget]() {
+                if (!mFlag)
+                {
+                    button->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_right_pressed.png").c_str()));
+                    elementWidget->setVisible(false);
+                }
+                else
+                {
+                    button->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_down_pressed.png").c_str()));
+                    elementWidget->setVisible(true);
+                }
+                mFlag = !mFlag;
+            });
+        };
         void connectSignal(QFieldWidget* field, int id);
 
         virtual void updataData(int id) = 0;
@@ -54,7 +100,10 @@ namespace dyno
             updataData(id);
         };
 
-    public:
+    protected:
+
+        QVBoxLayout* layout = NULL;
+        bool mFlag = true;
 
     };
 
@@ -68,7 +117,7 @@ namespace dyno
     private:
         FCArray<T>* dataPtr;
         std::vector<FVar<T>*> fVarArray;
-        QVBoxLayout* layout = NULL;
+        
         std::vector<QFieldWidget*> widgets;
         virtual void rebuildUI()override;
         virtual void updateArray()override;
@@ -89,8 +138,6 @@ namespace dyno
             for (size_t i = 0; i < dataPtr->size(); i++)
                 fVarArray.push_back(new FVar<T>((*dataPtr->constDataPtr())[i], "var_[Element " + std::to_string(i) + "]", "", FieldTypeEnum::Param, NULL));
 
-            layout = new QVBoxLayout;
-            setLayout(layout);
             rebuildUI();
         }       
     }
@@ -104,6 +151,8 @@ namespace dyno
         }
         widgets.clear();
 
+        bool isValidWidgetType = false;
+
         for (size_t i = 0; i < fVarArray.size(); i++)
         {
             FVar<T>* it = fVarArray[i];
@@ -111,17 +160,23 @@ namespace dyno
 
             if (QFieldWidget* field = qobject_cast<QFieldWidget*>(item)) 
             {
+                isValidWidgetType = true;
+
                 widgets.push_back(field);
                 connectSignal(field, i);
 
-            }
-
-            QHBoxLayout* elementLayout = new QHBoxLayout;
-            QLabel* label = new QLabel;
-            label->setFixedWidth(60);
-            elementLayout->addWidget(label);
-            elementLayout->addWidget(item);
-            layout->addLayout(elementLayout);
+                QHBoxLayout* elementLayout = new QHBoxLayout;
+                QLabel* label = new QLabel;
+                label->setFixedWidth(30);
+                elementLayout->addWidget(label);
+                elementLayout->addWidget(item);
+                layout->addLayout(elementLayout);
+            }  
+        }
+        if (!isValidWidgetType) 
+        {
+            layout->addWidget(new QLabel(std::string("Data Size : " + std::to_string(dataPtr->size())).c_str()));
+            layout->addWidget(new QLabel(std::string("UnsupportedFieldWidget : " + dataPtr->getTemplateName()).c_str()));
         }
     }
 

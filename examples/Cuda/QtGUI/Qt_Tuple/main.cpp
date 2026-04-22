@@ -31,20 +31,24 @@ public:
 		this->varVec3fArrays()->assign(std::vector<Vec3f>{Vec3f(5),Vec3f(1), Vec3f(10), Vec3f(3)});
 		this->varFloatArrays()->assign(std::vector<float>{1.0f, 3.1415926f,52.31f});
 		this->varIntArrays()->assign(std::vector<int>{1,3,5,10});
+		this->varTransformArrays()->assign(std::vector<Transform3f>{Transform3f(), Transform3f(), Transform3f() });
 	};
 	~MyNode() override {};
 
-	DEF_VAR(Vec3f, AnotherVec3f, Vec3f(), "Define a boolean field");
+	//DEF_VAR(Vec3f, AnotherVec3f, Vec3f(), "Define a boolean field");
 
 	DEF_TUPLE(MyTuple, Tuple, "Define a Tuple");
 
 	DEF_ARRAY_VAR(Vec3f, Vec3fArray, "");
-
 	DEF_VAR(bool, AnotherBoolean, false, "Define a boolean field");
-	DEF_VAR(bool, BBoolean, false, "Define a boolean field");
-	DEF_VAR(bool, CBoolean, false, "Define a boolean field");
-	DEF_ARRAY_VAR(float, FloatArray,"Define a boolean field");
-	DEF_ARRAY_VAR(int, IntArray,"Define a boolean field");
+	DEF_ARRAY_VAR(Vec2f, Vec2Float, "");
+	DEF_ARRAY_VAR(Vec2i, Vec2Int, "");
+
+	DEF_ARRAY_VAR(float, FloatArray,"");
+	DEF_ARRAY_VAR(int, IntArray,"");
+	DEF_ARRAY_VAR(Transform3f, TransformArray,"");
+
+	DEF_ARRAY_VAR(MyTuple, MyTuple,"");
 
 
 };
@@ -56,7 +60,12 @@ int main(int, char**)
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	//Create a custom node
-	scn->addNode(std::make_shared<MyNode>());
+	auto tupleNode = scn->addNode(std::make_shared<MyNode>());
+
+	auto f = dynamic_cast<FCArray<Tuple>*> (tupleNode->varMyTuples());
+	auto fm = dynamic_cast<FCArray<MyTuple>*> (tupleNode->varMyTuples());
+	auto f2 = TypeInfo::cast<FCArray<Tuple>> (tupleNode->varMyTuples());
+	auto fm2 = TypeInfo::cast<FCArray<MyTuple>> (tupleNode->varMyTuples());
 
 
 	QtApp app;
