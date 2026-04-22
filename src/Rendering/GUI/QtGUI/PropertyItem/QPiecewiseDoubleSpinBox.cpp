@@ -122,7 +122,6 @@ namespace dyno
 		realValue = val;
 		this->lineEdit()->setText(QString::number(realValue, 10, displayDecimals));
 		this->setKeyboardTracking(false);
-		std::cout << "result : " << this->realValue << "\n";
 		return realValue;
 	}
 

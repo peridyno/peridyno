@@ -37,12 +37,14 @@ public:
 
 	//DEF_VAR(Vec3f, AnotherVec3f, Vec3f(), "Define a boolean field");
 
+	DEF_VAR(bool, AnotherBoolean, false, "Define a boolean field");
+	DEF_VAR(Vec2f, Vec2Float, Vec2f(0), "");
+	DEF_VAR(Vec2i, Vec2Int, Vec2i(1),"");
+
 	DEF_TUPLE(MyTuple, Tuple, "Define a Tuple");
 
+
 	DEF_ARRAY_VAR(Vec3f, Vec3fArray, "");
-	DEF_VAR(bool, AnotherBoolean, false, "Define a boolean field");
-	DEF_ARRAY_VAR(Vec2f, Vec2Float, "");
-	DEF_ARRAY_VAR(Vec2i, Vec2Int, "");
 
 	DEF_ARRAY_VAR(float, FloatArray,"");
 	DEF_ARRAY_VAR(int, IntArray,"");
