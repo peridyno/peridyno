@@ -45,7 +45,12 @@ namespace dyno
 
 	protected:
 		void resetStates() override;
-	};
 
+		void updateStates() override;
+
+	private:
+		void clip();
+	};
+	
 	IMPLEMENT_TCLASS(VolumeClipper, TDataType)
 }

@@ -505,7 +505,6 @@ namespace dyno
 
 	void POpenGLWidget::nodeNodeRenderingKeyUpdated(std::shared_ptr<Node> node)
 	{
-		node->reset();
 		updateGraphicsContext(node.get());
 	}
 

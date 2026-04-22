@@ -35,8 +35,20 @@ namespace dyno
 	template<typename TDataType>
 	void VolumeClipper<TDataType>::resetStates()
 	{
+		this->clip();
+	}
+
+	template<typename TDataType>
+	void VolumeClipper<TDataType>::updateStates()
+	{
+		this->clip();
+	}
+
+	template<typename TDataType>
+	void VolumeClipper<TDataType>::clip()
+	{
 		auto center = this->varLocation()->getValue();
-		
+
 		Quat<Real> q = this->computeQuaternion();
 
 		auto levelSet = this->inLevelSet()->getDataPtr()->getSDF();
@@ -53,8 +65,8 @@ namespace dyno
 		Coord shifted_center = center + 0.5 * (lo + hi);
 
 		MarchingCubesHelper<TDataType>::countVerticeNumberForClipper(
-			voxelVertNum, 
-			levelSet, 
+			voxelVertNum,
+			levelSet,
 			TPlane3D<Real>(shifted_center, q.rotate(Coord(0, 1, 0))));
 
 		Reduction<int> reduce;
@@ -71,10 +83,10 @@ namespace dyno
 
 		MarchingCubesHelper<TDataType>::constructTrianglesForClipper(
 			this->stateField()->getData(),
-			vertices, 
+			vertices,
 			triangles,
-			voxelVertNum, 
-			levelSet, 
+			voxelVertNum,
+			levelSet,
 			TPlane3D<Real>(shifted_center, q.rotate(Coord(0, 1, 0))));
 
 		auto triSet = this->stateTriangleSet()->getDataPtr();

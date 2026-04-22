@@ -31,21 +31,26 @@ namespace dyno
 
 		Real h = sdf.getGridSpacing();
 
+		auto distances = sdf.distances();
+
+		int nx = distances.nx() - 1;
+		int ny = distances.ny() - 1;
+		int nz = distances.nz() - 1;
+
+		if (nx <= 0 || ny <= 0 || nz <= 0)
+			return false;
+
 		if (h < EPSILON)
 			return false;
 
-		int nx = (upperBound[0] - lowerBound[0]) / h;
-		int ny = (upperBound[1] - lowerBound[1]) / h;
-		int nz = (upperBound[2] - lowerBound[2]) / h;
-
-		DArray3D<Real> distances(nx + 1, ny + 1, nz + 1);
+//		DArray3D<Real> distances(nx + 1, ny + 1, nz + 1);
 		DArray<int> voxelVertNum(nx * ny * nz);
 
-		MarchingCubesHelper<TDataType>::reconstructSDF(
-			distances,
-			lowerBound,
-			h,
-			sdf);
+// 		MarchingCubesHelper<TDataType>::reconstructSDF(
+// 			distances,
+// 			lowerBound,
+// 			h,
+// 			sdf);
 
 		MarchingCubesHelper<TDataType>::countVerticeNumber(
 			voxelVertNum,
@@ -81,7 +86,6 @@ namespace dyno
 		triSet->setTriangles(triangles);
 		triSet->update();
 
-		distances.clear();
 		voxelVertNum.clear();
 		vertices.clear();
 		triangles.clear();
