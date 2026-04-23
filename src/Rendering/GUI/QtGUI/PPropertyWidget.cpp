@@ -4,6 +4,7 @@
 #include "Module.h"
 #include "Node.h"
 #include "Tuple.h"
+#include "Field/FList.h"
 #include "SceneGraph.h"
 
 //Node editor
@@ -126,23 +127,8 @@ namespace dyno
 		for  (FBase * var : fields)
 		{
 			if (var != nullptr) {
-				if (var->getFieldType() == FieldTypeEnum::Param)
-				{
-					if (var->getClassName() == std::string("FVar"))
-					{
-						this->addScalarFieldWidget(var, mPropertyLayout[0], propertyNum[0]);
-						propertyNum[0]++;
-					}
-				}
-				else if (var->getClassName() == std::string("FTuple"))
-				{
-					auto tuple = dynamic_cast<FTuple*> (var);
-					if (tuple != nullptr)
-					{
-						addTupleFieldWidget(tuple, mPropertyLayout[0], propertyNum[0]);
-						propertyNum[0]++;
-					}
-				}
+				this->addVariableFieldWidget(var, mPropertyLayout[0]);
+				propertyNum[0]++;
 			}
 		}
 
@@ -253,32 +239,8 @@ namespace dyno
 			if (var != nullptr) {
 				if (var->getFieldType() == FieldTypeEnum::Param)
 				{
-					if (var->getClassName() == std::string("FVar"))
-					{
-						this->addScalarFieldWidget(var, mPropertyLayout[0], propertyNum[0]);
-						propertyNum[0]++;
-					}
-					else if (var->getClassName() == std::string("FTuple"))
-					{
-						auto tuple = dynamic_cast<FTuple*> (var);
-						if (tuple != nullptr)
-						{
-							addTupleFieldWidget(tuple, mPropertyLayout[0], propertyNum[0]);
-							propertyNum[0]++;
-						}
-					}
-					else if (var->getClassName() == std::string("FArray")) 
-					{
-						//if (dynamic_cast<FCArray<Vec3f>*> (var))
-						//{
-						//	auto aw = new ArrayWidget<Vec3f>(dynamic_cast<FCArray<Vec3f>*> (var));
-						//	mPropertyLayout[0]->addWidget(aw);
-						//	propertyNum[0]++;
-						//}
-
-						if (createArrayWidget(var))
-							propertyNum[0]++;
-					}
+					this->addVariableFieldWidget(var, mPropertyLayout[0]);
+					propertyNum[0]++;
 				}
 				else if (var->getFieldType() == FieldTypeEnum::State) {
 					this->addStateFieldWidget(var);
@@ -388,25 +350,30 @@ namespace dyno
 		return fw;
 	}
 
-	void PPropertyWidget::addScalarFieldWidget(FBase* field, QGridLayout* layout,int j)
+	QWidget* PPropertyWidget::addScalarFieldWidget(FBase* field, QGridLayout* layout)
 	{
+		if (field->getClassName() != std::string("FVar")) return nullptr;
+
 		QWidget* fw = createFieldWidget(field);
 		
 		if(fw != nullptr) {
 			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
-			layout->addWidget(fw, j, 0);
 
 			//Hide the item if the field is not active in default
 			if (!field->isActive())
 				fw->setVisible(false);
+
+			if(layout != nullptr) layout->addWidget(fw);
 		}
 		else 
 		{
 			std::cout <<(field->getObjectName());
 		}
+
+		return fw;
 	}
 
-	void PPropertyWidget::addTupleFieldWidget(FTuple* tuple, QGridLayout* layout, int j)
+	QWidget* PPropertyWidget::addTupleFieldWidget(FTuple* tuple, QGridLayout* layout)
 	{
 		QString name = FormatFieldWidgetName(tuple->getObjectName());
 		name = QString("[ ") + name + QString("]");
@@ -427,34 +394,72 @@ namespace dyno
 		for (size_t i = 0; i < tuple->size(); i++)
 		{
 			auto field = tuple->get(i);
-			QWidget* fw = createFieldWidget(field);
+			QWidget* fw = this->addVariableFieldWidget(field, vbox);
 
-			fw->setStyleSheet(R"(
+			if (fw != nullptr) {
+				fw->setStyleSheet(R"(
 					QGroupBox {
 					margin-top: 4px;
 					border: 1px solid #454545;
 				}
 				)");
-
-			if (fw != nullptr) {
-				this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
-				vbox->addWidget(fw, i, 0);
-
-				//Hide the item if the field is not active in default
-				if (!field->isActive())
-					fw->setVisible(false);
 			}
 		}
 
 		groupBox->setLayout(vbox);
 
-		layout->addWidget(groupBox, j, 0);
+		if(layout != nullptr) layout->addWidget(groupBox);
+
+		return groupBox;
 	}
 
-	void PPropertyWidget::addArrayFieldWidget(FBase* field)
+	QWidget* PPropertyWidget::addListFieldWidget(FList* field, QGridLayout* layout)
 	{
-		auto fw = new QStateFieldWidget(field);
-		this->addWidget(fw);
+		if (field->getClassName() != std::string("FList")) return nullptr;
+
+		if (auto f = dynamic_cast<FList*> (field))
+		{
+			auto aw = new ArrayWidget<float>(f);
+
+			auto it_begin = f->begin();
+
+			for (auto it = it_begin; it != f->end(); it++)
+			{
+				auto field = *it;
+				QWidget* fw = addVariableFieldWidget(field);
+
+				aw->addItem(fw);
+			}
+
+			if (layout != nullptr) layout->addWidget(aw);
+
+			return aw;
+		}
+
+		return nullptr;
+	}
+
+	QWidget* PPropertyWidget::addVariableFieldWidget(FBase* field, QGridLayout* layout)
+	{
+		if (field->getClassName() == std::string("FVar"))
+		{
+			return this->addScalarFieldWidget(field, layout);
+		}
+		else if (field->getClassName() == std::string("FTuple"))
+		{
+			auto tuple = dynamic_cast<FTuple*> (field);
+			if (tuple != nullptr)
+			{
+				return addTupleFieldWidget(tuple, layout);
+			}
+		}
+		else if (field->getClassName() == std::string("FList"))
+		{
+			auto flist = dynamic_cast<FList*> (field);
+			return addListFieldWidget(flist, layout);
+		}
+
+		return nullptr;
 	}
 
 	void PPropertyWidget::addStateFieldWidget(FBase* field)
@@ -463,63 +468,6 @@ namespace dyno
 		connect(widget, &QStateFieldWidget::stateUpdated, this, &PPropertyWidget::stateFieldUpdated);
 		mPropertyLayout[1]->addWidget(widget);
 	}
-
-	bool PPropertyWidget::createArrayWidget(FBase* field)
-	{
-		if (auto f = dynamic_cast<FCArray<Vec3f>*> (field))
-		{
-			auto aw = new ArrayWidget<Vec3f>(f);
-			mPropertyLayout[0]->addWidget(aw);
-			return true;
-		}
-		else if (auto f = dynamic_cast<FCArray<Vec3d>*> (field))
-		{
-			auto aw = new ArrayWidget<Vec3d>(f);
-			mPropertyLayout[0]->addWidget(aw);
-			return true;
-		}
-		else if (auto f = dynamic_cast<FCArray<int>*> (field))
-		{
-			auto aw = new ArrayWidget<int>(f);
-			mPropertyLayout[0]->addWidget(aw);
-			return true;
-		}
-		else if (auto f = dynamic_cast<FCArray<uint>*> (field))
-		{
-			auto aw = new ArrayWidget<uint>(f);
-			mPropertyLayout[0]->addWidget(aw);
-			return true;
-		}
-		else if (auto f = dynamic_cast<FCArray<float>*> (field))
-		{
-			auto aw = new ArrayWidget<float>(f);
-			mPropertyLayout[0]->addWidget(aw);
-			return true;
-		}
-		else if (auto f = dynamic_cast<FCArray<double>*> (field))
-		{
-			auto aw = new ArrayWidget<double>(f);
-			mPropertyLayout[0]->addWidget(aw);
-			return true;
-		}
-		else if (auto f = dynamic_cast<FCArray<Transform3f>*> (field))
-		{
-			auto aw = new ArrayWidget<Transform3f>(f);
-			mPropertyLayout[0]->addWidget(aw);
-			return true;
-		}
-		else if (auto f = dynamic_cast<FCArray<Transform3d>*> (field))
-		{
-			auto aw = new ArrayWidget<Transform3d>(f);
-			mPropertyLayout[0]->addWidget(aw);
-			return true;
-		}
-
-
-		return false;
-	}
-
-
 }
 
 

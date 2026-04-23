@@ -37,6 +37,7 @@ namespace dyno
 	class OBase;
 	class Node;
 	class FBase;
+	class FList;
 	class FTuple;
 	class Module;
 
@@ -83,15 +84,15 @@ namespace dyno
 
 		static QWidget* createFieldWidget(FBase* field);
 
-		bool createArrayWidget(FBase* field);
-
 		static std::map<std::string, FieldWidgetMeta> tempGetMeta() { return sFieldWidgetMeta; };
 	private:
 		static std::map<std::string, FieldWidgetMeta> sFieldWidgetMeta;
 
-		void addScalarFieldWidget(FBase* field, QGridLayout* layout,int j);
-		void addTupleFieldWidget(FTuple* field, QGridLayout* layout, int j);
-		void addArrayFieldWidget(FBase* field);
+		QWidget* addScalarFieldWidget(FBase* field, QGridLayout* layout = nullptr);
+		QWidget* addTupleFieldWidget(FTuple* field, QGridLayout* layout = nullptr);
+		QWidget* addListFieldWidget(FList* field, QGridLayout* layout = nullptr);
+
+		QWidget* addVariableFieldWidget(FBase* field, QGridLayout* layout = nullptr);
 
 		void addStateFieldWidget(FBase* field);
 

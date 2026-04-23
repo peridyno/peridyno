@@ -17,52 +17,76 @@
 
 #include <list>
 
-#include "FBase.h"
-
-#include "Array/Array.h"
+#include "Field.h"
+#include "Tuple.h"
 
 namespace dyno {
+
+	class FList : public FBase
+	{
+	public:
+		FList() : FBase("", "") {}
+		FList(std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent)
+			: FBase(name, description, fieldType, parent) {}
+
+		~FList() override {};
+
+		const std::string getClassName() override { return "FList"; }
+
+		virtual std::list<FBase*>::iterator begin() = 0;
+
+		virtual std::list<FBase*>::iterator end() = 0;
+
+	protected:
+		std::list<FBase*> mListOfFieldPtr;
+	};
+
 	/*!
 	*	\class 	Variable of List
 	*	\brief	Variables of build-in data types.
 	*/
 	template<typename T>
-	class FList : public FBase
+	class TFList : public FList
 	{
 	public:
-		typedef T					VarType;
-		typedef std::list<T>		DataType;
-		typedef FList<T>			FieldType;
+		typedef T						VarType;
+		typedef std::list<FBase*>		DataType;
+		typedef TFList<T>				FieldType;
 
-		FList() : FBase("", "") {}
-		FList(std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent)
-			: FBase(name, description, fieldType, parent) {}
+		TFList() : FList("", "") {}
+		TFList(std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent)
+			: FList(name, description, fieldType, parent) {}
 
-		~FList() override;
+		~TFList() override {};
 
 		const std::string getTemplateName() override { return std::string(typeid(VarType).name()); }
-		const std::string getClassName() override { return "FList"; }
 
-		uint size() override { return mList.size(); }
+		uint size() override { 
+			auto data_ptr = this->constDataPtr();
+			return data_ptr == nullptr ? 0 : data_ptr->size();
+		}
 
 		inline std::string serialize() override { return "Unknown"; }
 		inline bool deserialize(const std::string& str) override { return false; }
 
+		typename std::list<FBase*>::iterator begin() override {
+			auto data_ptr = this->constDataPtr();
+			return data_ptr->begin();
+		}
+
+		typename std::list<FBase*>::iterator end() override {
+			auto data_ptr = this->constDataPtr();
+			return data_ptr->end();
+		}
+
 		void insert(T val);
 
 		bool isEmpty() override {
-			auto& data = this->constData();
-			return data.size() == 0;
+			auto data_ptr = this->constDataPtr();
+			return data_ptr == nullptr || data_ptr->size() == 0;
 		}
 
-		const DataType& constData()
-		{
-			FBase* topField = this->getTopField();
-			FieldType* derived = dynamic_cast<FieldType*>(topField);
-			return derived->mList;
-		}
-
-		bool bind(FieldType* dst)
+		bool quote(FieldType* dst)
 		{
 			if (this->getFieldType() != FieldTypeEnum::Param || dst->getFieldType() != FieldTypeEnum::Param)
 				return false;
@@ -71,45 +95,61 @@ namespace dyno {
 			return true;
 		}
 
-	protected:
+	private:
+		std::shared_ptr<DataType>& constDataPtr()
+		{
+			FBase* topField = this->getTopField();
+			FieldType* derived = dynamic_cast<FieldType*>(topField);
+			return derived->mDataPtr;
+		}
+
+		std::shared_ptr<DataType>& getDataPtr()
+		{
+			FBase* topField = this->getTopField();
+			FieldType* derived = dynamic_cast<FieldType*>(topField);
+			return derived->mDataPtr;
+		}
+
 		bool connect(FBase* dst) override {
 			FieldType* derived = dynamic_cast<FieldType*>(dst);
 			if (derived == nullptr) return false;
-			return this->bind(derived);
+			return this->quote(derived);
 		}
 
-	private:
-		std::list<T> mList;
+		std::shared_ptr<DataType> mDataPtr = std::make_shared<DataType>();
 	};
 
 	template<typename T>
-	void FList<T>::insert(T val)
+	void TFList<T>::insert(T val)
 	{
-		std::shared_ptr<T>& data = this->getDataPtr();
-		if (data == nullptr)
-		{
-			data = std::make_shared<T>(val);
+		auto& data = this->getDataPtr();
+
+		FBase* f = nullptr;
+
+		//if constexpr requires C++ 17
+		if constexpr (std::is_base_of<Tuple, T>::value) {
+			f = new TFTuple<T>();
 		}
 		else
 		{
-			*data = val;
+			auto derived = new FVar<T>();
+			derived->setValue(val);
+			f = derived;
 		}
+
+		data->push_back(f);
 
 		this->update();
 
 		this->tick();
 	}
 
-	template<typename T>
-	FList<T>::~FList()
-	{
-	};
 
 #define DEF_LIST(T, name, desc) \
 private:									\
-	FList<T> var_##name = FList<T>(std::string(#name), desc, FieldTypeEnum::Param, this);			\
+	TFList<T> var_##name = TFList<T>(std::string(#name), desc, FieldTypeEnum::Param, this);			\
 public:										\
-	inline FList<T>* var##name() {return &var_##name;}
+	inline TFList<T>* var##name() {return &var_##name;}
 }
 
 #include "FList.inl"

@@ -15,7 +15,7 @@
  */
 #pragma once
 #include "OBase.h"
-#
+
 #include "DeclareEnum.h"
 #include "DeclareField.h"
 
@@ -60,7 +60,7 @@ namespace dyno {
 		typedef T				DataType;
 		typedef TFTuple<T>			FieldType;
 
-		TFTuple() : FBase("", "") { m_data = std::make_shared<DataType>(); }
+		TFTuple() : FTuple() { m_data = std::make_shared<DataType>(); }
 		TFTuple(std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent)
 			: FTuple(name, description, fieldType, parent) {
 			m_data = std::make_shared<DataType>();

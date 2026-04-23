@@ -49,6 +49,8 @@ namespace dyno
         virtual void rebuildUI() = 0;
         virtual void updateArray() = 0;
 
+        virtual void addItem(QWidget* item) = 0;
+
     public slots:
         void OnElementUpdate(int id) 
         {
@@ -70,6 +72,8 @@ namespace dyno
     public:
      
         explicit ArrayWidget(FBase* t);
+
+        void addItem(QWidget* item) override;
 
     private:
         FCArray<T>* dataPtr;
@@ -95,9 +99,28 @@ namespace dyno
             for (size_t i = 0; i < dataPtr->size(); i++)
                 fVarArray.push_back(new FVar<T>((*dataPtr->constDataPtr())[i], "var_[Element " + std::to_string(i) + "]", "", FieldTypeEnum::Param, NULL));
 
-            rebuildUI();
+            //rebuildUI();
         }       
     }
+
+	template<typename T>
+	void ArrayWidget<T>::addItem(QWidget* item)
+	{
+		//if (QFieldWidget* field = qobject_cast<QFieldWidget*>(item))
+		{
+			//isValidWidgetType = true;
+
+//             connectSignal(field, widgets.size());
+// 			widgets.push_back(field);
+
+			QHBoxLayout* elementLayout = new QHBoxLayout;
+			QLabel* label = new QLabel;
+			label->setFixedWidth(30);
+			elementLayout->addWidget(label);
+			elementLayout->addWidget(item);
+			layout->addLayout(elementLayout);
+		}
+	}
 
     template<typename T>
     void ArrayWidget<T>::rebuildUI()
@@ -115,26 +138,13 @@ namespace dyno
             FVar<T>* it = fVarArray[i];
             auto item = PPropertyWidget::createFieldWidget(it);
 
-            if (QFieldWidget* field = qobject_cast<QFieldWidget*>(item)) 
-            {
-                isValidWidgetType = true;
-
-                widgets.push_back(field);
-                connectSignal(field, i);
-
-                QHBoxLayout* elementLayout = new QHBoxLayout;
-                QLabel* label = new QLabel;
-                label->setFixedWidth(30);
-                elementLayout->addWidget(label);
-                elementLayout->addWidget(item);
-                layout->addLayout(elementLayout);
-            }  
+            this->addItem(item);
         }
-        if (!isValidWidgetType) 
-        {
-            layout->addWidget(new QLabel(std::string("Data Size : " + std::to_string(dataPtr->size())).c_str()));
-            layout->addWidget(new QLabel(std::string("UnsupportedFieldWidget : " + dataPtr->getTemplateName()).c_str()));
-        }
+//         if (!isValidWidgetType) 
+//         {
+//             layout->addWidget(new QLabel(std::string("Data Size : " + std::to_string(dataPtr->size())).c_str()));
+//             layout->addWidget(new QLabel(std::string("UnsupportedFieldWidget : " + dataPtr->getTemplateName()).c_str()));
+//         }
     }
 
     template<typename T>
