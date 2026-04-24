@@ -36,9 +36,6 @@ namespace dyno {
 		virtual std::list<std::unique_ptr<FBase>>::iterator begin() = 0;
 
 		virtual std::list<std::unique_ptr<FBase>>::iterator end() = 0;
-
-	protected:
-		std::list<std::unique_ptr<FBase>> mListOfFieldPtr;
 	};
 
 	/*!
