@@ -425,7 +425,7 @@ namespace dyno
 
 			for (auto it = it_begin; it != f->end(); it++)
 			{
-				auto field = *it;
+				auto field = (*it).get();
 				QWidget* fw = addVariableFieldWidget(field);
 
 				aw->addItem(fw);

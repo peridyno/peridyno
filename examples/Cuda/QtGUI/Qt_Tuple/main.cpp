@@ -32,7 +32,7 @@ public:
 // 		this->varIntArrays()->assign(std::vector<int>{1,3,5,10});
 // 		this->varTransformArrays()->assign(std::vector<Transform3f>{Transform3f(), Transform3f(), Transform3f() });
 
- 		this->varFloatList()->insert(1.0f);
+  		this->varFloatList()->insert(1.0f);
 		this->varFloatList()->insert(3.1415926f);
 		this->varFloatList()->insert(52.31f);
 

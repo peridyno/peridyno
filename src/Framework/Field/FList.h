@@ -33,12 +33,12 @@ namespace dyno {
 
 		const std::string getClassName() override { return "FList"; }
 
-		virtual std::list<FBase*>::iterator begin() = 0;
+		virtual std::list<std::unique_ptr<FBase>>::iterator begin() = 0;
 
-		virtual std::list<FBase*>::iterator end() = 0;
+		virtual std::list<std::unique_ptr<FBase>>::iterator end() = 0;
 
 	protected:
-		std::list<FBase*> mListOfFieldPtr;
+		std::list<std::unique_ptr<FBase>> mListOfFieldPtr;
 	};
 
 	/*!
@@ -49,9 +49,9 @@ namespace dyno {
 	class TFList : public FList
 	{
 	public:
-		typedef T						VarType;
-		typedef std::list<FBase*>		DataType;
-		typedef TFList<T>				FieldType;
+		typedef T										VarType;
+		typedef std::list<std::unique_ptr<FBase>>		DataType;
+		typedef TFList<T>								FieldType;
 
 		TFList() : FList("", "") {}
 		TFList(std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent)
@@ -69,12 +69,12 @@ namespace dyno {
 		inline std::string serialize() override { return "Unknown"; }
 		inline bool deserialize(const std::string& str) override { return false; }
 
-		typename std::list<FBase*>::iterator begin() override {
+		typename DataType::iterator begin() override {
 			auto data_ptr = this->constDataPtr();
 			return data_ptr->begin();
 		}
 
-		typename std::list<FBase*>::iterator end() override {
+		typename DataType::iterator end() override {
 			auto data_ptr = this->constDataPtr();
 			return data_ptr->end();
 		}
@@ -124,20 +124,16 @@ namespace dyno {
 	{
 		auto& data = this->getDataPtr();
 
-		FBase* f = nullptr;
-
 		//if constexpr requires C++ 17
 		if constexpr (std::is_base_of<Tuple, T>::value) {
-			f = new TFTuple<T>();
+			data->push_back(std::move(std::make_unique<TFTuple<T>>()));
 		}
 		else
 		{
-			auto derived = new FVar<T>();
+			auto derived = std::make_unique<FVar<T>>();
 			derived->setValue(val);
-			f = derived;
+			data->push_back(std::move(derived));
 		}
-
-		data->push_back(f);
 
 		this->update();
 
