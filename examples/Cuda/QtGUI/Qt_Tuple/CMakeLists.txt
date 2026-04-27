@@ -1,5 +1,11 @@
 set(LIB_DEPENDENCY 
-    Core 
-    Framework 
-    QtGUI)
+     Modeling
+     RigidBody
+     HeightField
+     ParticleSystem
+     Peridynamics
+     SemiAnalyticalScheme
+     Multiphysics
+     UbiGUI
+     )
 add_example(Qt_Tuple Qt LIB_DEPENDENCY)

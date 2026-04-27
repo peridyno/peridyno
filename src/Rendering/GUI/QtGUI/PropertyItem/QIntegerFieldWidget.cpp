@@ -1,6 +1,13 @@
 #include "QIntegerFieldWidget.h"
 
 #include <QGridLayout>
+#include <QDialog>
+#include <QVBoxLayout>
+#include <QFormLayout>
+#include <QPushButton>
+#include <QMenu>
+#include <QMouseEvent>
+#include <climits>
 
 #include "Field.h"
 #include "QPiecewiseSpinBox.h"
@@ -34,14 +41,20 @@ namespace dyno
 		//Set label tips
 		name->setToolTip(str);
 
-		QPiecewiseSpinBox* spinner = new QPiecewiseSpinBox;
-		spinner->setRange(castMinimum<int>(field->getMin()), castMaximum<int>(field->getMax()));
+		mSpinner = new QPiecewiseSpinBox;
+		mSpinner->setRange(castMinimum<int>(field->getMin()), castMaximum<int>(field->getMax()));
+		mSpinner->setValue(f->getValue());
+		mSpinner->setFixedWidth(100);
 
 		layout->addWidget(name, 0, 0);
-		layout->addWidget(spinner, 0, 1, Qt::AlignRight);
+		layout->addWidget(mSpinner, 0, 1, Qt::AlignRight);
 
+		this->connect(mSpinner, SIGNAL(valueChanged(int)), this, SLOT(updateField(int)));
 
-		this->connect(spinner, SIGNAL(valueChanged(int)), this, SLOT(updateField(int)));
+		mRightMenu = new QMenu(this);
+		mRightMenu->addAction("Set Range", this, &QIntegerFieldWidget::editRange);
+
+		this->installEventFilter(this);
 
 	}
 
@@ -77,16 +90,23 @@ namespace dyno
 		name->setFixedHeight(18);
 		name->setText(FormatFieldWidgetName(field->getObjectName()));
 
-		QPiecewiseSpinBox* spinner = new QPiecewiseSpinBox;
-		spinner->setFixedWidth(100);
-		spinner->setRange(castMinimum<uint>(field->getMin()), castMaximum<int>(field->getMax()));
-		spinner->setValue(f->getValue());
+		mSpinner = new QPiecewiseSpinBox;
+		mSpinner->setFixedWidth(100);
+
+		mSpinner->setRange(castMinimum<int>(field->getMin()) >= 0 ? castMinimum<int>(field->getMin()) : 0,
+			castMaximum<int>(field->getMax()) >= 0 ? castMaximum<int>(field->getMax()) : 0);
+		mSpinner->setValue(f->getValue());
 
 		layout->addWidget(name, 0, 0);
-		layout->addWidget(spinner, 0, 1, Qt::AlignRight);
+		layout->addWidget(mSpinner, 0, 1, Qt::AlignRight);
 		layout->setSpacing(3);
 
-		this->connect(spinner, SIGNAL(valueChanged(int)), this, SLOT(updateField(int)));
+		this->connect(mSpinner, SIGNAL(valueChanged(int)), this, SLOT(updateField(int)));
+
+		mRightMenu = new QMenu(this);
+		mRightMenu->addAction("Set Range", this, &QUIntegerFieldWidget::editRange);
+
+		this->installEventFilter(this);
 	}
 
 	void QUIntegerFieldWidget::updateField(int value)
@@ -98,5 +118,137 @@ namespace dyno
 		f->setValue(value,false);
 		emit fieldChanged();
 	}
-}
 
+	bool QIntegerFieldWidget::eventFilter(QObject* watched, QEvent* event)
+	{
+		if (watched == this && event->type() == QEvent::MouseButtonPress)
+		{
+			QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+			if (mouseEvent->button() == Qt::RightButton)
+			{
+				mRightMenu->exec(mouseEvent->globalPos());
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void QIntegerFieldWidget::editRange()
+	{
+		QDialog* dialog = new QDialog(this);
+		dialog->setWindowTitle("Set Range");
+		dialog->setFixedSize(300, 150);
+
+		QVBoxLayout* mainLayout = new QVBoxLayout(dialog);
+		QFormLayout* formLayout = new QFormLayout();
+		QSpinBox* minSpinBox = new QSpinBox();
+		QSpinBox* maxSpinBox = new QSpinBox();
+
+		minSpinBox->setRange(INT_MIN, INT_MAX);
+		maxSpinBox->setRange(INT_MIN, INT_MAX);
+		minSpinBox->setValue(castMinimum<int>(field()->getMin()));
+		maxSpinBox->setValue(castMaximum<int>(field()->getMax()));
+		formLayout->addRow("Minimum:", minSpinBox);
+		formLayout->addRow("Maximum:", maxSpinBox);
+
+		QHBoxLayout* buttonLayout = new QHBoxLayout();
+		QPushButton* okButton = new QPushButton("OK");
+		QPushButton* cancelButton = new QPushButton("Cancel");
+
+		buttonLayout->addStretch();
+		buttonLayout->addWidget(okButton);
+		buttonLayout->addWidget(cancelButton);
+		mainLayout->addLayout(formLayout);
+		mainLayout->addLayout(buttonLayout);
+
+		QObject::connect(okButton, &QPushButton::clicked, [=]() {
+			int min = minSpinBox->value();
+			int max = maxSpinBox->value();
+
+			if (min > max) {
+				std::swap(min, max);
+				minSpinBox->setValue(min);
+				maxSpinBox->setValue(max);
+				return;
+			}
+
+			field()->setRange(min, max);
+			mSpinner->setRange(min, max);
+			dialog->accept();
+		});
+
+		QObject::connect(cancelButton, &QPushButton::clicked, dialog, &QDialog::reject);
+		dialog->exec();		
+		delete dialog;
+	}
+
+	bool QUIntegerFieldWidget::eventFilter(QObject* watched, QEvent* event)
+	{
+		if (watched == this && event->type() == QEvent::MouseButtonPress)
+		{
+			QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+			if (mouseEvent->button() == Qt::RightButton)
+			{
+				mRightMenu->exec(mouseEvent->globalPos());
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void QUIntegerFieldWidget::editRange()
+	{
+		QDialog* dialog = new QDialog(this);
+		dialog->setWindowTitle("Set Range");
+		dialog->setFixedSize(300, 150);
+
+		QVBoxLayout* mainLayout = new QVBoxLayout(dialog);
+		QFormLayout* formLayout = new QFormLayout();
+		QSpinBox* minSpinBox = new QSpinBox();
+		QSpinBox* maxSpinBox = new QSpinBox();
+
+		int currentMin = castMinimum<int>(field()->getMin()) >= 0 ? castMinimum<int>(field()->getMin()) : 0;
+		int currentMax = castMaximum<int>(field()->getMax()) >= 0 ? castMaximum<int>(field()->getMax()) : 0;
+		
+		minSpinBox->setRange(0, INT_MAX);
+		maxSpinBox->setRange(0, INT_MAX);
+
+		minSpinBox->setValue(currentMin);
+		maxSpinBox->setValue(currentMax);
+
+		formLayout->addRow("Minimum:", minSpinBox);
+		formLayout->addRow("Maximum:", maxSpinBox);
+
+		QHBoxLayout* buttonLayout = new QHBoxLayout();
+		QPushButton* okButton = new QPushButton("OK");
+		QPushButton* cancelButton = new QPushButton("Cancel");
+
+		buttonLayout->addStretch();
+		buttonLayout->addWidget(okButton);
+		buttonLayout->addWidget(cancelButton);
+
+		mainLayout->addLayout(formLayout);
+		mainLayout->addLayout(buttonLayout);
+
+		QObject::connect(okButton, &QPushButton::clicked, [=]() {
+			int min = minSpinBox->value();
+			int max = maxSpinBox->value();
+
+			if (min > max) {
+				std::swap(min, max);
+				minSpinBox->setValue(min);
+				maxSpinBox->setValue(max);
+				return;
+			}
+
+			field()->setRange(min, max);
+			mSpinner->setRange(min, max);
+			dialog->accept();
+		});
+
+		QObject::connect(cancelButton, &QPushButton::clicked, dialog, &QDialog::reject);
+
+		dialog->exec();
+		delete dialog;
+	}
+}

@@ -249,8 +249,13 @@ namespace dyno
 	protected:
 		void mousePressEvent(QMouseEvent* event) override
 		{
-			current = !current;
-			emit toggle(current);
+			if (event->button() == Qt::LeftButton)
+			{
+				current = !current;
+				emit toggle(current);
+			}
+
+			QWidget::mousePressEvent(event);
 		}
 
 

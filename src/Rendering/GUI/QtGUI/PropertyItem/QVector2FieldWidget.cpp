@@ -8,7 +8,17 @@
 
 namespace dyno
 {
-	IMPL_FIELD_WIDGET(Vec2f, QVector2FieldWidget)
+	//IMPL_FIELD_WIDGET(Vec2f, QVector2FieldWidget)
+
+	int QVector2FieldWidget::reg_field_widget = []() {
+		dyno::PPropertyWidget::registerWidget({ &typeid(Vec2f), &QVector2FieldWidget::createWidget });
+		dyno::PPropertyWidget::registerWidget({ &typeid(Vec2d), &QVector2FieldWidget::createWidget });
+		return 0;
+	}();
+
+	QWidget* QVector2FieldWidget::createWidget(dyno::FBase* f) {
+			return new QVector2FieldWidget(f);
+	}
 
 	QVector2FieldWidget::QVector2FieldWidget(FBase* field)
 		: QFieldWidget(field)
@@ -167,6 +177,7 @@ namespace dyno
 
 			v1 = v[0];
 			v2 = v[1];
+
 		}
 
 		spinner1->blockSignals(true);

@@ -268,7 +268,7 @@ namespace dyno
 
 		Vec3f rot = Vec3f(0);
 
-		Quat<Real>(v.rotation()).toEulerAngle(rot[0], rot[1], rot[2]);
+		Quat<Real>(v.rotation()).toEulerAngle(rot.y, rot.x, rot.z);
 		
 		mR0->setRealValue(rot[2] * 180 / M_PI);
 		mR1->setRealValue(rot[1] * 180 / M_PI);

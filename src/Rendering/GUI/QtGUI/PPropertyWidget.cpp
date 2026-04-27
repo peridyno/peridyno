@@ -419,16 +419,16 @@ namespace dyno
 
 		if (auto f = dynamic_cast<FList*> (field))
 		{
-			auto aw = new ArrayWidget<float>(f);
+			auto aw = new ArrayWidget(f);
 
-			auto it_begin = f->begin();
-
-			for (auto it = it_begin; it != f->end(); it++)
+			int id = 0;
+			for (auto it = f->begin(); it != f->end(); ++it)
 			{
-				auto field = (*it).get();
-				QWidget* fw = addVariableFieldWidget(field);
-
-				aw->addItem(fw);
+				auto childField = (*it).get();
+				childField->setObjectName("[element " + std::to_string(id)+"]");
+				QWidget* fw = addVariableFieldWidget(childField);
+				aw->addItem(fw,id);
+				id++;
 			}
 
 			if (layout != nullptr) layout->addWidget(aw);

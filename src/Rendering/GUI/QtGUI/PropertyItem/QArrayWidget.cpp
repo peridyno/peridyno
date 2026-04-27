@@ -2,12 +2,14 @@
 
 namespace dyno 
 {
-    ArrayWidgetBase::ArrayWidgetBase(FBase* t) : QFieldWidget(t)
-
+    ArrayWidget::ArrayWidget(FBase* t) : QFieldWidget(t)
     {
+        this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
         QString name = FormatFieldWidgetName(t->getObjectName());
         name = QString("[ ") + name + QString("]");
         this->setTitle(name);
+
         this->setStyleSheet(R"(
 					QGroupBox {
 						margin-top: 12px;
@@ -32,34 +34,69 @@ namespace dyno
                     border-radius: 4px;
                 }
                 LockerButton:hover {
-                    background-color: #2e2e2e;
+                    background-color: #616161;
                 }
                 LockerButton:pressed {
                     background-color: #000000;
                 }
             )");
 
-        auto buttonLayout = new QHBoxLayout;
-        buttonLayout->addWidget(button);
         sizeLabel = new QLabel;
-        sizeLabel->setText("Size"); 
+        sizeLabel->setText("Size: "); 
+        sizeLabel->setStyleSheet(R"(
+            QLabel {
+                background-color: #464646;  
+                color: #ffffff;
+                border-radius: 4px;        
+                border: 1px solid #000000; 
+            }
+        )");
 
-        addButton = new LockerButton;
-        deleteButton = new LockerButton;
+        const QString btnStyle = R"(
+			QPushButton {
+				background-color: #464646;
+				border-radius: 4px;
+			}
+			QPushButton:hover {
+				background-color: #616161;
+			}
+			QPushButton:pressed {
+				background-color: #000000;
+			}
+		)";
 
-        buttonLayout->addWidget(sizeLabel);
+        addButton = new QPushButton(" Add ");
+        clearButton = new QPushButton("Clear");
+        addButton->setStyleSheet(btnStyle);
+        clearButton->setStyleSheet(btnStyle);
 
+        QHBoxLayout* controlLayout = new QHBoxLayout;
+        controlLayout->addWidget(sizeLabel,1);
+        controlLayout->addWidget(addButton,0.5);
+        controlLayout->addWidget(clearButton,0.5);
+        controlLayout->setSpacing(0);
 
-
+        sizeLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+        addButton->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+        clearButton->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+        sizeLabel->setAlignment(Qt::AlignLeft);
 
         auto mainlayout = new QVBoxLayout;
         setLayout(mainlayout);
 
         auto elementWidget = new QWidget;
-        layout = new QVBoxLayout;
-        layout->setSpacing(0);
-        elementWidget->setLayout(layout);
-        mainlayout->addWidget(button);
+        listLayout = new QVBoxLayout;
+        listLayout->setSpacing(0);
+        listLayout->setContentsMargins(0, 0, 0, 0);
+        this->setContentsMargins(0, 0, 0, 0);
+
+        elementWidget->setLayout(listLayout);
+        QHBoxLayout* titleLayout = new QHBoxLayout;
+        titleLayout->addWidget(button,2);
+        titleLayout->addLayout(controlLayout,1);
+        titleLayout->setSpacing(0);
+
+        mainlayout->addLayout(titleLayout);
         mainlayout->addWidget(elementWidget);
         elementWidget->setVisible(false);
 
@@ -75,17 +112,14 @@ namespace dyno
                 elementWidget->setVisible(true);
             }
             mFlag = !mFlag;
-            });
+        });
 
-    }
-
-    void ArrayWidgetBase::connectSignal(QFieldWidget* field, int id)
-    {
-        QObject::connect(field, QOverload<>::of(&QFieldWidget::fieldChanged), [this, id]()
-            {
-                OnElementUpdate(id);
-            }
-        );
+        connect(addButton, &QPushButton::clicked, [&]() {
+            this->addElement();
+        });
+        connect(clearButton, &QPushButton::clicked, [&]() {
+            this->clearList();
+        });
     }
 
 }

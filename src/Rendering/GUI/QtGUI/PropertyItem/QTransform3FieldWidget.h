@@ -1,6 +1,6 @@
 /**
- * Program:   Qt-based widget to visualize a float or double type value
- * Module:    QRealFieldWidget.h
+ * Program:   Qt-based widget to visualize Transform3f or Transform3d
+ * Module:    QTransform3FieldWidget.h
  *
  * Copyright 2023 Xiaowei He
  *
@@ -18,37 +18,31 @@
  */
 #pragma once
 #include "QFieldWidget.h"
-#include "PCustomWidgets.h"
 #include "QtGUI/PPropertyWidget.h"
 
 namespace dyno
 {
-	class QRealFieldWidget : public QFieldWidget
+	class QTransform3FieldWidget : public QFieldWidget
 	{
 		Q_OBJECT
 	public:
 		DECLARE_FIELD_WIDGET
 
-		QRealFieldWidget(FBase* field);
-		~QRealFieldWidget() override;
+		QTransform3FieldWidget(FBase* field);
+		~QTransform3FieldWidget() override;
 
 	public slots:
 		//Called when the field is updated
-		void updateWidget();
-
-		//Called when the widget is updated
 		void updateField(double);
 
-	private slots:
-		void onSliderValueChanged(double val);
-		void editRange();
-
-	protected:
-		bool eventFilter(QObject* watched, QEvent* event) override;
+		void updateWidget();
 
 	private:
-		QDoubleSlider* slider = nullptr;
-		QPiecewiseDoubleSpinBox* spinner = nullptr;
-		QMenu* mRightMenu = nullptr;
+		QPiecewiseDoubleSpinBox* transSpinners[3];
+		QPiecewiseDoubleSpinBox* scaleSpinners[3];
+		QPiecewiseDoubleSpinBox* rotSpinners[9];
+		QPiecewiseDoubleSpinBox* rotAngleSpinners[3];
+		QPushButton* rotModeToggle;
+		bool useAngleMode; // true for angle input, false for matrix input
 	};
 }

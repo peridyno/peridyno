@@ -1,6 +1,6 @@
 /**
- * Program:  
- * Module:    
+ * Program:
+ * Module:
  * Copyright 2023 Yuzhong Guo
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,132 +32,121 @@
 #include <typeinfo>
 #include <memory>
 #include "LockerButton.h"
+#include "Field/FList.h"
+#include <QLabel>
+#include <QPushButton>
 
 namespace dyno
 {
-
-    class ArrayWidgetBase : public QFieldWidget
+    class ArrayWidget : public QFieldWidget
     {
         Q_OBJECT
     public:
 
-        ArrayWidgetBase(FBase* t);
-        
-        void connectSignal(QFieldWidget* field, int id);
+        ArrayWidget(FBase* t);
 
-        virtual void updataData(int id) = 0;
-        virtual void rebuildUI() = 0;
-        virtual void updateArray() = 0;
+        virtual void addItem(QWidget* item, int id)
+        {
+            if (!item)
+                return;
 
-        virtual void addItem(QWidget* item) = 0;
+            QHBoxLayout* elementLayout = new QHBoxLayout;
+            elementLayout->setAlignment(Qt::AlignVCenter);
+            QLabel* label = new QLabel;
+            label->setFixedWidth(30);
+            elementLayout->addWidget(label);
+            elementLayout->addWidget(item);
+            listLayout->addLayout(elementLayout);
+
+            auto deleteButton = new QPushButton("-");
+            elementLayout->addWidget(deleteButton);
+            deleteButton->setFixedSize(20,20);
+            deleteButton->setStyleSheet(R"(
+                QPushButton {
+                    background-color: #464646;
+                    border-radius: 4px;
+                }
+                QPushButton:hover {
+                    background-color: #616161;
+                }
+                QPushButton:pressed {
+                    background-color: #000000;
+                }
+            )");
+
+            connect(deleteButton, &QPushButton::clicked, [this, elementLayout]() {
+                int index = listLayout->indexOf(elementLayout);
+                this->deleteElement(index);
+            });
+        };
+
+    signals:
+        void onRebuildElement();
+        void onAddElement();
 
     public slots:
-        void OnElementUpdate(int id) 
+        void deleteElement(int id)
         {
-            updataData(id);
-        };
+            removeSubLayout(id, listLayout);
+            emit onDeleteElement(id);
+        }
+
+        void clearList()
+        {
+            if (listLayout)
+                clearLayoutRecursively(listLayout);
+
+            printf("ListWidget::Clear list completed\n");
+        }
+
+        void addElement()
+        {
+            printf("ListWidget::Need to implement the add element function\n");
+            emit onAddElement();
+        }
+
+        void onDeleteElement(int id)
+        {
+            printf("ListWidget::Delete element at index: %d\n", id);
+        }
 
     protected:
         bool mFlag = true;
-        QVBoxLayout* layout = NULL;
-        QLabel* sizeLabel = NULL;
-        LockerButton* addButton = NULL;
-        LockerButton* deleteButton = NULL;
-
-    };
-
-    template<typename T>
-    class ArrayWidget : public ArrayWidgetBase//: public QGroupBox
-    {
-    public:
-     
-        explicit ArrayWidget(FBase* t);
-
-        void addItem(QWidget* item) override;
+        QVBoxLayout* listLayout = nullptr;
+        QLabel* sizeLabel = nullptr;
+        QPushButton* addButton = nullptr;
+        QPushButton* clearButton = nullptr;
 
     private:
-        FCArray<T>* dataPtr;
-        std::vector<FVar<T>*> fVarArray;
-        
-        std::vector<QFieldWidget*> widgets;
-        virtual void rebuildUI()override;
-        virtual void updateArray()override;
-        virtual void updataData(int id)override 
-        {
-            (*dataPtr->getDataPtr())[id] = fVarArray[id]->getValue();
+        void clearLayoutRecursively(QLayout* layout) {
+            if (!layout) return;
+            while (QLayoutItem* item = layout->takeAt(0)) {
+                if (QLayout* childLayout = item->layout()) {
+                    clearLayoutRecursively(childLayout);
+                    delete childLayout;   // 递归删除子布局对象
+                }
+                else if (QWidget* widget = item->widget()) {
+                    widget->deleteLater();
+                }
+                delete item;
+            }
+        }
+
+        void removeSubLayout(int index, QVBoxLayout* parentLayout) {
+            if (!parentLayout || index < 0 || index >= parentLayout->count())
+                return;
+
+            QLayoutItem* item = parentLayout->takeAt(index);
+            if (!item) return;
+
+            if (QLayout* subLayout = item->layout()) {
+                clearLayoutRecursively(subLayout);
+                subLayout->deleteLater();
+                delete item;  
+            }
+            else {
+                delete item;
+            }
         }
     };
-
-    template<typename T>
-    ArrayWidget<T>::ArrayWidget(FBase* t)
-        : ArrayWidgetBase(t)
-    {
-        auto farray = dynamic_cast<FCArray<T>*> (t);
-        if (farray)
-        {
-            dataPtr = farray;
-            for (size_t i = 0; i < dataPtr->size(); i++)
-                fVarArray.push_back(new FVar<T>((*dataPtr->constDataPtr())[i], "var_[Element " + std::to_string(i) + "]", "", FieldTypeEnum::Param, NULL));
-
-            //rebuildUI();
-        }       
-    }
-
-	template<typename T>
-	void ArrayWidget<T>::addItem(QWidget* item)
-	{
-		//if (QFieldWidget* field = qobject_cast<QFieldWidget*>(item))
-		{
-			//isValidWidgetType = true;
-
-//             connectSignal(field, widgets.size());
-// 			widgets.push_back(field);
-
-			QHBoxLayout* elementLayout = new QHBoxLayout;
-			QLabel* label = new QLabel;
-			label->setFixedWidth(30);
-			elementLayout->addWidget(label);
-			elementLayout->addWidget(item);
-			layout->addLayout(elementLayout);
-		}
-	}
-
-    template<typename T>
-    void ArrayWidget<T>::rebuildUI()
-    {
-        for (size_t i = 0; i < widgets.size(); i++)
-        {
-            widgets[i]->disconnect();
-        }
-        widgets.clear();
-
-        bool isValidWidgetType = false;
-
-        for (size_t i = 0; i < fVarArray.size(); i++)
-        {
-            FVar<T>* it = fVarArray[i];
-            auto item = PPropertyWidget::createFieldWidget(it);
-
-            this->addItem(item);
-        }
-//         if (!isValidWidgetType) 
-//         {
-//             layout->addWidget(new QLabel(std::string("Data Size : " + std::to_string(dataPtr->size())).c_str()));
-//             layout->addWidget(new QLabel(std::string("UnsupportedFieldWidget : " + dataPtr->getTemplateName()).c_str()));
-//         }
-    }
-
-    template<typename T>
-    void ArrayWidget<T>::updateArray()
-    {
-        dataPtr->resize(fVarArray.size());
-
-        for (size_t i = 0; i < fVarArray.size(); i++)
-        {
-            FVar<T>* item = fVarArray[i];
-            (*dataPtr->constDataPtr())[i] = item->getValue();
-        }
-        dataPtr->getDataPtr();
-
-    }
 }

@@ -3,6 +3,11 @@
 
 #include "Node.h"
 #include "Field/FList.h"
+#include "Tuple.h"
+#include "Matrix/Matrix3x3.h"
+#include "Matrix/Transform2x2.h"
+#include "initializeModeling.h"
+
 
 using namespace dyno;
 
@@ -27,11 +32,6 @@ class MyNode : public Node
 public:
 	MyNode() 
 	{
-//		this->varVec3fArrays()->assign(std::vector<Vec3f>{Vec3f(5),Vec3f(1), Vec3f(10), Vec3f(3)});
-// 		this->varFloatArrays()->assign(std::vector<float>{1.0f, 3.1415926f,52.31f});
-// 		this->varIntArrays()->assign(std::vector<int>{1,3,5,10});
-// 		this->varTransformArrays()->assign(std::vector<Transform3f>{Transform3f(), Transform3f(), Transform3f() });
-
   		this->varFloatList()->insert(1.0f);
 		this->varFloatList()->insert(3.1415926f);
 		this->varFloatList()->insert(52.31f);
@@ -41,31 +41,26 @@ public:
 		this->varIntList()->insert(3);
 
 		this->varTupleList()->insert(MyTuple());
+		this->varTupleList()->insert(MyTuple());
+
+		this->varTransformList()->insert(Transform3f());
+		this->varTransformList()->insert(Transform3f());
+		this->varTransformList()->insert(Transform3f());
 	};
+
 	~MyNode() override {};
 
-	//DEF_VAR(Vec3f, AnotherVec3f, Vec3f(), "Define a boolean field");
-
-	DEF_VAR(bool, AnotherBoolean, false, "Define a boolean field");
-	DEF_VAR(Vec2f, Vec2Float, Vec2f(0), "");
-	DEF_VAR(Vec2i, Vec2Int, Vec2i(1),"");
+	DEF_VAR(double, VarDouble,30.0f, "Define a list");
+	DEF_VAR(float, VarFloat,30.0f, "Define a list");
+	DEF_VAR(int, VarInt,10, "Define a list");
+	DEF_VAR(uint, VarUint,10, "Define a list");
 
 	DEF_TUPLE(MyTuple, Tuple, "Define a Tuple");
-
-
-//	DEF_ARRAY_VAR(Vec3f, Vec3fArray, "");
-
- 	DEF_LIST(float, FloatList, "Define a list");
+	DEF_LIST(float, FloatList, "Define a list");
 	DEF_LIST(int, IntList, "Define a list");
 	DEF_LIST(Transform3f, TransformList, "Define a list");
-
 	DEF_LIST(MyTuple, TupleList, "");
 
-// 	DEF_ARRAY_VAR(float, FloatArray,"");
-// 	DEF_ARRAY_VAR(int, IntArray,"");
-// 	DEF_ARRAY_VAR(Transform3f, TransformArray,"");
-// 
-// 	DEF_ARRAY_VAR(MyTuple, MyTuple,"");
 };
 
 using namespace dyno;
