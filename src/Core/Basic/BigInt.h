@@ -1,272 +1,21 @@
-/**
- * Copyright 2025 Xuanye Chen
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 #ifndef BIGINT_BIGINT_H
 #define BIGINT_BIGINT_H
 
-#include "Platform.h"
-#include "BigIntUtils.h"
 #include <cstdint>
+#include <algorithm>
+#include "BigIntConfig.h"
+#include "BigIntUtils.h"
+
+#ifndef DYN_FUNC
+#define DYN_FUNC DYNO_HOST_DEVICE
+#endif
+
+#include "BigInt128.h"
 
 namespace dyno
 {
-#ifndef USE_PTX
+#if !DYNO_ENABLE_PTX
 
-    struct uint128_t
-    {
-        uint64_t lo;
-        uint64_t hi;
-
-        DYN_FUNC uint128_t() = default;
-        DYN_FUNC uint128_t(uint64_t lo, uint64_t hi) : lo(lo), hi(hi)
-        {
-        }
-
-        DYN_FUNC uint128_t operator+(const uint128_t& other) const
-        {
-            uint128_t result;
-            result.lo = lo + other.lo;
-            result.hi = hi + other.hi + (result.lo < lo ? 1 : 0);
-            return result;
-        }
-
-        static DYN_FUNC uint128_t from_uint64_mul(uint64_t a, uint64_t b)
-        {
-            uint128_t res;
-            mul64x64_to_128(a, b, res.lo, res.hi);
-            return res;
-        }
-
-        DYN_FUNC uint128_t operator-(const uint128_t& other) const
-        {
-            uint128_t result;
-            result.lo = lo - other.lo;
-            result.hi = hi - other.hi - (lo < other.lo ? 1 : 0);
-            return result;
-        }
-
-        DYN_FUNC uint128_t operator*(const uint128_t& other) const
-        {
-            uint128_t result;
-            uint64_t lo_lo, lo_hi, hi_lo, hi_hi;
-
-            dyno::mul64x64_to_128(lo, other.lo, lo_lo, lo_hi);
-
-            dyno::mul64x64_to_128(hi, other.lo, hi_lo, hi_hi);
-
-            uint64_t tmp = lo_hi + hi_lo;
-            uint64_t carry = (tmp < lo_hi) ? 1 : 0;
-
-            dyno::mul64x64_to_128(lo, other.hi, hi_lo, hi_hi);
-
-            uint64_t tmp2 = tmp + hi_lo;
-            carry += (tmp2 < tmp) ? 1 : 0;
-
-            result.lo = lo_lo;
-            result.hi = tmp2;
-
-            return result;
-        }
-
-        DYN_FUNC uint128_t operator/(uint64_t other) const
-        {
-            uint128_t res;
-            div128by64(hi, lo, other, res.hi, res.lo);
-            return res;
-        }
-
-        DYN_FUNC uint128_t operator<<(int shift) const
-        {
-            if (shift == 0)
-            {
-                return *this;
-            }
-            if (shift < 64)
-            {
-                uint64_t new_hi = (hi << shift) | (lo >> (64 - shift));
-                uint64_t new_lo = lo << shift;
-                return {new_lo, new_hi};
-            }
-            if (shift < 128)
-            {
-                uint64_t new_hi = lo << (shift - 64);
-                uint64_t new_lo = 0;
-                return {new_lo, new_hi};
-            }
-            return {0, 0};
-        }
-
-        // Try to add other to this, if overflow occurs, return false
-        DYN_FUNC bool try_add(const uint128_t& other, uint128_t& res) const
-        {
-            auto new_lo = lo + other.lo;
-            auto carry = (new_lo < lo) ? 1 : 0;
-            auto new_hi = hi + other.hi + carry;
-            if (new_hi < hi || (carry == 1 && new_hi == hi))
-                return false;
-            res.lo = new_lo;
-            res.hi = new_hi;
-            return true;
-        }
-
-        DYN_FUNC bool try_sub(const uint128_t& other, uint128_t& res) const
-        {
-            if (*this < other)
-                return false;
-            res.lo = lo - other.lo;
-            res.hi = hi - other.hi - (lo < other.lo ? 1 : 0);
-            return true;
-        }
-
-        DYN_FUNC bool try_mul(const uint128_t& other, uint128_t& res) const
-        {
-            if (hi != 0 && other.hi != 0)
-                return false;
-            uint64_t lo_lo, lo_hi, hi_lo, hi_hi;
-
-            dyno::mul64x64_to_128(lo, other.lo, lo_lo, lo_hi);
-
-            dyno::mul64x64_to_128(hi, other.lo, hi_lo, hi_hi);
-
-
-            uint64_t tmp = lo_hi + hi_lo;
-            uint64_t carry = (tmp < lo_hi) ? 1 : 0;
-
-            dyno::mul64x64_to_128(lo, other.hi, hi_lo, hi_hi);
-
-            if (addition_will_overflow(tmp, hi_lo))
-                return false;
-            uint64_t tmp2 = tmp + hi_lo;
-
-            res.lo = lo_lo;
-            res.hi = tmp2;
-
-            return true;
-        }
-
-        DYN_FUNC uint128_t operator/(uint128_t other) const
-        {
-            if (other.hi == 0)
-            {
-                uint128_t res;
-                div128by64(hi, lo, other.lo, res.hi, res.lo);
-                return res;
-            }
-
-            int s = count_leading_zeros(other.hi); // 0 <= s < 64
-            uint128_t vn = other << s;
-
-            uint128_t un_lo = (*this) << s;
-            uint64_t un2 = (s == 0) ? 0 : (hi >> (64 - s));
-            uint64_t un1 = un_lo.hi;
-            uint64_t un0 = un_lo.lo;
-
-            uint64_t vn1 = vn.hi;
-            uint64_t vn0 = vn.lo;
-
-            // estimate qhat = floor((un2*b + un1)/vn1)
-            uint64_t rem = 0;
-            uint64_t qhat;
-            div128by64_rem(un2, un1, vn1, qhat, rem);
-            uint64_t rhat = rem;
-
-            while (from_uint64_mul(qhat, vn0) > uint128_t{un0, rhat})
-            {
-                qhat--;
-                uint64_t old = rhat;
-                rhat += vn1;
-                if (rhat < old) break;
-            }
-
-            uint128_t qv0 = from_uint64_mul(qhat, vn0);
-            uint128_t qv1 = from_uint64_mul(qhat, vn1);
-
-            uint64_t p0 = qv0.lo;
-            uint64_t mid = qv0.hi + qv1.lo;
-            uint64_t carry_mid = (mid < qv0.hi);
-            uint64_t p1 = mid;
-            uint64_t p2 = qv1.hi + carry_mid;
-
-            int cmp = cmp_3_limbs(un2, un1, un0, p2, p1, p0);
-            if (cmp < 0)
-            {
-                qhat--;
-            }
-
-            uint128_t q = {qhat, 0};
-            return q;
-        }
-
-        DYN_FUNC uint128_t operator>>(int shift) const
-        {
-            if (shift == 0)
-            {
-                return *this;
-            }
-            if (shift < 64)
-            {
-                uint64_t new_lo = (lo >> shift) | (hi << (64 - shift));
-                uint64_t new_hi = hi >> shift;
-                return {new_lo, new_hi};
-            }
-            if (shift < 128)
-            {
-                uint64_t new_lo = hi >> (shift - 64);
-                uint64_t new_hi = 0;
-                return {new_lo, new_hi};
-            }
-            return {0, 0};
-        }
-
-        DYN_FUNC bool operator>=(const uint128_t& other) const
-        {
-            return (hi > other.hi) || (hi == other.hi && lo >= other.lo);
-        }
-
-        DYN_FUNC bool operator<(const uint128_t& other) const
-        {
-            return (hi < other.hi) || (hi == other.hi && lo < other.lo);
-        }
-
-        DYN_FUNC bool operator>(const uint128_t& other) const
-        {
-            return this->hi > other.hi || (this->hi == other.hi && this->lo > other.lo);
-        }
-
-        DYN_FUNC bool operator==(const uint128_t& uint128) const;
-    };
-
-    DYN_FUNC inline uint64_t estimate_qhat(uint64_t un2, uint64_t un1, uint64_t un0, uint64_t vn1, uint64_t vn0)
-    {
-        uint64_t qhat, rem;
-        if (un2 == 0)
-        {
-            qhat = un1 / vn1;
-            rem = un1 % vn1;
-        } else
-            div128by64_rem(un2, un1, vn1, qhat, rem);
-        uint64_t rhat = rem;
-        while (uint128_t::from_uint64_mul(qhat, vn0) > uint128_t{un0, rhat})
-        {
-            qhat--;
-            uint64_t old = rhat;
-            rhat += vn1;
-            if (rhat < old) break;
-        }
-        return qhat;
-    }
     struct uint192_t
     {
         uint64_t lo;
@@ -454,25 +203,23 @@ namespace dyno
         {
             uint64_t rem = 0;
             uint64_t q_hi = 0, q_mid = 0, q_lo = 0;
+            auto rc = dyno::precompute_div64_reciprocal(other);
 
             {
-                uint128_t numer{hi, rem}; // lo = u.hi, hi = rem
                 uint64_t q = 0, r = 0;
-                div128by64_rem(numer.hi, numer.lo, other, q, r);
+                dyno::div128by64_precomputed(rem, hi, rc, q, r);
                 q_hi = q;
                 rem = r;
             }
             {
-                uint128_t numer{mi, rem};
                 uint64_t q = 0, r = 0;
-                div128by64_rem(numer.hi, numer.lo, other, q, r);
+                dyno::div128by64_precomputed(rem, mi, rc, q, r);
                 q_mid = q;
                 rem = r;
             }
             {
-                uint128_t numer{lo, rem};
                 uint64_t q = 0, r = 0;
-                div128by64_rem(numer.hi, numer.lo, other, q, r);
+                dyno::div128by64_precomputed(rem, lo, rc, q, r);
                 q_lo = q;
                 rem = r;
             }
@@ -672,211 +419,9 @@ namespace dyno
             return !(*this >= other);
         }
 
-        DYN_FUNC bool operator==(const uint192_t& other) const;
-    };
-
-    struct ext_sgn_int128_t
-    {
-        uint64_t lo;
-        uint64_t hi;
-        uint64_t neg_mask;
-
-        DYN_FUNC ext_sgn_int128_t() : lo(0), hi(0), neg_mask(0)
+        DYN_FUNC bool operator==(const uint192_t& other) const
         {
-        }
-
-        DYN_FUNC ext_sgn_int128_t(uint64_t low, uint64_t high, bool negative)
-            : lo(low), hi(high), neg_mask(negative ? ~0ULL : 0)
-        {
-        }
-
-        DYN_FUNC static ext_sgn_int128_t from_int64_mul(int64_t a, int64_t b)
-        {
-            bool negative = (a < 0) ^ (b < 0);
-
-            uint64_t ua = static_cast<uint64_t>(a < 0 ? uint64_t(-(a + (a == INT64_MIN))) + (a == INT64_MIN) : a);
-            uint64_t ub = static_cast<uint64_t>(b < 0 ? uint64_t(-(b + (b == INT64_MIN))) + (b == INT64_MIN) : b);
-
-            uint64_t lo, hi;
-            dyno::mul64x64_to_128(ua, ub, lo, hi);
-
-            return ext_sgn_int128_t(lo, hi, negative);
-        }
-
-        DYN_FUNC static void add128(uint64_t a_lo, uint64_t a_hi, uint64_t b_lo, uint64_t b_hi,
-                                    uint64_t& res_lo, uint64_t& res_hi)
-        {
-            res_lo = a_lo + b_lo;
-            uint64_t carry = (res_lo < a_lo);
-            res_hi = a_hi + b_hi + carry;
-        }
-
-        DYN_FUNC static void sub128(uint64_t a_lo, uint64_t a_hi, uint64_t b_lo, uint64_t b_hi,
-                                    uint64_t& res_lo, uint64_t& res_hi)
-        {
-            res_lo = a_lo - b_lo;
-            uint64_t borrow = (a_lo < b_lo);
-            res_hi = a_hi - b_hi - borrow;
-        }
-
-        DYN_FUNC bool try_add(const ext_sgn_int128_t& b, ext_sgn_int128_t& res) const
-        {
-            uint128_t abs_a = {lo, hi};
-            uint128_t abs_b = {b.lo, b.hi};
-            if (neg_mask == b.neg_mask)
-            {
-                uint128_t sum;
-                if (!abs_a.try_add(abs_b, sum))
-                    return false;
-                res.lo = sum.lo;
-                res.hi = sum.hi;
-                res.neg_mask = neg_mask;
-                return true;
-            }
-            uint128_t diff;
-            if (!abs_a.try_sub(abs_b, diff))
-                return false;
-            // the abs/neg abs must be diff
-            bool a_ge_b = (hi > b.hi) || (hi == b.hi && lo >= b.lo);
-            res.lo = diff.lo;
-            res.hi = diff.hi;
-            res.neg_mask = a_ge_b ? neg_mask : b.neg_mask;
-            return true;
-        }
-        DYN_FUNC bool try_sub(const ext_sgn_int128_t& b, ext_sgn_int128_t& res) const
-        {
-            ext_sgn_int128_t neg_b = b;
-            neg_b.neg_mask = ~neg_b.neg_mask;
-            return this->try_add(neg_b, res);
-        }
-        DYN_FUNC bool try_mul(const ext_sgn_int128_t& b, ext_sgn_int128_t& res) const
-        {
-            uint128_t abs_a = {lo, hi};
-            uint128_t abs_b = {b.lo, b.hi};
-            uint128_t prod;
-            if (!abs_a.try_mul(abs_b, prod))
-                return false;
-            res.lo = prod.lo;
-            res.hi = prod.hi;
-            res.neg_mask = (neg_mask ^ b.neg_mask);
-            return true;
-        }
-        DYN_FUNC ext_sgn_int128_t operator+(const ext_sgn_int128_t& b) const
-        {
-            uint64_t same_sign = ~(neg_mask ^ b.neg_mask);
-            uint64_t diff_sign = neg_mask ^ b.neg_mask;
-
-            uint64_t sum_lo, sum_hi;
-            add128(lo, hi, b.lo, b.hi, sum_lo, sum_hi);
-
-            uint64_t a_ge_b = ((hi > b.hi) || ((hi == b.hi) && (lo >= b.lo))) ? ~0ULL : 0;
-            uint64_t diff_lo, diff_hi;
-            uint64_t hi1 = hi, lo1 = lo;
-            uint64_t hi2 = b.hi, lo2 = b.lo;
-            uint64_t mask_hi = a_ge_b;
-            uint64_t mask_lo = ~a_ge_b;
-            uint64_t sub_hi = (hi1 & mask_hi) | (hi2 & mask_lo);
-            uint64_t sub_lo = (lo1 & mask_hi) | (lo2 & mask_lo);
-            uint64_t other_hi = (hi1 & mask_lo) | (hi2 & mask_hi);
-            uint64_t other_lo = (lo1 & mask_lo) | (lo2 & mask_hi);
-            sub128(sub_lo, sub_hi, other_lo, other_hi, diff_lo, diff_hi);
-
-            uint64_t res_lo = (sum_lo & same_sign) | (diff_lo & diff_sign);
-            uint64_t res_hi = (sum_hi & same_sign) | (diff_hi & diff_sign);
-
-            uint64_t res_neg = (same_sign & neg_mask) | (diff_sign & ((a_ge_b & neg_mask) | (~a_ge_b & b.neg_mask)));
-
-            return ext_sgn_int128_t(res_lo, res_hi, res_neg != 0);
-        }
-
-        DYN_FUNC ext_sgn_int128_t operator-(const ext_sgn_int128_t& b) const
-        {
-            ext_sgn_int128_t neg_b = b;
-            neg_b.neg_mask = ~neg_b.neg_mask;
-            return *this + neg_b;
-        }
-
-        DYN_FUNC static uint64_t abs_greater_mask(uint64_t hi1, uint64_t lo1, uint64_t hi2, uint64_t lo2)
-        {
-            uint64_t hi_diff = hi1 - hi2;
-            uint64_t hi_mask = ~(hi_diff >> 63);
-            uint64_t hi_eq_mask = ~(hi1 ^ hi2);
-            uint64_t lo_diff = lo1 - lo2;
-            uint64_t lo_mask = ~(lo_diff >> 63);
-
-            return hi_mask | (lo_mask & hi_eq_mask);
-        }
-
-        DYN_FUNC bool operator<(const ext_sgn_int128_t& other) const
-        {
-            uint64_t this_is_neg_other_is_pos = neg_mask & ~other.neg_mask;
-
-            uint64_t abs_greater = ((hi > other.hi) || (hi == other.hi && lo > other.lo)) ? ~0ULL : 0;
-            uint64_t abs_equal = ((hi == other.hi) && (lo == other.lo)) ? ~0ULL : 0;
-
-            uint64_t both_pos_mask = ~neg_mask & ~other.neg_mask;
-            uint64_t lt_if_both_pos = both_pos_mask & ~abs_greater & ~abs_equal;
-
-            uint64_t both_neg_mask = neg_mask & other.neg_mask;
-            uint64_t lt_if_both_neg = both_neg_mask & abs_greater;
-
-            return (this_is_neg_other_is_pos | lt_if_both_pos | lt_if_both_neg) != 0;
-        }
-
-        DYN_FUNC ext_sgn_int128_t operator*(const ext_sgn_int128_t& other) const
-        {
-            uint128_t a = {lo, hi};
-            uint128_t b = {other.lo, other.hi};
-            uint128_t res = a * b;
-            bool res_neg = (neg_mask ^ other.neg_mask) != 0;
-            return ext_sgn_int128_t(res.lo, res.hi, res_neg);
-        }
-
-        DYN_FUNC bool operator<=(const ext_sgn_int128_t& other) const
-        {
-            return !(*this > other);
-        }
-
-        DYN_FUNC bool operator>(const ext_sgn_int128_t& other) const
-        {
-            return other < *this;
-        }
-
-        DYN_FUNC bool operator>=(const ext_sgn_int128_t& other) const
-        {
-            return !(*this < other);
-        }
-
-        DYN_FUNC bool operator==(const ext_sgn_int128_t& other) const
-        {
-            return (lo == other.lo) && (hi == other.hi) && (neg_mask == other.neg_mask);
-        }
-
-        DYN_FUNC bool operator!=(const ext_sgn_int128_t& other) const
-        {
-            return !(*this == other);
-        }
-
-        DYN_FUNC ext_sgn_int128_t operator/(const ext_sgn_int128_t& other) const
-        {
-            // Handle division by zero
-            if (other.lo == 0 && other.hi == 0)
-            {
-                // Return max value as error
-                return ext_sgn_int128_t(~0ULL, ~0ULL, true);
-            }
-
-            // Get absolute values
-            uint128_t abs_this = {lo, hi};
-            uint128_t abs_other = {other.lo, other.hi};
-
-            // Perform unsigned division
-            uint128_t abs_result = abs_this / abs_other;
-
-            // Determine sign of result
-            bool result_negative = (neg_mask ^ other.neg_mask) != 0;
-
-            return ext_sgn_int128_t(abs_result.lo, abs_result.hi, result_negative);
+            return (hi == other.hi) && (mi == other.mi) && (lo == other.lo);
         }
     };
 
@@ -1103,20 +648,22 @@ namespace dyno
         {
             uint256_t res;
 
+            auto rc = dyno::precompute_div64_reciprocal(other);
+
             // Divide highest 64 bits
             res.hi1 = hi1 / other;
             uint64_t rem1 = hi1 % other;
 
             // Divide (rem1:hi0) by other
             uint64_t rem2;
-            dyno::div128by64_rem(rem1, hi0, other, res.hi0, rem2);
+            dyno::div128by64_precomputed(rem1, hi0, rc, res.hi0, rem2);
 
             // Divide (rem2:lo1) by other
             uint64_t rem3;
-            dyno::div128by64_rem(rem2, lo1, other, res.lo1, rem3);
+            dyno::div128by64_precomputed(rem2, lo1, rc, res.lo1, rem3);
 
             // Divide (rem3:lo0) by other
-            dyno::div128by64(rem3, lo0, other, res.lo0);
+            dyno::div128by64_precomputed(rem3, lo0, rc, res.lo0);
 
             return res;
         }
@@ -1393,7 +940,11 @@ namespace dyno
                 (hi1 == uint256.hi1 && hi0 == uint256.hi0 && lo1 == uint256.lo1 && lo0 < uint256.lo0);
         }
 
-        bool operator==(const uint256_t& uint256) const;
+        bool operator==(const uint256_t& uint256) const
+        {
+            return (lo0 == uint256.lo0) && (lo1 == uint256.lo1) &&
+                   (hi0 == uint256.hi0) && (hi1 == uint256.hi1);
+        }
     };
 
     struct ext_sgn_int192_t
@@ -1412,6 +963,30 @@ namespace dyno
         {
         }
 
+        DYN_FUNC static ext_sgn_int192_t from_int128_int64_mul(const ext_sgn_int128_t& a, int64_t b)
+        {
+            bool negative = (a.neg_mask != 0) ^ (b < 0);
+
+            uint64_t ua = a.lo;
+            uint64_t ub = a.hi;
+            uint64_t uc = (b < 0) ? static_cast<uint64_t>(-b) : static_cast<uint64_t>(b);
+
+            uint64_t lo_lo, lo_hi;
+            dyno::mul64x64_to_128(ua, uc, lo_lo, lo_hi);
+
+            uint64_t hi_lo, hi_hi;
+            dyno::mul64x64_to_128(ub, uc, hi_lo, hi_hi);
+
+            uint64_t limb0 = lo_lo;
+
+            uint64_t limb1 = lo_hi + hi_lo;
+            uint64_t carry = 0;
+            if (limb1 < lo_hi) carry = 1;
+
+            uint64_t limb2 = hi_hi + carry;
+
+            return {limb0, limb1, limb2, negative};
+        }
         DYN_FUNC static void add192(uint64_t a0, uint64_t a1, uint64_t a2,
                                     uint64_t b0, uint64_t b1, uint64_t b2,
                                     uint64_t& res0, uint64_t& res1, uint64_t& res2)
@@ -1434,15 +1009,12 @@ namespace dyno
             res2 = a2 - b2 - borrow1;
         }
 
-        DYN_FUNC static uint64_t abs_greater_mask(uint64_t a2, uint64_t a1, uint64_t a0,
-                                                  uint64_t b2, uint64_t b1, uint64_t b0)
+        DYN_FUNC [[nodiscard]] int sgn() const
         {
-            uint64_t mask = (a2 > b2) ? ~0ULL : 0;
-            mask |= ((a2 == b2) && (a1 > b1)) ? ~0ULL : 0;
-            mask |= ((a2 == b2) && (a1 == b1) && (a0 > b0)) ? ~0ULL : 0;
-            return mask;
+            if (limb0 == 0 && limb1 == 0 && limb2 == 0)
+                return 0;
+            return (neg_mask != 0) ? -1 : 1;
         }
-
         DYN_FUNC bool try_add(const ext_sgn_int192_t& b, ext_sgn_int192_t& result) const
         {
             uint192_t abs_a = uint192_t(limb0, limb1, limb2);
@@ -1463,7 +1035,7 @@ namespace dyno
             result.limb0 = abs_res.lo;
             result.limb1 = abs_res.mi;
             result.limb2 = abs_res.hi;
-            uint64_t a_ge_b = abs_greater_mask(limb2, limb1, limb0, b.limb2, b.limb1, b.limb0);
+            uint64_t a_ge_b = dyno::abs_greater_mask(limb2, limb1, limb0, b.limb2, b.limb1, b.limb0);
             result.neg_mask = (a_ge_b & neg_mask) | (~a_ge_b & b.neg_mask);
             return true;
         }
@@ -1497,7 +1069,7 @@ namespace dyno
             uint64_t sum0, sum1, sum2;
             add192(limb0, limb1, limb2, b.limb0, b.limb1, b.limb2, sum0, sum1, sum2);
 
-            uint64_t a_ge_b = abs_greater_mask(limb2, limb1, limb0, b.limb2, b.limb1, b.limb0);
+            uint64_t a_ge_b = dyno::abs_greater_mask(limb2, limb1, limb0, b.limb2, b.limb1, b.limb0);
             uint64_t d0, d1, d2;
             uint64_t hi = (a_ge_b & limb2) | (~a_ge_b & b.limb2);
             uint64_t mi = (a_ge_b & limb1) | (~a_ge_b & b.limb1);
@@ -1525,7 +1097,7 @@ namespace dyno
             uint64_t sum0, sum1, sum2;
             add192(limb0, limb1, limb2, b.limb0, b.limb1, b.limb2, sum0, sum1, sum2);
 
-            uint64_t a_ge_b = abs_greater_mask(limb2, limb1, limb0, b.limb2, b.limb1, b.limb0);
+            uint64_t a_ge_b = dyno::abs_greater_mask(limb2, limb1, limb0, b.limb2, b.limb1, b.limb0);
             uint64_t d0, d1, d2;
             uint64_t hi = (a_ge_b & limb2) | (~a_ge_b & b.limb2);
             uint64_t mi = (a_ge_b & limb1) | (~a_ge_b & b.limb1);
@@ -1648,10 +1220,15 @@ namespace dyno
 
         DYN_FUNC bool operator<(const ext_sgn_int192_t& b) const
         {
-            if ((neg_mask != 0) != (b.neg_mask != 0)) return (neg_mask != 0);
-            bool abs_gt = abs_greater_mask(limb2, limb1, limb0, b.limb2, b.limb1, b.limb0) != 0;
+            bool zero_this = (limb0 == 0 && limb1 == 0 && limb2 == 0);
+            bool zero_other = (b.limb0 == 0 && b.limb1 == 0 && b.limb2 == 0);
+            uint64_t eff_neg_mask = zero_this ? 0 : neg_mask;
+            uint64_t eff_b_neg_mask = zero_other ? 0 : b.neg_mask;
+
+            if ((eff_neg_mask != 0) != (eff_b_neg_mask != 0)) return (eff_neg_mask != 0);
+            bool abs_gt = dyno::abs_greater_mask(limb2, limb1, limb0, b.limb2, b.limb1, b.limb0) != 0;
             bool abs_eq = (limb2 == b.limb2) && (limb1 == b.limb1) && (limb0 == b.limb0);
-            if (neg_mask == 0)
+            if (eff_neg_mask == 0)
             {
                 return (!abs_gt) && !abs_eq;
             }
@@ -1663,6 +1240,9 @@ namespace dyno
 
         DYN_FUNC bool operator==(const ext_sgn_int192_t& b) const
         {
+            bool zero_this = (limb0 == 0 && limb1 == 0 && limb2 == 0);
+            bool zero_other = (b.limb0 == 0 && b.limb1 == 0 && b.limb2 == 0);
+            if (zero_this && zero_other) return true;
             return (limb0 == b.limb0) && (limb1 == b.limb1) && (limb2 == b.limb2) && (neg_mask == b.neg_mask);
         }
 
@@ -1707,6 +1287,21 @@ namespace dyno
         {
         }
 
+        DYN_FUNC ext_sgn_int256_t(int64_t a)
+            : lo1(0), hi0(0), hi1(0)
+        {
+            neg_mask = (a < 0) ? ~0ULL : 0;
+            lo0 = static_cast<uint64_t>(a < 0 ? uint64_t(-(a + (a == INT64_MIN))) + (a == INT64_MIN) : a);
+        }
+
+        DYN_FUNC ext_sgn_int256_t(ext_sgn_int128_t a)
+            : hi0(0), hi1(0)
+        {
+            neg_mask = a.neg_mask;
+            lo1 = a.hi;
+            lo0 = a.lo;
+        }
+
         DYN_FUNC static void add256_u(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3,
                                       uint64_t b0, uint64_t b1, uint64_t b2, uint64_t b3,
                                       uint64_t& r0, uint64_t& r1, uint64_t& r2, uint64_t& r3)
@@ -1726,6 +1321,66 @@ namespace dyno
             r3 = a3 + b3 + c;
         }
 
+        DYN_FUNC static ext_sgn_int256_t from_s192_int64_mul(const ext_sgn_int192_t& a, int64_t b)
+        {
+            bool negative = (a.neg_mask != 0) ^ (b < 0);
+
+            uint64_t p00_lo, p00_hi;
+            uint64_t p10_lo, p10_hi;
+            uint64_t p20_lo, p20_hi;
+            uint64_t a0 = a.limb0;
+            uint64_t a1 = a.limb1;
+            uint64_t a2 = a.limb2;
+            uint64_t b_abs = (b < 0) ? static_cast<uint64_t>(-b) : static_cast<uint64_t>(b);
+            uint64_t r0, r1, r2, r3;
+            dyno::mul64x64_to_128(a0, b_abs, p00_lo, p00_hi);
+
+            dyno::mul64x64_to_128(a1, b_abs, p10_lo, p10_hi);
+
+            dyno::mul64x64_to_128(a2, b_abs, p20_lo, p20_hi);
+            r0 = p00_lo;
+
+            {
+                uint64_t acc = p00_hi;
+                uint64_t tmp, carry = 0;
+                tmp = acc;
+                carry += (tmp < acc);
+                acc = tmp;
+                tmp = acc + p10_lo;
+                carry += (tmp < acc);
+                acc = tmp;
+                r1 = acc;
+
+                uint64_t carry_to_2 = p10_hi + carry;
+
+                acc = carry_to_2;
+                tmp = acc;
+                carry = (tmp < acc);
+                acc = tmp;
+                tmp = acc;
+                carry += (tmp < acc);
+                acc = tmp;
+                tmp = acc + p20_lo;
+                carry += (tmp < acc);
+                acc = tmp;
+                r2 = acc;
+
+                uint64_t carry_to_3 = p20_hi + carry;
+
+                acc = carry_to_3;
+                tmp = acc;
+                acc = tmp;
+                tmp = acc;
+                acc = tmp;
+                tmp = acc;
+                acc = tmp;
+                tmp = acc;
+                acc = tmp;
+                r3 = acc;
+            }
+
+            return ext_sgn_int256_t(r0, r1, r2, r3, negative);
+        }
         DYN_FUNC static void sub256_u(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3,
                                       uint64_t b0, uint64_t b1, uint64_t b2, uint64_t b3,
                                       uint64_t& r0, uint64_t& r1, uint64_t& r2, uint64_t& r3)
@@ -1743,21 +1398,6 @@ namespace dyno
             r2 = t;
 
             r3 = a3 - b3 - brw;
-        }
-
-        DYN_FUNC static bool lt256_u(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3,
-                                     uint64_t b0, uint64_t b1, uint64_t b2, uint64_t b3)
-        {
-            if (a3 != b3) return a3 < b3;
-            if (a2 != b2) return a2 < b2;
-            if (a1 != b1) return a1 < b1;
-            return a0 < b0;
-        }
-
-        DYN_FUNC static bool eq256_u(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3,
-                                     uint64_t b0, uint64_t b1, uint64_t b2, uint64_t b3)
-        {
-            return (a0 == b0) && (a1 == b1) && (a2 == b2) && (a3 == b3);
         }
 
         DYN_FUNC static void mul256_u(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3,
@@ -1831,31 +1471,11 @@ namespace dyno
             }
         }
 
-        DYN_FUNC static uint64_t mask_from_bool(bool b)
-        {
-            return (uint64_t)0 - (uint64_t)(b ? 1 : 0);
-        }
-
-        DYN_FUNC static uint64_t abs_ge_mask_u(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3,
-                                               uint64_t b0, uint64_t b1, uint64_t b2, uint64_t b3)
-        {
-            if (a3 != b3) return mask_from_bool(a3 > b3);
-            if (a2 != b2) return mask_from_bool(a2 > b2);
-            if (a1 != b1) return mask_from_bool(a1 > b1);
-            return mask_from_bool(a0 >= b0);
-        }
-
-        DYN_FUNC static inline bool abs_gt_u(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3,
-                                             uint64_t b0, uint64_t b1, uint64_t b2, uint64_t b3)
-        {
-            if (a3 != b3) return a3 > b3;
-            if (a2 != b2) return a2 > b2;
-            if (a1 != b1) return a1 > b1;
-            return a0 > b0;
-        }
-
         DYN_FUNC bool operator==(const ext_sgn_int256_t& other) const
         {
+            bool zero_this = (lo0 == 0 && lo1 == 0 && hi0 == 0 && hi1 == 0);
+            bool zero_other = (other.lo0 == 0 && other.lo1 == 0 && other.hi0 == 0 && other.hi1 == 0);
+            if (zero_this && zero_other) return true;
             return (neg_mask == other.neg_mask)
                 && (lo0 == other.lo0) && (lo1 == other.lo1)
                 && (hi0 == other.hi0) && (hi1 == other.hi1);
@@ -1865,17 +1485,22 @@ namespace dyno
 
         DYN_FUNC bool operator<(const ext_sgn_int256_t& other) const
         {
-            bool signs_differ = (neg_mask != other.neg_mask);
-            if (signs_differ) return (neg_mask != 0);
+            bool zero_this = (lo0 == 0 && lo1 == 0 && hi0 == 0 && hi1 == 0);
+            bool zero_other = (other.lo0 == 0 && other.lo1 == 0 && other.hi0 == 0 && other.hi1 == 0);
+            uint64_t eff_neg = zero_this ? 0 : neg_mask;
+            uint64_t eff_other_neg = zero_other ? 0 : other.neg_mask;
 
-            bool absLess = lt256_u(lo0, lo1, hi0, hi1, other.lo0, other.lo1, other.hi0, other.hi1);
-            if (neg_mask == 0)
+            bool signs_differ = (eff_neg != eff_other_neg);
+            if (signs_differ) return (eff_neg != 0);
+
+            bool absLess = dyno::lt256_u(lo0, lo1, hi0, hi1, other.lo0, other.lo1, other.hi0, other.hi1);
+            if (eff_neg == 0)
             {
                 return absLess;
             }
             else
             {
-                return abs_gt_u(lo0, lo1, hi0, hi1, other.lo0, other.lo1, other.hi0, other.hi1);
+                return dyno::abs_gt_u(lo0, lo1, hi0, hi1, other.lo0, other.lo1, other.hi0, other.hi1);
             }
         }
 
@@ -1905,7 +1530,7 @@ namespace dyno
             result.lo1 = abs_res.lo1;
             result.hi0 = abs_res.hi0;
             result.hi1 = abs_res.hi1;
-            uint64_t a_ge_b = abs_ge_mask_u(lo0, lo1, hi0, hi1, other.lo0, other.lo1, other.hi0, other.hi1);
+            uint64_t a_ge_b = dyno::abs_ge_mask_u(lo0, lo1, hi0, hi1, other.lo0, other.lo1, other.hi0, other.hi1);
             result.neg_mask = (a_ge_b & neg_mask) | (~a_ge_b & other.neg_mask);
             return true;
         }
@@ -1944,7 +1569,7 @@ namespace dyno
 
             uint64_t same_mask = ~(neg_mask ^ other.neg_mask);
 
-            uint64_t agemask = abs_ge_mask_u(lo0, lo1, hi0, hi1, other.lo0, other.lo1, other.hi0, other.hi1);
+            uint64_t agemask = dyno::abs_ge_mask_u(lo0, lo1, hi0, hi1, other.lo0, other.lo1, other.hi0, other.hi1);
             uint64_t chosen0 = (diff_ab0 & agemask) | (diff_ba0 & ~agemask);
             uint64_t chosen1 = (diff_ab1 & agemask) | (diff_ba1 & ~agemask);
             uint64_t chosen2 = (diff_ab2 & agemask) | (diff_ba2 & ~agemask);
@@ -1973,8 +1598,10 @@ namespace dyno
             uint64_t r0, r1, r2, r3;
             mul256_u(lo0, lo1, hi0, hi1, other.lo0, other.lo1, other.hi0, other.hi1, r0, r1, r2, r3);
             uint64_t res_neg_mask = neg_mask ^ other.neg_mask;
+            if (r0 == 0 && r1 == 0 && r2 == 0 && r3 == 0) res_neg_mask = 0;
             return ext_sgn_int256_t(r0, r1, r2, r3, (res_neg_mask != 0));
         }
+
 
         DYN_FUNC ext_sgn_int256_t operator/(const ext_sgn_int256_t& other) const
         {
@@ -2007,12 +1634,19 @@ namespace dyno
         {
         }
 
+        DYN_FUNC uint512_t(uint64_t _lo0, uint64_t _lo1, uint64_t _lo2, uint64_t _lo3)
+            : lo0(_lo0), lo1(_lo1), lo2(_lo2), lo3(_lo3),
+              lo4(0), lo5(0), lo6(0), lo7(0)
+        {
+        }
+
         DYN_FUNC uint512_t(uint64_t _lo0, uint64_t _lo1, uint64_t _lo2, uint64_t _lo3,
                            uint64_t _lo4, uint64_t _lo5, uint64_t _lo6, uint64_t _lo7)
             : lo0(_lo0), lo1(_lo1), lo2(_lo2), lo3(_lo3),
               lo4(_lo4), lo5(_lo5), lo6(_lo6), lo7(_lo7)
         {
         }
+
 
         DYN_FUNC bool try_add(const uint512_t& b, uint512_t& res) const
         {
@@ -2240,8 +1874,18 @@ namespace dyno
         {
         }
 
+        DYN_FUNC ext_sgn_int512_t(const ext_sgn_int256_t& a)
+        {
+            neg_mask = a.neg_mask;
+            abs_val = uint512_t(a.lo0, a.lo1, a.hi0, a.hi1);
+        }
+
         DYN_FUNC bool operator==(const ext_sgn_int512_t& b) const
         {
+
+            bool zero_this = (abs_val == uint512_t());
+            bool zero_other = (b.abs_val == uint512_t());
+            if (zero_this && zero_other) return true;
             return neg_mask == b.neg_mask && abs_val == b.abs_val;
         }
 
@@ -2249,8 +1893,13 @@ namespace dyno
 
         DYN_FUNC bool operator<(const ext_sgn_int512_t& b) const
         {
-            if (neg_mask != b.neg_mask) return neg_mask != 0;
-            if (neg_mask == 0) return abs_val < b.abs_val;
+            bool zero_this = (abs_val == uint512_t());
+            bool zero_other = (b.abs_val == uint512_t());
+            uint64_t eff_neg = zero_this ? 0 : neg_mask;
+            uint64_t eff_b_neg = zero_other ? 0 : b.neg_mask;
+
+            if (eff_neg != eff_b_neg) return eff_neg != 0;
+            if (eff_neg == 0) return abs_val < b.abs_val;
             return abs_val > b.abs_val;
         }
 
@@ -2348,69 +1997,8 @@ namespace dyno
             return ext_sgn_int512_t(abs_result, result_negative);
         }
     };
+
 #else
-
-    struct uint128_t
-    {
-        uint4 limbs; // x,y,z,w correspond to low to high 32-bit parts
-
-        __host__ __device__ uint128_t (
-
-        )
-        :
-        limbs (make_uint4(0, 0, 0, 0))
-        {
-        }
-
-        __host__ __device__ uint128_t (uint64_t lo
-        ,
-        uint64_t hi
-        )
-        :
-        limbs (make_uint4((uint32_t)
-        lo
-        ,
-        (uint32_t)(lo>> 32), (uint32_t)hi, (uint32_t)(hi>> 32)
-        )
-        )
- {}
-
-        __device__ uint128_t operator+(const uint128_t& other) const
-        {
-            uint128_t result;
-            add_uint128_vectorized_asm(limbs, other.limbs, result.limbs);
-            return result;
-        }
-
-        __device__ uint128_t operator-(const uint128_t& other) const
-        {
-            uint128_t result;
-            sub_uint128_vectorized_asm(limbs, other.limbs, result.limbs);
-            return result;
-        }
-
-        __device__ uint128_t operator*(const uint128_t& other) const
-        {
-            uint128_t result;
-            mul_uint128_vectorized_asm(limbs, other.limbs, result.limbs);
-            return result;
-        }
-
-        __device__ bool operator>=(const uint128_t& other) const
-        {
-            if (limbs.w != other.limbs.w) return limbs.w > other.limbs.w;
-            if (limbs.z != other.limbs.z) return limbs.z > other.limbs.z;
-            if (limbs.y != other.limbs.y) return limbs.y > other.limbs.y;
-            return limbs.x >= other.limbs.x;
-        }
-
-        __device__ bool operator<(const uint128_t& other) const
-        {
-            return !(*this >= other);
-        }
-
-        __device__ bool operator==(const uint128_t& other) const = default;
-    };
 
     struct uint192_t
     {
@@ -2530,4 +2118,3 @@ namespace dyno
 #endif
 }
 #endif
-

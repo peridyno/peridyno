@@ -18,7 +18,7 @@
 #include <vector>
 #include "Node.h"
 
-#include "Complex.h"
+#include "Basic/Complex.h"
 #include "Topology/HeightField.h"
 
 namespace dyno {
