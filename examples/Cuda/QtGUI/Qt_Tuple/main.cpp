@@ -25,12 +25,9 @@ public:
 		this->varFloat()->setValue(other.varFloat()->getValue());
 		this->varVector()->setValue(other.varVector()->getValue());
 
-		this->varVec3fTupleArray()->clear();
+		this->varVec3fTupleArray()->assign(other.varVec3fTupleArray());
 
-		for (auto it = other.varVec3fTupleArray()->begin(); it != other.varVec3fTupleArray()->end(); it++)
-		{
-			this->varVec3fTupleArray()->pushBack(other.varVec3fTupleArray()->getElement(it));
-		}
+		return *this;
 	}
 
 	DEF_VAR(bool, Boolean, false, "Define a boolean field");

@@ -82,6 +82,8 @@ namespace dyno
             }
 
             mItemMapper.erase(id);
+
+            emit fieldChanged();
         }
 
     protected:

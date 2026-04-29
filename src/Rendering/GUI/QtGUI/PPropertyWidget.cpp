@@ -421,6 +421,9 @@ namespace dyno
 		{
 			auto aw = new ArrayWidget(f);
 
+			//handle add/delete items
+			this->connect(aw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
+
 			int id = 0;
 			for (auto it = f->begin(); it != f->end(); ++it)
 			{

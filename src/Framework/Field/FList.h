@@ -105,6 +105,9 @@ namespace dyno {
 			return true;
 		}
 
+		void assign(const std::list<T>& lst);
+		void assign(TFList<T>* lst);
+
 	private:
 		std::shared_ptr<DataType>& constDataPtr()
 		{
@@ -128,6 +131,30 @@ namespace dyno {
 
 		std::shared_ptr<DataType> mDataPtr = std::make_shared<DataType>();
 	};
+
+	template<typename T>
+	void TFList<T>::assign(const std::list<T>& lst)
+	{
+		this->clear();
+
+		for (auto it = lst.begin(); it != lst.end(); it++)
+		{
+			this->pushBack(*it);
+		}
+	}
+
+	template<typename T>
+	void TFList<T>::assign(TFList<T>* lst)
+	{
+		this->clear();
+
+		auto data_ptr = lst->constDataPtr();
+
+		for (auto it = data_ptr->begin(); it != data_ptr->end(); it++)
+		{
+			this->pushBack(lst->getElement(it));
+		}
+	}
 
 	template<typename T>
 	void TFList<T>::clear()
