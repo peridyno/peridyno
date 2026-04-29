@@ -43,42 +43,10 @@ namespace dyno
         Q_OBJECT
     public:
 
-        ArrayWidget(FBase* t);
+        ArrayWidget(FList* t);
+        ~ArrayWidget();
 
-        virtual void addItem(QWidget* item, int id)
-        {
-            if (!item)
-                return;
-
-            QHBoxLayout* elementLayout = new QHBoxLayout;
-            elementLayout->setAlignment(Qt::AlignVCenter);
-            QLabel* label = new QLabel;
-            label->setFixedWidth(30);
-            elementLayout->addWidget(label);
-            elementLayout->addWidget(item);
-            listLayout->addLayout(elementLayout);
-
-            auto deleteButton = new QPushButton("-");
-            elementLayout->addWidget(deleteButton);
-            deleteButton->setFixedSize(20,20);
-            deleteButton->setStyleSheet(R"(
-                QPushButton {
-                    background-color: #464646;
-                    border-radius: 4px;
-                }
-                QPushButton:hover {
-                    background-color: #616161;
-                }
-                QPushButton:pressed {
-                    background-color: #000000;
-                }
-            )");
-
-            connect(deleteButton, &QPushButton::clicked, [this, elementLayout]() {
-                int index = listLayout->indexOf(elementLayout);
-                this->deleteElement(index);
-            });
-        };
+        virtual void addItem(QWidget* item, int id, FBase* field);
 
     signals:
         void onRebuildElement();
@@ -101,13 +69,19 @@ namespace dyno
 
         void addElement()
         {
-            printf("ListWidget::Need to implement the add element function\n");
+            mFlist->pushBack();
+
             emit onAddElement();
         }
 
         void onDeleteElement(int id)
         {
-            printf("ListWidget::Delete element at index: %d\n", id);
+			auto it = mItemMapper.find(id);
+            if (it != mItemMapper.end()) {
+                mFlist->erase(mItemMapper[id]);
+            }
+
+            mItemMapper.erase(id);
         }
 
     protected:
@@ -148,5 +122,9 @@ namespace dyno
                 delete item;
             }
         }
+
+        private:
+            FList* mFlist = nullptr;
+            std::map<int, FBase*> mItemMapper;
     };
 }

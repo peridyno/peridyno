@@ -427,7 +427,7 @@ namespace dyno
 				auto childField = (*it).get();
 				childField->setObjectName("[element " + std::to_string(id)+"]");
 				QWidget* fw = addVariableFieldWidget(childField);
-				aw->addItem(fw,id);
+				aw->addItem(fw, id, childField);
 				id++;
 			}
 

@@ -36,6 +36,10 @@ namespace dyno {
 		virtual std::list<std::unique_ptr<FBase>>::iterator begin() = 0;
 
 		virtual std::list<std::unique_ptr<FBase>>::iterator end() = 0;
+
+		virtual void pushBack() = 0;
+		virtual void erase(FBase* f) = 0;
+		virtual void clear() = 0;
 	};
 
 	/*!
@@ -76,7 +80,16 @@ namespace dyno {
 			return data_ptr->end();
 		}
 
-		void insert(T val);
+		/**
+		 * Push back a default value
+		 */
+		void pushBack() override;
+		void erase(FBase* f) override;
+		void clear() override;
+
+		T getElement(std::list<std::unique_ptr<FBase>>::iterator it);
+
+		void pushBack(T val);
 
 		bool isEmpty() override {
 			auto data_ptr = this->constDataPtr();
@@ -117,7 +130,52 @@ namespace dyno {
 	};
 
 	template<typename T>
-	void TFList<T>::insert(T val)
+	void TFList<T>::clear()
+	{
+		auto& data_ptr = this->getDataPtr();
+		data_ptr->clear();
+	}
+
+	template<typename T>
+	void TFList<T>::erase(FBase* f)
+	{
+		auto& data_ptr = this->getDataPtr();
+		auto it = std::find_if(data_ptr->begin(), data_ptr->end(),
+			[f](const std::unique_ptr<FBase>& ptr) {
+				return ptr.get() == f;
+			});
+
+		if (it != data_ptr->end()) {
+			data_ptr->erase(it);
+		}
+	}
+
+	template<typename T>
+	void TFList<T>::pushBack()
+	{
+		T val{};
+		this->pushBack(val);
+	}
+
+	template<typename T>
+	T TFList<T>::getElement(std::list<std::unique_ptr<FBase>>::iterator it)
+	{
+		FBase* base_ptr = (*it).get();
+		if constexpr (std::is_base_of<Tuple, T>::value) {
+			if (auto* derived_ptr = dynamic_cast<TFTuple<T>*>(base_ptr)) {
+				return derived_ptr->getValue();
+			}
+		}
+		else
+		{
+			if (auto* derived_ptr = dynamic_cast<FVar<T>*>(base_ptr)) {
+				return derived_ptr->getValue();
+			}
+		}
+	}
+
+	template<typename T>
+	void TFList<T>::pushBack(T val)
 	{
 		auto& data = this->getDataPtr();
 
