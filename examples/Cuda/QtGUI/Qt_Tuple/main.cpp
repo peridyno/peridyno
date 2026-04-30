@@ -14,7 +14,21 @@ using namespace dyno;
 class MyTuple : public Tuple
 {
 public:
-	MyTuple() {};
+	MyTuple() {
+		this->varVec3fTupleArray()->pushBack(Vec3f());
+	};
+
+	//Deep copy
+	MyTuple& operator=(MyTuple& other) {
+		this->varBoolean()->setValue(other.varBoolean()->getValue());
+		this->varInt()->setValue(other.varInt()->getValue());
+		this->varFloat()->setValue(other.varFloat()->getValue());
+		this->varVector()->setValue(other.varVector()->getValue());
+
+		this->varVec3fTupleArray()->assign(other.varVec3fTupleArray());
+
+		return *this;
+	}
 
 	DEF_VAR(bool, Boolean, false, "Define a boolean field");
 
@@ -32,23 +46,34 @@ class MyNode : public Node
 public:
 	MyNode() 
 	{
-  		this->varFloatList()->insert(1.0f);
-		this->varFloatList()->insert(3.1415926f);
-		this->varFloatList()->insert(52.31f);
+  		this->varFloatList()->pushBack(1.0f);
+		this->varFloatList()->pushBack(3.1415926f);
+		this->varFloatList()->pushBack(52.31f);
 
-		this->varIntList()->insert(5);
-		this->varIntList()->insert(10);
-		this->varIntList()->insert(3);
+		this->varIntList()->pushBack(5);
+		this->varIntList()->pushBack(10);
+		this->varIntList()->pushBack(3);
 
-		this->varTupleList()->insert(MyTuple());
-		this->varTupleList()->insert(MyTuple());
+		this->varTupleList()->pushBack(MyTuple());
+		this->varTupleList()->pushBack(MyTuple());
 
-		this->varTransformList()->insert(Transform3f());
-		this->varTransformList()->insert(Transform3f());
-		this->varTransformList()->insert(Transform3f());
+		this->varTransformList()->pushBack(Transform3f());
+		this->varTransformList()->pushBack(Transform3f());
+		this->varTransformList()->pushBack(Transform3f());
 	};
 
 	~MyNode() override {};
+
+	void resetStates() override
+	{
+		auto begin_it = this->varFloatList()->begin();
+		for (auto it = begin_it; it != this->varFloatList()->end(); it++)
+		{
+			std::cout << this->varFloatList()->getElement(it) << std::endl;
+		}
+
+		std::cout << "Reset called " << std::endl;
+	}
 
 	DEF_VAR(double, VarDouble,30.0f, "Define a list");
 	DEF_VAR(float, VarFloat,30.0f, "Define a list");
@@ -60,7 +85,6 @@ public:
 	DEF_LIST(int, IntList, "Define a list");
 	DEF_LIST(Transform3f, TransformList, "Define a list");
 	DEF_LIST(MyTuple, TupleList, "");
-
 };
 
 using namespace dyno;
@@ -76,7 +100,6 @@ int main(int, char**)
 // 	auto fm = dynamic_cast<FCArray<MyTuple>*> (tupleNode->varMyTuples());
 // 	auto f2 = TypeInfo::cast<FCArray<Tuple>> (tupleNode->varMyTuples());
 // 	auto fm2 = TypeInfo::cast<FCArray<MyTuple>> (tupleNode->varMyTuples());
-
 
 	QtApp app;
 	app.setSceneGraph(scn);

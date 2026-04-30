@@ -88,6 +88,14 @@ namespace dyno {
 			return 0; 
 		}
 
+		/**
+		 * @brief set the value
+		 *
+		 * notify: call the callback function when the value is true
+		 */
+		void setValue(T val, bool notify = true);
+		T getValue();
+
 		bool connect(FBase* dst) override {
 			return false;
 		}
@@ -132,9 +140,30 @@ namespace dyno {
 		std::shared_ptr<DataType> m_data = nullptr;
 	};
 
+	template<typename T>
+	T TFTuple<T>::getValue()
+	{
+		std::shared_ptr<T>& data = this->constDataPtr();
+
+		return *data;
+	}
+
+	template<typename T>
+	void TFTuple<T>::setValue(T val, bool notify /*= true*/)
+	{
+		std::shared_ptr<T>& data = this->getDataPtr();
+		
+		*data = val;
+
+		if (notify && isActive())
+			this->update();
+
+		this->tick();
+	}
+
 #define DEF_TUPLE(T, name, desc) \
 private:									\
 	TFTuple<T> var_##name = TFTuple<T>(std::string("var_") + std::string(#name), desc, FieldTypeEnum::Param, this);			\
 public:										\
-	inline TFTuple<T>* tuple##name() {return &var_##name;}
+	inline TFTuple<T>* var##name() {return &var_##name;}
 }

@@ -2,8 +2,10 @@
 
 namespace dyno 
 {
-    ArrayWidget::ArrayWidget(FBase* t) : QFieldWidget(t)
+    ArrayWidget::ArrayWidget(FList* t) : QFieldWidget(t)
     {
+        mFlist = t;
+
         this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
         QString name = FormatFieldWidgetName(t->getObjectName());
@@ -121,5 +123,47 @@ namespace dyno
             this->clearList();
         });
     }
+
+	ArrayWidget::~ArrayWidget()
+	{
+        mItemMapper.clear();
+	}
+
+	void ArrayWidget::addItem(QWidget* item, int id, FBase* field)
+	{
+		if (!item)
+			return;
+
+        mItemMapper[id] = field;
+
+		QHBoxLayout* elementLayout = new QHBoxLayout;
+		elementLayout->setAlignment(Qt::AlignVCenter);
+		QLabel* label = new QLabel;
+		label->setFixedWidth(30);
+		elementLayout->addWidget(label);
+		elementLayout->addWidget(item);
+		listLayout->addLayout(elementLayout);
+
+		auto deleteButton = new QPushButton("-");
+		elementLayout->addWidget(deleteButton);
+		deleteButton->setFixedSize(20, 20);
+		deleteButton->setStyleSheet(R"(
+                QPushButton {
+                    background-color: #464646;
+                    border-radius: 4px;
+                }
+                QPushButton:hover {
+                    background-color: #616161;
+                }
+                QPushButton:pressed {
+                    background-color: #000000;
+                }
+            )");
+
+		connect(deleteButton, &QPushButton::clicked, [this, elementLayout]() {
+			int index = listLayout->indexOf(elementLayout);
+			this->deleteElement(index);
+			});
+	};
 
 }

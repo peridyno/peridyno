@@ -421,13 +421,16 @@ namespace dyno
 		{
 			auto aw = new ArrayWidget(f);
 
+			//handle add/delete items
+			this->connect(aw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
+
 			int id = 0;
 			for (auto it = f->begin(); it != f->end(); ++it)
 			{
 				auto childField = (*it).get();
 				childField->setObjectName("[element " + std::to_string(id)+"]");
 				QWidget* fw = addVariableFieldWidget(childField);
-				aw->addItem(fw,id);
+				aw->addItem(fw, id, childField);
 				id++;
 			}
 
