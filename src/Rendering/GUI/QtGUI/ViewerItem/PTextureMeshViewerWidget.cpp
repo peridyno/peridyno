@@ -334,20 +334,19 @@ namespace dyno
 					connect(isolatedCheckBox, QOverload<int>::of(&QCheckBox::stateChanged), updateRenderShape);
 					connect(isolatedCheckBox, QOverload<int>::of(&QCheckBox::stateChanged), updateTransparcy);
 
-					auto updateGL_Repaint = [=]() {
-						renderWidget->updateModuleGL();
+					auto repaintWidget = [=]() {
 						renderWidget->update();
 					};
 
-					connect(MetallicWidget, QOverload<>::of(&mPiecewiseDoubleSpinBox::valueChange), updateGL_Repaint);
-					connect(RoughnessWidget, QOverload<>::of(&mPiecewiseDoubleSpinBox::valueChange), updateGL_Repaint);
-					connect(AlphaWidget, QOverload<>::of(&mPiecewiseDoubleSpinBox::valueChange), updateGL_Repaint);
-					connect(ColorWidget, QOverload<const QColor&>::of(&QColorButton::colorChanged), updateGL_Repaint);
+					connect(MetallicWidget, QOverload<>::of(&mPiecewiseDoubleSpinBox::valueChange), repaintWidget);
+					connect(RoughnessWidget, QOverload<>::of(&mPiecewiseDoubleSpinBox::valueChange), repaintWidget);
+					connect(AlphaWidget, QOverload<>::of(&mPiecewiseDoubleSpinBox::valueChange), repaintWidget);
+					connect(ColorWidget, QOverload<const QColor&>::of(&QColorButton::colorChanged), repaintWidget);
 
 					updateRenderShape();
 					if (f_textureMesh)
 					{
-						renderWidget->setTextureMesh(std::vector<FInstance<TextureMesh>*>{f_textureMesh});
+						renderWidget->addField(f_textureMesh);
 					}
 				}
 			}

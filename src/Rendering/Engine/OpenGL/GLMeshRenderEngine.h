@@ -18,21 +18,10 @@ namespace dyno
 		GLMeshRenderEngine();
 		~GLMeshRenderEngine();
 
-		void renderMesh(const std::vector<FInstance<TextureMesh>*>& texmeshs, const std::vector<FInstance<TriangleSet<DataType3f>>*>& triangles, const RenderParams& rparams,bool renderTransparency = false);
+		void addField(FBase* field);
 
 		virtual std::string name() const override;
 
-		void updateModuleGL()
-		{
-			realisticRenderModule->inTextureMesh()->getDataPtr();
-			transparencyRealisticModule->inTextureMesh()->getDataPtr();
-			surfaceRenderModule->inTriangleSet()->getDataPtr();
-		};
-
-		std::shared_ptr<GLSurfaceVisualModule> surfaceRenderModule = NULL;
-		std::shared_ptr<GLPhotorealisticRender> realisticRenderModule = NULL;
-		std::shared_ptr<GLPhotorealisticRender> transparencyRealisticModule = NULL;
-
-
+		std::shared_ptr<SceneGraph> renderSceneGraph = NULL;
 	};
 };

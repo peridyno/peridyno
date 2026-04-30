@@ -52,19 +52,13 @@ namespace dyno
 		GLMeshRenderWidget(QWidget* parent = nullptr) ;
 		~GLMeshRenderWidget() override ;
 
-		//Set TextureMesh for rendering
-		void setTextureMesh(const std::vector<FInstance<TextureMesh>*>& mesh) { mTextureMesh = mesh; }
-
-		//Set TriangleSet for rendering
-		void setTriangleSet(const std::vector<FInstance<TriangleSet<DataType3f>>*>& mesh) { mTriangleSet = mesh; }
-
 		void setDefaultAnimationOption(bool op) {}
 
 		void setTexMeshShapesID(std::vector<uint> shapes);
 
+		void addField(FBase* field) { mRenderEngine->addField(field); }
 
 	public slots:
-		void updateModuleGL() { mRenderEngine->updateModuleGL(); };
 		void setTransparency(bool t)
 		{
 			mTransparency = t;
@@ -84,10 +78,6 @@ namespace dyno
 
 		// Render engine
 		std::unique_ptr<GLMeshRenderEngine> mRenderEngine;
-
-		// Mesh data
-		std::vector<FInstance<TextureMesh>*> mTextureMesh;
-		std::vector<FInstance<TriangleSet<DataType3f>>*> mTriangleSet;
 
 		// Rendering state
 		bool mGLInitialized = false;

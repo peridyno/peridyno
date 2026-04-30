@@ -9,6 +9,7 @@
 
 #include "GLMeshRenderEngine.h"
 #include "GLShapeRender.h"
+#include "SceneGraph.h"
 
 namespace dyno
 {
@@ -24,7 +25,6 @@ namespace dyno
 
 		// Create render engine
 		mRenderEngine = std::make_unique<GLMeshRenderEngine>();
-		mRenderEngine->realisticRenderModule = std::make_shared<GLShapeRender>();
 
 	}
 
@@ -37,8 +37,6 @@ namespace dyno
 
 	void GLMeshRenderWidget::setTexMeshShapesID(std::vector<uint> shapes)
 	{
-		auto shapeRender = std::dynamic_pointer_cast<GLShapeRender>(mRenderEngine->realisticRenderModule);
-		shapeRender->varShapes()->setValue(shapes);
 	}
 
 	void GLMeshRenderWidget::initializeGL()
@@ -96,7 +94,9 @@ namespace dyno
 		rparams.unitScale = 1.0f;
 
 		// Render the meshes
-		mRenderEngine->renderMesh(mTextureMesh, mTriangleSet, rparams, mTransparency);
+		mRenderEngine->renderSceneGraph->updateGraphicsContext();
+		mRenderEngine->draw(mRenderEngine->renderSceneGraph.get(), rparams);
+
 	}
 
 	void GLMeshRenderWidget::mousePressEvent(QMouseEvent* event)

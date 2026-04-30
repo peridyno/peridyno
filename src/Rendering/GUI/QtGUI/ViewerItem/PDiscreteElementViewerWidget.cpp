@@ -20,6 +20,7 @@
 #include "PropertyItem/QColorWidget.h"
 #include "PropertyItem/QPiecewiseDoubleSpinBox.h"
 #include "PropertyItem/QVehicleInfoWidget.h"
+#include "RenderWindow.h"
 
 namespace dyno
 {
@@ -126,114 +127,107 @@ namespace dyno
 		tabWidget->addTab(discreateElementWidget, "Widgets");
 		layout->addWidget(tabWidget);
 
-		//if (f_discreteElement)
-		//{
-		//	// Shapes tab - display shape information
-		//	{
-		//		// Shape ID selector
-		//		QHBoxLayout* elementLayout = new QHBoxLayout();
-		//		QLabel* elementLabel = new QLabel("Elements:");
-		//		elementLayout->addLayout(elementLayout);
+		if (f_discreteElement)
+		{
+			{
+				//QHBoxLayout* elementLayout = new QHBoxLayout();
+				//QLabel* elementLabel = new QLabel("Elements:");
+				//elementLayout->addLayout(elementLayout);
 
-		//		QHBoxLayout* transpracyLabelLayout = new QHBoxLayout();
-		//		QLabel* transpracyLabel = new QLabel("transpracy:");
-		//		QCheckBox* transpracyCheckBox = new QCheckBox();
-		//		transpracyCheckBox->setChecked(false);
+				//QHBoxLayout* transpracyLabelLayout = new QHBoxLayout();
+				//QLabel* transpracyLabel = new QLabel("transpracy:");
+				//QCheckBox* transpracyCheckBox = new QCheckBox();
+				//transpracyCheckBox->setChecked(false);
 
-		//		transpracyLabelLayout->addWidget(transpracyLabel);
-		//		transpracyLabelLayout->addWidget(transpracyCheckBox);
+				//transpracyLabelLayout->addWidget(transpracyLabel);
+				//transpracyLabelLayout->addWidget(transpracyCheckBox);
 
-		//		shapesLayout->addLayout(elementLayout);
-		//		shapesLayout->addLayout(transpracyLabelLayout);
+				//shapesLayout->addLayout(elementLayout);
+				//shapesLayout->addLayout(transpracyLabelLayout);
 
-		//		CArray<TOrientedBox3D<Real>> boxes;
-		//		boxes.assign(f_discreteElement->constDataPtr()->boxesInLocal());
+				//QHBoxLayout* bindCamLayout = new QHBoxLayout();
+				//QLabel* camLabel = new QLabel("Bind Main Camera:");
+				//shapesLayout->addLayout(bindCamLayout);
 
-		//		for (size_t i = 0; i < f_discreteElement->constDataPtr()->boxesInLocal().size(); i++)
-		//		{
-		//			ShapeConfig config;
-		//			config.shapeType = ConfigShapeType::CONFIG_BOX;
-		//			config.center = boxes[i].center;
+				//QCheckBox* bindCameraCheckBox = new QCheckBox();
+				//bindCameraCheckBox->setChecked(true);
+				//bindCamLayout->addWidget(camLabel);
+				//bindCamLayout->addWidget(bindCameraCheckBox);
 
-		//			Mat3f R;
-		//			R.setCol(0, boxes[i].u);
-		//			R.setCol(1, boxes[i].v);
-		//			R.setCol(2, boxes[i].w);
+				CArray<TOrientedBox3D<Real>> boxes;
+				boxes.assign(f_discreteElement->constDataPtr()->boxesInLocal());
 
-		//			config.rot = quatFromMatrix(R);
-		//			
-		//			config.halfLength = boxes[i].extent;
-		//			config.center = boxes[i].center;
-		//			config.center = boxes[i].center;
+				for (size_t i = 0; i < f_discreteElement->constDataPtr()->boxesInLocal().size(); i++)
+				{
+					ShapeConfig config;
+					config.shapeType = ConfigShapeType::CONFIG_BOX;
+					config.center = boxes[i].center;
 
-		//			//QShapeDetail shape = new QShapeDetail(config);
+					Mat3f R;
+					R.setCol(0, boxes[i].u);
+					R.setCol(1, boxes[i].v);
+					R.setCol(2, boxes[i].w);
 
-		//		}
+					config.rot = quatFromMatrix(R);
+					
+					config.halfLength = boxes[i].extent;
+					config.center = boxes[i].center;
+					config.center = boxes[i].center;
+
+					QShapeDetail* shape = new QShapeDetail(config,i);
+					shapesLayout->addWidget(shape);
+				}
 
 
-		//		shapesLayout->addStretch();
+				shapesLayout->addStretch();
 
-		//		auto updateWidgetInfo = [=]() {
-		//			
-		//		};
+				// Render tab - display TextureMesh
+				{
+					renderWidget = new GLMeshRenderWidget();
+					renderWidget->setMinimumSize(400, 300);
+					discreteElementsLayout->addWidget(renderWidget,1);
 
-		//		auto updateField = [=]() {
 
-		//		};
+					//auto bindCamera = [=]() {
+					//	if (bindCameraCheckBox && renderWidget)
+					//	{
+					//		if (bindCameraCheckBox->isChecked()) 
+					//		{
+					//			//renderWidget->bindCamera(RenderWindow::getCamera());
+					//		}
+					//		else
+					//			renderWidget->bindCamera(NULL);
+					//	}
+					//};
 
-		//		//connect(MetallicWidget, QOverload<>::of(&mPiecewiseDoubleSpinBox::valueChange), updateField);
+					//connect(bindCameraCheckBox, QOverload<int>::of(&QCheckBox::stateChanged), bindCamera);
+					//bindCamera();
 
-		//		// Initial update
-		//		updateWidgetInfo();
+					if (f_discreteElement)
+					{
+						renderWidget->addField(f_discreteElement);			
+					}
+					connect(PSimulationThread::instance(), QOverload<int>::of(&PSimulationThread::oneFrameFinished), this,&PDiscreteElementViewerWidget::updateRenderWidget);
 
-		//		// Render tab - display TextureMesh
-		//		{
-		//			GLMeshRenderWidget* renderWidget = new GLMeshRenderWidget();
-		//			renderWidget->setMinimumSize(400, 300);
-		//			discreteElementsLayout->addWidget(renderWidget,1);
-
-		//			auto updateRenderData = [=]() {
-		//				if (dis2Tri == NULL)
-		//					dis2Tri = std::make_shared<DiscreteElementsToTriangleSet<DataType3f>>();
-
-		//				if (f_discreteElement) 
-		//				{
-		//					f_discreteElement->connect(dis2Tri->inDiscreteElements());
-		//					dis2Tri->update();
-		//				}
-		//			};
-
-		//			auto updateTransparcy = [=]() {
-		//				renderWidget->setTransparency(transpracyCheckBox->isChecked());
-		//				renderWidget->update();
-		//				};
-
-		//			auto updateGL_Repaint = [=]() {
-		//				renderWidget->updateModuleGL();
-		//				renderWidget->update();
-		//			};
-
-		//			
-		//			updateRenderData();
-		//			if (f_discreteElement && dis2Tri)
-		//			{
-		//				if (!dis2Tri->outTriangleSet()->isEmpty()) 
-		//				{
-		//					auto t = TypeInfo::cast<FInstance<TriangleSet<DataType3f>>>(dis2Tri->outTriangleSet());
-		//					if(t)
-		//						renderWidget->setTriangleSet(std::vector<FInstance<TriangleSet<DataType3f>>*>{t});
-		//				}
-		//			}
-		//		}
-		//	}
-		//}
+				}
+			}
+		}
 
 		connect(PSimulationThread::instance(), &PSimulationThread::sceneGraphChanged, this, &QWidget::close);
+
 	}
 
-	void PDiscreteElementViewerWidget::updateWidget()
+
+	void PDiscreteElementViewerWidget::closeEvent(QCloseEvent* event)
 	{
+		disconnect(PSimulationThread::instance(),SIGNAL(oneFrameFinished(int)),this,SLOT(updateRenderWidget()));
 
+		event->accept();
 	}
+
+	void PDiscreteElementViewerWidget::updateRenderWidget() 
+	{ 
+		renderWidget->update(); 
+	};
 
 }
