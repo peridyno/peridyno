@@ -4,7 +4,7 @@ namespace dyno
 {
     ArrayWidget::ArrayWidget(FList* t) : QFieldWidget(t)
     {
-        mFlist = t;
+        mList = t;
 
         this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
@@ -44,7 +44,8 @@ namespace dyno
             )");
 
         sizeLabel = new QLabel;
-        sizeLabel->setText("Size: "); 
+        updateSizeLabel();
+
         sizeLabel->setStyleSheet(R"(
             QLabel {
                 background-color: #464646;  
@@ -111,15 +112,17 @@ namespace dyno
             else
             {
                 button->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_down_pressed.png").c_str()));
+                if (mItemMapper.size() == 0)
+                    emit onExpandList();
                 elementWidget->setVisible(true);
             }
             mFlag = !mFlag;
         });
 
-        connect(addButton, &QPushButton::clicked, [&]() {
+        connect(addButton, &QPushButton::clicked, [this]() {
             this->addElement();
         });
-        connect(clearButton, &QPushButton::clicked, [&]() {
+        connect(clearButton, &QPushButton::clicked, [this]() {
             this->clearList();
         });
     }
@@ -163,7 +166,10 @@ namespace dyno
 		connect(deleteButton, &QPushButton::clicked, [this, elementLayout]() {
 			int index = listLayout->indexOf(elementLayout);
 			this->deleteElement(index);
-			});
+		});
+
+        updateSizeLabel();
+
 	};
 
 }

@@ -47,67 +47,75 @@ namespace dyno
         ~ArrayWidget();
 
         virtual void addItem(QWidget* item, int id, FBase* field);
+        void setList(FList* list) { mList = list; }
+        FList* list() { return mList; }
 
     signals:
-        void onRebuildElement();
         void onAddElement();
+        void onExpandList();
 
     public slots:
         void deleteElement(int id)
         {
             removeSubLayout(id, listLayout);
-            emit onDeleteElement(id);
-        }
-
-        void clearList()
-        {
-            if (listLayout)
-                clearLayoutRecursively(listLayout);
-
-            printf("ListWidget::Clear list completed\n");
-        }
-
-        void addElement()
-        {
-            mFlist->pushBack();
-
-            emit onAddElement();
-        }
-
-        void onDeleteElement(int id)
-        {
-			auto it = mItemMapper.find(id);
+            auto it = mItemMapper.find(id);
             if (it != mItemMapper.end()) {
-                mFlist->erase(mItemMapper[id]);
+                mList->erase(mItemMapper[id]);
             }
 
             mItemMapper.erase(id);
 
+            updateSizeLabel();
             emit fieldChanged();
         }
 
+        void updateSizeLabel() 
+        {
+            std::string str = "Size: " + std::to_string(mList->size());
+            sizeLabel->setText(str.c_str());
+        }
+        void clearList()
+        {
+            if (listLayout)
+                clearLayoutRecursively(listLayout);
+            updateSizeLabel();
+            mList->clear();
+        }
+
+        void addElement()
+        {
+            mList->pushBack();
+
+            emit onAddElement();
+        }
+
+
+
     protected:
         bool mFlag = true;
+        FList* mList = NULL;
         QVBoxLayout* listLayout = nullptr;
         QLabel* sizeLabel = nullptr;
         QPushButton* addButton = nullptr;
         QPushButton* clearButton = nullptr;
 
     private:
+
         void clearLayoutRecursively(QLayout* layout) {
             if (!layout) return;
-            while (QLayoutItem* item = layout->takeAt(0)) {
+
+            QLayoutItem* item;
+            while ((item = layout->takeAt(0)) != nullptr) {
                 if (QLayout* childLayout = item->layout()) {
                     clearLayoutRecursively(childLayout);
-                    delete childLayout;   // 递归删除子布局对象
+                    delete childLayout;
                 }
                 else if (QWidget* widget = item->widget()) {
+                    widget->setParent(nullptr);
                     widget->deleteLater();
                 }
-                delete item;
             }
         }
-
         void removeSubLayout(int index, QVBoxLayout* parentLayout) {
             if (!parentLayout || index < 0 || index >= parentLayout->count())
                 return;
@@ -126,7 +134,6 @@ namespace dyno
         }
 
         private:
-            FList* mFlist = nullptr;
             std::map<int, FBase*> mItemMapper;
     };
 }

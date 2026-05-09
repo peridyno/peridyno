@@ -30,11 +30,11 @@ public:
 		return *this;
 	}
 
-	DEF_VAR(bool, Boolean, false, "Define a boolean field");
+	DEF_VAR(bool, Boolean, false, "Define a boolean; QtStyle(HLayout,OnlyDetail)");
 
-	DEF_VAR(int, Int, 1, "Define an int");
+	DEF_VAR(int, Int, 1, "Define an int; QtStyle(HLayout,OnlyDetail)");
 
-	DEF_VAR(float, Float, 1.0f, "Define a float field");
+	DEF_VAR(float, Float, 1.0f, "Define a float field; QtStyle(HLayout,OnlyDetail)");
 
 	DEF_VAR(Vec3f, Vector, Vec3f(1.0f), "Define a vector field");
 
@@ -95,11 +95,6 @@ int main(int, char**)
 
 	//Create a custom node
 	auto tupleNode = scn->addNode(std::make_shared<MyNode>());
-
-// 	auto f = dynamic_cast<FCArray<Tuple>*> (tupleNode->varMyTuples());
-// 	auto fm = dynamic_cast<FCArray<MyTuple>*> (tupleNode->varMyTuples());
-// 	auto f2 = TypeInfo::cast<FCArray<Tuple>> (tupleNode->varMyTuples());
-// 	auto fm2 = TypeInfo::cast<FCArray<MyTuple>> (tupleNode->varMyTuples());
 
 	QtApp app;
 	app.setSceneGraph(scn);

@@ -20,6 +20,7 @@
 
 #include "PropertyItem/QStateFieldWidget.h"
 #include "PropertyItem/QArrayWidget.h"
+#include "PropertyItem/DescriptionHelper.h"
 
 namespace dyno
 {
@@ -391,10 +392,79 @@ namespace dyno
 
 		QGridLayout* vbox = new QGridLayout;
 
+		QBoxLayout* currentLayout = NULL;
+		enum LastLayoutMode
+		{
+			None,
+			VBox,
+			HBox
+		};
+
+		LastLayoutMode lastMode = None;
+		int row = -1;
+		int temp = -1;
 		for (size_t i = 0; i < tuple->size(); i++)
 		{
 			auto field = tuple->get(i);
-			QWidget* fw = this->addVariableFieldWidget(field, vbox);
+			bool selfVLayout = true;
+			bool nextVLayout = true;
+			bool onlyDetail = false;
+
+			DescriptionHelper::parseQtStyleDescriptionRobust(field->getDescription(), std::string(), selfVLayout, onlyDetail);
+
+			if (i < tuple->size() - 1)
+				DescriptionHelper::parseQtStyleDescriptionRobust(tuple->get(i + 1)->getDescription(), std::string(), nextVLayout, onlyDetail);
+
+			switch (lastMode)
+			{
+			case None:
+				if (!nextVLayout) 
+				{
+					currentLayout = new QHBoxLayout;
+					lastMode = HBox;
+				}
+				else 
+				{
+					currentLayout = new QVBoxLayout;
+					lastMode = VBox;
+				}
+				row++;
+				break;
+			case VBox:
+				if (!nextVLayout) 
+				{
+					currentLayout = new QHBoxLayout;
+					row++;
+					lastMode = HBox;
+				}
+				break;
+			case HBox:
+				if (selfVLayout) 
+				{
+					if (!nextVLayout)
+					{
+						currentLayout = new QHBoxLayout;
+						lastMode = HBox;
+					}
+					else
+					{
+						currentLayout = new QVBoxLayout;
+						lastMode = VBox;
+					}
+					row++;
+				}
+				break;
+			default:
+				break;
+			}
+
+			QWidget* fw = this->addVariableFieldWidget(field, NULL);
+
+			currentLayout->addWidget(fw);
+
+			if (temp != row)
+				vbox->addLayout(currentLayout,row,0);
+			temp = row;
 
 			if (fw != nullptr) {
 				fw->setStyleSheet(R"(
@@ -421,18 +491,29 @@ namespace dyno
 		{
 			auto aw = new ArrayWidget(f);
 
-			//handle add/delete items
 			this->connect(aw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
 
-			int id = 0;
-			for (auto it = f->begin(); it != f->end(); ++it)
-			{
+			connect(aw, &ArrayWidget::onExpandList, [this, aw]() {
+				int id = 0;
+				for (auto it = aw->list()->begin(); it != aw->list()->end(); ++it)
+				{
+					auto childField = (*it).get();
+					childField->setObjectName("[" + std::to_string(id) + "]");
+					QWidget* fw = addVariableFieldWidget(childField);
+					aw->addItem(fw, id, childField);
+					id++;
+				}			
+			});
+
+			connect(aw, &ArrayWidget::onAddElement, [this, aw]()
+			{				
+				auto it = aw->list()->end();
+				--it;
 				auto childField = (*it).get();
-				childField->setObjectName("[element " + std::to_string(id)+"]");
+				childField->setObjectName("[" + std::to_string(aw->list()->size() - 1) + "]");
 				QWidget* fw = addVariableFieldWidget(childField);
-				aw->addItem(fw, id, childField);
-				id++;
-			}
+				aw->addItem(fw, aw->list()->size() - 1, childField);
+			});
 
 			if (layout != nullptr) layout->addWidget(aw);
 
