@@ -8,7 +8,17 @@
 
 namespace dyno
 {
-	IMPL_FIELD_WIDGET(Vec3f, QVector3FieldWidget)
+	//IMPL_FIELD_WIDGET(Vec3f, QVector3FieldWidget)
+	int QVector3FieldWidget::reg_field_widget = []()
+	{
+		dyno::PPropertyWidget::registerWidget({ &typeid(Vec3f), &QVector3FieldWidget::createWidget });
+		dyno::PPropertyWidget::registerWidget({ &typeid(Vec3d), &QVector3FieldWidget::createWidget });
+		return 0;
+	}();
+
+	QWidget* QVector3FieldWidget::createWidget(dyno::FBase* f) {
+		return new QVector3FieldWidget(f);
+	}
 
 	QVector3FieldWidget::QVector3FieldWidget(FBase* field)
 		: QFieldWidget(field)

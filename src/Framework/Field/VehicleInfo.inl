@@ -3,498 +3,540 @@
 
 #include "Field.h"
 #include "VehicleInfo.h"
+#include "tinygltf/json.hpp"
+#include "Quat.h"
+#include "Matrix.h"
 
 namespace dyno {
 
-	inline void replaceSpacesWithEquals(std::string& substr) {
-		for (char& c : substr) {
-			if (c == ' ') {
-				c = '='; 
-			}
-		}
-	}
+    using json = nlohmann::json;
 
-	inline void replaceEqualsWithSpaces(std::string& substr) {
-		for (char& c : substr) {
-			if (c == '=') {
-				c = ' ';
-			}
-		}
-	}
+    inline void to_json(json& j, const Vector<Real, 3>& v) {
+        j = json::array({ v[0], v[1], v[2] });
+    }
 
-	inline void convertRigidInfoToStr(std::string VarName, std::vector<VehicleRigidBodyInfo> Array, std::string& Str)
-	{
-		Str.append(VarName + " ");
-		for (int i = 0; i < Array.size(); i++)
-		{
-			auto& it = Array[i];
-			std::string tempName= it.shapeName.name;
-			replaceSpacesWithEquals(tempName);
-			Str.append(tempName + " ");	//1
-			Str.append(std::to_string(it.shapeName.rigidBodyId) + " ");		//1
-			Str.append(std::to_string(it.meshShapeId) + " ");		//1
-			Str.append(std::to_string(static_cast<int>(it.shapeType)) + " ");	//1
-			auto& t = it.transform.translation();
-			auto& r = it.transform.rotation();
-			auto& s = it.transform.scale();
-			Str.append(std::to_string(t.x) + " " + std::to_string(t.y) + " " + std::to_string(t.z) + " ");
-			Str.append(std::to_string(r(0, 0)) + " " + std::to_string(r(0, 1)) + " " + std::to_string(r(0, 2)) + " ");
-			Str.append(std::to_string(r(1, 0)) + " " + std::to_string(r(1, 1)) + " " + std::to_string(r(1, 2)) + " ");
-			Str.append(std::to_string(r(2, 0)) + " " + std::to_string(r(2, 1)) + " " + std::to_string(r(2, 2)) + " ");
-			Str.append(std::to_string(s.x) + " " + std::to_string(s.y) + " " + std::to_string(s.z) + " ");
+    inline void from_json(const json& j, Vector<Real, 3>& v) {
+        v[0] = (j.at(0));
+        v[1] = (j.at(1));
+        v[2] = (j.at(2));
+    }
 
-			Str.append(std::to_string(it.Offset.x) + " " + std::to_string(it.Offset.y) + " " + std::to_string(it.Offset.z) + " ");
-			Str.append(std::to_string(it.mHalfLength.x) + " " + std::to_string(it.mHalfLength.y) + " " + std::to_string(it.mHalfLength.z) + " ");
-			Str.append(std::to_string(it.radius) + " ");
+    inline void to_json(json& j, const Quat<Real>& q) {
+        j = json::array({ q.x, q.y, q.z, q.w });
+    }
 
-			Str.append(std::to_string(it.tet[0].x) + " " + std::to_string(it.tet[0].y) + " " + std::to_string(it.tet[0].z) + " ");
-			Str.append(std::to_string(it.tet[1].x) + " " + std::to_string(it.tet[1].y) + " " + std::to_string(it.tet[1].z) + " ");
-			Str.append(std::to_string(it.tet[2].x) + " " + std::to_string(it.tet[2].y) + " " + std::to_string(it.tet[2].z) + " ");
-			Str.append(std::to_string(it.tet[3].x) + " " + std::to_string(it.tet[3].y) + " " + std::to_string(it.tet[3].z) + " ");
+    inline void from_json(const json& j, Quat<Real>& q) {
+        q.x = (j.at(0));
+        q.y = (j.at(1));
+        q.z = (j.at(2));
+        q.w = (j.at(3));
+    }
 
-			Str.append(std::to_string(it.capsuleLength) + " ");
-			Str.append(std::to_string(static_cast<int>(it.motion)) + " ");
-			Str.append(std::to_string(it.mDensity) + " ");
-			Str.append(std::to_string(int(it.rigidGroup)) + " ");
+    inline void to_json(json& j, const SquareMatrix<Real, 3>& m) {
+        j = json::array({
+            {m(0,0), m(0,1), m(0,2)},
+            {m(1,0), m(1,1), m(1,2)},
+            {m(2,0), m(2,1), m(2,2)}
+            });
+    }
 
-			if (i != Array.size() - 1)
-			{
-				Str.append(" \n");
-			}
-		}
-		Str.append(" ");
-	}
+    inline void from_json(const json& j, SquareMatrix<Real, 3>& m) {
+        for (int i = 0; i < 3; ++i) {
+            for (int k = 0; k < 3; ++k) {
+                m(i, k) = (j.at(i).at(k));
+            }
+        }
+    }
 
-	inline void convertJointInfoToStr(std::string VarName, std::vector<VehicleJointInfo> Array, std::string& Str)
-	{
-		Str.append(VarName + " ");
-		for (int i = 0; i < Array.size(); i++)
-		{
-			auto& it = Array[i];
+    inline void to_json(json& j, const NameRigidID& n) {
+        j = json{ {"name", n.name}, {"rigidBodyId", n.rigidBodyId} };
+    }
+    inline void from_json(const json& j, NameRigidID& n) {
+        n.name = j.at("name").get<std::string>();
+        n.rigidBodyId = j.at("rigidBodyId").get<int>();
+    }
 
-			Str.append(std::to_string(static_cast<int>(it.mJointType)) + " ");
-			std::string tempName = it.mRigidBodyName_1.name;
-			replaceSpacesWithEquals(tempName);
-			Str.append(tempName + " ");	//1
-			Str.append(std::to_string(it.mRigidBodyName_1.rigidBodyId) + " ");	
-			tempName = it.mRigidBodyName_2.name;
-			replaceSpacesWithEquals(tempName);
-			Str.append(tempName + " ");	//1
-			Str.append(std::to_string(it.mRigidBodyName_2.rigidBodyId) + " ");
-			Str.append(std::to_string(int(it.mUseMoter)) + " ");
-			Str.append(std::to_string(int(it.mUseRange)) + " ");
-			Str.append(std::to_string(it.mAnchorPoint[0]) + " " + std::to_string(it.mAnchorPoint[1]) + " " + std::to_string(it.mAnchorPoint[2]) + " ");
-			Str.append(std::to_string(it.mMin) + " ");
-			Str.append(std::to_string(it.mMax) + " ");
-			Str.append(std::to_string(it.mMoter) + " ");
-			Str.append(std::to_string(it.mAxis[0]) + " " + std::to_string(it.mAxis[1]) + " " + std::to_string(it.mAxis[2]) + " ");
+    inline void to_json(json& j, const ShapeConfig& s) {
+        j = json{
+            {"shapeType", static_cast<int>(s.shapeType)},
+            {"center", s.center},
+            {"rot", s.rot},
+            {"density", s.density},
+            {"halfLength", s.halfLength},
+            {"radius", s.radius},
+            {"tet", s.tet},
+            {"capsuleLength", s.capsuleLength}
+        };
+    }
+    inline void from_json(const json& j, ShapeConfig& s) {
+        s.shapeType = static_cast<ConfigShapeType>(j.at("shapeType").get<int>());
+        s.center = j.at("center").get<Vec3f>();
+        s.rot = j.at("rot").get<Quat<Real>>();
+        s.density = j.at("density").get<Real>();
+        s.halfLength = j.at("halfLength").get<Vec3f>();
+        s.radius = j.at("radius").get<float>();
+        s.tet = j.at("tet").get<std::vector<Vec3f>>();
+        s.capsuleLength = j.at("capsuleLength").get<float>();
+    }
 
-			if (i != Array.size() - 1)
-			{
-				Str.append(" \n");
-			}
-		}
-		Str.append(" ");
-	}
+    inline void to_json(json& j, const RigidBodyConfig& r) {
+        j = json{
+            {"shapeName", r.shapeName},
+            {"angle", r.angle},
+            {"linearVelocity", r.linearVelocity},
+            {"angularVelocity", r.angularVelocity},
+            {"position", r.position},
+            {"offset", r.offset},
+            {"ConfigGroup", r.ConfigGroup},
+            {"inertia", r.inertia},
+            {"friction", r.friction},
+            {"restitution", r.restitution},
+            {"motionType", static_cast<int>(r.motionType)},
+            {"shapeType", static_cast<int>(r.shapeType)},
+            {"collisionMask", static_cast<uint32_t>(r.collisionMask)},
+            {"visualShapeIds", r.visualShapeIds},
+            {"shapeConfigs", r.shapeConfigs}
+        };
+    }
+    inline void from_json(const json& j, RigidBodyConfig& r) {
+        r.shapeName = j.at("shapeName").get<NameRigidID>();
+        r.angle = j.at("angle").get<Quat<Real>>();
+        r.linearVelocity = j.at("linearVelocity").get<Vector<Real, 3>>();
+        r.angularVelocity = j.at("angularVelocity").get<Vector<Real, 3>>();
+        r.position = j.at("position").get<Vector<Real, 3>>();
+        r.offset = j.at("offset").get<Vector<Real, 3>>();
+        r.ConfigGroup = j.at("ConfigGroup").get<int>();
+        r.inertia = j.at("inertia").get<SquareMatrix<Real, 3>>();
+        r.friction = j.at("friction").get<Real>();
+        r.restitution = j.at("restitution").get<Real>();
+        r.motionType = static_cast<ConfigMotionType>(j.at("motionType").get<int>());
+        r.shapeType = static_cast<ConfigShapeType>(j.at("shapeType").get<int>());
+        r.collisionMask = static_cast<ConfigCollisionMask>(j.at("collisionMask").get<uint32_t>());
+        r.visualShapeIds = j.at("visualShapeIds").get<std::vector<int>>();
+        r.shapeConfigs = j.at("shapeConfigs").get<std::vector<ShapeConfig>>();
+    }
 
-	template<>
-	inline std::string FVar<VehicleBind>::serialize()
-	{
+    inline void to_json(json& j, const MultiBodyJointConfig& mj) {
+        j = json{
+            {"mJointType", static_cast<int>(mj.mJointType)},
+            {"mRigidBodyName_1", mj.mRigidBodyName_1},
+            {"mRigidBodyName_2", mj.mRigidBodyName_2},
+            {"mUseMoter", mj.mUseMoter},
+            {"mUseRange", mj.mUseRange},
+            {"mAnchorPoint", mj.mAnchorPoint},
+            {"mMin", mj.mMin},
+            {"mMax", mj.mMax},
+            {"mMoter", mj.mMoter},
+            {"mAxis", mj.mAxis},
+            {"q", mj.q},
+            {"r1", mj.r1},
+            {"r2", mj.r2},
+            {"distance", mj.distance}
+        };
+    }
+    inline void from_json(const json& j, MultiBodyJointConfig& mj) {
+        mj.mJointType = static_cast<ConfigJointType>(j.at("mJointType").get<int>());
+        mj.mRigidBodyName_1 = j.at("mRigidBodyName_1").get<NameRigidID>();
+        mj.mRigidBodyName_2 = j.at("mRigidBodyName_2").get<NameRigidID>();
+        mj.mUseMoter = j.at("mUseMoter").get<bool>();
+        mj.mUseRange = j.at("mUseRange").get<bool>();
+        mj.mAnchorPoint = j.at("mAnchorPoint").get<Vec3f>();
+        mj.mMin = j.at("mMin").get<Real>();
+        mj.mMax = j.at("mMax").get<Real>();
+        mj.mMoter = j.at("mMoter").get<Real>();
+        mj.mAxis = j.at("mAxis").get<Vec3f>();
+        mj.q = j.at("q").get<Quat<Real>>();
+        mj.r1 = j.at("r1").get<Vec3f>();
+        mj.r2 = j.at("r2").get<Vec3f>();
+        mj.distance = j.at("distance").get<Real>();
+    }
 
-		std::string finalText;
-		//serialize Array
-		finalText.append(std::to_string(this->getValue().mVehicleRigidBodyInfo.size()) + " ");
-		finalText.append(std::to_string(this->getValue().mVehicleJointInfo.size()) + " ");
-		finalText.append("\nVehicleRigidBodyInfo \n");
-		convertRigidInfoToStr("", this->getValue().mVehicleRigidBodyInfo, finalText);
-		finalText.append("\nVehicleJointInfo \n");
-		convertJointInfoToStr("", this->getValue().mVehicleJointInfo, finalText);
-
-		std::stringstream ss;
-		ss << finalText;
-
-		return ss.str();
-	}
-
-	template<>
-	inline bool FVar<VehicleBind>::deserialize(const std::string& str)
-	{
-		if (str.empty())
-			return false;
-
-		std::stringstream ss(str);
-		std::string substr;
-
-		auto field = std::make_shared<VehicleBind>();
-		std::vector<VehicleRigidBodyInfo> rigids;
-		std::vector<VehicleJointInfo> joints;
-
-		int dataID = 0;
-		bool isRigid = false;
-		bool isJoint = false;
-
-		int arrayID = -1;
-		int dId = -1;;
-
-		while (ss >> substr)
-		{
-			std::cout << substr << "\n";
-			if (substr == " " || substr == "\n")
-				continue;
-
-			{
-				if (!isRigid && !isJoint)
-				{
-					switch (dataID)
-					{
-					case 0:
-						if (std::isdigit(substr[0]))
-						{
-							rigids.resize(std::stoi(substr));
-						}
-
-						break;
-					case 1:
-						if (std::isdigit(substr[0]))
-						{
-							joints.resize(std::stoi(substr));
-						}
-						break;
-					default:
-						break;
-					}
-				}
-			}
-
-			{
-				if (isRigid) 
-				{
-					arrayID = dataID / 42;
-					dId = dataID % 42;
-				}
-				if (arrayID < rigids.size()&&isRigid)
-				{
-					switch (dId)
-					{
-					case 0:
-						replaceEqualsWithSpaces(substr);
-						rigids[arrayID].shapeName.name = substr;
-						break;
-					case 1:
-						rigids[arrayID].shapeName.rigidBodyId = std::stoi(substr);
-						break;
-					case 2:
-						rigids[arrayID].meshShapeId = std::stoi(substr);
-						break;
-					case 3:
-						rigids[arrayID].shapeType = static_cast<ConfigShapeType>(std::stoi(substr));
-						break;
-					case 4:
-						rigids[arrayID].transform.translation().x = std::stod(substr);
-						break;
-					case 5:
-						rigids[arrayID].transform.translation().y = std::stod(substr);
-						break;
-					case 6:
-						rigids[arrayID].transform.translation().z = std::stod(substr);
-						break;
-					case 7:
-						rigids[arrayID].transform.rotation()(0, 0) = std::stod(substr);
-						break;
-					case 8:
-						rigids[arrayID].transform.rotation()(0, 1) = std::stod(substr);
-						break;
-					case 9:
-						rigids[arrayID].transform.rotation()(0, 2) = std::stod(substr);
-						break;
-					case 10:
-						rigids[arrayID].transform.rotation()(1, 0) = std::stod(substr);
-						break;
-					case 11:
-						rigids[arrayID].transform.rotation()(1, 1) = std::stod(substr);
-						break;
-					case 12:
-						rigids[arrayID].transform.rotation()(1, 2) = std::stod(substr);
-						break;
-					case 13:
-						rigids[arrayID].transform.rotation()(2, 0) = std::stod(substr);
-						break;
-					case 14:
-						rigids[arrayID].transform.rotation()(2, 1) = std::stod(substr);
-						break;
-					case 15:
-						rigids[arrayID].transform.rotation()(2, 2) = std::stod(substr);
-						break;
-					case 16:
-						rigids[arrayID].transform.scale().x = std::stod(substr);
-						break;
-					case 17:
-						rigids[arrayID].transform.scale().y = std::stod(substr);
-						break;
-					case 18:
-						rigids[arrayID].transform.scale().z = std::stod(substr);
-						break;
-					case 19:
-						rigids[arrayID].Offset.x = std::stod(substr);
-						break;
-					case 20:
-						rigids[arrayID].Offset.y = std::stod(substr);
-						break;
-					case 21:
-						rigids[arrayID].Offset.z = std::stod(substr);
-						break;
-					case 22:
-						rigids[arrayID].mHalfLength.x = std::stod(substr);
-						break;
-					case 23:
-						rigids[arrayID].mHalfLength.y = std::stod(substr);
-						break;
-					case 24:
-						rigids[arrayID].mHalfLength.z = std::stod(substr);
-						break;
-					case 25:
-						rigids[arrayID].radius = std::stod(substr);
-						break;
-					case 26:
-						rigids[arrayID].tet[0].x = std::stod(substr);
-						break;
-					case 27:
-						rigids[arrayID].tet[0].y = std::stod(substr);
-						break;
-					case 28:
-						rigids[arrayID].tet[0].z = std::stod(substr);
-						break;
-					case 29:
-						rigids[arrayID].tet[1].x = std::stod(substr);
-						break;
-					case 30:
-						rigids[arrayID].tet[1].y = std::stod(substr);
-						break;
-					case 31:
-						rigids[arrayID].tet[1].z = std::stod(substr);
-						break;
-					case 32:
-						rigids[arrayID].tet[2].x = std::stod(substr);
-						break;
-					case 33:
-						rigids[arrayID].tet[2].y = std::stod(substr);
-						break;
-					case 34:
-						rigids[arrayID].tet[2].z = std::stod(substr);
-						break;
-					case 35:
-						rigids[arrayID].tet[3].x = std::stod(substr);
-						break;
-					case 36:
-						rigids[arrayID].tet[3].y = std::stod(substr);
-						break;
-					case 37:
-						rigids[arrayID].tet[3].z = std::stod(substr);
-						break;
-					case 38:
-						rigids[arrayID].capsuleLength = std::stod(substr);
-						break;
-					case 39:
-						rigids[arrayID].motion = static_cast<ConfigMotionType>(std::stoi(substr));
-						break;
-					case 40:
-						rigids[arrayID].mDensity = std::stoi(substr);
-						break;
-					case 41:
-						rigids[arrayID].rigidGroup = std::stoi(substr);
-						break;
-
-					default:
-						break;
-					}
-					arrayID = -1;
-					dId = -1;
-				}
-
-				if (substr == "VehicleRigidBodyInfo")
-				{
-					dataID = -1;
-					isRigid = true;
-					isJoint = false;
-				}
-				
-			}
-			
-			{
-				if (isJoint)
-				{
-					arrayID = dataID / 16;
-					dId = dataID % 16;
-				}
-
-				if (arrayID < joints.size() && isJoint)
-				{
-					switch (dId)
-					{
-					case 0:
-						joints[arrayID].mJointType = static_cast<ConfigJointType>(std::stoi(substr));
-						break;
-					case 1:
-						replaceEqualsWithSpaces(substr);
-						joints[arrayID].mRigidBodyName_1.name = substr;
-						break;
-					case 2:
-						joints[arrayID].mRigidBodyName_1.rigidBodyId = std::stoi(substr);
-						break;
-					case 3:
-						replaceEqualsWithSpaces(substr);
-						joints[arrayID].mRigidBodyName_2.name = substr;
-						break;
-					case 4:
-						joints[arrayID].mRigidBodyName_2.rigidBodyId = std::stoi(substr);
-						break;
-					case 5:
-						joints[arrayID].mUseMoter = bool(std::stoi(substr));
-						break;
-					case 6:
-						joints[arrayID].mUseRange = bool(std::stoi(substr));
-						break;
-					case 7:
-						joints[arrayID].mAnchorPoint.x = std::stod(substr);
-						break;
-					case 8:
-						joints[arrayID].mAnchorPoint.y = std::stod(substr);
-						break;
-					case 9:
-						joints[arrayID].mAnchorPoint.z = std::stod(substr);
-						break;
-					case 10:
-						joints[arrayID].mMin = std::stod(substr);
-						break;
-					case 11:
-						joints[arrayID].mMax = std::stod(substr);
-						break;
-					case 12:
-						joints[arrayID].mMoter = std::stod(substr);
-						break;
-					case 13:
-						joints[arrayID].mAxis.x = std::stod(substr);
-						break;
-					case 14:
-						joints[arrayID].mAxis.y = std::stod(substr);
-						break;
-					case 15:
-						joints[arrayID].mAxis.z = std::stod(substr);
-						break;
-
-					default:
-						break;
-					}
-				}
-
-				if (substr == "VehicleJointInfo")
-				{
-					dataID = -1;
-					isJoint = true;
-					isRigid = false;
-				}
-			}
-			
-			dataID++;
-		}
-
-		field->mVehicleRigidBodyInfo = rigids;
-		field->mVehicleJointInfo = joints;
-		this->setValue(*field);
-
-		return true;
-	}
-
-	inline void convertAnimationJointConfigToStr(Animation2JointConfig& bind, std::string& Str)
-	{
-		Str.append(bind.JointName + " ");
-		Str.append(std::to_string(bind.JointId) + " ");
-		Str.append(std::to_string(bind.Axis) + " ");
-		Str.append(std::to_string(bind.Intensity) + " ");
-	}
-
-	
-	template<>
-	inline std::string FVar<std::vector<Animation2JointConfig>>::serialize()
-	{
-		std::string finalText;
-		//serialize Array
-		auto values = this->getValue();
-		finalText.append(std::to_string(values.size()) + " ");
-		for (auto it : values)
-		{
-			convertAnimationJointConfigToStr(it, finalText);
-			finalText.append("\n");
-		}
-
-		return finalText;
-	}
-	template<>
-	inline bool FVar<std::vector<Animation2JointConfig>>::deserialize(const std::string& str)
-	{
-		if (str.empty())
-			return false;
-
-		std::stringstream ss(str);
-		std::string substr;
-
-		std::vector<Animation2JointConfig> animBinds;
+    inline void to_json(json& j, const MultiBodyBind& mb) {
+        j = json{
+            {"rigidBodyConfigs", mb.rigidBodyConfigs},
+            {"jointConfigs", mb.jointConfigs}
+        };
+    }
+    inline void from_json(const json& j, MultiBodyBind& mb) {
+        mb.rigidBodyConfigs = j.at("rigidBodyConfigs").get<std::vector<RigidBodyConfig>>();
+        mb.jointConfigs = j.at("jointConfigs").get<std::vector<MultiBodyJointConfig>>();
+    }
 
 
-		int strID = -1;
+    template<>
+    inline std::string FVar<MultiBodyBind>::serialize() {
+        json j = this->getValue();
+        return j.dump(4); 
+    }
 
-		int arrayID = -1;
-		int dataID = -1;
+    template<>
+    inline bool FVar<MultiBodyBind>::deserialize(const std::string& str) {
+        try {
+            if (str.empty()) {
+                std::cerr << "deserialize error: empty string" << std::endl;
+                return false;
+            }
+            json j = json::parse(str);
+            MultiBodyBind value = j.get<MultiBodyBind>();
+            this->setValue(value);
+            return true;
+        }
+        catch (const std::exception& e) {
+            std::cerr << "deserialize error: " << e.what() << std::endl;
+            return false;
+        }
+    }
 
-		while (ss >> substr)
-		{
-			std::cout << substr << "\n";
-			if (substr == " " || substr == "\n")
-				continue;
 
-			strID++;
+    inline void convertAnimationJointConfigToStr(Animation2JointConfig& bind, std::string& Str) {
+        Str.append(bind.JointName + " ");
+        Str.append(std::to_string(bind.JointId) + " ");
+        Str.append(std::to_string(bind.Axis) + " ");
+        Str.append(std::to_string(bind.Intensity) + " ");
+    }
 
-			switch (strID)
-			{
-			case 0:
-				if (std::isdigit(substr[0]))
-					animBinds.resize(std::stoi(substr));
+    template<>
+    inline std::string FVar<std::vector<Animation2JointConfig>>::serialize() {
+        std::string finalText;
+        auto values = this->getValue();
+        finalText.append(std::to_string(values.size()) + " ");
+        for (auto& it : values) {
+            convertAnimationJointConfigToStr(it, finalText);
+            finalText.append("\n");
+        }
+        return finalText;
+    }
 
-				break;
+    template<>
+    inline bool FVar<std::vector<Animation2JointConfig>>::deserialize(const std::string& str) {
+        if (str.empty())
+            return false;
 
-			}
+        std::stringstream ss(str);
+        std::string substr;
+        std::vector<Animation2JointConfig> animBinds;
 
-			arrayID = (strID - 1) / 4;
-			dataID = (strID - 1) % 4;
+        int strID = -1;
+        int arrayID = -1;
+        int dataID = -1;
 
-			switch (dataID)
-			{
+        while (ss >> substr) {
+            if (substr.empty()) continue;
+            strID++;
 
-			case 0:
-				animBinds[arrayID].JointName = substr;
-				break;
+            if (strID == 0) {
+                if (std::isdigit(substr[0])) {
+                    try {
+                        animBinds.resize(std::stoi(substr));
+                    }
+                    catch (...) {
+                        std::cerr << "deserialize error: invalid array size" << std::endl;
+                        return false;
+                    }
+                }
+                continue;
+            }
 
-			case 1:
-				animBinds[arrayID].JointId = std::stoi(substr);
-				break;
+            arrayID = (strID - 1) / 4;
+            dataID = (strID - 1) % 4;
 
-			case 2:
-				animBinds[arrayID].Axis = std::stoi(substr);
-				break;
+            if (arrayID >= (int)animBinds.size()) {
+                std::cerr << "deserialize error: data out of range" << std::endl;
+                return false;
+            }
 
-			case 3:
-				animBinds[arrayID].Intensity = std::stod(substr);
-				break;
-			}
+            switch (dataID) {
+            case 0: animBinds[arrayID].JointName = substr; break;
+            case 1: animBinds[arrayID].JointId = std::stoi(substr); break;
+            case 2: animBinds[arrayID].Axis = std::stoi(substr); break;
+            case 3: animBinds[arrayID].Intensity = std::stod(substr); break;
+            default: break;
+            }
+        }
 
-			
-		}
+        this->setValue(animBinds);
+        return true;
+    }
 
-		this->setValue(animBinds);
-		return true;
-	}
+    template class FVar<MultiBodyBind>;
+    template class FVar<std::vector<Animation2JointConfig>>;
 
-	template class FVar<std::vector<Animation2JointConfig>>;
-}
+} // namespace dyno
 
 #endif // !VEHICLEINFO_SERIALIZATION
+
+//
+//namespace dyno {
+//
+//    using json = nlohmann::json;
+//
+//    inline void to_json(json& j, const Vec3f& v) {
+//        j = json::array({ v.x, v.y, v.z });
+//    }
+//    inline void from_json(const json& j, Vec3f& v) {
+//        v.x = j.at(0).get<float>();
+//        v.y = j.at(1).get<float>();
+//        v.z = j.at(2).get<float>();
+//    }
+//
+//    // Quat<Real> 序列化
+//    inline void to_json(json& j, const Quat<Real>& q) {
+//        j = json::array({ q.x, q.y, q.z, q.w });
+//    }
+//    inline void from_json(const json& j, Quat<Real>& q) {
+//        q.x = j.at(0).get<Real>();
+//        q.y = j.at(1).get<Real>();
+//        q.z = j.at(2).get<Real>();
+//        q.w = j.at(3).get<Real>();
+//    }
+//
+//    // Vector<Real,3> 序列化
+//    inline void to_json(json& j, const Vector<Real, 3>& v) {
+//        j = json::array({ v[0], v[1], v[2] });
+//    }
+//    inline void from_json(const json& j, Vector<Real, 3>& v) {
+//        v[0] = j.at(0).get<Real>();
+//        v[1] = j.at(1).get<Real>();
+//        v[2] = j.at(2).get<Real>();
+//    }
+//
+//    // SquareMatrix<Real,3> 序列化
+//    inline void to_json(json& j, const SquareMatrix<Real, 3>& m) {
+//        j = json::array({
+//            json::array({ m(0,0),m(0,1), m(0,2) }),
+//            json::array({ m(1,0), m(1,1), m(1,2) }),
+//            json::array({ m(2,0), m(2,1), m(2,2) })
+//            });
+//    }
+//    inline void from_json(const json& j, SquareMatrix<Real, 3>& m) {
+//        for (int i = 0; i < 3; ++i)
+//            for (int k = 0; k < 3; ++k)
+//                m(i,k) = j.at(i).at(k).get<Real>();
+//    }
+//
+//    // NameRigidID 序列化
+//    inline void to_json(json& j, const NameRigidID& n) {
+//        j = json{ {"name", n.name}, {"rigidBodyId", n.rigidBodyId} };
+//    }
+//    inline void from_json(const json& j, NameRigidID& n) {
+//        n.name = j.at("name").get<std::string>();
+//        n.rigidBodyId = j.at("rigidBodyId").get<int>();
+//    }
+//
+//    // ShapeConfig 序列化
+//    inline void to_json(json& j, const ShapeConfig& s) {
+//        j = json{
+//            {"shapeType", static_cast<int>(s.shapeType)},
+//            {"center", s.center},
+//            {"rot", s.rot},
+//            {"density", s.density},
+//            {"halfLength", s.halfLength},
+//            {"radius", s.radius},
+//            {"tet", s.tet},
+//            {"capsuleLength", s.capsuleLength}
+//        };
+//    }
+//    inline void from_json(const json& j, ShapeConfig& s) {
+//        s.shapeType = static_cast<ConfigShapeType>(j.at("shapeType").get<int>());
+//        s.center = j.at("center").get<Vec3f>();
+//        s.rot = j.at("rot").get<Quat<Real>>();
+//        s.density = j.at("density").get<Real>();
+//        s.halfLength = j.at("halfLength").get<Vec3f>();
+//        s.radius = j.at("radius").get<float>();
+//        s.tet = j.at("tet").get<std::vector<Vec3f>>();
+//        s.capsuleLength = j.at("capsuleLength").get<float>();
+//    }
+//
+//    // RigidBodyConfig 序列化
+//    inline void to_json(json& j, const RigidBodyConfig& r) {
+//        j = json{
+//            {"shapeConfigs", r.shapeConfigs},
+//            {"visualShapeIds", r.visualShapeIds},
+//            {"shapeName", r.shapeName},
+//            {"angle", r.angle},
+//            {"linearVelocity", r.linearVelocity},
+//            {"angularVelocity", r.angularVelocity},
+//            {"position", r.position},
+//            {"offset", r.offset},
+//            {"inertia", r.inertia},
+//            {"bodyId", r.bodyId},
+//            {"friction", r.friction},
+//            {"restitution", r.restitution},
+//            {"motionType", static_cast<int>(r.motionType)},
+//            {"shapeType", static_cast<int>(r.shapeType)},
+//            {"collisionMask", static_cast<unsigned int>(r.collisionMask)}
+//        };
+//    }
+//    inline void from_json(const json& j, RigidBodyConfig& r) {
+//        r.shapeConfigs = j.at("shapeConfigs").get<std::vector<ShapeConfig>>();
+//        r.visualShapeIds = j.at("visualShapeIds").get<std::vector<int>>();
+//        r.shapeName = j.at("shapeName").get<NameRigidID>();
+//        r.angle = j.at("angle").get<Quat<Real>>();
+//        r.linearVelocity = j.at("linearVelocity").get<Vector<Real, 3>>();
+//        r.angularVelocity = j.at("angularVelocity").get<Vector<Real, 3>>();
+//        r.position = j.at("position").get<Vector<Real, 3>>();
+//        r.offset = j.at("offset").get<Vector<Real, 3>>();
+//        r.inertia = j.at("inertia").get<SquareMatrix<Real, 3>>();
+//        r.bodyId = j.at("bodyId").get<unsigned int>();
+//        r.friction = j.at("friction").get<Real>();
+//        r.restitution = j.at("restitution").get<Real>();
+//        r.motionType = static_cast<ConfigMotionType>(j.at("motionType").get<int>());
+//        r.shapeType = static_cast<ConfigShapeType>(j.at("shapeType").get<int>());
+//        r.collisionMask = static_cast<ConfigCollisionMask>(j.at("collisionMask").get<unsigned int>());
+//    }
+//
+//    // MultiBodyJointConfig 序列化
+//    inline void to_json(json& j, const MultiBodyJointConfig& m) {
+//        j = json{
+//            {"mJointType", static_cast<int>(m.mJointType)},
+//            {"mRigidBodyName_1", m.mRigidBodyName_1},
+//            {"mRigidBodyName_2", m.mRigidBodyName_2},
+//            {"mUseMoter", m.mUseMoter},
+//            {"mUseRange", m.mUseRange},
+//            {"mAnchorPoint", m.mAnchorPoint},
+//            {"mMin", m.mMin},
+//            {"mMax", m.mMax},
+//            {"mMoter", m.mMoter},
+//            {"mAxis", m.mAxis}
+//        };
+//    }
+//    inline void from_json(const json& j, MultiBodyJointConfig& m) {
+//        m.mJointType = static_cast<ConfigJointType>(j.at("mJointType").get<int>());
+//        m.mRigidBodyName_1 = j.at("mRigidBodyName_1").get<NameRigidID>();
+//        m.mRigidBodyName_2 = j.at("mRigidBodyName_2").get<NameRigidID>();
+//        m.mUseMoter = j.at("mUseMoter").get<bool>();
+//        m.mUseRange = j.at("mUseRange").get<bool>();
+//        m.mAnchorPoint = j.at("mAnchorPoint").get<Vector<Real, 3>>();
+//        m.mMin = j.at("mMin").get<Real>();
+//        m.mMax = j.at("mMax").get<Real>();
+//        m.mMoter = j.at("mMoter").get<Real>();
+//        m.mAxis = j.at("mAxis").get<Vector<Real, 3>>();
+//    }
+//
+//    // MultiBodyBind 序列化
+//    inline void to_json(json& j, const MultiBodyBind& m) {
+//        j = json{
+//            {"rigidBodyConfigs", m.rigidBodyConfigs},
+//            {"jointConfigs", m.jointConfigs}
+//        };
+//    }
+//    inline void from_json(const json& j, MultiBodyBind& m) {
+//        m.rigidBodyConfigs = j.at("rigidBodyConfigs").get<std::vector<RigidBodyConfig>>();
+//        m.jointConfigs = j.at("jointConfigs").get<std::vector<MultiBodyJointConfig>>();
+//    }
+//
+//    // FVar<MultiBodyBind> 序列化示例（假设你有FVar模板）
+//    template<>
+//    inline std::string FVar<MultiBodyBind>::serialize() {
+//        json j = this->getValue();
+//        return j.dump(4);
+//    }
+//
+//    template<>
+//    inline bool FVar<MultiBodyBind>::deserialize(const std::string& str) {
+//        try {
+//            json j = json::parse(str);
+//            auto value = j.get<MultiBodyBind>();
+//            this->setValue(value);
+//            return true;
+//        }
+//        catch (const std::exception& e) {
+//            std::cerr << "deserialize error: " << e.what() << std::endl;
+//            return false;
+//        }
+//    }
+//
+//
+//	inline void convertAnimationJointConfigToStr(Animation2JointConfig& bind, std::string& Str)
+//	{
+//		Str.append(bind.JointName + " ");
+//		Str.append(std::to_string(bind.JointId) + " ");
+//		Str.append(std::to_string(bind.Axis) + " ");
+//		Str.append(std::to_string(bind.Intensity) + " ");
+//	}
+//
+//	
+//	template<>
+//	inline std::string FVar<std::vector<Animation2JointConfig>>::serialize()
+//	{
+//		std::string finalText;
+//		//serialize Array
+//		auto values = this->getValue();
+//		finalText.append(std::to_string(values.size()) + " ");
+//		for (auto it : values)
+//		{
+//			convertAnimationJointConfigToStr(it, finalText);
+//			finalText.append("\n");
+//		}
+//
+//		return finalText;
+//	}
+//	template<>
+//	inline bool FVar<std::vector<Animation2JointConfig>>::deserialize(const std::string& str)
+//	{
+//		if (str.empty())
+//			return false;
+//
+//		std::stringstream ss(str);
+//		std::string substr;
+//
+//		std::vector<Animation2JointConfig> animBinds;
+//
+//
+//		int strID = -1;
+//
+//		int arrayID = -1;
+//		int dataID = -1;
+//
+//		while (ss >> substr)
+//		{
+//			std::cout << substr << "\n";
+//			if (substr == " " || substr == "\n")
+//				continue;
+//
+//			strID++;
+//
+//			switch (strID)
+//			{
+//			case 0:
+//				if (std::isdigit(substr[0]))
+//					animBinds.resize(std::stoi(substr));
+//
+//				break;
+//
+//			}
+//
+//			arrayID = (strID - 1) / 4;
+//			dataID = (strID - 1) % 4;
+//
+//			switch (dataID)
+//			{
+//
+//			case 0:
+//				animBinds[arrayID].JointName = substr;
+//				break;
+//
+//			case 1:
+//				animBinds[arrayID].JointId = std::stoi(substr);
+//				break;
+//
+//			case 2:
+//				animBinds[arrayID].Axis = std::stoi(substr);
+//				break;
+//
+//			case 3:
+//				animBinds[arrayID].Intensity = std::stod(substr);
+//				break;
+//			}
+//
+//			
+//		}
+//
+//		this->setValue(animBinds);
+//		return true;
+//	}
+//
+//	template class FVar<std::vector<Animation2JointConfig>>;
+//}
+//
+//#endif // !VEHICLEINFO_SERIALIZATION

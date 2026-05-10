@@ -6,11 +6,15 @@
 #include <QHBoxLayout>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QFileDialog>
+#include "QNameLabel.h"
 
 namespace dyno
 {
 	IMPL_FIELD_WIDGET(std::string, QStringFieldWidget)
 	IMPL_FIELD_WIDGET(FilePath, QFilePathWidget)
+	IMPL_FIELD_WIDGET(SaveFilePath, QSaveFilePathWidget)
+
 
 	QStringFieldWidget::QStringFieldWidget(FBase* field)
 		: QFieldWidget(field)
@@ -25,14 +29,8 @@ namespace dyno
 		this->setLayout(layout);
 
 		//Label
-		QLabel* name = new QLabel();
 		QString str = FormatFieldWidgetName(field->getObjectName());
-		name->setFixedSize(100, 18);
-		QFontMetrics fontMetrics(name->font());
-		QString elide = fontMetrics.elidedText(str, Qt::ElideRight, 100);
-		name->setText(elide);
-		//Set label tips
-		name->setToolTip(str);
+		QNameLabel* name = new QNameLabel(str);
 
 		fieldname = new QLineEdit;
 		fieldname->setText(QString::fromStdString(f->getValue()));
@@ -53,7 +51,6 @@ namespace dyno
 			return;
 		}
 		f->setValue(str.toStdString());
-		f->update();
 	}
 
 	void QStringFieldWidget::updateWidget()
@@ -75,14 +72,8 @@ namespace dyno
 		this->setLayout(layout);
 
 		//Label
-		QLabel* name = new QLabel();
 		QString str = FormatFieldWidgetName(field->getObjectName());
-		name->setFixedSize(100, 18);
-		QFontMetrics fontMetrics(name->font());
-		QString elide = fontMetrics.elidedText(str, Qt::ElideRight, 100);
-		name->setText(elide);
-		//Set label tips
-		name->setToolTip(str);
+		QNameLabel* name = new QNameLabel(str);
 
 		location = new QLineEdit;
 		location->setText(QString::fromStdString(f->getValue().string()));
@@ -105,7 +96,9 @@ namespace dyno
 			bool bPath = f->constDataPtr()->is_path();
 			if (bPath)
 			{
-				QString path = QFileDialog::getExistingDirectory(this, tr("Open File"), QString::fromStdString(getAssetPath()), QFileDialog::ReadOnly);
+				
+				QString path = QFileDialog::getOpenFileName(this, tr("Open File"), QString::fromStdString(getAssetPath()), f->getValue().getFileFilter().c_str());
+				
 				if (!path.isEmpty()) {
 					//Windows: "\\"; Linux: "/"
 					path = QDir::toNativeSeparators(path);
@@ -147,13 +140,88 @@ namespace dyno
 		auto path = f->getValue();
 
 		path.set_path(str.toStdString());
+		path.setFilter(path.getFileFilter());
 
 		f->setValue(path);
-		f->update();
 
 		emit fieldChanged();
 	}
 
 
+	QSaveFilePathWidget::QSaveFilePathWidget(FBase* field)
+		: QFieldWidget(field)
+	{
+		FVar<SaveFilePath>* f = TypeInfo::cast<FVar<SaveFilePath>>(field);
+
+		//this->setStyleSheet("border:none");
+		QHBoxLayout* layout = new QHBoxLayout;
+		layout->setContentsMargins(0, 0, 0, 0);
+		layout->setSpacing(0);
+
+		//Label
+		QString str = FormatFieldWidgetName(field->getObjectName());
+		QNameLabel* name = new QNameLabel(str);
+
+		saveButton = new QPushButton("Save");
+		saveButton->setFixedSize(60, 24);
+
+		layout->addWidget(name, 0);
+		layout->addStretch();
+		layout->addWidget(saveButton, 1);
+		layout->setSpacing(2);
+		this->setLayout(layout);
+
+		connect(saveButton, &QPushButton::clicked, this, [=]() {
+
+			if (1)
+			{
+
+				QString qpath = QFileDialog::getSaveFileName(this, tr("Save As ..."), "", tr(f->getValue().getFileFilter().c_str()));//"Peridyno Multibody Files (*.pdm)"
+				if (!qpath.isEmpty()) {
+					//Windows: "\\"; Linux: "/"
+					qpath = QDir::toNativeSeparators(qpath);
+					path = qpath.toStdString();
+
+					updateField();
+				}
+				else
+					QMessageBox::warning(this, tr("Path"), tr("You do not select any path."));
+
+
+			}
+			//else
+			//{
+			//	QString qpath = QFileDialog::getOpenFileName(this, tr("Save As ..."), QString::fromStdString(getAssetPath()), tr("Peridyno Multibody Files (*.pdm)"));
+			//	if (!qpath.isEmpty()) {
+			//		//Windows: "\\"; Linux: "/"
+			//		qpath = QDir::toNativeSeparators(qpath);
+			//		QFile file(qpath);
+			//		if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+			//			QMessageBox::warning(this, tr("Read File"),
+			//				tr("Cannot open file:\n%1").arg(qpath));
+			//			return;
+			//		}
+			//		path = qpath.toStdString();
+			//		file.close();
+			//	}
+			//	else {
+			//		QMessageBox::warning(this, tr("Path"), tr("You do not select any file."));
+			//	}
+			//}
+			});
+	}
+
+	void QSaveFilePathWidget::updateField()
+	{
+		auto f = TypeInfo::cast<FVar<SaveFilePath>>(field());
+		if (f == nullptr)
+		{
+			return;
+		}
+
+		f->setValue(SaveFilePath(path,f->getValue().getFileFilter()));
+
+		emit fieldChanged();
+	}
 }
 

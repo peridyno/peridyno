@@ -40,8 +40,8 @@ namespace dyno {
 
 		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
 
-		DeviceArrayField<int> FixedIds;
-		DeviceArrayField<Coord> FixedPos;
+		FDArray<int> FixedIds;
+		FDArray<Coord> FixedPos;
 
 	protected:
 		virtual bool initializeImpl() override;

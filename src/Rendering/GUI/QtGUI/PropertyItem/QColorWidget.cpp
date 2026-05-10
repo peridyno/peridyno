@@ -48,7 +48,7 @@ namespace dyno
 	void QColorButton::mousePressEvent(QMouseEvent* event)
 	{
 		QColorDialog colorDialog;
-
+		colorDialog.setWindowFlags(colorDialog.windowFlags() | Qt::WindowStaysOnTopHint);
 		connect(&colorDialog, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(onColorChanged(const QColor&)));
 
 		//ColorDialog.setWindowIcon(GetIcon("color--pencil"));

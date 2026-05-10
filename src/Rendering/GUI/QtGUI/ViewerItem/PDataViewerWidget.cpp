@@ -34,9 +34,6 @@ namespace dyno
 
 		disconnect(this, 0, 0, 0);
 
-		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, this, &PDataViewerWidget::updateDataTable);
-
-
 		if (mfield->getClassName() == std::string("FArrayList")) 
 			mTemplateType = TemplateName::FArrayListType;
 

@@ -147,6 +147,28 @@ namespace dyno
 		this->updateAssigner();
 	}
 
+	void CustomMaterial::initialVar()
+	{
+		this->varAlpha()->setRange(0, 1);
+		this->varBumpScale()->setRange(0, 1);
+		this->varEmissiveIntensity()->setRange(0, 1);
+		this->varMetallic()->setRange(0, 1);
+		this->varRoughness()->setRange(0, 1);
+
+		this->inAlpha()->tagOptional(true);
+		this->inBaseColor()->tagOptional(true);
+		this->inBumpScale()->tagOptional(true);
+		this->inEmissiveIntensity()->tagOptional(true);
+		this->inRoughness()->tagOptional(true);
+		this->inMetallic()->tagOptional(true);
+
+		this->inTexAlpha()->tagOptional(true);
+		this->inTexBump()->tagOptional(true);
+		this->inBaseColor()->tagOptional(true);
+		this->inTexEmissiveColor()->tagOptional(true);
+		this->inTexORM()->tagOptional(true);
+	}
+
 	void CustomMaterial::addAssigner(std::shared_ptr<Module> assigner)
 	{
 		mAssigner.insert(assigner);
@@ -325,6 +347,22 @@ namespace dyno
 
 		return customMat;
 	}
+
+	bool  MaterialManager::addCustomMaterial(std::shared_ptr<CustomMaterial> CustomMaterial) 
+	{
+		if (containsMaterial(CustomMaterial)) 
+		{
+			printf("MaterialManager::addMaterial: Failed!\n");
+			return false;
+		}
+		std::string uniqueName = MaterialManager::generateUniqueMaterialName(CustomMaterial->getName());
+		CustomMaterial->setName(uniqueName);
+		addMaterial(CustomMaterial);
+		CustomMaterial->materialPipeline()->pushModule(CustomMaterial);
+		MaterialManager::pushMaterialManagedModule(CustomMaterial);
+
+	}
+
 
 	std::string MaterialManager::generateUniqueMaterialName(const std::string& baseName)
 	{

@@ -66,9 +66,12 @@ namespace dyno
 
 					if (idx < mTextureMesh.shapes().size())
 					{
-						auto material = mTextureMesh.shapes()[idx]->material;
-						if (material)
-							material->roughness = this->varAlpha()->getValue();
+						for (auto& it : mTextureMesh.shapes())
+						{
+							auto material = it->material;
+							if (material)
+								material->alpha = this->varAlpha()->getValue();
+						}			
 					}
 				}));
 
@@ -222,7 +225,7 @@ namespace dyno
 					pbr.color = { mtl->baseColor.x, mtl->baseColor.y, mtl->baseColor.z };
 					pbr.metallic = mtl->metallic;
 					pbr.roughness = mtl->roughness;
-					pbr.alpha = mtl->alpha;
+					pbr.alpha = mtl->alpha * this->varAlpha()->getValue();
 					pbr.EmissiveIntensity = mtl->emissiveIntensity;
 
 					if( mtl->texORM.isValid())

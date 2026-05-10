@@ -540,7 +540,7 @@ namespace dyno
 
 	void POpenGLWidget::paintEvent(QPaintEvent* event)
 	{
-		if (mImWindow.forceRender())
+		if (getRenderEngine()->forceRender)
 		{
 			QOpenGLWidget::paintEvent(event);
 		}

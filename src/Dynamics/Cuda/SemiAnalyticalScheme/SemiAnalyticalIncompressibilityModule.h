@@ -42,7 +42,7 @@ namespace dyno
 		 */
 		void constrain() override;
 
-		DeviceArrayField<Coord>* getPosition()
+		FDArray<Coord>* getPosition()
 		{
 			return &m_particle_position;
 		}  //override;
@@ -51,18 +51,18 @@ namespace dyno
 		FVar<Real> m_smoothing_length;
 		FVar<Real> m_sampling_distance;
 
-		DeviceArrayField<Real> m_particle_mass;
+		FDArray<Real> m_particle_mass;
 
-		DeviceArrayField<Coord> m_particle_position;
-		DeviceArrayField<Coord> m_particle_velocity;
+		FDArray<Coord> m_particle_position;
+		FDArray<Coord> m_particle_velocity;
 
-		DeviceArrayField<Attribute> m_particle_attribute;
-		DeviceArrayField<int>       m_flip;
+		FDArray<Attribute> m_particle_attribute;
+		FDArray<int>       m_flip;
 
-		DeviceArrayField<Real>     m_triangle_vertex_mass;
-		DeviceArrayField<Coord>    m_triangle_vertex;
-		DeviceArrayField<Coord>    m_triangle_vertex_old;
-		DeviceArrayField<Triangle> m_triangle_index;
+		FDArray<Real>     m_triangle_vertex_mass;
+		FDArray<Coord>    m_triangle_vertex;
+		FDArray<Coord>    m_triangle_vertex_old;
+		FDArray<Triangle> m_triangle_index;
 
 		/**
 			 * @brief Storing neighboring particles and triangles' ids

@@ -19,6 +19,8 @@ using namespace dyno;
 #include "Node.h"
 #include "Vector.h"
 
+#include "Field/FList.h"
+
 #include "Topology/TriangleSet.h"
 #include "Topology/TetrahedronSet.h"
 
@@ -62,6 +64,8 @@ public:
 	DEF_VAR(float, Float, 1.0f, "Define a float field");
 
 	DEF_VAR(Vec3f, Vector, Vec3f(1.0f), "Define a vector field");
+
+	DEF_LIST(int, Number, "An array of int");
 
 	DEF_ENUM(ENum, Enum, ENum::Key0, "Define an enum");
 

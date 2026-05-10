@@ -41,9 +41,14 @@ namespace dyno
 
 	private slots:
 		void onSliderValueChanged(double val);
+		void editRange();
+
+	protected:
+		bool eventFilter(QObject* watched, QEvent* event) override;
 
 	private:
 		QDoubleSlider* slider = nullptr;
 		QPiecewiseDoubleSpinBox* spinner = nullptr;
+		QMenu* mRightMenu = nullptr;
 	};
 }

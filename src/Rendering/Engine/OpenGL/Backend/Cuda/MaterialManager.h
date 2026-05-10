@@ -183,27 +183,7 @@ namespace dyno
 
 		DEF_INSTANCE_OUT(Material,Material,"");
 
-		void initialVar()
-		{
-			this->varAlpha()->setRange(0, 1);
-			this->varBumpScale()->setRange(0, 1);
-			this->varEmissiveIntensity()->setRange(0, 1);
-			this->varMetallic()->setRange(0, 1);
-			this->varRoughness()->setRange(0, 1);
-
-			this->inAlpha()->tagOptional(true);
-			this->inBaseColor()->tagOptional(true);
-			this->inBumpScale()->tagOptional(true);
-			this->inEmissiveIntensity()->tagOptional(true);
-			this->inRoughness()->tagOptional(true);
-			this->inMetallic()->tagOptional(true);
-
-			this->inTexAlpha()->tagOptional(true);
-			this->inTexBump()->tagOptional(true);
-			this->inBaseColor()->tagOptional(true);
-			this->inTexEmissiveColor()->tagOptional(true);
-			this->inTexORM()->tagOptional(true);
-		}
+		virtual void initialVar();
 
 		void addAssigner(std::shared_ptr<Module> assigner);
 			          
@@ -235,6 +215,8 @@ namespace dyno
 		static std::shared_ptr<CustomMaterial> createCustomMaterial(std::string name = "Material");
 		
 		static std::shared_ptr<CustomMaterial> createCustomMaterial(const std::shared_ptr<MaterialLoaderModule>& MaterialLoaderPtr, std::shared_ptr<BreakMaterial>& BreakMaterialModule, std::string Name = "Material");
+
+		static bool addCustomMaterial(std::shared_ptr<CustomMaterial> CustomMaterial);
 
 		void rename(std::shared_ptr<MaterialManagedModule> ptr, const std::string& name);
 

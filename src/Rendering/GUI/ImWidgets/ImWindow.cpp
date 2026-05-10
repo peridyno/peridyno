@@ -357,7 +357,7 @@ void ImWindow::draw(RenderWindow* app)
 
 				ImGui::Separator();
 
-				ImGui::Checkbox("Force Render", &mForceRender);
+				ImGui::Checkbox("Force Render", &(engine->forceRender));
 				ImGui::Spacing();
 
 				ImGui::Separator();
@@ -640,7 +640,7 @@ void dyno::ImWindow::drawNodeManipulator(std::shared_ptr<Node> n, glm::mat4 view
 				node->varRotation()->setValue(r1);
 			}
 
-			node->updateGraphicsContext();
+			//node->updateGraphicsContext();
 		}
 	}
 }

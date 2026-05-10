@@ -7,7 +7,17 @@
 
 namespace dyno
 {
-	IMPL_FIELD_WIDGET(Vec3i, QVector3iFieldWidget)
+	//IMPL_FIELD_WIDGET(Vec3i, QVector3iFieldWidget)
+	int QVector3iFieldWidget::reg_field_widget = []()
+	{
+		dyno::PPropertyWidget::registerWidget({ &typeid(Vec3i), &QVector3iFieldWidget::createWidget });
+		dyno::PPropertyWidget::registerWidget({ &typeid(Vec3u), &QVector3iFieldWidget::createWidget });
+		return 0;
+	}();
+
+	QWidget* QVector3iFieldWidget::createWidget(dyno::FBase* f) {
+		return new QVector3iFieldWidget(f);
+	}
 
 	QVector3iFieldWidget::QVector3iFieldWidget(FBase* field)
 		: QFieldWidget(field)
@@ -69,6 +79,14 @@ namespace dyno
 			v1 = v[0];
 			v2 = v[1];
 			v3 = v[2];
+
+			spinner1->setRange(castMinimum<int>(field->getMin()) >= 0 ? castMinimum<int>(field->getMin()) : 0,
+				castMaximum<int>(field->getMax()) >= 0 ? castMaximum<int>(field->getMax()) : 0);
+			spinner2->setRange(castMinimum<int>(field->getMin()) >= 0 ? castMinimum<int>(field->getMin()) : 0,
+				castMaximum<int>(field->getMax()) >= 0 ? castMaximum<int>(field->getMax()) : 0);
+			spinner3->setRange(castMinimum<int>(field->getMin()) >= 0 ? castMinimum<int>(field->getMin()) : 0,
+				castMaximum<int>(field->getMax()) >= 0 ? castMaximum<int>(field->getMax()) : 0);
+
 		}
 
 		spinner1->setValue(v1);

@@ -12,7 +12,10 @@ namespace dyno
 
 	void Framebuffer::release()
 	{
-		glDeleteFramebuffers(1, &id);		
+		if (id != GL_INVALID_INDEX) {
+			glDeleteFramebuffers(1, &id);
+			glCheckError();
+		}
 		
 		// reset object id
 		id = GL_INVALID_INDEX;

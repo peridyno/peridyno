@@ -115,7 +115,7 @@ namespace dyno
 		Vec2u range
 	);
 
-	void loadGLTFTextureMesh(std::shared_ptr<TextureMesh> texMesh, const std::string& filepath);
+	bool loadGLTFTextureMesh(std::shared_ptr<TextureMesh> texMesh, const std::string& filepath);
 
 	void loadGLTFMaterial(tinygltf::Model& model, std::vector<std::shared_ptr<Material>>& mats, FilePath filename);
 

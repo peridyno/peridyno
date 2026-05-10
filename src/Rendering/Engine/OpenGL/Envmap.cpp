@@ -23,7 +23,8 @@ Envmap::Envmap()
 
 Envmap::~Envmap()
 {
-
+	delete prog;
+	delete cube;
 }
 
 void Envmap::initialize()
@@ -102,10 +103,8 @@ void Envmap::release()
 	brdfLut.release();
 
 	cube->release();
-	delete cube;
 
 	prog->release();
-	delete prog;
 
 	uboParams.release();
 }

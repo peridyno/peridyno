@@ -91,8 +91,10 @@ namespace dyno {
 
 	void Program::release()
 	{
-		glDeleteProgram(id);
-
+		if (id != GL_INVALID_INDEX) {
+			glDeleteProgram(id);
+			glCheckError();
+		}
 		// reset object id
 		id = GL_INVALID_INDEX;
 	}
