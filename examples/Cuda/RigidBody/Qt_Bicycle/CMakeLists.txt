@@ -5,6 +5,7 @@ if(PERIDYNO_QT_GUI AND PERIDYNO_LIBRARY_RIGIDBODY)
         QtGUI
         ObjIO
         GlfwGUI
+        UbiGUI
     )
     add_example(Qt_Bicycle RigidBody LIB_DEPENDENCY)
 endif()
