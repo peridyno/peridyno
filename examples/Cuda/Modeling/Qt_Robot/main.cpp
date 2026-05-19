@@ -40,7 +40,7 @@ int main()
 	fbx->setVisible(false);
 
 
-	MultiBodyBind configData;
+	MultiBodyTuple configData;
 
 	Vec3f angle = Vec3f(0, 0, 90);
 	Quat<Real> q = Quat<Real>(angle[2] * M_PI / 180, angle[1] * M_PI / 180, angle[0] * M_PI / 180);
@@ -74,30 +74,29 @@ int main()
 	std::string Wrist_L = std::string("Model::Wrist_L");
 	std::string Hand_L = std::string("Model::Hand_L");
 
-
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Hip, 0), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Hip), CONFIG_BOX,100));//
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Trochanter_R, 1), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Trochanter_R), CONFIG_BOX, 100));//
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Thigh_R, 2), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Thigh_R), CONFIG_BOX, 100));//
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Shank_R, 3), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Shank_R), CONFIG_BOX, 100));
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Foot_R, 4), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Foot_R), CONFIG_BOX, 100));
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Trochanter_L, 5), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Trochanter_L), CONFIG_BOX, 100));
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Thigh_L, 6), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Thigh_L), CONFIG_BOX, 100));
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Shank_L, 7), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Shank_L), CONFIG_BOX, 100));
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Foot_L, 8), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Foot_L), CONFIG_BOX, 100));
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Spine, 9), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Spine), CONFIG_BOX,  100));
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Body, 10), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Body), CONFIG_BOX,  100));
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Neck, 11), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Neck), CONFIG_BOX,  100));
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Head, 12), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Head), CONFIG_BOX,  100));
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Shoulder_R, 13), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Shoulder_R), CONFIG_BOX,  20));
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(UpperArm_R, 14), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(UpperArm_R), CONFIG_BOX,  40));
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(LowerArm_R, 15), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(LowerArm_R), CONFIG_BOX,  40));
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Wrist_R, 16), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Wrist_R), CONFIG_BOX,  10));
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Hand_R, 17), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Hand_R), CONFIG_BOX,  10));
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Shoulder_L, 18), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Shoulder_L), CONFIG_BOX,  20));
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(UpperArm_L, 19), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(UpperArm_L), CONFIG_BOX,  40));
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(LowerArm_L, 20), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(LowerArm_L), CONFIG_BOX,  40));
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Wrist_L, 21), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Wrist_L), CONFIG_BOX,  10));
-	configData. rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID(Hand_L, 22), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Hand_L), CONFIG_BOX,  10));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(Hip, 0, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Hip), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(Trochanter_R, 1, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Trochanter_R), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(Thigh_R, 2, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Thigh_R), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(Shank_R, 3, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Shank_R), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(Foot_R, 4, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Foot_R), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(Trochanter_L, 5, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Trochanter_L), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(Thigh_L, 6, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Thigh_L), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(Shank_L, 7, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Shank_L), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(Foot_L, 8, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Foot_L), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(Spine, 9, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Spine), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(Body, 10, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Body), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(Neck, 11, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Neck), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(Head, 12, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Head), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(Shoulder_R, 13, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Shoulder_R), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(UpperArm_R, 14, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(UpperArm_R), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(LowerArm_R, 15, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(LowerArm_R), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(Wrist_R, 16, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Wrist_R), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(Hand_R, 17, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Hand_R), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(Shoulder_L, 18, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Shoulder_L), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(UpperArm_L, 19, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(UpperArm_L), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(LowerArm_L, 20, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(LowerArm_L), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(Wrist_L, 21, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Wrist_L), RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple(Hand_L, 22, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(Hand_L), RigidShapeType::SHAPE_BOX, 100));
 
 
 	Vec3f offset = Vec3f(0, 0, 0);
@@ -109,36 +108,32 @@ int main()
 
 	Vec3f axis = Vec3f(1,0,0);
 
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Trochanter_R, 1), NameRigidID(Hip, 0), CONFIG_Hinge, axis, offset, true, 0,true,-90,90));
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Trochanter_L, 5), NameRigidID(Hip, 0), CONFIG_Hinge, axis, offset, true, 0, true, -90, 90));
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Shank_R, 3), NameRigidID(Thigh_R, 2), CONFIG_Hinge, axis, shankOffset, true, 0, true, -90, 90));
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Shank_L, 7), NameRigidID(Thigh_L, 6), CONFIG_Hinge, axis, shankOffset, true, 0, true, -90, 90));
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Foot_R, 4), NameRigidID(Shank_R, 3), CONFIG_Hinge, axis, footOffset, true, 0, true, -90, 90));
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Foot_L, 8), NameRigidID(Shank_L, 7), CONFIG_Hinge, axis, footOffset, true, 0, true, -90, 90));
-
-
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Thigh_R, 2), NameRigidID(Trochanter_R, 1), CONFIG_Fixed, axis, thighOffset, true, 0, true, -90, 90));
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Thigh_L, 6), NameRigidID(Trochanter_L, 5), CONFIG_Fixed, axis, thighOffset, true, 0, true, -90, 90));
-
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Spine, 9), NameRigidID(Hip, 0), CONFIG_Fixed, Vec3f(0, 1, 0), offset, true, 0, true, -90, 90));
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Body, 10), NameRigidID(Spine, 9), CONFIG_Fixed, Vec3f(1, 0, 0), bodyOffset, true, 0, true, -90, 90));
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Neck, 11), NameRigidID(Body, 10), CONFIG_Fixed, Vec3f(1, 0, 0), offset, true, 0, true, -90, 90));
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Head, 12), NameRigidID(Neck, 11), CONFIG_Fixed, Vec3f(1, 0, 0), offset, true, 0, true, -90, 90));
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Shoulder_R, 13), NameRigidID(Body, 10), CONFIG_Fixed, Vec3f(1, 0, 0), offset, true, 0, true, -90, 90));
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Shoulder_L, 18), NameRigidID(Body, 10), CONFIG_Fixed, Vec3f(1, 0, 0), offset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(Trochanter_R, 1, Hip, 0, JointType::JOINT_Hinge, axis, offset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(Trochanter_L, 5, Hip, 0, JointType::JOINT_Hinge, axis, offset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(Shank_R, 3, Thigh_R, 2, JointType::JOINT_Hinge, axis, shankOffset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(Shank_L, 7, Thigh_L, 6, JointType::JOINT_Hinge, axis, shankOffset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(Foot_R, 4, Shank_R, 3, JointType::JOINT_Hinge, axis, footOffset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(Foot_L, 8, Shank_L, 7, JointType::JOINT_Hinge, axis, footOffset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(Thigh_R, 2, Trochanter_R, 1, JointType::JOINT_Hinge, axis, thighOffset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(Thigh_L, 6, Trochanter_L, 5, JointType::JOINT_Hinge, axis, thighOffset, true, 0, true, -90, 90));
 	
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(UpperArm_R, 14), NameRigidID(Shoulder_R, 13), CONFIG_Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(UpperArm_L, 19), NameRigidID(Shoulder_L, 18), CONFIG_Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
-
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(LowerArm_R, 15), NameRigidID(UpperArm_R, 14), CONFIG_Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(LowerArm_L, 20), NameRigidID(UpperArm_L, 19), CONFIG_Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
-
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Wrist_R, 16), NameRigidID(LowerArm_R, 15), CONFIG_Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Wrist_L, 21), NameRigidID(LowerArm_L, 20), CONFIG_Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(Spine, 9, Hip, 0, JointType::JOINT_Fixed, Vec3f(0, 1, 0), offset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(Body, 10, Spine, 9, JointType::JOINT_Fixed, Vec3f(1, 0, 0), bodyOffset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(Neck, 11, Body, 10, JointType::JOINT_Fixed, Vec3f(1, 0, 0), offset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(Head, 12, Neck, 11, JointType::JOINT_Fixed, Vec3f(1, 0, 0), offset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(Shoulder_R, 13, Body, 10, JointType::JOINT_Fixed, Vec3f(1, 0, 0), offset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(Shoulder_L, 18, Body, 10, JointType::JOINT_Fixed, Vec3f(1, 0, 0), offset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(UpperArm_R, 14, Shoulder_R, 13, JointType::JOINT_Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(UpperArm_L, 19, Shoulder_L, 18, JointType::JOINT_Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(LowerArm_R, 15, UpperArm_R, 14, JointType::JOINT_Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(LowerArm_L, 20, UpperArm_L, 19, JointType::JOINT_Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(Wrist_R, 16, LowerArm_R, 15, JointType::JOINT_Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
 	
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Hand_R, 17), NameRigidID(Wrist_R, 16), CONFIG_Fixed, Vec3f(1, 0, 0), handOffset, true, 0, true, -90, 90));
-	configData. jointConfigs.push_back(MultiBodyJointConfig(NameRigidID(Hand_L, 22), NameRigidID(Wrist_L, 21), CONFIG_Fixed, Vec3f(1, 0, 0), -handOffset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(Wrist_L, 21, LowerArm_L, 20, JointType::JOINT_Fixed, Vec3f(0, 0, 1), offset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(Hand_R, 17, Wrist_R, 16, JointType::JOINT_Fixed, Vec3f(1, 0, 0), handOffset, true, 0, true, -90, 90));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple(Hand_L, 22, Wrist_L, 21, JointType::JOINT_Fixed, Vec3f(1, 0, 0), -handOffset, true, 0, true, -90, 90));
 
+	
 	robot->varConfiguration()->setValue(configData);
 
 	robot->varGravityValue()->setValue(0);

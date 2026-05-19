@@ -66,8 +66,8 @@ public:
 
 	void resetStates() override
 	{
-		auto begin_it = this->varFloatList()->begin();
-		for (auto it = begin_it; it != this->varFloatList()->end(); it++)
+		auto begin_it = this->varTuple()->getValue().varVec3fTupleArray()->begin();
+		for (auto it = begin_it; it != this->varTuple()->getValue().varVec3fTupleArray()->end(); it++)
 		{
 			std::cout << this->varFloatList()->getElement(it) << std::endl;
 		}

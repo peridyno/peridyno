@@ -38,53 +38,65 @@ std::shared_ptr<ConfigurableBody<DataType3f>> getTank(std::shared_ptr<SceneGraph
 	gltf->setVisible(false);
 
 	gltf->stateTextureMesh()->connect(vehicle->inTextureMesh());
-
-	MultiBodyBind configData;
+	
+	MultiBodyTuple configData;
 
 	Vec3f angle = Vec3f(0, 0, 90);
 	Quat<Real> q = Quat<Real>(angle[2] * M_PI / 180, angle[1] * M_PI / 180, angle[0] * M_PI / 180);
-	;
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("Main", 0), 0, ConfigShapeType::CONFIG_BOX));//
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("Head", 1), 1, ConfigShapeType::CONFIG_BOX));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L0", 2), 2, ConfigShapeType::CONFIG_CAPSULE));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L1", 3), 3, ConfigShapeType::CONFIG_CAPSULE));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L2", 4), 4, ConfigShapeType::CONFIG_CAPSULE));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L3", 5), 5, ConfigShapeType::CONFIG_CAPSULE));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L4", 6), 6, ConfigShapeType::CONFIG_CAPSULE ));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L5", 7), 7, ConfigShapeType::CONFIG_CAPSULE ));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L6", 8), 8, ConfigShapeType::CONFIG_CAPSULE ));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R0", 9), 9, ConfigShapeType::CONFIG_CAPSULE ));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R1", 10), 10, ConfigShapeType::CONFIG_CAPSULE ));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R2", 11), 11, ConfigShapeType::CONFIG_CAPSULE ));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R3", 12), 12, ConfigShapeType::CONFIG_CAPSULE ));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R4", 13), 13, ConfigShapeType::CONFIG_CAPSULE ));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R5", 14), 14, ConfigShapeType::CONFIG_CAPSULE ));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R6", 15), 15, ConfigShapeType::CONFIG_CAPSULE ));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("Main", 0, 0, RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("Head", 1, 1, RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("L0", 2, 2, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("L1", 3, 3, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("L2", 4, 4, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("L3", 5, 5, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("L4", 6, 6, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("L5", 7, 7, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("L6", 8, 8, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("R0", 9, 9, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("R1", 10, 10, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("R2", 11, 11, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("R3", 12, 12, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("R4", 13, 13, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("R5", 14, 14, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("R6", 15, 15, RigidShapeType::SHAPE_CAPSULE, 100));
 
-	for (size_t i = 0; i < configData.rigidBodyConfigs.size(); i++)
+	for (auto it = configData.varRigidBodyConfigs()->begin();
+		it != configData.varRigidBodyConfigs()->end();
+		++it)
 	{
-		configData.rigidBodyConfigs[i].shapeConfigs[0].capsuleLength = 0.3;
-		configData.rigidBodyConfigs[i].shapeConfigs[0].rot = q;
+		auto* rigidPtr = dynamic_cast<TFTuple<RigidBodyTuple>*>((*it).get());
+
+		auto rigid = configData.varRigidBodyConfigs()->getElement(it);
+		auto base_ptr = (*rigid.varShapeConfigs()->begin()).get();
+		auto* shapePtr = dynamic_cast<TFTuple<ShapeTuple>*>(base_ptr);
+
+		auto shape = shapePtr->getValue();
+		shape.varCapsuleLength()->setValue(0.2);
+		shape.varRot()->setValue(q);
+		shapePtr->setValue(shape);
+
+		rigidPtr->setValue(rigid);
 	}
+
 	float speed = 5.5;
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("L0", 2, "Main", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("L1", 3, "Main", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("L2", 4, "Main", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("L3", 5, "Main", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("L4", 6, "Main", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("L5", 7, "Main", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("L6", 7, "Main", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("R0", 9, "Main", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("R1", 10, "Main", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("R2", 11, "Main", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("R3", 12, "Main", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("R4", 13, "Main", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("R5", 14, "Main", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("R6", 15, "Main", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("Head", 1, "Main", 0, JointType::JOINT_Fixed, Vec3f(1, 0, 0), Vec3f(0), true, 0));
 
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L0", 2), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L1", 3), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L2", 4), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L3", 5), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L4", 6), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L5", 7), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L6", 8), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R0", 9), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R1", 10), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R2", 11), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R3", 12), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R4", 13), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R5", 14), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R6", 15), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("Head", 1), NameRigidID("Main", 0), ConfigJointType::CONFIG_Fixed, Vec3f(1, 0, 0), Vec3f(0), false, 0));
 
 	vehicle->varConfiguration()->setValue(configData);
 
@@ -109,37 +121,52 @@ std::shared_ptr<ConfigurableBody<DataType3f>> getVehicle(std::shared_ptr<SceneGr
 
 	gltf->stateTextureMesh()->connect(vehicle->inTextureMesh());
 
-	MultiBodyBind configData;
+	MultiBodyTuple configData;
 
 	Vec3f angle = Vec3f(0, 0, 90);
 	Quat<Real> q = Quat<Real>(angle[2] * M_PI / 180, angle[1] * M_PI / 180, angle[0] * M_PI / 180);
-	;
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("Body", 0), 0, ConfigShapeType::CONFIG_BOX));//
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L1", 1), 1, ConfigShapeType::CONFIG_CAPSULE ));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L2", 2), 2, ConfigShapeType::CONFIG_CAPSULE ));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L3", 3), 3, ConfigShapeType::CONFIG_CAPSULE ));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("L4", 4), 4, ConfigShapeType::CONFIG_CAPSULE ));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R1", 5), 5, ConfigShapeType::CONFIG_CAPSULE ));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R2", 6), 6, ConfigShapeType::CONFIG_CAPSULE ));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R3", 7), 7, ConfigShapeType::CONFIG_CAPSULE ));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("R4", 8), 8, ConfigShapeType::CONFIG_CAPSULE ));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("Body", 0, 0, RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("L1", 1, 1, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("L2", 2, 2, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("L3", 3, 3, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("L4", 4, 4, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("R1", 5, 5, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("R2", 6, 6, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("R3", 7, 7, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("R4", 8, 8, RigidShapeType::SHAPE_CAPSULE, 100));
 
-	for (size_t i = 0; i < configData.rigidBodyConfigs.size(); i++)
+	int index = 0;
+	for (auto it = configData.varRigidBodyConfigs()->begin();
+		it != configData.varRigidBodyConfigs()->end();
+		++it, ++index)
 	{
-		configData.rigidBodyConfigs[i].shapeConfigs[0].capsuleLength = 0.3;
-		configData.rigidBodyConfigs[i].shapeConfigs[0].rot = q;
+		auto* rigidPtr = dynamic_cast<TFTuple<RigidBodyTuple>*>((*it).get());
+
+		auto rigid = configData.varRigidBodyConfigs()->getElement(it);
+		auto base_ptr = (*rigid.varShapeConfigs()->begin()).get();
+		auto* shapePtr = dynamic_cast<TFTuple<ShapeTuple>*>(base_ptr);
+
+		auto shape = shapePtr->getValue();
+		shape.varCapsuleLength()->setValue(0.2);
+		shape.varRot()->setValue(q);
+		shapePtr->setValue(shape);
+
+		rigidPtr->setValue(rigid);
+
+		if (index >= 3)
+			break;
 	}
 	float speed = 5.5;
 
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L1", 1), NameRigidID("Body", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L2", 2), NameRigidID("Body", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L3", 3), NameRigidID("Body", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("L4", 4), NameRigidID("Body", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("L1", 1, "Body", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("L2", 2, "Body", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("L3", 3, "Body", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("L4", 4, "Body", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("R1", 5, "Body", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("R2", 6, "Body", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("R3", 7, "Body", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("R4", 8, "Body", 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
 
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R1", 5), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R2", 6), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R3", 7), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("R4", 8), NameRigidID("Main", 0), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, speed));
 
 	vehicle->varConfiguration()->setValue(configData);
 	vehicle->varRotation()->setValue(Vec3f(0, 0, 0));
