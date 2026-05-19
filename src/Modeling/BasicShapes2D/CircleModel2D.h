@@ -38,8 +38,6 @@ namespace dyno
 
 		DEF_VAR(Real, Radius, 0.5, "Circle radius");
 
-		DEF_VAR(Coord2D, Center, Coord2D(0), "");
-
 		DEF_VAR(uint, SegmentNumber, 32, "Segement number");
 
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, EdgeSet, "");

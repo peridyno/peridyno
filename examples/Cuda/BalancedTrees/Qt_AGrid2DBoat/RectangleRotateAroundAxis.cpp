@@ -21,41 +21,24 @@ namespace dyno
 			m_alignedBox = m_alignedBox.merge(bounding);
 		}
 
-		//Adjust the size of the bounding box
-		m_center = (m_alignedBox.v0 + m_alignedBox.v1) / 2;
-		Coord3D m_length = m_alignedBox.v1 - m_alignedBox.v0;
-		this->varWidth()->setValue(m_length[0]);
-		this->varHeight()->setValue(m_length[2]);
-		//this->varLength()->setValue(Coord3D(m_length[0], 0.0f, m_length[2]));
-		this->varLocation()->setValue(Coord3D(m_center[0], 0.0f, m_center[2]));
-
 		Real m_angle = this->varInitialAngle()->getData();
 		updateCenterAndRotation(m_angle);
-
 	}
 
 	template<typename TDataType>
 	void RectangleRotateAroundAxis<TDataType>::updateCenterAndRotation(Real y_rotation)
 	{
-		this->varRotation()->setValue(Coord3D(0.0f, y_rotation, 0.0f));
+		this->varVisPlane()->setValue(1);
+		this->varRotation2D()->setValue(y_rotation);
 
-		Quat<Real> q = this->computeQuaternion();
-		q.normalize();
+		//Adjust the size of the bounding box
+		Coord3D m_center = (m_alignedBox.v0 + m_alignedBox.v1) / 2;
+		Coord3D m_length = m_alignedBox.v1 - m_alignedBox.v0;
+		Coord2D center2D = this->computeRotate(Coord2D(m_center[0] + this->varRotationRadius()->getData(), m_center[2] - m_length[2] * 1.5f / 2.0f));
 
-		Real w = this->varWidth()->getValue();
-		Real h = this->varHeight()->getValue();
-		//Coord3D length = this->varLength()->getData();
-		Coord3D center = q.rotate(Coord3D(m_center[0] + this->varRotationRadius()->getData(), 0.0f, m_center[2]- this->varHeight()->getValue() * 1.5f / 2.0f));
-		Coord3D u_axis = q.rotate(Coord3D(1, 0, 0));
-		Coord3D w_axis = q.rotate(Coord3D(0, 0, 1));
-
-		TOrientedBox2D<Real> retangle;
-		retangle.center = Coord2D(center[0], center[2]);
-		retangle.u = Coord2D(u_axis[0], u_axis[2]);
-		retangle.v = Coord2D(w_axis[0], w_axis[2]);
-		retangle.extent = Coord2D(w * 3.5f / 2.0f, h * 2.5f / 2.0f);
-
-		this->stateRectangle()->setValue(retangle);
+		this->varWidth()->setValue(m_length[0] * 3.5f, false);
+		this->varHeight()->setValue(m_length[2] * 2.5f, false);
+		this->varLocation2D()->setValue(center2D);
 	}
 
 

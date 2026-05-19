@@ -28,7 +28,9 @@ namespace dyno
 		tms.resize(1.0, shapes.size());
 		for (int i = 0; i < shapes.size(); i++)
 		{
-			Quat<Real> q = shapes[i]->computeQuaternion();
+			Real angle = shapes[i]->varRotation2D()->getValue();
+
+			Quat<Real> q(Real(M_PI) * angle / 180, Coord3D(0, 1, 0));
 			q.normalize();
 			Coord3D tran(shapes[i]->varRotationRadius()->getData(), 0.0f, 0.0f);
 

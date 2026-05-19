@@ -367,7 +367,7 @@ namespace dyno
 		Level level = volumeSet->adaptiveGridLevelMax2D();
 		Real dx = volumeSet->adaptiveGridDx2D();
 
-		auto& particles = this->statePPosition()->getData();
+		auto& particles = this->inPPosition()->getData();
 		DArray<Coord2D> particles_pos(particles.size());
 		cuExecute(particles.size(),
 			ESS_3DTo2D,
@@ -376,8 +376,8 @@ namespace dyno
 		DArray<int> nodeIndex(particles.size());
 		volumeSet->accessRandom(nodeIndex, particles_pos);
 
-		Real sdx = this->varSamplingDistance()->getData();
-		auto& pvelocity = this->statePVelocity()->getData();
+		Real sdx = this->inSamplingDistance()->getData();
+		auto& pvelocity = this->inPVelocity()->getData();
 		DArray<Coord2D> pvelocity2D(pvelocity.size());
 		cuExecute(pvelocity.size(),
 			ESS_3DTo2D,
@@ -562,7 +562,7 @@ namespace dyno
 			mNode2Ver);
 		vcoefficient.clear();
 
-		auto& particles = this->statePPosition()->getData();
+		auto& particles = this->inPPosition()->getData();
 		DArray<Coord2D> particles_pos(particles.size());
 		cuExecute(particles.size(),
 			ESS_3DTo2D,
@@ -572,7 +572,7 @@ namespace dyno
 		volumeSet->accessRandom(nodeIndex, particles_pos);
 		cuExecute(particles.size(),
 			ESS_VertexToParticle,
-			this->statePVelocity()->getData(),
+			this->inPVelocity()->getData(),
 			particles_pos,
 			nodeIndex,
 			m_node,
