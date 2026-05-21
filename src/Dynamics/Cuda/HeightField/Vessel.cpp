@@ -6,6 +6,7 @@
 #include "GLPhotorealisticInstanceRender.h"
 
 #include "GltfFunc.h"
+#include "helpers/tinyobj_helper.h"
 
 namespace dyno
 {
@@ -61,12 +62,23 @@ namespace dyno
 
 		auto textureMeshLoader = std::make_shared<FCallBackFunc>(
 			[=]() {
-				std::string filepath = this->varTextureMeshName()->getValue().string();
+				auto filepath = this->varTextureMeshName()->getValue();
 				if (this->stateTextureMesh()->isEmpty())
 					this->stateTextureMesh()->allocate();
 
+				auto ext = filepath.path().extension().string();
+				auto name = filepath.string();
+
 				std::shared_ptr<TextureMesh> texMesh = this->stateTextureMesh()->getDataPtr();
-				loadGLTFTextureMesh(texMesh, filepath);
+
+				if (ext == ".gltf")
+				{
+					loadGLTFTextureMesh(texMesh, name);
+				}
+				else if (ext == ".obj")
+				{
+					loadTextureMeshFromObj(texMesh, name);
+				}
 			}
 		);
 
