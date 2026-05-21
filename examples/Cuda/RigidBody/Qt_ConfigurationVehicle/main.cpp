@@ -46,30 +46,45 @@ std::shared_ptr<SceneGraph> creatCar()
 	gltf->stateTextureMesh()->connect(configCar->inTextureMesh());
 
 
-	MultiBodyBind configData;
+	MultiBodyTuple configData;
 
-	Vec3f angle = Vec3f(0, 0, 90);
+	Vec3f angle = Vec3f(90, 90, 0);
 	Quat<Real> q = Quat<Real>(angle[2] * M_PI / 180, angle[1] * M_PI / 180, angle[0] * M_PI / 180);
-	;
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("LF", 0), 0, ConfigShapeType::CONFIG_CAPSULE,100));//
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("LB", 1), 1, ConfigShapeType::CONFIG_CAPSULE, 100));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("RF", 2), 2, ConfigShapeType::CONFIG_CAPSULE, 100));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("RB", 3), 3, ConfigShapeType::CONFIG_CAPSULE, 100));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("BackWheel", 4), 4, ConfigShapeType::CONFIG_BOX, 100));
-	configData.rigidBodyConfigs.push_back(RigidBodyConfig(NameRigidID("Body", 5), 5, ConfigShapeType::CONFIG_BOX, 100));
 
-	for (size_t i = 0; i < 4; i++)
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("LF",0,0, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("LB",1,1, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("RF",2,2, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("RB",3,3, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("BackWheel",4,4, RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("Body",5,5, RigidShapeType::SHAPE_BOX, 100));
+
+	int index = 0; 
+	for (auto it = configData.varRigidBodyConfigs()->begin();
+		it != configData.varRigidBodyConfigs()->end();
+		++it, ++index)
 	{
-		configData.rigidBodyConfigs[i].shapeConfigs[0].capsuleLength = 0.3;
-		configData.rigidBodyConfigs[i].shapeConfigs[0].rot = q;
+		auto* rigidPtr = dynamic_cast<TFTuple<RigidBodyTuple>*>((*it).get());
+
+		auto rigid = configData.varRigidBodyConfigs()->getElement(it);
+		auto base_ptr = (*rigid.varShapeConfigs()->begin()).get();
+		auto* shapePtr = dynamic_cast<TFTuple<ShapeTuple>*>(base_ptr);
+
+		auto shape = shapePtr->getValue();
+		shape.varCapsuleLength()->setValue(0.1);
+		shape.varRot()->setValue(q);
+		shapePtr->setValue(shape);
+
+		rigidPtr->setValue(rigid);
+
+		if (index >= 3)
+			break;
 	}
 
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("LF", 0), NameRigidID("Body", 5), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("LB", 1), NameRigidID("Body", 5), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("RF", 2), NameRigidID("Body", 5), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("RB", 3), NameRigidID("Body", 5), ConfigJointType::CONFIG_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
-	configData.jointConfigs.push_back(MultiBodyJointConfig(NameRigidID("BackWheel", 4), NameRigidID("Body", 5), ConfigJointType::CONFIG_Fixed, Vec3f(1, 0, 0), Vec3f(0), true, 0));
-
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("LF", 0, "Body", 5, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("LB", 1, "Body", 5, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("RF", 2, "Body", 5, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("RB", 3, "Body", 5, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("BackWheel", 4, "Body", 5, JointType::JOINT_Fixed, Vec3f(1, 0, 0), Vec3f(0), true, 0));
 
 	configCar->varConfiguration()->setValue(configData);
 

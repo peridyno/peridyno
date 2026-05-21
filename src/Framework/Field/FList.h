@@ -208,7 +208,9 @@ namespace dyno {
 
 		//if constexpr requires C++ 17
 		if constexpr (std::is_base_of<Tuple, T>::value) {
-			data->push_back(std::move(std::make_unique<TFTuple<T>>()));
+			auto tuplePtr = std::make_unique<TFTuple<T>>();
+			tuplePtr->setValue(val);
+			data->push_back(std::move(tuplePtr));
 		}
 		else
 		{
