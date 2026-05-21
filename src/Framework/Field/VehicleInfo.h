@@ -122,8 +122,6 @@ namespace dyno {
 			shape.shapeType = type;
 			shape.density = density;
 			shapeConfigs.push_back(shape);
-			this->position = position;
-			this->angle = angle;
 		}
 
 		void bindShapeConfig(
