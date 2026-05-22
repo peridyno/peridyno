@@ -71,17 +71,6 @@ std::shared_ptr<SceneGraph> creatCar()
 	multiBodyConfig.varJointConfigs()->pushBack(MultiBodyJointTuple(rb_up, 7, body, 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), offset, true, 0));
 	multiBodyConfig.varJointConfigs()->pushBack(MultiBodyJointTuple(rb_down, 8, rb_up, 7, JointType::JOINT_Hinge, Vec3f(1, 0, 0), offset, true, 0));
 
-	std::vector<Animation2JointConfig> config(multiBodyConfig.varJointConfigs()->size());
-
-	config[0] = Animation2JointConfig(std::string("Model::LFU_2"), 0, 2, 0.5);
-	config[1] = Animation2JointConfig(std::string("Model::LFD_3"), 1, 2, 0.5);
-	config[2] = Animation2JointConfig(std::string("Model::LBU_5"), 2, 2, 0.5);
-	config[3] = Animation2JointConfig(std::string("Model::LBD_6"), 3, 2, 0.5);
-	config[4] = Animation2JointConfig(std::string("Model::RFU_8"), 4, 2, 0.5);
-	config[5] = Animation2JointConfig(std::string("Model::RFD_9"), 5, 2, 0.5);
-	config[6] = Animation2JointConfig(std::string("Model::RBU_11"), 6, 2, 0.5);
-	config[7] = Animation2JointConfig(std::string("Model::RBD_12"), 7, 2, 0.5);
-
 	robot->varConfiguration()->setValue(multiBodyConfig);
 
 	auto multibody = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
@@ -91,7 +80,15 @@ std::shared_ptr<SceneGraph> creatCar()
 	robot->connect(multibody->importVehicles());
 
 	auto animDriver = std::make_shared<AnimationDriver<DataType3f>>();
-	animDriver->varBindingConfiguration()->setValue(config);
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::LFU_2"), 0, 2, 0.5));
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::LFD_3"), 1, 2, 0.5));
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::LBU_5"), 2, 2, 0.5));
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::LBD_6"), 3, 2, 0.5));
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::RFU_8"), 4, 2, 0.5));
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::RFD_9"), 5, 2, 0.5));
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::RBU_11"), 6, 2, 0.5));
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::RBD_12"), 7, 2, 0.5));
+
 	animDriver->varSpeed()->setValue(8);
 	fbx->stateJointAnimationInfo()->connect(animDriver->inJointAnimationInfo());
 

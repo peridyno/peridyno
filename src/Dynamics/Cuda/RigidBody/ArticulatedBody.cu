@@ -16,7 +16,6 @@
 #include "GltfFunc.h"
 #include "helpers/tinyobj_helper.h"
 
-#include "Field/VehicleInfo.h"
 #include <fstream>
 
 namespace dyno

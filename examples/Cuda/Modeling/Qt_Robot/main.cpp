@@ -144,22 +144,14 @@ int main()
 	auto animDriver = std::make_shared<AnimationDriver<DataType3f>>();
 	multibody->animationPipeline()->pushModule(animDriver);
 
-
-	std::vector<Animation2JointConfig> config(6);
-
 	float weight = 1;
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::R_Hip01"), 0, 1, weight));
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::L_Hip01"), 1, 1, weight));
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::R_Knee"), 2, 1, weight));
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::L_Knee"), 3, 1, weight));
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::R_Foot"), 4, 1, weight));
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::L_Foot"), 5, 1, weight));
 
-	config[0] = Animation2JointConfig(std::string("Model::R_Hip01"), 0, 1, weight);
-	config[1] = Animation2JointConfig(std::string("Model::L_Hip01"), 1, 1, weight);
-
-	config[2] = Animation2JointConfig(std::string("Model::R_Knee"), 2, 1, weight);
-	config[3] = Animation2JointConfig(std::string("Model::L_Knee"), 3, 1, weight);
-
-	config[4] = Animation2JointConfig(std::string("Model::R_Foot"), 4, 1, weight);
-	config[5] = Animation2JointConfig(std::string("Model::L_Foot"), 5, 1, weight);
-
-
-	animDriver->varBindingConfiguration()->setValue(config);
 	animDriver->varSpeed()->setValue(1);
 	multibody->stateTimeStep()->connect(animDriver->inDeltaTime());
 	fbx->stateJointAnimationInfo()->connect(animDriver->inJointAnimationInfo());

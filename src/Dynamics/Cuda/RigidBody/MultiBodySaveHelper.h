@@ -26,7 +26,7 @@ namespace dyno
 		MultiBodySaveHelper() {};
 		~MultiBodySaveHelper() override {};
 
-		void initialShapeConfig(
+		/*void initialShapeConfig(
 			ShapeConfig& shapeRigid,
 			ConfigShapeType type,
 			Vec3f center,
@@ -77,7 +77,7 @@ namespace dyno
 			const std::vector<PointJoint>& getJointsPoint,
 			const std::vector<Pair<uint, uint>>& getShape2RigidBodyMapping
 		);
-
+*/
 
 	};
 }
