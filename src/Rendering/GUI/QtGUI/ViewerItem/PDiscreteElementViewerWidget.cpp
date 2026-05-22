@@ -19,7 +19,6 @@
 #include <QMouseEvent>
 #include "PropertyItem/QColorWidget.h"
 #include "PropertyItem/QPiecewiseDoubleSpinBox.h"
-#include "PropertyItem/QVehicleInfoWidget.h"
 #include "RenderWindow.h"
 
 namespace dyno
@@ -157,7 +156,7 @@ namespace dyno
 				CArray<TOrientedBox3D<Real>> boxes;
 				boxes.assign(f_discreteElement->constDataPtr()->boxesInLocal());
 
-				for (size_t i = 0; i < f_discreteElement->constDataPtr()->boxesInLocal().size(); i++)
+				/*for (size_t i = 0; i < f_discreteElement->constDataPtr()->boxesInLocal().size(); i++)
 				{
 					ShapeConfig config;
 					config.shapeType = ConfigShapeType::CONFIG_BOX;
@@ -176,7 +175,7 @@ namespace dyno
 
 					QShapeDetail* shape = new QShapeDetail(config,i);
 					shapesLayout->addWidget(shape);
-				}
+				}*/
 
 
 				shapesLayout->addStretch();

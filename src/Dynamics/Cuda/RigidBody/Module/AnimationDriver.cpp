@@ -33,15 +33,15 @@ namespace dyno
 		std::map<int, std::vector<std::vector<Real>*>> animTime;
 
 
-		auto binding = this->varBindingConfiguration()->getValue();
+		auto binding = this->varBindingConfiguration();
 
 
-		for (size_t i = 0; i < binding.size(); i++)
+		for (auto bindIterator = binding->begin(); bindIterator != binding->end(); bindIterator++)
 		{
+			auto bindDetail = binding->getElement(bindIterator);
 
-
-			auto name = binding[i].JointName;
-			auto hingeId = binding[i].JointId;
+			auto name = bindDetail.varJointName()->getValue();
+			auto hingeId = bindDetail.varJointId()->getValue();
 
 			auto boneId = skeleton->findJointIndexByName(name);
 			if (boneId != -1)
@@ -97,11 +97,13 @@ namespace dyno
 		};
 
 
-		for (size_t i = 0; i < binding.size(); i++)
+		for (auto bindIterator = binding->begin(); bindIterator != binding->end(); bindIterator++)
 		{
-			int hingeId = binding[i].JointId;
-			int axis = binding[i].Axis;
-			float intensity = binding[i].Intensity;
+			auto bindDetail = binding->getElement(bindIterator);
+
+			int hingeId = bindDetail.varJointId()->getValue();
+			int axis = bindDetail.varAxis()->getValue();
+			float intensity = bindDetail.varIntensity()->getValue();
 
 			if (!animRot[hingeId].size())
 				continue;
