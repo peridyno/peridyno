@@ -159,8 +159,6 @@ std::shared_ptr<ConfigurableBody<DataType3f>> getVehicle(std::shared_ptr<SceneGr
 
 		rigidPtr->setValue(rigid);
 
-		if (index >= 3)
-			break;
 	}
 	float speed = 5.5;
 
