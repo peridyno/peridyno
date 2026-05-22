@@ -22,6 +22,7 @@
 #include "Topology/TextureMesh.h"
 
 #include "Field/FilePath.h"
+#include "MultiBodyTuple.h"
 
 namespace dyno 
 {

@@ -25,7 +25,7 @@ namespace dyno {
 	class FList : public FBase
 	{
 	public:
-		FList() : FBase("", "") {}
+		FList() : FBase() {}
 		FList(std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent)
 			: FBase(name, description, fieldType, parent) {}
 
@@ -54,7 +54,7 @@ namespace dyno {
 		typedef std::list<std::unique_ptr<FBase>>		DataType;
 		typedef TFList<T>								FieldType;
 
-		TFList() : FList("", "") {}
+		TFList() : FList() {}
 		TFList(std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent)
 			: FList(name, description, fieldType, parent) {}
 

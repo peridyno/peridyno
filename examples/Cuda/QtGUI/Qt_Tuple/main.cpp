@@ -8,6 +8,8 @@
 #include "Matrix/Transform2x2.h"
 #include "initializeModeling.h"
 
+#include "RigidBody/MultiBodyTuple.h"
+
 
 using namespace dyno;
 
@@ -60,6 +62,8 @@ public:
 		this->varTransformList()->pushBack(Transform3f());
 		this->varTransformList()->pushBack(Transform3f());
 		this->varTransformList()->pushBack(Transform3f());
+
+		this->varRigidBodyConfigs()->pushBack(RigidBodyTuple());
 	};
 
 	~MyNode() override {};
@@ -85,6 +89,8 @@ public:
 	DEF_LIST(int, IntList, "Define a list");
 	DEF_LIST(Transform3f, TransformList, "Define a list");
 	DEF_LIST(MyTuple, TupleList, "");
+
+	DEF_LIST(RigidBodyTuple, RigidBodyConfigs, "");
 };
 
 using namespace dyno;

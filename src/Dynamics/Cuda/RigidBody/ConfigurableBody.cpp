@@ -19,11 +19,11 @@
 //IO
 #include "GltfFunc.h"
 #include "helpers/tinyobj_helper.h"
-#include "Field/VehicleInfo.inl"
 #include <fstream>
 
 //topo
 #include "Mapping/DiscreteElementsToTriangleSet.h"
+#include "MultiBodyTuple.h"
 
 namespace dyno
 {
@@ -179,18 +179,18 @@ namespace dyno
 		//this->varVehiclesTransform()->deserialize(instanceTransformStr);
 	}
 
-	ElementType ToElementType(ConfigShapeType configShape)
+	ElementType ToElementType(RigidShapeType configShape)
 	{
 		switch (configShape)
 		{
-		case CONFIG_BOX:       return ET_BOX;
-		case CONFIG_TET:       return ET_TET;
-		case CONFIG_CAPSULE:   return ET_CAPSULE;
-		case CONFIG_SPHERE:    return ET_SPHERE;
-		case CONFIG_TRI:       return ET_TRI;
-		case CONFIG_COMPOUND:  return ET_COMPOUND;
-		case CONFIG_Other:     return ET_Other;
-		default:               return ET_Other; 
+		case SHAPE_BOX:       return ET_BOX;
+		case SHAPE_TET:       return ET_TET;
+		case SHAPE_CAPSULE:   return ET_CAPSULE;
+		case SHAPE_SPHERE:    return ET_SPHERE;
+		case SHAPE_TRI:       return ET_TRI;
+		case SHAPE_COMPOUND:  return ET_COMPOUND;
+		case SHAPE_Other:     return ET_Other;
+		default:              return ET_Other; 
 		}
 	}
 
@@ -550,12 +550,23 @@ namespace dyno
 				auto anchorOffset = jointDetail.varAnchorPoint()->getValue();
 
 				if (first == -1 || second == -1)
+				{
+					printf("JointInfo : id == -1 [%d], [%d]\n", first, second);
 					continue;
-				if (Actors[first] == NULL || Actors[second] == NULL)
+				}
+				if (first >= Actors.size() || second >= Actors.size())
+				{
+					printf("JointInfo : Error RigidId  [%d], [%d]\n", first, second);
 					continue;
+				}
+				if (Actors[first] == NULL || Actors[second] == NULL) 
+				{
+					printf("JointInfo : Actor is NULL [%d], [%d]\n", first, second);
+					continue;
+				}
 
 
-				if (type == CONFIG_Hinge)
+				if (type == JOINT_Hinge)
 				{
 					auto& hingeJoint = this->createHingeJoint(Actors[first], Actors[second]);
 					hingeJoint.setAnchorPoint(Actors[first]->center + anchorOffset);
@@ -566,7 +577,7 @@ namespace dyno
 						hingeJoint.setRange(jointDetail.varRange()->getValue().x, jointDetail.varRange()->getValue().y);
 
 				}
-				if (type == CONFIG_Slider)
+				if (type == JOINT_Slider)
 				{
 					auto& sliderJoint = this->createSliderJoint(Actors[first], Actors[second]);
 					sliderJoint.setAnchorPoint((Actors[first]->center + Actors[first]->center) / 2 + anchorOffset);
@@ -576,17 +587,17 @@ namespace dyno
 					if (jointDetail.varUseRange()->getValue())
 						sliderJoint.setRange(jointDetail.varRange()->getValue().x, jointDetail.varRange()->getValue().y);
 				}
-				if (type == CONFIG_Fixed)
+				if (type == JOINT_Fixed)
 				{
 					auto& fixedJoint1 = this->createFixedJoint(Actors[first], Actors[second]);
 					fixedJoint1.setAnchorPoint((Actors[first]->center + Actors[first]->center) / 2 + anchorOffset);
 				}
-				if (type == CONFIG_Point)
+				if (type == JOINT_Point)
 				{
 					auto& pointJoint = this->createPointJoint(Actors[first]);
 					pointJoint.setAnchorPoint(Actors[first]->center + anchorOffset);
 				}
-				if (type == CONFIG_BallAndSocket)
+				if (type == JOINT_BallAndSocket)
 				{
 					auto& ballAndSocketJoint = this->createBallAndSocketJoint(Actors[first], Actors[second]);
 					ballAndSocketJoint.setAnchorPoint((Actors[first]->center + Actors[first]->center) / 2 + anchorOffset);

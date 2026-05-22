@@ -17,13 +17,10 @@
 #include "Module/KeyboardInputModule.h"
 #include "Topology/DiscreteElements.h"
 #include "Topology/HierarchicalModel.h"
-#include "Field/VehicleInfo.h"
+#include "RigidBody/MultiBodyTuple.h"
 
 namespace dyno 
 {
-
-
-
 	template<typename TDataType>
 	class AnimationDriver : public KeyboardInputModule
 	{
@@ -47,7 +44,7 @@ namespace dyno
 
 		DEF_VAR(Real, Speed,4,"Speed");
 
-		DEF_VAR(std::vector<Animation2JointConfig>, BindingConfiguration, std::vector<Animation2JointConfig>(), "Animation Joint Config");
+		DEF_LIST(Animation2JointConfigTuple, BindingConfiguration, "Animation Joint Config");
 
 		DEF_INSTANCE_IN(DiscreteElements<TDataType>, Topology, "Topology");
 		DEF_INSTANCE_IN(JointAnimationInfo, JointAnimationInfo,"Animation objects");

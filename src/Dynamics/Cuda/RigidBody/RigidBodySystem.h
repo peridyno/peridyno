@@ -22,7 +22,6 @@
 #include "Field/FilePath.h"
 #include <vector>
 #include <iostream>
-#include "Field/VehicleInfo.h"
 
 namespace dyno
 {
@@ -268,7 +267,7 @@ namespace dyno
 
 		virtual void saveToFile();
 
-		MultiBodyBind getMultiBodyBind();
+		//MultiBodyBind getMultiBodyBind();
 
 		template<typename TDataType>
 		friend class MultiBodySaveHelper;

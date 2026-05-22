@@ -17,11 +17,8 @@
 #include "RigidBody/ArticulatedBody.h"
 
 #include "STL/Pair.h"
-
 #include "Field/FilePath.h"
 #include "Topology/EdgeSet.h"
-
-#include "Field/VehicleInfo.h"
 
 namespace dyno
 {
