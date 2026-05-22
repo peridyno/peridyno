@@ -550,9 +550,20 @@ namespace dyno
 				auto anchorOffset = jointDetail.varAnchorPoint()->getValue();
 
 				if (first == -1 || second == -1)
+				{
+					printf("JointInfo : id == -1 [%d], [%d]\n", first, second);
 					continue;
-				if (Actors[first] == NULL || Actors[second] == NULL)
+				}
+				if (first >= Actors.size() || second >= Actors.size())
+				{
+					printf("JointInfo : Error RigidId  [%d], [%d]\n", first, second);
 					continue;
+				}
+				if (Actors[first] == NULL || Actors[second] == NULL) 
+				{
+					printf("JointInfo : Actor is NULL [%d], [%d]\n", first, second);
+					continue;
+				}
 
 
 				if (type == CONFIG_Hinge)

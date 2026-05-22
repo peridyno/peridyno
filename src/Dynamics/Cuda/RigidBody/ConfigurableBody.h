@@ -52,6 +52,19 @@ namespace dyno
 			this->varCapsuleLength()->setValue(other.varCapsuleLength()->getValue());
 			this->varTet()->assign(other.varTet());
 		}
+		ShapeTuple& operator=(ShapeTuple& other) {
+			this->varShapeType()->setValue(other.varShapeType()->getValue());
+			this->varCenter()->setValue(other.varCenter()->getValue());
+			this->varRot()->setValue(other.varRot()->getValue());
+			this->varDensity()->setValue(other.varDensity()->getValue());
+			this->varHalfLength()->setValue(other.varHalfLength()->getValue());
+			this->varRadius()->setValue(other.varRadius()->getValue());
+			this->varCapsuleLength()->setValue(other.varCapsuleLength()->getValue());
+			this->varTet()->assign(other.varTet());
+			return *this;
+
+		}
+
 		//Shape:
 		DEF_ENUM(RigidShapeType, ShapeType, RigidShapeType::SHAPE_CAPSULE, "");
 		DEF_VAR(Vec3f, Center, Vec3f(0.0f, 0.0f, 0.0f), "");
@@ -144,17 +157,7 @@ namespace dyno
 			varVisualShapeIds()->assign(other.varVisualShapeIds());
 			varShapeConfigs()->assign(other.varShapeConfigs());
 		}
-		////Deep copy
-		//RigidBodyTuple& operator=(RigidBodyTuple& other) {
-		//	//this->varBoolean()->setValue(other.varBoolean()->getValue());
-		//	//this->varInt()->setValue(other.varInt()->getValue());
-		//	//this->varFloat()->setValue(other.varFloat()->getValue());
-		//	//this->varVector()->setValue(other.varVector()->getValue());
 
-		//	//this->varVec3fTupleArray()->assign(other.varVec3fTupleArray());
-
-		//	return *this;
-		//}
 
 		DEF_VAR(std::string, ShapeName,"", "");
 		DEF_VAR(int, RigidBodyId,-1, "");
@@ -196,7 +199,25 @@ namespace dyno
 	{
 	public:
 		MultiBodyJointTuple() {};
+		MultiBodyJointTuple& operator=(MultiBodyJointTuple& other) {
+			this->varAShapeName()->setValue(other.varAShapeName()->getValue());
+			this->varARigidBodyId()->setValue(other.varARigidBodyId()->getValue());
+			this->varBShapeName()->setValue(other.varBShapeName()->getValue());
+			this->varBRigidBodyId()->setValue(other.varBRigidBodyId()->getValue());
+			this->varAnchorPoint()->setValue(other.varAnchorPoint()->getValue());
+			this->varRelativeAnchorPoint()->setValue(other.varRelativeAnchorPoint()->getValue());
+			this->varUseMoter()->setValue(other.varUseMoter()->getValue());
+			this->varUseRange()->setValue(other.varUseRange()->getValue());
+			this->varRange()->setValue(other.varRange()->getValue());
+			this->varMoter()->setValue(other.varMoter()->getValue());
+			this->varAxis()->setValue(other.varAxis()->getValue());
+			this->varQ()->setValue(other.varQ()->getValue());
+			this->varR1()->setValue(other.varR1()->getValue());
+			this->varR2()->setValue(other.varR2()->getValue());
+			this->varDistance()->setValue(other.varDistance()->getValue());
 
+			return *this;
+		}
 		MultiBodyJointTuple(std::string AName, int ARigidId, std::string BName, int BRigidId, JointType type, Vec3f Axi = Vec3f(1, 0, 0), Vec3f Point = Vec3f(0), bool Moter = false, Real moter = 0, bool Range = false, Real min = 0, Real max = 0)
 		{
 			this->varAShapeName()->setValue(AName);
@@ -263,6 +284,15 @@ namespace dyno
 	{
 	public:
 		MultiBodyTuple() {};
+
+		MultiBodyTuple& operator=(MultiBodyTuple& other) {
+			this->varRigidBodyConfigs()->assign(other.varRigidBodyConfigs());
+			this->varJointConfigs()->assign(other.varJointConfigs());
+
+			return *this;
+		}
+
+
 		MultiBodyTuple(int size) 
 		{
 			for (int i = 0; i < size; i++)
