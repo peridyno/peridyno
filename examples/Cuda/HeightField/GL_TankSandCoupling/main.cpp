@@ -60,10 +60,14 @@ std::shared_ptr<ConfigurableBody<DataType3f>> getTank(std::shared_ptr<SceneGraph
 	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("R5", 14, 14, RigidShapeType::SHAPE_CAPSULE, 100));
 	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("R6", 15, 15, RigidShapeType::SHAPE_CAPSULE, 100));
 
+	int index = 0;
+
 	for (auto it = configData.varRigidBodyConfigs()->begin();
 		it != configData.varRigidBodyConfigs()->end();
 		++it)
 	{
+		if (index == 0 ||index == 1)
+			continue;
 		auto* rigidPtr = dynamic_cast<TFTuple<RigidBodyTuple>*>((*it).get());
 
 		auto rigid = configData.varRigidBodyConfigs()->getElement(it);
@@ -140,6 +144,8 @@ std::shared_ptr<ConfigurableBody<DataType3f>> getVehicle(std::shared_ptr<SceneGr
 		it != configData.varRigidBodyConfigs()->end();
 		++it, ++index)
 	{
+		if (index == 0)
+			continue;
 		auto* rigidPtr = dynamic_cast<TFTuple<RigidBodyTuple>*>((*it).get());
 
 		auto rigid = configData.varRigidBodyConfigs()->getElement(it);
