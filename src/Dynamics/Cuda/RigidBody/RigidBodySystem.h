@@ -22,11 +22,10 @@
 #include "Field/FilePath.h"
 #include <vector>
 #include <iostream>
+#include "MultiBodyTuple.h"
 
 namespace dyno
 {
-	template<typename TDataType>
-	class MultiBodySaveHelper;
 
 	/*!
 	*	\class	RigidBodySystem
@@ -269,8 +268,6 @@ namespace dyno
 
 		//MultiBodyBind getMultiBodyBind();
 
-		template<typename TDataType>
-		friend class MultiBodySaveHelper;
 
 	public:
 		int m_numOfSamples;

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 #pragma once
-#include "ArticulatedBody.h"
 
 #include "STL/Pair.h"
 
+#include "OBase.h"   
+#include "FBase.h"   
 #include "Tuple.h"
 #include "Field/FList.h"
 #include "Matrix/Matrix3x3.h"
@@ -339,6 +340,14 @@ namespace dyno
 			this->varIntensity()->setValue(other.varIntensity()->getValue());
 			return *this;
 		}
+		Animation2JointConfigTuple(Animation2JointConfigTuple& other)
+		{
+			this->varJointName()->setValue(other.varJointName()->getValue());
+			this->varJointId()->setValue(other.varJointId()->getValue());
+			this->varAxis()->setValue(other.varAxis()->getValue());
+			this->varIntensity()->setValue(other.varIntensity()->getValue());
+		}
+
 		DEF_VAR(std::string, JointName, "", "");
 		DEF_VAR(int, JointId, -1, "");
 		DEF_VAR(uint, Axis, 0, "");
