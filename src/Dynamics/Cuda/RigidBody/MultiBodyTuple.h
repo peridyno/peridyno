@@ -321,10 +321,13 @@ namespace dyno
 			}
 		};
 
-		MultiBodyTuple(MultiBodyTuple& other)
+		MultiBodyTuple(const MultiBodyTuple& other)
 		{
-			this->varRigidBodyConfigs()->assign(other.varRigidBodyConfigs());
-			this->varJointConfigs()->assign(other.varJointConfigs());
+			const MultiBodyTuple* constPtr = &other;
+			MultiBodyTuple* nonConstPtr = const_cast<MultiBodyTuple*>(constPtr);
+
+			this->varRigidBodyConfigs()->assign(nonConstPtr->varRigidBodyConfigs());
+			this->varJointConfigs()->assign(nonConstPtr->varJointConfigs());
 		}
 
 		~MultiBodyTuple() {};
@@ -362,12 +365,15 @@ namespace dyno
 			this->varIntensity()->setValue(other.varIntensity()->getValue());
 			return *this;
 		}
-		Animation2JointConfigTuple(Animation2JointConfigTuple& other)
+		Animation2JointConfigTuple(const Animation2JointConfigTuple& other)
 		{
-			this->varJointName()->setValue(other.varJointName()->getValue());
-			this->varJointId()->setValue(other.varJointId()->getValue());
-			this->varAxis()->setValue(other.varAxis()->getValue());
-			this->varIntensity()->setValue(other.varIntensity()->getValue());
+			const Animation2JointConfigTuple* constPtr = &other;
+			Animation2JointConfigTuple* nonConstPtr = const_cast<Animation2JointConfigTuple*>(constPtr);
+
+			this->varJointName()->setValue(nonConstPtr->varJointName()->getValue());
+			this->varJointId()->setValue(nonConstPtr->varJointId()->getValue());
+			this->varAxis()->setValue(nonConstPtr->varAxis()->getValue());
+			this->varIntensity()->setValue(nonConstPtr->varIntensity()->getValue());
 		}
 
 		DEF_VAR(std::string, JointName, "", "");
