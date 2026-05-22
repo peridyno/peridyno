@@ -184,29 +184,16 @@ namespace dyno
 		auto shapes = this->getShapes();
 		for (int i = 0; i < shapes.size(); i++)
 		{
-			Quat<Real> q = shapes[i]->computeQuaternion();
-			q.normalize();
-
-			Real width = shapes[i]->varWidth()->getValue();
-			Real height = shapes[i]->varHeight()->getValue();
-			Coord3D center = shapes[i]->varLocation()->getData();
-
-			center = q.rotate(Coord3D(center[0] + shapes[i]->varRotationRadius()->getData(), 0.0f, center[2] - height * 0.1f));
-			Coord3D u_axis = q.rotate(Coord3D(1, 0, 0));
-			Coord3D w_axis = q.rotate(Coord3D(0, 0, 1));
-
-			TOrientedBox2D<Real> retangle;
-			retangle.center = Coord2D(center[0], center[2]);
-			retangle.u = Coord2D(u_axis[0], u_axis[2]);
-			retangle.v = Coord2D(w_axis[0], w_axis[2]);
-			retangle.extent = Coord2D(width * 0.9f, height * 0.8f);
+			auto rectangleModel = dynamic_cast<RectangleModel2D<TDataType>*>(shapes[i]);
+			auto box = rectangleModel->stateRectangle()->getData();
+			box.extent = Coord2D(box.extent.x * 0.3f, box.extent.y * 0.5f);
 
 			Real linear_v = (shapes[i]->varRotationRadius()->getData()) * 3.14 / (shapes[i]->varFrequency()->getData());
 			cuExecute(pos.size(),
 				CWASpeed_ApplySpeedToWater,
 				mDeviceGridNext,
 				pos,
-				retangle,
+				box,
 				linear_v);
 		}
 

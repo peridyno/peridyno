@@ -59,9 +59,9 @@ namespace dyno
 
 		DEF_VAR_IN(Real, Radius, "The radius of the circle");
 		DEF_VAR_IN(Coord2D, Center, "The center of the circle");
-		DEF_ARRAY_STATE(Coord, PPosition, DeviceType::GPU, "the position of particles");
-		DEF_ARRAY_STATE(Coord, PVelocity, DeviceType::GPU, "the velocity of particles");
-		DEF_VAR(Real, SamplingDistance, 0.1, "Sampling distance of particles");
+		DEF_ARRAY_IN(Coord, PPosition, DeviceType::GPU, "the position of particles");
+		DEF_ARRAY_IN(Coord, PVelocity, DeviceType::GPU, "the velocity of particles");
+		DEF_VAR_IN(Real, SamplingDistance, "Sampling distance of particles");
 
 		DEF_ARRAY_OUT(Coord, NodeType, DeviceType::GPU, "");
 		//DEF_INSTANCE_OUT(PointSet<TDataType>, LeafNodes, "Topology");

@@ -1,3 +1,4 @@
+#include <UbiApp.h>
 #include <QtApp.h>
 #include <GlfwGUI/GlfwApp.h>
 
@@ -11,6 +12,7 @@
 #include "RigidBody/Vehicle.h"
 
 #include "Module/KeyboardInputModule.h"
+#include <UbiGUI/UbiApp.h>
 
 using namespace std;
 using namespace dyno;
@@ -110,7 +112,8 @@ std::shared_ptr<SceneGraph> creatCar()
 int main()
 {
 	//QtApp app;
-	GlfwApp app;
+	//GlfwApp app;
+	UbiApp app(GUIType::GUI_GLFW);
 	app.setSceneGraph(creatCar());
 	app.initialize(1280, 768);
 

@@ -31,6 +31,9 @@ namespace dyno
 	class BasicShape2D : public ParametricModel<TDataType>
 	{
 	public:
+		typedef typename TDataType::Real Real;
+		typedef typename dyno::Vector<Real, 2> Coord2D;
+
 		BasicShape2D();
 
 		std::string getNodeType() override { return "Basic Shapes 2D"; }
@@ -38,5 +41,24 @@ namespace dyno
 		virtual BasicShapeType2D getShapeType() {
 			return BasicShapeType2D::UNKNOWN2D;
 		};
+
+		Coord2D computeRotate(Coord2D v)
+		{
+			auto rot = this->varRotation2D()->getValue();
+			Real angle = Real(M_PI) * rot / 180;
+
+			//rotation matrix: cos() sin()
+			//                               * v
+			//				  -sin() con()  
+
+			Real s = glm::sin(angle);
+			Real c = glm::cos(angle);
+			return Coord2D(v[0] * c + v[1] * s, v[0] * (-s) + v[1] * c);
+		}
+
+		DEF_VAR(Coord2D, Location2D, 0, "Node2D location");
+		DEF_VAR(Real, Rotation2D, 0, "Node2D rotation");
+		DEF_VAR(Coord2D, Scale2D, Coord2D(1), "Node2D scale");
+
 	};
 }

@@ -67,20 +67,10 @@ namespace dyno
 		m_max = aabb_box.v1;
 
 		Real m_dx = this->varDx()->getValue();
-		int rs = std::floor(std::max(m_max[0] - m_origin[0], m_max[1] - m_origin[1]) / m_dx);
-		m_levelmax = std::ceil(std::log2(float(rs)));
-		m_levelmax = std::max(m_levelmax, this->varMaxLevel()->getValue());
 
-		int rs_max = (1 << m_levelmax);
-		m_origin = m_origin - (m_dx * (rs_max - rs) / 2);
-		std::printf("The origin, dx, levelmax are: %f  %f,  %f  %f,   %f, %d %d \n", m_origin[0], m_origin[1], m_max[0], m_max[1], m_dx, rs, m_levelmax);
-
-		this->varMaxLevel()->setValue(m_levelmax);
 		this->stateAGridSet()->allocate();
-		auto m_AGrid = this->stateAGridSet()->getDataPtr();
-		m_AGrid->setOrigin(m_origin);
-		m_AGrid->setDx(m_dx);
-		m_AGrid->setLevelMax(m_levelmax);
+		this->stateAGridSet()->getDataPtr()->setSpace(m_origin, m_max, m_dx);
+		m_origin = this->stateAGridSet()->getDataPtr()->adaptiveGridOrigin2D();
 	}
 
 	template <typename Real, typename Coord2D>
@@ -143,9 +133,12 @@ namespace dyno
 	template<typename TDataType>
 	void AdaptiveVolumeFromBasicShape2D<TDataType>::circleSeeds(DArray<uint>& marker,Coord2D center, Real radius)
 	{
+		auto m_agrid = this->stateAGridSet()->constDataPtr();
+		Level m_levelmax = m_agrid->adaptiveGridLevelMax2D();
+		int resolution = (1 << m_levelmax);
+
 		Real m_dx = this->varDx()->getValue();
 		Real band = this->varNarrowWidth()->getValue();
-		int resolution = (1 << m_levelmax);
 
 		cuExecute(marker.size(),
 			AVBS2D_CircleNarrowBandCount,
@@ -218,7 +211,7 @@ namespace dyno
 			if (type == BasicShapeType2D::CIRCLE)
 			{
 				auto circleModel = dynamic_cast<CircleModel2D<TDataType>*>(shapes[i]);
-				Coord2D center = circleModel->varCenter()->getValue();
+				Coord2D center = circleModel->varLocation2D()->getValue();
 				Real radius = circleModel->varRadius()->getValue();
 
 				circleSeeds(marker, center, radius);
@@ -236,7 +229,10 @@ namespace dyno
 	template<typename TDataType>
 	void AdaptiveVolumeFromBasicShape2D<TDataType>::computeSeedsFromScratch()
 	{
+		auto m_agrid = this->stateAGridSet()->constDataPtr();
+		Level m_levelmax = m_agrid->adaptiveGridLevelMax2D();
 		int resolution = (1 << m_levelmax);
+
 		DArray<uint> data_count(resolution * resolution);
 		data_count.reset();
 
@@ -317,14 +313,15 @@ namespace dyno
 	template<typename TDataType>
 	void AdaptiveVolumeFromBasicShape2D<TDataType>::computeSeedsDynamicUpdate()
 	{
+		auto m_agrid = this->stateAGridSet()->constDataPtr();
+		Level m_levelmax = m_agrid->adaptiveGridLevelMax2D();
 		int resolution = (1 << m_levelmax);
+
 		DArray<uint> data_count(resolution * resolution);
 		data_count.reset();
 
 		computeSeeds(data_count);
 
-		auto&& m_agrid = this->stateAGridSet()->constDataPtr();
-		Level m_levelmax = m_agrid->adaptiveGridLevelMax2D();
 		DArray<AdaptiveGridNode2D> leaves;
 		m_agrid->extractLeafs(leaves);
 

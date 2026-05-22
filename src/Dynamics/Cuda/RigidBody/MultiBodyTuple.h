@@ -60,7 +60,20 @@ namespace dyno
 			this->varCapsuleLength()->setValue(other.varCapsuleLength()->getValue());
 			this->varTet()->assign(other.varTet());
 			return *this;
+		}
 
+		ShapeTuple(const ShapeTuple& other) {
+			const ShapeTuple* constPtr = &other;
+			ShapeTuple* nonConstPtr = const_cast<ShapeTuple*>(constPtr);
+
+			this->varShapeType()->setValue(nonConstPtr->varShapeType()->getValue());
+			this->varCenter()->setValue(nonConstPtr->varCenter()->getValue());
+			this->varRot()->setValue(nonConstPtr->varRot()->getValue());
+			this->varDensity()->setValue(nonConstPtr->varDensity()->getValue());
+			this->varHalfLength()->setValue(nonConstPtr->varHalfLength()->getValue());
+			this->varRadius()->setValue(nonConstPtr->varRadius()->getValue());
+			this->varCapsuleLength()->setValue(nonConstPtr->varCapsuleLength()->getValue());
+			this->varTet()->assign(nonConstPtr->varTet());
 		}
 
 		//Shape:
@@ -116,46 +129,51 @@ namespace dyno
 			this->varShapeConfigs()->pushBack(shape);
 		}
 
-		RigidBodyTuple& operator=(RigidBodyTuple& other) {
-			this->varShapeName()->setValue(other.varShapeName()->getValue());
-			this->varRigidBodyId()->setValue(other.varRigidBodyId()->getValue());
-			this->varAngel()->setValue(other.varAngel()->getValue());
-			this->varLinearVelocity()->setValue(other.varLinearVelocity()->getValue());
-			this->varAngularVelocity()->setValue(other.varAngularVelocity()->getValue());
-			this->varPosition()->setValue(other.varPosition()->getValue());
-			this->varOffset()->setValue(other.varOffset()->getValue());
-			this->varInertia()->setValue(other.varInertia()->getValue());
-			this->varFriction()->setValue(other.varFriction()->getValue());
-			this->varRestitution()->setValue(other.varRestitution()->getValue());
-			this->varMotionType()->setValue(other.varMotionType()->getValue());
-			this->varShapeType()->setValue(other.varShapeType()->getValue());
-			this->varCollisionMask()->setValue(other.varCollisionMask()->getValue());
-			this->varConfigGroup()->setValue(other.varConfigGroup()->getValue());
-			this->varVisualShapeIds()->assign(other.varVisualShapeIds());
-			this->varShapeConfigs()->assign(other.varShapeConfigs());
+		RigidBodyTuple& operator=(const RigidBodyTuple& other) {
+			const RigidBodyTuple* constPtr = &other;
+			RigidBodyTuple* nonConstPtr = const_cast<RigidBodyTuple*>(constPtr);
+
+			this->varShapeName()->setValue(nonConstPtr->varShapeName()->getValue());
+			this->varRigidBodyId()->setValue(nonConstPtr->varRigidBodyId()->getValue());
+			this->varAngel()->setValue(nonConstPtr->varAngel()->getValue());
+			this->varLinearVelocity()->setValue(nonConstPtr->varLinearVelocity()->getValue());
+			this->varAngularVelocity()->setValue(nonConstPtr->varAngularVelocity()->getValue());
+			this->varPosition()->setValue(nonConstPtr->varPosition()->getValue());
+			this->varOffset()->setValue(nonConstPtr->varOffset()->getValue());
+			this->varInertia()->setValue(nonConstPtr->varInertia()->getValue());
+			this->varFriction()->setValue(nonConstPtr->varFriction()->getValue());
+			this->varRestitution()->setValue(nonConstPtr->varRestitution()->getValue());
+			this->varMotionType()->setValue(nonConstPtr->varMotionType()->getValue());
+			this->varShapeType()->setValue(nonConstPtr->varShapeType()->getValue());
+			this->varCollisionMask()->setValue(nonConstPtr->varCollisionMask()->getValue());
+			this->varConfigGroup()->setValue(nonConstPtr->varConfigGroup()->getValue());
+			this->varVisualShapeIds()->assign(nonConstPtr->varVisualShapeIds());
+			this->varShapeConfigs()->assign(nonConstPtr->varShapeConfigs());
 
 			return *this;
 		}
 
-		RigidBodyTuple(RigidBodyTuple& other) {
-			varShapeName()->setValue(other.varShapeName()->getValue());
-			varRigidBodyId()->setValue(other.varRigidBodyId()->getValue());
-			varAngel()->setValue(other.varAngel()->getValue());
-			varLinearVelocity()->setValue(other.varLinearVelocity()->getValue());
-			varAngularVelocity()->setValue(other.varAngularVelocity()->getValue());
-			varPosition()->setValue(other.varPosition()->getValue());
-			varOffset()->setValue(other.varOffset()->getValue());
-			varInertia()->setValue(other.varInertia()->getValue());
-			varFriction()->setValue(other.varFriction()->getValue());
-			varRestitution()->setValue(other.varRestitution()->getValue());
-			varMotionType()->setValue(other.varMotionType()->getValue());
-			varShapeType()->setValue(other.varShapeType()->getValue());
-			varCollisionMask()->setValue(other.varCollisionMask()->getValue());
-			varConfigGroup()->setValue(other.varConfigGroup()->getValue());
-			varVisualShapeIds()->assign(other.varVisualShapeIds());
-			varShapeConfigs()->assign(other.varShapeConfigs());
-		}
+		RigidBodyTuple(const RigidBodyTuple& other) {
+			const RigidBodyTuple* constPtr = &other;
+			RigidBodyTuple* nonConstPtr = const_cast<RigidBodyTuple*>(constPtr);
 
+			this->varShapeName()->setValue(nonConstPtr->varShapeName()->getValue());
+			this->varRigidBodyId()->setValue(nonConstPtr->varRigidBodyId()->getValue());
+			this->varAngel()->setValue(nonConstPtr->varAngel()->getValue());
+			this->varLinearVelocity()->setValue(nonConstPtr->varLinearVelocity()->getValue());
+			this->varAngularVelocity()->setValue(nonConstPtr->varAngularVelocity()->getValue());
+			this->varPosition()->setValue(nonConstPtr->varPosition()->getValue());
+			this->varOffset()->setValue(nonConstPtr->varOffset()->getValue());
+			this->varInertia()->setValue(nonConstPtr->varInertia()->getValue());
+			this->varFriction()->setValue(nonConstPtr->varFriction()->getValue());
+			this->varRestitution()->setValue(nonConstPtr->varRestitution()->getValue());
+			this->varMotionType()->setValue(nonConstPtr->varMotionType()->getValue());
+			this->varShapeType()->setValue(nonConstPtr->varShapeType()->getValue());
+			this->varCollisionMask()->setValue(nonConstPtr->varCollisionMask()->getValue());
+			this->varConfigGroup()->setValue(nonConstPtr->varConfigGroup()->getValue());
+			this->varVisualShapeIds()->assign(nonConstPtr->varVisualShapeIds());
+			this->varShapeConfigs()->assign(nonConstPtr->varShapeConfigs());
+		}
 
 		DEF_VAR(std::string, ShapeName,"", "");
 		DEF_VAR(int, RigidBodyId,-1, "");
@@ -233,23 +251,26 @@ namespace dyno
 			this->varJointType()->setCurrentKey(type);
 		}
 
-		MultiBodyJointTuple(MultiBodyJointTuple& other) 
+		MultiBodyJointTuple(const MultiBodyJointTuple& other) 
 		{
-			this->varAShapeName()->setValue(other.varAShapeName()->getValue());
-			this->varARigidBodyId()->setValue(other.varARigidBodyId()->getValue());
-			this->varBShapeName()->setValue(other.varBShapeName()->getValue());
-			this->varBRigidBodyId()->setValue(other.varBRigidBodyId()->getValue());
-			this->varAnchorPoint()->setValue(other.varAnchorPoint()->getValue());
-			this->varRelativeAnchorPoint()->setValue(other.varRelativeAnchorPoint()->getValue());
-			this->varUseMoter()->setValue(other.varUseMoter()->getValue());
-			this->varUseRange()->setValue(other.varUseRange()->getValue());
-			this->varRange()->setValue(other.varRange()->getValue());
-			this->varMoter()->setValue(other.varMoter()->getValue());
-			this->varAxis()->setValue(other.varAxis()->getValue());
-			this->varQ()->setValue(other.varQ()->getValue());
-			this->varR1()->setValue(other.varR1()->getValue());
-			this->varR2()->setValue(other.varR2()->getValue());
-			this->varDistance()->setValue(other.varDistance()->getValue());
+			const MultiBodyJointTuple* constPtr = &other;
+			MultiBodyJointTuple* nonConstPtr = const_cast<MultiBodyJointTuple*>(constPtr);
+
+			this->varAShapeName()->setValue(nonConstPtr->varAShapeName()->getValue());
+			this->varARigidBodyId()->setValue(nonConstPtr->varARigidBodyId()->getValue());
+			this->varBShapeName()->setValue(nonConstPtr->varBShapeName()->getValue());
+			this->varBRigidBodyId()->setValue(nonConstPtr->varBRigidBodyId()->getValue());
+			this->varAnchorPoint()->setValue(nonConstPtr->varAnchorPoint()->getValue());
+			this->varRelativeAnchorPoint()->setValue(nonConstPtr->varRelativeAnchorPoint()->getValue());
+			this->varUseMoter()->setValue(nonConstPtr->varUseMoter()->getValue());
+			this->varUseRange()->setValue(nonConstPtr->varUseRange()->getValue());
+			this->varRange()->setValue(nonConstPtr->varRange()->getValue());
+			this->varMoter()->setValue(nonConstPtr->varMoter()->getValue());
+			this->varAxis()->setValue(nonConstPtr->varAxis()->getValue());
+			this->varQ()->setValue(nonConstPtr->varQ()->getValue());
+			this->varR1()->setValue(nonConstPtr->varR1()->getValue());
+			this->varR2()->setValue(nonConstPtr->varR2()->getValue());
+			this->varDistance()->setValue(nonConstPtr->varDistance()->getValue());
 		};
 		
 
@@ -295,7 +316,8 @@ namespace dyno
 		{
 			for (int i = 0; i < size; i++)
 			{
-				this->varRigidBodyConfigs()->pushBack(RigidBodyTuple(std::string("Rigid") + std::to_string(i), i));
+				RigidBodyTuple rb(std::string("Rigid") + std::to_string(i), i);
+				this->varRigidBodyConfigs()->pushBack(rb);
 			}
 		};
 

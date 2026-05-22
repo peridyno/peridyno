@@ -29,7 +29,7 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename dyno::Vector<Real, 2> Coord2D;
-		typedef typename dyno::Vector<Real, 3> Coord3D;
+		typedef typename TDataType::Coord Coord3D;
 
 		RectangleModel2D();
 
@@ -42,6 +42,9 @@ namespace dyno
 		DEF_INSTANCE_STATE(EdgeSet<TDataType>, EdgeSet, "");
 
 		DEF_VAR_STATE(TOrientedBox2D<Real>, Rectangle, TOrientedBox2D < Real>(), "");
+
+		//0 for XY plane, 1 for XZ plane
+		DEF_VAR(int, VisPlane, 0, "Visualization plane");
 
 	protected:
 		void resetStates() override;

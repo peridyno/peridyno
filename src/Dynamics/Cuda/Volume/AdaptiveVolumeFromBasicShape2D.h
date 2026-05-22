@@ -65,7 +65,6 @@ namespace dyno {
 		std::shared_ptr<MSTsGeneratorLocalUpdate2D<TDataType>> mMSTGenLocal = nullptr;
 
 		Coord2D m_origin;
-		Level m_levelmax;
 	};
 
 }

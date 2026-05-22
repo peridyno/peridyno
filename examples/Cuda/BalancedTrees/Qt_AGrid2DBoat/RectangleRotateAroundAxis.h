@@ -28,7 +28,6 @@ namespace dyno
 
 	public:
 		typedef typename TDataType::Real Real;
-		//typedef typename TDataType::Coord Coord2D;
 		typedef typename dyno::Vector<Real, 2> Coord2D;
 		typedef typename dyno::Vector<Real, 3> Coord3D;
 
@@ -48,7 +47,6 @@ namespace dyno
 
 	private:
 		TAlignedBox3D<Real> m_alignedBox;
-		Coord3D m_center;
 	};
 
 	IMPLEMENT_TCLASS(RectangleRotateAroundAxis, TDataType);

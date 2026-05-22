@@ -153,7 +153,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto circle = scn->addNode(std::make_shared<CircleModel2D<DataType3f>>());
 	circle->varRadius()->setValue(0.9f);
-	circle->varCenter()->setValue(Vec2f(0.0, 0.9));
+	circle->varLocation2D()->setValue(Vec2f(0.0, 0.9));
 
 	auto AGrid = scn->addNode(std::make_shared<AdaptiveVolumeFromBasicShape2D<DataType3f>>());
 	circle->connect(AGrid->importShapes());
@@ -166,9 +166,9 @@ std::shared_ptr<SceneGraph> createScene()
 	AGrid->stateAGridSet()->connect(esim->inAdaptiveVolume2D());
 	esim->inRadius()->setValue(0.9f);
 	esim->inCenter()->setValue(Vec2f(0.0, 0.9));
-	fluid->stateVelocity()->connect(esim->statePVelocity());
-	fluid->statePosition()->connect(esim->statePPosition());
-	samplingDistance->outFloating()->connect(esim->varSamplingDistance());
+	fluid->stateVelocity()->connect(esim->inPVelocity());
+	fluid->statePosition()->connect(esim->inPPosition());
+	samplingDistance->outFloating()->connect(esim->inSamplingDistance());
 	esim->varSandDensity()->setValue(2000.0f);
 	esim->varUpdateCoefficient()->setValue(0.03f);
 	//esim->varSandDensity()->setValue(5000.0f);

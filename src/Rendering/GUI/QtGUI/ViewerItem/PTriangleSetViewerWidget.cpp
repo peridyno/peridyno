@@ -3,7 +3,8 @@
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QTabWidget>
-#include "Framework/FInstance.h"
+#include "FInstance.h"
+//#include "Framework/FInstance.h"
 #include "Topology/TriangleSet.h"
 #include "PVec3FieldViewerWidget.h"
 #include "PVec2FieldViewerWidget.h"

@@ -122,6 +122,8 @@ namespace dyno
 
 		void clear();
 
+		void setSpace(const Coord2D p0, const Coord2D p1, Real dx);
+
 		DYN_FUNC inline void setLevelNum(Level num) { m_level_num = num; }
 		DYN_FUNC inline void setLevelMax(Level num) { m_level_max = num; }
 		DYN_FUNC inline void setDx(Real dx) { m_dx = dx; }
@@ -169,7 +171,7 @@ namespace dyno
 		uint m_leaf_num;
 
 		DArray<AdaptiveGridNode2D> m_quadtree;
-		DArrayList<int> m_neighbors;//the size is 4*(m_quadtree.size())��the order is: -x,+x,-y,+y
+		DArrayList<int> m_neighbors;//the size is 4*(m_quadtree.size()), the order is: -x,+x,-y,+y
 		DArray<int> m_leafIndex;//the index of leaf in all node
  	};
 

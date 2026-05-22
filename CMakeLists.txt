@@ -100,6 +100,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${CMAKE_BUILD_TYPE})
 IF(MSVC)
     SET( CMAKE_DEBUG_POSTFIX "d" )
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+	# fix the fetal error for cuda 13.2: MSVC/cl.exe with traditional preprocessor is used. This may lead to unexpected compilation errors.
+	add_compile_definitions(CCCL_IGNORE_MSVC_TRADITIONAL_PREPROCESSOR_WARNING)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -utf-8")
 ENDIF(MSVC)
 

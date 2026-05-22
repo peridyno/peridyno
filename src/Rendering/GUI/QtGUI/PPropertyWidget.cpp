@@ -403,6 +403,7 @@ namespace dyno
 		LastLayoutMode lastMode = None;
 		int row = -1;
 		int temp = -1;
+		std::string dummy;
 		for (size_t i = 0; i < tuple->size(); i++)
 		{
 			auto field = tuple->get(i);
@@ -410,10 +411,10 @@ namespace dyno
 			bool nextVLayout = true;
 			bool onlyDetail = false;
 
-			DescriptionHelper::parseQtStyleDescriptionRobust(field->getDescription(), std::string(), selfVLayout, onlyDetail);
+			DescriptionHelper::parseQtStyleDescriptionRobust(field->getDescription(), dummy, selfVLayout, onlyDetail);
 
 			if (i < tuple->size() - 1)
-				DescriptionHelper::parseQtStyleDescriptionRobust(tuple->get(i + 1)->getDescription(), std::string(), nextVLayout, onlyDetail);
+				DescriptionHelper::parseQtStyleDescriptionRobust(tuple->get(i + 1)->getDescription(), dummy, nextVLayout, onlyDetail);
 
 			switch (lastMode)
 			{
