@@ -175,7 +175,7 @@ namespace dyno
 	template<typename T>
 	void Array<T, DeviceType::GPU>::set(const uint id, const T value)
 	{
-		assert(id >= 0 && id < mTotalNum);
+		assert(id < mTotalNum);
 
 		cuSafeCall(cudaMemcpy(&mData[id], &value, sizeof(T), cudaMemcpyHostToDevice));
 	}
@@ -183,7 +183,7 @@ namespace dyno
 	template<typename T>
 	T Array<T, DeviceType::GPU>::get(const uint id)
 	{
-		assert(id >= 0 && id < mTotalNum);
+		assert(id < mTotalNum);
 
 		T value;
 		cuSafeCall(cudaMemcpy(&value, &mData[id], sizeof(T), cudaMemcpyDeviceToHost));

@@ -87,6 +87,8 @@ namespace dyno
 
 			if (id >= triStart && id < triEnd)
 				return ET_TRI;
+
+			return ET_Other;
 		}
 
 	private:

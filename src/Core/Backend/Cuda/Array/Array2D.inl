@@ -154,7 +154,7 @@ namespace dyno {
 	template<typename T>
 	void Array2D<T, DeviceType::GPU>::set(const uint i, const uint j, const T value)
 	{
-		assert(i < m_nx && j < m_ny && i >= 0 && j >= 0);
+		assert(i < m_nx && j < m_ny);
 		
 		char* addr = (char*)m_data;
 		addr += j * m_pitch;
@@ -165,7 +165,7 @@ namespace dyno {
 	template<typename T>
 	T Array2D<T, DeviceType::GPU>::get(const uint i, const uint j)
 	{
-		assert(i < m_nx && j < m_ny && i >= 0 && j >= 0);
+		assert(i < m_nx && j < m_ny);
 
 		char* addr = (char*)m_data;
 		addr += j * m_pitch;

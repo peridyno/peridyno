@@ -143,7 +143,6 @@ set(WT_GUI_SUPPORTED "WT_GUI_UNKNOWN")
 
 
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
-	#option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
 	#option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
 	option(PERIDYNO_PLUGIN_ALL "Enable binding the plugin libraries" ON)
 

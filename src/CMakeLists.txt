@@ -11,13 +11,22 @@ add_subdirectory(Topology)
 
 add_subdirectory(Rendering)
 
-#if(PERIDYNO_LIBRARY_IO)
+option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
+if(PERIDYNO_LIBRARY_IO)
     add_subdirectory(IO)
-#endif()
+endif()
 
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
-    add_subdirectory(Interaction)
-    add_subdirectory(Modeling)
+    option(PERIDYNO_LIBRARY_MODELING "Enable binding the io library" ON)
+    option(PERIDYNO_LIBRARY_INTERACTION "Enable binding the io library" ON)
+
+    if(PERIDYNO_LIBRARY_MODELING)
+        add_subdirectory(Interaction)
+    endif()
+    
+    if(PERIDYNO_LIBRARY_MODELING)
+        add_subdirectory(Modeling)
+    endif()
 endif()
 
 add_subdirectory(Dynamics)

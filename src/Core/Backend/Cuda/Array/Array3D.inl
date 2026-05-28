@@ -165,7 +165,7 @@ namespace dyno {
 	template<typename T>
 	T Array3D<T, DeviceType::GPU>::get(const uint i, const uint j, const uint k)
 	{
-		assert(i < m_nx && j < m_ny && k < m_nz && i >= 0 && j >= 0 && k >= 0);
+		assert(i < m_nx && j < m_ny && k < m_nz);
 
 		char* addr = (char*)m_data;
 		addr += (j * m_pitch_x + k * m_nxy);
@@ -180,7 +180,7 @@ namespace dyno {
 	template<typename T>
 	void Array3D<T, DeviceType::GPU>::set(const uint i, const uint j, const uint k, const T value)
 	{
-		assert(i < m_nx && j < m_ny && k < m_nz && i >= 0 && j >= 0 && k >= 0);
+		assert(i < m_nx && j < m_ny && k < m_nz);
 
 		char* addr = (char*)m_data;
 		addr += (j * m_pitch_x + k * m_nxy);

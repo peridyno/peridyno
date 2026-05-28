@@ -691,10 +691,23 @@ namespace dyno
 		DYN_FUNC TTet3D(const Coord3D& v0, const Coord3D& v1, const Coord3D& v2, const Coord3D& v3);
 		DYN_FUNC TTet3D(const TTet3D<Real>& tet);
 
-		DYN_FUNC TTriangle3D<Real> face(const int index) const;
-		DYN_FUNC TSegment3D<Real> edge(const int index) const;
+		//Return a triangle with the following vertex ids v0, v1, v2
+		// triangle 0: 0, 1, 2
+		// triangle 1: 1, 0, 3
+		// triangle 2: 2, 3, 0
+		// triangle 3: 3, 2, 1
+		DYN_FUNC TTriangle3D<Real> face(const uint index) const;
 
-		DYN_FUNC Real solidAngle(const int index) const;
+		// Return edges with the following vertex ids
+		// edge 0: 2, 0
+		// edge 1: 0, 1
+		// edge 2: 1, 2
+		// edge 3: 3, 0
+		// edge 4: 3, 1
+		// edge 5: 3, 2
+		DYN_FUNC TSegment3D<Real> edge(const uint index) const;
+
+		DYN_FUNC Real solidAngle(const uint index) const;
 
 		DYN_FUNC Real volume() const;
 

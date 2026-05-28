@@ -308,7 +308,7 @@ namespace dyno
 
 		void setAsLine(const Coord2D& v0, const Coord2D& v1);
 
-		const uint vertexSize() const { return size; };
+		uint vertexSize() const { return size; };
 
 		inline const Coord2D& vertex(uint i) const { return _vertices[i]; }
 		inline const Coord2D& normal(uint i) const { return _normals[i]; }

@@ -56,7 +56,7 @@ namespace dyno
 	}
 
 	template<typename T>
-	void Scan<T>::exclusive(T* data, size_t length, bool bcao /*= true*/)
+	void Scan<T>::exclusive(T* data, uint length, bool bcao /*= true*/)
 	{
 		if (length == 0) return;
 
@@ -71,7 +71,7 @@ namespace dyno
 	}
 
 	template<typename T>
-	void Scan<T>::exclusive(T* output, const T* input, size_t length, bool bcao /*= true*/)
+	void Scan<T>::exclusive(T* output, const T* input, uint length, bool bcao /*= true*/)
 	{
 		if (length == 0) return;
 
@@ -84,7 +84,7 @@ namespace dyno
 	}
 
 	template<typename T>
-	__global__ void k_prescan_arbitrary(T *output, const T *input, size_t n, int powerOfTwo)
+	__global__ void k_prescan_arbitrary(T *output, const T *input, uint n, int powerOfTwo)
 	{
 		//extern __shared__ T temp[];// allocated on invocation
 		SharedMemory<T> shared_mem;
@@ -153,7 +153,7 @@ namespace dyno
 	}
 
 	template<typename T>
-	__global__ void k_prescan_arbitrary_unoptimized(T *output, const T *input, size_t n, int powerOfTwo) {
+	__global__ void k_prescan_arbitrary_unoptimized(T *output, const T *input, uint n, int powerOfTwo) {
 		//extern __shared__ T temp[];// allocated on invocation
 		SharedMemory<T> shared_mem;
 		T* temp = shared_mem.getPointer();
@@ -207,7 +207,7 @@ namespace dyno
 	}
 
 	template<typename T>
-	__global__ void k_add(T *output, size_t length, const T *n) {
+	__global__ void k_add(T *output, uint length, const T *n) {
 		int blockID = blockIdx.x;
 		int threadID = threadIdx.x;
 		int blockOffset = blockID * length;
@@ -216,7 +216,7 @@ namespace dyno
 	}
 
 	template<typename T>
-	__global__ void k_add(T *output, size_t length, const T *n1, const T *n2) {
+	__global__ void k_add(T *output, uint length, const T *n1, const T *n2) {
 		int blockID = blockIdx.x;
 		int threadID = threadIdx.x;
 		int blockOffset = blockID * length;
@@ -225,9 +225,9 @@ namespace dyno
 	}
 
 	template<typename T>
-	void Scan<T>::scanLargeDeviceArray(T *d_out, const T *d_in, size_t length, bool bcao, size_t level)
+	void Scan<T>::scanLargeDeviceArray(T *d_out, const T *d_in, uint length, bool bcao, uint level)
 	{
-		size_t remainder = length % (SCAN_ELEMENTS_PER_BLOCK);
+		uint remainder = length % (SCAN_ELEMENTS_PER_BLOCK);
 		if (remainder == 0) {
 			scanLargeEvenDeviceArray(d_out, d_in, length, bcao, level);
 		}
@@ -240,22 +240,22 @@ namespace dyno
 			T *startOfOutputArray = &(d_out[lengthMultiple]);
 			scanSmallDeviceArray(startOfOutputArray, &(d_in[lengthMultiple]), remainder, bcao);
 
-			k_add << <1, (unsigned int)remainder >> > (startOfOutputArray, remainder, &(d_in[lengthMultiple - 1]), &(d_out[lengthMultiple - 1]));
+			k_add << <1, (uint)remainder >> > (startOfOutputArray, remainder, &(d_in[lengthMultiple - 1]), &(d_out[lengthMultiple - 1]));
 			cuSynchronize();
 		}
 	}
 
 	template<typename T>
-	void Scan<T>::scanSmallDeviceArray(T *d_out, const T *d_in, size_t length, bool bcao)
+	void Scan<T>::scanSmallDeviceArray(T *d_out, const T *d_in, uint length, bool bcao)
 	{
 		size_t powerOfTwo = nextPowerOfTwo(length);
 
 		if (bcao) {
-			k_prescan_arbitrary << <1, (unsigned int)(length + 1) / 2, (unsigned int)2 * powerOfTwo * sizeof(T) >> > (d_out, d_in, length, powerOfTwo);
+			k_prescan_arbitrary << <1, (uint)(length + 1) / 2, (uint)2 * powerOfTwo * sizeof(T) >> > (d_out, d_in, length, powerOfTwo);
 			cuSynchronize();
 		}
 		else {
-			k_prescan_arbitrary_unoptimized << <1, (unsigned int)(length + 1) / 2, (unsigned int)2 * powerOfTwo * sizeof(T) >> > (d_out, d_in, length, powerOfTwo);
+			k_prescan_arbitrary_unoptimized << <1, (uint)(length + 1) / 2, (uint)2 * powerOfTwo * sizeof(T) >> > (d_out, d_in, length, powerOfTwo);
 			cuSynchronize();
 		}
 	}
@@ -375,7 +375,7 @@ namespace dyno
 	}
 
 	template<typename T>
-	void Scan<T>::scanLargeEvenDeviceArray(T *output, const T *input, size_t length, bool bcao, size_t level)
+	void Scan<T>::scanLargeEvenDeviceArray(T *output, const T *input, uint length, bool bcao, uint level)
 	{
 		const int blocks = length / SCAN_ELEMENTS_PER_BLOCK;
 		const int sharedMemArraySize = SCAN_ELEMENTS_PER_BLOCK * sizeof(T);
@@ -448,13 +448,13 @@ namespace dyno
 	}
 
 	template<typename T>
-	bool Scan<T>::isPowerOfTwo(size_t x)
+	bool Scan<T>::isPowerOfTwo(uint x)
 	{
 		return x && !(x & (x - 1));
 	}
 
 	template<typename T>
-	size_t Scan<T>::nextPowerOfTwo(size_t x)
+	uint Scan<T>::nextPowerOfTwo(uint x)
 	{
 		int power = 1;
 		while (power < x) {

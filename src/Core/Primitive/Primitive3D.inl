@@ -647,7 +647,7 @@ namespace dyno
 		Real x = Vector<Real, 2>(pLocal.x, pLocal.z).norm();
 		Real y = pLocal.y;
 
-		auto equationOfLine = [](Real x, Real y, Real a, Real b, Real c) -> float 
+		auto equationOfLine = [](Real x, Real y, Real a, Real b, Real c) -> Real
 		{
 			return a * x + b * y + c;
 		};
@@ -3449,7 +3449,7 @@ namespace dyno
 		Coord3D v = rotation.rotate(Coord3D(0, 1, 0));
 		Coord3D w = rotation.rotate(Coord3D(0, 0, 1));
 
-		Coord3D extent(radius, 0.5 * height, radius);
+		Coord3D extent(radius, Real(0.5) * height, radius);
 
 		Coord3D r_ext;
 		r_ext[0] = abs(extent[0] * u[0]) + abs(extent[1] * v[0]) + abs(extent[2] * w[0]);
@@ -3472,7 +3472,7 @@ namespace dyno
 		Coord3D v = rotation.rotate(Coord3D(0, 1, 0));
 		Coord3D w = rotation.rotate(Coord3D(0, 0, 1));
 
-		Coord3D extent(radius, 0.5 * height, radius);
+		Coord3D extent(radius, Real(0.5) * height, radius);
 
 		Coord3D r_ext;
 		r_ext[0] = abs(extent[0] * u[0]) + abs(extent[1] * v[0]) + abs(extent[2] * w[0]);
@@ -3513,61 +3513,31 @@ namespace dyno
 	}
 
 	template<typename Real>
-	DYN_FUNC TSegment3D<Real> TTet3D<Real>::edge(const int index) const
+	DYN_FUNC TSegment3D<Real> TTet3D<Real>::edge(const uint index) const
 	{
-		switch (index)
-		{
-		case 0:
-			return TSegment3D<Real>(v[0], v[1]);
-			break;
-		case 1:
-			return TSegment3D<Real>(v[0], v[2]);
-			break;
-		case 2:
-			return TSegment3D<Real>(v[0], v[3]);
-			break;
-		case 3:
-			return TSegment3D<Real>(v[1], v[2]);
-			break;
-		case 4:
-			return TSegment3D<Real>(v[1], v[3]);
-			break;
-		case 5:
-			return TSegment3D<Real>(v[2], v[3]);
-			break;
-		default:
-			break;
-		}
+		assert(index < 6);
+
+		uint i = index < 3 ? (index + 2) % 3 : 3;
+		uint j = index % 3;
+
+		return TSegment3D<Real>(v[i], v[j]);
 	}
 
 	template<typename Real>
-	DYN_FUNC TTriangle3D<Real> TTet3D<Real>::face(const int index) const
+	DYN_FUNC TTriangle3D<Real> TTet3D<Real>::face(const uint index) const
 	{
-		switch (index)
-		{
-		case 0:
-			return TTriangle3D<Real>(v[1], v[3], v[2]);
-			break;
-		case 1:
-			return TTriangle3D<Real>(v[0], v[2], v[3]);
-			break;
-		case 2:
-			return TTriangle3D<Real>(v[0], v[3], v[1]);
-			break;
-		case 3:
-			return TTriangle3D<Real>(v[0], v[1], v[2]);
-			break;
-		default:
-			break;
-		}
+		assert(index < 4);
 
-		//return an ill triangle in case index is out of range
-		return TTriangle3D<Real>(Coord3D(0), Coord3D(0), Coord3D(0));
+		uint i = index;
+		uint j = (4 - index + 1) % 4;
+		uint k = (index + 2) % 4;
+
+		return TTriangle3D<Real>(v[i], v[j], v[k]);
 	}
 
 	//https://en.wikipedia.org/wiki/Solid_angle
 	template<typename Real>
-	DYN_FUNC Real TTet3D<Real>::solidAngle(const int index) const
+	DYN_FUNC Real TTet3D<Real>::solidAngle(const uint index) const
 	{
 		Coord3D v0, v1, v2, v3;
 		switch (index)
@@ -3601,7 +3571,7 @@ namespace dyno
 
 		Real angle = 2 * glm::atan(glm::abs(dividend) / divisor);
 
-		if (dividend > 0 && divisor < 0) angle += M_PI;
+		if (dividend > 0 && divisor < 0) angle += Real(M_PI);
 
 		return angle;
 	}
@@ -3979,7 +3949,7 @@ namespace dyno
 		Real cross_bc_z = ba_x * ca_y - ca_x * ba_y;
 
 		// Calculate the denominator of the formula.
-		Real denominator = 0.5 / (ba_x * cross_cd_x + ba_y * cross_cd_y + ba_z * cross_cd_z);
+		Real denominator = Real(0.5) / (ba_x * cross_cd_x + ba_y * cross_cd_y + ba_z * cross_cd_z);
 
 		// Calculate offset (from `a') of circumcenter.
 		Real circ_x = (len_ba * cross_cd_x + len_ca * cross_db_x + len_da * cross_bc_x) * denominator;
