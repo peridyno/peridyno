@@ -181,6 +181,7 @@ namespace dyno
 		buoy->scale(scale);
 		buoy->translate(center - mShapeCenter);
 
+		//TODO: we can optimize this by updating the transform directly on GPU
 		auto texMesh = this->stateTextureMesh()->getDataPtr();
 		{
 
