@@ -15,13 +15,125 @@
  */
 #pragma once
 #include "RigidBody/ArticulatedBody.h"
+#include "Module/KeyboardInputModule.h"
 
 #include "STL/Pair.h"
 #include "Field/FilePath.h"
 #include "Topology/EdgeSet.h"
+#include "Topology/DiscreteElements.h"
+
+#include <algorithm>
 
 namespace dyno
 {
+	template<typename TDataType>
+	class J15Operator : public KeyboardInputModule
+	{
+		DECLARE_TCLASS(J15Operator, TDataType);
+
+	public:
+		typedef typename TDataType::Real Real;
+		typedef typename TDataType::Coord Coord;
+		typedef typename TDataType::Matrix Matrix;
+		typedef typename ::dyno::Quat<Real> TQuat;
+
+		struct FlightInput
+		{
+			Real Elevator = Real(0);
+			Real Aileron = Real(0);
+			Real Rudder = Real(0);
+			Real Stabilator = Real(0);
+			Real Throttle = Real(0);
+		};
+
+		struct FlightAttitude
+		{
+			Real Roll = Real(0);
+			Real Pitch = Real(0);
+			Real Yaw = Real(0);
+		};
+
+		struct FlightState
+		{
+			FlightAttitude Attitude;
+			Coord LinearVelocity = Coord(0);
+			Coord LinearVelocityIncrement = Coord(0);
+		};
+
+		struct FlightConstants
+		{
+			Real ThrottleGain = Real(45);
+			Real DragAcceleration = Real(0);
+			Real LiftGain = Real(30);
+			Real StabilatorWeight = Real(1);
+
+			Real RollGain = Real(1.6);
+			Real PitchGain = Real(1.2);
+			Real YawGain = Real(0.8);
+			Real VelocityDirectionCorrectionGain = Real(4);
+
+			Real MaxAbsRoll = Real(1.57);
+			Real MaxAbsPitch = Real(1.22);
+		};
+
+		J15Operator();
+		~J15Operator() override {};
+
+		void reset();
+
+	public:
+		DEF_VAR_IN(Real, TimeStep, "");
+
+		DEF_ARRAY_IN(Coord, Center, DeviceType::GPU, "");
+		DEF_ARRAY_IN(Coord, Velocity, DeviceType::GPU, "");
+		DEF_ARRAY_IN(Coord, AngularVelocity, DeviceType::GPU, "");
+		DEF_ARRAY_IN(TQuat, Quaternion, DeviceType::GPU, "");
+		DEF_ARRAY_IN(Matrix, RotationMatrix, DeviceType::GPU, "");
+		DEF_ARRAY_IN(Matrix, Inertia, DeviceType::GPU, "");
+		DEF_ARRAY_IN(Matrix, InitialInertia, DeviceType::GPU, "");
+		DEF_INSTANCE_IN(DiscreteElements<TDataType>, Topology, "");
+
+	protected:
+		void onEvent(PKeyboardEvent event) override;
+		void postprocess() override;
+
+	private:
+		void setKeyState(PKeyboardType key, bool pressed);
+		void updateInput();
+		void stepFlightModel(Real dt);
+		void applyFlightState();
+		static Real clamp(Real value, Real lo, Real hi);
+
+	private:
+		bool mKeyA = false;
+		bool mKeyS = false;
+		bool mKeyD = false;
+		bool mKeyW = false;
+		bool mKeyQ = false;
+		bool mKeyE = false;
+		bool mKeyZ = false;
+		bool mKeyX = false;
+		bool mKeyJ = false;
+		bool mKeyK = false;
+		bool mKeyV = false;
+
+		bool mInitialized = false;
+		bool mResetRequested = false;
+		bool mHasAttitudeIncrement = false;
+		bool mHasVelocityIncrement = false;
+		uint mBodyId = 6;
+		TQuat mInitialQuaternion = TQuat(Real(0), Real(0), Real(0), Real(1));
+		Coord mBodyVelocityIncrement = Coord(0);
+		Real mRollIncrement = Real(0);
+		Real mPitchIncrement = Real(0);
+		Real mElevatorPitchIncrement = Real(0);
+		Real mYawIncrement = Real(0);
+
+		FlightInput mInput;
+		FlightState mState;
+		FlightConstants mConstants;
+	};
+
 	template<typename TDataType>
 	class J15 : virtual public ArticulatedBody<TDataType>
 	{
@@ -36,6 +148,8 @@ namespace dyno
 	protected:
 		void resetStates() override;
 
+	private:
+		std::shared_ptr<J15Operator<TDataType>> aircraftOperator;
 	};
 }
 
