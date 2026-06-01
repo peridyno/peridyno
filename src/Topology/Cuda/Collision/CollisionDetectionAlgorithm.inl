@@ -5877,6 +5877,22 @@ namespace dyno
     }
 
     template<typename Real>
+    DYN_FUNC inline Vector<Real, 3> matBoxWorldToLocal(const TOrientedBox3D<Real>& box, const Vector<Real, 3>& point)
+    {
+        const Vector<Real, 3> offset = point - box.center;
+        return Vector<Real, 3>(
+            offset.dot(box.u),
+            offset.dot(box.v),
+            offset.dot(box.w));
+    }
+
+    template<typename Real>
+    DYN_FUNC inline Vector<Real, 3> matBoxLocalToWorldPoint(const TOrientedBox3D<Real>& box, const Vector<Real, 3>& local)
+    {
+        return box.center + matBoxLocalToWorld<Real>(box, local);
+    }
+
+    template<typename Real>
     DYN_FUNC inline void evaluateMatBoxProjection(
         MatBoxProjection<Real>& proj,
         const TOrientedBox3D<Real>& box,
@@ -5884,11 +5900,7 @@ namespace dyno
     {
         proj = MatBoxProjection<Real>();
 
-        const Vector<Real, 3> offset = point - box.center;
-        const Vector<Real, 3> pLocal(
-            offset.dot(box.u),
-            offset.dot(box.v),
-            offset.dot(box.w));
+        const Vector<Real, 3> pLocal = matBoxWorldToLocal<Real>(box, point);
 
         Vector<Real, 3> qLocal = pLocal;
         bool inside = true;
@@ -5937,7 +5949,7 @@ namespace dyno
             proj.signedDistance = dist;
         }
 
-        proj.closestPoint = box.center + matBoxLocalToWorld<Real>(box, qLocal);
+        proj.closestPoint = matBoxLocalToWorldPoint<Real>(box, qLocal);
     }
 
     template<typename Real>
@@ -5956,8 +5968,114 @@ namespace dyno
         cand.normal = proj.normal;
         cand.radiusA = Real(0);
         cand.radiusB = matRadius;
-        cand.phi = proj.signedDistance - matRadius;
+
+        const Real rawPhi = proj.signedDistance - matRadius;
+        cand.phi = rawPhi;
+        if (proj.inside && matRadius > EPSILON) {
+            cand.phi = maximum(rawPhi, -Real(2) * matRadius);
+        }
         return cand;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline bool matSegmentIntersectsBox(
+        const TOrientedBox3D<Real>& box,
+        const Vector<Real, 3>& p0,
+        const Vector<Real, 3>& p1,
+        Real& tHit)
+    {
+        const Vector<Real, 3> l0 = matBoxWorldToLocal<Real>(box, p0);
+        const Vector<Real, 3> l1 = matBoxWorldToLocal<Real>(box, p1);
+        const Vector<Real, 3> d = l1 - l0;
+
+        Real tMin = Real(0);
+        Real tMax = Real(1);
+        const Real tol = Real(64) * EPSILON;
+
+        for (int i = 0; i < 3; ++i) {
+            if (matAbs(d[i]) <= tol) {
+                if (l0[i] < -box.extent[i] || l0[i] > box.extent[i]) {
+                    return false;
+                }
+                continue;
+            }
+
+            Real t0 = (-box.extent[i] - l0[i]) / d[i];
+            Real t1 = (box.extent[i] - l0[i]) / d[i];
+            if (t0 > t1) {
+                const Real tmp = t0;
+                t0 = t1;
+                t1 = tmp;
+            }
+
+            if (t0 > tMin) {
+                tMin = t0;
+            }
+            if (t1 < tMax) {
+                tMax = t1;
+            }
+            if (tMin > tMax) {
+                return false;
+            }
+        }
+
+        tHit = matClamp01(Real(0.5) * (tMin + tMax));
+        return true;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void updateMatSegmentCandidate(
+        TSegment3D<Real>& best,
+        Real& bestDistSq,
+        const TSegment3D<Real>& cand)
+    {
+        const Real distSq = cand.lengthSquared();
+        if (distSq < bestDistSq) {
+            bestDistSq = distSq;
+            best = cand;
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void matSegmentBoxProximity(
+        TSegment3D<Real>& out,
+        const TOrientedBox3D<Real>& box,
+        const Vector<Real, 3>& p0,
+        const Vector<Real, 3>& p1)
+    {
+        const Vector<Real, 3> axis = p1 - p0;
+        const Real axisLenSq = axis.dot(axis);
+        if (axisLenSq <= EPSILON * EPSILON) {
+            MatBoxProjection<Real> proj;
+            evaluateMatBoxProjection(proj, box, p0);
+            out = TSegment3D<Real>(p0, proj.closestPoint);
+            return;
+        }
+
+        Real tHit = Real(0);
+        if (matSegmentIntersectsBox<Real>(box, p0, p1, tHit)) {
+            const Vector<Real, 3> p = p0 + axis * tHit;
+            out = TSegment3D<Real>(p, p);
+            return;
+        }
+
+        TSegment3D<Real> best;
+        Real bestDistSq = REAL_infinity;
+
+        MatBoxProjection<Real> proj0;
+        evaluateMatBoxProjection(proj0, box, p0);
+        updateMatSegmentCandidate(best, bestDistSq, TSegment3D<Real>(p0, proj0.closestPoint));
+
+        MatBoxProjection<Real> proj1;
+        evaluateMatBoxProjection(proj1, box, p1);
+        updateMatSegmentCandidate(best, bestDistSq, TSegment3D<Real>(p1, proj1.closestPoint));
+
+        const TSegment3D<Real> seg(p0, p1);
+        for (int i = 0; i < 12; ++i) {
+            updateMatSegmentCandidate(best, bestDistSq, seg.proximity(box.edge(i)));
+        }
+
+        out = best;
     }
 
     template<typename Real>
@@ -6100,6 +6218,89 @@ namespace dyno
     }
 
     template<typename Real>
+    DYN_FUNC inline void sortMatScalars(Real* values, const int count)
+    {
+        for (int i = 1; i < count; ++i) {
+            const Real v = values[i];
+            int j = i - 1;
+            while (j >= 0 && values[j] > v) {
+                values[j + 1] = values[j];
+                --j;
+            }
+            values[j + 1] = v;
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void addMatSqrtMinusLinearStationary(
+        Real* values,
+        int& count,
+        const int maxCount,
+        const Real a,
+        const Real b,
+        const Real c,
+        const Real linearSlope,
+        const Real xMin,
+        const Real xMax)
+    {
+        const Real tol = Real(128) * EPSILON;
+        if (xMax - xMin <= tol) {
+            return;
+        }
+
+        if (matAbs(a) <= tol) {
+            return;
+        }
+
+        if (matAbs(linearSlope) <= tol) {
+            addMatScalarCandidateInInterval(values, count, maxCount, -b / a, xMin, xMax);
+            return;
+        }
+
+        const Real aa = a * (a - linearSlope * linearSlope);
+        const Real bb = Real(2) * b * (a - linearSlope * linearSlope);
+        const Real cc = b * b - linearSlope * linearSlope * c;
+
+        if (matAbs(aa) <= tol) {
+            if (matAbs(bb) > tol) {
+                const Real x = -cc / bb;
+                const Real q = fma(fma(a, x, Real(2) * b), x, c);
+                if (q > tol) {
+                    const Real d = sqrt(q);
+                    if (matAbs((a * x + b) - linearSlope * d) <= Real(512) * EPSILON) {
+                        addMatScalarCandidateInInterval(values, count, maxCount, x, xMin, xMax);
+                    }
+                }
+            }
+            return;
+        }
+
+        const Real disc = bb * bb - Real(4) * aa * cc;
+        if (disc < -tol) {
+            return;
+        }
+
+        const Real sqrtDisc = sqrt(disc > Real(0) ? disc : Real(0));
+        const Real roots[2] = {
+            (-bb - sqrtDisc) / (Real(2) * aa),
+            (-bb + sqrtDisc) / (Real(2) * aa)
+        };
+
+        for (int i = 0; i < 2; ++i) {
+            const Real x = roots[i];
+            const Real q = fma(fma(a, x, Real(2) * b), x, c);
+            if (q <= tol) {
+                continue;
+            }
+
+            const Real d = sqrt(q);
+            if (matAbs((a * x + b) - linearSlope * d) <= Real(512) * EPSILON) {
+                addMatScalarCandidateInInterval(values, count, maxCount, x, xMin, xMax);
+            }
+        }
+    }
+
+    template<typename Real>
     DYN_FUNC inline bool buildMatSlabInfo(MatSlabInfo<Real>& info, const MedialSlab3D& slab)
     {
         info = MatSlabInfo<Real>();
@@ -6182,6 +6383,511 @@ namespace dyno
     DYN_FUNC inline Real evalMatSlabRadius(const MatSlabInfo<Real>& info, Real u, Real v)
     {
         return info.r0 + info.dr1 * u + info.dr2 * v;
+    }
+
+    template<typename Real>
+    struct MatParamPolygon
+    {
+        Vector<Real, 2> p[16];
+        int count = 0;
+    };
+
+    template<typename Real>
+    DYN_FUNC inline Vector<Real, 3> evalMatSlabLocalPoint(
+        const Vector<Real, 3>& p0,
+        const Vector<Real, 3>& e1,
+        const Vector<Real, 3>& e2,
+        const Vector<Real, 2>& uv)
+    {
+        return p0 + e1 * uv[0] + e2 * uv[1];
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void updateMatBoxSlabAt(
+        MatContactCandidate<Real>& best,
+        const TOrientedBox3D<Real>& box,
+        const MatSlabInfo<Real>& info,
+        Real u,
+        Real v)
+    {
+        const Real tol = Real(256) * EPSILON;
+        if (u < -tol || v < -tol || u + v > Real(1) + tol) {
+            return;
+        }
+
+        u = matClamp01(u);
+        v = matClamp01(v);
+        const Real uv = u + v;
+        if (uv > Real(1)) {
+            const Real inv = Real(1) / uv;
+            u *= inv;
+            v *= inv;
+        }
+
+        updateMatCandidate(best, makeMatBoxCandidate<Real>(
+            box,
+            evalMatSlabPoint(info, u, v),
+            evalMatSlabRadius(info, u, v)));
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void addMatParamPolygonPoint(
+        MatParamPolygon<Real>& poly,
+        const Vector<Real, 2>& p)
+    {
+        if (poly.count >= 16) {
+            return;
+        }
+
+        const Real tolSq = Real(256) * EPSILON * EPSILON;
+        for (int i = 0; i < poly.count; ++i) {
+            const Vector<Real, 2> d = poly.p[i] - p;
+            if (d.dot(d) <= tolSq) {
+                return;
+            }
+        }
+
+        poly.p[poly.count++] = p;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void clipMatParamPolygonLessEqual(
+        MatParamPolygon<Real>& dst,
+        const MatParamPolygon<Real>& src,
+        const Real a,
+        const Real b,
+        const Real c)
+    {
+        dst = MatParamPolygon<Real>();
+        if (src.count == 0) {
+            return;
+        }
+
+        const Real tol = Real(256) * EPSILON;
+        Vector<Real, 2> prev = src.p[src.count - 1];
+        Real prevVal = a * prev[0] + b * prev[1] + c;
+        bool prevInside = prevVal <= tol;
+
+        for (int i = 0; i < src.count; ++i) {
+            const Vector<Real, 2> curr = src.p[i];
+            const Real currVal = a * curr[0] + b * curr[1] + c;
+            const bool currInside = currVal <= tol;
+
+            if (prevInside != currInside) {
+                const Real denom = prevVal - currVal;
+                if (matAbs(denom) > tol) {
+                    const Real s = prevVal / denom;
+                    addMatParamPolygonPoint(dst, prev + (curr - prev) * s);
+                }
+            }
+
+            if (currInside) {
+                addMatParamPolygonPoint(dst, curr);
+            }
+
+            prev = curr;
+            prevVal = currVal;
+            prevInside = currInside;
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void buildMatSlabBoxCellPolygon(
+        MatParamPolygon<Real>& poly,
+        const Vector<Real, 3>& p0Local,
+        const Vector<Real, 3>& e1Local,
+        const Vector<Real, 3>& e2Local,
+        const Vector<Real, 3>& extent,
+        const int state[3])
+    {
+        poly = MatParamPolygon<Real>();
+        poly.p[0] = Vector<Real, 2>(Real(0), Real(0));
+        poly.p[1] = Vector<Real, 2>(Real(1), Real(0));
+        poly.p[2] = Vector<Real, 2>(Real(0), Real(1));
+        poly.count = 3;
+
+        MatParamPolygon<Real> tmp;
+        for (int axis = 0; axis < 3; ++axis) {
+            const Real a = e1Local[axis];
+            const Real b = e2Local[axis];
+            const Real c = p0Local[axis];
+
+            if (state[axis] > 0) {
+                clipMatParamPolygonLessEqual(tmp, poly, -a, -b, extent[axis] - c);
+                poly = tmp;
+            }
+            else if (state[axis] < 0) {
+                clipMatParamPolygonLessEqual(tmp, poly, a, b, c + extent[axis]);
+                poly = tmp;
+            }
+            else {
+                clipMatParamPolygonLessEqual(tmp, poly, a, b, c - extent[axis]);
+                poly = tmp;
+                clipMatParamPolygonLessEqual(tmp, poly, -a, -b, -c - extent[axis]);
+                poly = tmp;
+            }
+
+            if (poly.count == 0) {
+                return;
+            }
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline bool matSlabParamInCell(
+        const Vector<Real, 3>& p0Local,
+        const Vector<Real, 3>& e1Local,
+        const Vector<Real, 3>& e2Local,
+        const Vector<Real, 3>& extent,
+        const int state[3],
+        const Vector<Real, 2>& uv)
+    {
+        const Real tol = Real(512) * EPSILON;
+        if (uv[0] < -tol || uv[1] < -tol || uv[0] + uv[1] > Real(1) + tol) {
+            return false;
+        }
+
+        const Vector<Real, 3> p = evalMatSlabLocalPoint(p0Local, e1Local, e2Local, uv);
+        for (int axis = 0; axis < 3; ++axis) {
+            if (state[axis] > 0) {
+                if (p[axis] < extent[axis] - tol) {
+                    return false;
+                }
+            }
+            else if (state[axis] < 0) {
+                if (p[axis] > -extent[axis] + tol) {
+                    return false;
+                }
+            }
+            else {
+                if (p[axis] < -extent[axis] - tol || p[axis] > extent[axis] + tol) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void updateMatBoxSlabParamIfValid(
+        MatContactCandidate<Real>& best,
+        const TOrientedBox3D<Real>& box,
+        const MatSlabInfo<Real>& info,
+        const Vector<Real, 3>& p0Local,
+        const Vector<Real, 3>& e1Local,
+        const Vector<Real, 3>& e2Local,
+        const Vector<Real, 3>& extent,
+        const int state[3],
+        const Vector<Real, 2>& uv)
+    {
+        if (matSlabParamInCell(p0Local, e1Local, e2Local, extent, state, uv)) {
+            updateMatBoxSlabAt(best, box, info, uv[0], uv[1]);
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void minimizeMatBoxSlabEdge(
+        MatContactCandidate<Real>& best,
+        const TOrientedBox3D<Real>& box,
+        const MatSlabInfo<Real>& info,
+        const Vector<Real, 3>& p0Local,
+        const Vector<Real, 3>& e1Local,
+        const Vector<Real, 3>& e2Local,
+        const Vector<Real, 3>& extent,
+        const int state[3],
+        const Vector<Real, 2>& aUv,
+        const Vector<Real, 2>& bUv)
+    {
+        Real xs[8];
+        int xCount = 0;
+        addMatScalarCandidate(xs, xCount, 8, Real(0));
+        addMatScalarCandidate(xs, xCount, 8, Real(1));
+
+        const Vector<Real, 2> dirUv = bUv - aUv;
+        Real qa = Real(0);
+        Real qb = Real(0);
+        Real qc = Real(0);
+        int activeCount = 0;
+
+        for (int axis = 0; axis < 3; ++axis) {
+            if (state[axis] == 0) {
+                continue;
+            }
+
+            const Real sign = Real(state[axis]);
+            const Real y0 = sign * (p0Local[axis] + e1Local[axis] * aUv[0] + e2Local[axis] * aUv[1]) - extent[axis];
+            const Real yd = sign * (e1Local[axis] * dirUv[0] + e2Local[axis] * dirUv[1]);
+            qa += yd * yd;
+            qb += y0 * yd;
+            qc += y0 * y0;
+            ++activeCount;
+        }
+
+        if (activeCount > 0) {
+            const Real radiusSlope = info.dr1 * dirUv[0] + info.dr2 * dirUv[1];
+            addMatSqrtMinusLinearStationary(xs, xCount, 8, qa, qb, qc, radiusSlope, Real(0), Real(1));
+        }
+
+        for (int i = 0; i < xCount; ++i) {
+            updateMatBoxSlabParamIfValid(best, box, info, p0Local, e1Local, e2Local, extent, state, aUv + dirUv * xs[i]);
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void matSlabFaceAffine(
+        Real& a,
+        Real& b,
+        Real& c,
+        const Vector<Real, 3>& p0Local,
+        const Vector<Real, 3>& e1Local,
+        const Vector<Real, 3>& e2Local,
+        const Vector<Real, 3>& extent,
+        const MatSlabInfo<Real>& info,
+        const int faceId)
+    {
+        const int axis = faceId / 2;
+        const Real sign = (faceId & 1) ? Real(1) : Real(-1);
+        a = sign * e1Local[axis] - info.dr1;
+        b = sign * e2Local[axis] - info.dr2;
+        c = sign * p0Local[axis] - extent[axis] - info.r0;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void minimizeMatBoxSlabInsideCell(
+        MatContactCandidate<Real>& best,
+        const TOrientedBox3D<Real>& box,
+        const MatSlabInfo<Real>& info,
+        const Vector<Real, 3>& p0Local,
+        const Vector<Real, 3>& e1Local,
+        const Vector<Real, 3>& e2Local,
+        const Vector<Real, 3>& extent,
+        const int state[3],
+        const MatParamPolygon<Real>& poly)
+    {
+        Real fa[6], fb[6], fc[6];
+        for (int i = 0; i < 6; ++i) {
+            matSlabFaceAffine(fa[i], fb[i], fc[i], p0Local, e1Local, e2Local, extent, info, i);
+        }
+
+        for (int i = 0; i < poly.count; ++i) {
+            updateMatBoxSlabParamIfValid(best, box, info, p0Local, e1Local, e2Local, extent, state, poly.p[i]);
+        }
+
+        const Real tol = Real(256) * EPSILON;
+        for (int i = 0; i < 6; ++i) {
+            for (int j = i + 1; j < 6; ++j) {
+                const Real a0 = fa[i] - fa[j];
+                const Real b0 = fb[i] - fb[j];
+                const Real c0 = fc[i] - fc[j];
+
+                for (int edgeId = 0; edgeId < poly.count; ++edgeId) {
+                    const Vector<Real, 2> pA = poly.p[edgeId];
+                    const Vector<Real, 2> pB = poly.p[(edgeId + 1) % poly.count];
+                    const Vector<Real, 2> dir = pB - pA;
+                    const Real denom = a0 * dir[0] + b0 * dir[1];
+                    if (matAbs(denom) <= tol) {
+                        continue;
+                    }
+
+                    const Real s = -(a0 * pA[0] + b0 * pA[1] + c0) / denom;
+                    if (s >= -tol && s <= Real(1) + tol) {
+                        updateMatBoxSlabParamIfValid(best, box, info, p0Local, e1Local, e2Local, extent, state, pA + dir * matClamp01(s));
+                    }
+                }
+
+                for (int k = j + 1; k < 6; ++k) {
+                    const Real a1 = fa[i] - fa[k];
+                    const Real b1 = fb[i] - fb[k];
+                    const Real c1 = fc[i] - fc[k];
+                    Real u = Real(0);
+                    Real v = Real(0);
+                    if (solveLinearSystem22(a0, b0, a1, b1, -c0, -c1, u, v)) {
+                        updateMatBoxSlabParamIfValid(best, box, info, p0Local, e1Local, e2Local, extent, state, Vector<Real, 2>(u, v));
+                    }
+                }
+            }
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline Real evalMatSlabOutsideQuadratic(
+        const Real m00,
+        const Real m01,
+        const Real m11,
+        const Real h0,
+        const Real h1,
+        const Real k,
+        const Vector<Real, 2>& uv)
+    {
+        return m00 * uv[0] * uv[0] + Real(2) * m01 * uv[0] * uv[1] + m11 * uv[1] * uv[1]
+            + Real(2) * h0 * uv[0] + Real(2) * h1 * uv[1] + k;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void addMatBoxSlabOutsideInteriorCandidate(
+        MatContactCandidate<Real>& best,
+        const TOrientedBox3D<Real>& box,
+        const MatSlabInfo<Real>& info,
+        const Vector<Real, 3>& p0Local,
+        const Vector<Real, 3>& e1Local,
+        const Vector<Real, 3>& e2Local,
+        const Vector<Real, 3>& extent,
+        const int state[3])
+    {
+        Real m00 = Real(0), m01 = Real(0), m11 = Real(0);
+        Real h0 = Real(0), h1 = Real(0), k = Real(0);
+        int activeCount = 0;
+
+        for (int axis = 0; axis < 3; ++axis) {
+            if (state[axis] == 0) {
+                continue;
+            }
+
+            const Real sign = Real(state[axis]);
+            const Real a = sign * e1Local[axis];
+            const Real b = sign * e2Local[axis];
+            const Real c = sign * p0Local[axis] - extent[axis];
+
+            m00 += a * a;
+            m01 += a * b;
+            m11 += b * b;
+            h0 += a * c;
+            h1 += b * c;
+            k += c * c;
+            ++activeCount;
+        }
+
+        if (activeCount == 0) {
+            return;
+        }
+
+        const Real det = fma(m00, m11, -m01 * m01);
+        if (matAbs(det) <= Real(512) * EPSILON) {
+            return;
+        }
+
+        const Real inv00 = m11 / det;
+        const Real inv01 = -m01 / det;
+        const Real inv11 = m00 / det;
+
+        const Vector<Real, 2> y0(
+            -(inv00 * h0 + inv01 * h1),
+            -(inv01 * h0 + inv11 * h1));
+        const Vector<Real, 2> y1(
+            inv00 * info.dr1 + inv01 * info.dr2,
+            inv01 * info.dr1 + inv11 * info.dr2);
+
+        const Real qa =
+            m00 * y1[0] * y1[0] +
+            Real(2) * m01 * y1[0] * y1[1] +
+            m11 * y1[1] * y1[1];
+        const Real qb = Real(2) * (
+            m00 * y0[0] * y1[0] +
+            m01 * (y0[0] * y1[1] + y0[1] * y1[0]) +
+            m11 * y0[1] * y1[1] +
+            h0 * y1[0] +
+            h1 * y1[1]);
+        const Real qc = evalMatSlabOutsideQuadratic(m00, m01, m11, h0, h1, k, y0);
+
+        const Real aa = qa - Real(1);
+        const Real bb = qb;
+        const Real cc = qc;
+        const Real tol = Real(512) * EPSILON;
+
+        Real lambdas[2];
+        int lambdaCount = 0;
+        if (matAbs(aa) <= tol) {
+            if (matAbs(bb) > tol) {
+                lambdas[lambdaCount++] = -cc / bb;
+            }
+        }
+        else {
+            const Real disc = bb * bb - Real(4) * aa * cc;
+            if (disc >= -tol) {
+                const Real sqrtDisc = sqrt(disc > Real(0) ? disc : Real(0));
+                lambdas[lambdaCount++] = (-bb - sqrtDisc) / (Real(2) * aa);
+                lambdas[lambdaCount++] = (-bb + sqrtDisc) / (Real(2) * aa);
+            }
+        }
+
+        for (int i = 0; i < lambdaCount; ++i) {
+            const Real lambda = lambdas[i];
+            if (lambda < -tol) {
+                continue;
+            }
+
+            const Vector<Real, 2> uv = y0 + y1 * (lambda < Real(0) ? Real(0) : lambda);
+            const Real q = evalMatSlabOutsideQuadratic(m00, m01, m11, h0, h1, k, uv);
+            if (q < -tol) {
+                continue;
+            }
+
+            const Real d = sqrt(q > Real(0) ? q : Real(0));
+            if (matAbs(d - lambda) <= Real(1024) * EPSILON) {
+                updateMatBoxSlabParamIfValid(best, box, info, p0Local, e1Local, e2Local, extent, state, uv);
+            }
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void minimizeMatBoxSlabOutsideCell(
+        MatContactCandidate<Real>& best,
+        const TOrientedBox3D<Real>& box,
+        const MatSlabInfo<Real>& info,
+        const Vector<Real, 3>& p0Local,
+        const Vector<Real, 3>& e1Local,
+        const Vector<Real, 3>& e2Local,
+        const Vector<Real, 3>& extent,
+        const int state[3],
+        const MatParamPolygon<Real>& poly)
+    {
+        for (int i = 0; i < poly.count; ++i) {
+            updateMatBoxSlabParamIfValid(best, box, info, p0Local, e1Local, e2Local, extent, state, poly.p[i]);
+        }
+
+        for (int i = 0; i < poly.count; ++i) {
+            minimizeMatBoxSlabEdge(best, box, info, p0Local, e1Local, e2Local, extent, state, poly.p[i], poly.p[(i + 1) % poly.count]);
+        }
+
+        addMatBoxSlabOutsideInteriorCandidate(best, box, info, p0Local, e1Local, e2Local, extent, state);
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void findBestMatBoxSlabExact(
+        MatContactCandidate<Real>& best,
+        const TOrientedBox3D<Real>& box,
+        const TMedialSlab3D<Real>& slab,
+        const MatSlabInfo<Real>& info)
+    {
+        best = MatContactCandidate<Real>();
+
+        const Vector<Real, 3> p0Local = matBoxWorldToLocal<Real>(box, slab.v[0]);
+        const Vector<Real, 3> p1Local = matBoxWorldToLocal<Real>(box, slab.v[1]);
+        const Vector<Real, 3> p2Local = matBoxWorldToLocal<Real>(box, slab.v[2]);
+        const Vector<Real, 3> e1Local = p1Local - p0Local;
+        const Vector<Real, 3> e2Local = p2Local - p0Local;
+
+        for (int sx = -1; sx <= 1; ++sx) {
+            for (int sy = -1; sy <= 1; ++sy) {
+                for (int sz = -1; sz <= 1; ++sz) {
+                    const int state[3] = { sx, sy, sz };
+                    MatParamPolygon<Real> poly;
+                    buildMatSlabBoxCellPolygon(poly, p0Local, e1Local, e2Local, box.extent, state);
+                    if (poly.count == 0) {
+                        continue;
+                    }
+
+                    const int activeCount = (sx != 0 ? 1 : 0) + (sy != 0 ? 1 : 0) + (sz != 0 ? 1 : 0);
+                    if (activeCount == 0) {
+                        minimizeMatBoxSlabInsideCell(best, box, info, p0Local, e1Local, e2Local, box.extent, state, poly);
+                    }
+                    else {
+                        minimizeMatBoxSlabOutsideCell(best, box, info, p0Local, e1Local, e2Local, box.extent, state, poly);
+                    }
+                }
+            }
+        }
     }
 
     template<typename Real>
@@ -6341,37 +7047,149 @@ namespace dyno
     }
 
     template<typename Real>
-    DYN_FUNC inline void refineMatBoxConeSeed(
+    DYN_FUNC inline void updateMatBoxConeAt(
         MatContactCandidate<Real>& best,
         const TOrientedBox3D<Real>& box,
         const TMedialCone3D<Real>& cone,
-        Real seed)
+        Real t)
     {
         const Vector<Real, 3> axis = cone.v[1] - cone.v[0];
         const Real dr = cone.radius[1] - cone.radius[0];
-        Real t = matClamp01(seed);
 
-        for (int iter = 0; iter < 6; ++iter) {
-            const Vector<Real, 3> center = cone.v[0] + axis * t;
-            const Real radius = cone.radius[0] + dr * t;
-            updateMatCandidate(best, makeMatBoxCandidate<Real>(box, center, radius));
+        t = matClamp01(t);
+        updateMatCandidate(best, makeMatBoxCandidate<Real>(
+            box,
+            cone.v[0] + axis * t,
+            cone.radius[0] + dr * t));
+    }
 
-            MatBoxProjection<Real> proj;
-            evaluateMatBoxProjection(proj, box, center);
+    template<typename Real>
+    DYN_FUNC inline void minimizeMatBoxConeInterval(
+        MatContactCandidate<Real>& best,
+        const TOrientedBox3D<Real>& box,
+        const TMedialCone3D<Real>& cone,
+        const Vector<Real, 3>& p0Local,
+        const Vector<Real, 3>& dLocal,
+        const Real tMin,
+        const Real tMax)
+    {
+        const Real tol = Real(128) * EPSILON;
+        if (tMax < tMin + tol) {
+            updateMatBoxConeAt(best, box, cone, tMin);
+            return;
+        }
 
-            MatContactCandidate<Real> pointCand;
-            findBestMatSphereCone(pointCand, TSphere3D<Real>(proj.closestPoint, Real(0)), cone);
-            if (!pointCand.valid) {
-                break;
+        const Real tMid = Real(0.5) * (tMin + tMax);
+        const Vector<Real, 3> pMid = p0Local + dLocal * tMid;
+
+        int state[3] = { 0, 0, 0 };
+        int activeCount = 0;
+        for (int i = 0; i < 3; ++i) {
+            if (pMid[i] > box.extent[i]) {
+                state[i] = 1;
+                ++activeCount;
+            }
+            else if (pMid[i] < -box.extent[i]) {
+                state[i] = -1;
+                ++activeCount;
+            }
+        }
+
+        Real candidates[32];
+        int candidateCount = 0;
+        addMatScalarCandidateInInterval(candidates, candidateCount, 32, tMin, tMin, tMax);
+        addMatScalarCandidateInInterval(candidates, candidateCount, 32, tMax, tMin, tMax);
+
+        const Real dr = cone.radius[1] - cone.radius[0];
+        if (activeCount > 0) {
+            Real a = Real(0);
+            Real b = Real(0);
+            Real c = Real(0);
+
+            for (int i = 0; i < 3; ++i) {
+                if (state[i] == 0) {
+                    continue;
+                }
+
+                const Real y0 = Real(state[i]) * p0Local[i] - box.extent[i];
+                const Real yd = Real(state[i]) * dLocal[i];
+                a += yd * yd;
+                b += y0 * yd;
+                c += y0 * y0;
             }
 
-            updateMatCandidate(best, makeMatBoxCandidate<Real>(box, pointCand.centerB, pointCand.radiusB));
+            addMatSqrtMinusLinearStationary(candidates, candidateCount, 32, a, b, c, dr, tMin, tMax);
+        }
+        else {
+            const Real signs[2] = { Real(-1), Real(1) };
+            for (int axisA = 0; axisA < 3; ++axisA) {
+                for (int signAId = 0; signAId < 2; ++signAId) {
+                    const Real signA = signs[signAId];
+                    const Real a0 = signA * p0Local[axisA] - box.extent[axisA];
+                    const Real ad = signA * dLocal[axisA];
 
-            const Real nextT = evalMatConeParameter<Real>(cone, pointCand.centerB);
-            if (matAbs(nextT - t) <= Real(64) * EPSILON) {
-                break;
+                    for (int axisB = axisA; axisB < 3; ++axisB) {
+                        for (int signBId = 0; signBId < 2; ++signBId) {
+                            if (axisA == axisB && signAId == signBId) {
+                                continue;
+                            }
+
+                            const Real signB = signs[signBId];
+                            const Real b0 = signB * p0Local[axisB] - box.extent[axisB];
+                            const Real bd = signB * dLocal[axisB];
+                            const Real denom = ad - bd;
+                            if (matAbs(denom) <= tol) {
+                                continue;
+                            }
+
+                            addMatScalarCandidateInInterval(candidates, candidateCount, 32, (b0 - a0) / denom, tMin, tMax);
+                        }
+                    }
+                }
             }
-            t = nextT;
+        }
+
+        for (int i = 0; i < candidateCount; ++i) {
+            updateMatBoxConeAt(best, box, cone, candidates[i]);
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void findBestMatBoxConeExact(
+        MatContactCandidate<Real>& best,
+        const TOrientedBox3D<Real>& box,
+        const TMedialCone3D<Real>& cone)
+    {
+        best = MatContactCandidate<Real>();
+
+        const Real rMax = maximum(cone.radius[0], cone.radius[1]);
+        TSegment3D<Real> axisToBox;
+        matSegmentBoxProximity(axisToBox, box, cone.v[0], cone.v[1]);
+        if (axisToBox.lengthSquared() > rMax * rMax) {
+            return;
+        }
+
+        const Vector<Real, 3> p0Local = matBoxWorldToLocal<Real>(box, cone.v[0]);
+        const Vector<Real, 3> p1Local = matBoxWorldToLocal<Real>(box, cone.v[1]);
+        const Vector<Real, 3> dLocal = p1Local - p0Local;
+
+        Real breaks[16];
+        int breakCount = 0;
+        addMatScalarCandidate(breaks, breakCount, 16, Real(0));
+        addMatScalarCandidate(breaks, breakCount, 16, Real(1));
+
+        for (int axis = 0; axis < 3; ++axis) {
+            if (matAbs(dLocal[axis]) <= Real(128) * EPSILON) {
+                continue;
+            }
+
+            addMatScalarCandidate(breaks, breakCount, 16, (-box.extent[axis] - p0Local[axis]) / dLocal[axis]);
+            addMatScalarCandidate(breaks, breakCount, 16, ( box.extent[axis] - p0Local[axis]) / dLocal[axis]);
+        }
+
+        sortMatScalars(breaks, breakCount);
+        for (int i = 0; i + 1 < breakCount; ++i) {
+            minimizeMatBoxConeInterval(best, box, cone, p0Local, dLocal, breaks[i], breaks[i + 1]);
         }
     }
 
@@ -6381,34 +7199,7 @@ namespace dyno
         const TOrientedBox3D<Real>& box,
         const TMedialCone3D<Real>& cone)
     {
-        best = MatContactCandidate<Real>();
-
-        const TSegment3D<Real> axisSeg(cone.v[0], cone.v[1]);
-        const Real rMax = maximum(cone.radius[0], cone.radius[1]);
-        const TSegment3D<Real> axisToBox = axisSeg.proximity(box);
-        if (axisToBox.isValid() && axisToBox.lengthSquared() > rMax * rMax) {
-            return;
-        }
-
-        Real seeds[8];
-        int seedCount = 0;
-        addMatScalarCandidate(seeds, seedCount, 8, Real(0));
-        addMatScalarCandidate(seeds, seedCount, 8, Real(1));
-        addMatScalarCandidate(seeds, seedCount, 8, Real(0.5));
-
-        if (axisToBox.isValid()) {
-            addMatScalarCandidate(seeds, seedCount, 8, evalMatConeParameter<Real>(cone, axisToBox.startPoint()));
-
-            MatContactCandidate<Real> pointCand;
-            findBestMatSphereCone(pointCand, TSphere3D<Real>(axisToBox.endPoint(), Real(0)), cone);
-            if (pointCand.valid) {
-                addMatScalarCandidate(seeds, seedCount, 8, evalMatConeParameter<Real>(cone, pointCand.centerB));
-            }
-        }
-
-        for (int i = 0; i < seedCount; ++i) {
-            refineMatBoxConeSeed(best, box, cone, seeds[i]);
-        }
+        findBestMatBoxConeExact(best, box, cone);
     }
 
     template<typename Real>
@@ -6559,34 +7350,6 @@ namespace dyno
     }
 
     template<typename Real>
-    DYN_FUNC inline void refineMatBoxSlabSeed(
-        MatContactCandidate<Real>& best,
-        const TOrientedBox3D<Real>& box,
-        const TMedialSlab3D<Real>& slab,
-        Vector<Real, 3> qSeed)
-    {
-        Vector<Real, 3> q = qSeed;
-
-        for (int iter = 0; iter < 6; ++iter) {
-            MatContactCandidate<Real> pointCand;
-            findBestMatSlabSphere(pointCand, slab, TSphere3D<Real>(q, Real(0)));
-            if (!pointCand.valid) {
-                break;
-            }
-
-            updateMatCandidate(best, makeMatBoxCandidate<Real>(box, pointCand.centerA, pointCand.radiusA));
-
-            MatBoxProjection<Real> proj;
-            evaluateMatBoxProjection(proj, box, pointCand.centerA);
-            const Vector<Real, 3> delta = proj.closestPoint - q;
-            q = proj.closestPoint;
-            if (delta.dot(delta) <= Real(256) * EPSILON * EPSILON) {
-                break;
-            }
-        }
-    }
-
-    template<typename Real>
     DYN_FUNC inline void findBestMatBoxSlab(
         MatContactCandidate<Real>& best,
         const TOrientedBox3D<Real>& box,
@@ -6594,87 +7357,23 @@ namespace dyno
     {
         best = MatContactCandidate<Real>();
 
-        Vector<Real, 3> qSeeds[32];
-        int qCount = 0;
-
-        for (int i = 0; i < 3; ++i) {
-            updateMatCandidate(best, makeMatBoxCandidate<Real>(box, slab.v[i], slab.radius[i]));
-
-            MatBoxProjection<Real> proj;
-            evaluateMatBoxProjection(proj, box, slab.v[i]);
-            addMatPointCandidate(qSeeds, qCount, 32, proj.closestPoint);
-        }
-
         MatSlabInfo<Real> info;
         if (buildMatSlabInfo(info, slab)) {
-            const Real oneThird = Real(1) / Real(3);
-            const Vector<Real, 3> faceCenter = evalMatSlabPoint(info, oneThird, oneThird);
-            const Real faceRadius = evalMatSlabRadius(info, oneThird, oneThird);
-            updateMatCandidate(best, makeMatBoxCandidate<Real>(box, faceCenter, faceRadius));
+            findBestMatBoxSlabExact(best, box, slab, info);
+        }
 
-            MatBoxProjection<Real> faceProj;
-            evaluateMatBoxProjection(faceProj, box, faceCenter);
-            addMatPointCandidate(qSeeds, qCount, 32, faceProj.closestPoint);
+        if (!best.valid || best.phi > EPSILON) {
+            const TMedialCone3D<Real> edges[3] = {
+                TMedialCone3D<Real>(slab.v[0], slab.v[1], slab.radius[0], slab.radius[1]),
+                TMedialCone3D<Real>(slab.v[1], slab.v[2], slab.radius[1], slab.radius[2]),
+                TMedialCone3D<Real>(slab.v[2], slab.v[0], slab.radius[2], slab.radius[0])
+            };
 
-            MatBoxProjection<Real> boxCenterProj;
-            evaluateMatBoxProjection(boxCenterProj, box, box.center);
-            addMatPointCandidate(qSeeds, qCount, 32, boxCenterProj.closestPoint);
-
-            TTriangle3D<Real> centerTri(slab.v[0], slab.v[1], slab.v[2]);
-            Vector<Real, 3> interNormal(Real(0));
-            Vector<Real, 3> boxPoint(Real(0));
-            Vector<Real, 3> slabPoint(Real(0));
-            Real interDepth = Real(0);
-            if (box.point_intersect(centerTri, interNormal, interDepth, boxPoint, slabPoint)) {
-                Real u = Real(0);
-                Real v = Real(0);
-                if (solveMatSlabBarycentric(info, slabPoint, u, v)) {
-                    const Real tol = Real(64) * EPSILON;
-                    if (u >= -tol && v >= -tol && u + v <= Real(1) + tol) {
-                        u = matClamp01(u);
-                        v = matClamp01(v);
-                        const Real uv = u + v;
-                        if (uv > Real(1)) {
-                            const Real inv = Real(1) / uv;
-                            u *= inv;
-                            v *= inv;
-                        }
-
-                        updateMatCandidate(best, makeMatBoxCandidate<Real>(
-                            box,
-                            evalMatSlabPoint(info, u, v),
-                            evalMatSlabRadius(info, u, v)));
-                        addMatPointCandidate(qSeeds, qCount, 32, boxPoint);
-                    }
-                }
+            for (int i = 0; i < 3; ++i) {
+                MatContactCandidate<Real> edgeCand;
+                findBestMatBoxCone(edgeCand, box, edges[i]);
+                updateMatCandidate(best, edgeCand);
             }
-        }
-
-        const TMedialCone3D<Real> edges[3] = {
-            TMedialCone3D<Real>(slab.v[0], slab.v[1], slab.radius[0], slab.radius[1]),
-            TMedialCone3D<Real>(slab.v[1], slab.v[2], slab.radius[1], slab.radius[2]),
-            TMedialCone3D<Real>(slab.v[2], slab.v[0], slab.radius[2], slab.radius[0])
-        };
-
-        for (int i = 0; i < 3; ++i) {
-            MatContactCandidate<Real> edgeCand;
-            findBestMatBoxCone(edgeCand, box, edges[i]);
-            updateMatCandidate(best, edgeCand);
-            if (edgeCand.valid) {
-                addMatPointCandidate(qSeeds, qCount, 32, edgeCand.centerA);
-            }
-        }
-
-        for (int i = 0; i < 6; ++i) {
-            addMatPointCandidate(qSeeds, qCount, 32, box.face(i).center);
-        }
-
-        for (int i = 0; i < 8; ++i) {
-            addMatPointCandidate(qSeeds, qCount, 32, box.vertex(i).origin);
-        }
-
-        for (int i = 0; i < qCount; ++i) {
-            refineMatBoxSlabSeed(best, box, slab, qSeeds[i]);
         }
     }
 

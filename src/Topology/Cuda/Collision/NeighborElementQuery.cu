@@ -163,6 +163,7 @@ namespace dyno
 		DArray<Pair<uint, uint>> shape2RigidBodyMapping,
 		ElementOffset elementOffset,
 		Real dHat,
+		bool enableAttribute,
 		bool enableSelfCollision,
 		bool enableCollisionMask)
 	{
@@ -189,12 +190,17 @@ namespace dyno
 		if (mappedId1 == mappedId2)
 			return;
 
-		if (!enableSelfCollision)
+		if (enableAttribute)
 		{
 			Attribute att_i = attribute[mappedId1];
 			Attribute att_j = attribute[mappedId2];
 
-			if (att_i.objectId() == att_j.objectId())
+			const uint collisionGroup_i = att_i.collisionGroup();
+			const uint collisionGroup_j = att_j.collisionGroup();
+			if (collisionGroup_i != 0 && collisionGroup_i == collisionGroup_j)
+				return;
+
+			if (!enableSelfCollision && att_i.objectId() == att_j.objectId())
 				return;
 		}
 
@@ -641,9 +647,6 @@ namespace dyno
 
 		int totalSize = mReduce.accumulate(count.begin(), count.size());
 
-		printf("[NeighborElementQuery] Broad-phase candidate pairs = %d (lists=%d)\n",
-			totalSize, (int)contactList.size());
-
 		if (totalSize <= 0) {
 			this->outContacts()->clear();
 			return;
@@ -661,8 +664,6 @@ namespace dyno
 
 		count.clear();
 
-		Real zero = 0;
-
 		DArray<int> contactNum;
 		DArray<int> contactNumCpy;
 
@@ -678,7 +679,7 @@ namespace dyno
 		if (this->inCollisionMask()->isEmpty())
 		{
 			DArray<CollisionMask> dummyCollisionMask;
-			if (!this->varSelfCollision()->getValue() && !this->inAttribute()->isEmpty())
+			if (!this->inAttribute()->isEmpty())
 			{
 				cuExecute(deviceIds.size(),
 					NEQ_Narrow_Count,
@@ -700,7 +701,8 @@ namespace dyno
 					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
 					dHat,
-					false,
+					true,
+					this->varSelfCollision()->getValue(),
 					false);
 			}
 			else
@@ -726,6 +728,7 @@ namespace dyno
 					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
 					dHat,
+					false,
 					true,
 					false);
 			}
@@ -733,7 +736,7 @@ namespace dyno
 		}
 		else
 		{
-			if (!this->varSelfCollision()->getValue() && !this->inAttribute()->isEmpty())
+			if (!this->inAttribute()->isEmpty())
 			{
 				cuExecute(deviceIds.size(),
 					NEQ_Narrow_Count,
@@ -755,7 +758,8 @@ namespace dyno
 					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
 					dHat,
-					false,
+					true,
+					this->varSelfCollision()->getValue(),
 					true);
 			}
 			else
@@ -781,6 +785,7 @@ namespace dyno
 					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
 					dHat,
+					false,
 					true,
 					true);
 			}
@@ -789,8 +794,6 @@ namespace dyno
 		contactNumCpy.assign(contactNum);
 
 		int sum = mReduce.accumulate(contactNum.begin(), contactNum.size());
-
-		printf("[NeighborElementQuery] Narrow-phase contact points = %d\n", sum);
 
 		auto& contacts = this->outContacts()->getData();
 		mScan.exclusive(contactNum, true);

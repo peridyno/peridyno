@@ -2289,6 +2289,95 @@ namespace dyno
 			rotMat);
 	}
 
+	__global__ void SF_markContactsByCollisionGroup(
+		DArray<int> validFlags,
+		DArray<TContactPair<float>> contacts,
+		DArray<Attribute> attributes)
+	{
+		int tId = threadIdx.x + blockIdx.x * blockDim.x;
+		if (tId >= contacts.size())
+			return;
+
+		const TContactPair<float>& contact = contacts[tId];
+		if (contact.bodyId1 == INVALID || contact.bodyId2 == INVALID)
+		{
+			validFlags[tId] = 1;
+			return;
+		}
+
+		const Attribute att1 = attributes[contact.bodyId1];
+		const Attribute att2 = attributes[contact.bodyId2];
+		const uint collisionGroup1 = att1.collisionGroup();
+		const uint collisionGroup2 = att2.collisionGroup();
+
+		validFlags[tId] = (collisionGroup1 != 0 && collisionGroup1 == collisionGroup2) ? 0 : 1;
+	}
+
+	__global__ void SF_compactContactsByCollisionGroup(
+		DArray<TContactPair<float>> filteredContacts,
+		DArray<TContactPair<float>> contacts,
+		DArray<int> offsets,
+		DArray<int> validFlags)
+	{
+		int tId = threadIdx.x + blockIdx.x * blockDim.x;
+		if (tId >= contacts.size())
+			return;
+
+		if (validFlags[tId] == 0)
+			return;
+
+		filteredContacts[offsets[tId]] = contacts[tId];
+	}
+
+	void filterContactsByCollisionGroup(
+		DArray<TContactPair<float>>& filteredContacts,
+		DArray<TContactPair<float>> contacts,
+		DArray<Attribute> attributes)
+	{
+		const int contactCount = contacts.size();
+		if (contactCount == 0)
+		{
+			filteredContacts.resize(0);
+			return;
+		}
+
+		DArray<int> validFlags(contactCount);
+		DArray<int> offsets(contactCount);
+
+		cuExecute(contactCount,
+			SF_markContactsByCollisionGroup,
+			validFlags,
+			contacts,
+			attributes);
+
+		offsets.assign(validFlags);
+		thrust::exclusive_scan(
+			thrust::device,
+			offsets.begin(),
+			offsets.begin() + contactCount,
+			offsets.begin());
+
+		const int filteredCount = thrust::reduce(
+			thrust::device,
+			validFlags.begin(),
+			validFlags.begin() + contactCount,
+			0);
+
+		filteredContacts.resize(filteredCount);
+		if (filteredCount > 0)
+		{
+			cuExecute(contactCount,
+				SF_compactContactsByCollisionGroup,
+				filteredContacts,
+				contacts,
+				offsets,
+				validFlags);
+		}
+
+		validFlags.clear();
+		offsets.clear();
+	}
+
 	/**
 	* Set up the contact and friction constraints
 	*

@@ -151,6 +151,12 @@ namespace dyno
 		DArray<Vec3f> pos,
 		DArray<Mat3f> rotMat
 	);
+
+	void filterContactsByCollisionGroup(
+		DArray<TContactPair<float>>& filteredContacts,
+		DArray<TContactPair<float>> contacts,
+		DArray<Attribute> attributes
+	);
 	
 	void setUpContactAndFrictionConstraints(
 		DArray<TConstraintPair<float>> constraints,

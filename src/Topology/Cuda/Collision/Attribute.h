@@ -56,32 +56,40 @@ namespace dyno
 			OBJECTID_INVALID = 0x000000FF,
 		};
 
+		enum CollisionGroup
+		{
+			COLLISION_GROUP_SHIFT = 8,
+			COLLISION_GROUP_MASK = 0x0FFFFF00,
+		};
+
 		DYN_FUNC inline void setMaterialType(MaterialType type) { m_tag = ((~MATERIAL_MASK) & m_tag) | type; }
 		DYN_FUNC inline void setKinematicType(KinematicType type) { m_tag = ((~KINEMATIC_MASK) & m_tag) | type; }
 		DYN_FUNC inline void setObjectId(unsigned id) { m_tag = ((~OBJECTID_MASK) & m_tag) | ((OBJECTID_MASK)& id); }
+		DYN_FUNC inline void setCollisionGroup(unsigned id) { m_tag = ((~COLLISION_GROUP_MASK) & m_tag) | ((id << COLLISION_GROUP_SHIFT) & COLLISION_GROUP_MASK); }
 
-		DYN_FUNC inline MaterialType materialType() { return (MaterialType)(m_tag&MATERIAL_MASK); }
-		DYN_FUNC inline KinematicType kinematicType() { return (KinematicType)(m_tag&KINEMATIC_MASK); }
+		DYN_FUNC inline MaterialType materialType() const { return (MaterialType)(m_tag&MATERIAL_MASK); }
+		DYN_FUNC inline KinematicType kinematicType() const { return (KinematicType)(m_tag&KINEMATIC_MASK); }
 
-		DYN_FUNC inline bool isFluid() { return MaterialType::MATERIAL_FLUID == materialType(); }
-		DYN_FUNC inline bool isRigid() { return MaterialType::MATERIAL_RIGID == materialType(); }
-		DYN_FUNC inline bool isElastic() { return MaterialType::MATERIAL_ELASTIC == materialType(); }
-		DYN_FUNC inline bool isPlastic() { return MaterialType::MATERIAL_PLASTIC == materialType(); }
+		DYN_FUNC inline bool isFluid() const { return MaterialType::MATERIAL_FLUID == materialType(); }
+		DYN_FUNC inline bool isRigid() const { return MaterialType::MATERIAL_RIGID == materialType(); }
+		DYN_FUNC inline bool isElastic() const { return MaterialType::MATERIAL_ELASTIC == materialType(); }
+		DYN_FUNC inline bool isPlastic() const { return MaterialType::MATERIAL_PLASTIC == materialType(); }
 
 		DYN_FUNC inline void setFluid() { setMaterialType(MaterialType::MATERIAL_FLUID); }
 		DYN_FUNC inline void setRigid() { setMaterialType(MaterialType::MATERIAL_RIGID); }
 		DYN_FUNC inline void setElastic() { setMaterialType(MaterialType::MATERIAL_ELASTIC); }
 		DYN_FUNC inline void setPlastic() { setMaterialType(MaterialType::MATERIAL_PLASTIC); }
 
-		DYN_FUNC inline bool isFixed() { return KinematicType::KINEMATIC_FIXED == kinematicType(); }
-		DYN_FUNC inline bool isPassive() { return KinematicType::KINEMATIC_PASSIVE == kinematicType(); }
-		DYN_FUNC inline bool isDynamic() { return KinematicType::KINEMATIC_POSITIVE == kinematicType(); }
+		DYN_FUNC inline bool isFixed() const { return KinematicType::KINEMATIC_FIXED == kinematicType(); }
+		DYN_FUNC inline bool isPassive() const { return KinematicType::KINEMATIC_PASSIVE == kinematicType(); }
+		DYN_FUNC inline bool isDynamic() const { return KinematicType::KINEMATIC_POSITIVE == kinematicType(); }
 
 		DYN_FUNC inline void setFixed() { setKinematicType(KinematicType::KINEMATIC_FIXED); }
 		DYN_FUNC inline void setPassive() { setKinematicType(KinematicType::KINEMATIC_PASSIVE); }
 		DYN_FUNC inline void setDynamic() { setKinematicType(KinematicType::KINEMATIC_POSITIVE); }
 
-		DYN_FUNC inline unsigned objectId() { return (unsigned)(m_tag&OBJECTID_MASK); }
+		DYN_FUNC inline unsigned objectId() const { return (unsigned)(m_tag&OBJECTID_MASK); }
+		DYN_FUNC inline unsigned collisionGroup() const { return (unsigned)((m_tag&COLLISION_GROUP_MASK) >> COLLISION_GROUP_SHIFT); }
 
 	private:
 		uint m_tag;

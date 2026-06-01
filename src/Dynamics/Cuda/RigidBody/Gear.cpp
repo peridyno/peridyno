@@ -6,6 +6,8 @@
 #include <cmath>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
+#include <vector>
 #include "helpers/tinyobj_helper.h"
 
 namespace dyno
@@ -92,6 +94,127 @@ namespace dyno
 				localHalfExtent.z * absScale.z);
 			box.rot = Quat1f(0.0f, 0.0f, 0.0f, 1.0f);
 			return box;
+		}
+
+		std::string extractChainCollisionGroup(const std::string& objectName)
+		{
+			const std::size_t linkPos = objectName.rfind("_link");
+			if (linkPos == std::string::npos)
+			{
+				return std::string();
+			}
+
+			const std::size_t chainPos = objectName.rfind("_chain", linkPos);
+			if (chainPos == std::string::npos)
+			{
+				return std::string();
+			}
+
+			return objectName.substr(0, linkPos);
+		}
+
+		std::unordered_map<std::string, uint> buildCollisionGroupsFromJoints(
+			const std::vector<SceneObject>& objects,
+			const std::vector<SceneJoint>& joints)
+		{
+			std::unordered_map<std::string, std::vector<std::string>> adjacency;
+			adjacency.reserve(objects.size());
+
+			for (const auto& object : objects)
+			{
+				adjacency.emplace(object.name, std::vector<std::string>());
+			}
+
+			for (const auto& joint : joints)
+			{
+				if (joint.body1Name.empty()
+					|| joint.body2IsWorld
+					|| joint.type == SceneJointType::Point
+					|| joint.body2Name.empty())
+				{
+					continue;
+				}
+
+				auto body1It = adjacency.find(joint.body1Name);
+				auto body2It = adjacency.find(joint.body2Name);
+				if (body1It == adjacency.end() || body2It == adjacency.end())
+				{
+					continue;
+				}
+
+				body1It->second.push_back(joint.body2Name);
+				body2It->second.push_back(joint.body1Name);
+			}
+
+			std::unordered_map<std::string, uint> groupsByObjectName;
+			groupsByObjectName.reserve(objects.size());
+			std::unordered_map<std::string, uint> fallbackGroupsByName;
+
+			std::unordered_set<std::string> visited;
+			visited.reserve(objects.size());
+
+			uint nextCollisionGroup = 1;
+			std::vector<std::string> stack;
+			stack.reserve(objects.size());
+
+			for (const auto& object : objects)
+			{
+				if (visited.find(object.name) != visited.end())
+				{
+					continue;
+				}
+
+				auto adjacencyIt = adjacency.find(object.name);
+				if (adjacencyIt == adjacency.end())
+				{
+					continue;
+				}
+
+				stack.clear();
+				stack.push_back(object.name);
+				visited.insert(object.name);
+
+				std::vector<std::string> component;
+				component.reserve(8);
+
+				while (!stack.empty())
+				{
+					const std::string current = stack.back();
+					stack.pop_back();
+					component.push_back(current);
+
+					for (const auto& neighbor : adjacency[current])
+					{
+						if (visited.insert(neighbor).second)
+						{
+							stack.push_back(neighbor);
+						}
+					}
+				}
+
+				if (component.size() <= 1)
+				{
+					const std::string fallbackGroup = extractChainCollisionGroup(object.name);
+					if (!fallbackGroup.empty())
+					{
+						auto fallbackIt = fallbackGroupsByName.find(fallbackGroup);
+						if (fallbackIt == fallbackGroupsByName.end())
+						{
+							fallbackIt = fallbackGroupsByName.emplace(fallbackGroup, nextCollisionGroup++).first;
+						}
+						groupsByObjectName[object.name] = fallbackIt->second;
+					}
+					continue;
+				}
+
+				const uint groupId = nextCollisionGroup++;
+				for (const auto& name : component)
+				{
+					groupsByObjectName[name] = groupId;
+				}
+			}
+
+			return groupsByObjectName;
 		}
 	}
 
@@ -198,6 +321,8 @@ namespace dyno
 		}
 
 		std::unordered_map<std::string, std::shared_ptr<PdActor>> actorsByName;
+		const std::unordered_map<std::string, uint> collisionGroupsByObjectName =
+			buildCollisionGroupsFromJoints(this->mObjects, this->mJoints);
 		std::vector<bool> matLoaded(this->mAssets.size(), false);
 
 		for (int i = 0; i < this->mObjects.size(); i++)
@@ -227,6 +352,12 @@ namespace dyno
 			info.angularVelocity = object.angularVelocity;
 			info.motionType = toBodyType(object.motionType);
 			info.bodyId = i;
+
+			const auto collisionGroupIt = collisionGroupsByObjectName.find(object.name);
+			if (collisionGroupIt != collisionGroupsByObjectName.end())
+			{
+				info.collisionGroup = collisionGroupIt->second;
+			}
 
 			std::shared_ptr<PdActor> actor = nullptr;
 			Vec3f renderScale = object.scale;

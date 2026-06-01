@@ -217,6 +217,7 @@ namespace dyno
 		mImpulseExt.reset();
 
 		Real dt = this->inTimeStep()->getData();
+		DArray<ContactPair>* activeContactsPtr = nullptr;
 
 		if (!this->inContacts()->isEmpty() || topo->totalJointSize() > 0) {
 			if (mContactsInLocalFrame.size() != this->inContacts()->size()) {
@@ -231,10 +232,23 @@ namespace dyno
 			);
 
 			DArray<ContactPair>* solverContactsPtr = &mContactsInLocalFrame;
-			if (this->varContactReductionEnabled()->getValue() && mContactsInLocalFrame.size() > 0) {
+			if (!this->inAttribute()->isEmpty() && mContactsInLocalFrame.size() > 0)
+			{
+				filterContactsByCollisionGroup(
+					mFilteredContacts,
+					mContactsInLocalFrame,
+					this->inAttribute()->getData());
+				solverContactsPtr = &mFilteredContacts;
+			}
+			else
+			{
+				mFilteredContacts.resize(0);
+			}
+
+			if (this->varContactReductionEnabled()->getValue() && solverContactsPtr->size() > 0) {
 				reduceContacts(
 					mReducedContacts,
-					mContactsInLocalFrame,
+					*solverContactsPtr,
 					this->varMaxReducedContactsPerPair()->getValue(),
 					this->varContactReductionDistance()->getValue(),
 					this->varContactReductionNormalCosThreshold()->getValue()
@@ -248,6 +262,7 @@ namespace dyno
 			}
 
 			auto& solverContacts = *solverContactsPtr;
+			activeContactsPtr = &solverContacts;
 
 			if (mContactNumber.size() != bodyNum) {
 				mContactNumber.resize(bodyNum);
@@ -437,11 +452,17 @@ namespace dyno
 			}
 		}
 		
-		DArray<ContactPair>* cachedContactsPtr = &mContactsInLocalFrame;
-		if (this->varContactReductionEnabled()->getValue() && mReducedContacts.size() > 0) {
-			cachedContactsPtr = &mReducedContacts;
+		if (activeContactsPtr == nullptr)
+		{
+			mFilteredContacts.resize(0);
+			mReducedContacts.resize(0);
+			cacheContacts.resize(0);
+			mPrevContactLambdaCount = 0;
+			mLambdaOld.assign(mLambda);
+			return;
 		}
-		auto& cachedContacts = *cachedContactsPtr;
+
+		auto& cachedContacts = *activeContactsPtr;
 
 		cacheContacts.resize(cachedContacts.size());
 		StoreCacheKernel(

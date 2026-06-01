@@ -38,6 +38,7 @@ namespace dyno
 		this->stateBindingTag()->connect(transformer->inBindingTag());
 		this->stateInstanceTransform()->connect(transformer->inInstanceTransform());
 		this->graphicsPipeline()->pushModule(transformer);
+		
 		/*
 		auto prRender = std::make_shared<GLPhotorealisticInstanceRender>();
 		this->stateTextureMesh()->connect(prRender->inTextureMesh());

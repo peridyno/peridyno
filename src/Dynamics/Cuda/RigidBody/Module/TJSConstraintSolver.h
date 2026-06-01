@@ -126,6 +126,7 @@ namespace dyno
 		DArray<Real> mLambda;
 
 		DArray<ContactPair> mContactsInLocalFrame;
+		DArray<ContactPair> mFilteredContacts;
 		DArray<ContactPair> mReducedContacts;
 
 		DArray<Constraint> mVelocityConstraints;
