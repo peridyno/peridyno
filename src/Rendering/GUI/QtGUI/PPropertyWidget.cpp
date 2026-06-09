@@ -377,7 +377,14 @@ namespace dyno
 	QWidget* PPropertyWidget::addTupleFieldWidget(FTuple* tuple, QGridLayout* layout)
 	{
 		QString name = FormatFieldWidgetName(tuple->getObjectName());
-		name = QString("[ ") + name + QString("]");
+		
+		if (!tuple->getObjectName().empty()) {
+			char first = tuple->getObjectName()[0];
+			if (std::isalpha(static_cast<unsigned char>(first))) {
+				name = QString("[ ") + name + QString("]");
+			}
+		}
+
 		QGroupBox* groupBox = new QGroupBox(name);
 		groupBox->setStyleSheet(R"(
 					QGroupBox {
@@ -511,7 +518,6 @@ namespace dyno
 				auto it = aw->list()->end();
 				--it;
 				auto childField = (*it).get();
-				childField->setObjectName("[" + std::to_string(aw->list()->size() - 1) + "]");
 				QWidget* fw = addVariableFieldWidget(childField);
 				aw->addItem(fw, aw->list()->size() - 1, childField);
 			});

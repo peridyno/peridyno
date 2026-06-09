@@ -916,17 +916,18 @@ namespace dyno
 		std::shared_ptr<TextureMesh> texMesh = this->stateTextureMesh()->getDataPtr();
 
 
-		auto instances = this->varVehiclesTransform()->getValue();
-		uint vehicleNum = instances.size();
-		for (size_t i = 0; i < vehicleNum; i++)
+		auto instances = this->varVehiclesTransform();
+		int i = 0;
+		for (auto it = instances->begin(); it != instances->end(); it++, i++)
 		{
+			auto instance = instances->getElement(it);
 			for (auto body : mXMLBody)
 				body->actor = nullptr;
 
 			RigidBodyInfo rigidbody;
 			rigidbody.bodyId = i;
 			rigidbody.friction = this->varFrictionCoefficient()->getValue();
-			rigidbody.angle = Quat1f(instances[i].rotation());
+			rigidbody.angle = Quat1f(instance.rotation());
 
 			for (auto body : mXMLBody)
 			{
@@ -954,7 +955,7 @@ namespace dyno
 						{
 							if (body->shapeId != -1)
 							{
-								rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[body->shapeId]->boundingTransform.translation()) + instances[i].translation();
+								rigidbody.position = Quat1f(instance.rotation()).rotate(texMesh->shapes()[body->shapeId]->boundingTransform.translation()) + instance.translation();
 							}
 							else
 								rigidbody.position = body->massCenter.value();
@@ -1084,12 +1085,12 @@ namespace dyno
 							if (body->joint->type == XMLJointType::hinge)
 							{
 								auto& joint = this->createHingeJoint(body->parentBody->actor, body->actor);
-								joint.setAnchorPoint(Quat1f(instances[i].rotation()).rotate(body->realPos.value()) + instances[i].translation());
+								joint.setAnchorPoint(Quat1f(instance.rotation()).rotate(body->realPos.value()) + instance.translation());
 
 								if (body->joint->axis.has_value())
-									joint.setAxis(Quat1f(instances[i].rotation()).rotate(body->joint->axis.value()));
+									joint.setAxis(Quat1f(instance.rotation()).rotate(body->joint->axis.value()));
 								else
-									joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(0, 0, 1)));
+									joint.setAxis(Quat1f(instance.rotation()).rotate(Vec3f(0, 0, 1)));
 
 								if (body->joint->range.has_value())
 									joint.setRange(body->joint->range.value()[0], body->joint->range.value()[1]);

@@ -26,6 +26,10 @@ namespace dyno {
 
 		bool save(std::shared_ptr<SceneGraph> scn, const std::string filename) override;
 
+		void serializeField(FBase* var, tinyxml2::XMLElement* parent, tinyxml2::XMLDocument& doc);
+
+		void deserializeField(tinyxml2::XMLElement* parent, std::map<std::string, FBase*>& fieldMap);
+
 	private:
 		std::shared_ptr<Node> processNode(tinyxml2::XMLElement* nodeXML);
 
@@ -53,5 +57,7 @@ namespace dyno {
 			uint ToIndex,
 			tinyxml2::XMLElement* nodeConnectionsXml
 		);
+
+
 	};
 }

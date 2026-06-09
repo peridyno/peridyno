@@ -50,6 +50,9 @@ namespace dyno {
 		inline bool deserialize(const std::string& str) override { return false; }
 
 		virtual FBase* get(uint i) = 0;
+
+		virtual std::vector<FBase*> getParameters() = 0;
+
 	};
 
 	template<typename T>
@@ -87,7 +90,16 @@ namespace dyno {
 
 			return 0; 
 		}
-
+		virtual std::vector<FBase*> getParameters() override 
+		{
+			auto ptr = this->getDataPtr();
+			if (ptr != nullptr)
+			{
+				auto& fields = ptr->getAllFields();
+				return ptr->getAllFields();
+			}
+			return std::vector<FBase*>();
+		}
 		/**
 		 * @brief set the value
 		 *

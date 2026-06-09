@@ -40,6 +40,7 @@ namespace dyno {
 		virtual void pushBack() = 0;
 		virtual void erase(FBase* f) = 0;
 		virtual void clear() = 0;
+		virtual FBase* get(uint i) = 0;
 	};
 
 	/*!
@@ -88,6 +89,12 @@ namespace dyno {
 		void clear() override;
 
 		T getElement(std::list<std::unique_ptr<FBase>>::iterator it);
+		virtual FBase* get(uint i)override 
+		{
+			auto it = this->begin();
+			std::advance(it, i); 
+			return it->get();
+		}
 
 		void pushBack(T val);
 
@@ -208,13 +215,13 @@ namespace dyno {
 
 		//if constexpr requires C++ 17
 		if constexpr (std::is_base_of<Tuple, T>::value) {
-			auto tuplePtr = std::make_unique<TFTuple<T>>();
+			auto tuplePtr = std::make_unique<TFTuple<T>>("[" + std::to_string(this->size()) + "]","", FieldTypeEnum::Param,nullptr);
 			tuplePtr->setValue(val);
 			data->push_back(std::move(tuplePtr));
 		}
 		else
 		{
-			auto derived = std::make_unique<FVar<T>>();
+			auto derived = std::make_unique<FVar<T>>("[" + std::to_string(this->size()) + "]", "", FieldTypeEnum::Param, nullptr);
 			derived->setValue(val);
 			data->push_back(std::move(derived));
 		}

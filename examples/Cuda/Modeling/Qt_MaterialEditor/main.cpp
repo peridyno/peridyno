@@ -44,10 +44,10 @@ int main()
 	auto jeep = scn->addNode(std::make_shared<Jeep<DataType3f>>());
 
 	jeep->reset();
-	std::vector<Transform3f> temp;
+	std::list<Transform3f> temp;
 	temp.push_back(Transform3f());
 	temp.push_back(Transform3f(Vec3f(-5,0,0),Mat3f::identityMatrix()));
-	jeep->varVehiclesTransform()->setValue(temp);
+	jeep->varVehiclesTransform()->assign(temp);
 	auto gltfWireframe = jeep->graphicsPipeline()->findFirstModule<GLWireframeVisualModule>();
 	if (gltfWireframe)
 	{

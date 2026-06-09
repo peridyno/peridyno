@@ -38,7 +38,7 @@ namespace dyno
 		/**
 		 * @brief Creates multiple vehicles and specifies the transformations for each vehicle
 		 */
-		DEF_VAR(std::vector<Transform3f>, VehiclesTransform, std::vector<Transform3f>{Transform3f()}, "");
+		DEF_LIST(Transform3f, VehiclesTransform, "");
 
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "TriangleSet of the boundary");
 

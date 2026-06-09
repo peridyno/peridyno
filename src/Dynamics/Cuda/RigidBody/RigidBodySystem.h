@@ -266,9 +266,6 @@ namespace dyno
 
 		virtual void saveToFile();
 
-		//MultiBodyBind getMultiBodyBind();
-
-
 	public:
 		int m_numOfSamples;
 		DArray2D<Vec3f> m_deviceSamples;
@@ -284,5 +281,7 @@ namespace dyno
 
 	private:
 		std::vector<std::shared_ptr<PdActor>> mActors;
+
+		MultiBodyTuple getMultiBodyBind();
 	};
 }

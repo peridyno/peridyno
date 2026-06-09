@@ -24,6 +24,7 @@
 //topo
 #include "Mapping/DiscreteElementsToTriangleSet.h"
 #include "MultiBodyTuple.h"
+#include "SceneLoaderXML.h"
 
 namespace dyno
 {
@@ -113,70 +114,65 @@ namespace dyno
 	template<typename TDataType>
 	void ConfigurableBody<TDataType>::saveToFile()
 	{
-		/*auto fileStr = this->varFilePath()->serialize();
-		auto configStr = this->varConfiguration()->serialize();
-		auto instanceTransformStr = this->varVehiclesTransform()->serialize();
+		auto fileStr = this->varFilePath()->serialize();
+	
+		SceneLoaderXML saveHelper;
+		FilePath path = this->varSaveConfigPath()->getValue();
+		tinyxml2::XMLDocument doc;
 
-		auto Path = this->varSaveConfigPath()->getValue();
+		tinyxml2::XMLElement* file = doc.NewElement("MeshFile");
+		saveHelper.serializeField(this->varFilePath(), file, doc);
+		doc.InsertFirstChild(file);
 
-		std::ofstream outFile(Path.string(), std::ios::out | std::ios::trunc);
-		if (!outFile.is_open())
-		{
-			throw std::runtime_error("Error Path : " + Path.string());
-		}
-		MultiBodyBind vehicleBind = getMultiBodyBind();
+		tinyxml2::XMLElement* transform = doc.NewElement("Transform");
+		saveHelper.serializeField(this->varVehiclesTransform(), transform, doc);
+		doc.InsertFirstChild(transform);
 
-		outFile << "TextureMesh File:\n" << fileStr << "\n\n";
-		outFile << "Configuration:\n" << configStr << "\n\n";
-		outFile << "VehiclesTransform:\n" << instanceTransformStr << "\n";
+		tinyxml2::XMLElement* config = doc.NewElement("Configuration");
+		saveHelper.serializeField(this->varConfiguration(), config, doc);
+		doc.InsertFirstChild(config);
 
-		outFile.close();*/
+		doc.SaveFile(path.string().c_str());
 	}
 
 	template<typename TDataType>
 	void ConfigurableBody<TDataType>::loadFromFile()
 	{
-		//auto Path = this->varLoadConfigPath()->getValue();
+		auto path = this->varLoadConfigPath()->getValue().string();
 
-		//std::ifstream inFile(Path.string(), std::ios::in);
-		//if (!inFile.is_open())
-		//{
-		//	//throw std::runtime_error("Error Path : " + Path.string());
-		//	return;
-		//}
+		tinyxml2::XMLDocument doc;
+		if (doc.LoadFile(path.c_str()) != tinyxml2::XML_SUCCESS)
+		{
+			doc.PrintError();
+			std::cout << "Error Load" << std::endl;
+			return ;
+		}
 
-		//std::stringstream buffer;
-		//buffer << inFile.rdbuf();
-		//std::string content = buffer.str();
-		//inFile.close();
+		SceneLoaderXML saveHelper;
+
+		std::map<std::string, FBase*> fieldMap;
+		auto& params = this->getParameters();
+		for (const auto& f : params)
+		{
+			fieldMap[f->getObjectName()] = f;
+			FList* listPtr = dynamic_cast<FList*>(f);
+			if (listPtr)
+				listPtr->clear();
+		}
+
+		tinyxml2::XMLElement* texfileXmls = doc.FirstChildElement("MeshFile");
+		if(texfileXmls)
+			saveHelper.deserializeField(texfileXmls, fieldMap);
+
+		tinyxml2::XMLElement* transXmls = doc.FirstChildElement("Transform");
+		if(transXmls)
+			saveHelper.deserializeField(transXmls, fieldMap);
+
+		tinyxml2::XMLElement* configXmls = doc.FirstChildElement("Configuration");
+		if(configXmls)
+			saveHelper.deserializeField(configXmls, fieldMap);
 
 
-		//auto extractSection = [](const std::string& text, const std::string& sectionName) -> std::string {
-		//	std::string startTag = sectionName + ":";
-		//	size_t startPos = text.find(startTag);
-		//	if (startPos == std::string::npos)
-		//		throw std::runtime_error("Error Section: " + sectionName);
-
-		//	size_t lineEnd = text.find('\n', startPos);
-		//	if (lineEnd == std::string::npos)
-		//		lineEnd = text.length();
-
-		//	size_t contentStart = lineEnd + 1;
-
-		//	size_t endPos = text.find("\n\n", contentStart);
-		//	if (endPos == std::string::npos)
-		//		endPos = text.length();
-
-		//	return text.substr(contentStart, endPos - contentStart);
-		//};
-
-		//std::string fileStr = extractSection(content, "TextureMesh File");
-		//std::string configStr = extractSection(content, "Configuration");
-		//std::string instanceTransformStr = extractSection(content, "VehiclesTransform");
-
-		//this->inTextureMesh()->deserialize(fileStr);
-		//this->varConfiguration()->deserialize(configStr);
-		//this->varVehiclesTransform()->deserialize(instanceTransformStr);
 	}
 
 	ElementType ToElementType(RigidShapeType configShape)
@@ -240,7 +236,7 @@ namespace dyno
 			ArticulatedBody<TDataType>::varChanged();
 		}
 		std::cout << this->varConfiguration()->getValue().varRigidBodyConfigs()->size()<<"\n";
-		if (!this->varConfiguration()->getValue().isValid() || !bool(this->varVehiclesTransform()->getValue().size()) || this->stateTextureMesh()->isEmpty())
+		if (!this->varConfiguration()->getValue().isValid() || !bool(this->varVehiclesTransform()->size()) || this->stateTextureMesh()->isEmpty())
 			return;
 
 		auto texMesh = this->stateTextureMesh()->constDataPtr();
@@ -339,8 +335,7 @@ namespace dyno
 		}
 
 		// **************************** Create RigidBody  **************************** //
-		auto instances = this->varVehiclesTransform()->getValue();
-		uint vehicleNum = instances.size();
+		auto instances = this->varVehiclesTransform();
 		int maxGroup = 0;
 
 		for (auto rigid = rigidInfo->begin(); rigid != rigidInfo->end(); rigid++)
@@ -351,8 +346,11 @@ namespace dyno
 		}
 
 
-		for (size_t j = 0; j < vehicleNum; j++)
+		int j = 0;
+		for (auto it = varVehiclesTransform()->begin(); it != varVehiclesTransform()->end(); it++, j++)
 		{
+			auto instance = instances->getElement(it);
+
 			std::vector<std::shared_ptr<PdActor>> Actors;
 			Actors.resize(rigidInfo->size());
 			int i = -1;
@@ -382,7 +380,7 @@ namespace dyno
 				RigidBodyInfo rigidbody;
 
 				rigidbody.bodyId = j * maxGroup + rigid.varConfigGroup()->getValue();
-				rigidbody.angle = rigid.varAngel()->getValue() * Quat<Real>(instances[j].rotation());
+				rigidbody.angle = rigid.varAngel()->getValue() * Quat<Real>(instance.rotation());
 				rigidbody.linearVelocity = rigid.varLinearVelocity()->getValue();
 				rigidbody.angularVelocity = rigid.varAngularVelocity()->getValue();
 				
@@ -407,7 +405,7 @@ namespace dyno
 					}
 				}
 				
-				rigidbody.position = Quat<Real>(instances[j].rotation()).rotate(rigidbody.position) + instances[j].translation();
+				rigidbody.position = Quat<Real>(instance.rotation()).rotate(rigidbody.position) + instance.translation();
 
 				rigidbody.offset = rigid.varOffset()->getValue();
 				rigidbody.inertia = rigid.varInertia()->getValue();
@@ -546,8 +544,9 @@ namespace dyno
 				int first = jointDetail.varARigidBodyId()->getValue();
 				int second = jointDetail.varBRigidBodyId()->getValue();
 				Real speed = jointDetail.varMoter()->getValue();
-				auto axis = Quat1f(instances[j].rotation()).rotate(jointDetail.varAxis()->getValue());
+				auto axis = Quat1f(instance.rotation()).rotate(jointDetail.varAxis()->getValue());
 				auto anchorOffset = jointDetail.varAnchorPoint()->getValue();
+				auto relative = jointDetail.varRelativeAnchorPoint()->getValue();
 
 				if (first == -1 || second == -1)
 				{
@@ -569,7 +568,7 @@ namespace dyno
 				if (type == JOINT_Hinge)
 				{
 					auto& hingeJoint = this->createHingeJoint(Actors[first], Actors[second]);
-					hingeJoint.setAnchorPoint(Actors[first]->center + anchorOffset);
+					hingeJoint.setAnchorPoint(relative ? (Actors[first]->center + anchorOffset) : anchorOffset);
 					hingeJoint.setAxis(axis);
 					if (jointDetail.varUseMoter()->getValue())
 						hingeJoint.setMoter(speed);

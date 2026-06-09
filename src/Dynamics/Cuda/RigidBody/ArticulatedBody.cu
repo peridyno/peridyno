@@ -16,7 +16,7 @@
 #include "GltfFunc.h"
 #include "helpers/tinyobj_helper.h"
 
-#include <fstream>
+#include "SceneLoaderXML.h"
 
 namespace dyno
 {
@@ -49,6 +49,9 @@ namespace dyno
 		this->stateTextureMesh()->connect(prRender->inTextureMesh());
 		transformer->outInstanceTransform()->connect(prRender->inTransform());
 		this->graphicsPipeline()->pushModule(prRender);
+
+		if(this->varVehiclesTransform()->size()==0)
+			this->varVehiclesTransform()->pushBack(Transform3f());
 
 		this->setForceUpdate(true);
 	}
@@ -164,36 +167,6 @@ namespace dyno
 				this->stateTextureMesh()->getDataPtr();
 
 		}
-	}
-
-	template<typename TDataType>
-	void ArticulatedBody<TDataType>::saveToFile()
-	{
-		//auto fileStr = this->varFilePath()->serialize();
-		//MultiBodyBind vehicleBind;//T value, std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent
-		//
-		//
-		//vehicleBind.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo());
-
-		//FVar<MultiBodyBind> fvarBind(vehicleBind,"tempBind","", FieldTypeEnum::Param,NULL);
-		//auto configStr = fvarBind.serialize();
-		//auto instanceTransformStr = this->varVehiclesTransform()->serialize();
-
-		//auto Path = this->varSaveConfigPath()->getValue();
-
-		//std::ofstream outFile(Path.string(), std::ios::out | std::ios::trunc);
-		//if (!outFile.is_open())
-		//{
-		//	throw std::runtime_error("Error Path : " + Path.string());
-		//}
-
-		//outFile << "TextureMesh File:\n" << fileStr << "\n\n";
-		//outFile << "VehicleConfiguration:\n" << configStr << "\n\n";
-		//outFile << "VehiclesTransform:\n" << instanceTransformStr << "\n";
-
-		//outFile.close();
-		
-		
 	}
 
 	template<typename TDataType>
