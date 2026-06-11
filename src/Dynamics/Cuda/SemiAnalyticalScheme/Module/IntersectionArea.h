@@ -21,7 +21,7 @@ namespace dyno
 	/**
 	 * @brief Calculate the intersection area between a sphere and a triangle by using the domain decompsotion algorithm.
 	 * 			For more details, please refer to Section 4.1 of [Chang et al. 2020]: "Semi-analytical Solid Boundary Conditions for Free Surface Flows"
-	 * 
+	 *
 	 * @param pt center of the sphere
 	 * @param triangle trianlge
 	 * @param r radius of the sphere
@@ -48,7 +48,7 @@ namespace dyno
 		if (abs(pt.distance(triangle)) > R)
 			return Real(0);
 
-		Real r = sqrt(R2 - d2);
+		Real r = glm::sqrt(R2 - d2);
 
 		TPoint3D<Real> center = pt.project(plane);
 
@@ -92,8 +92,8 @@ namespace dyno
 			Point3D p1 = center.project(line1);
 			Point3D p2 = center.project(line2);
 
-			Real l1 = sqrt(r * r - center.distanceSquared(p1));
-			Real l2 = sqrt(r * r - center.distanceSquared(p2));
+			Real l1 = glm::sqrt(r * r - center.distanceSquared(p1));
+			Real l2 = glm::sqrt(r * r - center.distanceSquared(p2));
 
 			Coord3D s1 = p1.origin - l1 * dir01;
 			Coord3D s2 = p2.origin - l2 * dir02;
@@ -103,7 +103,7 @@ namespace dyno
 
 			Real d1 = center.distance(Segment3D(s1, s2));
 			Real d10 = 0.5 * (s1 - s2).norm();
-			Real angle = asin(d10 / r);
+			Real angle = glm::asin(d10 / r);
 			Real secArea = angle * r * r - d1 * d10;
 
 			ret += secArea;
@@ -143,8 +143,8 @@ namespace dyno
 			Real d1 = center.distance(p1);
 			Real d2 = center.distance(p2);
 
-			Real l1 = sqrt(r * r - d1 * d1);
-			Real l2 = sqrt(r * r - d2 * d2);
+			Real l1 = glm::sqrt(r * r - d1 * d1);
+			Real l2 = glm::sqrt(r * r - d2 * d2);
 
 			Coord3D s1 = p1.origin + l1 * dir01;
 			Coord3D s2 = p2.origin + l2 * dir02;
@@ -155,8 +155,8 @@ namespace dyno
 				ret += Triangle3D(v0, v1, v2).area();
 
 				TPoint3D<Real> p0 = center.project(seg12);
-				Real l = sqrt(r * r - center.distanceSquared(p0));
-				
+				Real l = glm::sqrt(r * r - center.distanceSquared(p0));
+
 				Coord3D s10 = p0.origin - l * dir12;
 				Coord3D s20 = p0.origin + l * dir12;
 
@@ -165,12 +165,12 @@ namespace dyno
 
 				Real d2 = center.distance(Segment3D(s2, s20));
 				Real d20 = 0.5 * (s2 - s20).norm();
-				Real angle2 = asin(d20 / r);
+				Real angle2 = glm::asin(d20 / r);
 				Real secArea2 = angle2 * r * r - d2 * d20;
 
 				Real d1 = center.distance(Segment3D(s1, s10));
 				Real d10 = 0.5 * (s1 - s10).norm();
-				Real angle1 = asin(d10 / r);
+				Real angle1 = glm::asin(d10 / r);
 				Real secArea1 = angle1 * r * r - d1 * d10;
 
 				ret += secArea1 + secArea2;
@@ -182,7 +182,7 @@ namespace dyno
 
 				Real d0 = center.distance(Segment3D(s1, s2));
 				Real d12 = 0.5 * (s1 - s2).norm();
-				Real angle = asin(d12 / r);
+				Real angle = glm::asin(d12 / r);
 
 				//check whether the center is located inside the triangle
 				bool opposite = (v0 - s1).dot(center.origin - s1) < 0;
@@ -215,8 +215,8 @@ namespace dyno
 			Real d0 = center.distance(p);
 			if (d0 <= r)
 			{
-				Real d1 = sqrt(r * r - d0 * d0);
-				Real angle = asin(d1 / r);
+				Real d1 = glm::sqrt(r * r - d0 * d0);
+				Real angle = glm::asin(d1 / r);
 
 				//check whether the center is located inside the triangle
 				bool opposite = (p.origin - center.origin).dot(p.origin - v0) < 0;

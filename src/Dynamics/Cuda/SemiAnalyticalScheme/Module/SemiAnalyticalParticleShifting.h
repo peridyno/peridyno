@@ -48,9 +48,9 @@ namespace dyno
 
 		DEF_VAR(Real, Bulk, Real(0.5), "bulk");
 
-		DEF_VAR(Real, SurfaceTension, Real(0.03), "surface tension");
+		DEF_VAR(Real, SurfaceTension, Real(0.1), "surface tension");
 
-		DEF_VAR(Real, AdhesionIntensity, Real(30.0), "adhesion");
+		DEF_VAR(Real, AdhesionIntensity, Real(3000.0), "adhesion");
 
 		DEF_VAR(Real, RestDensity, Real(1000.0), "Rest Density");
 

@@ -2,7 +2,7 @@
 
 #include "Collision/NeighborTriangleQuery.h"
 
-#include "TriangularMeshConstraint.h"
+#include "Module/TriangularMeshConstraint.h"
 
 #include "Auxiliary/DataSource.h"
 

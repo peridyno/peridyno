@@ -27,11 +27,13 @@ namespace dyno {
 	protected:
 		void calculateParticleMass();
 
-		void compute(DArray<Real>& rho);
+		void compute(DArray<Real>& rho,
+					 DArray<Real>& rhoBoundary);
 
 	public:
 		void compute(
 			DArray<Real>& rho,
+			DArray<Real>& rhoBoundary,
 			DArray<Coord>& pos,
 			DArray<Topology::Triangle>& Tri,
 			DArray<Coord>& positionTri,
@@ -39,6 +41,7 @@ namespace dyno {
 			DArrayList<int>& neighborsTri,
 			Real smoothingLength,
 			Real mass,
+			Real restDensity,
 			Real sampling_distance);
 
 	public:
@@ -51,6 +54,7 @@ namespace dyno {
 		DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "");
 
 		DEF_ARRAY_OUT(Real, Density, DeviceType::GPU, "Return the particle density");
+		DEF_ARRAY_OUT(Real, BoundaryDensity, DeviceType::GPU, "Return the density contributed by the boundary");
 
 	private:
 		Real m_particle_mass;

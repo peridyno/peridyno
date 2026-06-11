@@ -1,8 +1,12 @@
 #include "SemiAnalyticalSFINode.h"
-#include "SemiAnalyticalSharedFunc.h"
+
+#include "Module/SemiAnalyticalSharedFunc.h"
 
 //#include "PBFM.h"
-#include "SemiAnalyticalPositionBasedFluidModel.h"
+#include "Module/SemiAnalyticalPositionBasedFluidModel.h"
+#include "Module/SemiAnalyticalParticleShifting.h"
+#include "Module/TriangularMeshConstraint.h"
+
 #include "ParticleSystem/ParticleSystem.h"
 
 #include "ParticleSystem/Module/ParticleIntegrator.h"
@@ -10,12 +14,6 @@
 
 #include "Collision/NeighborPointQuery.h"
 #include "Collision/NeighborTriangleQuery.h"
-
-#include "SemiAnalyticalParticleShifting.h"
-
-#include "TriangularMeshConstraint.h"
-
-#include "Auxiliary/DataSource.h"
 
 namespace dyno
 {
@@ -28,15 +26,8 @@ namespace dyno
 		//Clear the animation pipeline in ParticleFluid
 		this->animationPipeline()->clear();
 
-		auto smoothingLength = std::make_shared<FloatingNumber<TDataType>>();
-		smoothingLength->setName("Smoothing Length");
-		smoothingLength->varValue()->setValue(Real(0.012));
-		this->animationPipeline()->pushModule(smoothingLength);
-
-		auto samplingDistance = std::make_shared<FloatingNumber<TDataType>>();
-		samplingDistance->setName("Sampling Distance");
-		samplingDistance->varValue()->setValue(Real(0.005));
-		this->animationPipeline()->pushModule(samplingDistance);
+		this->varSamplingDistance()->setValue(0.005f);
+		this->varSmoothingLength()->setValue(2.4f);
 
 		//integrator
 		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
@@ -47,13 +38,13 @@ namespace dyno
 
 		//neighbor query
 		auto nbrQuery = std::make_shared<NeighborPointQuery<TDataType>>();
-		smoothingLength->outFloating()->connect(nbrQuery->inRadius());
+		this->stateSmoothingLength()->connect(nbrQuery->inRadius());
 		this->statePosition()->connect(nbrQuery->inPosition());
 		this->animationPipeline()->pushModule(nbrQuery);
 
 		//triangle neighbor
 		auto nbrQueryTri = std::make_shared<NeighborTriangleQuery<TDataType>>();
-		smoothingLength->outFloating()->connect(nbrQueryTri->inRadius());
+		this->stateSmoothingLength()->connect(nbrQueryTri->inRadius());
 		this->statePosition()->connect(nbrQueryTri->inPosition());
 		this->inTriangleSet()->connect(nbrQueryTri->inTriangleSet());
 		this->animationPipeline()->pushModule(nbrQueryTri);
@@ -73,8 +64,8 @@ namespace dyno
 		auto viscosity = std::make_shared<ImplicitViscosity<TDataType>>();
 		viscosity->varViscosity()->setValue(Real(0.5));//0.5
 		this->stateTimeStep()->connect(viscosity->inTimeStep());
-		smoothingLength->outFloating()->connect(viscosity->inSmoothingLength());
-		samplingDistance->outFloating()->connect(viscosity->inSamplingDistance());
+		this->stateSmoothingLength()->connect(viscosity->inSmoothingLength());
+		this->stateSamplingDistance()->connect(viscosity->inSamplingDistance());
 		this->statePosition()->connect(viscosity->inPosition());
 		this->stateVelocity()->connect(viscosity->inVelocity());
 		nbrQuery->outNeighborIds()->connect(viscosity->inNeighborIds());
@@ -82,16 +73,13 @@ namespace dyno
 
 		//particle shifting
 		auto pshiftModule = std::make_shared<SemiAnalyticalParticleShifting<TDataType>>();
-		samplingDistance->outFloating()->connect(pshiftModule->inSamplingDistance());
-		smoothingLength->outFloating()->connect(pshiftModule->inSmoothingLength());
+		this->stateSamplingDistance()->connect(pshiftModule->inSamplingDistance());
+		this->stateSmoothingLength()->connect(pshiftModule->inSmoothingLength());
 		this->stateTimeStep()->connect(pshiftModule->inTimeStep());
 		this->statePosition()->connect(pshiftModule->inPosition());
 		this->stateVelocity()->connect(pshiftModule->inVelocity());
-		nbrQuery->outNeighborIds()->connect(pshiftModule->inNeighborIds());
 		this->inTriangleSet()->connect(pshiftModule->inTriangleSet());
-// 		this->stateTriangleVertex()->connect(pshiftModule->inTriangleVer());
-// 		this->stateTriangleIndex()->connect(pshiftModule->inTriangleInd());
-//		this->stateAttribute()->connect(pshiftModule->inAttribute());
+		nbrQuery->outNeighborIds()->connect(pshiftModule->inNeighborIds());
 		nbrQueryTri->outNeighborIds()->connect(pshiftModule->inNeighborTriIds());
 		this->animationPipeline()->pushModule(pshiftModule);
 

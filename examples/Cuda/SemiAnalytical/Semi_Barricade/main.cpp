@@ -26,10 +26,8 @@
 #include <GLSurfaceVisualModule.h>
 #include <GLInstanceVisualModule.h>
 
-#include "SemiAnalyticalScheme/ComputeParticleAnisotropy.h"
 #include "SemiAnalyticalScheme/SemiAnalyticalSFINode.h"
 #include "SemiAnalyticalScheme/TriangularMeshBoundary.h"
-#include "SemiAnalyticalScheme/SemiAnalyticalPositionBasedFluidModel.h"
 
 #include "StaticMeshLoader.h"
 
@@ -89,8 +87,6 @@ std::shared_ptr<SceneGraph> createScene()
 
 	//SFI node
 	auto sfi = scn->addNode(std::make_shared<TriangularMeshBoundary<DataType3f>>());
-	auto pbd = std::make_shared<SemiAnalyticalPositionBasedFluidModel<DataType3f>>();
-	pbd->varSmoothingLength()->setValue(0.0085);
 
 	auto merge = scn->addNode(std::make_shared<MergeTriangleSet<DataType3f>>());
 	boundary->stateTriangleSet()->connect(merge->inFirst());
