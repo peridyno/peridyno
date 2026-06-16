@@ -30,7 +30,7 @@ namespace dyno{
 {																															\
 	dim3 gridDims, blockDims;																								\
 	computeGridSize3D(grid, block, gridDims, blockDims);																	\
-	##name << < gridDims, blockDims>> >(__VA_ARGS__);																		\
+	name <<< gridDims, blockDims>>>(__VA_ARGS__);   																		\
 	cudaError_t code = cudaDeviceSynchronize();																				\
 	if (code != cudaSuccess)																								\
 	{																														\
@@ -64,11 +64,11 @@ namespace dyno{
 	{
 		typedef typename TDataType::Real Real;
 
-		typedef typename DArray3D<int> Grid1i;
-		typedef typename DArray3D<Real> Grid1f;
-		typedef typename DArray3D<Vector<Real, 3>> Grid3f;
-		typedef typename DArray3D<Vector<Real, 4>> Grid4f;
-		typedef typename DArray3D<Coef> GridCoef;
+		typedef DArray3D<int> Grid1i;
+		typedef DArray3D<Real> Grid1f;
+		typedef DArray3D<Vector<Real, 3>> Grid3f;
+		typedef DArray3D<Vector<Real, 4>> Grid4f;
+		typedef DArray3D<Coef> GridCoef;
 
 	public:
 		PhaseFieldKernels() {};

@@ -194,7 +194,7 @@ namespace dyno
 		}
 	}
 
-	CollisionMask ToCollisionMask(int configMask)
+	CollisionMask ToCollisionMask(unsigned int configMask)
 	{
 		switch (configMask)
 		{
@@ -244,7 +244,7 @@ namespace dyno
 			return;
 
 		auto texMesh = this->stateTextureMesh()->constDataPtr();
-		auto& config = this->varConfiguration()->getValue();
+		auto&& config = this->varConfiguration()->getValue();
 
 		auto rigidInfo = config.varRigidBodyConfigs();
 		std::cout << rigidInfo;

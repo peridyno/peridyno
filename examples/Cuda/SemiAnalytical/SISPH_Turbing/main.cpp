@@ -7,7 +7,7 @@
 #include <RigidBody/Module/InstanceTransform.h>
 
 #include <ParticleSystem/Emitters/CircularEmitter.h>
-#include "ParticleSystem/Particlefluid.h"
+#include "ParticleSystem/ParticleFluid.h"
 
 #include "SemiAnalyticalScheme/SemiAnalyticalParticleFluid.h"
 
