@@ -250,7 +250,7 @@ namespace dyno {
 		}
 		mPolyN[pId] = N;
 		// Warm-start: keep previous kappa as initial guess, but clamp to lower bound.
-		if (warmStart)	
+		if (warmStart)
 		{
 			outKappas[pId] = outKappas[pId] > KappaLower ? outKappas[pId] : KappaLower;
 		}
@@ -281,6 +281,7 @@ namespace dyno {
 		DArray<Coord> Kappas,
 		DArray<Coord> posBuf,	//in
 		DArray<Real> rho,		//in
+		DArray<Real> BoundaryDensity,
 		DArrayList<int> neighbors,	//in
 		Real smoothingLength,
 		Real mu,
@@ -292,11 +293,13 @@ namespace dyno {
 		if (pId >= posNext.size()) return;
 		Real rho_0 = Real(1000);
 
-		Real rho_i = rho[pId];
+		Real rho_i = rho[pId] - BoundaryDensity[pId];
 		rho_i = rho_i > rho_0 ? rho_i : rho_0;
+		Real bulk_rho_i = rho[pId];
+		bulk_rho_i = bulk_rho_i > rho_0 ? bulk_rho_i : rho_0;
 		Real A = mu * dt * dt / rho_0;
-
 		Real B_plus = rho_i / rho_0;
+		Real bulk_B_plus = bulk_rho_i / rho_0;
 		Real B_minus = Real(-1);
 
 		Coord pos_i = posBuf[pId];
@@ -333,7 +336,7 @@ namespace dyno {
 				posAcc_i += B_minus * a_ij * pos_j + B_plus * a_ij * (pos_j - pos_i);
 #endif // CONSERVE_MOMETNUM
 				a_i += B_minus * a_ij;
-				Kappas[pId] += (B_plus + B_minus) * a_ij * (pos_j - pos_i) / (dt * dt);
+				Kappas[pId] += (bulk_B_plus + B_minus) * a_ij * (pos_j - pos_i) / (dt * dt);
 			}
 		}
 #ifdef CONSERVE_MOMETNUM
@@ -1096,6 +1099,7 @@ namespace dyno {
 				mKappa,
 				mPosBuf,
 				this->outDensity()->getData(),
+				mCalculateDensity->outBoundaryDensity()->getData(),
 				this->inNeighborIds()->getData(),
 				h,
 				this->varMu()->getValue(),

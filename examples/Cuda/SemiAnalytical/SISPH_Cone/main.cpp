@@ -78,7 +78,7 @@ std::shared_ptr<SceneGraph> createScene()
 	auto solver = sfi->animationPipeline()->findFirstModule<SemiAnalyticalDensitySolver<DataType3f>>();
 	solver->varIterationNumber()->setValue(5);
 	solver->varMu()->setValue(1.0);
-	solver->varBoundaryFriction()->setValue(0.0001f);
+	solver->varBoundaryFriction()->setValue(0.000001f);
 	solver->varKappaLower()->setValue(100.0f);
 	solver->varPolynomialNumber()->setValue(5);
 	solver->varD_hat()->setValue(sfi->varSamplingDistance()->getValue() * 2);
