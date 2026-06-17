@@ -172,6 +172,9 @@ namespace dyno
 	template<typename TDataType>
 	void J15Operator<TDataType>::updateInput()
 	{
+		if (mExternalInput)
+			return;
+
 		const Real step = Real(0.01);
 
 		if (mKeyA)

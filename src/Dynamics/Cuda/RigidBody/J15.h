@@ -93,15 +93,42 @@ namespace dyno
 		DEF_ARRAY_IN(Matrix, InitialInertia, DeviceType::GPU, "");
 		DEF_INSTANCE_IN(DiscreteElements<TDataType>, Topology, "");
 
+		void setFlightInput(const FlightInput& input) {
+			mInput = input;
+			mExternalInput = true;
+		}
+		void setFlightInput(Real elev, Real ail, Real rud, Real stab, Real thr) {
+			mInput.Elevator = elev;
+			mInput.Aileron = ail;
+			mInput.Rudder = rud;
+			mInput.Stabilator = stab;
+			mInput.Throttle = thr;
+			mExternalInput = true;
+		}
+
+		void step(Real elev, Real ail, Real rud, Real stab, Real thr, Real dt) {
+			setFlightInput(elev, ail, rud, stab, thr);
+			stepFlightModel(dt);
+			applyFlightState();
+		}
+
+		void setUseExternalInput(bool b) { mExternalInput = b; }
+		bool isExternalInput() const { return mExternalInput; }
+
+		const FlightState& getFlightState() const { return mState; }
+		const FlightInput& getFlightInput() const { return mInput; }
+		const FlightConstants& getFlightConstants() const { return mConstants; }
+
 	protected:
 		void onEvent(PKeyboardEvent event) override;
 		void postprocess() override;
 
-	private:
-		void setKeyState(PKeyboardType key, bool pressed);
 		void updateInput();
 		void stepFlightModel(Real dt);
 		void applyFlightState();
+
+	private:
+		void setKeyState(PKeyboardType key, bool pressed);
 		static Real clamp(Real value, Real lo, Real hi);
 
 	private:
@@ -117,6 +144,7 @@ namespace dyno
 		bool mKeyK = false;
 		bool mKeyV = false;
 
+		bool mExternalInput = false;
 		bool mInitialized = false;
 		bool mResetRequested = false;
 		bool mHasAttitudeIncrement = false;
@@ -144,6 +172,8 @@ namespace dyno
 
 		J15();
 		~J15() override;
+
+		std::shared_ptr<J15Operator<TDataType>> getOperator() { return aircraftOperator; }
 
 	protected:
 		void resetStates() override;
