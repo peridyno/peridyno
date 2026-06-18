@@ -27,7 +27,7 @@
 #include "blend.frag.h"
 #include "postprocess.frag.h"
 #include "surface.frag.h"
-#include "cuda/Module/GLPhotorealisticRender.h"
+#include "Module/GLPhotorealisticRender.h"
 #include "Topology/TriangleSet.h"
 #include "Topology/TextureMesh.h"
 #include "Topology/DiscreteElements.h"

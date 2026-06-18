@@ -1,5 +1,9 @@
 //#include "Primitive3D.h"
-#include "Complex.h"
+#ifdef _WIN32
+	#include "complex.h"
+#else
+	
+#endif
 
 #include "CCD/TightCCD.h"
 

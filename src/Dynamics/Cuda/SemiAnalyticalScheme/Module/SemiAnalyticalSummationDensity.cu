@@ -8,12 +8,11 @@ namespace dyno
 {
 	IMPLEMENT_TCLASS(SemiAnalyticalSummationDensity, TDataType)
 
-	template<typename TDataType>
+	template <typename TDataType>
 	SemiAnalyticalSummationDensity<TDataType>::SemiAnalyticalSummationDensity()
-		: ParticleApproximation<TDataType>()
-		, m_factor(Real(1))
+		: ParticleApproximation<TDataType>(), m_factor(Real(1))
 	{
-		this->varRestDensity()->setValue(Real(1000));//1000
+		this->varRestDensity()->setValue(Real(1000)); // 1000
 
 		auto callback = std::make_shared<FCallBackFunc>(
 			std::bind(&SemiAnalyticalSummationDensity<TDataType>::calculateParticleMass, this));
@@ -22,26 +21,28 @@ namespace dyno
 		this->inSamplingDistance()->attach(callback);
 	}
 
-	template<typename TDataType>
+	template <typename TDataType>
 	void SemiAnalyticalSummationDensity<TDataType>::compute()
 	{
 		auto ts = this->inTriangleSet()->constDataPtr();
-		auto& triVertex = ts->getPoints();
-		auto& triIndex = ts->triangleIndices();
+		auto &triVertex = ts->getPoints();
+		auto &triIndex = ts->triangleIndices();
 
 		int p_num = this->inPosition()->getDataPtr()->size();
 		int n_num = this->inNeighborIds()->getDataPtr()->size();
 		int t_num = triIndex.size();
 		int tn_num = this->inNeighborTriIds()->getDataPtr()->size();
 
-		//printf("tn_num:  %d\n", tn_num);
+		// printf("tn_num:  %d\n", tn_num);
 
-		if (p_num != n_num ) {
+		if (p_num != n_num)
+		{
 			Log::sendMessage(Log::Error, "The input array sizes of DensitySummation are not compatible!");
 			return;
 		}
 
-		if (this->outDensity()->size() != p_num) {
+		if (this->outDensity()->size() != p_num)
+		{
 			this->outDensity()->resize(p_num);
 			this->outBoundaryDensity()->resize(p_num);
 		}
@@ -60,15 +61,14 @@ namespace dyno
 			this->inSamplingDistance()->getData());
 	}
 
-
-	template<typename TDataType>
+	template <typename TDataType>
 	void SemiAnalyticalSummationDensity<TDataType>::compute(
-		DArray<Real>& rho,
-		DArray<Real>& rhoBoundary)
+		DArray<Real> &rho,
+		DArray<Real> &rhoBoundary)
 	{
 		auto ts = this->inTriangleSet()->constDataPtr();
-		auto& triVertex = ts->getPoints();
-		auto& triIndex = ts->triangleIndices();
+		auto &triVertex = ts->getPoints();
+		auto &triIndex = ts->triangleIndices();
 
 		compute(
 			rho,
@@ -84,7 +84,7 @@ namespace dyno
 			this->inSamplingDistance()->getData());
 	}
 
-	template<typename Real, typename Coord, typename Kernel>
+	template <typename Real, typename Coord, typename Kernel>
 	__global__ void SASD_ComputeDensity(
 		DArray<Real> rhoArr,
 		DArray<Coord> posArr,
@@ -96,14 +96,15 @@ namespace dyno
 		Real scale)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= posArr.size()) return;
+		if (pId >= posArr.size())
+			return;
 
 		Real r;
 		Real rho_i = Real(0);
 		Real rho_tmp(0);
 		Coord pos_i = posArr[pId];
 
-		List<int>& list_i = neighbors[pId];
+		List<int> &list_i = neighbors[pId];
 
 		int nbSize = list_i.size();
 		for (int ne = 0; ne < nbSize; ne++)
@@ -116,7 +117,7 @@ namespace dyno
 		rhoArr[pId] = rho_i;
 	}
 
-	template<typename Real, typename Coord, typename Kernel>
+	template <typename Real, typename Coord, typename Kernel>
 	__global__ void SASD_BoundaryIntegral(
 		DArray<Real> rhoInterior,
 		DArray<Real> rhoBoundary,
@@ -130,14 +131,15 @@ namespace dyno
 		Real scale)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= rhoInterior.size()) return;
+		if (pId >= rhoInterior.size())
+			return;
 
 		Real weight_i = Real(0);
 		Coord pos_i = posArr[pId];
 
 		Real threshold = Real(0.1);
 
-		List<int>& nbrTriIds_i = triNeighbors[pId];
+		List<int> &nbrTriIds_i = triNeighbors[pId];
 		int nbSizeTri = nbrTriIds_i.size();
 
 		bool onPositiveSide = true;
@@ -178,57 +180,57 @@ namespace dyno
 			onPositiveSide = p3d.signed_distance > 0 ? true : false;
 		}
 
-		//If on the negative side, calculate the compensate
+		// If on the negative side, calculate the compensate
 		Real rho_i = onPositiveSide ? rho_0 * weight_i : rho_0 * (1 - weight_i);
 
 		rhoBoundary[pId] = rho_i;
 		rhoInterior[pId] += rho_i;
 	}
 
-	template<typename TDataType>
+	template <typename TDataType>
 	void SemiAnalyticalSummationDensity<TDataType>::compute(
-		DArray<Real>& rho, 
-		DArray<Real>& rhoBoundary,
-		DArray<Coord>& pos,
-		DArray<Topology::Triangle>& Tri,
-		DArray<Coord>& positionTri,
-		DArrayList<int>& neighbors,
-		DArrayList<int>& neighborsTri,
+		DArray<Real> &rho,
+		DArray<Real> &rhoBoundary,
+		DArray<Coord> &pos,
+		DArray<Topology::Triangle> &Tri,
+		DArray<Coord> &positionTri,
+		DArrayList<int> &neighbors,
+		DArrayList<int> &neighborsTri,
 		Real smoothingLength,
 		Real mass,
 		Real restDensity,
 		Real sampling_distance)
 	{
-		cuZerothOrder(rho.size(), this->varKernelType()->getDataPtr()->currentKey(), mScalingFactor,
-			SASD_ComputeDensity,
-			rho,
-			pos,
-			neighbors,
-			smoothingLength,
-			mass,
-			sampling_distance);
+		cuZerothOrder(rho.size(), this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
+					  SASD_ComputeDensity,
+					  rho,
+					  pos,
+					  neighbors,
+					  smoothingLength,
+					  mass,
+					  sampling_distance);
 		if (neighborsTri.size() > 0)
 		{
-			cuIntegral(rho.size(), this->varKernelType()->getDataPtr()->currentKey(), mScalingFactor,
-				SASD_BoundaryIntegral,
-				rho,
-				rhoBoundary,
-				pos,
-				Tri,
-				positionTri,
-				neighborsTri,
-				smoothingLength,
-				restDensity);
+			cuIntegral(rho.size(), this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
+					   SASD_BoundaryIntegral,
+					   rho,
+					   rhoBoundary,
+					   pos,
+					   Tri,
+					   positionTri,
+					   neighborsTri,
+					   smoothingLength,
+					   restDensity);
 		}
 	}
 
-	template<typename TDataType>
+	template <typename TDataType>
 	void SemiAnalyticalSummationDensity<TDataType>::calculateParticleMass()
 	{
 		Real rho_0 = this->varRestDensity()->getData();
 		Real d = this->inSamplingDistance()->getData();
 
-		m_particle_mass = d*d*d*rho_0;
+		m_particle_mass = d * d * d * rho_0;
 	}
 
 	DEFINE_CLASS(SemiAnalyticalSummationDensity);
