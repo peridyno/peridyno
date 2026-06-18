@@ -1,5 +1,6 @@
 #pragma once
 #include "MatrixBase.h"
+#include "Platform.h"
 
 namespace dyno {
 

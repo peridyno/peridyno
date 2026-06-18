@@ -1,6 +1,6 @@
 #pragma once
 #include "Module/OutputModule.h"
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 #include "Topology/PointSet.h"
 #include <string>
 
@@ -14,7 +14,7 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TopologyModule::Triangle Triangle;
+		typedef typename Topology::Triangle Triangle;
 
 		DECLARE_ENUM(OpenType,
 			ASCII = 0,

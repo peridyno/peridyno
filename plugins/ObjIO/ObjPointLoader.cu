@@ -26,8 +26,8 @@ namespace dyno
 		pointrender = new GLPointVisualModule;
 		std::shared_ptr<GLPointVisualModule>ptrender(pointrender);
 		
-		pointrender->setVisible(true);
-		pointrender->setColor(Color(1, 0, 0));
+		pointrender->varVisible()->setValue(true);
+		pointrender->varBaseColor()->setValue(Color(1, 0, 0));
 		pointrender->varPointSize()->setValue(this->varRadius()->getData());
 		pointrender->varPointSize()->setValue(varRadius()->getData()/100);
 
@@ -137,7 +137,7 @@ namespace dyno
 	void ObjPoint<TDataType>::loadObj(PointSet<TDataType>& pointset, std::string filename)
 	{
 		std::vector<Coord> vertList;
-		std::vector<TopologyModule::Triangle> faceList;
+		std::vector<Topology::Triangle> faceList;
 
 		tinyobj::attrib_t myattrib;
 		std::vector <tinyobj::shape_t> myshape;
@@ -177,7 +177,7 @@ namespace dyno
 			{
 				//std::cout << myshape[i].mesh.indices[s].vertex_index <<"  " << std::endl;
 
-				faceList.push_back(TopologyModule::Triangle(myshape[i].mesh.indices[3 * s].vertex_index, myshape[i].mesh.indices[3 * s + 1].vertex_index, myshape[i].mesh.indices[3 * s + 2].vertex_index));
+				faceList.push_back(Topology::Triangle(myshape[i].mesh.indices[3 * s].vertex_index, myshape[i].mesh.indices[3 * s + 1].vertex_index, myshape[i].mesh.indices[3 * s + 2].vertex_index));
 			}
 		}
 		std::cout << "************************    Loading completed    **********************" << std::endl << std::endl;

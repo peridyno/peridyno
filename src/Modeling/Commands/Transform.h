@@ -46,7 +46,7 @@ namespace dyno
 
 	public:
 		//DEF_INSTANCE_IN(TriangleSet<TDataType>, TriangleSet, "")
-		DEF_INSTANCE_IN(TopologyModule, Topology, "")
+		DEF_INSTANCE_IN(Topology, Topology, "")
 
 		DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 		DEF_INSTANCE_STATE(PointSet<TDataType>, PointSet, "");

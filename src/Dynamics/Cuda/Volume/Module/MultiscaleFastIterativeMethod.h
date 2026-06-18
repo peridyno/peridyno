@@ -57,7 +57,15 @@ namespace dyno {
 		void compute() override;
 
 	private:
+		/**
+		 * @brief Level set generator for TriangleSet
+		 */
 		void makeLevelSet();
+
+		/**
+		 * @brief Level set generator for TriangleSets
+		 */
+		void makeLevelSetFromTriangleSets();
 	};
 }
 

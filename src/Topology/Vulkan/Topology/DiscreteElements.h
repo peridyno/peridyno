@@ -1,7 +1,7 @@
 #pragma once
 #include "VkDeviceArray.h"
 #include "Primitive/Primitive3D.h"
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 
 namespace dyno
 {

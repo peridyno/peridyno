@@ -121,12 +121,12 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void TriangleSets<TDataType>::appendShape(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles)
+	void TriangleSets<TDataType>::appendShape(std::vector<Vec3f>& vertices, std::vector<Topology::Triangle>& triangles)
 	{
 		auto& pts = this->getPoints();
 		auto& tris = this->triangleIndices();
 		DArray<Vec3f> tempPts;
-		DArray<TopologyModule::Triangle> tempTris;
+		DArray<Topology::Triangle> tempTris;
 		DArray<uint> tempId;
 
 		tempPts.assign(pts);
@@ -166,12 +166,12 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void TriangleSets<TDataType>::appendShape(std::vector<Vec3f>& vertices, CArray<TopologyModule::Triangle>& triangles)
+	void TriangleSets<TDataType>::appendShape(std::vector<Vec3f>& vertices, CArray<Topology::Triangle>& triangles)
 	{
 		auto& pts = this->getPoints();
 		auto& tris = this->triangleIndices();
 		DArray<Vec3f> tempPts;
-		DArray<TopologyModule::Triangle> tempTris;
+		DArray<Topology::Triangle> tempTris;
 		DArray<uint> tempId;
 
 		tempPts.assign(pts);
@@ -211,12 +211,12 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void TriangleSets<TDataType>::appendShape(DArray<Vec3f>& vertices, DArray<TopologyModule::Triangle>& triangles)
+	void TriangleSets<TDataType>::appendShape(DArray<Vec3f>& vertices, DArray<Topology::Triangle>& triangles)
 	{
 		auto& pts = this->getPoints();
 		auto& tris = this->triangleIndices();
 		DArray<Vec3f> tempPts;
-		DArray<TopologyModule::Triangle> tempTris;
+		DArray<Topology::Triangle> tempTris;
 		DArray<uint> tempId;
 
 		tempPts.assign(pts);

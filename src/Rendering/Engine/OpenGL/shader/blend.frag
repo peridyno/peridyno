@@ -27,18 +27,27 @@ void main(void)
 			walkerIndex = nodes[walkerIndex].nextIndex;
 		}
 
-		// Sort the indices: Highest to lowest depth.
-		for (uint i = 0; i < numberFragments; i++)
+		// Step 1: Pre-fetch depths to avoid repeated SSBO access
+		float fragmentDepths[MAX_FRAGMENTS];
+		for (uint i = 0; i < numberFragments; i++) {
+			fragmentDepths[i] = nodes[fragmentIndices[i]].depth;
+		}
+
+		// Step 2: Insertion sort using cached depths
+		for (uint i = 1; i < numberFragments; i++)
 		{
-			for (uint j = i + 1; j < numberFragments; j++)
+			float keyDepth = fragmentDepths[i];
+			uint keyIdx = fragmentIndices[i];
+			int j = int(i) - 1;
+    
+			while (j >= 0 && fragmentDepths[uint(j)] < keyDepth)
 			{
-				if (nodes[fragmentIndices[j]].depth > nodes[fragmentIndices[i]].depth)
-				{
-					tempIndex = fragmentIndices[i];
-					fragmentIndices[i] = fragmentIndices[j];
-					fragmentIndices[j] = tempIndex;
-				}
+				fragmentDepths[uint(j + 1)] = fragmentDepths[uint(j)];
+				fragmentIndices[uint(j + 1)] = fragmentIndices[uint(j)];
+				j--;
 			}
+			fragmentDepths[uint(j + 1)] = keyDepth;
+			fragmentIndices[uint(j + 1)] = keyIdx;
 		}
 
 		vec3 color = vec3(0, 0, 0);
@@ -46,12 +55,17 @@ void main(void)
 		float depth = 1.f;
 		for (uint i = 0; i < numberFragments; i++)
 		{
-			if (nodes[fragmentIndices[i]].depth == depth )
-				continue;
+			uint idx = fragmentIndices[i];
+    
+			// Skip if fully transparent
+			if (nodes[idx].color.a < 0.001) continue;
+			if (nodes[idx].depth == depth ) continue;
 			
 			depth = nodes[fragmentIndices[i]].depth;
 			color = mix(color, nodes[fragmentIndices[i]].color.rgb, nodes[fragmentIndices[i]].color.a);
 			factor = factor * (1 - nodes[fragmentIndices[i]].color.a);
+			
+			if (factor < 0.01) break;
 		}
 		float alpha = 1 - factor;
 

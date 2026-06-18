@@ -14,13 +14,13 @@ namespace dyno
 		this->stateTriangleSets()->setDataPtr(std::make_shared<TriangleSets<TDataType>>());
 
 		auto glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Color(0.8f, 0.3f, 0.25f));
-		glModule->setVisible(true);
+		glModule->varBaseColor()->setValue(Color(0.8f, 0.3f, 0.25f));
+		glModule->varVisible()->setValue(true);
 		this->stateTriangleSets()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
 
 		auto ptModule = std::make_shared<GLPointVisualModule>();
-		ptModule->setVisible(false);
+		ptModule->varVisible()->setValue(false);
 		this->stateTriangleSets()->connect(ptModule->inPointSet());
 		this->graphicsPipeline()->pushModule(ptModule);
 		ptModule->varPointSize()->setValue(0.01);

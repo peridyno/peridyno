@@ -53,7 +53,7 @@ namespace dyno
 	class TPoint2D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename dyno::Vector<Real, 2> Coord2D;
 
 	public:
 		DYN_FUNC TPoint2D();
@@ -110,7 +110,7 @@ namespace dyno
 	class TLine2D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename dyno::Vector<Real, 2> Coord2D;
 
 	public:
 		DYN_FUNC TLine2D();
@@ -154,7 +154,7 @@ namespace dyno
 	class TRay2D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename dyno::Vector<Real, 2> Coord2D;
 
 	public:
 		DYN_FUNC TRay2D();
@@ -199,7 +199,7 @@ namespace dyno
 	class TSegment2D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename dyno::Vector<Real, 2> Coord2D;
 
 	public:
 		DYN_FUNC TSegment2D();
@@ -239,7 +239,7 @@ namespace dyno
 	class TCircle2D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename dyno::Vector<Real, 2> Coord2D;
 
 	public:
 		DYN_FUNC TCircle2D();
@@ -257,7 +257,7 @@ namespace dyno
 	class TAlignedBox2D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename dyno::Vector<Real, 2> Coord2D;
 
 	public:
 		DYN_FUNC TAlignedBox2D();
@@ -294,7 +294,7 @@ namespace dyno
 	class TPolygon2D
 	{
 	public:
-		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename dyno::Vector<Real, 2> Coord2D;
 
 	public:
 		TPolygon2D();
@@ -308,7 +308,7 @@ namespace dyno
 
 		void setAsLine(const Coord2D& v0, const Coord2D& v1);
 
-		const uint vertexSize() const { return size; };
+		uint vertexSize() const { return size; };
 
 		inline const Coord2D& vertex(uint i) const { return _vertices[i]; }
 		inline const Coord2D& normal(uint i) const { return _normals[i]; }

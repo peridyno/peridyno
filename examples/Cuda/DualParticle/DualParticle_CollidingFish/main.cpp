@@ -2,8 +2,10 @@
 #include <SceneGraph.h>
 
 ///Particle fluid solver
-#include <DualParticleSystem/DualParticleFluid.h>
+#include <ParticleSystem/ParticleFluid.h>
+#include <ParticleSystem/Emitters/SquareEmitter.h>
 #include <ParticleSystem/MakeParticleSystem.h>
+#include <ParticleSystem/DualParticle/VirtualFissionFusionStrategy.h>
 
 ///Particle Sampler
 #include <PointsLoader.h>
@@ -43,8 +45,10 @@ std::shared_ptr<SceneGraph> createScene()
 	initialParticles2->varInitialVelocity()->setValue(Vec3f(0.0f, 0.0f, 1.5f));
 	ptsLoader2->outPointSet()->promoteOuput()->connect(initialParticles2->inPoints());
 
-	auto fluid = scn->addNode(std::make_shared<DualParticleFluid<DataType3f>>(DualParticleFluid<DataType3f>::FissionFusionStrategy));
-	fluid->varReshuffleParticles()->setValue(true);
+	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
+	fluid->varIncompressibilitySolver()->setCurrentKey(ParticleFluid<DataType3f>::DualParticle);
+	fluid->setDt(0.001);
+	fluid->varSmoothingLength()->setValue(2.4);
 	initialParticles->connect(fluid->importInitialStates());
 	initialParticles2->connect(fluid->importInitialStates());
 
@@ -58,7 +62,7 @@ std::shared_ptr<SceneGraph> createScene()
 	fluid->graphicsPipeline()->pushModule(colorMapper);
 
 	auto ptRender = std::make_shared<GLPointVisualModule>();
-	ptRender->setColor(Color(1, 0, 0));
+	ptRender->varBaseColor()->setValue(Color(1, 0, 0));
 	ptRender->varPointSize()->setValue(0.0025f);
 	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 	fluid->statePointSet()->connect(ptRender->inPointSet());
@@ -73,20 +77,12 @@ std::shared_ptr<SceneGraph> createScene()
 	// add the widget to app
 	fluid->graphicsPipeline()->pushModule(colorBar);
 
-
-	auto vpRender = std::make_shared<GLPointVisualModule>();
-	vpRender->setColor(Color(1, 1, 0));
-	vpRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-	fluid->stateVirtualPointSet()->connect(vpRender->inPointSet());
-	vpRender->varPointSize()->setValue(0.0005);
-	fluid->graphicsPipeline()->pushModule(vpRender);
-
 	return scn;
 }
 
 int main()
 {
-	UbiApp window;
+	UbiApp window(GUIType::GUI_QT);
 	window.setSceneGraph(createScene());
 	window.initialize(1024, 768);
 	window.mainLoop();

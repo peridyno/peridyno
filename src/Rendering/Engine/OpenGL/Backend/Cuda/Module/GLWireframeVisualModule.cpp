@@ -14,25 +14,17 @@ namespace dyno
 	IMPLEMENT_CLASS(GLWireframeVisualModule)
 
 	GLWireframeVisualModule::GLWireframeVisualModule()
+		: GLVisualModule()
 	{
 		this->setName("wireframe_renderer");
-		this->varBaseColor()->setValue(Color::Grey21());
+		this->varBaseColor()->setValue(Color::Grey81());
+		this->varEndColor()->setValue(Color::Grey81());
 		this->varRadius()->setRange(0.001, 0.01);
 	}
 
-	GLWireframeVisualModule::~GLWireframeVisualModule()
-	{
-// 		edges.clear();
-// 		vertices.clear();
-
-// 		mVertexBuffer.release();
-// 		mIndexBuffer.release();
-	}
-
-
 	std::string GLWireframeVisualModule::caption()
 	{
-		return "Wireframe Visual Module";
+		return "GLWireframeVisualModule";
 	}
 
 	bool GLWireframeVisualModule::initializeGL()
@@ -105,7 +97,9 @@ namespace dyno
 		if (rparams.mode == GLRenderMode::COLOR)
 		{
 			Color c = this->varBaseColor()->getValue();
+			Color e = this->varEndColor()->getValue();
 			mShaderProgram->setVec3("uBaseColor", Vec3f(c.r, c.g, c.b));
+			mShaderProgram->setVec3("uEndColor", Vec3f(e.r, e.g, e.b));
 			mShaderProgram->setFloat("uMetallic", this->varMetallic()->getValue());
 			mShaderProgram->setFloat("uRoughness", this->varRoughness()->getValue());
 			mShaderProgram->setFloat("uAlpha", this->varAlpha()->getValue());
@@ -124,17 +118,22 @@ namespace dyno
 		int mode;
 		glGetIntegerv(GL_POLYGON_MODE, &mode);
 
-		if (this->varRenderMode()->getDataPtr()->currentKey() == EEdgeMode::LINE)
+		if (this->varRenderMode()->currentKey() == EEdgeMode::LINE)
 		{
 			mShaderProgram->setInt("uEdgeMode", 0);
 			// draw as lines
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			glLineWidth(this->varLineWidth()->getData());
+			glLineWidth(this->varLineWidth()->getValue());
 		}
-		else
+		else if((this->varRenderMode()->currentKey() == EEdgeMode::CYLINDER))
 		{
 			// draw as cylinders
 			mShaderProgram->setInt("uEdgeMode", 1);
+			mShaderProgram->setFloat("uRadius", this->varRadius()->getValue());
+		}
+		else
+		{
+			mShaderProgram->setInt("uEdgeMode", 2);
 			mShaderProgram->setFloat("uRadius", this->varRadius()->getValue());
 		}
 

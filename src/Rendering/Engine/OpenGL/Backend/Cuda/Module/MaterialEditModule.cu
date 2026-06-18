@@ -248,7 +248,7 @@ __global__ void grayscaleCorrectionKernel(
 		auto brightnessOffset = this->varBrightness()->getValue();
 		outTexture->resize(inTexture.nx(), inTexture.ny());
 
-		cuExecute2D(make_uint2(unsigned int(inTexture.nx()), unsigned int(inTexture.ny())),
+		cuExecute2D(make_uint2((unsigned int)(inTexture.nx()), (unsigned int)(inTexture.ny())),
 			grayscaleCorrectionKernel,
 			inTexture,
 			*outTexture,
@@ -387,7 +387,7 @@ __global__ void grayscaleCorrectionKernel(
 
 		outTexture->resize(inTexture.nx(),inTexture.ny());
 
-		cuExecute2D(make_uint2(unsigned int(inTexture.nx()), unsigned int(inTexture.ny())),
+		cuExecute2D(make_uint2((unsigned int)(inTexture.nx()), (unsigned int)(inTexture.ny())),
 			colorCorrectionKernel,
 			inTexture,
 			*outTexture,
@@ -448,7 +448,7 @@ __global__ void grayscaleCorrectionKernel(
 			this->outB()->resize(inTex->nx(), inTex->ny());
 			this->outA()->resize(inTex->nx(), inTex->ny());
 
-			cuExecute2D(make_uint2(unsigned int(x), unsigned int(y)),
+			cuExecute2D(make_uint2((unsigned int)(x), (unsigned int)(y)),
 				breakTextureKernel,
 				*inTex,
 				*this->outR()->getDataPtr(),
@@ -649,7 +649,7 @@ __global__ void grayscaleCorrectionKernel(
 				this->outTexture()->allocate();
 			this->outTexture()->resize(x,y);
 
-			cuExecute2D(make_uint2(unsigned int(x), unsigned int(y)),
+			cuExecute2D(make_uint2((unsigned int)(x), (unsigned int)(y)),
 				CompositeRGBAKernel,
 				this->inR()->getData(),
 				this->inG()->getData(),
@@ -817,7 +817,7 @@ __global__ void grayscaleCorrectionKernel(
 			if (this->outTexture()->isEmpty())
 				this->outTexture()->allocate();
 			this->outTexture()->resize(x, y);
-			cuExecute2D(make_uint2(unsigned int(x), unsigned int(y)),
+			cuExecute2D(make_uint2((unsigned int)(x), (unsigned int)(y)),
 				MixRGBA,
 				this->inTextureA()->getData(),
 				this->inTextureB()->getData(),
@@ -835,7 +835,7 @@ __global__ void grayscaleCorrectionKernel(
 			if (this->outFloat()->isEmpty())
 				this->outFloat()->allocate();
 			this->outFloat()->resize(x, y);
-			cuExecute2D(make_uint2(unsigned int(x), unsigned int(y)),
+			cuExecute2D(make_uint2((unsigned int)(x), (unsigned int)(y)),
 				MixFloat,
 				this->inFloatA()->getData(),
 				this->inFloatB()->getData(),
@@ -935,7 +935,7 @@ __global__ void grayscaleCorrectionKernel(
 				}
 
 				if (foundModule) {
-					std::cout << "found Module£¬ID = " << foundModule->objectId() << std::endl;
+					std::cout << "found ModuleID = " << foundModule->objectId() << std::endl;
 
 				}
 				else {

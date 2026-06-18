@@ -11,13 +11,13 @@
 #pragma once
 
 #include <string>
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 #include "DistanceField3D.h"
 
 namespace dyno {
 
 	template<typename TDataType>
-	class LevelSet : public TopologyModule {
+	class LevelSet : public Topology {
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
@@ -29,7 +29,5 @@ namespace dyno {
 
 	private:
 		DistanceField3D<TDataType> distanceField;
-
-
 	};
 }

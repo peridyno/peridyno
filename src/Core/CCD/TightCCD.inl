@@ -1,11 +1,8 @@
 #include "Vector.h"
+#include "Math/SimpleMath.h"
 
 namespace dyno
 {
-	#define REAL_infinity 1.0e30
-	#define	REAL_EQUAL(a,b)  (((a < b + EPSILON) && (a > b - EPSILON)) ? true : false)
-
-
 	template<typename T>
 	inline DYN_FUNC T STP(
 		const Vector<T, 3>& u, const Vector<T, 3>& v, const Vector<T, 3>& w)
@@ -37,7 +34,7 @@ namespace dyno
 
 		*n = y01.cross(y02);
 		if ((*n).normSquared() < 1e-6)
-			return REAL_infinity;
+			return REAL_INF;
 		*n = (*n).normalize();
 		T h = (x - y0).dot(*n);
 		T b0 = STP(y1 - x, y2 - x, *n),
@@ -54,8 +51,8 @@ namespace dyno
 	DYN_FUNC T SignedDistanceEE(
 		const Vector<T, 3>& x0, const Vector<T, 3>& x1,
 		const Vector<T, 3>& y0, const Vector<T, 3>& y1,
-		Vector<T, 3>* n, 
-		Real* w) 
+		Vector<T, 3>* n,
+		Real* w)
 	{
 		Vector<T, 3> _n; if (!n) n = &_n;
 		T _w[4]; if (!w) w = _w;
@@ -65,7 +62,7 @@ namespace dyno
 
 		*n = x01.cross(y01);
 		if ((*n).normSquared() < 1e-6)
-			return REAL_infinity;
+			return REAL_INF;
 
 		*n = (*n).normalize();
 		T h = (x0 - y0).dot(*n);
@@ -115,7 +112,7 @@ namespace dyno
 	}
 
 	template<typename T>
-	inline DYN_FUNC T NewtonsMethod(T a, T b, T c, T d, T x0, int init_dir) 
+	inline DYN_FUNC T NewtonsMethod(T a, T b, T c, T d, T x0, int init_dir)
 	{
 		if (init_dir != 0) {
 			// quadratic approximation around x0, assuming y' = 0
@@ -176,8 +173,8 @@ namespace dyno
 		T a2 = STP(x1, v2, v3) + STP(v1, x2, v3) + STP(v1, v2, x3);
 		T a3 = STP(v1, v2, v3);
 
-		if (REAL_EQUAL(a1, 0) && REAL_EQUAL(a2, 0) && REAL_EQUAL(a1, 0))
-		//if (a1 == 0 && a2 == 0 && a3 == 0)
+		if (iseq(a1, 0) && iseq(a2, 0) && iseq(a1, 0))
+			//if (a1 == 0 && a2 == 0 && a3 == 0)
 			return false;
 
 		T t[4];
@@ -210,8 +207,8 @@ namespace dyno
 
 			if (fabs(d) < 1e-6 && inside)
 			{
-// 				time = t[i];
-// 				return true;
+				// 				time = t[i];
+				// 				return true;
 				time = t[i] < time ? t[i] : time;
 				t_flag = true;
 			}

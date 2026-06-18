@@ -15,7 +15,7 @@
  */
 
 #pragma once
-#include "BasicShapes/RectangleModel2D.h"
+#include "BasicShapes2D/RectangleModel2D.h"
 #include "Topology/TextureMesh.h"
 #include "Topology/TriangleSet.h"
 
@@ -28,9 +28,8 @@ namespace dyno
 
 	public:
 		typedef typename TDataType::Real Real;
-		//typedef typename TDataType::Coord Coord2D;
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord3D;
+		typedef typename dyno::Vector<Real, 2> Coord2D;
+		typedef typename dyno::Vector<Real, 3> Coord3D;
 
 		RectangleRotateAroundAxis();
 
@@ -48,7 +47,6 @@ namespace dyno
 
 	private:
 		TAlignedBox3D<Real> m_alignedBox;
-		Coord3D m_center;
 	};
 
 	IMPLEMENT_TCLASS(RectangleRotateAroundAxis, TDataType);

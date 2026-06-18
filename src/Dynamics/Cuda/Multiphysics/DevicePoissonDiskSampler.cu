@@ -75,9 +75,9 @@ namespace dyno
 		m_constraint->varIterationNumber()->setValue(50);
 		m_constraint->varKernelType()->getDataPtr()->setCurrentKey(1);
 		m_constraint->varRestDensity()->setValue(1000.0);
-		this->varSpacing()->connect(m_constraint->inSamplingDistance());
+		//this->varSpacing()->connect(m_constraint->inSamplingDistance());
 		this->stateNeighborLength()->connect(m_constraint->inSmoothingLength());
-		this->varDelta()->connect(m_constraint->inDelta());
+		this->varDelta()->quote(m_constraint->varDelta());
 		this->statePosition()->connect(m_constraint->inPosition());
 		//this->stateVirtualVelocity()->connect(m_constraint->inVelocity());
 		m_neighbor->outNeighborIds()->connect(m_constraint->inNeighborIds());

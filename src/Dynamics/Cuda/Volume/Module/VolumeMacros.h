@@ -31,4 +31,6 @@ namespace dyno
 		Tentative = 1,
 		Infinite = 2
 	};
+
+	constexpr Real MAX_DISTANCE = 10000.0;
 }

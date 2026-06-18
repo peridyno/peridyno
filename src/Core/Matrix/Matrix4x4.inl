@@ -308,10 +308,4 @@ namespace dyno {
 			0.0, 0.0, 0.0, 1.0);
 	}
 
-	template <typename S, typename T>
-	DYN_FUNC  const SquareMatrix<T, 4> operator* (S scale, const SquareMatrix<T, 4> &mat)
-	{
-		return mat * scale;
-	}
-
 }  //end of namespace dyno

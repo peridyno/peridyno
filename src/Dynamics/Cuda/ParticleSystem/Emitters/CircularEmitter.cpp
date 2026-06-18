@@ -26,7 +26,7 @@ namespace dyno
 		this->varRadius()->attach(callback);
 
 		auto wireRender = std::make_shared<GLWireframeVisualModule>();
-		wireRender->setColor(Color(0, 1, 0));
+		wireRender->varBaseColor()->setValue(Color(0, 1, 0));
 		this->stateOutline()->connect(wireRender->inEdgeSet());
 		this->graphicsPipeline()->pushModule(wireRender);
 	}
@@ -36,7 +36,7 @@ namespace dyno
 	{
 		this->mPosition.clear();
 	}
-	
+
 
 	template<typename TDataType>
 	void CircularEmitter<TDataType>::generateParticles()
@@ -50,7 +50,9 @@ namespace dyno
 		auto quat = this->computeQuaternion();
 
 		auto r = this->varRadius()->getData();
-
+		auto framenum = this->stateFrameNumber()->getData();
+		auto stopframe = this->varStopFrame()->getData();
+		auto beginframe = this->varBeginFrame()->getData();
 		std::vector<Coord> pos_list;
 		std::vector<Coord> vel_list;
 
@@ -65,16 +67,19 @@ namespace dyno
 		Real invA2 = Real(1) / (a * a);
 		Real invB2 = Real(1) / (b * b);
 
-		for (Real x = -a; x <= a; x += sampling_distance)
+		if (framenum < stopframe && framenum > beginframe)
 		{
-			for (Real z = -b; z <= b; z += sampling_distance)
+			for (Real x = -a; x <= a; x += sampling_distance)
 			{
-				if ((x * x * invA2 + z * z * invB2) < 1)// && rand() % 5 == 0)
+				for (Real z = -b; z <= b; z += sampling_distance)
 				{
-					Coord p = Coord(x / scale.x, 0, z / scale.z);
+					if ((x * x * invA2 + z * z * invB2) < 1)// && rand() % 5 == 0)
+					{
+						Coord p = Coord(x / scale.x, 0, z / scale.z);
 
-					pos_list.push_back(tr * p);
-					vel_list.push_back(v0);
+						pos_list.push_back(tr * p);
+						vel_list.push_back(v0);
+					}
 				}
 			}
 		}
@@ -96,7 +101,7 @@ namespace dyno
 	void CircularEmitter<TDataType>::tranformChanged()
 	{
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Edge> edges;
+		std::vector<Topology::Edge> edges;
 
 		auto center = this->varLocation()->getData();
 		auto scale = this->varScale()->getData();
@@ -115,7 +120,7 @@ namespace dyno
 			Real z = r * cos(i * deltaTheta);
 
 			vertices.push_back(tr * Coord(x, 0, z));
-			edges.push_back(TopologyModule::Edge(i, (i + 1) % segNum));
+			edges.push_back(Topology::Edge(i, (i + 1) % segNum));
 		}
 
 		auto edgeTopo = this->stateOutline()->getDataPtr();

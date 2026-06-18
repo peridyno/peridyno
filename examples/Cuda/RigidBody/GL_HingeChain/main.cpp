@@ -65,8 +65,8 @@ std::shared_ptr<SceneGraph> creatBricks()
 	rigid->graphicsPipeline()->pushModule(mapper);
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Color(0.204, 0.424, 0.612));
-	sRender->setAlpha(1.0f);
+	sRender->varBaseColor()->setValue(Color(0.204, 0.424, 0.612));
+	sRender->varAlpha()->setValue(1.0f);
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
 
@@ -83,7 +83,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 	rigid->graphicsPipeline()->pushModule(contactMapper);
 
 	auto wireRender = std::make_shared<GLWireframeVisualModule>();
-	wireRender->setColor(Color(0, 0, 0));
+	wireRender->varBaseColor()->setValue(Color(0, 0, 0));
 	mapper->outTriangleSet()->connect(wireRender->inEdgeSet());
 	rigid->graphicsPipeline()->pushModule(wireRender);
 
@@ -93,7 +93,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 	rigid->graphicsPipeline()->pushModule(contactPointMapper);
 
 	auto pointRender = std::make_shared<GLPointVisualModule>();
-	pointRender->setColor(Color(1, 0, 0));
+	pointRender->varBaseColor()->setValue(Color(1, 0, 0));
 	pointRender->varPointSize()->setValue(0.003f);
 	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
 	rigid->graphicsPipeline()->pushModule(pointRender);*/
@@ -106,7 +106,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 	rigid->graphicsPipeline()->pushModule(anchorPointMapper);
 
 	auto pointRender2 = std::make_shared<GLPointVisualModule>();
-	pointRender2->setColor(Color(1, 0, 0));
+	pointRender2->varBaseColor()->setValue(Color(1, 0, 0));
 	pointRender2->varPointSize()->setValue(0.03f);
 	anchorPointMapper->outPointSet()->connect(pointRender2->inPointSet());
 	rigid->graphicsPipeline()->pushModule(pointRender2);*/

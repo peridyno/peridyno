@@ -29,8 +29,8 @@ namespace dyno
 
 		auto wireRender = std::make_shared<GLWireframeVisualModule>();
 		
-		wireRender->setVisible(true);
-		wireRender->setColor(Color::Green());
+		wireRender->varVisible()->setValue(true);
+		wireRender->varBaseColor()->setValue(Color::Green());
 
 		this->stateEdgeSet()->connect(wireRender->inEdgeSet());
 		this->graphicsPipeline()->pushModule(wireRender);
@@ -61,7 +61,7 @@ namespace dyno
 	{
 
 		std::vector<Coord> vertList;
-		std::vector<TopologyModule::Edge> edgeList;
+		std::vector<Topology::Edge> edgeList;
 		parseOBJ(filename, vertList, edgeList );
 
 		edgeSet.setPoints(vertList);
@@ -70,7 +70,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void ObjLine<TDataType>::parseOBJ(const std::string& filename, std::vector<Vec3f>& vertices, std::vector<TopologyModule::Edge>& edges)
+	void ObjLine<TDataType>::parseOBJ(const std::string& filename, std::vector<Vec3f>& vertices, std::vector<Topology::Edge>& edges)
 	{
         std::ifstream file(filename);
         if (!file.is_open()) {

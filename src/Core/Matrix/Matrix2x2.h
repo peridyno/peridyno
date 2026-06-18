@@ -80,6 +80,12 @@ namespace dyno {
 		return mat * scale;
 	}
 
+	template<typename Real>
+	DYN_FUNC inline SquareMatrix<Real, 2> dyadic(const Vector<Real, 2>& A, const Vector<Real, 2>& B)
+	{
+		return SquareMatrix<Real, 2>(A.x * B.x, A.x * B.y, A.y * B.x, A.y * B.y);
+	}
+
 	template class SquareMatrix<float, 2>;
 	template class SquareMatrix<double, 2>;
 	//convenient typedefs

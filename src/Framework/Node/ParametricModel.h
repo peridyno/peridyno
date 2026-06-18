@@ -35,7 +35,8 @@ namespace dyno
 		Quat<Real> computeQuaternion()
 		{
 			auto rot = this->varRotation()->getValue();
-
+			
+			// XYZ Euler angles
 			Quat<Real> q =
 				  Quat<Real>(Real(M_PI) * rot[2] / 180, Coord(0, 0, 1))
 				* Quat<Real>(Real(M_PI) * rot[1] / 180, Coord(0, 1, 0))

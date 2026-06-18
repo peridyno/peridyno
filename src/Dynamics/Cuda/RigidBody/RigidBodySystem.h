@@ -19,11 +19,14 @@
 
 #include "Collision/Attribute.h"
 #include "Collision/CollisionData.h"
-
+#include "Field/FilePath.h"
 #include <vector>
 #include <iostream>
+#include "MultiBodyTuple.h"
+
 namespace dyno
 {
+
 	/*!
 	*	\class	RigidBodySystem
 	*	\brief	Implementation of a rigid body system containing a variety of rigid bodies with different shapes.
@@ -191,25 +194,7 @@ namespace dyno
 
 		DEF_VAR(Real, Slop, 0.0001, "");
 
-		DEF_VAR(uint, SolverSubStepping, 10, "Number of TJS solver substeps");
-
-		DEF_VAR(uint, SolverIterationNumber, 30, "Number of TJS velocity solver iterations");
-
-		DEF_VAR(Real, SolverLinearDamping, 0.1, "Linear damping used by the TJS solver");
-
-		DEF_VAR(Real, SolverAngularDamping, 0.1, "Angular damping used by the TJS solver");
-
-		DEF_VAR(Real, SolverHertz, 300, "TJS contact stiffness in Hertz");
-
-		DEF_VAR(Real, SolverDampingRatio, 1.0, "TJS contact damping ratio");
-
-		DEF_VAR(bool, ContactReductionEnabled, true, "A toggle to reduce redundant contacts per body pair");
-
-		DEF_VAR(uint, MaxReducedContactsPerPair, 4, "Maximum reduced contacts kept for each body pair");
-
-		DEF_VAR(Real, ContactReductionDistance, 0.01, "Minimum local-space distance between reduced contacts");
-
-		DEF_VAR(Real, ContactReductionNormalCosThreshold, 0.95, "Normal similarity threshold used by contact reduction");
+		DEF_VAR(SaveFilePath, SaveConfigPath, SaveFilePath("", "Peridyno Multibody Files (*.pdm)"), "");
 
 		DEF_INSTANCE_STATE(DiscreteElements<TDataType>, Topology, "Topology");
 
@@ -279,6 +264,27 @@ namespace dyno
 
 		std::vector<Pair<uint, uint>> mHostShape2RigidBodyMapping;
 
+	protected:
+
+		const std::vector<RigidBodyInfo>& getRigidBodyStates() { return mHostRigidBodyStates; }
+
+		const std::vector<SphereInfo>& getSpheres() { return mHostSpheres; }
+		const std::vector<BoxInfo>& getBoxes() { return mHostBoxes; }
+		const std::vector<TetInfo>& getTets() { return mHostTets; }
+		const std::vector<CapsuleInfo>& getCapsules() { return mHostCapsules; }
+		const std::vector<Pair<uint, uint>>& getShape2RigidBodyMapping() { return mHostShape2RigidBodyMapping; }
+
+		const std::vector<BallAndSocketJoint>& getJointsBallAndSocket() { return mHostJointsBallAndSocket; }
+		const std::vector<SliderJoint>& getJointsSlider(){ return mHostJointsSlider; }
+		const std::vector<HingeJoint>& getJointsHinge(){ return mHostJointsHinge; }
+		const std::vector<FixedJoint>& getJointsFixed() { return mHostJointsFixed; }
+		const std::vector<PointJoint>& getJointsPoint() { return mHostJointsPoint; }
+
+		virtual void saveToFile();
+
+		//MultiBodyBind getMultiBodyBind();
+
+
 	public:
 		int m_numOfSamples;
 		DArray2D<Vec3f> m_deviceSamples;
@@ -291,5 +297,8 @@ namespace dyno
 
 		DArray2D<Vec3f> getSamples() { return m_deviceSamples; }
 		DArray2D<Vec3f> getNormals() { return m_deviceNormals; }
+
+	private:
+		std::vector<std::shared_ptr<PdActor>> mActors;
 	};
 }

@@ -120,7 +120,7 @@ namespace dyno
 
 
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Triangle> indices;
+		std::vector<Topology::Triangle> indices;
 
 		for (size_t i = 0; i < nodes.size() / 3; i++)
 		{
@@ -129,7 +129,7 @@ namespace dyno
 
 		for (size_t i = 0; i < nodeTags2[1].size() / 3; i++)
 		{
-			TopologyModule::Triangle t(nodeTags2[1][3 * i] - 1, nodeTags2[1][3 * i + 1] - 1, nodeTags2[1][3 * i + 2] - 1);
+			Topology::Triangle t(nodeTags2[1][3 * i] - 1, nodeTags2[1][3 * i + 1] - 1, nodeTags2[1][3 * i + 2] - 1);
 			indices.push_back(t);
 		}
 

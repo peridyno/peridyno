@@ -22,6 +22,7 @@
 #include "Topology/TextureMesh.h"
 
 #include "Field/FilePath.h"
+#include "MultiBodyTuple.h"
 
 #include "helpers/tinyobj_helper.h"
 
@@ -44,7 +45,7 @@ namespace dyno
 		void bindShape(std::shared_ptr<PdActor> actor, Pair<uint, uint> shapeId, const Vec3f& scale = Vec3f(1.0f));
 
 	public:
-		DEF_VAR(FilePath, FilePath, "", "");
+		DEF_VAR(FilePath, FilePath, FilePath(std::string(""), std::string("gltf ACSII (*.gltf);;glb (*.glb);;obj (*.obj);;fbx (*.fbx)")), "");
 
 		/**
 		 * @brief Creates multiple vehicles and specifies the transformations for each vehicle
@@ -55,6 +56,8 @@ namespace dyno
 
 	public:
 		DEF_ARRAYLIST_STATE(Transform3f, InstanceTransform, DeviceType::GPU, "Instance transforms");
+		
+		DEF_ARRAYLIST_STATE(uint, InstanceArticulatedBodyID, DeviceType::GPU, "ShapeArticulatedBodyID");
 
 		DEF_ARRAY_STATE(BindingPair, BindingPair, DeviceType::GPU, "");
 
@@ -74,6 +77,9 @@ namespace dyno
 		void transform();
 
 		void varChanged();
+
+		virtual void saveToFile() override;
+
 
 	protected:
 

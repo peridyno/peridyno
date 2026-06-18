@@ -46,7 +46,7 @@ namespace dyno
 		DEF_VAR(Coord, Center, Coord(0), "");
 		DEF_VAR(Coord, Velocity, Coord(0), "");
 		DEF_VAR(Coord, AngularVelocity, Coord(0), "");
-		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+		DEF_INSTANCE_STATE(Topology, Topology, "Topology");
 		//DEF_INSTANCE_STATE(TriangleSet<TDataType>, TriangleSet, "");
 
 	protected:

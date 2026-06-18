@@ -5,6 +5,7 @@
 
 #include <SceneGraph.h>
 #include <OrbitCamera.h>
+#include "Action.h"
 
 //Qt
 #include <QMouseEvent>
@@ -28,12 +29,6 @@
 
 namespace dyno
 {
-	std::unordered_set<int> POpenGLWidget::mPressedKeys;
-	std::unordered_set<int> POpenGLWidget::mPressedMouseButtons;
-	bool POpenGLWidget::mRreshape = false;
-	bool POpenGLWidget::mMouseButtonRelease = false;
-	bool POpenGLWidget::mScroll = false;
-
 	std::map<int, PKeyboardType> KeyMap =
 	{
 		{Qt::Key_unknown, PKEY_UNKNOWN},
@@ -201,22 +196,16 @@ namespace dyno
 		mRenderParams.transforms.view = mCamera->getViewMat();
 		mRenderParams.transforms.proj = mCamera->getProjMat();
 		mRenderParams.unitScale = mCamera->unitScale();
+		mRenderParams.groundPlaneAxis = (int)mCamera->viewportType();
 
 		// Draw scene		
 		mRenderEngine->draw(SceneGraphFactory::instance()->active().get(), mRenderParams);
-		
+
 		// Draw ImGui
-		if (showImGUI())
+		if (showImGUI()) {
 			mImWindow.draw(this);
-
-		// Draw widgets
-// 		// TODO: maybe move into mImWindow...
-// 		for (auto widget : mWidgets)
-// 		{
-// 			widget->update();
-// 			widget->paint();
-// 		}
-
+		}
+			
 		ImGui::Render();
 		// Do QtImgui Render After Glfw Render
 		QtImGui::render();
@@ -266,10 +255,6 @@ namespace dyno
 
 	void POpenGLWidget::mousePressEvent(QMouseEvent *event)
 	{
-		mBlockFieldUpdate = true;
-
-		mPressedMouseButtons.insert(event->button());
-
 		mButtonState = QButtonState::QBUTTON_DOWN;
 		mCursorX = event->x();
 		mCursorY = event->y();
@@ -291,8 +276,7 @@ namespace dyno
 
 			auto activeScene = SceneGraphFactory::instance()->active();
 
-			if (activeScene->getWorkMode() == SceneGraph::EDIT_MODE)
-			{
+			if (activeScene->getWorkMode() == SceneGraph::EDIT_MODE) {
 				activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
 			}
 			else
@@ -306,10 +290,6 @@ namespace dyno
 
 	void POpenGLWidget::mouseReleaseEvent(QMouseEvent *event)
 	{
-		mBlockFieldUpdate = false;
-
-		mPressedMouseButtons.erase(event->button());
-		mMouseButtonRelease = true;
 		// Object selection
 		if (this->getSelectionMode() == RenderWindow::OBJECT_MODE)
 		{
@@ -353,7 +333,11 @@ namespace dyno
 
 			auto activeScene = SceneGraphFactory::instance()->active();
 
-			activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
+			if (activeScene->getWorkMode() == SceneGraph::EDIT_MODE) {
+				activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
+			}
+			else
+				activeScene->onMouseEvent(mouseEvent);
 
 			mImWindow.mouseReleaseEvent(mouseEvent);
 		}
@@ -400,7 +384,11 @@ namespace dyno
 
 			auto activeScene = SceneGraphFactory::instance()->active();
 
-			activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
+			if (activeScene->getWorkMode() == SceneGraph::EDIT_MODE) {
+				activeScene->onMouseEvent(mouseEvent, this->getCurrentSelectedNode());
+			}
+			else
+				activeScene->onMouseEvent(mouseEvent);
 
 			//To draw a selected region
 			mImWindow.mouseMoveEvent(mouseEvent);
@@ -419,8 +407,6 @@ namespace dyno
 
 	void POpenGLWidget::keyPressEvent(QKeyEvent* event)
 	{
-		mPressedMouseButtons.insert(event->key());
-
 		auto activeScene = SceneGraphFactory::instance()->active();
 
 		PKeyboardEvent keyEvent;
@@ -442,8 +428,6 @@ namespace dyno
 
 	void POpenGLWidget::keyReleaseEvent(QKeyEvent* event)
 	{
-		mPressedMouseButtons.erase(event->key());
-
 		auto activeScene = SceneGraphFactory::instance()->active();
 
 		PKeyboardEvent keyEvent;
@@ -464,51 +448,59 @@ namespace dyno
 			emit this->nodeSelected(s.items[0].node);
 	}
 
+	//TODO: makeCurrent() and doneCurrent are not necessary any more?
 	void POpenGLWidget::updateGraphicsContext()
 	{
-		makeCurrent();
+//		makeCurrent();
 
 		PSimulationThread::instance()->startUpdatingGraphicsContext();
 
 		SceneGraphFactory::instance()->active()->updateGraphicsContext();
 
 		PSimulationThread::instance()->stopUpdatingGraphicsContext();
-		mNeedUpdate = true;
+		
+		flush();
 
-		update();
-
-		doneCurrent();
+//		doneCurrent();
 	}
 
 	void POpenGLWidget::updateGraphicsContext(Node* node)
 	{
-		makeCurrent();
+//		makeCurrent();
 
 		PSimulationThread::instance()->startUpdatingGraphicsContext();
 
 		node->graphicsPipeline()->forceUpdate();
 
 		PSimulationThread::instance()->stopUpdatingGraphicsContext();
-		mNeedUpdate = true;
+		
+		flush();
 
-		update();
-
-		doneCurrent();
-
-
+//		doneCurrent();
 	}
 
 	void POpenGLWidget::onNodeUpdated(std::shared_ptr<Node> node)
 	{
-		if(!mBlockFieldUpdate)
-			updateGraphicsContext(node.get());
+		auto scn = SceneGraphFactory::instance()->active();
 
+		//When a node is updated, its descendants will be updated according to isAutoSync()
+		class AutoSyncAct : public Action
+		{
+		public:
+			void process(Node* node) override {
+				node->reset();
+				node->updateGraphicsContext();
+			}
+		};
+
+		scn->traverseForwardWithAutoSync<AutoSyncAct>(node);
+
+		flush();
 	}
 
 	void POpenGLWidget::onModuleUpdated(std::shared_ptr<Module> node)
 	{
-		if(!mBlockFieldUpdate)
-			updateGraphicsContext();
+		updateGraphicsContext();
 	}
 
 	void POpenGLWidget::nodeNodeRenderingKeyUpdated(std::shared_ptr<Node> node)
@@ -527,6 +519,13 @@ namespace dyno
 		saveScreen(frame);
 	}
 
+	void POpenGLWidget::flush()
+	{
+		mNeedUpdate = true;
+
+		update();
+	}
+
 	void POpenGLWidget::resetSceneFrame()
 	{
 		updateGraphicsContext();
@@ -541,12 +540,7 @@ namespace dyno
 
 	void POpenGLWidget::paintEvent(QPaintEvent* event)
 	{
-		auto activeScene = SceneGraphFactory::instance()->active();
-		if (mImWindow.forceRender())
-		{
-			QOpenGLWidget::paintEvent(event);
-		}
-		else if (mImWindow.isGuizmoDisplayed()) 
+		if (getRenderEngine()->forceRender)
 		{
 			QOpenGLWidget::paintEvent(event);
 		}
@@ -555,17 +549,7 @@ namespace dyno
 			QOpenGLWidget::paintEvent(event);
 			mNeedUpdate = false;
 		}
-		else if (isAnyKeyPressed() || mRreshape || isAnyMouseButtonPressed() || mScroll) 
-		{
-			QOpenGLWidget::paintEvent(event);
-		}
-		else if (mMouseButtonRelease) 
-		{
-			QOpenGLWidget::paintEvent(event);
-			mMouseButtonRelease = false;
-		}
 	}
-
 
 	void POpenGLWidget::setDefaultAnimationOption(bool op)
 	{

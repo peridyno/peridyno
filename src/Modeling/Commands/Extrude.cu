@@ -16,19 +16,19 @@ namespace dyno
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
 		auto glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
-		glModule->setVisible(true);
+		glModule->varBaseColor()->setValue(Color(0.8f, 0.52f, 0.25f));
+		glModule->varVisible()->setValue(true);
 		this->stateTriangleSet()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
 
 		auto glModule2 = std::make_shared<GLPointVisualModule>();
-		glModule2->setColor(Color(1.0f, 1.0f, 1.0f));
+		glModule2->varBaseColor()->setValue(Color(1.0f, 1.0f, 1.0f));
 		glModule2->varPointSize()->setValue(0.01);
 		this->stateTriangleSet()->connect(glModule2->inPointSet());
 		this->graphicsPipeline()->pushModule(glModule2);
 
 		auto glModule3 = std::make_shared<GLWireframeVisualModule>();
-		glModule3->setColor(Color(1.0f, 1.0f, 1.0f));
+		glModule3->varBaseColor()->setValue(Color(1.0f, 1.0f, 1.0f));
 		this->stateTriangleSet()->connect(glModule3->inEdgeSet());
 		this->graphicsPipeline()->pushModule(glModule3);
 
@@ -135,7 +135,7 @@ namespace dyno
 
 
 			//top and bottom
-			std::vector<TopologyModule::Triangle> triangle;
+			std::vector<Topology::Triangle> triangle;
 
 			int pt_side_len = vertices.size();
 
@@ -147,13 +147,13 @@ namespace dyno
 				{
 					if (faceid != columns_i - 1)
 					{
-						triangle.push_back(TopologyModule::Triangle(columns_i + faceid + rowl * columns_i, 0 + faceid + rowl * columns_i, 1 + faceid + rowl * columns_i));
-						triangle.push_back(TopologyModule::Triangle(columns_i + 1 + faceid + rowl * columns_i, columns_i + faceid + rowl * columns_i, 1 + faceid + rowl * columns_i));
+						triangle.push_back(Topology::Triangle(columns_i + faceid + rowl * columns_i, 0 + faceid + rowl * columns_i, 1 + faceid + rowl * columns_i));
+						triangle.push_back(Topology::Triangle(columns_i + 1 + faceid + rowl * columns_i, columns_i + faceid + rowl * columns_i, 1 + faceid + rowl * columns_i));
 					}
 					else
 					{
-						triangle.push_back(TopologyModule::Triangle(1 + 2 * faceid + rowl * columns_i, 0 + faceid + rowl * columns_i, 0 + rowl * columns_i));
-						triangle.push_back(TopologyModule::Triangle(1 + faceid + rowl * columns_i, 1 + 2 * faceid + rowl * columns_i, 0 + rowl * columns_i));
+						triangle.push_back(Topology::Triangle(1 + 2 * faceid + rowl * columns_i, 0 + faceid + rowl * columns_i, 0 + rowl * columns_i));
+						triangle.push_back(Topology::Triangle(1 + faceid + rowl * columns_i, 1 + 2 * faceid + rowl * columns_i, 0 + rowl * columns_i));
 					}
 
 				}
@@ -200,7 +200,7 @@ namespace dyno
 
 
 			EarClipper<DataType3f> sab;
-			std::vector<TopologyModule::Triangle> triangleCap;
+			std::vector<Topology::Triangle> triangleCap;
 
 			sab.polyClip(capPoint, triangleCap);
 			int addnum2 = vertices.size() - capPoint.size();
@@ -209,7 +209,7 @@ namespace dyno
 			for (int i = 0; i < triangleCap.size(); i++)
 			{
 				triangle.push_back(triangleCap[i]);
-				triangle.push_back(TopologyModule::Triangle(triangleCap[i][0] + addnum2, triangleCap[i][1] + addnum2, triangleCap[i][2] + addnum2));
+				triangle.push_back(Topology::Triangle(triangleCap[i][0] + addnum2, triangleCap[i][1] + addnum2, triangleCap[i][2] + addnum2));
 			}
 
 			auto triangleSet = this->stateTriangleSet()->getDataPtr();

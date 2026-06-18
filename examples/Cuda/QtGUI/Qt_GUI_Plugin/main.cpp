@@ -3,7 +3,6 @@ using namespace dyno;
 
 #include "RigidBody/initializeRigidBody.h"
 #include "ParticleSystem/initializeParticleSystem.h"
-#include "DualParticleSystem/initializeDualParticleSystem.h"
 #include "Peridynamics/initializePeridynamics.h"
 #include "SemiAnalyticalScheme/initializeSemiAnalyticalScheme.h"
 #include "Volume/initializeVolume.h"
@@ -20,16 +19,12 @@ using namespace dyno;
 
 int main()
 {
-
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
-
-
 
 	Modeling::initStaticPlugin();
 	RigidBody::initStaticPlugin();
 	PaticleSystem::initStaticPlugin();
 	HeightFieldLibrary::initStaticPlugin();
-	DualParticleSystem::initStaticPlugin();
 	Peridynamics::initStaticPlugin();
 	SemiAnalyticalScheme::initStaticPlugin();
 	Volume::initStaticPlugin();

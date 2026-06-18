@@ -20,7 +20,7 @@
  * @brief This is an implementation of AdditiveCCD based on peridyno.
  * 
  *	Additive CCD calc maximum TOI such that  d(x) > s * (d(x) - xi) + xi 
- *	to satisfy separation in collision handling board phrase, where d(x) is current primitive distance 
+ *	to satisfy separation in collision handling broad phrase, where d(x) is current primitive distance 
  *  and xi is the thickness. s is a rescalar.
  *		
  * For details, refer to "Li M, Kaufman D M, Jiang C.
@@ -39,7 +39,7 @@ namespace dyno
 			: xi(xi_), s(s_), tc(tc_) {
 		};
 		DYN_FUNC AdditiveCCD() = default;
-		//default: this is a normal CCD board phrase as thickness = 0, that return TOI as distance >0; TOI in[0,1]
+		//default: this is a normal CCD broad phrase as thickness = 0, that return TOI as distance >0; TOI in[0,1]
 		//with CA strategy.
 
 		/**

@@ -32,7 +32,7 @@ namespace dyno
 		{
 			vts.push_back(c_coords[i]);
 		}
-		std::vector<TopologyModule::Triangle> outTriangles;
+		std::vector<Topology::Triangle> outTriangles;
 		polyClip(vts,outTriangles);
 
 
@@ -78,7 +78,7 @@ namespace dyno
 	}
 
 	// Check poly ear
-	bool isEar(const std::vector<Vec3f>& vertices, const TopologyModule::Triangle& triangle,Vec3f n) {
+	bool isEar(const std::vector<Vec3f>& vertices, const Topology::Triangle& triangle,Vec3f n) {
 		const Vec3f& a = vertices[triangle[0]];
 		const Vec3f& b = vertices[triangle[1]];
 		const Vec3f& c = vertices[triangle[2]];
@@ -102,8 +102,8 @@ namespace dyno
 	}
 	
 	// Ear clip
-	std::vector<TopologyModule::Triangle> earClipping(const std::vector<Vec3f>& vertices) {
-		std::vector<TopologyModule::Triangle> triangles;
+	std::vector<Topology::Triangle> earClipping(const std::vector<Vec3f>& vertices) {
+		std::vector<Topology::Triangle> triangles;
 		std::vector<int> indices(vertices.size());
 		std::iota(indices.begin(), indices.end(), 0); // init 0,1,2...
 		
@@ -125,7 +125,7 @@ namespace dyno
 				int curr = indices[i];
 				int next = indices[(i + 1) % indices.size()];
 
-				TopologyModule::Triangle triangle(prev, curr, next);
+				Topology::Triangle triangle(prev, curr, next);
 				if (isEar(vertices, triangle, stand_N)) {
 					triangles.push_back(triangle); // add this ear triangle;
 					indices.erase(indices.begin() + i); // delete vertex from vertices;
@@ -136,7 +136,7 @@ namespace dyno
 			if (!earFound) {
 				for (int i = 0; i < indices.size() - 2; i++)
 				{
-					triangles.push_back(TopologyModule::Triangle(indices[0], indices[i + 1], indices[i + 2]));
+					triangles.push_back(Topology::Triangle(indices[0], indices[i + 1], indices[i + 2]));
 				}
 
 				break; 
@@ -149,7 +149,7 @@ namespace dyno
 
 
 	template<typename TDataType>
-	void EarClipper<TDataType>::polyClip(std::vector<DataType3f::Coord> vts, std::vector<TopologyModule::Triangle>& outTriangles)
+	void EarClipper<TDataType>::polyClip(std::vector<DataType3f::Coord> vts, std::vector<Topology::Triangle>& outTriangles)
 	{
 		
 		outTriangles = earClipping(vts);

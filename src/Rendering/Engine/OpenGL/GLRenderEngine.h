@@ -76,7 +76,7 @@ namespace dyno
 
 		int  getShadowMapSize();
 		void updateShadowMapAttribute()override;
-	private:
+	protected:
 		void createFramebuffer();
 		void resizeFramebuffer(int w, int h, int samples);
 		void setupTransparencyPass();
@@ -96,7 +96,7 @@ namespace dyno
 
 		std::vector<RenderItem> mRenderItems;
 
-	private:
+	protected:
 
 		//Texture2DMultiSample	mColorCorrectTex;
 		Program* mPostProcessProgram;
@@ -119,7 +119,7 @@ namespace dyno
 		Program*				mBlendProgram;
 
 		GLRenderHelper*			mRenderHelper;
-		ShadowMap*				mShadowMap;
+		ShadowMap*				mShadowMap = NULL;
 
 		// anti-aliasing
 		
@@ -135,7 +135,7 @@ namespace dyno
 
 		// Envmap
 		std::string				mEnvmapFilePath = getAssetPath() + "textures/hdr/venice_dawn_1_4k.hdr";
-		Envmap*					mEnvmap = 0;
+		Envmap*					mEnvmap = NULL;
 		
 		Mesh* mScreenQuad = 0;
 	};

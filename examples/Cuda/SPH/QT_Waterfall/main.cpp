@@ -24,7 +24,7 @@
 #include "ParticleSystem/Module/IterativeDensitySolver.h"
 #include "ParticleSystem/Module/ApproximateImplicitViscosity.h"
 #include <ParticleSystem/Emitters/SquareEmitter.h>
-#include "Waterfall.h"
+
 //Framework
 #include "Auxiliary/DataSource.h"
 
@@ -34,7 +34,6 @@
 #include "Topology/TriangleSet.h"
 #include "Mapping/TextureMeshToTriangleSet.h"
 #include "SemiAnalyticalScheme/TriangularMeshBoundary.h"
-#include "SemiAnalyticalScheme/TriangularMeshConstraint.h"
 
 //ParticleOutput
 #include "ABCExporter/ParticleWriterABC.h"
@@ -63,7 +62,7 @@ std::shared_ptr<SceneGraph> createScene()
 	scn->setLowerBound(Vec3f(-4.793, 0.145f, -2.224));
 
 
-	auto emitter = scn->addNode(std::make_shared<Waterfall<DataType3f>>());
+	auto emitter = scn->addNode(std::make_shared<SquareEmitter<DataType3f>>());
 	emitter->varLocation()->setValue(Vec3f(-2.37f, 2.99f, -0.07f));
 	emitter->varRotation()->setValue(Vec3f(-0.0f, -5.0f, 50.0f));
 	emitter->varSamplingDistance()->setValue(PARTICLE_SPACING);
@@ -75,7 +74,7 @@ std::shared_ptr<SceneGraph> createScene()
 	cube->varLocation()->setValue(Vec3f(-1.9, 2.78, -0.04));
 	cube->varRotation()->setValue(Vec3f(0.0f, 0.0f, 0.0f));
 	cube->varLength()->setValue(Vec3f(0.02, 0.02, 0.02));
-	
+
 	cube->graphicsPipeline()->disable();
 
 	//Create a sampler
@@ -195,18 +194,18 @@ std::shared_ptr<SceneGraph> createScene()
 	fluid->stateVelocity()->connect(calculateNorm->inVec());
 	fluid->graphicsPipeline()->pushModule(calculateNorm);
 
-// 	auto output = std::make_shared<ParticleWriterABC<DataType3f>>();
-// 	fluid->stateFrameNumber()->connect(output->inFrameNumber());
-// 	output->varInterval()->setValue(20);
-// 	fluid->statePointSet()->connect(output->inPointSet());
-// 	calculateNorm->outNorm()->connect(output->inColor());
-// 	output->varOutputPath()->setValue(FilePath("D:/DATA/Cache/"));
-// 	//output->varPrefix()->setValue("fluid_");
-// 	fluid->animationPipeline()->pushModule(output);
+	// 	auto output = std::make_shared<ParticleWriterABC<DataType3f>>();
+	// 	fluid->stateFrameNumber()->connect(output->inFrameNumber());
+	// 	output->varInterval()->setValue(20);
+	// 	fluid->statePointSet()->connect(output->inPointSet());
+	// 	calculateNorm->outNorm()->connect(output->inColor());
+	// 	output->varOutputPath()->setValue(FilePath("D:/DATA/Cache/"));
+	// 	//output->varPrefix()->setValue("fluid_");
+	// 	fluid->animationPipeline()->pushModule(output);
 
 
-	//auto plyoutput = scn->addNode(std::make_shared <PlyExporter<DataType3f>>());
-	//fluid->statePointSet()->connect(plyoutput->inTopology());
+		//auto plyoutput = scn->addNode(std::make_shared <PlyExporter<DataType3f>>());
+		//fluid->statePointSet()->connect(plyoutput->inTopology());
 
 
 	auto colorMapper = std::make_shared<ColorMapping<DataType3f>>();
@@ -215,7 +214,7 @@ std::shared_ptr<SceneGraph> createScene()
 	fluid->graphicsPipeline()->pushModule(colorMapper);
 
 	auto ptRender = std::make_shared<GLPointVisualModule>();
-	ptRender->setColor(Color(1, 0, 0));
+	ptRender->varBaseColor()->setValue(Color(1, 0, 0));
 	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 	ptRender->varPointSize()->setValue(0.2 * PARTICLE_SPACING);
 	fluid->statePointSet()->connect(ptRender->inPointSet());

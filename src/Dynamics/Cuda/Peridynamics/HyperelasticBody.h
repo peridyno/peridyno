@@ -24,7 +24,7 @@ namespace dyno
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
 		typedef typename ::dyno::TBond<TDataType> Bond;
-		typedef typename TopologyModule::Tetrahedron Tetrahedron;
+		typedef typename Topology::Tetrahedron Tetrahedron;
 		
 		HyperelasticBody();
 		~HyperelasticBody() override;
@@ -55,9 +55,9 @@ namespace dyno
 
 		DEF_VAR(bool, AlphaComputed, true, "alphaComputed");
 
-		DEF_VAR(EnergyType, EnergyType, NeoHookean, "");
+		DEF_VAR_STATE(EnergyType, EnergyType, NeoHookean, "");
 
-		DEF_VAR(EnergyModels<Real>, EnergyModel, EnergyModels<Real>(), "");
+		DEF_VAR_STATE(EnergyModels<Real>, EnergyModel, EnergyModels<Real>(), "");
 
 		DEF_ARRAY_STATE(Coord, RestPosition, DeviceType::GPU, "");
 

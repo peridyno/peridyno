@@ -1,6 +1,5 @@
 #include "VertexArray.h"
 
-#include <glad/glad.h>
 #include <vector>
 
 namespace dyno
@@ -12,7 +11,8 @@ namespace dyno
 
 	void VertexArray::release()
 	{
-		glDeleteVertexArrays(1, &id);		
+		if (id != GL_INVALID_INDEX)
+			glDeleteVertexArrays(1, &id);
 		
 		// reset object id
 		id = GL_INVALID_INDEX;

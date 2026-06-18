@@ -28,7 +28,7 @@ namespace dyno
 
 	typedef std::map<ObjectId, std::shared_ptr<Node>> NodeMap;
 
-	class SceneGraph : public OBase
+	class SceneGraph
 	{
 	public:
 		typedef NodeIterator Iterator;
@@ -129,6 +129,12 @@ namespace dyno
 		void setAdaptiveInterval(bool adaptive);
 
 		void setAsynchronousSimulation(bool b);
+		
+		/**
+		 * If true, the logging system will output additional info to the console
+		 */
+		bool isVerbose() { return mVerboseMode; }
+		void setVerboseMode(bool b);
 
 		void setGravity(Vec3f g);
 		Vec3f getGravity();
@@ -229,7 +235,6 @@ namespace dyno
 			, mLowerBound(-10, 0, -10)
 			, mUpperBound(10, 10, 10)
 		{
-			//mRoot = std::make_shared<Node>();
 			mGravity = Vec3f(0.0f, -9.8f, 0.0f);
 		};
 
@@ -240,6 +245,8 @@ namespace dyno
 		SceneGraph& operator=(const SceneGraph&) = delete;
 
 	private:
+		bool mVerboseMode = true;
+
 		bool mAdvativeInterval = true;
 
 		float mElapsedTime;

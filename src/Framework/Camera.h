@@ -23,6 +23,17 @@ namespace dyno
 			Orthogonal
 		};
 
+		enum ViewportType
+		{
+			Right = 0,
+			Top = 1,
+			Front = 2,
+			Left = 3,
+			Bottom = 4,
+			Back = 5,
+			Free = 6
+		};
+
 		virtual glm::mat4 getViewMat() = 0;
 		virtual glm::mat4 getProjMat() = 0;
 
@@ -61,6 +72,9 @@ namespace dyno
 		void setProjectionType(ProjectionType type) { mProjectionType = type; }
 		ProjectionType projectionType() { return mProjectionType; }
 
+		void setViewportType(ViewportType type) { mViewType = type; }
+		ViewportType viewportType() { return mViewType; }
+
 	protected:
 		float mNear = 0.01f;
 		float mFar = 10.0f;
@@ -70,6 +84,7 @@ namespace dyno
 		int mViewportHeight;
 
 		ProjectionType mProjectionType = Perspective;	//0:pers 1:ortho
+		ViewportType mViewType = Free;
 
 		//Distance unit
 		float mUnitScale = 1.0f;

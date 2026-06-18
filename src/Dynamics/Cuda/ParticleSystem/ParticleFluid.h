@@ -38,13 +38,18 @@ namespace dyno
 			SISPH = 0,
 			DFSPH = 1,
 			PBF = 2,
-			IISPH = 3);
+			IISPH = 3,
+			DualParticle = 4,
+			FissionDP = 5,
+			VSSPH = 6,
+			ISPH = 7
+			);
 
 		DEF_ENUM(IncompressibilitySolver, IncompressibilitySolver, IncompressibilitySolver::SISPH, "Select the solver type");
 
 		DEF_VAR(Real, SamplingDistance, 0.005, "Sampling distance");
 
-		DEF_VAR(Real, SmoothingLength, 1.5, "The smoothing length is preferably set to a value between 1.5 and 2.5");
+		DEF_VAR(Real, SmoothingLength, 2.5, "The smoothing length is preferably set to a value between 1.5 and 2.5");
 
 		DEF_VAR(bool, ReshuffleParticles, false, "");
 

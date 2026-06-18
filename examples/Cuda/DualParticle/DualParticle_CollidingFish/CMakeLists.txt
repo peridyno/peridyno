@@ -4,7 +4,7 @@ if(PERIDYNO_LIBRARY_DUALPARTICLESYSTEM AND PERIDYNO_QT_GUI)
         Framework 
         IO          
         UbiGUI
-        DualParticleSystem 
+        ParticleSystem 
         GLRenderEngine)
     add_example(DualParticle_CollidingFish DualParticle LIB_DEPENDENCY)
 endif()

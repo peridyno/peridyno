@@ -90,7 +90,7 @@ namespace dyno
 	void Waterfall<TDataType>::tranformChanged()
 	{
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Edge> edges;
+		std::vector<Topology::Edge> edges;
 
 		auto center = this->varLocation()->getData();
 		auto scale = this->varScale()->getData();
@@ -110,10 +110,10 @@ namespace dyno
 		vertices.push_back(center - Nx - Nz);
 		vertices.push_back(center - Nx + Nz);
 
-		edges.push_back(TopologyModule::Edge(0, 1));
-		edges.push_back(TopologyModule::Edge(1, 2));
-		edges.push_back(TopologyModule::Edge(2, 3));
-		edges.push_back(TopologyModule::Edge(3, 0));
+		edges.push_back(Topology::Edge(0, 1));
+		edges.push_back(Topology::Edge(1, 2));
+		edges.push_back(Topology::Edge(2, 3));
+		edges.push_back(Topology::Edge(3, 0));
 
 		auto edgeTopo = this->stateOutline()->getDataPtr();
 

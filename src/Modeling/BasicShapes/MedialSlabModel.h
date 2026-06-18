@@ -66,7 +66,7 @@
  
      public:
  
-         static void pushback_medialslab(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles, Vec3f pA, Vec3f pB, Vec3f pC, Real rA, Real rB, Real rC, uint resolution = 40);
+         static void pushback_medialslab(std::vector<Vec3f>& vertices, std::vector<Topology::Triangle>& triangles, Vec3f pA, Vec3f pB, Vec3f pC, Real rA, Real rB, Real rC, uint resolution = 40);
  
      protected:
          void resetStates() override;
@@ -92,7 +92,7 @@
              const Vec3f& v3,
              double r3,
              std::vector<Vec3f>& slab_verts,
-             std::vector<TopologyModule::Triangle>& slab_faces,
+             std::vector<Topology::Triangle>& slab_faces,
              double threshold = 1e-4);
  
          static void generate_conical_surface(
@@ -102,7 +102,7 @@
              float r2,
              int resolution,
              std::vector<Vec3f>& cone_verts,
-             std::vector<TopologyModule::Triangle>& cone_faces);
+             std::vector<Topology::Triangle>& cone_faces);
  
      };
  

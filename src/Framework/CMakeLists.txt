@@ -65,6 +65,8 @@ target_include_directories(${LIB_NAME} PUBLIC
     #$<INSTALL_INTERFACE:${PERIDYNO_INC_INSTALL_DIR}/external/filesystem>
 	)
 
+target_compile_options(${LIB_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-lineinfo>)
+
 target_link_libraries(${LIB_NAME} Core)
 
 peridyno_install(${LIB_NAME})

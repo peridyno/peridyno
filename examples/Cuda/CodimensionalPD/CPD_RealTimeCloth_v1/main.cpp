@@ -66,11 +66,11 @@ std::shared_ptr<SceneGraph> createScene()
 	}
 
 	auto surfaceRendererCloth = std::make_shared<GLSurfaceVisualModule>();
-	surfaceRendererCloth->setColor(Color(0.4,0.4,1.0));
+	surfaceRendererCloth->varBaseColor()->setValue(Color(0.4,0.4,1.0));
 	surfaceRendererCloth->varUseVertexNormal()->setValue(true);
 	auto surfaceRenderer = std::make_shared<GLSurfaceVisualModule>();
 	
-	surfaceRenderer->setColor(Color(0,0,0));
+	surfaceRenderer->varBaseColor()->setValue(Color(0,0,0));
 	surfaceRenderer->varUseVertexNormal()->setValue(true);
 	cloth->stateTriangleSet()->connect(surfaceRendererCloth->inTriangleSet());
 	object->stateTriangleSet()->connect(surfaceRenderer->inTriangleSet());

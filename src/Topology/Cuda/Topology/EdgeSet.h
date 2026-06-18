@@ -95,7 +95,7 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TopologyModule::Edge Edge;
+		typedef typename Topology::Edge Edge;
 
 		EdgeSet();
 		~EdgeSet() override;

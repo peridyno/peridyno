@@ -39,7 +39,7 @@ namespace dyno
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
 		auto tsRender = std::make_shared<GLSurfaceVisualModule>();
-		tsRender->setVisible(true);
+		tsRender->varVisible()->setValue(true);
 		this->stateTriangleSet()->connect(tsRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(tsRender);
 
@@ -51,8 +51,8 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(mapper);
 
 		auto sRender = std::make_shared<GLSurfaceVisualModule>();
-		sRender->setColor(Color(1, 1, 0));
-		sRender->setAlpha(0.5f);
+		sRender->varBaseColor()->setValue(Color(1, 1, 0));
+		sRender->varAlpha()->setValue(0.5f);
 		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(sRender);
 
@@ -67,7 +67,7 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(contactPointMapper);
 
 		auto pointRender = std::make_shared<GLPointVisualModule>();
-		pointRender->setColor(Color(1, 0, 0));
+		pointRender->varBaseColor()->setValue(Color(1, 0, 0));
 		pointRender->varPointSize()->setValue(0.01f);
 		contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
 		this->graphicsPipeline()->pushModule(pointRender);
@@ -844,7 +844,7 @@ namespace dyno
 		c.vertices.insert(c.vertices.end(), b.vertices.begin(), b.vertices.end());
 		for (auto it : b.triangles)
 		{
-			b2.triangles.push_back(TopologyModule::Triangle(it[0] + offset, it[1] + offset, it[2] + offset));
+			b2.triangles.push_back(Topology::Triangle(it[0] + offset, it[1] + offset, it[2] + offset));
 		}
 		c.triangles.reserve(a.triangles.size() + b.triangles.size());
 		c.triangles.insert(c.triangles.end(), a.triangles.begin(), a.triangles.end());
@@ -869,11 +869,11 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void MujocoXMLLoader<TDataType>::offsetTriangleIndex(std::vector<TopologyModule::Triangle>& triangles, const int& offset)
+	void MujocoXMLLoader<TDataType>::offsetTriangleIndex(std::vector<Topology::Triangle>& triangles, const int& offset)
 	{
 		for (size_t i = 0; i < triangles.size(); i++)
 		{
-			triangles[i] = TopologyModule::Triangle(triangles[i][0] + offset, triangles[i][1] + offset, triangles[i][2] + offset);
+			triangles[i] = Topology::Triangle(triangles[i][0] + offset, triangles[i][1] + offset, triangles[i][2] + offset);
 
 		}
 	}

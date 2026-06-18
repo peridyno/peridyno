@@ -2,26 +2,38 @@
 
 #include <QRegularExpression>
 #include <QVector>
-#include <QTextCodec>
 
 namespace dyno
 {
 	QString FormatFieldWidgetName(std::string name)
 	{
-		QString qName = QString::fromStdString(name.c_str());
+		QString qName = QString::fromStdString(name);
 
+		// Check if the string contains Chinese characters
 		bool isChinese = qName.contains(QRegularExpression("[\u4e00-\u9fa5]"));
 
-		//If the string contains Chinese, show all the original string without splitting
+		// If Chinese is present, return the original string without processing
 		if (isChinese)
 		{
 			return qName;
 		}
 
-		//Otherwise, slit the name by the space
-		QRegularExpression regexp("[A-Z][^A-Z]*");
-		QRegularExpressionMatchIterator match = regexp.globalMatch(qName);
-		QVector<QString> vec;
+		//remove the prefix "*_",
+		QString subtitle;
+		int underscorePos = qName.indexOf('_');
+		if (underscorePos != -1)
+		{
+			subtitle = qName.mid(underscorePos + 1);
+		}
+		else
+		{
+			subtitle = qName;
+		}
+
+		// Split camelCase names into space-separated words
+		// Preserves special symbols like [ ] ( ) numbers
+		QRegularExpression regexp("([A-Z][a-z0-9_\\[\\] ]*)");
+		QRegularExpressionMatchIterator match = regexp.globalMatch(subtitle);
 
 		QString ret;
 		while (match.hasNext())
@@ -29,7 +41,10 @@ namespace dyno
 			ret += match.next().captured() + " ";
 		}
 
-		return ret;
+		// Remove trailing whitespace
+		ret = ret.trimmed();
+
+		return ret.isEmpty() ? subtitle : ret;
 	}
 
 	QString FormatBlockPortName(std::string name)
@@ -44,8 +59,14 @@ namespace dyno
 			return qName;
 		}
 
+		//remove the "*_" prefix
+		QRegularExpression prefix("_(.+)");
+		QRegularExpressionMatch prefix_match = prefix.match(qName);
+
+		QString subtitle = prefix_match.hasMatch() ? prefix_match.captured(1) : qName;
+
 		QRegularExpression regexp0("[A-Za-z()]*");
-		QRegularExpressionMatchIterator match0 = regexp0.globalMatch(qName);
+		QRegularExpressionMatchIterator match0 = regexp0.globalMatch(subtitle);
 
 		QString subStr = match0.hasNext() ? match0.next().captured() : QString("Port");
 
@@ -90,10 +111,13 @@ namespace dyno
 		return ret;
 	}
 
+	QString FormatCategoryName(std::string name)
+	{
+		return QString::fromStdString(name);
+	}
+
 	QString FormatDescription(std::string name)
 	{
-		QTextCodec* codec = QTextCodec::codecForName("GB2312");
-
 		QString desc = QString::fromStdString(name.c_str());
 
 // 		bool isChinese = qName.contains(QRegExp("[\\x4e00-\\x9fa5]+"));

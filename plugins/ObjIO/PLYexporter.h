@@ -1,6 +1,6 @@
 #pragma once
 #include "Module/OutputModule.h"
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 #include "Node.h"
 #include "Topology/TriangleSet.h"
 
@@ -37,7 +37,7 @@ namespace dyno
 		DEF_VAR(bool, ReCount, false, "ReCount");
 		DEF_VAR(unsigned, EndFrame, 3, "EndFrame");
 
-		DEF_INSTANCE_IN(TopologyModule, Topology, "TopologyModule");
+		DEF_INSTANCE_IN(Topology, Topology, "TopologyModule");
 
 		DEF_ARRAY_IN(Vec3f, Vec3f, DeviceType::GPU, "");
 

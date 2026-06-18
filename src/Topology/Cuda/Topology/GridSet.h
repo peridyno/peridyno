@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 #pragma once
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 
 namespace dyno
 {
 	template<typename TDataType>
-	class GridSet : public TopologyModule
+	class GridSet : public Topology
 	{
 		DECLARE_TCLASS(GridSet, TDataType)
 	public:

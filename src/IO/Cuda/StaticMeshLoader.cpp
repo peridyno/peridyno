@@ -18,8 +18,8 @@ namespace dyno
 		this->stateInitialTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
 		auto surfaceRender = std::make_shared<GLSurfaceVisualModule>();
-		surfaceRender->setColor(Color(0.8f, 0.52f, 0.25f));
-		surfaceRender->setVisible(true);
+		surfaceRender->varBaseColor()->setValue(Color(0.8f, 0.52f, 0.25f));
+		surfaceRender->varVisible()->setValue(true);
 		this->stateTriangleSet()->connect(surfaceRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(surfaceRender);
 

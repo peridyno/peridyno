@@ -33,15 +33,6 @@ namespace dyno
 		this->varForceUpdate()->setValue(true);
 	}
 
-	GLPointVisualModule::~GLPointVisualModule()
-	{
-// 		points.clear();
-// 		colors.clear();
-// 
-// 		mPosition.release();
-// 		mColor.release();
-	}
-
 	void GLPointVisualModule::setColorMapMode(ColorMapMode mode)
 	{
 		this->varColorMode()->setCurrentKey(mode);

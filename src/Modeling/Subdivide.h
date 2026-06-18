@@ -55,7 +55,7 @@ namespace dyno
 
 	public:
 
-		static void loopSubdivide(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles);
+		static void loopSubdivide(std::vector<Vec3f>& vertices, std::vector<Topology::Triangle>& triangles);
 
 	protected:
 		void resetStates() override;

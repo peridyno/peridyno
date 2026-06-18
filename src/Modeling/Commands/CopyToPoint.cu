@@ -15,21 +15,21 @@ namespace dyno
 		this->stateTriangleSet()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
 		glModule = std::make_shared<GLSurfaceVisualModule>();
-		glModule->setColor(Color(0.8f, 0.52f, 0.25f));
-		glModule->setVisible(true);
+		glModule->varBaseColor()->setValue(Color(0.8f, 0.52f, 0.25f));
+		glModule->varVisible()->setValue(true);
 		this->stateTriangleSet()->connect(glModule->inTriangleSet());
 		this->graphicsPipeline()->pushModule(glModule);
 
 		auto glModule2 = std::make_shared<GLPointVisualModule>();
-		glModule2->setColor(Color(1.0f, 0.1f, 0.1f));
-		glModule2->setVisible(false);
+		glModule2->varBaseColor()->setValue(Color(1.0f, 0.1f, 0.1f));
+		glModule2->varVisible()->setValue(false);
 		glModule2->varPointSize()->setValue(0.01);
 		this->stateTriangleSet()->connect(glModule2->inPointSet());
 		this->graphicsPipeline()->pushModule(glModule2);
 
 		auto glModule3 = std::make_shared<GLWireframeVisualModule>();
-		glModule3->setColor(Color(0.0f, 0.0f, 0.0f));
-		glModule3->setVisible(false);
+		glModule3->varBaseColor()->setValue(Color(0.0f, 0.0f, 0.0f));
+		glModule3->varVisible()->setValue(false);
 		this->stateTriangleSet()->connect(glModule3->inEdgeSet());
 		this->graphicsPipeline()->pushModule(glModule3);
 
@@ -49,9 +49,9 @@ namespace dyno
 
 
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Triangle> triangle;
+		std::vector<Topology::Triangle> triangle;
 
-		CArray<TopologyModule::Triangle> c_triangle;
+		CArray<Topology::Triangle> c_triangle;
 		CArray<Coord> c_point;
 		CArray<Coord> c_target;
 		c_point.assign(VertexIn);
@@ -119,7 +119,7 @@ namespace dyno
 				for (int j = 0; j < lengthT; j++)
 				{
 					;
-					triangle.push_back(TopologyModule::Triangle(c_triangle[j][0] + i * lengthV, c_triangle[j][1] + i  * lengthV, c_triangle[j][2] + i  * lengthV));
+					triangle.push_back(Topology::Triangle(c_triangle[j][0] + i * lengthV, c_triangle[j][1] + i  * lengthV, c_triangle[j][2] + i  * lengthV));
 
 				}
 		
@@ -165,7 +165,7 @@ namespace dyno
 
 	template<typename TDataType>
 	void CopyToPoint<TDataType>::disableRender() {
-		glModule->setVisible(false);
+		glModule->varVisible()->setValue(false);
 	};
 
 

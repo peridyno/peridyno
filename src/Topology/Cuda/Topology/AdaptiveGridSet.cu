@@ -54,7 +54,7 @@ namespace dyno
 
 	template<typename TDataType>
 	AdaptiveGridSet<TDataType>::AdaptiveGridSet()
-		: TopologyModule()
+		: Topology()
 	{
 	}
 

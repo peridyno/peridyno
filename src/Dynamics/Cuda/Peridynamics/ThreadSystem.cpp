@@ -52,7 +52,7 @@ namespace dyno
 		for (int i = 0; i < segSize; i++)
 		{
 			particles.push_back(Coord(start + i * length * dir));
-			edges.push_back(TopologyModule::Edge(idx1, idx1 + 1));
+			edges.push_back(Topology::Edge(idx1, idx1 + 1));
 			idx1++;
 		}
 		particles.push_back(end);

@@ -7,9 +7,9 @@
 #include "SemiAnalyticalSFINode.h"
 #include "TriangularMeshBoundary.h"
 
-#include "ComputeParticleAnisotropy.h"
-#include "SemiAnalyticalSummationDensity.h"
-#include "SemiAnalyticalPBD.h"
+#include "Module/ComputeParticleAnisotropy.h"
+#include "Module/SemiAnalyticalSummationDensity.h"
+#include "Module/SemiAnalyticalPBD.h"
 
 namespace dyno 
 {

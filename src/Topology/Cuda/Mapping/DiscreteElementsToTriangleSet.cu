@@ -216,7 +216,7 @@ namespace dyno
 	DiscreteElementsToTriangleSet<TDataType>::DiscreteElementsToTriangleSet()
 		: TopologyMapping()
 	{
-
+		this->outTriangleSet()->allocate();
 	}
 
 	template<typename Triangle>
@@ -664,10 +664,6 @@ namespace dyno
 	template<typename TDataType>
 	bool DiscreteElementsToTriangleSet<TDataType>::apply()
 	{
-		if (this->outTriangleSet()->isEmpty())
-		{
-			this->outTriangleSet()->allocate();
-		}
 
 		if (mStandardSphere.isEmpty())
 		{

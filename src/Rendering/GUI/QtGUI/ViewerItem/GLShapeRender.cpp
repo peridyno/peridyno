@@ -1,0 +1,213 @@
+#include "GLShapeRender.h"
+#include "Utility.h"
+
+#include <glad/glad.h>
+#include "ShaderStruct.h"
+//#include "Rendering/Engine/OpenGL/shader/surface.vert.h"
+//#include "Rendering/Engine/OpenGL/shader/surface.frag.h"
+//#include "Rendering/Engine/OpenGL/shader/surface.geom.h"
+
+
+namespace dyno
+{
+	IMPLEMENT_CLASS(GLShapeRender)
+
+	GLShapeRender::GLShapeRender()
+	{
+		this->setName("ObjMeshRenderer");
+
+#ifdef CUDA_BACKEND
+		mTangentSpaceConstructor = std::make_shared<ConstructTangentSpace>();
+		this->inTextureMesh()->connect(mTangentSpaceConstructor->inTextureMesh());
+#endif
+	}
+
+	void GLShapeRender::paintGL(const RenderParams& rparams)
+	{
+
+		mShaderProgram->use();
+
+		auto& vertices = mTextureMesh.vertices();
+		auto& normals = mTextureMesh.normals();
+		auto& texCoords = mTextureMesh.texCoords();
+
+		// setup uniforms
+		if (normals.count() > 0
+			&& mTangent.count() > 0 
+			&& mBitangent.count() > 0
+			&& normals.count() == mTangent.count()
+			&& normals.count() == mBitangent.count())
+		{
+			mShaderProgram->setInt("uVertexNormal", 1);
+			normals.bindBufferBase(9);
+			mTangent.bindBufferBase(12);
+			mBitangent.bindBufferBase(13);
+		}
+		else
+			mShaderProgram->setInt("uVertexNormal", 0);
+		
+		mShaderProgram->setInt("uInstanced", 0);
+
+		vertices.bindBufferBase(8);
+		texCoords.bindBufferBase(10);
+
+		auto& shapes = mTextureMesh.shapes();
+		std::vector<uint> selectShapes = this->varShapes()->getValue();
+
+		for (auto selectShapeID: selectShapes)
+		{
+			if (selectShapeID < shapes.size())
+			{
+				auto shape = shapes[selectShapeID];
+				if (shape->material != nullptr)
+				{
+					auto mtl = shape->material;
+
+					// 
+					{
+						RenderParams pm_i = rparams;
+
+						pm_i.transforms.model = shape->transform;
+
+						mRenderParamsUBlock.load((void*)&pm_i, sizeof(RenderParams));
+						mRenderParamsUBlock.bindBufferBase(0);
+					}
+
+					// material 
+					{
+
+						PBRMaterial pbr;
+						auto color = this->varBaseColor()->getValue();
+
+						pbr.color = { mtl->baseColor.x, mtl->baseColor.y, mtl->baseColor.z };
+						pbr.metallic = mtl->metallic;
+						pbr.roughness = mtl->roughness;
+						pbr.alpha = mtl->alpha;
+						pbr.EmissiveIntensity = mtl->emissiveIntensity;
+
+						if (mtl->texORM.isValid())
+							pbr.useAOTex = 1;
+						if (mtl->texORM.isValid())
+						{
+							pbr.useRoughnessTex = 1;
+							pbr.useMetallicTex = 1;
+						}
+						else
+						{
+							pbr.useRoughnessTex = 0;
+							pbr.useMetallicTex = 0;
+						}
+						if (mtl->texEmissiveColor.isValid())
+							pbr.useEmissiveTex = 1;
+						else
+							pbr.useEmissiveTex = 0;
+
+						mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
+						mPBRMaterialUBlock.bindBufferBase(1);
+					}
+
+					// bind textures 
+					{
+						// reset 
+						glActiveTexture(GL_TEXTURE10);		// color
+						glBindTexture(GL_TEXTURE_2D, 0);
+						glActiveTexture(GL_TEXTURE11);		// bump map
+						glBindTexture(GL_TEXTURE_2D, 0);
+						glActiveTexture(GL_TEXTURE12);		// ORM
+						glBindTexture(GL_TEXTURE_2D, 0);
+						glActiveTexture(GL_TEXTURE13);		// Emissive
+						glBindTexture(GL_TEXTURE_2D, 0);
+
+						if (mtl->texColor.isValid()) {
+							mShaderProgram->setInt("uColorMode", 2);
+							mtl->texColor.bind(GL_TEXTURE10);
+						}
+						else {
+							mtl->texColor.unbind();
+							mShaderProgram->setInt("uColorMode", 0);
+						}
+
+						if (mtl->texBump.isValid()) {
+							mtl->texBump.bind(GL_TEXTURE11);
+							mShaderProgram->setFloat("uBumpScale", mtl->bumpScale);
+						}
+						if (mtl->texORM.isValid())
+						{
+							mtl->texORM.bind(GL_TEXTURE12);
+						}
+						if (mtl->texEmissiveColor.isValid())
+						{
+							mtl->texEmissiveColor.bind(GL_TEXTURE13);
+						}
+					}
+				}
+				else
+				{
+					RenderParams pm_i = rparams;
+					pm_i.transforms.model = shape->transform;
+
+					// setup uniform buffer
+					mRenderParamsUBlock.load((void*)&rparams, sizeof(RenderParams));
+					mRenderParamsUBlock.bindBufferBase(0);
+
+					// material 
+					{
+						PBRMaterial pbr;
+
+						auto color = this->varBaseColor()->getValue();
+						pbr.color = { color.r, color.g, color.b };
+						pbr.metallic = this->varMetallic()->getValue();
+						pbr.roughness = this->varRoughness()->getValue();
+						pbr.alpha = this->varAlpha()->getValue();
+						mPBRMaterialUBlock.load((void*)&pbr, sizeof(pbr));
+						mPBRMaterialUBlock.bindBufferBase(1);
+					}
+
+					mShaderProgram->setInt("uColorMode", 0);
+				}
+
+				int numTriangles = shape->glVertexIndex.count();
+
+				mVAO.bind();
+
+				// setup VAO binding...
+				{
+					// vertex index
+					shape->glVertexIndex.bind();
+					glEnableVertexAttribArray(0);
+					glVertexAttribIPointer(0, 1, GL_INT, sizeof(int), (void*)0);
+
+					if (shape->glNormalIndex.count() == numTriangles) {
+						shape->glNormalIndex.bind();
+						glEnableVertexAttribArray(1);
+						glVertexAttribIPointer(1, 1, GL_INT, sizeof(int), (void*)0);
+					}
+					else
+					{
+						glDisableVertexAttribArray(1);
+						glVertexAttribI4i(1, -1, -1, -1, -1);
+					}
+
+					if (shape->glTexCoordIndex.count() == numTriangles) {
+						shape->glTexCoordIndex.bind();
+						glEnableVertexAttribArray(2);
+						glVertexAttribIPointer(2, 1, GL_INT, sizeof(int), (void*)0);
+					}
+					else
+					{
+						glDisableVertexAttribArray(2);
+						glVertexAttribI4i(2, -1, -1, -1, -1);
+					}
+				}
+
+				glDrawArrays(GL_TRIANGLES, 0, numTriangles * 3);
+
+				glCheckError();
+				mVAO.unbind();
+			}
+		}
+		
+	}
+
+
+}

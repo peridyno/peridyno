@@ -8,52 +8,51 @@ namespace dyno
 
 	template<typename TDataType>
 	ApproximateImplicitViscosity<TDataType>::ApproximateImplicitViscosity()
-		:ConstraintModule()
+		:ConstraintModule(),
+		m_reduce(),
+		m_arithmetic_v()
 	{
 		this->inAttribute()->tagOptional(true);
 	}
 
 
-	//F-norms
 	template<typename Real>
-	__device__ Real VB_FNorm(const Real a, const Real b, const Real c)
+	__device__ inline Real vb_trace_norm(const Real a, const Real b, const Real c)
 	{
 		Real p = a + b + c;
 		return sqrt(p * p / 2);
 	}
 
-	//CrossModel Viscosity Coefficient
 	template<typename Real>
-	__device__ Real VB_Viscosity(const Real Viscosity_h, const Real Viscosity_l, const Real StrainRate, const Real CrossModel_K, const Real CrossModel_n)
+	__device__ inline Real vb_cross_viscosity(const Real Viscosity_h, const Real Viscosity_l, const Real StrainRate, const Real CrossModel_K, const Real CrossModel_n)
 	{
 		Real p = CrossModel_K * StrainRate;
 		p = pow(p, CrossModel_n);
 		return Viscosity_h + (Viscosity_l - Viscosity_h) / (1 + p);
 	}
 
-	__device__ inline float kernWeight(const float r, const float h)
+	template<typename Real>
+	__device__ inline Real kernWeight(const float r, const float h)
 	{
-		const float q = r / h;
-		if (q > 1.0f) return 0.0f;
+		if (r / h > 1.0f) return 0.0f;
 		else {	
-			return (1.0 - pow(q, 4.0f));
+			return (1.0 - pow(r / h, 4.0f));
 		}
 	}
 
-	__device__ inline float kernWR(const float r, const float h)
+	template<typename Real>
+	__device__ inline Real kernWR(const float r, const float h)
 	{
-		float w = kernWeight(r, h);
-		const float q = r / h;
-		if (q < 0.4f)
+		if (r / h < 0.4f)
 		{
-			return w / (0.4f*h);
+			return kernWeight<Real>(r, h) / (0.4f*h);
 		}
-		return w / r;
+		return kernWeight<Real>(r, h) / r;
 	}
 
 	__device__ inline float kernWRR(const float r, const float h)
 	{
-		float w = kernWeight(r, h);
+		Real w = kernWeight<Real>(r, h);
 		const float q = r / h;
 		if (q < 0.4f)
 		{
@@ -80,97 +79,24 @@ namespace dyno
 		Real alpha_i = 0.0f;
 
 		List<int>& list_i = neighbors[pId];
-		int nbSize = list_i.size();
-
-		for (int ne = 0; ne < nbSize; ne++)
+		for (int ne = 0; ne < list_i.size(); ne++)
 		{
 			int j = list_i[ne];
 			Real r = (pos_i - position[j]).norm();;
-
 			if (r > EPSILON)
 			{
-				Real a_ij = kernWeight(r, smoothingLength);
+				Real a_ij = kernWeight<Real>(r, smoothingLength);
 				alpha_i += a_ij;
 			}
 		}
 		alpha[pId] = alpha_i;
 	}
 
-	template <typename Real>
-	__global__ void VC_CorrectAlpha
-	(
-		DArray<Real> alpha,
-		Real maxAlpha)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= alpha.size()) return;
-
-		Real alpha_i = alpha[pId];
-		if (alpha_i < maxAlpha)
-		{
-			alpha_i = maxAlpha;
-		}
-		alpha[pId] = alpha_i;
-	}
-
-	//Jacobi Mehthod 
-	template <typename Real, typename Coord, typename Matrix>
-	__global__ void VC_VisComput
-	(
-		DArray<Coord> velNew,
-		DArray<Coord> velBuf,
-		DArray<Coord> velOld,
-		DArray<Coord> velDp,
-		DArray<Coord> position,
-		DArray<Real> alpha,
-		DArray<Attribute> attribute,
-		DArrayList<int> neighbor,
-		Real rest_density,
-		Real h,
-		Real dt,
-		DArray<Real> vis
-	)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= position.size()) return;
-		if (!attribute[pId].isDynamic()) return;
-
-		Real tempValue = 0;
-		Coord Avj(0);
-		Matrix Mii(0);
-		Real invAlpha_i = 1.0f / alpha[pId];
-
-		List<int>& list_i = neighbor[pId];
-		int nbSize = list_i.size();
-		for (int ne = 0; ne < nbSize; ne++)
-		{
-			int j = list_i[ne];
-			Real r = (position[pId] - position[j]).norm();
-			if (r > EPSILON)
-			{
-				Real wrr_ij = kernWRR(r, h);
-				Real ai = 1.0f / alpha[pId];
-				Real aj = 1.0f / alpha[j];
-				Coord nij = (position[j] - position[pId]) / r;
-				tempValue = 0.25 * dt * (vis[pId] + vis[j]) * (ai + aj) * wrr_ij / rest_density;
-				Avj += tempValue * velBuf[j].dot(nij) * nij;
-				Matrix Mij(0);
-				Mij(0, 0) += nij[0] * nij[0];	Mij(0, 1) += nij[0] * nij[1];	Mij(0, 2) += nij[0] * nij[2];
-				Mij(1, 0) += nij[1] * nij[0];	Mij(1, 1) += nij[1] * nij[1];	Mij(1, 2) += nij[1] * nij[2];
-				Mij(2, 0) += nij[2] * nij[0];	Mij(2, 1) += nij[2] * nij[1];	Mij(2, 2) += nij[2] * nij[2];
-				Mii += Mij*tempValue;
-			}
-		}
-		Mii += Matrix::identityMatrix();
-		velNew[pId] = Mii.inverse()*(velOld[pId] + velDp[pId] + Avj);
-	}
-
-
 	//Conjugate Gradient Method.
 	template <typename Real, typename Coord>
 	__global__ void VC_Vis_AxComput
 	(
-		DArray<Real> v_y,
+		DArray<Real> vy,
 		DArray<Coord> velBuf,
 		DArray<Coord> position,
 		DArray<Real> alpha,
@@ -188,8 +114,7 @@ namespace dyno
 
 		Real tempValue = 0;
 		Coord Avi(0);
-		Real invAlpha_i = 1.0f / alpha[pId];
-
+		
 		List<int>& list_i = neighbor[pId];
 		int nbSize = list_i.size();
 		for (int ne = 0; ne < nbSize; ne++)
@@ -202,23 +127,21 @@ namespace dyno
 				Real ai = 1.0f / alpha[pId];
 				Real aj = 1.0f / alpha[j];
 				Coord nij = (position[j] - position[pId]) / r;
-				Coord vij = velBuf[pId] - velBuf[j];
-				tempValue = 2.5 * dt * (vis[pId] + vis[j]) * (ai + aj) * wrr_ij / rest_density; 
-				Avi += tempValue * vij.dot(nij) * nij;
+				Avi += 2.5 * dt * (vis[pId] + vis[j]) * (ai + aj) * wrr_ij  * (velBuf[pId] - velBuf[j]).dot(nij) * nij / rest_density;;
 			}
 		}
 		Avi += velBuf[pId];
-		v_y[3 * pId] = Avi[0];
-		v_y[3 * pId + 1] = Avi[1];
-		v_y[3 * pId + 2] = Avi[2];
+		vy[3 * pId] = Avi[0];
+		vy[3 * pId + 1] = Avi[1];
+		vy[3 * pId + 2] = Avi[2];
 	}
 
 
 	template <typename Real, typename Coord>
 	__global__ void VC_Vis_r_Comput
 	(
-		DArray<Real> v_r,
-		DArray<Real> v_y,
+		DArray<Real> vr,
+		DArray<Real> vy,
 		DArray<Coord> vel_old,
 		DArray<Coord> position,
 		DArray<Attribute> attribute
@@ -227,16 +150,16 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= position.size()) return;
 		if (!attribute[pId].isDynamic()) return;
-		Coord temp_vel = vel_old[pId];
-		v_r[3 * pId] = temp_vel[0] - v_y[3 * pId];
-		v_r[3 * pId + 1] = temp_vel[1] - v_y[3 * pId + 1];
-		v_r[3 * pId + 2] = temp_vel[2] - v_y[3 * pId + 2];
+
+		vr[3 * pId] = vel_old[pId][0] - vy[3 * pId];
+		vr[3 * pId + 1] = vel_old[pId][1] - vy[3 * pId + 1];
+		vr[3 * pId + 2] = vel_old[pId][2] - vy[3 * pId + 2];
 	}
 
 	template <typename Real, typename Coord>
 	__global__ void VC_Vis_pToVector
 	(
-		DArray<Real> v_p,
+		DArray<Real> vp,
 		DArray<Coord> pv,
 		DArray<Attribute> attribute
 	)
@@ -244,9 +167,9 @@ namespace dyno
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= attribute.size()) return;
 		if (!attribute[pId].isDynamic()) return;
-		pv[pId][0] = v_p[3 * pId];
-		pv[pId][1] = v_p[3 * pId + 1];
-		pv[pId][2] = v_p[3 * pId + 2];
+		pv[pId][0] = vp[3 * pId];
+		pv[pId][1] = vp[3 * pId + 1];
+		pv[pId][2] = vp[3 * pId + 2];
 	}
 
 
@@ -306,18 +229,16 @@ namespace dyno
 		Coord vel_i = velBuf[pId];
 		Real invAlpha_i = 1.0f / alpha[pId];
 
-		Coord dv(0);
-		Coord vij(0);
+		Coord dv(0), vij(0);
 
 		List<int>& list_i = neighbor[pId];
-		int nbSize = list_i.size();
-		for (int ne = 0; ne < nbSize; ne++)
+		for (int ne = 0; ne < list_i.size(); ne++)
 		{
 			int j = list_i[ne];
 			Real r = (position[pId] - position[j]).norm();
 			if(r > EPSILON)
 			{
-				Real wr_ij = kernWR(r, smoothingLength);
+				Real wr_ij = kernWR<Real>(r, smoothingLength);
 				Coord g = -invAlpha_i*(pos_i - position[j])*wr_ij*(1.0f / r);
 				vij = 0.5*(velBuf[pId] - velBuf[j]);
 				dv[0] += vij[0] * g[0];
@@ -326,59 +247,46 @@ namespace dyno
 			}
 
 		}
-		Real Norm = VB_FNorm(dv[0], dv[1], dv[2]);
-		crossVis[pId] = VB_Viscosity(visTop, visFloor, Norm, K, N);
-		if (pId == 100) printf("viscosity : %f\r\n", crossVis[pId]);
+		crossVis[pId] = vb_cross_viscosity(visTop, visFloor, vb_trace_norm(dv[0], dv[1], dv[2]), K, N);
 	}
 
-	template <typename Real, typename Coord>
-	__global__ void VC_updateScar
-	(
-		DArray<Real> scar,
-		DArray<Coord> velocity
-	)
-	{
-		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= velocity.size()) return;
-		
-		scar[pId] = velocity[pId].norm();
-		
-	}
-	
-	__global__ void VC_AttributeInit
-	(
-		DArray<Attribute> atts
-	)
+	__global__ void VC_AttributeInit(DArray<Attribute> atts)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= atts.size()) return;
-
 		atts[pId].setFluid();
 		atts[pId].setDynamic();
 	}
 
 	template <typename Real>
-	__global__ void VC_ViscosityValueUpdate
-	(
-		DArray<Real> viscosities,
-		Real viscosityValue
-	)
+	__global__ void VC_ViscosityValueUpdate(DArray<Real> viscosities, Real value)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= viscosities.size()) return;
-		viscosities[pId] = viscosityValue;
+		viscosities[pId] = value;
 	}
 
 	template<typename TDataType>
 	ApproximateImplicitViscosity<TDataType>::~ApproximateImplicitViscosity()
 	{
 		m_alpha.clear();
-		//if (m_reduce)
-		//{
-		//	delete m_reduce;
-		//}
+		m_vy.clear();
+		m_vr.clear();
+		m_vp.clear();
+		m_vpv.clear();
+		m_VelocityReal.clear();
+		velOld.clear();
+		velBuf.clear();
+		m_viscosity.clear();;
+		if (m_reduce)
+		{
+			delete m_reduce;
+		}
+		if (m_arithmetic_v)
+		{
+			delete m_arithmetic_v;
+		}
 	};
-
 
 	template<typename TDataType>
 	bool ApproximateImplicitViscosity<TDataType>::SetCross()
@@ -389,18 +297,13 @@ namespace dyno
 
 		Cross_K = this->varCrossK()->getValue();
 		Cross_N = this->varCrossN()->getValue();
-		std::cout << "*Non-Newtonian Fluid, Viscosity:" << CrossVisFloor
-			<< " to " << CrossVisCeil << ", Cross_K:"
-			<< Cross_K << ", Cross_N:" << Cross_N
-			<< std::endl;
+		std::cout << "*Non-Newtonian Fluid, Viscosity:" << CrossVisFloor << " to " << CrossVisCeil << ", K:"<< Cross_K << ", N:" << Cross_N << std::endl;
 		return true;
 	};
 
 	template<typename TDataType>
 	void ApproximateImplicitViscosity<TDataType>::constrain()
 	{
-		std::cout << "*Approximate Vicosity Solver::Dynamic Viscosity: " << this->varViscosity()->getValue()  << std::endl;
-
 		int num = this->inPosition()->size();
 
 		if ((num != m_alpha.size())||
@@ -408,10 +311,10 @@ namespace dyno
 			(num != m_viscosity.size()))
 		{
 			m_alpha.resize(num);
-			v_y.resize(3 * num);
-			v_r.resize(3 * num);
-			v_p.resize(3 * num);
-			v_pv.resize(num);
+			m_vy.resize(3 * num);
+			m_vr.resize(3 * num);
+			m_vp.resize(3 * num);
+			m_vpv.resize(num);
 			m_VelocityReal.resize(3 * num);
 			velOld.resize(num);
 			velBuf.resize(num);
@@ -433,14 +336,11 @@ namespace dyno
 		auto& m_velocity = this->inVelocity()->getData();
 		auto& m_neighborhood = this->inNeighborIds()->getData();
 		auto& m_attribute = this->inAttribute()->getData();
-		auto m_smoothingLength = this->varSmoothingLength()->getValue();
+		auto m_smoothingLength = this->inSmoothingLength()->getValue();
 		auto m_restDensity = this->varRestDensity()->getValue();
 
-		cuExecute(num, VC_ViscosityValueUpdate,
-			m_viscosity,
-			this->varViscosity()->getValue()
-			);
-
+		cuExecute(num, VC_ViscosityValueUpdate,	m_viscosity, this->varViscosity()->getValue());
+	
 		m_alpha.reset();
 		cuExecute(num, VC_ComputeAlpha,
 			m_alpha,
@@ -448,12 +348,6 @@ namespace dyno
 			m_attribute,
 			m_neighborhood,
 			m_smoothingLength);
-
-		//VC_CorrectAlpha << <pDims, BLOCK_SIZE >> > (
-		//	m_alpha,
-		//	m_maxAlpha);
-
-		//IF Cross Model is active, viscous coefficients should be computed.
 
 
 		if (this->varFluidType()->getValue() == FluidType::NonNewtonianFluid)
@@ -475,10 +369,10 @@ namespace dyno
 		}
 
 		velOld.assign(m_velocity);
-		v_y.reset();
+		m_vy.reset();
 
 		cuExecute(num, VC_Vis_AxComput,
-				v_y,
+				m_vy,
 				m_velocity,
 				m_position,
 				m_alpha,
@@ -490,37 +384,35 @@ namespace dyno
 				m_viscosity
 				);
 
-		v_r.reset();
+		m_vr.reset();
 		cuExecute(num, VC_Vis_r_Comput,
-				v_r,
-				v_y,
+				m_vr,
+				m_vy,
 				velOld,
 				m_position,
 				m_attribute
 				);
 
-		v_p.assign(v_r);
+		m_vp.assign(m_vr);
 
-		Real Vrr = m_arithmetic_v->Dot(v_r, v_r);
-		Real Verr = sqrt(Vrr / v_r.size());
-		int VisItor = 0;
+		Real Vrr = m_arithmetic_v->Dot(m_vr, m_vr);
+		Real Verr = sqrt(Vrr / m_vr.size());
+		int it = 0;
 		Real initErr = Verr;
 
-		std::cout <<"*Approximate Vicosity Solver::Residual:"  << Vrr <<std::endl;
-		while (VisItor < 1000 && Verr / initErr > 0.01f && Vrr > 1000.0f * EPSILON)
+		while (it < 150 && Verr / initErr > 0.01f && Vrr > 1000.0f * EPSILON)
 		{
-				VisItor++;
-		//		//The type of "v_p" should convert to DArray<Coord>
+			it++;
 				cuExecute(num, VC_Vis_pToVector,
-					v_p,
-					v_pv,
+					m_vp,
+					m_vpv,
 					m_attribute
 				);
 
-				v_y.reset();
+				m_vy.reset();
 				cuExecute(num, VC_Vis_AxComput,
-					v_y,
-					v_pv,
+					m_vy,
+					m_vpv,
 					m_position,
 					m_alpha,
 					m_attribute,
@@ -531,7 +423,7 @@ namespace dyno
 					m_viscosity
 					);
 
-				float alpha = Vrr / m_arithmetic_v->Dot(v_p, v_y);
+				Real alpha = Vrr / m_arithmetic_v->Dot(m_vp, m_vy);
 
 				cuExecute(num, VC_Vis_CoordToReal,
 					m_VelocityReal,
@@ -539,24 +431,22 @@ namespace dyno
 					m_attribute
 					);
 
-				Function2Pt::saxpy(m_VelocityReal, v_p, m_VelocityReal, alpha);
-
+				Function2Pt::saxpy(m_VelocityReal, m_vp, m_VelocityReal, alpha);
 				cuExecute(num, VC_Vis_RealToVeloctiy,
 					m_velocity,
 					m_VelocityReal,
 					m_attribute
 					);
 
-				Function2Pt::saxpy(v_r, v_y, v_r, -alpha);
+				Function2Pt::saxpy(m_vr, m_vy, m_vr, -alpha);
 				Real Vrr_old = Vrr;
 
-				Vrr = m_arithmetic_v->Dot(v_r, v_r);
+				Vrr = m_arithmetic_v->Dot(m_vr, m_vr);
 				Real beta = Vrr / Vrr_old;
-				Function2Pt::saxpy(v_p, v_p, v_r, beta);
 
-				Verr = sqrt(Vrr / v_r.size());
+				Function2Pt::saxpy(m_vp, m_vp, m_vr, beta);
+				Verr = sqrt(Vrr / m_vr.size());
 		}
-		std::cout << "*Approximate Vicosity Solver::Iteration #" << VisItor << ", Relative Resisual:" << Verr / initErr << std::endl;
 	};
 
 	DEFINE_CLASS(ApproximateImplicitViscosity);

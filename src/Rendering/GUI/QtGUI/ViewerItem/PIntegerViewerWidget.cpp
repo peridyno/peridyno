@@ -186,33 +186,31 @@ namespace dyno
 				dataPtr = f_CPU->getDataPtr().get();
 			}
 
-
-			if (dataPtr == NULL)
-				return;
-
-			//BuildDataTable
-			uint rowId = first;
-			uint rowTarget = 0;
-			for (size_t i = first; i <= last; i++)
+			if (dataPtr != NULL) 
 			{
-				auto it = (*dataPtr)[i];
-
-				for (size_t j = 0; j < it.size(); j++)
+				//BuildDataTable
+				uint rowId = first;
+				uint rowTarget = 0;
+				for (size_t i = first; i <= last; i++)
 				{
-					auto trans = it[j];
+					auto it = (*dataPtr)[i];
 
-					QString value;
+					for (size_t j = 0; j < it.size(); j++)
+					{
+						auto trans = it[j];
 
-					value.append(QString::number(trans));
+						QString value;
 
-					addItemToPosition(value, rowTarget, j, QString::number(rowId), QString("[") + QString::number(j) + QString("]") , true, rowsHeight);
+						value.append(QString::number(trans));
 
-					value.clear();
+						addItemToPosition(value, rowTarget, j, QString::number(rowId), QString("[") + QString::number(j) + QString("]"), true, rowsHeight);
+
+						value.clear();
+					}
+					rowId++;
+					rowTarget++;
 				}
-				rowId++;
-				rowTarget++;
 			}
-
 		}
 
 
@@ -241,30 +239,30 @@ namespace dyno
 			}
 
 
-			if (dataPtr == NULL)
-				return;
-
-			//BuildDataTable
-			uint rowId = first;
-			uint rowTarget = 0;
-			for (size_t i = first; i <= last; i++)
+			if (dataPtr != NULL) 
 			{
-				auto it = (*dataPtr)[i];
-
-				for (size_t j = 0; j < it.size(); j++)
+				//BuildDataTable
+				uint rowId = first;
+				uint rowTarget = 0;
+				for (size_t i = first; i <= last; i++)
 				{
-					auto trans = it[j];
+					auto it = (*dataPtr)[i];
 
-					QString value;
+					for (size_t j = 0; j < it.size(); j++)
+					{
+						auto trans = it[j];
 
-					value.append(QString::number(trans));
+						QString value;
 
-					addItemToPosition(value, rowTarget, j, QString::number(rowId), QString("[") + QString::number(j) + QString("]"), true, rowsHeight);
+						value.append(QString::number(trans));
 
-					value.clear();
+						addItemToPosition(value, rowTarget, j, QString::number(rowId), QString("[") + QString::number(j) + QString("]"), true, rowsHeight);
+
+						value.clear();
+					}
+					rowId++;
+					rowTarget++;
 				}
-				rowId++;
-				rowTarget++;
 			}
 
 		}

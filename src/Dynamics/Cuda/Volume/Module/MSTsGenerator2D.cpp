@@ -1,7 +1,7 @@
 #include "MSTsGenerator2D.h"
 #include "Algorithm/Scan.h"
 #include "Algorithm/Reduction.h"
-#include <thrust/sort.h>
+
 #include <ctime>
 #include "Timer.h"
 #include "STL/Stack.h"

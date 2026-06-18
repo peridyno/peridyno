@@ -27,9 +27,9 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		typedef typename TopologyModule::Edge Edge;
-		typedef typename TopologyModule::Triangle Triangle;
-		typedef typename TopologyModule::Tetrahedron Tetrahedron;
+		typedef typename Topology::Edge Edge;
+		typedef typename Topology::Triangle Triangle;
+		typedef typename Topology::Tetrahedron Tetrahedron;
 
 	public:
 		SimplexSet();

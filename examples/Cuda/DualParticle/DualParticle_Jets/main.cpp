@@ -1,11 +1,11 @@
-#include <GlfwApp.h>
+#include <UbiApp.h>
 #include <SceneGraph.h>
 
 ///Particle Emitter
 #include <ParticleSystem/Emitters/PoissonEmitter.h>
 
 ///Fluid Solver
-#include <DualParticleSystem/DualParticleFluid.h>
+#include <ParticleSystem/ParticleFluid.h>
 #include <ParticleSystem/MakeParticleSystem.h>
 
 ///Renderer
@@ -44,8 +44,10 @@ std::shared_ptr<SceneGraph> createScene()
 	emitter2->varVelocityMagnitude()->setValue(1.5);
 	emitter2->varLocation()->setValue(Vec3f(-0.2f, 0.5f, -0.0f));
 
-	auto fluid = scn->addNode(std::make_shared<DualParticleFluid<DataType3f>>(
-		DualParticleFluid<DataType3f>::FissionFusionStrategy));
+	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
+	fluid->varIncompressibilitySolver()->setCurrentKey(ParticleFluid<DataType3f>::DualParticle);
+	fluid->setDt(0.001);
+	fluid->varSmoothingLength()->setValue(2.4);
 	emitter->connect(fluid->importParticleEmitters());
 	emitter2->connect(fluid->importParticleEmitters());
 
@@ -59,7 +61,7 @@ std::shared_ptr<SceneGraph> createScene()
 	fluid->graphicsPipeline()->pushModule(colorMapper);
 
 	auto ptRender = std::make_shared<GLPointVisualModule>();
-	ptRender->setColor(Color(1, 0, 0));
+	ptRender->varBaseColor()->setValue(Color(1, 0, 0));
 	ptRender->varPointSize()->setValue(0.0035f);
 	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 
@@ -75,24 +77,16 @@ std::shared_ptr<SceneGraph> createScene()
 	// add the widget to app
 	fluid->graphicsPipeline()->pushModule(colorBar);
 
-
-	auto vpRender = std::make_shared<GLPointVisualModule>();
-	vpRender->setColor(Color(1, 1, 0));
-	vpRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
-	fluid->stateVirtualPointSet()->connect(vpRender->inPointSet());
-	vpRender->varPointSize()->setValue(0.001);
-	fluid->graphicsPipeline()->pushModule(vpRender);
-
 	return scn;
 }
 
 int main()
 {
 
-	GlfwApp window;
-	window.setSceneGraph(createScene());
-	window.initialize(1024, 768);
-	window.mainLoop();
+	UbiApp app(GUIType::GUI_QT);
+	app.setSceneGraph(createScene());
+	app.initialize(1024, 768);
+	app.mainLoop();
 
 	return 0;
 }

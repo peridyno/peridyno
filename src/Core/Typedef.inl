@@ -147,7 +147,7 @@ namespace dyno {
   */
 #define cuExecute(size, Func, ...){						\
 		uint pDims = cudaGridSize((uint)size, BLOCK_SIZE);	\
-		Func << <pDims, BLOCK_SIZE >> > (				\
+		Func <<<pDims, BLOCK_SIZE >>> (				\
 		__VA_ARGS__);									\
 		cuSynchronize();								\
 	}
@@ -155,7 +155,7 @@ namespace dyno {
 #define cuExecute2D(size, Func, ...){						\
 		uint3 pDims = cudaGridSize2D(size, 8);				\
 		dim3 threadsPerBlock(8, 8, 1);		\
-		Func << <pDims, threadsPerBlock >> > (				\
+		Func <<<pDims, threadsPerBlock >>> (				\
 		__VA_ARGS__);										\
 		cuSynchronize();									\
 	}
@@ -163,14 +163,14 @@ namespace dyno {
 #define cuExecute3D(size, Func, ...){						\
 		dim3 pDims = cudaGridSize3D(size, 8);		\
 		dim3 threadsPerBlock(8, 8, 8);		\
-		Func << <pDims, threadsPerBlock >> > (				\
+		Func <<<pDims, threadsPerBlock >>> (				\
 		__VA_ARGS__);										\
 		cuSynchronize();									\
 	}
 
 #define cuExecuteNoSync(size, Func, ...){						\
 	uint pDims = cudaGridSize((uint)size, BLOCK_SIZE);	\
-	Func << <pDims, BLOCK_SIZE >> > (				\
+	Func <<<pDims, BLOCK_SIZE >>> (				\
 	__VA_ARGS__);									\
 }
 

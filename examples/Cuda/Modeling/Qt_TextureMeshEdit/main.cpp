@@ -49,32 +49,49 @@ std::shared_ptr<SceneGraph> creatCar()
 
 
 	auto configCar = scn->addNode(std::make_shared<ConfigurableBody<DataType3f>>());
-	VehicleBind configData;
+	MultiBodyTuple configData;
 
 	Vec3f angle = Vec3f(0, 0, 90);
 	Quat<Real> q = Quat<Real>(angle[2] * M_PI / 180, angle[1] * M_PI / 180, angle[0] * M_PI / 180);
-	;
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("LF", 0), 0, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));//
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("LB", 1), 1, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("RF", 2), 2, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("RB", 3), 3, Capsule, Transform3f(Vec3f(0), q.toMatrix3x3(), Vec3f(1))));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("BackWheel", 4), 4, Box));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("Body", 5), 5, Box));
+	
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("LF", 0, 0, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("LB", 1, 1, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("RF", 2, 2, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("RB", 3, 3, RigidShapeType::SHAPE_CAPSULE, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("BackWheel", 4, 4, RigidShapeType::SHAPE_BOX, 100));
+	configData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("Body", 5, 5, RigidShapeType::SHAPE_BOX, 100));
 
 
-	for (size_t i = 0; i < 4; i++)
+	int index = 0;
+	for (auto it = configData.varRigidBodyConfigs()->begin();
+		it != configData.varRigidBodyConfigs()->end();
+		++it, ++index)
 	{
-		configData.mVehicleRigidBodyInfo[i].capsuleLength = 0.3;
+		auto* rigidPtr = dynamic_cast<TFTuple<RigidBodyTuple>*>((*it).get());
+
+		auto rigid = configData.varRigidBodyConfigs()->getElement(it);
+		auto base_ptr = (*rigid.varShapeConfigs()->begin()).get();
+		auto* shapePtr = dynamic_cast<TFTuple<ShapeTuple>*>(base_ptr);
+
+		auto shape = shapePtr->getValue();
+		shape.varCapsuleLength()->setValue(0.1);
+		shape.varRot()->setValue(q);
+		shapePtr->setValue(shape);
+
+		rigidPtr->setValue(rigid);
+
+		if (index >= 3)
+			break;
 	}
 
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("LF", 0), Name_Shape("Body", 5), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("LB", 1), Name_Shape("Body", 5), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("RF", 2), Name_Shape("Body", 5), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("RB", 3), Name_Shape("Body", 5), Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape("BackWheel", 4), Name_Shape("Body", 5), Fixed, Vec3f(1, 0, 0), Vec3f(0), true, 0));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("LF", 0, "Body", 5, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("LB", 1, "Body", 5, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("RF", 2, "Body", 5, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("RB", 3, "Body", 5, JointType::JOINT_Hinge, Vec3f(1, 0, 0), Vec3f(0), true, 10));
+	configData.varJointConfigs()->pushBack(MultiBodyJointTuple("BackWheel", 4, "Body", 5, JointType::JOINT_Fixed, Vec3f(1, 0, 0), Vec3f(0), true, 0));
 
+	configCar->varConfiguration()->setValue(configData);
 
-	configCar->varVehicleConfiguration()->setValue(configData);
 
 	configCar->varRotation()->setValue(Vec3f(0, 0, 0));
 
@@ -117,17 +134,24 @@ std::shared_ptr<SceneGraph> creatCar()
 
 	auto configBlock = scn->addNode(std::make_shared<ConfigurableBody<DataType3f>>());
 
-	VehicleBind configBlockData;
-	configBlockData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("Block1", 0), 0, Box));
-	configBlockData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("Block2", 1), 1, Box));
-	configBlockData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("Block3", 2), 2, Box));
-	configBlockData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape("Block4", 3), 3, Box));
+	MultiBodyTuple configBlockData;
+	configBlockData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("Block1", 0, 0, RigidShapeType::SHAPE_BOX));
+	configBlockData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("Block2", 1, 1, RigidShapeType::SHAPE_BOX));
+	configBlockData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("Block3", 2, 2, RigidShapeType::SHAPE_BOX));
+	configBlockData.varRigidBodyConfigs()->pushBack(RigidBodyTuple("Block4", 3, 3, RigidShapeType::SHAPE_BOX));
 
-	configBlockData.mVehicleRigidBodyInfo[0].rigidGroup = 1;
-	configBlockData.mVehicleRigidBodyInfo[1].rigidGroup = 2;
-	configBlockData.mVehicleRigidBodyInfo[2].rigidGroup = 3;
+	int group = 1;
+	for (auto it = configData.varRigidBodyConfigs()->begin();
+		it != configData.varRigidBodyConfigs()->end();
+		++it, ++group)
+	{
+		auto* rigidPtr = dynamic_cast<TFTuple<RigidBodyTuple>*>((*it).get());
 
-	configBlock->varVehicleConfiguration()->setValue(configBlockData);
+		auto rigid = configData.varRigidBodyConfigs()->getElement(it);
+		rigid.varConfigGroup()->setValue(group);
+	}
+
+	configBlock->varConfiguration()->setValue(configBlockData);
 
 	extractBlock->stateResult()->connect(configBlock->inTextureMesh());
 

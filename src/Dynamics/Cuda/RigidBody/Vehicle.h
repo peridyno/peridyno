@@ -21,8 +21,6 @@
 #include "Field/FilePath.h"
 #include "Topology/EdgeSet.h"
 
-#include "Field/VehicleInfo.h"
-
 namespace dyno
 {
 	template<typename TDataType>

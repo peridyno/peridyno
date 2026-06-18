@@ -63,7 +63,7 @@ namespace dyno
 
 	template<typename TDataType>
 	AdaptiveGridSet2D<TDataType>::AdaptiveGridSet2D()
-		: TopologyModule()
+		: Topology()
 	{
 	}
 
@@ -78,8 +78,22 @@ namespace dyno
 		m_quadtree.clear();
 		m_neighbors.clear();
 		m_leafIndex.clear();
-		//m_vertexs.clear();
-		//m_node2ver.clear();
+	}
+
+	template<typename TDataType>
+	void AdaptiveGridSet2D<TDataType>::setSpace(const Coord2D p0, const Coord2D p1, Real dx)
+	{
+		m_dx = dx;
+
+		int rs = floor(max(p1[0] - p0[0], p1[1] - p0[1]) / dx);
+		m_level_max = ceil(log2(float(rs)));
+
+		int rs_max = (1 << m_level_max);
+		m_origin = p0 - (dx * (rs_max - rs) / 2);
+
+		m_origin[0] = floor(m_origin[0] / m_dx) * m_dx;
+		m_origin[1] = floor(m_origin[1] / m_dx) * m_dx;
+		std::printf("The origin, dx, levelmax are: %f  %f,   %f, %d %d \n", m_origin[0], m_origin[1], m_dx, rs, m_level_max);
 	}
 
 	template<typename TDataType>

@@ -17,15 +17,16 @@
 #include <string>
 #include <atomic>
 #include <map>
+#include <functional>
 
 namespace dyno
 {
 class Object;
 class ClassInfo;
 
-
-typedef Object* (*ObjectConstructorFn)(void);
 bool Register(ClassInfo* ci);
+
+using ObjectConstructorFn = std::function<Object* ()>;
 
 class ClassInfo
 {
@@ -47,7 +48,7 @@ public:
 
 	Object* createObject()const 
 	{ 
-		return m_objectConstructor ? (*m_objectConstructor)() : 0; 
+		return m_objectConstructor ? (m_objectConstructor)() : 0; 
 	}
 
 	bool isDynamic()const 
@@ -71,13 +72,13 @@ public:  \
 
 
 #define IMPLEMENT_CLASS_COMMON(name,func) \
-const ClassInfo* name::ms_classinfo = new ClassInfo((#name), (ObjectConstructorFn) func); \
+const ClassInfo* name::ms_classinfo = new ClassInfo((#name), (ObjectConstructorFn)func); \
                         \
 const ClassInfo* name::getClassInfo() const \
     {return name::ms_classinfo;}
 
 #define IMPLEMENT_CLASS(name)            \
-IMPLEMENT_CLASS_COMMON(name,name::createObject) \
+IMPLEMENT_CLASS_COMMON(name, std::bind(&name::createObject)) \
 Object* name::createObject()                   \
     { return new name;}
 
@@ -94,14 +95,14 @@ public:  \
 #define IMPLEMENT_CLASS_COMMON_1(name, T1, func) \
 template<typename T1>		\
 const ClassInfo name<T1>::ms_classinfo(std::string(_STR(name)).append("<").append(T1::getName()).append(">"), \
-            (ObjectConstructorFn) func); \
+            (ObjectConstructorFn)func); \
 							\
 template<typename T1>		\
 const ClassInfo* name<T1>::getClassInfo() const \
     {return &name<T1>::ms_classinfo;}
 
 #define IMPLEMENT_TCLASS(name, T1)            \
-IMPLEMENT_CLASS_COMMON_1(name, T1, name<T1>::createObject) \
+IMPLEMENT_CLASS_COMMON_1(name, T1, std::bind(&name<T1>::createObject)) \
 							\
 template<typename T1>		\
 Object* name<T1>::createObject()                   \
@@ -116,7 +117,7 @@ public:
 	Object();
 	virtual ~Object() {};
 	static bool registerClass(ClassInfo* ci);
-	static Object* createObject(std::string name);
+	static Object* createObjectByName(std::string name);
 	static std::map< std::string, ClassInfo*>* getClassMap();
 
 	/**

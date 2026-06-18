@@ -3,6 +3,9 @@
 //Basic shapes
 #include "BasicShapes/CubeModel.h"
 #include "BasicShapes/SphereModel.h"
+#include "BasicShapes/CapsuleModel.h"
+#include "BasicShapes/CylinderModel.h"
+#include "BasicShapes/ConeModel.h"
 
 namespace dyno
 {
@@ -45,6 +48,8 @@ namespace dyno
 
 		bool inverted = this->varInerted()->getValue();
 
+		uint padding = this->varPadding()->getValue();
+
 		Real h = this->varGridSpacing()->getValue();
 
 		BasicShapeType type = shape->getShapeType();
@@ -78,12 +83,10 @@ namespace dyno
 
 				auto& sdf = levelset->getSDF();
 
-				uint padding = 5;
-
 				calculateAxisAlignedBoundingBox(lo, hi, aabb.v0, aabb.v1, h, padding);
 
 				sdf.setSpace(lo, hi, h);
-				sdf.loadBox(aabb.v0, aabb.v1, inverted);
+				sdf.loadBox(obb, inverted);
 			}
 		}
 		else if (type == BasicShapeType::SPHERE)
@@ -98,13 +101,60 @@ namespace dyno
 
 				auto& sdf = levelset->getSDF();
 
-				uint padding = 5;
+				calculateAxisAlignedBoundingBox(lo, hi, aabb.v0, aabb.v1, h, padding);
+
+				sdf.setSpace(lo, hi, h);
+				sdf.loadSphere(sphere, inverted);
+			}
+		}
+		else if (type == BasicShapeType::CAPSULE)
+		{
+			auto capsuleModel = dynamic_cast<CapsuleModel<TDataType>*>(shape);
+
+			if (capsuleModel != nullptr)
+			{
+				auto capsule = capsuleModel->outCapsule()->getValue();
+
+				auto aabb = capsule.aabb();
+
+				auto& sdf = levelset->getSDF();
 
 				calculateAxisAlignedBoundingBox(lo, hi, aabb.v0, aabb.v1, h, padding);
 
 				sdf.setSpace(lo, hi, h);
-				sdf.loadSphere(sphere.center, sphere.radius, inverted);
+
+				sdf.loadCapsule(capsule, inverted);
 			}
+		}
+		else if (type == BasicShapeType::CYLINDER)
+		{
+			auto cylinderModel = dynamic_cast<CylinderModel<TDataType>*>(shape);
+
+			auto cylinder = cylinderModel->outCylinder()->getValue();
+
+			auto aabb = cylinder.aabb();
+
+			auto& sdf = levelset->getSDF();
+
+			calculateAxisAlignedBoundingBox(lo, hi, aabb.v0, aabb.v1, h, padding);
+
+			sdf.setSpace(lo, hi, h);
+			sdf.loadCylinder(cylinder, inverted);
+		}
+		else if (type == BasicShapeType::CONE)
+		{
+			auto coneModel = dynamic_cast<ConeModel<TDataType>*>(shape);
+
+			auto cone = coneModel->outCone()->getValue();
+
+			auto aabb = cone.aabb();
+
+			auto& sdf = levelset->getSDF();
+
+			calculateAxisAlignedBoundingBox(lo, hi, aabb.v0, aabb.v1, h, padding);
+
+			sdf.setSpace(lo, hi, h);
+			sdf.loadCone(cone, inverted);
 		}
 		else
 		{

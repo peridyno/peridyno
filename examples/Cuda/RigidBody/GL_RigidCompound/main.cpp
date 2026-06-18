@@ -58,8 +58,8 @@ std::shared_ptr<SceneGraph> creatRigidCompound()
 	rigid->graphicsPipeline()->pushModule(mapper);
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Color(1, 1, 0));
-	sRender->setAlpha(0.5f);
+	sRender->varBaseColor()->setValue(Color(1, 1, 0));
+	sRender->varAlpha()->setValue(0.5f);
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
 
@@ -74,7 +74,7 @@ std::shared_ptr<SceneGraph> creatRigidCompound()
 	rigid->graphicsPipeline()->pushModule(contactPointMapper);
 
 	auto pointRender = std::make_shared<GLPointVisualModule>();
-	pointRender->setColor(Color(1, 0, 0));
+	pointRender->varBaseColor()->setValue(Color(1, 0, 0));
 	pointRender->varPointSize()->setValue(0.01f);
 	contactPointMapper->outPointSet()->connect(pointRender->inPointSet());
 	rigid->graphicsPipeline()->pushModule(pointRender);
@@ -90,7 +90,7 @@ std::shared_ptr<SceneGraph> creatRigidCompound()
 // 	rigid->graphicsPipeline()->pushModule(boundaryContactsMapper);
 // 
 // 	auto boundaryContactsRender = std::make_shared<GLPointVisualModule>();
-// 	boundaryContactsRender->setColor(Color(0, 1, 0));
+// 	boundaryContactsRender->varBaseColor()->setValue(Color(0, 1, 0));
 // 	boundaryContactsRender->varPointSize()->setValue(0.01f);
 // 	boundaryContactsMapper->outPointSet()->connect(boundaryContactsRender->inPointSet());
 // 	rigid->graphicsPipeline()->pushModule(boundaryContactsRender);

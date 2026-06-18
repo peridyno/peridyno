@@ -22,6 +22,15 @@ namespace dyno
 	Thread<TDataType>::Thread()
 		: ThreadSystem<TDataType>()
 	{
+		this->varHorizon()->attach(
+			std::make_shared<FCallBackFunc>(
+				[=]() {
+					this->stateHorizon()->setValue(this->varHorizon()->getValue());
+				})
+		);
+
+		this->varHorizon()->setValue(0.0085);
+
 		auto integrator = std::make_shared<ParticleIntegrator<TDataType>>();
 		this->stateTimeStep()->connect(integrator->inTimeStep());
 		this->statePosition()->connect(integrator->inPosition());
@@ -30,14 +39,12 @@ namespace dyno
 		this->animationPipeline()->pushModule(integrator);
 
 		auto elasticity = std::make_shared<LinearElasticitySolver<TDataType>>();
-		this->varHorizon()->connect(elasticity->inHorizon());
+		this->stateHorizon()->connect(elasticity->inHorizon());
 		this->stateTimeStep()->connect(elasticity->inTimeStep());
 		this->statePosition()->connect(elasticity->inY());
 		this->stateVelocity()->connect(elasticity->inVelocity());
 		this->stateRestShape()->connect(elasticity->inBonds());
 		this->animationPipeline()->pushModule(elasticity);
-
-		
 	}
 
 	template<typename TDataType>

@@ -35,9 +35,14 @@ namespace dyno {
 
 		inline T* begin() const { return m_data; }
 
+		// Called by silling
+		inline uint64 address() const {
+			return uint64(m_data);
+		}
 		DYN_FUNC inline uint nx() const { return m_nx; }
 		DYN_FUNC inline uint ny() const { return m_ny; }
 		DYN_FUNC inline uint nz() const { return m_nz; }
+		DYN_FUNC inline uint nxy() const { return m_nxy; }
 		DYN_FUNC inline uint pitch() const { return m_pitch_x; }
 
 		DYN_FUNC inline T operator () (const int i, const int j, const int k) const
@@ -56,12 +61,24 @@ namespace dyno {
 
 		DYN_FUNC inline T operator [] (const int id) const
 		{
-			return m_data[id];
+			uint xy = m_nx * m_ny;
+			uint k = id / xy;
+			uint mod = id % xy;
+			uint j = mod / m_nx;
+			uint i = mod % m_nx;
+
+			return (*this)(i, j, k);
 		}
 
 		DYN_FUNC inline T& operator [] (const int id)
 		{
-			return m_data[id];
+			uint xy = m_nx * m_ny;
+			uint k = id / xy;
+			uint mod = id % xy;
+			uint j = mod / m_nx;
+			uint i = mod % m_nx;
+
+			return (*this)(i, j, k);
 		}
 
 		DYN_FUNC inline size_t index(const uint i, const uint j, const uint k) const
@@ -80,20 +97,18 @@ namespace dyno {
 		T get(const uint i, const uint j, const uint k);
 
 	private:
+		T* m_data = nullptr;
 		uint m_nx = 0;
-		uint m_pitch_x = 0;
-
 		uint m_ny = 0;
 		uint m_nz = 0;
 		uint m_nxy = 0;
-		T* m_data = nullptr;
+		uint m_pitch_x = 0;
 	};
 
 	template<typename T>
 	using DArray3D = Array3D<T, DeviceType::GPU>;
 
 	typedef DArray3D<float>	Grid1f;
-	typedef DArray3D<float3> Grid3f;
 	typedef DArray3D<bool> Grid1b;
 
 
@@ -150,7 +165,7 @@ namespace dyno {
 	template<typename T>
 	T Array3D<T, DeviceType::GPU>::get(const uint i, const uint j, const uint k)
 	{
-		assert(i < m_nx && j < m_ny && k < m_nz && i >= 0 && j >= 0 && k >= 0);
+		assert(i < m_nx && j < m_ny && k < m_nz);
 
 		char* addr = (char*)m_data;
 		addr += (j * m_pitch_x + k * m_nxy);
@@ -165,7 +180,7 @@ namespace dyno {
 	template<typename T>
 	void Array3D<T, DeviceType::GPU>::set(const uint i, const uint j, const uint k, const T value)
 	{
-		assert(i < m_nx && j < m_ny && k < m_nz && i >= 0 && j >= 0 && k >= 0);
+		assert(i < m_nx && j < m_ny && k < m_nz);
 
 		char* addr = (char*)m_data;
 		addr += (j * m_pitch_x + k * m_nxy);

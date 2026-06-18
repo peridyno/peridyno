@@ -58,7 +58,7 @@ namespace dyno
 
 		void parseOBJ(const std::string& filename,
 			std::vector<Vec3f>& vertices,
-			std::vector<TopologyModule::Edge>& edges);
+			std::vector<Topology::Edge>& edges);
 
 		DArray<Coord> initPos;
 

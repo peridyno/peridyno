@@ -190,6 +190,8 @@ namespace dyno
 		DYN_FUNC Real distance(const TTet3D<Real>& tet) const;
 		DYN_FUNC Real distance(const TAlignedBox3D<Real>& abox) const;
 		DYN_FUNC Real distance(const TOrientedBox3D<Real>& obb) const;
+		DYN_FUNC Real distance(const TCylinder3D<Real>& cylinder) const;
+		DYN_FUNC Real distance(const TCone3D<Real>& cone) const;
 
 
 
@@ -607,15 +609,15 @@ namespace dyno
 
 	public:
 		DYN_FUNC TCylinder3D();
-		DYN_FUNC TCylinder3D(const Coord3D& c, const Real& h, const Real& r, const Quat<Real>& rot = Quat<Real>(), const Coord3D& s = Coord3D(1));
+		DYN_FUNC TCylinder3D(const Coord3D& c, const Real& h, const Real& r, const Quat<Real>& rot = Quat<Real>());
 		DYN_FUNC TCylinder3D(const TCylinder3D<Real>& cylinder);
-		DYN_FUNC Real volume() const { return Real(M_PI) * radius * radius * height * scale[0] * scale[1] * scale[2]; }
+		DYN_FUNC Real volume() const { return Real(M_PI) * radius * radius * height; }
+
+		DYN_FUNC TAlignedBox3D<Real> aabb() const;
 
 		Coord3D center;
 		Real height;
 		Real radius;
-
-		Coord3D scale;
 		Quat<Real> rotation;
 	};
 
@@ -627,16 +629,17 @@ namespace dyno
 
 	public:
 		DYN_FUNC TCone3D();
-		DYN_FUNC TCone3D(const Coord3D& c, const Real& h, const Real& r, const Quat<Real>& rot = Quat<Real>(), const Coord3D& s = Coord3D(1));
+		DYN_FUNC TCone3D(const Coord3D& c, const Real& h, const Real& r, const Quat<Real>& rot = Quat<Real>());
 		DYN_FUNC TCone3D(const TCone3D<Real>& cone);
 		DYN_FUNC Real volume() const { return Real(M_PI) * radius * radius * height / Real(3); }
+
+		DYN_FUNC TAlignedBox3D<Real> aabb() const;
 
 		//Center of the bottom circle
 		Coord3D center;
 		Real height;
 		Real radius;
 
-		Coord3D scale;
 		Quat<Real> rotation;
 	};
 
@@ -690,10 +693,23 @@ namespace dyno
 		DYN_FUNC TTet3D(const Coord3D& v0, const Coord3D& v1, const Coord3D& v2, const Coord3D& v3);
 		DYN_FUNC TTet3D(const TTet3D<Real>& tet);
 
-		DYN_FUNC TTriangle3D<Real> face(const int index) const;
-		DYN_FUNC TSegment3D<Real> edge(const int index) const;
+		//Return a triangle with the following vertex ids v0, v1, v2
+		// triangle 0: 0, 1, 2
+		// triangle 1: 1, 0, 3
+		// triangle 2: 2, 3, 0
+		// triangle 3: 3, 2, 1
+		DYN_FUNC TTriangle3D<Real> face(const uint index) const;
 
-		DYN_FUNC Real solidAngle(const int index) const;
+		// Return edges with the following vertex ids
+		// edge 0: 2, 0
+		// edge 1: 0, 1
+		// edge 2: 1, 2
+		// edge 3: 3, 0
+		// edge 4: 3, 1
+		// edge 5: 3, 2
+		DYN_FUNC TSegment3D<Real> edge(const uint index) const;
+
+		DYN_FUNC Real solidAngle(const uint index) const;
 
 		DYN_FUNC Real volume() const;
 
@@ -771,12 +787,17 @@ namespace dyno
 	public:
 		DYN_FUNC TAlignedBox3D();
 		DYN_FUNC TAlignedBox3D(const Coord3D& p0, const Coord3D& p1);
+		DYN_FUNC TAlignedBox3D(const Coord3D& p);
 		DYN_FUNC TAlignedBox3D(const TAlignedBox3D<Real>& box);
 
 		DYN_FUNC bool intersect(const TAlignedBox3D<Real>& abox, TAlignedBox3D<Real>& interBox) const;
 		DYN_FUNC bool checkOverlap(const TAlignedBox3D<Real>& abox) const;
 
 		DYN_FUNC TAlignedBox3D<Real> merge(const TAlignedBox3D<Real>& aabb) const;
+
+		DYN_FUNC TAlignedBox3D<Real> merge(const Vector<Real, 3>& point);
+
+		DYN_FUNC TAlignedBox3D<Real> enlarge(const Real thickness);
 
 		DYN_FUNC bool meshInsert(const TTriangle3D<Real>& tri) const;
 		DYN_FUNC bool isValid();

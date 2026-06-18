@@ -27,6 +27,8 @@ namespace dyno
 	public:
 		DEF_VAR(Real, Horizon, 0.01, "Horizon");
 
+		DEF_VAR_STATE(Real, Horizon, Real(1), "A state field representing horizon");
+
 		DEF_ARRAYLIST_STATE(Bond, RestShape, DeviceType::GPU, "Storing neighbors");
 
 	protected:

@@ -24,20 +24,14 @@ std::shared_ptr<SceneGraph> creatCar()
 	std::shared_ptr<SceneGraph> scn = std::make_shared<SceneGraph>();
 
 	auto fbx = scn->addNode(std::make_shared<FBXLoader<DataType3f>>());
+	fbx->varImportAnimation()->setValue(true);
 	fbx->varFileName()->setValue(getAssetPath() + "fbx/Dog.fbx");
 	fbx->reset();
 	fbx->setVisible(false);
-	fbx->varImportAnimation()->setValue(true);
 
 	auto robot = scn->addNode(std::make_shared<ConfigurableBody<DataType3f>>());
 	fbx->stateTextureMesh()->connect(robot->inTextureMesh());
 	robot->varLocation()->setValue(Vec3f(0,0.3,0));
-
-
-	VehicleBind configData;
-
-	Vec3f angle = Vec3f(0, 0, 90);
-	Quat<Real> q = Quat<Real>(angle[2] * M_PI / 180, angle[1] * M_PI / 180, angle[0] * M_PI / 180);
 
 	std::string body = std::string("Model::Robot_GLTF:Body");
 	std::string lf_up = std::string("Model::Robot_GLTF:LF_Up");
@@ -49,46 +43,35 @@ std::shared_ptr<SceneGraph> creatCar()
 	std::string rb_up = std::string("Model::Robot_GLTF:RB_Up");
 	std::string rb_down = std::string("Model::Robot_GLTF:RB_Down");
 
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(body, 0), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(body), Box, Transform3f(), 5100));//
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(lf_up, 1), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(lf_up), Box, Transform3f(), 5100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(lf_down, 2), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(lf_down), Box, Transform3f(), 5100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(lb_up, 3), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(lb_up), Box, Transform3f(), 5100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(lb_down, 4), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(lb_down), Box, Transform3f(), 5100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(rf_up, 5), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(rf_up), Box, Transform3f(), 5100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(rf_down, 6), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(rf_down), Box, Transform3f(), 5100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(rb_up, 7), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(rb_up), Box, Transform3f(), 5100));
-	configData.mVehicleRigidBodyInfo.push_back(VehicleRigidBodyInfo(Name_Shape(rb_down, 8), fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(rb_down), Box, Transform3f(), 5100));
+	MultiBodyTuple multiBodyConfig;
+	multiBodyConfig.varRigidBodyConfigs()->pushBack(RigidBodyTuple(body, 0, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(body), RigidShapeType::SHAPE_BOX, 5100));
+	multiBodyConfig.varRigidBodyConfigs()->pushBack(RigidBodyTuple(lf_up, 1, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(lf_up), RigidShapeType::SHAPE_BOX, 5100));
+	multiBodyConfig.varRigidBodyConfigs()->pushBack(RigidBodyTuple(lf_down, 2, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(lf_down), RigidShapeType::SHAPE_BOX, 5100));
+	multiBodyConfig.varRigidBodyConfigs()->pushBack(RigidBodyTuple(lb_up, 3, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(lb_up), RigidShapeType::SHAPE_BOX, 5100));
+	multiBodyConfig.varRigidBodyConfigs()->pushBack(RigidBodyTuple(lb_down, 4, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(lb_down), RigidShapeType::SHAPE_BOX, 5100));
+	multiBodyConfig.varRigidBodyConfigs()->pushBack(RigidBodyTuple(rf_up, 5, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(rf_up), RigidShapeType::SHAPE_BOX, 5100));
+	multiBodyConfig.varRigidBodyConfigs()->pushBack(RigidBodyTuple(rf_down, 6, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(rf_down), RigidShapeType::SHAPE_BOX, 5100));
+	multiBodyConfig.varRigidBodyConfigs()->pushBack(RigidBodyTuple(rb_up, 7, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(rb_up), RigidShapeType::SHAPE_BOX, 5100));
+	multiBodyConfig.varRigidBodyConfigs()->pushBack(RigidBodyTuple(rb_down, 8, fbx->stateHierarchicalScene()->getDataPtr()->findMeshIndexByName(rb_down), RigidShapeType::SHAPE_BOX, 5100));
 
-	for (size_t i = 0; i < configData.mVehicleRigidBodyInfo.size(); i++)
+	for (auto it = multiBodyConfig.varRigidBodyConfigs()->begin(); it != multiBodyConfig.varRigidBodyConfigs()->end(); it++)
 	{
-		configData.mVehicleRigidBodyInfo[i].radius = 0.2;
+		auto rigid = multiBodyConfig.varRigidBodyConfigs()->getElement(it);
+		auto shape = rigid.varShapeConfigs()->getElement(rigid.varShapeConfigs()->begin());
+		shape.varRadius()->setValue(0.2);
 	}
 
 	Vec3f offset = Vec3f(0, 0.17, 0);
+	multiBodyConfig.varJointConfigs()->pushBack(MultiBodyJointTuple(lf_up, 1, body, 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), offset, true, 0));
+	multiBodyConfig.varJointConfigs()->pushBack(MultiBodyJointTuple(lf_down, 2, lf_up, 1, JointType::JOINT_Hinge, Vec3f(1, 0, 0), offset, true, 0));
+	multiBodyConfig.varJointConfigs()->pushBack(MultiBodyJointTuple(lb_up, 3, body, 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), offset, true, 0));
+	multiBodyConfig.varJointConfigs()->pushBack(MultiBodyJointTuple(lb_down, 4, lb_up, 3, JointType::JOINT_Hinge, Vec3f(1, 0, 0), offset, true, 0));
+	multiBodyConfig.varJointConfigs()->pushBack(MultiBodyJointTuple(rf_up, 5, body, 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), offset, true, 0));
+	multiBodyConfig.varJointConfigs()->pushBack(MultiBodyJointTuple(rf_down, 6, rf_up, 5, JointType::JOINT_Hinge, Vec3f(1, 0, 0), offset, true, 0));
+	multiBodyConfig.varJointConfigs()->pushBack(MultiBodyJointTuple(rb_up, 7, body, 0, JointType::JOINT_Hinge, Vec3f(1, 0, 0), offset, true, 0));
+	multiBodyConfig.varJointConfigs()->pushBack(MultiBodyJointTuple(rb_down, 8, rb_up, 7, JointType::JOINT_Hinge, Vec3f(1, 0, 0), offset, true, 0));
 
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(lf_up, 1), Name_Shape(body, 0), Hinge, Vec3f(1, 0, 0), offset, true, 0));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(lf_down, 2), Name_Shape(lf_up, 1), Hinge, Vec3f(1, 0, 0), offset, true, 0));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(lb_up, 3), Name_Shape(body, 0), Hinge, Vec3f(1, 0, 0), offset, true, 0));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(lb_down, 4), Name_Shape(lb_up, 3), Hinge, Vec3f(1, 0, 0), offset, true, 0));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(rf_up, 5), Name_Shape(body, 0), Hinge, Vec3f(1, 0, 0), offset, true, 0));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(rf_down, 6), Name_Shape(rf_up, 5), Hinge, Vec3f(1, 0, 0), offset, true, 0));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(rb_up, 7), Name_Shape(body, 0), Hinge, Vec3f(1, 0, 0), offset, true, 0));
-	configData.mVehicleJointInfo.push_back(VehicleJointInfo(Name_Shape(rb_down, 8), Name_Shape(rb_up, 7), Hinge, Vec3f(1, 0, 0), offset, true, 0));
-
-
-	robot->varVehicleConfiguration()->setValue(configData);
-
-	std::vector<Animation2JointConfig> config(configData.mVehicleJointInfo.size());
-
-	config[0] = Animation2JointConfig(std::string("Model::LFU_2"), 0, 2, 0.5);
-	config[1] = Animation2JointConfig(std::string("Model::LFD_3"), 1, 2, 0.5);
-	config[2] = Animation2JointConfig(std::string("Model::LBU_5"), 2, 2, 0.5);
-	config[3] = Animation2JointConfig(std::string("Model::LBD_6"), 3, 2, 0.5);
-	config[4] = Animation2JointConfig(std::string("Model::RFU_8"), 4, 2, 0.5);
-	config[5] = Animation2JointConfig(std::string("Model::RFD_9"), 5, 2, 0.5);
-	config[6] = Animation2JointConfig(std::string("Model::RBU_11"), 6, 2, 0.5);
-	config[7] = Animation2JointConfig(std::string("Model::RBD_12"), 7, 2, 0.5);
-
+	robot->varConfiguration()->setValue(multiBodyConfig);
 
 	auto multibody = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
 	multibody->varFrictionCoefficient()->setValue(200);
@@ -97,16 +80,20 @@ std::shared_ptr<SceneGraph> creatCar()
 	robot->connect(multibody->importVehicles());
 
 	auto animDriver = std::make_shared<AnimationDriver<DataType3f>>();
-	animDriver->varBindingConfiguration()->setValue(config);
-
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::LFU_2"), 0, 2, 0.5));
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::LFD_3"), 1, 2, 0.5));
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::LBU_5"), 2, 2, 0.5));
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::LBD_6"), 3, 2, 0.5));
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::RFU_8"), 4, 2, 0.5));
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::RFD_9"), 5, 2, 0.5));
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::RBU_11"), 6, 2, 0.5));
+	animDriver->varBindingConfiguration()->pushBack(Animation2JointConfigTuple(std::string("Model::RBD_12"), 7, 2, 0.5));
 
 	animDriver->varSpeed()->setValue(8);
 	fbx->stateJointAnimationInfo()->connect(animDriver->inJointAnimationInfo());
 
-
 	multibody->animationPipeline()->pushModule(animDriver);
 	multibody->stateTimeStep()->connect(animDriver->inDeltaTime());
-	
 	multibody->stateTopology()->connect(animDriver->inTopology());
 
 	auto plane = scn->addNode(std::make_shared<PlaneModel<DataType3f>>());

@@ -39,8 +39,8 @@ namespace dyno
 		this->varRadiusB()->setRange(0.1, 1.0);
 
         auto tsRender = std::make_shared<GLSurfaceVisualModule>();
-		tsRender->setVisible(true);
-		tsRender->setAlpha(0.2);
+		tsRender->varVisible()->setValue(true);
+		tsRender->varAlpha()->setValue(0.2);
 		this->stateTriangleSet()->connect(tsRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(tsRender);
 
@@ -135,7 +135,7 @@ namespace dyno
         this->outMedialCone()->setValue(medialConePrim);
 
         std::vector<Vec3f> vertices;
-		std::vector<TopologyModule::Triangle> triangles;
+		std::vector<Topology::Triangle> triangles;
 
 		pushback_medialslab(vertices, triangles, pA_world, pB_world, rA, rB);
 
@@ -245,7 +245,7 @@ namespace dyno
 		const Vec3f& v3,
 		double r3,
 		std::vector<Vec3f>& slab_verts,
-		std::vector<TopologyModule::Triangle>& slab_faces,
+		std::vector<Topology::Triangle>& slab_faces,
 		double threshold)
 	{
 
@@ -272,8 +272,8 @@ namespace dyno
 
 		size_t vcount = slab_verts.size();
 
-		slab_faces.push_back(TopologyModule::Triangle(vcount - 1, vcount - 3, vcount - 2));
-		slab_faces.push_back(TopologyModule::Triangle(vcount - 4, vcount - 5, vcount - 6));
+		slab_faces.push_back(Topology::Triangle(vcount - 1, vcount - 3, vcount - 2));
+		slab_faces.push_back(Topology::Triangle(vcount - 4, vcount - 5, vcount - 6));
 		return 1;
 	}
 
@@ -285,7 +285,7 @@ namespace dyno
 		float r2,
 		int resolution,
 		std::vector<Vec3f>& cone_verts,
-		std::vector<TopologyModule::Triangle>& cone_faces)
+		std::vector<Topology::Triangle>& cone_faces)
 	{
 		if (r1 < 1e-3f && r2 < 1e-3f)
 			return;
@@ -328,16 +328,16 @@ namespace dyno
 		}
 
 		for (int i = 0; i < local_vcount - 2; i += 2) {
-			cone_faces.emplace_back(TopologyModule::Triangle(start_idx + i, start_idx + i + 3, start_idx + i + 1));
-			cone_faces.emplace_back(TopologyModule::Triangle(start_idx + i, start_idx + i + 2, start_idx + i + 3));
+			cone_faces.emplace_back(Topology::Triangle(start_idx + i, start_idx + i + 3, start_idx + i + 1));
+			cone_faces.emplace_back(Topology::Triangle(start_idx + i, start_idx + i + 2, start_idx + i + 3));
 		}
 
-		cone_faces.emplace_back(TopologyModule::Triangle(start_idx + local_vcount - 2, start_idx + 1, start_idx + local_vcount - 1));
-		cone_faces.emplace_back(TopologyModule::Triangle(start_idx + local_vcount - 2, start_idx, start_idx + 1));
+		cone_faces.emplace_back(Topology::Triangle(start_idx + local_vcount - 2, start_idx + 1, start_idx + local_vcount - 1));
+		cone_faces.emplace_back(Topology::Triangle(start_idx + local_vcount - 2, start_idx, start_idx + 1));
 	}
 
 	template<typename TDataType>
-	void MedialConeModel<TDataType>::pushback_medialslab(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles, Vec3f pA, Vec3f pB, Real rA, Real rB, uint resolution)
+	void MedialConeModel<TDataType>::pushback_medialslab(std::vector<Vec3f>& vertices, std::vector<Topology::Triangle>& triangles, Vec3f pA, Vec3f pB, Real rA, Real rB, uint resolution)
 	{
 
 		generate_conical_surface(pA, rA, pB, rB, resolution, vertices, triangles);

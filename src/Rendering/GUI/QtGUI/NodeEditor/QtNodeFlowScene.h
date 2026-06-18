@@ -36,11 +36,9 @@ public:
 	float dx() { return mDx; }
 	float dy() { return mDy; }
 
-public:
-
-signals:
+Q_SIGNALS:
+	void nodeVisibilityChanged(QtNode& n);
 	void nodeRenderingKeyChanged(std::shared_ptr<dyno::Node> node);
-
 
 public Q_SLOTS:
 	/**

@@ -334,8 +334,8 @@ namespace dyno
 	__global__ void SI_NeighborTrisDiffuse(
 		DArray<Triangle> triangles,
 		DArray<Coord> points,
-		DArray<TopologyModule::Tri2Edg> tri2Edg,
-		DArray<TopologyModule::Edg2Tri> edg2Tri,
+		DArray<Topology::Tri2Edg> tri2Edg,
+		DArray<Topology::Edg2Tri> edg2Tri,
 		DArray<int> intersected,
 		DArray<int> unintersected,
 		Real diffusionAngle)

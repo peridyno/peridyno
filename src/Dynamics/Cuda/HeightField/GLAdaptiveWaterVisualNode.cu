@@ -37,7 +37,7 @@ namespace dyno
 	template <typename Real, typename Coord2D, typename Coord3D>
 	__global__ void AW_CountNodes2D(
 		DArray<Coord3D> edge_points,
-		DArray<TopologyModule::Edge> edge,
+		DArray<Topology::Edge> edge,
 		DArray<OcKey> seeds,
 		Coord2D origin,
 		Real dx)
@@ -55,10 +55,10 @@ namespace dyno
 		edge_points[4 * tId + 2] = pos + Coord3D(dx, 0.0, dx);
 		edge_points[4 * tId + 3] = pos + Coord3D(0.0, 0.0, dx);
 
-		edge[4 * tId] = TopologyModule::Edge(4 * tId, 4 * tId + 1);
-		edge[4 * tId + 1] = TopologyModule::Edge(4 * tId + 1, 4 * tId + 2);
-		edge[4 * tId + 2] = TopologyModule::Edge(4 * tId + 2, 4 * tId + 3);
-		edge[4 * tId + 3] = TopologyModule::Edge(4 * tId + 3, 4 * tId);		
+		edge[4 * tId] = Topology::Edge(4 * tId, 4 * tId + 1);
+		edge[4 * tId + 1] = Topology::Edge(4 * tId + 1, 4 * tId + 2);
+		edge[4 * tId + 2] = Topology::Edge(4 * tId + 2, 4 * tId + 3);
+		edge[4 * tId + 3] = Topology::Edge(4 * tId + 3, 4 * tId);		
 	}
 
 	template<typename TDataType>
@@ -66,7 +66,7 @@ namespace dyno
 	{
 		auto volumeSet = this->inAGridSet()->constDataPtr();
 		DArray<Coord3D> edge_points;
-		DArray<TopologyModule::Edge> edges;
+		DArray<Topology::Edge> edges;
 		if (!this->stateSeedMorton()->isEmpty())
 		{
 			auto dx = volumeSet->adaptiveGridDx2D();

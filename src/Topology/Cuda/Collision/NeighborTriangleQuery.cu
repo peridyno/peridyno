@@ -41,13 +41,13 @@ namespace dyno
 	__global__ void NTQ_SetupAABB(
 		DArray<AABB> boundingBox,
 		DArray<Coord> vertex,
-		DArray<TopologyModule::Triangle> tIndex)
+		DArray<Topology::Triangle> tIndex)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= boundingBox.size()) return;
 
 		AABB box;
-		TopologyModule::Triangle index = tIndex[tId];
+		Topology::Triangle index = tIndex[tId];
 
 		Coord v0 = vertex[index[0]];
 		Coord v1 = vertex[index[1]];
@@ -64,7 +64,7 @@ namespace dyno
 		DArrayList<int> nbr,
 		DArray<Coord> position,
 		DArray<Coord> vertex,
-		DArray<TopologyModule::Triangle> triangles,
+		DArray<Topology::Triangle> triangles,
 		DArray<uint> count,
 		Real radius)
 	{
@@ -95,7 +95,7 @@ namespace dyno
 		DArrayList<int> nbr_out,
 		DArray<Coord> position,
 		DArray<Coord> vertex,
-		DArray<TopologyModule::Triangle> triangles,
+		DArray<Topology::Triangle> triangles,
 		Real radius)
 	{
 		int tId = threadIdx.x + (blockIdx.x * blockDim.x);

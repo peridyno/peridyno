@@ -569,7 +569,7 @@ namespace dyno
 		if (!name)
 			return nullptr;
 
-		std::shared_ptr<Node> node(dynamic_cast<Node*>(Object::createObject(name)));
+		std::shared_ptr<Node> node(dynamic_cast<Node*>(Object::createObjectByName(name)));
 		if (node == nullptr)
 		{
 			std::cout << name << " does not exist! " << std::endl;
@@ -928,7 +928,7 @@ namespace dyno
 	{
 		const char* name = moduleXml->Attribute("Class");
 		if (name) {
-			std::shared_ptr<Module> module(dynamic_cast<Module*>(Object::createObject(name)));
+			std::shared_ptr<Module> module(dynamic_cast<Module*>(Object::createObjectByName(name)));
 			if (module != nullptr) {
 				pipeline->pushModule(module);
 				modules.push_back(module.get());

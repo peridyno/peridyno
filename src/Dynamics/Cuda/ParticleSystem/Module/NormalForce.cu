@@ -74,10 +74,10 @@ namespace dyno
 		DArrayList<int> triangle_neighbors,
 		DArray<int> particleMeshID,
 		DArray<Coord> vertices,
-		DArray<TopologyModule::Triangle> triangles,
+		DArray<Topology::Triangle> triangles,
 		DArray<Coord> noramls,
-		DArray<TopologyModule::Edg2Tri> Edg2Tri,
-		DArray<TopologyModule::Tri2Edg> Tri2Edg
+		DArray<Topology::Edg2Tri> Edg2Tri,
+		DArray<Topology::Tri2Edg> Tri2Edg
 	) {
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= positions.size()) return;

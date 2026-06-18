@@ -3,6 +3,7 @@
 
 #include <QThread>
 #include <QMutex>
+#include <QTimer>
 #include <QWaitCondition>
 #include <atomic>
 #include <chrono>
@@ -23,6 +24,14 @@ namespace dyno
 	public:
 		static PSimulationThread* instance();
 
+		//When multithreading true, the simulation will be run in separate thread, other it runs on the same thread with GUI
+		void launch(bool multithreading);
+		void abort();
+
+		void switchThreadingMode(bool multithreading);
+
+		bool isMultithreading() { return mMultithreading; }
+
 		void pause();
 		void resume();
 		void stop();
@@ -33,8 +42,6 @@ namespace dyno
 		void closeCurrentScene();
 
 		void closeAllScenes();
-
-		void run() override;
 
 		std::shared_ptr<SceneGraph> getCurrentScene();
 
@@ -78,7 +85,10 @@ namespace dyno
 		void resetNode(std::shared_ptr<Node> node);
 		void resetQtNode(Qt::QtNode& node);
 
-		void syncNode(std::shared_ptr<Node> node);
+	private:
+		void run() override;
+
+		bool mainEventLoop();
 
 	private:
 		PSimulationThread();
@@ -93,6 +103,10 @@ namespace dyno
 		bool mReset;
 		bool mFinished;
 		bool mOneStep = false;
+
+		bool mMultithreading = false;
+
+		QTimer* mTimer = nullptr;
 
 	 	std::atomic<bool> mPaused;
 		std::atomic<bool> mRunning;

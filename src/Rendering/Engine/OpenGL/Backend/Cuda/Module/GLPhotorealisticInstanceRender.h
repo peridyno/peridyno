@@ -24,7 +24,6 @@ namespace dyno
 		DECLARE_CLASS(GLPhotorealisticInstanceRender)
 	public:
 		GLPhotorealisticInstanceRender();
-		~GLPhotorealisticInstanceRender() override;
 
 	public:
 		virtual std::string caption() override;

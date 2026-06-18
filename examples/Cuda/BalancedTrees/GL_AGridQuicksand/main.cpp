@@ -1,7 +1,7 @@
 #include <GlfwApp.h>
 #include <SceneGraph.h>
 
-#include "BasicShapes/CircleModel2D.h"
+#include "BasicShapes2D/CircleModel2D.h"
 #include "Volume/AdaptiveVolumeFromBasicShape2D.h"
 #include "Volume/GLAdaptiveGridVisualNode2D.h"
 #include "EulerFluid/GLEuleSimVisualNode2D.h"
@@ -119,7 +119,7 @@ std::shared_ptr<SceneGraph> createScene()
 	fluid->graphicsPipeline()->pushModule(colorMapper);
 
 	auto ptRender = std::make_shared<GLPointVisualModule>();
-	//ptRender->setColor(Color(0.76, 0.7, 0.5));
+	//ptRender->varBaseColor()->setValue(Color(0.76, 0.7, 0.5));
 	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 	fluid->statePointSet()->connect(ptRender->inPointSet());
 	colorMapper->outColor()->connect(ptRender->inColor());
@@ -146,7 +146,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto circle = scn->addNode(std::make_shared<CircleModel2D<DataType3f>>());
 	circle->varRadius()->setValue(0.9f);
-	circle->varCenter2D()->setValue(Vec2f(0.0, 0.9));
+	circle->varLocation2D()->setValue(Vec2f(0.0, 0.9));
 
 	auto AGrid = scn->addNode(std::make_shared<AdaptiveVolumeFromBasicShape2D<DataType3f>>());
 	circle->connect(AGrid->importShapes());
@@ -159,9 +159,9 @@ std::shared_ptr<SceneGraph> createScene()
 	AGrid->stateAGridSet()->promoteOuput()->connect(esim->inAdaptiveVolume2D());
 	esim->inRadius()->setValue(0.9f);
 	esim->inCenter()->setValue(Vec2f(0.0, 0.9));
-	fluid->stateVelocity()->connect(esim->statePVelocity());
-	fluid->statePosition()->connect(esim->statePPosition());
-	samplingDistance->outFloating()->connect(esim->varSamplingDistance());
+	fluid->stateVelocity()->connect(esim->inPVelocity());
+	fluid->statePosition()->connect(esim->inPPosition());
+	samplingDistance->outFloating()->connect(esim->inSamplingDistance());
 	esim->varSandDensity()->setValue(5000.0f);
 	esim->varUpdateCoefficient()->setValue(0.1f);
 	 

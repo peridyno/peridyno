@@ -41,10 +41,10 @@ std::shared_ptr<SceneGraph> createSceneGraph()
 	auto convoy = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
 	convoy->varFrictionEnabled()->setValue(true);
 	convoy->varSlop()->setValue(0.0015f);
-	convoy->varSolverSubStepping()->setValue(12);
-	convoy->varSolverIterationNumber()->setValue(30);
-	convoy->varSolverHertz()->setValue(220.0f);
-	convoy->varSolverDampingRatio()->setValue(1.0f);
+// 	convoy->varSolverSubStepping()->setValue(12);
+// 	convoy->varSolverIterationNumber()->setValue(30);
+// 	convoy->varSolverHertz()->setValue(220.0f);
+// 	convoy->varSolverDampingRatio()->setValue(1.0f);
 
 
 	auto gear = scn->addNode(std::make_shared<MatBody<DataType3f>>());
@@ -62,7 +62,7 @@ std::shared_ptr<SceneGraph> createSceneGraph()
 	gear->graphicsPipeline()->pushModule(meshTransformer);
 
 	auto meshRender = std::make_shared<GLPhotorealisticInstanceRender>();
-	meshRender->setAlpha(1.0f);
+	meshRender->varAlpha()->setValue(1.0f);
 	gear->stateTextureMesh()->connect(meshRender->inTextureMesh());
 	meshTransformer->outInstanceTransform()->connect(meshRender->inTransform());
 	gear->graphicsPipeline()->pushModule(meshRender);

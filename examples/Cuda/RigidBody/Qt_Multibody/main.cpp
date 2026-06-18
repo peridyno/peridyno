@@ -59,8 +59,8 @@ std::shared_ptr<RigidBodySystem<DataType3f>> createCompound(std::shared_ptr<Scen
 	rigid->graphicsPipeline()->pushModule(mapper);
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Color(1, 1, 0));
-	sRender->setAlpha(0.5f);
+	sRender->varBaseColor()->setValue(Color(1, 1, 0));
+	sRender->varAlpha()->setValue(0.5f);
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
 
@@ -95,13 +95,13 @@ std::shared_ptr<RigidBodySystem<DataType3f>> createBoxes(std::shared_ptr<SceneGr
 	rigid->graphicsPipeline()->pushModule(mapper);
 
 	auto sRender = std::make_shared<GLSurfaceVisualModule>();
-	sRender->setColor(Color::SteelBlue2());
-	sRender->setAlpha(1.0f);
+	sRender->varBaseColor()->setValue(Color::SteelBlue2());
+	sRender->varAlpha()->setValue(1.0f);
 	mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 	rigid->graphicsPipeline()->pushModule(sRender);
 
 	auto wireRender = std::make_shared<GLWireframeVisualModule>();
-	wireRender->setColor(Color(0, 0, 0));
+	wireRender->varBaseColor()->setValue(Color(0, 0, 0));
 	mapper->outTriangleSet()->connect(wireRender->inEdgeSet());
 	rigid->graphicsPipeline()->pushModule(wireRender);
 

@@ -31,22 +31,9 @@ namespace dyno
 #endif
 	}
 
-	GLSurfaceVisualModule::~GLSurfaceVisualModule()
-	{
-// 		mIndexBuffer.release();
-// 		mVertexBuffer.release();
-// 		mNormalBuffer.release();
-// 		mColorBuffer.release();
-// 
-// 		triangles.clear();
-// 		vertices.clear();
-// 		normals.clear();
-// 		colors.clear();
-	}
-
 	std::string GLSurfaceVisualModule::caption()
 	{
-		return "Surface Visual Module";
+		return "GLSurfaceVisualModule";
 	}
 
 	bool GLSurfaceVisualModule::initializeGL()

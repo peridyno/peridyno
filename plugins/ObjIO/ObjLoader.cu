@@ -24,7 +24,7 @@ namespace dyno
 		auto triSet = std::make_shared<TriangleSet<TDataType>>();
 
 		std::vector<Coord> vertList;
-		std::vector<TopologyModule::Triangle> faceList;
+		std::vector<Topology::Triangle> faceList;
 
 		triSet->setPoints(vertList);
 		triSet->setTriangles(faceList);
@@ -39,8 +39,8 @@ namespace dyno
 		this->varAngularVelocity()->attach(callback);
 
 		auto surfacerender = std::make_shared<GLSurfaceVisualModule>();
-		surfacerender->setVisible(true);
-		surfacerender->setColor(Color(0.8, 0.52, 0.25));
+		surfacerender->varVisible()->setValue(true);
+		surfacerender->varBaseColor()->setValue(Color(0.8, 0.52, 0.25));
 
 		this->stateTopology()->connect(surfacerender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(surfacerender);
@@ -156,7 +156,7 @@ namespace dyno
 	void ObjLoader<TDataType>::loadObj(TriangleSet<TDataType>& Triangleset, std::string filename)
 	{
 		std::vector<Coord> vertList;
-		std::vector<TopologyModule::Triangle> faceList;
+		std::vector<Topology::Triangle> faceList;
 		dyno::loadObj(vertList,faceList,filename);
 
 		Triangleset.setPoints(vertList);

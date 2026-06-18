@@ -38,7 +38,7 @@ std::shared_ptr<SceneGraph> createScene()
 	cloth->animationPipeline()->pushModule(custom);
 
 	auto surfaceRendererCloth = std::make_shared<GLSurfaceVisualModule>();
-	surfaceRendererCloth->setColor(Color(1,1,1));
+	surfaceRendererCloth->varBaseColor()->setValue(Color(1,1,1));
 	cloth->stateTriangleSet()->connect(surfaceRendererCloth->inTriangleSet());
 	cloth->graphicsPipeline()->pushModule(surfaceRendererCloth);
 	cloth->setVisible(true);

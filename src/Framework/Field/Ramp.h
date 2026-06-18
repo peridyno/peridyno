@@ -4,6 +4,7 @@
 #include <string>
 #include "Vector/Vector2D.h"
 #include "Vector/Vector3D.h"
+#include <cctype>
 
 #include "Canvas.h"
 

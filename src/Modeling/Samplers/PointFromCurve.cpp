@@ -28,7 +28,7 @@ namespace dyno
 		auto wireframe = std::make_shared<GLWireframeVisualModule>();
 		this->stateEdgeSet()->connect(wireframe->inEdgeSet());
 		this->graphicsPipeline()->pushModule(wireframe);
-		wireframe->setColor(Color(1, 1, 0));
+		wireframe->varBaseColor()->setValue(Color(1, 1, 0));
 		wireframe->varLineWidth()->setValue(0.1);
 		wireframe->varRenderMode()->setCurrentKey(1);
 
@@ -110,7 +110,7 @@ namespace dyno
 
 		// create EdgeSet
 		{
-			std::vector<TopologyModule::Edge> edges;
+			std::vector<Topology::Edge> edges;
 
 			auto edgeSet = this->stateEdgeSet()->getDataPtr();
 
@@ -120,13 +120,13 @@ namespace dyno
 			{
 				for (int i = 0; i < ptnum - 1; i++)
 				{
-					edges.push_back(TopologyModule::Edge(i, i + 1));
+					edges.push_back(Topology::Edge(i, i + 1));
 				}
 			}
 
 			if (curve.getClose() == true && vertices.size()>=3)
 			{
-				edges.push_back(TopologyModule::Edge(vertices.size()-1,0));
+				edges.push_back(Topology::Edge(vertices.size()-1,0));
 			}
 
 			edgeSet->setPoints(vertices);

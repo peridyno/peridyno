@@ -12,6 +12,8 @@ namespace dyno
 	{
 		this->animationPipeline()->clear();
 
+		this->varSmoothingLength()->setValue(2.5);
+
 		auto model = std::make_shared<ProjectionBasedFluidModel<DataType3f>>();
 
 		this->stateTimeStep()->connect(model->inTimeStep());

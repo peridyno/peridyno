@@ -39,8 +39,8 @@ namespace dyno
 		Real L, 
 		int level)
 	{
-		int grid_size = (int)pow(Real(2), int(level));
-
+		//int grid_size = (int)pow(Real(2), int(level));
+		int grid_size = (1 << level);
 		Coord p_rel = p - origin;
 
 		i = (int)floor(p_rel.x / L * grid_size);
@@ -82,8 +82,8 @@ namespace dyno
 		Real segments = m_L / h;
 		m_level_max = std::max(ceil(log2(segments)), Real(2));
 
-		m_L = m_h * pow(Real(2), m_level_max);
-
+		//m_L = m_h * pow(Real(2), m_level_max);
+		m_L = m_h * (1 << m_level_max);
 		m_lo = (maxV + minV) / 2 - m_L / 2;
 
 		m_all_nodes.resize(points.size());

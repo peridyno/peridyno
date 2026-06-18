@@ -48,7 +48,7 @@ namespace dyno
 		void resetStates() override;
 
 		std::vector<Coord> particles;
-		std::vector<TopologyModule::Edge> edges;
+		std::vector<Topology::Edge> edges;
 
 		//		virtual void setVisible(bool visible) override;
 	};

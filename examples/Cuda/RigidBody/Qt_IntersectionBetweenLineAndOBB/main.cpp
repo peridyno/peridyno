@@ -103,10 +103,10 @@ protected:
 		auto edgeSet = this->stateEdgeSet()->getDataPtr();
 
 		std::vector<Coord> hPos;
-		std::vector<TopologyModule::Edge> edges;
+		std::vector<Topology::Edge> edges;
 		hPos.push_back(from);
 		hPos.push_back(to);
-		edges.push_back(TopologyModule::Edge(0, 1));
+		edges.push_back(Topology::Edge(0, 1));
 
 		edgeSet->setPoints(hPos);
 		edgeSet->setEdges(edges);
@@ -152,13 +152,13 @@ protected:
 		}
 
 		std::vector<Coord> coords;
-		std::vector<TopologyModule::Edge> edges;
+		std::vector<Topology::Edge> edges;
 
 		if (num == 2)
 		{
 			coords.push_back(inter.v0);
 			coords.push_back(inter.v1);
-			edges.push_back(TopologyModule::Edge(0, 1));
+			edges.push_back(Topology::Edge(0, 1));
 
 		}else if (num == 1)
 		{

@@ -30,7 +30,7 @@ namespace dyno {
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TopologyModule::Hexahedron Hexahedron;
+		typedef typename Topology::Hexahedron Hexahedron;
 
 		SdfSampler();
 		~SdfSampler() override;

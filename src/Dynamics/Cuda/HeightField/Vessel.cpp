@@ -6,6 +6,7 @@
 #include "GLPhotorealisticInstanceRender.h"
 
 #include "GltfFunc.h"
+#include "helpers/tinyobj_helper.h"
 
 namespace dyno
 {
@@ -21,10 +22,10 @@ namespace dyno
 		this->varRotation()->attach(callback);
 
 		auto EnvelopeRender = std::make_shared<GLSurfaceVisualModule>();
-		EnvelopeRender->setColor(Color(0.8f, 0.8f, 0.8f));
+		EnvelopeRender->varBaseColor()->setValue(Color(0.8f, 0.8f, 0.8f));
 		this->stateEnvelope()->promoteOuput()->connect(EnvelopeRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(EnvelopeRender);
-		EnvelopeRender->setVisible(false);
+		EnvelopeRender->varVisible()->setValue(false);
 
 
 		auto texMeshRender = std::make_shared<GLPhotorealisticInstanceRender>();
@@ -61,12 +62,23 @@ namespace dyno
 
 		auto textureMeshLoader = std::make_shared<FCallBackFunc>(
 			[=]() {
-				std::string filepath = this->varTextureMeshName()->getValue().string();
+				auto filepath = this->varTextureMeshName()->getValue();
 				if (this->stateTextureMesh()->isEmpty())
 					this->stateTextureMesh()->allocate();
 
+				auto ext = filepath.path().extension().string();
+				auto name = filepath.string();
+
 				std::shared_ptr<TextureMesh> texMesh = this->stateTextureMesh()->getDataPtr();
-				loadGLTFTextureMesh(texMesh, filepath);
+
+				if (ext == ".gltf")
+				{
+					loadGLTFTextureMesh(texMesh, name);
+				}
+				else if (ext == ".obj")
+				{
+					loadTextureMeshFromObj(texMesh, name);
+				}
 			}
 		);
 
@@ -169,6 +181,7 @@ namespace dyno
 		buoy->scale(scale);
 		buoy->translate(center - mShapeCenter);
 
+		//TODO: we can optimize this by updating the transform directly on GPU
 		auto texMesh = this->stateTextureMesh()->getDataPtr();
 		{
 

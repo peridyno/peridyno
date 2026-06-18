@@ -79,6 +79,22 @@ namespace dyno {
 		glm::tmat4x4<T> data_; //default: zero matrix
 	};
 
+	template <typename S, typename T>
+	DYN_FUNC  const SquareMatrix<T, 4> operator* (S scale, const SquareMatrix<T, 4>& mat)
+	{
+		return mat * scale;
+	}
+
+	template<typename Real>
+	DYN_FUNC inline SquareMatrix<Real, 4> dyadic(const Vector<Real, 4>& A, const Vector<Real, 4>& B)
+	{
+		return SquareMatrix<Real, 4>(
+			A.x * B.x, A.x * B.y, A.x * B.z, A.x * B.w, 
+			A.y * B.x, A.y * B.y, A.y * B.z, A.y * B.w, 
+			A.z * B.x, A.z * B.y, A.z * B.z, A.z * B.w,
+			A.w * B.x, A.w * B.y, A.w * B.z, A.w * B.w);
+	}
+
 	template class SquareMatrix<float, 4>;
 	template class SquareMatrix<double, 4>;
 	//convenient typedefs

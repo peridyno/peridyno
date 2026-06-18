@@ -24,7 +24,7 @@
 	url = https://gitee.com/peridyno/stb.git
 [submodule "data"]
 	path = data
-	url = https://gitee.com/peridyno/data.git
+	url = https://ghfast.top/https://github.com/peridyno/data.git
 [submodule "external/qscintilla"]
 	path = external/qscintilla
 	url = https://gitee.com/peridyno/qscintilla.git

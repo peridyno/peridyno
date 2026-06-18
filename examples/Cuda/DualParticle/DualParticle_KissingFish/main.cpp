@@ -11,12 +11,8 @@
 #include <SemiAnalyticalScheme/TriangularMeshBoundary.h>
 
 ///Fluid Solver
-#include "DualParticleSystem/Module/DualParticleIsphModule.h"
-#include <DualParticleSystem/Module/ThinFeature.h>
-#include <DualParticleSystem/Module/VirtualFissionFusionStrategy.h>
-#include <DualParticleSystem/DualParticleFluid.h>
+#include <ParticleSystem/ParticleFluid.h>
 #include <ParticleSystem/MakeParticleSystem.h>
-#include <ParticleSystem/Emitters/PoissonEmitter.h>
 
 ///Renderer
 #include <Module/CalculateNorm.h>
@@ -44,9 +40,10 @@ std::shared_ptr<SceneGraph> createScene()
 	auto initialParticles = scn->addNode(std::make_shared<MakeParticleSystem<DataType3f >>());
 	ptsLoader->outPointSet()->promoteOuput()->connect(initialParticles->inPoints());
 
-	auto fluid = scn->addNode(std::make_shared<DualParticleFluid<DataType3f>>(
-		DualParticleFluid<DataType3f>::FissionFusionStrategy));
-
+	auto fluid = scn->addNode(std::make_shared<ParticleFluid<DataType3f>>());
+	fluid->varIncompressibilitySolver()->setCurrentKey(ParticleFluid<DataType3f>::DualParticle);
+	fluid->setDt(0.001);
+	fluid->varSmoothingLength()->setValue(2.4);
 	initialParticles->connect(fluid->importInitialStates());
 	fluid->graphicsPipeline()->clear();
 
@@ -56,8 +53,8 @@ std::shared_ptr<SceneGraph> createScene()
 	fish->varLocation()->setValue(Vec3f(0.0, 0.6, -0.4));
 	fish->graphicsPipeline()->clear();
 	auto sRenderf = std::make_shared<GLSurfaceVisualModule>();
-	sRenderf->setColor(Color(0.8f, 0.52f, 0.25f));
-	sRenderf->setVisible(true);
+	sRenderf->varBaseColor()->setValue(Color(0.8f, 0.52f, 0.25f));
+	sRenderf->varVisible()->setValue(true);
 	sRenderf->varUseVertexNormal()->setValue(true);	// use generated smooth normal
 	sRenderf->varMetallic()->setValue(1.0);
 	fish->stateTriangleSet()->connect(sRenderf->inTriangleSet());
@@ -77,7 +74,7 @@ std::shared_ptr<SceneGraph> createScene()
 	fluid->graphicsPipeline()->pushModule(colorMapper);
 
 	auto ptRender = std::make_shared<GLPointVisualModule>();
-	ptRender->setColor(Color(1, 0, 0));
+	ptRender->varBaseColor()->setValue(Color(1, 0, 0));
 	ptRender->varPointSize()->setValue(0.004);
 	ptRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 
@@ -94,7 +91,7 @@ std::shared_ptr<SceneGraph> createScene()
 	//fluid->graphicsPipeline()->pushModule(colorBar);
 
 	//auto vpRender = std::make_shared<GLPointVisualModule>();
-	//vpRender->setColor(Color(1, 1, 0));
+	//vpRender->varBaseColor()->setValue(Color(1, 1, 0));
 	//vpRender->setColorMapMode(GLPointVisualModule::PER_VERTEX_SHADER);
 	//fluid->stateVirtualPointSet()->connect(vpRender->inPointSet());
 	//vpRender->varPointSize()->setValue(0.0005);
@@ -106,17 +103,13 @@ std::shared_ptr<SceneGraph> createScene()
 int main()
 {
 
-	UbiApp window(GUIType::GUI_GLFW);
+	UbiApp window(GUIType::GUI_QT);
+	window.setSceneGraph(createScene());
 	window.initialize(2048, 1080);
-	window.setSceneGraph(createScene());
-
-	window.setSceneGraph(createScene());
-	window.initialize(1366, 768);
 	auto cam = window.renderWindow()->getCamera();
 
 	cam->setEyePos(Vec3f(1.71378, 1.24788, 0.404752));
 	cam->setTargetPos(Vec3f(-0.172568, 0.750952, -0.466298));
-
 
 	auto renderer = std::dynamic_pointer_cast<dyno::GLRenderEngine>(window.renderWindow()->getRenderEngine());
 	if (renderer) {

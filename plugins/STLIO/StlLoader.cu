@@ -23,8 +23,8 @@ namespace dyno
 		this->stateTopology()->setDataPtr(std::make_shared<TriangleSet<TDataType>>());
 
 		auto surfacerender = std::make_shared<GLSurfaceVisualModule>();
-		surfacerender->setVisible(true);
-		surfacerender->setColor(Color(0.8, 0.52, 0.25));
+		surfacerender->varVisible()->setValue(true);
+		surfacerender->varBaseColor()->setValue(Color(0.8, 0.52, 0.25));
 
 		this->stateTopology()->connect(surfacerender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(surfacerender);
@@ -55,7 +55,7 @@ namespace dyno
 	void StlLoader<TDataType>::loadSTL(TriangleSet<TDataType>& Triangleset, std::string filename)
 	{
 		std::vector<Coord> vertList;
-		std::vector<TopologyModule::Triangle> faceList;
+		std::vector<Topology::Triangle> faceList;
 		dyno::loadStl(vertList,faceList,filename);
 
 		Triangleset.setPoints(vertList);

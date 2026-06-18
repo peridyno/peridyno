@@ -33,17 +33,23 @@ namespace dyno {
 		typedef typename TDataType::Coord Coord;
 		typedef typename TDataType::Matrix Matrix;
 
-
 		ApproximateImplicitViscosity() ;
 		~ApproximateImplicitViscosity() override;
 
 		void constrain() override;
-
 		bool SetCross();
 
 	public:
 
-		DEF_VAR(Real, Viscosity, Real(10), "Dynamic Viscosity");
+		DEF_VAR_IN(Real, SmoothingLength, "Smoothing Length");
+
+		DEF_VAR_IN(Real, SamplingDistance, "Sampling Distance");
+
+		DEF_VAR_IN(Real, TimeStep, "Time Step");
+
+		DEF_VAR(Real, Viscosity, Real(10.0), "Dynamic Viscosity");
+
+		DEF_VAR(Real, RestDensity, Real(1000.0), "Reference density");
 
 		DEF_ARRAYLIST_IN(int, NeighborIds, DeviceType::GPU, "");
 
@@ -67,40 +73,19 @@ namespace dyno {
 		DEF_ENUM(FluidType, FluidType, FluidType::NewtonianFluid, "Fluid type.");
 
 	private:
-		DArray<Real> m_viscosity;
 
-
-		/*
-		* @brief Important coefficients in the Cross model.
-		*/
-		Real CrossVisCeil;
-		Real CrossVisFloor;
-		Real CrossVisMag;
-		Real Cross_K;
-		Real Cross_N;
-
-		DEF_VAR(Real, SmoothingLength, Real(0.0125), "");
-		
-		DEF_VAR(Real, RestDensity, Real(1000), "Reference density");
-
-		DEF_VAR(Real, SamplingDistance, Real(0.005), "");
-
-		DEF_VAR_IN(Real, TimeStep, "");
-
-	private:
+		Real CrossVisCeil, CrossVisFloor, CrossVisMag, Cross_K, Cross_N;
 
 		bool IsCrossReady = false;
 
-		Real m_maxAlpha;
-		Real m_maxA;
-
+		DArray<Real> m_viscosity;
 		DArray<Real> m_alpha;
 		DArray<Coord> velOld;
 		DArray<Coord> velBuf;
-		DArray<Real> v_y;
-		DArray<Real> v_r;
-		DArray<Real> v_p;
-		DArray<Coord> v_pv;
+		DArray<Real> m_vy;
+		DArray<Real> m_vr;
+		DArray<Real> m_vp;
+		DArray<Coord> m_vpv;
 		DArray<Real> m_VelocityReal;
 		Reduction<Real>* m_reduce;
 		Arithmetic<Real>* m_arithmetic_v;

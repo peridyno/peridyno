@@ -19,8 +19,8 @@
 
 #include <GLRenderEngine.h>
 
-#include "SemiAnalyticalScheme/ComputeParticleAnisotropy.h"
 #include "SemiAnalyticalScheme/SemiAnalyticalSFINode.h"
+#include "SemiAnalyticalScheme/Module/ComputeParticleAnisotropy.h"
 
 #include "ParticleSystem/MakeParticleSystem.h"
 

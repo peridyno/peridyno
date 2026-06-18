@@ -90,7 +90,6 @@ private:
 };
 
 #define TT_PROPERTY(type, name)\
-    Q_PROPERTY(type name MEMBER name)\
     type name
 class TT_API StyleParams : public QObject
 {

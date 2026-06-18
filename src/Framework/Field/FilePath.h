@@ -7,9 +7,10 @@ namespace dyno
 	class  FilePath
 	{
 	public:
-		FilePath(std::string s = "")
+		FilePath(std::string s = "",std::string filter = "")
 		{
 			fs_path = s;
+			file_filter = filter;
 		}
 
 		//return the full string of the path
@@ -34,12 +35,31 @@ namespace dyno
 
 		void set_path(std::string s) { fs_path = s; }
 
+		std::string getFileFilter() { return file_filter; }
+
+		void setFilter(std::string filter) { file_filter = filter; }
+
 	private:
 		bool _is_path = false;
 
 		fs::path fs_path;
 		std::vector<std::string> exts;
+		std::string file_filter = "";
 	};
+
+	class SaveFilePath : public FilePath
+	{
+	public:
+		SaveFilePath(std::string s,std::string filter = "") :FilePath(s, filter)
+		{
+		
+		}
+
+	private:
+
+	};
+
+
 }
 
 #include "FilePath.inl"

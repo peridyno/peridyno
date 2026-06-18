@@ -1,12 +1,7 @@
 #include "ToolBarPage.h"
 
-#include "QTextCodec"
-
 namespace dyno {
 	ToolBarPage::ToolBarPage() {
-
-		QTextCodec* codec = QTextCodec::codecForName("GB2312");
-
 // 		//ToolBar file----------------------------------
 // 		ToolBarIcoAndLabel filePage;
 // 		// Main Page name and ico

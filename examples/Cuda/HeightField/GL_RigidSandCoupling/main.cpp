@@ -29,7 +29,6 @@
 
 #include "RigidBody/initializeRigidBody.h"
 #include "ParticleSystem/initializeParticleSystem.h"
-#include "DualParticleSystem/initializeDualParticleSystem.h"
 #include "Peridynamics/initializePeridynamics.h"
 #include "SemiAnalyticalScheme/initializeSemiAnalyticalScheme.h"
 #include "Volume/initializeVolume.h"
@@ -87,7 +86,6 @@ int main()
 	RigidBody::initStaticPlugin();
 	PaticleSystem::initStaticPlugin();
 	HeightFieldLibrary::initStaticPlugin();
-	DualParticleSystem::initStaticPlugin();
 	Peridynamics::initStaticPlugin();
 	SemiAnalyticalScheme::initStaticPlugin();
 	Volume::initStaticPlugin();

@@ -63,6 +63,10 @@ namespace dyno{
 			return ids[index[gId] + n];
 		}
 
+		DYN_FUNC int getResolution() {
+			return num;
+		}
+
 	public:
 		int num;
 		int nx, ny, nz;

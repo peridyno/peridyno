@@ -56,7 +56,7 @@ namespace dyno
 
 
 		CArray<Coord> host_vertices;
-		CArray<TopologyModule::Triangle> host_triangles;
+		CArray<Topology::Triangle> host_triangles;
 
 
 		if (triangleset->getPoints().size())

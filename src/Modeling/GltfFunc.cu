@@ -9,7 +9,7 @@
 
 namespace dyno
 {
-	void loadGLTFTextureMesh(std::shared_ptr<TextureMesh> texMesh,const std::string& filepath)
+	bool loadGLTFTextureMesh(std::shared_ptr<TextureMesh> texMesh,const std::string& filepath)
 	{
 		using namespace tinygltf;
 
@@ -21,15 +21,21 @@ namespace dyno
 
 		bool ret = loader.LoadASCIIFromFile(model, &err, &warn, filepath);
 		if (!warn.empty()) 
+		{
 			printf("Warn: %s\n", warn.c_str());
+			return false;
+		}
 		
 		if (!err.empty()) 
+		{
 			printf("Err: %s\n", err.c_str());
+			return false;
+		}
 		
 		if (!ret) 
 		{
 			printf("Failed to parse glTF\n");
-			return;
+			return false;
 
 		}
 		// import Scenes:
@@ -141,6 +147,7 @@ namespace dyno
 				reShapes[i]->boundingTransform.translation() = Vec3f(0);
 			}
 		}
+		return true;
 
 	}
 	void loadGLTFShape(tinygltf::Model& model, std::shared_ptr<TextureMesh> texMesh, const std::string& filepath, DArray<Vec3f>* initialPosition, DArray<Vec3f>* initialNormal, DArray<Mat4f>* d_mesh_Matrix,DArray<int>* d_shape_meshId, std::shared_ptr<SkinInfo> skinData )
@@ -157,7 +164,7 @@ namespace dyno
 		std::vector<Vec3f> texCoord0;
 		std::vector<Vec3f> texCoord1;
 
-		std::vector<TopologyModule::Triangle> trianglesVector;
+		std::vector<Topology::Triangle> trianglesVector;
 		int shapeNum = 0;
 
 		for (auto meshId : model.meshes)
@@ -188,9 +195,9 @@ namespace dyno
 			for (int mId = 0; mId < model.meshes.size(); mId++)
 			{
 				// import Mesh
-				std::vector<dyno::TopologyModule::Triangle> vertexIndex;
-				std::vector<dyno::TopologyModule::Triangle> normalIndex;
-				std::vector<dyno::TopologyModule::Triangle> texCoordIndex;
+				std::vector<dyno::Topology::Triangle> vertexIndex;
+				std::vector<dyno::Topology::Triangle> normalIndex;
+				std::vector<dyno::Topology::Triangle> texCoordIndex;
 
 				int primNum = model.meshes[mId].primitives.size();			
 
@@ -225,7 +232,7 @@ namespace dyno
 					if (primitive.mode == TINYGLTF_MODE_TRIANGLES)
 					{
 
-						std::vector<TopologyModule::Triangle> tempTriangles;
+						std::vector<Topology::Triangle> tempTriangles;
 
 						triangleIndices(model, primitive, tempTriangles, primitive_PointOffest);
 
@@ -724,7 +731,7 @@ namespace dyno
 	void triangleIndices(
 		tinygltf::Model& model,
 		const tinygltf::Primitive& primitive,
-		std::vector<TopologyModule::Triangle>& triangles,
+		std::vector<Topology::Triangle>& triangles,
 		int pointOffest
 	)
 	{
@@ -739,7 +746,7 @@ namespace dyno
 
 			for (size_t k = 0; k < accessorTriangles.count / 3; k++)
 			{
-				triangles.push_back(TopologyModule::Triangle(int(elements[k * 3]) + pointOffest, int(elements[k * 3 + 1]) + pointOffest, int(elements[k * 3 + 2]) + pointOffest));
+				triangles.push_back(Topology::Triangle(int(elements[k * 3]) + pointOffest, int(elements[k * 3 + 1]) + pointOffest, int(elements[k * 3 + 2]) + pointOffest));
 			}
 
 		}
@@ -749,7 +756,7 @@ namespace dyno
 
 			for (size_t k = 0; k < accessorTriangles.count / 3; k++)
 			{
-				triangles.push_back(TopologyModule::Triangle(int(elements[k * 3]) + pointOffest, int(elements[k * 3 + 1]) + pointOffest, int(elements[k * 3 + 2]) + pointOffest));
+				triangles.push_back(Topology::Triangle(int(elements[k * 3]) + pointOffest, int(elements[k * 3 + 1]) + pointOffest, int(elements[k * 3 + 2]) + pointOffest));
 			}
 
 		}
@@ -759,7 +766,7 @@ namespace dyno
 
 			for (size_t k = 0; k < accessorTriangles.count / 3; k++)
 			{
-				triangles.push_back(TopologyModule::Triangle(int(elements[k * 3]) + pointOffest, int(elements[k * 3 + 1]) + pointOffest, int(elements[k * 3 + 2]) + pointOffest));
+				triangles.push_back(Topology::Triangle(int(elements[k * 3]) + pointOffest, int(elements[k * 3 + 1]) + pointOffest, int(elements[k * 3 + 2]) + pointOffest));
 			}
 
 		}
@@ -1465,7 +1472,7 @@ namespace dyno
 		);
 	}
 
-	template void updateVertexIdShape<TopologyModule::Triangle>(DArray<TopologyModule::Triangle>& triangle,
+	template void updateVertexIdShape<Topology::Triangle>(DArray<Topology::Triangle>& triangle,
 		DArray<uint>& ID_shapeId,
 		int& shapeId,
 		int size

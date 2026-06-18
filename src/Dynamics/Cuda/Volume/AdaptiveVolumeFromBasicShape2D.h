@@ -19,7 +19,7 @@
 #include "AdaptiveVolume2D.h"
 #include "Module/MSTsGenerator2D.h"
 #include "Module/MSTsGeneratorLocalUpdate2D.h"
-#include "BasicShapes/BasicShape2D.h"
+#include "BasicShapes2D/BasicShape2D.h"
 
 namespace dyno {
 
@@ -30,8 +30,8 @@ namespace dyno {
 	public:
 		typedef typename TDataType::Real Real;
 		//typedef typename TDataType::Coord Coord;
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord3D;
+		typedef typename dyno::Vector<Real, 2> Coord2D;
+		typedef typename dyno::Vector<Real, 3> Coord3D;
 
 		AdaptiveVolumeFromBasicShape2D();
 		~AdaptiveVolumeFromBasicShape2D();
@@ -65,7 +65,6 @@ namespace dyno {
 		std::shared_ptr<MSTsGeneratorLocalUpdate2D<TDataType>> mMSTGenLocal = nullptr;
 
 		Coord2D m_origin;
-		Level m_levelmax;
 	};
 
 }

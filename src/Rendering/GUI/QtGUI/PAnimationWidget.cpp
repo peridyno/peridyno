@@ -12,6 +12,7 @@
 #include <QLineEdit>
 #include <QIntValidator>
 #include <QDebug>
+
 namespace dyno
 {
 	PAnimationWidget::PAnimationWidget(QWidget *parent) : 
@@ -100,25 +101,21 @@ namespace dyno
 		connect(mResetSim, SIGNAL(released()), this, SLOT(resetSimulation()));
 		connect(mNextStep, SIGNAL(released()), this, SLOT(takeOneStep()));
 
-		connect(PSimulationThread::instance(), SIGNAL(simulationFinished()), this, SLOT(simulationFinished()));
-		connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished(int)), this, SLOT(updateSlider(int)));
-		connect(PSimulationThread::instance(), SIGNAL(finished()), PSimulationThread::instance(), SLOT(deleteLater()));
-
 		connect(mTotalFrameSpinbox, SIGNAL(valueChanged(int)), mFrameSlider, SLOT(maximumChanged(int)));
 		connect(mTotalFrameSpinbox, SIGNAL(valueChanged(int)), this, SLOT(totalFrameChanged(int)));
 
 		connect(mPersistent, SIGNAL(stateChanged(int)), this, SLOT(runForever(int)));
 
-		PSimulationThread::instance()->start();
+		connect(PSimulationThread::instance(), SIGNAL(simulationFinished()), this, SLOT(simulationFinished()));
+		connect(PSimulationThread::instance(), SIGNAL(oneFrameFinished(int)), this, SLOT(updateSlider(int)));
+		connect(PSimulationThread::instance(), SIGNAL(finished()), PSimulationThread::instance(), SLOT(deleteLater()));
 
-
+		PSimulationThread::instance()->launch(true);
 	}
 
 	PAnimationWidget::~PAnimationWidget()
 	{
-		PSimulationThread::instance()->stop();
-// 		PSimulationThread::instance()->deleteLater();
-// 		PSimulationThread::instance()->wait();
+		PSimulationThread::instance()->abort();
 	}
 	
 	void PAnimationWidget::toggleSimulation()
@@ -142,7 +139,7 @@ namespace dyno
 			PSimulationThread::instance()->pause();
 			mStartSim->setText("");
 			mResetSim->setEnabled(true);
-			mStartLabel->setPixmap(*mStartIcon);		//更新Label上的icon为Starticon
+			mStartLabel->setPixmap(*mStartIcon);		//update icon Starticon
 
 			mNextStep->setEnabled(true);
 			mTotalFrameSpinbox->setEnabled(true);
@@ -160,7 +157,7 @@ namespace dyno
 		mStartSim->setText("");
 		mStartSim->setEnabled(true);
 		mStartSim->setChecked(false);
-		mStartLabel->setPixmap(*mStartIcon);		//更新Label上的icon为Starticon
+		mStartLabel->setPixmap(*mStartIcon);		
 
 		mTotalFrameSpinbox->setEnabled(true);
 		mFrameSlider->setEnabled(true);
@@ -174,7 +171,7 @@ namespace dyno
 
 	void PAnimationWidget::simulationFinished()
 	{
-		mStartLabel->setPixmap(*mFinishIcon);		//更新Label上的icon为Finishicon
+		mStartLabel->setPixmap(*mFinishIcon);		//update icon Finishicon
 
 		mStartSim->setText("");
 		mStartSim->setDisabled(true);

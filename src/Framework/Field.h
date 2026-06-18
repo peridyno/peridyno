@@ -66,6 +66,13 @@ namespace dyno {
 
 		bool connect(FieldType* dst)
 		{
+			bool valid = false;
+			valid = valid || (this->getFieldType() == FieldTypeEnum::Out && dst->getFieldType() == FieldTypeEnum::In);
+			valid = valid || (this->getFieldType() == FieldTypeEnum::In && dst->getFieldType() == FieldTypeEnum::In);
+			valid = valid || (this->getFieldType() == FieldTypeEnum::Out && dst->getFieldType() == FieldTypeEnum::Out);
+			valid = valid || (this->getFieldType() == FieldTypeEnum::State && dst->getFieldType() == FieldTypeEnum::In);
+			assert(valid == true);
+
 			this->connectField(dst);
 			return true;
 		}
@@ -74,6 +81,17 @@ namespace dyno {
 			FieldType* derived = dynamic_cast<FieldType*>(dst);
 			if (derived == nullptr) return false;
 			return this->connect(derived);
+		}
+
+		bool quote(FBase* dst) {
+			bool valid = false;
+			valid = valid || (this->getFieldType() == FieldTypeEnum::Param && dst->getFieldType() == FieldTypeEnum::Param);
+			assert(valid == true);
+
+			FieldType* derived = dynamic_cast<FieldType*>(dst);
+			if (derived == nullptr) return false;
+
+			return this->connectField(dst);
 		}
 
 		DataType getData() {
@@ -148,8 +166,8 @@ namespace dyno {
 	using DeviceVarField = FVar<T>;
 
 	/**
- * Define field for Array
- */
+	 * Define field for Array
+	 */
 	template<typename T, DeviceType deviceType>
 	class FArray : public FBase
 	{
@@ -278,11 +296,30 @@ namespace dyno {
 		data->clear();
 	}
 
-	template<typename T>
-	using HostArrayField = FArray<T, DeviceType::CPU>;
+	/**
+	 * Define FCArray
+	 */
+	template <typename T>
+	class FCArray : public FArray<T, DeviceType::CPU> {
+		typedef T								VarType;
+		typedef Array<T, DeviceType::CPU>		DataType;
+
+	public:
+		FCArray(std::string name, std::string description, FieldTypeEnum fieldType, OBase* parent)
+			: FArray<T, DeviceType::CPU>(name, description, fieldType, parent) {}
+
+		void push_back(const T& val) {
+			std::shared_ptr<DataType>& data = this->getDataPtr();
+			if (data == nullptr) {
+				data = std::make_shared<DataType>();
+			}
+
+			data->pushBack(val);
+		}
+	};
 
 	template<typename T>
-	using DeviceArrayField = FArray<T, DeviceType::GPU>;
+	using FDArray = FArray<T, DeviceType::GPU>;
 
 	/**
 	 * Define field for Array2D

@@ -37,7 +37,7 @@ public:
 
 	DEF_ARRAY_STATE(Transform3f, Transforms, DeviceType::GPU, "Instance transform");
 
-	DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+	DEF_INSTANCE_STATE(Topology, Topology, "Topology");
 };
 
 int main(int, char**)
@@ -53,7 +53,7 @@ int main(int, char**)
 	instanceNode->graphicsPipeline()->pushModule(mouseInterator);
 
 	auto instanceRender = std::make_shared<GLInstanceVisualModule>();
-	instanceRender->setColor(Color(0, 1, 0));
+	instanceRender->varBaseColor()->setValue(Color(0, 1, 0));
 	instanceNode->stateTopology()->connect(instanceRender->inTriangleSet());
 	instanceNode->stateTransforms()->connect(instanceRender->inInstanceTransform());
 	instanceNode->graphicsPipeline()->pushModule(instanceRender);

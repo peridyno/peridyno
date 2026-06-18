@@ -40,12 +40,6 @@ namespace dyno
 		GLVisualModule();
 		~GLVisualModule() override;
 
-		// basic Disney PBR material properties
-		void setColor(const Color& color);
-		void setMetallic(float metallic);
-		void setRoughness(float roughness);
-		void setAlpha(float alpha);
-
 		virtual bool isTransparent() const;
 
 		void draw(const RenderParams& rparams);

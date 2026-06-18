@@ -40,8 +40,8 @@ namespace dyno
 
 		typedef typename TDataType::Real Real;
 		//typedef typename TDataType::Coord Coord;
-		typedef typename Vector<Real, 2> Coord2D;
-		typedef typename Vector<Real, 3> Coord3D;
+		typedef typename dyno::Vector<Real, 2> Coord2D;
+		typedef typename dyno::Vector<Real, 3> Coord3D;
 
 		GLAdaptiveGridVisualNode2D();
 		~GLAdaptiveGridVisualNode2D() override;

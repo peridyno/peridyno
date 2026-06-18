@@ -5,7 +5,6 @@ if(PERIDYNO_LIBRARY_PARTICLESYSTEM)
         HeightField
         ParticleSystem
         Peridynamics
-        DualParticleSystem
         SemiAnalyticalScheme
         Multiphysics
         UbiGUI)

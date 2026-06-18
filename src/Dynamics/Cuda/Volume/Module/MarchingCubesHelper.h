@@ -18,7 +18,7 @@
 #include "Vector.h"
 #include "DataTypes.h"
 
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 
 #include "Primitive/Primitive3D.h"
 #include "Topology/DistanceField3D.h"
@@ -58,7 +58,7 @@ namespace dyno
 
 		static void constructTriangles(
 			DArray<Coord>& vertices,
-			DArray<TopologyModule::Triangle>& triangles,
+			DArray<Topology::Triangle>& triangles,
 			DArray<int>& vertNum,
 			DArray3D<Real>& distances,
 			Coord origin,
@@ -73,7 +73,7 @@ namespace dyno
 		static void constructTrianglesForClipper(
 			DArray<Real>& field,
 			DArray<Coord>& vertices,
-			DArray<TopologyModule::Triangle>& triangles,
+			DArray<Topology::Triangle>& triangles,
 			DArray<int>& vertNum,
 			DistanceField3D<TDataType>& sdf,
 			TPlane3D<Real> plane);
@@ -87,7 +87,7 @@ namespace dyno
 
 		static void constructTrianglesForOctree(
 			DArray<Coord>& triangleVertices,
-			DArray<TopologyModule::Triangle>& triangles,
+			DArray<Topology::Triangle>& triangles,
 			DArray<uint>& num,
 			DArray<Coord>& cellVertices,
 			DArray<Real>& sdfs,
@@ -102,7 +102,7 @@ namespace dyno
 		static void constructTrianglesForOctreeClipper(
 			DArray<Real>& vertSDFs,
 			DArray<Coord>& triangleVertices,
-			DArray<TopologyModule::Triangle>& triangles,
+			DArray<Topology::Triangle>& triangles,
 			DArray<uint>& num,
 			DArray<AdaptiveGridNode>& nodes,
 			std::shared_ptr<AdaptiveGridSet<TDataType>> gridSet,

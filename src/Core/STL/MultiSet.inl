@@ -7,40 +7,40 @@ namespace dyno
 {
 	template <typename T>
 	DYN_FUNC MultiSet<T>::MultiSet()
-		: STLBuffer()
+		: STLBuffer<T>()
 	{
 	}
 
 	template <typename T>
 	DYN_FUNC T* MultiSet<T>::find(T val)
 	{
-		int ind = leftBound(val, m_startLoc, m_size);
+		int ind = leftBound(val, this->m_startLoc, m_size);
 
-		return ind >= m_size || m_startLoc[ind] != val ? nullptr : m_startLoc + ind;
+		return ind >= m_size || this->m_startLoc[ind] != val ? nullptr : this->m_startLoc + ind;
 	}
 
 	template <typename T>
 	DYN_FUNC T* MultiSet<T>::insert(T val)
 	{
 		//return nullptr if the data buffer is full
-		if (m_size >= m_maxSize) return nullptr;
+		if (m_size >= this->m_maxSize) return nullptr;
 
 		//return the index of the last element that is equal to or smaller than val
-		int ind = rightBound(val, m_startLoc, m_size);
+		int ind = rightBound(val, this->m_startLoc, m_size);
 
 		int ind_plus = ind + 1;
 
 		//move all element backward
 		for (int j = m_size; j > ind_plus; j--)
 		{
-			m_startLoc[j] = m_startLoc[j - 1];
+			this->m_startLoc[j] = this->m_startLoc[j - 1];
 		}
 
 		//insert val to ind-th location.
-		m_startLoc[ind_plus] = val;
+		this->m_startLoc[ind_plus] = val;
 		m_size++;
 
-		return m_startLoc + ind_plus;
+		return this->m_startLoc + ind_plus;
 	}
 
 	template <typename T>
@@ -58,11 +58,11 @@ namespace dyno
 	template <typename T>
 	DYN_FUNC uint MultiSet<T>::count(T val)
 	{
-		int ind = leftBound(val, m_startLoc, m_size);
+		int ind = leftBound(val, this->m_startLoc, m_size);
 		if (ind >= m_size) return 0;
 
 		size_t num = 0;
-		while (m_startLoc[ind] == val && ind < m_size)
+		while (this->m_startLoc[ind] == val && ind < m_size)
 		{
 			num++;
 			ind++;
@@ -74,7 +74,7 @@ namespace dyno
 	template <typename T>
 	DYN_FUNC bool MultiSet<T>::empty()
 	{
-		return m_startLoc == nullptr;
+		return this->m_startLoc == nullptr;
 	}
 }
 

@@ -69,9 +69,9 @@ namespace dyno
 	template<typename TDataType>
 	void RigidWaterCoupling<TDataType>::updateStates()
 	{
-		Real dt = this->stateTimeStep()->getData();
+		Real dt = this->stateTimeStep()->getValue();
 
-		auto vessels = this->getVessels();
+		auto& vessels = this->getVessels();
 		auto ocean = this->getOcean();
 
 		auto patch = ocean->getOceanPatch();
@@ -80,18 +80,18 @@ namespace dyno
 
 		for (auto mesh : vessels)
 		{
-			auto& triangles = mesh->stateEnvelope()->getData();
+			auto ts = mesh->stateEnvelope()->constDataPtr();
 
-			Real mass = mesh->stateMass()->getData();
-			Coord barycenter = mesh->stateBarycenter()->getData();
-			Coord velocity = mesh->stateVelocity()->getData();
-			Coord angular_velocity = mesh->stateAngularVelocity()->getData();
-			Matrix inertia = mesh->stateInertia()->getData();
+			Real mass = mesh->stateMass()->getValue();
+			Coord barycenter = mesh->stateBarycenter()->getValue();
+			Coord velocity = mesh->stateVelocity()->getValue();
+			Coord angular_velocity = mesh->stateAngularVelocity()->getValue();
+			Matrix inertia = mesh->stateInertia()->getValue();
 
-			Coord gravity = mesh->varGravity()->getData();
+			Coord gravity = mesh->varGravity()->getValue();
 
-			auto& vertices = triangles.getPoints();
-			auto& indices = triangles.triangleIndices();
+			auto& vertices = ts->getPoints();
+			auto& indices = ts->triangleIndices();
 
 			uint num = indices.size();
 

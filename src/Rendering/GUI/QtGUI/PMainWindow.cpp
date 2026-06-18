@@ -144,13 +144,17 @@ namespace dyno
 		connect(mIoDockerWidget->contentBrowser(), &QContentBrowser::nodeCreated, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::createQtNode);
 
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodePlaced, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeDeleted, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeInputUpdated, PSimulationThread::instance(), &PSimulationThread::resetQtNode);
+		
+		//Trigger repaint when a node is selected or deselected
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeSelected, [&]() {mOpenGLWidget->flush(); });
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeDeselected, [&]() {mOpenGLWidget->flush(); });
 
 		connect(PSimulationThread::instance(), &PSimulationThread::oneFrameFinished, mOpenGLWidget, &POpenGLWidget::updateOneFrame);
 		connect(PSimulationThread::instance(), &PSimulationThread::sceneGraphChanged, mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::updateNodeGraphView);
-		connect(mAnimationWidget, &PAnimationWidget::resetScene, mOpenGLWidget, &POpenGLWidget::resetSceneFrame);
 
-		connect(mPropertyWidget, &PPropertyWidget::nodeUpdated, PSimulationThread::instance(), &PSimulationThread::syncNode);
+		connect(mPropertyWidget, &PPropertyWidget::nodeUpdated, mOpenGLWidget, &POpenGLWidget::onNodeUpdated);
 
 		connect(mToolBar, &PMainToolBar::logActTriggered, mIoDockerWidget, &PIODockWidget::toggleLogging);
 		
@@ -367,8 +371,6 @@ namespace dyno
 			}
 		});
 
-		connect(mPropertyWidget, &PPropertyWidget::nodeUpdated, mOpenGLWidget, &POpenGLWidget::onNodeUpdated);
-
 		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeSelected, [=](Qt::QtNode& n)
 			{
 				auto model = n.nodeDataModel();
@@ -387,6 +389,17 @@ namespace dyno
 			{
 				mOpenGLWidget->select(nullptr);
 				mOpenGLWidget->update();
+			});
+
+		connect(mNodeFlowView->flowScene(), &Qt::QtNodeFlowScene::nodeVisibilityChanged, [=](Qt::QtNode& n)
+			{
+				auto model = n.nodeDataModel();
+				auto widget = dynamic_cast<Qt::QtNodeWidget*>(model);
+
+				if (widget != nullptr)
+				{
+					mOpenGLWidget->updateGraphicsContext(widget->getNode().get());
+				}
 			});
 
 		connect(mAnimationWidget, &PAnimationWidget::simulationStarted, [=]()

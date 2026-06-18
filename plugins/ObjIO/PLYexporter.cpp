@@ -51,7 +51,7 @@ namespace dyno
 
 
 		auto d_tet = tetlist.tetrahedronIndices();
-		CArray<TopologyModule::Tetrahedron> c_tet;
+		CArray<Topology::Tetrahedron> c_tet;
 		if (d_tet.size()) 
 		{
 			c_tet.assign(d_tet);

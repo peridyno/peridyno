@@ -3,6 +3,8 @@
 //Framework
 #include "Module.h"
 #include "Node.h"
+#include "Tuple.h"
+#include "Field/FList.h"
 #include "SceneGraph.h"
 
 //Node editor
@@ -14,8 +16,11 @@
 #include <QVBoxLayout>
 #include <QScrollArea>
 #include <QGridLayout>
+#include <QRadioButton>
 
 #include "PropertyItem/QStateFieldWidget.h"
+#include "PropertyItem/QArrayWidget.h"
+#include "PropertyItem/DescriptionHelper.h"
 
 namespace dyno
 {
@@ -123,14 +128,8 @@ namespace dyno
 		for  (FBase * var : fields)
 		{
 			if (var != nullptr) {
-				if (var->getFieldType() == FieldTypeEnum::Param)
-				{
-					if (var->getClassName() == std::string("FVar"))
-					{
-						this->addScalarFieldWidget(var, mPropertyLayout[0], propertyNum[0]);
-						propertyNum[0]++;
-					}
-				}
+				this->addVariableFieldWidget(var, mPropertyLayout[0]);
+				propertyNum[0]++;
 			}
 		}
 
@@ -241,11 +240,8 @@ namespace dyno
 			if (var != nullptr) {
 				if (var->getFieldType() == FieldTypeEnum::Param)
 				{
-					if (var->getClassName() == std::string("FVar"))
-					{
-						this->addScalarFieldWidget(var, mPropertyLayout[0], propertyNum[0]);
-						propertyNum[0]++;
-					}
+					this->addVariableFieldWidget(var, mPropertyLayout[0]);
+					propertyNum[0]++;
 				}
 				else if (var->getFieldType() == FieldTypeEnum::State) {
 					this->addStateFieldWidget(var);
@@ -355,28 +351,200 @@ namespace dyno
 		return fw;
 	}
 
-	void PPropertyWidget::addScalarFieldWidget(FBase* field, QGridLayout* layout,int j)
+	QWidget* PPropertyWidget::addScalarFieldWidget(FBase* field, QGridLayout* layout)
 	{
+		if (field->getClassName() != std::string("FVar")) return nullptr;
+
 		QWidget* fw = createFieldWidget(field);
 		
 		if(fw != nullptr) {
 			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
-			layout->addWidget(fw, j, 0);
 
 			//Hide the item if the field is not active in default
 			if (!field->isActive())
 				fw->setVisible(false);
+
+			if(layout != nullptr) layout->addWidget(fw);
 		}
 		else 
 		{
 			std::cout <<(field->getObjectName());
 		}
+
+		return fw;
 	}
 
-	void PPropertyWidget::addArrayFieldWidget(FBase* field)
+	QWidget* PPropertyWidget::addTupleFieldWidget(FTuple* tuple, QGridLayout* layout)
 	{
-		auto fw = new QStateFieldWidget(field);
-		this->addWidget(fw);
+		QString name = FormatFieldWidgetName(tuple->getObjectName());
+		name = QString("[ ") + name + QString("]");
+		QGroupBox* groupBox = new QGroupBox(name);
+		groupBox->setStyleSheet(R"(
+					QGroupBox {
+						margin-top: 12px;
+						border: 2px solid #454545;
+					}
+					QGroupBox::title {
+						subcontrol-origin: margin;
+						subcontrol-position:top center;
+					}
+				)");
+
+		QGridLayout* vbox = new QGridLayout;
+
+		QBoxLayout* currentLayout = NULL;
+		enum LastLayoutMode
+		{
+			None,
+			VBox,
+			HBox
+		};
+
+		LastLayoutMode lastMode = None;
+		int row = -1;
+		int temp = -1;
+		std::string dummy;
+		for (size_t i = 0; i < tuple->size(); i++)
+		{
+			auto field = tuple->get(i);
+			bool selfVLayout = true;
+			bool nextVLayout = true;
+			bool onlyDetail = false;
+
+			DescriptionHelper::parseQtStyleDescriptionRobust(field->getDescription(), dummy, selfVLayout, onlyDetail);
+
+			if (i < tuple->size() - 1)
+				DescriptionHelper::parseQtStyleDescriptionRobust(tuple->get(i + 1)->getDescription(), dummy, nextVLayout, onlyDetail);
+
+			switch (lastMode)
+			{
+			case None:
+				if (!nextVLayout) 
+				{
+					currentLayout = new QHBoxLayout;
+					lastMode = HBox;
+				}
+				else 
+				{
+					currentLayout = new QVBoxLayout;
+					lastMode = VBox;
+				}
+				row++;
+				break;
+			case VBox:
+				if (!nextVLayout) 
+				{
+					currentLayout = new QHBoxLayout;
+					row++;
+					lastMode = HBox;
+				}
+				break;
+			case HBox:
+				if (selfVLayout) 
+				{
+					if (!nextVLayout)
+					{
+						currentLayout = new QHBoxLayout;
+						lastMode = HBox;
+					}
+					else
+					{
+						currentLayout = new QVBoxLayout;
+						lastMode = VBox;
+					}
+					row++;
+				}
+				break;
+			default:
+				break;
+			}
+
+			QWidget* fw = this->addVariableFieldWidget(field, NULL);
+
+			currentLayout->addWidget(fw);
+
+			if (temp != row)
+				vbox->addLayout(currentLayout,row,0);
+			temp = row;
+
+			if (fw != nullptr) {
+				fw->setStyleSheet(R"(
+					QGroupBox {
+					margin-top: 4px;
+					border: 1px solid #454545;
+				}
+				)");
+			}
+		}
+
+		groupBox->setLayout(vbox);
+
+		if(layout != nullptr) layout->addWidget(groupBox);
+
+		return groupBox;
+	}
+
+	QWidget* PPropertyWidget::addListFieldWidget(FList* field, QGridLayout* layout)
+	{
+		if (field->getClassName() != std::string("FList")) return nullptr;
+
+		if (auto f = dynamic_cast<FList*> (field))
+		{
+			auto aw = new ArrayWidget(f);
+
+			this->connect(aw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
+
+			connect(aw, &ArrayWidget::onExpandList, [this, aw]() {
+				int id = 0;
+				for (auto it = aw->list()->begin(); it != aw->list()->end(); ++it)
+				{
+					auto childField = (*it).get();
+					childField->setObjectName("[" + std::to_string(id) + "]");
+					QWidget* fw = addVariableFieldWidget(childField);
+					aw->addItem(fw, id, childField);
+					id++;
+				}			
+			});
+
+			connect(aw, &ArrayWidget::onAddElement, [this, aw]()
+			{				
+				auto it = aw->list()->end();
+				--it;
+				auto childField = (*it).get();
+				childField->setObjectName("[" + std::to_string(aw->list()->size() - 1) + "]");
+				QWidget* fw = addVariableFieldWidget(childField);
+				aw->addItem(fw, aw->list()->size() - 1, childField);
+			});
+
+			if (layout != nullptr) layout->addWidget(aw);
+
+			return aw;
+		}
+
+		return nullptr;
+	}
+
+	QWidget* PPropertyWidget::addVariableFieldWidget(FBase* field, QGridLayout* layout)
+	{
+		if (field->getClassName() == std::string("FVar"))
+		{
+			return this->addScalarFieldWidget(field, layout);
+		}
+		else if (field->getClassName() == std::string("FTuple"))
+		{
+			auto tuple = dynamic_cast<FTuple*> (field);
+			if (tuple != nullptr)
+			{
+				return addTupleFieldWidget(tuple, layout);
+			}
+		}
+		else if (field->getClassName() == std::string("FList"))
+		{
+			auto flist = dynamic_cast<FList*> (field);
+			return addListFieldWidget(flist, layout);
+		}
+
+		return nullptr;
 	}
 
 	void PPropertyWidget::addStateFieldWidget(FBase* field)
@@ -386,3 +554,5 @@ namespace dyno
 		mPropertyLayout[1]->addWidget(widget);
 	}
 }
+
+

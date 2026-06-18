@@ -53,6 +53,8 @@ namespace dyno
 
 		DEF_INSTANCE_STATE(QuadSet<TDataType>, QuadSet, "");
 
+		DEF_VAR_OUT(TPlane3D<Real>, Plane, "");
+
 	protected:
 		void resetStates() override;
 

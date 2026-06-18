@@ -25,8 +25,8 @@ namespace dyno
 	{
 		std::vector<Quad> quads;
 
-		m_hexahedrons.resize(hexahedrons.size());
-		m_hexahedrons.assign(hexahedrons);
+		mHexahedrons.resize(hexahedrons.size());
+		mHexahedrons.assign(hexahedrons);
 
 		this->updateQuads();
 	}
@@ -34,12 +34,12 @@ namespace dyno
 	template<typename TDataType>
 	void HexahedronSet<TDataType>::setHexahedrons(DArray<Hexahedron>& hexahedrons)
 	{
-		if (hexahedrons.size() != m_hexahedrons.size())
+		if (hexahedrons.size() != mHexahedrons.size())
 		{
-			m_hexahedrons.resize(hexahedrons.size());
+			mHexahedrons.resize(hexahedrons.size());
 		}
 
-		m_hexahedrons.assign(hexahedrons);
+		mHexahedrons.assign(hexahedrons);
 
 		this->updateQuads();
 	}
@@ -85,32 +85,7 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	DArrayList<int>& HexahedronSet<TDataType>::getVer2Hex()
-	{
-		DArray<uint> counter;
-		counter.resize(this->mCoords.size());
-		counter.reset();
-
-		cuExecute(m_hexahedrons.size(),
-			HS_CountHexs,
-			counter,
-			m_hexahedrons);
-
-		m_ver2Hex.resize(counter);
-
-		counter.reset();
-		cuExecute(m_hexahedrons.size(),
-			HS_SetupHexIds,
-			m_ver2Hex,
-			m_hexahedrons);
-
-		counter.clear();
-
-		return m_ver2Hex;
-	}
-
-	template<typename TDataType>
-	void HexahedronSet<TDataType>::getVolume(DArray<Real>& volume)
+	void HexahedronSet<TDataType>::calculateVolume(DArray<Real>& volume)
 	{
 
 	}
@@ -157,7 +132,7 @@ namespace dyno
 	template<typename Quad, typename Quad2Hex, typename QKey>
 	__global__ void HS_SetupQuads(
 		DArray<Quad> quads,
-		DArray<Quad2Hex> quad2Hex,
+		DArray<Quad2Hex> mQuad2Hex,
 		DArray<QKey> keys,
 		DArray<int> counter,
 		DArray<int> hexIds)
@@ -177,7 +152,7 @@ namespace dyno
 			if (tId + 1 < keys.size() && keys[tId + 1] == key)
 				q2H[1] = hexIds[tId + 1];
 
-			quad2Hex[shift] = q2H;
+			mQuad2Hex[shift] = q2H;
 
 		}
 	}
@@ -214,7 +189,7 @@ namespace dyno
 	template<typename TDataType>
 	void HexahedronSet<TDataType>::updateQuads()
 	{
-		uint hexSize = m_hexahedrons.size();
+		uint hexSize = mHexahedrons.size();
 
 		DArray<QKey> keys;
 		DArray<int> hexIds;
@@ -226,7 +201,7 @@ namespace dyno
 			HS_SetupKeys,
 			keys,
 			hexIds,
-			m_hexahedrons);
+			mHexahedrons);
 
 		thrust::sort_by_key(thrust::device, keys.begin(), keys.begin() + keys.size(), hexIds.begin());
 
@@ -241,14 +216,14 @@ namespace dyno
 		int quadNum = thrust::reduce(thrust::device, counter.begin(), counter.begin() + counter.size());
 		thrust::exclusive_scan(thrust::device, counter.begin(), counter.begin() + counter.size(), counter.begin());
 
-		quad2Hex.resize(quadNum);
+		mQuad2Hex.resize(quadNum);
 
 		auto& pQuad = this->quadIndices();
 		pQuad.resize(quadNum);
 		cuExecute(keys.size(),
 			HS_SetupQuads,
 			pQuad,
-			quad2Hex,
+			mQuad2Hex,
 			keys,
 			counter,
 			hexIds);
@@ -256,23 +231,49 @@ namespace dyno
 		counter.clear();
 		hexIds.clear();
 		keys.clear();
-
-		
-// 		this->updateTriangles();
-// 		this->updateEdges();
 	}
 
+	template<typename TDataType>
+	void HexahedronSet<TDataType>::updateTopology()
+	{
+		this->updateVertex2Hexahedron();
+
+		QuadSet<TDataType>::updateTopology();
+	}
+
+	template<typename TDataType>
+	void HexahedronSet<TDataType>::updateVertex2Hexahedron()
+	{
+		DArray<uint> counter;
+		counter.resize(this->mCoords.size());
+		counter.reset();
+
+		cuExecute(mHexahedrons.size(),
+			HS_CountHexs,
+			counter,
+			mHexahedrons);
+
+		mVer2Hex.resize(counter);
+
+		counter.reset();
+		cuExecute(mHexahedrons.size(),
+			HS_SetupHexIds,
+			mVer2Hex,
+			mHexahedrons);
+
+		counter.clear();
+	}
 
 	template<typename TDataType>
 	void HexahedronSet<TDataType>::copyFrom(HexahedronSet<TDataType> hexSet)
 	{
-		m_hexahedrons.resize(hexSet.m_hexahedrons.size());
-		m_hexahedrons.assign(hexSet.m_hexahedrons);
+		mHexahedrons.resize(hexSet.mHexahedrons.size());
+		mHexahedrons.assign(hexSet.mHexahedrons);
 
-		quad2Hex.resize(hexSet.quad2Hex.size());
-		quad2Hex.assign(hexSet.quad2Hex);
+		mQuad2Hex.resize(hexSet.mQuad2Hex.size());
+		mQuad2Hex.assign(hexSet.mQuad2Hex);
 
-		m_ver2Hex.assign(hexSet.m_ver2Hex);
+		mVer2Hex.assign(hexSet.mVer2Hex);
 
 		QuadSet<TDataType>::copyFrom(hexSet);
 	}

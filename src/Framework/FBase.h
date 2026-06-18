@@ -162,6 +162,11 @@ public:
 	void attach(std::shared_ptr<FCallBackFunc> func);
 	void detach(std::shared_ptr<FCallBackFunc> func);
 
+	/**
+	 * @brief Clear all callback functions
+	 */
+	void detachAll();
+
 protected:
 	void setSource(FBase* source);
 
@@ -241,6 +246,13 @@ std::shared_ptr<Data> allocate()									\
 \
 bool connect(DerivedField* dst)										\
 {																	\
+	bool valid = false;												\
+	valid = valid || (this->getFieldType() == FieldTypeEnum::Out && dst->getFieldType() == FieldTypeEnum::In);		\
+	valid = valid || (this->getFieldType() == FieldTypeEnum::In && dst->getFieldType() == FieldTypeEnum::In);		\
+	valid = valid || (this->getFieldType() == FieldTypeEnum::Out && dst->getFieldType() == FieldTypeEnum::Out);		\
+	valid = valid || (this->getFieldType() == FieldTypeEnum::State && dst->getFieldType() == FieldTypeEnum::In);	\
+	assert(valid == true);											\
+																	\
 	this->connectField(dst);										\
 	return true;													\
 }																	\

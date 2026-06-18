@@ -2,7 +2,7 @@
 
 #include "Array/Array.h"
 #include "ImageLoader.h"
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 #include "Topology/TextureMesh.h"
 #include "Vector/Vector3D.h"
 #include <algorithm>
@@ -271,9 +271,9 @@ namespace dyno
             // only load triangle mesh...
             const auto& mesh = shape.mesh;
             tShapes[sId] = std::make_shared<Shape>();
-            std::vector<TopologyModule::Triangle> vertexIndex;
-            std::vector<TopologyModule::Triangle> normalIndex;
-            std::vector<TopologyModule::Triangle> texCoordIndex;
+            std::vector<Topology::Triangle> vertexIndex;
+            std::vector<Topology::Triangle> normalIndex;
+            std::vector<Topology::Triangle> texCoordIndex;
 
             if (mesh.material_ids.size() > 0 && mesh.material_ids[0] >= 0)
             {
@@ -333,7 +333,7 @@ namespace dyno
         return true;
     }
 
-    bool loadObj(std::vector<Vec3f>& points, std::vector<TopologyModule::Triangle>& triangles, std::string filename, bool append)
+    bool loadObj(std::vector<Vec3f>& points, std::vector<Topology::Triangle>& triangles, std::string filename, bool append)
     {
         if (!append)
         {
@@ -372,7 +372,7 @@ namespace dyno
 
             for (int s = 0; s < myshape[i].mesh.indices.size() / 3; s++)
             {
-                triangles.push_back(TopologyModule::Triangle(myshape[i].mesh.indices[3 * s].vertex_index + offset, myshape[i].mesh.indices[3 * s + 1].vertex_index + offset, myshape[i].mesh.indices[3 * s + 2].vertex_index + offset));
+                triangles.push_back(Topology::Triangle(myshape[i].mesh.indices[3 * s].vertex_index + offset, myshape[i].mesh.indices[3 * s + 1].vertex_index + offset, myshape[i].mesh.indices[3 * s + 2].vertex_index + offset));
             }
         }
         std::cout << "************************ Loading completed    **********************" << std::endl << std::endl;
@@ -611,7 +611,7 @@ namespace dyno
 		return true;
 	}
 
-    void computeMassProperties(const std::vector<Vec3f>& vertices, const std::vector<TopologyModule::Triangle>& faces, Real& out_volume, Vec3f& out_center, Mat3f& out_inertia)
+    void computeMassProperties(const std::vector<Vec3f>& vertices, const std::vector<Topology::Triangle>& faces, Real& out_volume, Vec3f& out_center, Mat3f& out_inertia)
     {
         Real total_volume = 0.0;
         Vec3f com_accumulator(0);
@@ -766,7 +766,7 @@ namespace dyno
                 currentLocalMaterials.push_back(newMat);
             }
 
-            std::vector<TopologyModule::Triangle> assetLocalFaces;
+            std::vector<Topology::Triangle> assetLocalFaces;
             for (const tinyobj::shape_t& shape : shapes) {
                 for (size_t i = 0; i < shape.mesh.indices.size(); i += 3) {
                     assetLocalFaces.push_back({
@@ -810,9 +810,9 @@ namespace dyno
 
                 uint currentSId = static_cast<uint>(tShapes.size());
 
-                std::vector<TopologyModule::Triangle> vertexIndex;
-                std::vector<TopologyModule::Triangle> normalIndex;
-                std::vector<TopologyModule::Triangle> texCoordIndex;
+                std::vector<Topology::Triangle> vertexIndex;
+                std::vector<Topology::Triangle> normalIndex;
+                std::vector<Topology::Triangle> texCoordIndex;
 
                 if (!mesh.material_ids.empty() && mesh.material_ids[0] >= 0) {
                     if (mesh.material_ids[0] < currentLocalMaterials.size())

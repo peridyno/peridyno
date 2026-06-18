@@ -42,6 +42,10 @@ namespace dyno
 	{
 		delete mShadowMap;
 		delete mEnvmap;
+		delete mScreenQuad;
+		delete mBlendProgram;
+		delete mRenderHelper;
+		delete mFXAAFilter;
 	}
 
 	void GLRenderEngine::initialize()
@@ -100,14 +104,9 @@ namespace dyno
 		mLinkedListBuffer.release();
 		mHeadIndexTex.release();
 		mBlendProgram->release();
-		delete mBlendProgram;
 
 		// release other objects
 		mScreenQuad->release();
-		delete mScreenQuad;
-
-		delete mRenderHelper;
-		delete mFXAAFilter;
 
 	}
 
@@ -394,7 +393,7 @@ namespace dyno
 			float unitScale = rparams.unitScale;
 			// only draw to color buffer, so we can pick through
 			mFramebuffer.drawBuffers(1, attachments);
-			mRenderHelper->drawGround(params, 
+			mRenderHelper->drawGround(params,
 				this->planeScale * unitScale, this->rulerScale * unitScale,
 				Vec4f(this->planeColor.r, this->planeColor.g, this->planeColor.b, this->planeColor.a),
 				Vec4f(this->rulerColor.r, this->rulerColor.g, this->rulerColor.b, this->rulerColor.a));

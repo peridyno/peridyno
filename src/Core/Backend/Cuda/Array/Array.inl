@@ -29,7 +29,7 @@ namespace dyno
 		/*!
 		*	\brief	Do not release memory here, call clear() explicitly.
 		*/
-		~Array() {};
+		DYN_FUNC ~Array() {};
 
 		void resize(const uint n);
 
@@ -56,7 +56,14 @@ namespace dyno
 			return mData[id];
 		}
 
+		// Called by silling
+		inline uint64 address() const {
+			return uint64(mData);
+		}
+
 		DYN_FUNC inline uint size() const { return mTotalNum; }
+		DYN_FUNC inline uint bufferSize() const { return mBufferNum; }
+
 		DYN_FUNC inline bool isCPU() const { return false; }
 		DYN_FUNC inline bool isGPU() const { return true; }
 		DYN_FUNC inline bool isEmpty() const { return mData == nullptr; }
@@ -103,7 +110,8 @@ namespace dyno
 
 		int exp = (int)std::ceil(std::log2(float(n)));
 
-		int bound = (int)std::pow(2, exp);
+		//int bound = (int)std::pow(2, exp);
+		int bound = (1 << exp);
 
 		if (n > mBufferNum || n <= mBufferNum / 2) {
 			clear();
@@ -167,7 +175,7 @@ namespace dyno
 	template<typename T>
 	void Array<T, DeviceType::GPU>::set(const uint id, const T value)
 	{
-		assert(id >= 0 && id < mTotalNum);
+		assert(id < mTotalNum);
 
 		cuSafeCall(cudaMemcpy(&mData[id], &value, sizeof(T), cudaMemcpyHostToDevice));
 	}
@@ -175,7 +183,7 @@ namespace dyno
 	template<typename T>
 	T Array<T, DeviceType::GPU>::get(const uint id)
 	{
-		assert(id >= 0 && id < mTotalNum);
+		assert(id < mTotalNum);
 
 		T value;
 		cuSafeCall(cudaMemcpy(&value, &mData[id], sizeof(T), cudaMemcpyDeviceToHost));

@@ -1,13 +1,30 @@
 #include "QRealFieldWidget.h"
 
 #include <QHBoxLayout>
+#include <QDialog>
+#include <QVBoxLayout>
+#include <QFormLayout>
+#include <QPushButton>
 
 #include "Field.h"
 #include "QPiecewiseDoubleSpinBox.h"
+#include <QMenu>
+#include <QMouseEvent>
 
 namespace dyno
 {
-	IMPL_FIELD_WIDGET(float, QRealFieldWidget)
+	//IMPL_FIELD_WIDGET(float, QRealFieldWidget)
+
+	int QRealFieldWidget::reg_field_widget = []()
+		{
+			dyno::PPropertyWidget::registerWidget({ &typeid(float), &QRealFieldWidget::createWidget });
+			dyno::PPropertyWidget::registerWidget({ &typeid(double), &QRealFieldWidget::createWidget });
+			return 0;
+		}();
+
+		QWidget* QRealFieldWidget::createWidget(dyno::FBase* f) {
+			return new QRealFieldWidget(f);
+		}
 
 		QRealFieldWidget::QRealFieldWidget(FBase* field)
 		: QFieldWidget(field)
@@ -62,8 +79,11 @@ namespace dyno
 
 		QObject::connect(name, SIGNAL(toggle(bool)), spinner, SLOT(toggleDecimals(bool)));
 
-//		QObject::connect(spinner, SIGNAL(editingFinishedWithValue(double)), this, SLOT(onSpinnerEditingFinished(double)));
-//		QObject::connect(this, SIGNAL(fieldChanged()), this, SLOT(updateWidget()));
+		mRightMenu = new QMenu(this);
+		mRightMenu->addAction("Set Range", this, &QRealFieldWidget::editRange);
+
+		this->installEventFilter(this);
+
 	}
 
 	QRealFieldWidget::~QRealFieldWidget()
@@ -78,12 +98,12 @@ namespace dyno
 		if (template_name == std::string(typeid(float).name()))
 		{
 			FVar<float>* f = TypeInfo::cast<FVar<float>>(field());
-			f->setValue((float)v);
+			f->setValue((float)v, false);
 		}
 		else if (template_name == std::string(typeid(double).name()))
 		{
 			FVar<double>* f = TypeInfo::cast<FVar<double>>(field());
-			f->setValue(v);
+			f->setValue(v, false);
 		}
 
 		emit fieldChanged();
@@ -113,6 +133,94 @@ namespace dyno
 	void QRealFieldWidget::onSliderValueChanged(double val)
 	{
 		spinner->triggerEditingFinished(val);
+	}
+
+
+	bool QRealFieldWidget::eventFilter(QObject* watched, QEvent* event)
+	{
+		if (watched == this && event->type() == QEvent::MouseButtonPress)
+		{
+			QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+			if (mouseEvent->button() == Qt::RightButton)
+			{
+				mRightMenu->exec(mouseEvent->globalPos());
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void QRealFieldWidget::editRange() 
+	{
+		// Create a dialog for setting range
+		QDialog* dialog = new QDialog(this);
+		dialog->setWindowTitle("Set Range");
+		dialog->setFixedSize(300, 150);
+
+		// Create layout
+		QVBoxLayout* mainLayout = new QVBoxLayout(dialog);
+		QFormLayout* formLayout = new QFormLayout();
+
+		// Create spin boxes for min and max values
+		QDoubleSpinBox* minSpinBox = new QDoubleSpinBox();
+		QDoubleSpinBox* maxSpinBox = new QDoubleSpinBox();
+
+		minSpinBox->setRange(-1e9, 1e9);
+		maxSpinBox->setRange(-1e9, 1e9);
+
+		minSpinBox->setValue(field()->getMin());
+		maxSpinBox->setValue(field()->getMax());
+
+		formLayout->addRow("Minimum:", minSpinBox);
+		formLayout->addRow("Maximum:", maxSpinBox);
+
+		QHBoxLayout* buttonLayout = new QHBoxLayout();
+		QPushButton* okButton = new QPushButton("OK");
+		QPushButton* cancelButton = new QPushButton("Cancel");
+
+		const QString btnStyle = R"(
+			QPushButton {
+				background-color: #464646;
+				border-radius: 4px;
+			}
+			QPushButton:hover {
+				background-color: #616161;
+			}
+			QPushButton:pressed {
+				background-color: #000000;
+			}
+		)";
+
+		okButton->setStyleSheet(btnStyle);
+		cancelButton->setStyleSheet(btnStyle);
+
+		buttonLayout->addStretch();
+		buttonLayout->addWidget(okButton);
+		buttonLayout->addWidget(cancelButton);
+
+		mainLayout->addLayout(formLayout);
+		mainLayout->addLayout(buttonLayout);
+
+		QObject::connect(okButton, &QPushButton::clicked, [=]() {
+			double min = minSpinBox->value();
+			double max = maxSpinBox->value();
+
+			if (min > max) {
+				std::swap(min, max);
+				minSpinBox->setValue(min);
+				maxSpinBox->setValue(max);
+				return;
+			}
+
+			field()->setRange(min, max);
+			slider->setRange(min, max);
+			spinner->setRange(min, max);
+			dialog->accept();
+		});
+
+		QObject::connect(cancelButton, &QPushButton::clicked, dialog, &QDialog::reject);
+		dialog->exec();
+		delete dialog;
 	}
 }
 

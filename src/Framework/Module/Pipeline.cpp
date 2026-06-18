@@ -115,9 +115,6 @@ namespace dyno
 
 	void Pipeline::updateImpl()
 	{
-#ifdef PYTHON
-		std::cout << "Pipeline::updateImpl" << std::endl;
-#endif
 		if (mUpdateEnabled)
 		{
 			CTimer timer;

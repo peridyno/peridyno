@@ -3,7 +3,9 @@
 #include "Algorithm/Arithmetic.h"
 #include "Algorithm/Function2Pt.h"
 #include "Algorithm/SMAlgorithm.h"
-#include <windows.h>
+#ifdef _WIN32
+    #include <windows.h>
+#endif
 
 namespace dyno
 {

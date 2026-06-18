@@ -79,7 +79,7 @@ void Gmsh::loadFile(string filename)
 								(m_points[id4 - 1][0] < 0.85f || ((m_points[id4 - 1][2] > 0.7f * (m_points[id4 - 1][0] - 0.85f) || ((m_points[id4 - 1][2] < -0.7f * (m_points[id4 - 1][0] - 0.85f))))))
 								)*/
 							{ 
-								m_tets.push_back(TopologyModule::Tetrahedron(id1 - 1, id2 - 1, id3 - 1, id4 - 1));
+								m_tets.push_back(Topology::Tetrahedron(id1 - 1, id2 - 1, id3 - 1, id4 - 1));
 							}
 						}
 						else if (idx2 == 15)

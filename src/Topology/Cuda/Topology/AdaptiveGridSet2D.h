@@ -18,7 +18,7 @@
 // #include "Topology/AdaptiveGridSet.h"
 //#include "Topology/TriangleSet.h"
 #include "TopologyConstants.h"
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 #include "Primitive/Primitive2D.h"
 #include "Vector/Vector2D.h"
 
@@ -109,18 +109,20 @@ namespace dyno
 
 
 	template<typename TDataType>
-	class AdaptiveGridSet2D : public TopologyModule
+	class AdaptiveGridSet2D : public Topology
 	{
 		DECLARE_TCLASS(AdaptiveGridSet2D, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		//typedef typename TDataType::Coord Coord2D;
-		typedef typename Vector<Real, 2> Coord2D;
+		typedef typename dyno::Vector<Real, 2> Coord2D;
 
 		AdaptiveGridSet2D();
 		~AdaptiveGridSet2D() override;
 
 		void clear();
+
+		void setSpace(const Coord2D p0, const Coord2D p1, Real dx);
 
 		DYN_FUNC inline void setLevelNum(Level num) { m_level_num = num; }
 		DYN_FUNC inline void setLevelMax(Level num) { m_level_max = num; }
@@ -169,7 +171,7 @@ namespace dyno
 		uint m_leaf_num;
 
 		DArray<AdaptiveGridNode2D> m_quadtree;
-		DArrayList<int> m_neighbors;//the size is 4*(m_quadtree.size())£¬the order is: -x,+x,-y,+y
+		DArrayList<int> m_neighbors;//the size is 4*(m_quadtree.size()), the order is: -x,+x,-y,+y
 		DArray<int> m_leafIndex;//the index of leaf in all node
  	};
 

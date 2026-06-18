@@ -102,7 +102,7 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TopologyModule::Quad Quad;
+		typedef typename Topology::Quad Quad;
 
 		QuadSet();
 		~QuadSet() override;
@@ -139,7 +139,7 @@ namespace dyno
 		/**
 		 * mEdg2Quad can be automatically updated when calling update()
 		 */
-		DArray<::dyno::TopologyModule::Edg2Quad> mEdg2Quad;
+		DArray<::dyno::Topology::Edg2Quad> mEdg2Quad;
 	};
 }
 

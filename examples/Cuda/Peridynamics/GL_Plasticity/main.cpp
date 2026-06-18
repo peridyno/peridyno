@@ -100,7 +100,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto elasticBodyRenderer = std::make_shared<GLPointVisualModule>();
 	elasticBodyRenderer->varPointSize()->setValue(0.005);
-	elasticBodyRenderer->setColor(Color(1, 0.2, 1));
+	elasticBodyRenderer->varBaseColor()->setValue(Color(1, 0.2, 1));
 	elasticBodyRenderer->setColorMapMode(GLPointVisualModule::PER_OBJECT_SHADER);
 	elasticBody->statePointSet()->connect(elasticBodyRenderer->inPointSet());
 	elasticBody->stateVelocity()->connect(elasticBodyRenderer->inColor());

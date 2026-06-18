@@ -52,7 +52,7 @@ namespace dyno
 		DEF_VAR(Real, Radius, 0.5, "Sphere radius");
 
 		DECLARE_ENUM(SphereType,
-			Standard = 0,
+		Standard = 0,
 			Icosahedron = 1);
 
 		DEF_ENUM(SphereType, Type, SphereType::Standard, "Sphere type");
@@ -69,11 +69,12 @@ namespace dyno
 
 		DEF_VAR_OUT(TSphere3D<Real>, Sphere, "");
 
+
 	public:
 
-		static void generateIcosahedron(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles, Real sphereRadius, uint step, Vec3f offset = Vec3f(0));
+		static void generateIcosahedron(std::vector<Vec3f>& vertices, std::vector<Topology::Triangle>& triangles, Real sphereRadius, uint step, Vec3f offset = Vec3f(0));
 
-		static void generateStandardSphere(std::vector<Vec3f>& vertices, std::vector<TopologyModule::Triangle>& triangles, Real radius, Vec3f offset = Vec3f(0), uint latitude = 24, uint longitude = 24)
+		static void generateStandardSphere(std::vector<Vec3f>& vertices, std::vector<Topology::Triangle>& triangles, Real radius, Vec3f offset = Vec3f(0), uint latitude = 24, uint longitude = 24)
 		{
 			uint offsetIndex = vertices.size() + 1;
 
@@ -134,22 +135,22 @@ namespace dyno
 
 			for (uint j = 0; j < longitude; j++)
 			{
-				triangles.push_back(TopologyModule::Triangle(offsetIndex - 1, offsetIndex + j, offsetIndex + (j + 1) % longitude));
+				triangles.push_back(Topology::Triangle(offsetIndex - 1, offsetIndex + j, offsetIndex + (j + 1) % longitude));
 			}
 
 			for (uint i = 0; i < latitude - 2; i++)
 			{
 				for (uint j = 0; j < longitude; j++)
 				{
-					triangles.push_back(TopologyModule::Triangle(offsetIndex + j, offsetIndex + j + longitude, offsetIndex + (j + 1) % longitude + longitude));
-					triangles.push_back(TopologyModule::Triangle(offsetIndex + j, offsetIndex + (j + 1) % longitude + longitude, offsetIndex + (j + 1) % longitude));
+					triangles.push_back(Topology::Triangle(offsetIndex + j, offsetIndex + j + longitude, offsetIndex + (j + 1) % longitude + longitude));
+					triangles.push_back(Topology::Triangle(offsetIndex + j, offsetIndex + (j + 1) % longitude + longitude, offsetIndex + (j + 1) % longitude));
 				}
 				offsetIndex += longitude;
 			}
 
 			for (uint j = 0; j < longitude; j++)
 			{
-				triangles.push_back(TopologyModule::Triangle(offsetIndex + j, vertices.size() - 1, offsetIndex + (j + 1) % longitude));
+				triangles.push_back(Topology::Triangle(offsetIndex + j, vertices.size() - 1, offsetIndex + (j + 1) % longitude));
 			}
 		}
 
@@ -159,14 +160,13 @@ namespace dyno
 	private:
 		void varChanged();
 
+		void generateIcosahedron(std::vector<Vec3f>& vertices, std::vector<Topology::Triangle>& triangles);
+
 		void standardSphere();
-
-
 
 		void icosahedronSphere();
 
 	};
-
 
 	IMPLEMENT_TCLASS(SphereModel, TDataType);
 }

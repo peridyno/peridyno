@@ -25,7 +25,7 @@
 #include "./ParticleSystem/Module/ParticleIntegrator.h"
 #include "./ParticleSystem/Module/NormalForce.h"
 #include "Collision/NeighborTriangleQuery.h"
-#include "TriangularMeshConstraint.h"
+#include "Module/TriangularMeshConstraint.h"
 #include "Collision/NeighborPointQuery.h"
 #include "Topology/TriangleSet.h"
 

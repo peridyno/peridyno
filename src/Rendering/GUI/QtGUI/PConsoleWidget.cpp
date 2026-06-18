@@ -307,39 +307,39 @@ namespace dyno
 		lexer->setDefaultPaper(backgroundColor);
 
 		// set font color
-		lexer->setColor(defaultColor);
+		lexer->varBaseColor()->setValue(defaultColor);
 		lexer->setDefaultColor(defaultColor);
 
 		// comment
-		lexer->setColor(commentColor, 1);                    // Comment
-		lexer->setColor(commentColor, 12);                   // CommentBlock
+		lexer->varBaseColor()->setValue(commentColor, 1);                    // Comment
+		lexer->varBaseColor()->setValue(commentColor, 12);                   // CommentBlock
 
 		// number
-		lexer->setColor(numberColor, 2);                     // Number
+		lexer->varBaseColor()->setValue(numberColor, 2);                     // Number
 
 		// string
-		lexer->setColor(stringColor, 3);                     // DoubleQuotedString
-		lexer->setColor(stringColor, 4);                     // SingleQuotedString
-		lexer->setColor(stringColor, 6);                     // TripleSingleQuotedString
-		lexer->setColor(stringColor, 7);                     // TripleDoubleQuotedString
+		lexer->varBaseColor()->setValue(stringColor, 3);                     // DoubleQuotedString
+		lexer->varBaseColor()->setValue(stringColor, 4);                     // SingleQuotedString
+		lexer->varBaseColor()->setValue(stringColor, 6);                     // TripleSingleQuotedString
+		lexer->varBaseColor()->setValue(stringColor, 7);                     // TripleDoubleQuotedString
 
 		// f-string
-		lexer->setColor(fstringColor, 16);                   // DoubleQuotedFString
-		lexer->setColor(fstringColor, 17);                   // SingleQuotedFString
-		lexer->setColor(fstringColor, 18);                   // TripleSingleQuotedFString
-		lexer->setColor(fstringColor, 19);                   // TripleDoubleQuotedFString
+		lexer->varBaseColor()->setValue(fstringColor, 16);                   // DoubleQuotedFString
+		lexer->varBaseColor()->setValue(fstringColor, 17);                   // SingleQuotedFString
+		lexer->varBaseColor()->setValue(fstringColor, 18);                   // TripleSingleQuotedFString
+		lexer->varBaseColor()->setValue(fstringColor, 19);                   // TripleDoubleQuotedFString
 
 		// keyword
-		lexer->setColor(keywordColor, 5);                    // Keyword
-		lexer->setColor(classNameColor, 8);                  // ClassName
-		lexer->setColor(functionColor, 9);                   // FunctionMethodName
-		lexer->setColor(operatorColor, 10);                  // Operator
-		lexer->setColor(identifierColor, 11);                // Identifier
-		lexer->setColor(highlightedIdColor, 14);             // HighlightedIdentifier
-		lexer->setColor(decoratorColor, 15);                 // Decorator
+		lexer->varBaseColor()->setValue(keywordColor, 5);                    // Keyword
+		lexer->varBaseColor()->setValue(classNameColor, 8);                  // ClassName
+		lexer->varBaseColor()->setValue(functionColor, 9);                   // FunctionMethodName
+		lexer->varBaseColor()->setValue(operatorColor, 10);                  // Operator
+		lexer->varBaseColor()->setValue(identifierColor, 11);                // Identifier
+		lexer->varBaseColor()->setValue(highlightedIdColor, 14);             // HighlightedIdentifier
+		lexer->varBaseColor()->setValue(decoratorColor, 15);                 // Decorator
 
 		// error word
-		lexer->setColor(unclosedStringColor, 13);            // UnclosedString
+		lexer->varBaseColor()->setValue(unclosedStringColor, 13);            // UnclosedString
 
 		// set font
 		lexer->setFont(font, 8);                             // ClassName

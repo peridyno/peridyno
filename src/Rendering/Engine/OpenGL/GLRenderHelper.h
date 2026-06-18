@@ -30,7 +30,7 @@ namespace dyno
 		GLRenderHelper();
 		~GLRenderHelper();
 
-		void drawGround(const RenderParams& rparams, 
+		void drawGround(const RenderParams& rparams,
 			float planeScale, float rulerScale = 1.f,
 			dyno::Vec4f planeColor = { 0.3, 0.3, 0.3, 0.5 },
 			dyno::Vec4f rulerColor = { 0.1, 0.1, 0.1, 0.5 });

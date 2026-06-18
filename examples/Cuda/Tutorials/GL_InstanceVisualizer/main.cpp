@@ -56,8 +56,8 @@ int main(int, char**)
 
 	// config instance rendering
 	auto instanceRender = std::make_shared<GLInstanceVisualModule>();
-	instanceRender->setColor(Color(0, 1, 0));
-	//instanceRender->setAlpha(0.5f);
+	instanceRender->varBaseColor()->setValue(Color(0, 1, 0));
+	//instanceRender->varAlpha()->setValue(0.5f);
 	//instanceRender->varUseVertexNormal()->setValue(true);
 
 	instanceNode->stateTopology()->connect(instanceRender->inTriangleSet());

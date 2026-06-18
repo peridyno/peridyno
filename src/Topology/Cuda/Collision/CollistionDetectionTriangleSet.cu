@@ -22,12 +22,12 @@ namespace dyno
 	__global__ void CDTS_SetupAABBs(
 		DArray<AABB> aabbs,
 		DArray<Coord> vertices,
-		DArray<TopologyModule::Triangle> indices)
+		DArray<Topology::Triangle> indices)
 	{
 		uint tId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (tId >= indices.size()) return;
 
-		TopologyModule::Triangle index = indices[tId];
+		Topology::Triangle index = indices[tId];
 
 		Coord v0 = vertices[index[0]];
 		Coord v1 = vertices[index[1]];
@@ -89,7 +89,7 @@ namespace dyno
 		DArray<Tet3D> tets,
 		DArray<Capsule3D> capsules,
 		DArray<Coord> vertices,		//triangle vertices
-		DArray<TopologyModule::Triangle> indices,	//triangle indices
+		DArray<Topology::Triangle> indices,	//triangle indices
 		DArrayList<int> contactListBroadPhase,
 		DArray<Pair<uint, uint>> mapping,
 		ElementOffset elementOffset)
@@ -185,7 +185,7 @@ namespace dyno
 			TPoint3D<Real> pi = TPoint3D<Real>(points[i]);
 			for (uint j = 0; j < list_i.size(); j++)
 			{
-				TopologyModule::Triangle index = indices[list_i[j]];
+				Topology::Triangle index = indices[list_i[j]];
 				TTriangle3D<Real> tj(vertices[index[0]], vertices[index[1]], vertices[index[2]]);
 
 				Coord nj = tj.normal();

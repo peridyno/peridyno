@@ -114,10 +114,10 @@ protected:
 		}
 
 		std::vector<Coord> coords;
-		std::vector<TopologyModule::Edge> edges;
+		std::vector<Topology::Edge> edges;
 		coords.push_back(point.origin);
 		coords.push_back(q.origin);
-		edges.push_back(TopologyModule::Edge(0, 1));
+		edges.push_back(Topology::Edge(0, 1));
 
 		auto edgeSet = this->outEdgeSet()->getDataPtr();
 		edgeSet->setPoints(coords);

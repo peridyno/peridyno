@@ -19,7 +19,6 @@ namespace dyno
 	template<typename TDataType>
 	GLInstanceVisualNode<TDataType>::~GLInstanceVisualNode()
 	{
-		printf("GLInstanceVisualNode released \n");
 	}
 
 	template<typename TDataType>

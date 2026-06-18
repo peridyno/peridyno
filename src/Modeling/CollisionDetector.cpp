@@ -197,7 +197,7 @@ namespace dyno
 		std::vector<Coord> points;
 
 		std::vector<Coord> vertices;
-		std::vector<TopologyModule::Edge> edges;
+		std::vector<Topology::Edge> edges;
 
 
 		uint num = manifold.contactCount;
@@ -206,7 +206,7 @@ namespace dyno
 			points.push_back(manifold.contacts[i].position);
 			vertices.push_back(manifold.contacts[i].position);
 			vertices.push_back(manifold.contacts[i].position + manifold.normal * 0.05);
-			edges.push_back(TopologyModule::Edge(2 * i, 2 * i + 1));
+			edges.push_back(Topology::Edge(2 * i, 2 * i + 1));
 		}
 
 		auto ptSet = this->stateContacts()->getDataPtr();

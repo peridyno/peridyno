@@ -46,10 +46,24 @@ namespace dyno {
 
         if (this->outImage()->isEmpty())
             this->outImage()->allocate();
+        if (this->outGrayImage()->isEmpty())
+            this->outGrayImage()->allocate();
 
         ImageLoader::loadImage(mFilePath.c_str(), c_texture);
 
+        CArray2D<float> c_grayImage;
+        c_grayImage.resize(c_texture.nx(),c_texture.ny());
+        for (size_t i = 0; i < c_texture.nx(); i++)
+        {
+            for (size_t j = 0; j < c_texture.ny(); j++)
+            {
+                c_grayImage(i, j) = c_texture(i, j).x;
+            }
+        }
+
         this->outImage()->getDataPtr()->assign(c_texture);
+        this->outGrayImage()->getDataPtr()->assign(c_grayImage);
+
     }
 
 

@@ -35,8 +35,8 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 
 	# define library version (update: apparently you can also do it in project()!)
 	set(PERIDYNO_LIBRARY_VERSION_MAJOR 1 CACHE STRING "peridyno major version" FORCE)
-	set(PERIDYNO_LIBRARY_VERSION_MINOR 3 CACHE STRING "peridyno minor version" FORCE)
-	set(PERIDYNO_LIBRARY_VERSION_PATCH 0 CACHE STRING "patch version of peridyno" FORCE)
+	set(PERIDYNO_LIBRARY_VERSION_MINOR 4 CACHE STRING "peridyno minor version" FORCE)
+	set(PERIDYNO_LIBRARY_VERSION_PATCH 1 CACHE STRING "patch version of peridyno" FORCE)
 	set(PERIDYNO_LIBRARY_VERSION "${PERIDYNO_LIBRARY_VERSION_MAJOR}.${PERIDYNO_LIBRARY_VERSION_MINOR}.${PERIDYNO_LIBRARY_VERSION_PATCH}" CACHE STRING "Peridyno version" FORCE)
 
 	set_property(GLOBAL PROPERTY PERIDYNO_LIBRARIES "Core;Framework;Topology")
@@ -100,7 +100,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${CMAKE_BUILD_TYPE})
 IF(MSVC)
     SET( CMAKE_DEBUG_POSTFIX "d" )
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -utf-8")
+	# fix the fetal error for cuda 13.2: MSVC/cl.exe with traditional preprocessor is used. This may lead to unexpected compilation errors.
+	add_compile_definitions(CCCL_IGNORE_MSVC_TRADITIONAL_PREPROCESSOR_WARNING)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -utf-8 /MP")
 ENDIF(MSVC)
 
 # installation destinations
@@ -141,7 +143,6 @@ set(WT_GUI_SUPPORTED "WT_GUI_UNKNOWN")
 
 
 if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
-	#option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
 	#option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
 	option(PERIDYNO_PLUGIN_ALL "Enable binding the plugin libraries" ON)
 
@@ -169,7 +170,7 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	option(PERIDYNO_QT_GUI "Enable building Qt{5 or 6}-based applications" ON)
 
 	# Wt GUI to support web applications, off by default
-	option(PERIDYNO_WT_GUI "Enable building web applications" ON)
+	option(PERIDYNO_WT_GUI "Enable building web applications" OFF)
 
 	# Add Plugin folder
 	if(PERIDYNO_PLUGIN_ALL)

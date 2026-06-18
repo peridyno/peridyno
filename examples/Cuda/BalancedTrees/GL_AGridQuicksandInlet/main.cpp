@@ -1,7 +1,7 @@
 #include <UbiApp.h>
 #include <SceneGraph.h>
 
-#include "BasicShapes/CircleModel2D.h"
+#include "BasicShapes2D/CircleModel2D.h"
 #include "Volume/AdaptiveVolumeFromBasicShape2D.h"
 #include "Volume/GLAdaptiveGridVisualNode2D.h"
 #include "EulerFluid/GLEuleSimVisualNode2D.h"
@@ -95,10 +95,10 @@ std::shared_ptr<SceneGraph> createScene()
 	boundary->varNormalFriction()->setValue(1.0f);
 	boundary->varTangentialFriction()->setValue(0.8f);
 	boundary->varPlaneTangentialFriction()->setValue(0.8f);
-	semic->varCenter()->connect(boundary->varCenter());
-	semic->varRadius()->connect(boundary->varRadius());
-	semic->varDx()->connect(boundary->varDx());
-	semic->varYPlane()->connect(boundary->varYPlane());
+	semic->varCenter()->quote(boundary->varCenter());
+	semic->varRadius()->quote(boundary->varRadius());
+	semic->varDx()->quote(boundary->varDx());
+	semic->varYPlane()->quote(boundary->varYPlane());
 	boundary->varXInlet1()->setValue(-0.4f);
 	boundary->varXInlet2()->setValue(0.0f);
 	boundary->varXInlet3()->setValue(0.4f);
@@ -153,7 +153,7 @@ std::shared_ptr<SceneGraph> createScene()
 
 	auto circle = scn->addNode(std::make_shared<CircleModel2D<DataType3f>>());
 	circle->varRadius()->setValue(0.9f);
-	circle->varCenter2D()->setValue(Vec2f(0.0, 0.9));
+	circle->varLocation2D()->setValue(Vec2f(0.0, 0.9));
 
 	auto AGrid = scn->addNode(std::make_shared<AdaptiveVolumeFromBasicShape2D<DataType3f>>());
 	circle->connect(AGrid->importShapes());
@@ -166,9 +166,9 @@ std::shared_ptr<SceneGraph> createScene()
 	AGrid->stateAGridSet()->connect(esim->inAdaptiveVolume2D());
 	esim->inRadius()->setValue(0.9f);
 	esim->inCenter()->setValue(Vec2f(0.0, 0.9));
-	fluid->stateVelocity()->connect(esim->statePVelocity());
-	fluid->statePosition()->connect(esim->statePPosition());
-	samplingDistance->outFloating()->connect(esim->varSamplingDistance());
+	fluid->stateVelocity()->connect(esim->inPVelocity());
+	fluid->statePosition()->connect(esim->inPPosition());
+	samplingDistance->outFloating()->connect(esim->inSamplingDistance());
 	esim->varSandDensity()->setValue(2000.0f);
 	esim->varUpdateCoefficient()->setValue(0.03f);
 	//esim->varSandDensity()->setValue(5000.0f);

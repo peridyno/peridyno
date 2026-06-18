@@ -77,11 +77,6 @@ namespace dyno
 		alpha[pId] = rho_i / (inv_alpha_i);
 
 		if ((nbSize < 5))	alpha[pId] = 0.0;
-
-		//if (alpha[pId] > 1.0)
-		//{
-		//	printf("a %f, inv_a %e, rho %f, nb %d \r\n", alpha[pId], inv_alpha_i, rho_i, nbSize);
-		//}
 	}
 
 
@@ -122,8 +117,6 @@ namespace dyno
 			}
 		}
 		Real rho_i = rhoArr[pId] > rest_density ? rhoArr[pId] : rest_density;
-
-		//if (nbSize < 10) div_i = 0;
 
 		p_rhoArr[pId] = rho_i + dt * div_i;
 
@@ -239,7 +232,6 @@ namespace dyno
 			{
 				Coord g = gradient(r, smoothingLength, scale) * (pos_i - posArr[j]) * (1.0f / r);
 				{
-					//d_velo += mass * (KappaArr[pId] / rhoArr[pId] + KappaArr[j] / rhoArr[j]) * g;
 					d_velo += mass * (KappaArr[pId] / (rhoArr[pId]) + KappaArr[j] / (rhoArr[j]) ) * g;
 				}
 			}

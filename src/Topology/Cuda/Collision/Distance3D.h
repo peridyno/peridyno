@@ -20,7 +20,7 @@
 
 #include "Primitive/Primitive3D.h"
 
-#include "Module/TopologyModule.h"
+#include "Topology.h"
 #include "Topology/EdgeSet.h"
 
 namespace dyno
@@ -53,16 +53,16 @@ namespace dyno
 	 * @return return false when the input list is empty, in this case do not use p3d in the following code
 	 */
 	template<typename Real, typename Coord, DeviceType deviceType, typename IndexType>
-	DYN_FUNC bool calculateSignedDistance2TriangleSet(ProjectedPoint3D<Real>& p3d, Coord point, Array<Coord, deviceType>& vertices, Array<TopologyModule::Triangle, deviceType>& indices, List<IndexType>& list, Real dHat = 0);
+	DYN_FUNC bool calculateSignedDistance2TriangleSet(ProjectedPoint3D<Real>& p3d, Coord point, Array<Coord, deviceType>& vertices, Array<Topology::Triangle, deviceType>& indices, List<IndexType>& list, Real dHat = 0);
 
 	template<typename Real, typename Coord, DeviceType deviceType, typename IndexType>
 	DYN_FUNC bool calculateSignedDistance2TriangleSetFromNormal(
 		ProjectedPoint3D<Real>& p3d,
 		Coord point,
 		Array<Coord, deviceType>& vertices,
-		Array<TopologyModule::Edge, deviceType>& edges,
-		Array<TopologyModule::Triangle, deviceType>& triangles,
-		Array<TopologyModule::Tri2Edg, deviceType>& t2e,
+		Array<Topology::Edge, deviceType>& edges,
+		Array<Topology::Triangle, deviceType>& triangles,
+		Array<Topology::Tri2Edg, deviceType>& t2e,
 		Array<Coord, deviceType>& edgeNormal,
 		Array<Coord, deviceType>& vertexNormal,
 		List<IndexType>& list,
@@ -81,7 +81,7 @@ namespace dyno
 	 * @return return false when the input list is empty, in this case do not use p3d in the following code
 	 */
 	template<typename Real, typename Coord, DeviceType deviceType, typename IndexType>
-	DYN_FUNC bool calculateDistance2TriangleSet(ProjectedPoint3D<Real>& p3d, Coord point, Array<Coord, deviceType>& vertices, Array<TopologyModule::Triangle, deviceType>& indices, List<IndexType>& list, Real dHat = 0);
+	DYN_FUNC bool calculateDistance2TriangleSet(ProjectedPoint3D<Real>& p3d, Coord point, Array<Coord, deviceType>& vertices, Array<Topology::Triangle, deviceType>& indices, List<IndexType>& list, Real dHat = 0);
 
 }
 

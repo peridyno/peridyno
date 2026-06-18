@@ -63,7 +63,7 @@ namespace dyno
 			/**
 		* @brief Capsule Topology
 		*/	
-		DEF_INSTANCE_STATE(TopologyModule, Topology, "Topology");
+		DEF_INSTANCE_STATE(Topology, Topology, "Topology");
 		DEF_INSTANCE_STATE(TextureMesh, TextureMesh, "TextureMesh");
 
 

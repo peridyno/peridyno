@@ -2,6 +2,10 @@
 #include "Action.h"
 
 #include "SceneGraph.h"
+#include "Timer.h"
+
+#include <sstream>
+#include <iomanip>
 
 namespace dyno
 {
@@ -180,6 +184,14 @@ void Node::update()
 void Node::reset()
 {
 	if (this->validateInputs()) {
+
+		CTimer timer;
+
+		auto scn = this->getSceneGraph();
+		if (scn != nullptr && scn->isNodeInfoPrintable()) {
+			timer.start();
+		}
+
 		this->stateElapsedTime()->setValue(0.0f);
 		this->stateFrameNumber()->setValue(0);
 
@@ -187,6 +199,18 @@ void Node::reset()
 
 		//When the node is reset, call tick() to force updating all modules
 		this->tick();
+
+		if (scn != nullptr && scn->isNodeInfoPrintable()) {
+			timer.stop();
+
+			std::stringstream name;
+			std::stringstream ss;
+			name << std::setw(40) << this->getClassInfo()->getClassName();
+			ss << std::setprecision(10) << timer.getElapsedTime();
+
+			std::string info = "Node: \t" + name.str() + ": \t " + ss.str() + "ms \n";
+			Log::sendMessage(Log::Info, info);
+		}
 	}
 }
 
@@ -589,7 +613,7 @@ bool Node::addNodePort(NodePort* port)
 // 	getContext()->enable();
 // }
 
-// void Node::setTopologyModule(std::shared_ptr<TopologyModule> topology)
+// void Node::setTopologyModule(std::shared_ptr<Topology> topology)
 // {
 // 	if (m_topology != nullptr)
 // 	{

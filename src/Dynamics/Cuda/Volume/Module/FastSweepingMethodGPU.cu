@@ -34,7 +34,7 @@ namespace dyno
 		DArray3D<Real>& phi,
 		DArray3D<int>& closest_tri,
 		const DArray<Coord>& vert,
-		const DArray<TopologyModule::Triangle>& tri, 
+		const DArray<Topology::Triangle>& tri, 
 		const Coord gx,
 		int i0, int j0, int k0, 
 		int i1, int j1, int k1)
@@ -65,7 +65,7 @@ namespace dyno
 		DArray3D<int> closestId,
 		DArray3D<GridType> gridType, 
 		DArray<Coord> vertices,
-		DArray<TopologyModule::Triangle> indices,
+		DArray<Topology::Triangle> indices,
 		Coord origin,
 		Real dx,
 		int di)
@@ -96,7 +96,7 @@ namespace dyno
 		DArray3D<int> closestId,
 		DArray3D<GridType> gridType,
 		DArray<Coord> vertices,
-		DArray<TopologyModule::Triangle> indices,
+		DArray<Topology::Triangle> indices,
 		Coord origin,
 		Real dx,
 		int dj)
@@ -127,7 +127,7 @@ namespace dyno
 		DArray3D<int> closestId,
 		DArray3D<GridType> gridType,
 		DArray<Coord> vertices,
-		DArray<TopologyModule::Triangle> indices,
+		DArray<Topology::Triangle> indices,
 		Coord origin,
 		Real dx,
 		int dk)

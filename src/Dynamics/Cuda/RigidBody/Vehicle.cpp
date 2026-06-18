@@ -113,21 +113,85 @@ namespace dyno
 				this->bindShape(actors[it], Pair<uint, uint>(it, i));
 			}
 
+			std::vector <int> FrontWheels = { 0,1 };
+
+			std::map<int, CapsuleInfo> steerWheels;
+			//Capsule
+			int steer1 = 6;
+			int steer2 = 7;
+			std::vector <int> steerActorId = { steer1,steer2 };
+
+			for (size_t m = 0; m < FrontWheels.size(); m++)
+			{
+				auto shapeId = FrontWheels[m];
+				auto actorid = steerActorId[m];
+				auto up = texMesh->shapes()[shapeId]->boundingBox.v1;
+				auto down = texMesh->shapes()[shapeId]->boundingBox.v0;
+
+				steerWheels[actorid].center = Vec3f(0.0f);
+				steerWheels[actorid].rot = Quat1f(M_PI / 2, Vec3f(0, 0, 1));
+				steerWheels[actorid].halfLength = 0.03;
+				steerWheels[actorid].radius = std::abs(up.y - down.y) / 5;
+
+				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[shapeId]->boundingTransform.translation()) + instances[i].translation();
+				rigidbody.angle = Quat1f(instances[i].rotation());
+
+				actors[actorid] = this->addCapsule(steerWheels[actorid], rigidbody, 100);
+			}
+			
+			{
+				uint id = steer1;
+				auto& joint = this->createHingeJoint(actors[id], actors[body]);
+				joint.setAnchorPoint(actors[id]->center);
+				joint.setRange(-M_PI * 1 / 100, M_PI * 1 / 100);
+				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(0, 1, 0)));
+			}
+			{
+				uint id = steer2;
+				auto& joint = this->createHingeJoint(actors[id], actors[body]);
+				joint.setAnchorPoint(actors[id]->center);
+				joint.setRange(-M_PI * 1 / 100, M_PI * 1 / 100);
+				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(0, 1, 0)));
+			}
+
 			rigidbody.offset = Vec3f(0);
 
 			Real wheel_velocity = 10;
 
 			//wheel to Body
-			for (auto it : Wheel_Id)
 			{
-				auto& joint = this->createHingeJoint(actors[it], actors[body]);
-				joint.setAnchorPoint(actors[it]->center);
+				uint id = 0;
+				auto& joint = this->createHingeJoint(actors[id], actors[steer1]);
+				joint.setAnchorPoint(actors[id]->center);
+				joint.setMoter(wheel_velocity);
+				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(1, 0, 0)));
+			}
+			{
+				uint id = 1;
+				auto& joint = this->createHingeJoint(actors[id], actors[steer2]);
+				joint.setAnchorPoint(actors[id]->center);
+				joint.setMoter(wheel_velocity);
+				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(1, 0, 0)));
+			}
+			{
+				uint id = 2;
+				auto& joint = this->createHingeJoint(actors[id], actors[body]);
+				joint.setAnchorPoint(actors[id]->center);
+				joint.setMoter(wheel_velocity);
+				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(1, 0, 0)));
+			}
+			{
+				uint id = 3;
+				auto& joint = this->createHingeJoint(actors[id], actors[body]);
+				joint.setAnchorPoint(actors[id]->center);
 				joint.setMoter(wheel_velocity);
 				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(1, 0, 0)));
 			}
 
 			auto& jointBackWheel_Body = this->createFixedJoint(actors[backWheel], actors[body]);
 			jointBackWheel_Body.setAnchorPoint(actors[backWheel]->center);		//set and offset
+
+
 		}
 
 		//**************************************************//
@@ -501,7 +565,7 @@ namespace dyno
 
 			//Caterpillar Track Joint
 			auto edgeset = this->statecaterpillarTrack()->getDataPtr();
-			std::vector<TopologyModule::Edge> edges;
+			std::vector<Topology::Edge> edges;
 			std::vector<Vec3f> points;
 			for (int k = 0; k < caterpillarTrack_L.size(); k++)
 			{
@@ -515,9 +579,9 @@ namespace dyno
 				points.push_back(actors[start]->center);
 
 				if (k != caterpillarTrack_L.size() - 1)
-					edges.push_back(TopologyModule::Edge(k, k + 1));
+					edges.push_back(Topology::Edge(k, k + 1));
 				else
-					edges.push_back(TopologyModule::Edge(k, 0));
+					edges.push_back(Topology::Edge(k, 0));
 
 
 			}
@@ -534,9 +598,9 @@ namespace dyno
 				points.push_back(actors[start]->center);
 
 				if (k != caterpillarTrack_R.size() - 1)
-					edges.push_back(TopologyModule::Edge(k + edgeOffset, k + 1 + edgeOffset));
+					edges.push_back(Topology::Edge(k + edgeOffset, k + 1 + edgeOffset));
 				else
-					edges.push_back(TopologyModule::Edge(k + edgeOffset, 0 + edgeOffset));
+					edges.push_back(Topology::Edge(k + edgeOffset, 0 + edgeOffset));
 
 			}
 			edgeset->setPoints(points);
@@ -826,8 +890,8 @@ namespace dyno
 		this->graphicsPipeline()->pushModule(mapper);
 
 		auto sRender = std::make_shared<GLSurfaceVisualModule>();
-		sRender->setColor(Color(1, 1, 0));
-		sRender->setAlpha(0.2);
+		sRender->varBaseColor()->setValue(Color(1, 1, 0));
+		sRender->varAlpha()->setValue(0.2);
 		mapper->outTriangleSet()->connect(sRender->inTriangleSet());
 		this->graphicsPipeline()->pushModule(sRender);
 

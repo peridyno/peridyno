@@ -12,7 +12,9 @@
 #include <pybind11/embed.h>
 #include <SceneGraphFactory.h>
 #include <iomanip>
+#include <chrono>
 namespace py = pybind11;
+
 
 WPythonWidget::WPythonWidget()
 {

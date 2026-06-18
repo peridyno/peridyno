@@ -10,7 +10,7 @@ namespace dyno
 	template<typename TDataType>
 	class MakeParticleSystem : public ParticleSystem<TDataType>
 	{
-		DECLARE_TCLASS(ParticleSystem, TDataType)
+		DECLARE_TCLASS(MakeParticleSystem, TDataType)
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;

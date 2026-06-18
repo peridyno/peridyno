@@ -353,12 +353,12 @@ namespace dyno
 				pts.push_back(c_points[pt]);
 			}
 
-			std::vector<TopologyModule::Triangle> c_earTriangles;
+			std::vector<Topology::Triangle> c_earTriangles;
 			earClip.polyClip(pts, c_earTriangles);//
 			if (c_earTriangles.size() != (pts.size() - 2)) 
 			{
 				printf("EarClip Error!!\n");
-				std::vector<TopologyModule::Triangle> c_earTest;
+				std::vector<Topology::Triangle> c_earTest;
 				earClip.polyClip(pts, c_earTest);//
 			}
 
@@ -371,7 +371,7 @@ namespace dyno
 
 			int aa = 1;
 
-			DArray<TopologyModule::Triangle> d_earTriangles;
+			DArray<Topology::Triangle> d_earTriangles;
 			d_earTriangles.assign(c_earTriangles);
 
 			cuExecute(d_earTriangles.size(),

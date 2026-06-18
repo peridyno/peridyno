@@ -34,7 +34,7 @@ namespace dyno
 	public:
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
-		typedef typename TopologyModule::Triangle Triangle;
+		typedef typename Topology::Triangle Triangle;
 
 		ConvertToTextureMesh();
 
@@ -46,7 +46,7 @@ namespace dyno
 		DEF_VAR(Real, UvScaleV, 9, "");
 		DEF_VAR(bool,UseBoundingTransform,false,"");
 
-		DEF_INSTANCE_IN(TopologyModule, Topology, "");
+		DEF_INSTANCE_IN(Topology, Topology, "");
 
 		DEF_INSTANCE_STATE(TextureMesh, TextureMesh, "");
 

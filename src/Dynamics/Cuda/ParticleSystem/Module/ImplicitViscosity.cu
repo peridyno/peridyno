@@ -3,6 +3,7 @@
 
 namespace dyno
 {
+//#define ADAPTIVE_SMOOTHING_LENGTH_MODE
 	template<typename TDataType>
 	ImplicitViscosity<TDataType>::ImplicitViscosity()
 		:ParticleApproximation<TDataType>()
@@ -33,12 +34,56 @@ namespace dyno
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
 		if (pId >= velNew.size()) return;
-
 		Coord dv_i(0);
 		Coord pos_i = posArr[pId];
 		Coord vel_i = velBuf[pId];
 		Real totalWeight = 0.0f;
 
+		List<int>& list_i = neighbors[pId];
+		int nbSize = list_i.size();
+		for (int ne = 0; ne < nbSize; ne++)
+		{
+			int j = list_i[ne];
+			Real r = (pos_i - posArr[j]).norm();
+
+			if (r > EPSILON)
+			{
+				Real w = weight(r, smoothingLength, scale);
+				totalWeight += w;
+				dv_i += w * velBuf[j];
+			}
+		}
+
+		Real b = dt * viscosity / smoothingLength;
+		b = totalWeight < EPSILON ? 0.0f : b;
+
+		totalWeight = totalWeight < EPSILON ? 1.0f : totalWeight;
+
+		dv_i /= totalWeight;
+
+		velNew[pId] = velOld[pId] / (1.0f + b) + dv_i * b / (1.0f + b);
+	}
+
+	template<typename Real, typename Coord, typename Kernel>
+	__global__ void IV_ApplyViscosity(
+		DArray<Coord> velNew,
+		DArray<Coord> posArr,
+		DArray<Coord> velOld,
+		DArray<Coord> velBuf,
+		DArrayList<int> neighbors,
+		Real viscosity,
+		DArray<Real> smoothingLengthArr,
+		Real dt,
+		Kernel weight,
+		Real scale)
+	{
+		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (pId >= velNew.size()) return;
+		Coord dv_i(0);
+		Coord pos_i = posArr[pId];
+		Coord vel_i = velBuf[pId];
+		Real totalWeight = 0.0f;
+		Real smoothingLength = smoothingLengthArr[pId];
 		List<int>& list_i = neighbors[pId];
 		int nbSize = list_i.size();
 		for (int ne = 0; ne < nbSize; ne++)
@@ -87,6 +132,18 @@ namespace dyno
 		for (int t = 0; t < iterNum; t++)
 		{
 			mVelBuf.assign(vels);
+#ifdef ADAPTIVE_SMOOTHING_LENGTH_MODE
+			cuZerothOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
+				IV_ApplyViscosity,
+				vels,
+				poss,
+				mVelOld,
+				mVelBuf,
+				nbrIds,
+				vis,
+				this->inAdaptiveSmoothLength()->getData(),
+				dt);
+#else
 			cuZerothOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
 				IV_ApplyViscosity,
 				vels,
@@ -97,6 +154,7 @@ namespace dyno
 				vis,
 				h,
 				dt);
+#endif // ADAPTIVE_SMOOTHING_LENGTH_MODE
 		}
 	}
 

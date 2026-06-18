@@ -72,6 +72,25 @@ namespace dyno
 
 	}
 
+	void QPiecewiseDoubleSpinBox::focusOutEvent(QFocusEvent* event)
+	{	
+		interpretText();
+
+		if (fabs(this->value() - this->realValue) > (isDouble ? DBL_EPSILON : FLT_EPSILON))
+		{
+			onEditingFinished();
+		}
+		lineEdit()->setReadOnly(true);
+
+		//QDoubleSpinBox::focusOutEvent(event);					
+	}
+
+	void QPiecewiseDoubleSpinBox::focusInEvent(QFocusEvent* event)
+	{	
+		this->lineEdit()->setReadOnly(false); 	
+		QDoubleSpinBox::focusInEvent(event);	
+	}
+
 	bool QPiecewiseDoubleSpinBox::eventFilter(QObject* obj, QEvent* event)
 	{
 		if (obj == lineEdit())
@@ -103,7 +122,6 @@ namespace dyno
 		realValue = val;
 		this->lineEdit()->setText(QString::number(realValue, 10, displayDecimals));
 		this->setKeyboardTracking(false);
-
 		return realValue;
 	}
 

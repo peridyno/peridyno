@@ -30,7 +30,7 @@ bool Object::registerClass(ClassInfo* ci)
 	}
 	return true;
 }
-Object* Object::createObject(std::string name)
+Object* Object::createObjectByName(std::string name)
 {
 	std::map< std::string, ClassInfo*>::const_iterator iter = classInfoMap->find(name);
 	if (classInfoMap->end() != iter) {

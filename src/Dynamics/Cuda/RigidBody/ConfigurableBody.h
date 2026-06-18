@@ -18,7 +18,10 @@
 
 #include "STL/Pair.h"
 
-#include "Field/VehicleInfo.h"
+#include "Tuple.h"
+#include "Field/FList.h"
+#include "Matrix/Matrix3x3.h"
+#include "MultiBodyTuple.h"
 
 namespace dyno
 {
@@ -33,7 +36,9 @@ namespace dyno
 		ConfigurableBody();
 		~ConfigurableBody() override;
 
-		DEF_VAR(VehicleBind, VehicleConfiguration, VehicleBind(4), "");
+		DEF_TUPLE(MultiBodyTuple, Configuration, "Define a Tuple");
+
+		DEF_VAR(FilePath, LoadConfigPath, FilePath("", "Peridyno Multibody Files (*.pdm)"), "");
 
 	public:
 		DEF_INSTANCE_IN(TextureMesh, TextureMesh, "Input TextureMesh");
@@ -42,7 +47,8 @@ namespace dyno
 
 	protected:
 		void resetStates() override;
-
+		void saveToFile() override;
+		void loadFromFile();
 		void updateConfig();
 
 	};

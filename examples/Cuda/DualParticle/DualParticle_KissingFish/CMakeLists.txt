@@ -3,7 +3,7 @@ if(PERIDYNO_LIBRARY_DUALPARTICLESYSTEM AND PERIDYNO_QT_GUI)
         Core 
         Framework 
         UbiGUI
-        DualParticleSystem 
+        ParticleSystem 
         SemiAnalyticalScheme
         ParticleSystem
         GLRenderEngine)

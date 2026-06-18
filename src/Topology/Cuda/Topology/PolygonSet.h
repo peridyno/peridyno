@@ -30,9 +30,9 @@ namespace dyno
 		typedef typename TDataType::Real Real;
 		typedef typename TDataType::Coord Coord;
 
-		typedef typename TopologyModule::Edge Edge;
-		typedef typename TopologyModule::Triangle Triangle;
-		typedef typename TopologyModule::Quad Quad;
+		typedef typename Topology::Edge Edge;
+		typedef typename Topology::Triangle Triangle;
+		typedef typename Topology::Quad Quad;
 
 	public:
 		PolygonSet();
@@ -50,7 +50,7 @@ namespace dyno
 
 		const DArrayList<uint>& polygon2Edge() { return mPoly2Edg; };
 
-		const DArray<::dyno::TopologyModule::Edg2Poly>& edge2Polygon() {
+		const DArray<::dyno::Topology::Edg2Poly>& edge2Polygon() {
 			return mEdg2Poly;
 		}
 
@@ -99,7 +99,7 @@ namespace dyno
 		DArrayList<uint> mPoly2Edg;
 
 		//Map edge id to triangle id
-		DArray<::dyno::TopologyModule::Edg2Poly> mEdg2Poly;
+		DArray<::dyno::Topology::Edg2Poly> mEdg2Poly;
 	};
 }
 

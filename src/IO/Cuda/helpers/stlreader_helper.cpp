@@ -201,7 +201,7 @@ namespace dyno
 	}
 
 
-	bool loadStl(std::vector<Vec3f>& points, std::vector<TopologyModule::Triangle>& triangles, std::string filename, bool append)
+	bool loadStl(std::vector<Vec3f>& points, std::vector<Topology::Triangle>& triangles, std::string filename, bool append)
 	{
 		if (!append)
 		{
@@ -244,7 +244,7 @@ namespace dyno
 		{
 			//std::cout << myshape[i].mesh.indices[s].vertex_index <<"  " << std::endl;
 
-			triangles.push_back(TopologyModule::Triangle(tris[3 * s] + offset, tris[3 * s + 1] + offset, tris[3 * s + 2] + offset));
+			triangles.push_back(Topology::Triangle(tris[3 * s] + offset, tris[3 * s + 1] + offset, tris[3 * s + 2] + offset));
 		}
 		
 		std::cout << "************************    Loading completed    **********************" << std::endl << std::endl;

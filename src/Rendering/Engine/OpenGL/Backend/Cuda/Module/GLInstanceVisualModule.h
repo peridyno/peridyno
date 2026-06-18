@@ -25,7 +25,6 @@ namespace dyno
 		DECLARE_CLASS(GLSurfaceVisualModule)
 	public:
 		GLInstanceVisualModule();
-		~GLInstanceVisualModule();
 
 		virtual std::string caption() override;
 

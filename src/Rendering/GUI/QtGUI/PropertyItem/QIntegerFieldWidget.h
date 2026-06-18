@@ -19,6 +19,9 @@
 #pragma once
 #include "QFieldWidget.h"
 #include "QtGUI/PPropertyWidget.h"
+#include "QtGUI/PropertyItem/QPiecewiseSpinBox.h"
+
+#include <QMenu>
 
 namespace dyno
 {
@@ -34,7 +37,14 @@ namespace dyno
 	public slots:
 		//Called when the field is updated
 		void updateField(int);
+		void editRange();
 
+	protected:
+		bool eventFilter(QObject* watched, QEvent* event) override;
+
+	private:
+		QPiecewiseSpinBox* mSpinner;
+		QMenu* mRightMenu;
 	};
 
 	class QUIntegerFieldWidget : public QFieldWidget
@@ -49,5 +59,13 @@ namespace dyno
 	public slots:
 		//Called when the field is updated
 		void updateField(int);
+		void editRange();
+
+	protected:
+		bool eventFilter(QObject* watched, QEvent* event) override;
+
+	private:
+		QPiecewiseSpinBox* mSpinner;
+		QMenu* mRightMenu;
 	};
 }

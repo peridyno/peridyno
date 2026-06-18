@@ -16,8 +16,7 @@ TEST(ModuleField, connect)
 	calArea.update();
 	EXPECT_EQ(calArea.outArea()->getData(), float(60));
 
-	FVar<float> inputWidth;
-	inputWidth.setValue(30.0f);
+	FVar<float> inputWidth(30.0, "Width", "", FieldTypeEnum::Out, nullptr);
 	inputWidth.connect(calArea.inWidth());
 
 	calArea.update();
@@ -28,8 +27,7 @@ TEST(ModuleField, connect)
 	inputWidth.connect(calArea1.inWidth());
 	EXPECT_EQ(inputWidth.sizeOfSinks(), 2);
 
-	FVar<float> inputWidth1;
-	inputWidth1.setValue(10.0f);
+	FVar<float> inputWidth1(10.0, "Width", "", FieldTypeEnum::Out, nullptr);
 	inputWidth1.connect(calArea1.inWidth());
 	EXPECT_EQ(inputWidth.sizeOfSinks(), 1);
 	EXPECT_EQ(inputWidth1.sizeOfSinks(), 1);
@@ -63,13 +61,13 @@ private:
 
 TEST(FInstance, connect)
 {
-	FInstance<OA> oA;
+	FInstance<OA> oA("A", "", FieldTypeEnum::In, nullptr);
 	oA.setDataPtr(std::make_shared<OA>());
-	FInstance<OB> oB;
+	FInstance<OB> oB("B", "", FieldTypeEnum::State, nullptr);
 	oB.setDataPtr(std::make_shared<OB>());
 	oB.connect(&oA);
 
-	FInstance<OB> oA2;
+	FInstance<OB> oA2("A2", "", FieldTypeEnum::In, nullptr);
 	oB.connect(&oA2);
 
 	auto oBData = oB.getData();

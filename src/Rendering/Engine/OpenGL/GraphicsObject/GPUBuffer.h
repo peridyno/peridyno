@@ -21,7 +21,7 @@
 
 #include <Vector.h>
 #include <Matrix/Transform3x3.h>
-#include <Module/TopologyModule.h>
+#include <Topology.h>
 
 #ifdef CUDA_BACKEND
 struct cudaGraphicsResource;
@@ -97,9 +97,10 @@ namespace dyno
 #endif
 	};
 
+	template class XBuffer<float>;
 	template class XBuffer<dyno::Vec2f>;
 	template class XBuffer<dyno::Vec3f>;
 	template class XBuffer<dyno::Transform3f>;
-	template class XBuffer<dyno::TopologyModule::Edge>;
-	template class XBuffer<dyno::TopologyModule::Triangle>;
+	template class XBuffer<dyno::Topology::Edge>;
+	template class XBuffer<dyno::Topology::Triangle>;
 }
