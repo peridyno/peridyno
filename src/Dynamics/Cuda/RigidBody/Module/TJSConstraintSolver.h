@@ -15,12 +15,12 @@
  *
  */
 
- #pragma once
- #include "Module/ConstraintModule.h"
- #include "RigidBody/RigidBodyShared.h"
+#pragma once
+#include "Module/ConstraintModule.h"
+#include "RigidBody/RigidBodyShared.h"
 #include "Topology/DiscreteElements.h"
- #include "Collision/Attribute.h"
- #include "Collision/CollisionData.h"
+#include "Collision/Attribute.h"
+#include "Collision/CollisionData.h"
 
 namespace dyno
 {
@@ -67,6 +67,20 @@ namespace dyno
 
 		DEF_VAR(Real, Hertz, 300, "");
 
+		DEF_VAR(bool, warmStartEnabled, true, "");
+
+		DEF_VAR(Real, Gamma, 0.95, "");
+
+		DEF_VAR(Real, distThreshold, 0.01, "");
+
+		DEF_VAR(bool, ContactReductionEnabled, true, "");
+
+		DEF_VAR(uint, MaxReducedContactsPerPair, 4, "");
+
+		DEF_VAR(Real, ContactReductionDistance, 0.01, "");
+
+		DEF_VAR(Real, ContactReductionNormalCosThreshold, 0.95, "");
+
 	public:
 		DEF_VAR_IN(Real, TimeStep, "Time step size");
 
@@ -99,7 +113,7 @@ namespace dyno
 		void constrain() override;
 
 	private:
-		void initializeJacobian(Real dt);
+		void initializeJacobian(Real dt, bool resetLambda, DArray<ContactPair> contactsInLocalFrame, bool hasFriction);
 
 	private:
 		DArray<Coord> mJ;
@@ -112,6 +126,8 @@ namespace dyno
 		DArray<Real> mLambda;
 
 		DArray<ContactPair> mContactsInLocalFrame;
+		DArray<ContactPair> mFilteredContacts;
+		DArray<ContactPair> mReducedContacts;
 
 		DArray<Constraint> mVelocityConstraints;
 
@@ -120,5 +136,12 @@ namespace dyno
         DArray<Real> mK_1;
 		DArray<Mat2f> mK_2;
 		DArray<Matrix> mK_3;
+
+		DArray<CacheContact> cacheContacts;
+
+		DArray<Real> mLambdaOld;
+
+		int mPrevContactLambdaCount = 0;
+
 	};
 }

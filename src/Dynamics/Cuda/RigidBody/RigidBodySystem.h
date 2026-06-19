@@ -45,7 +45,7 @@ namespace dyno
 		typedef typename dyno::Quat<Real> TQuat;
 
 		typedef typename dyno::TContactPair<Real> ContactPair;
-		
+
 		typedef typename ::dyno::BallAndSocketJoint<Real> BallAndSocketJoint;
 		typedef typename ::dyno::SliderJoint<Real> SliderJoint;
 		typedef typename ::dyno::HingeJoint<Real> HingeJoint;
@@ -56,13 +56,13 @@ namespace dyno
 		~RigidBodySystem() override;
 
 		std::shared_ptr<PdActor> addBox(
-			const BoxInfo& box, 
+			const BoxInfo& box,
 			const RigidBodyInfo& bodyDef,
 			const Real density = Real(100));
 
 		std::shared_ptr<PdActor> addSphere(
 			const SphereInfo& sphere,
-			const RigidBodyInfo& bodyDef, 
+			const RigidBodyInfo& bodyDef,
 			const Real density = Real(100));
 
 		std::shared_ptr<PdActor> addTet(
@@ -80,7 +80,8 @@ namespace dyno
 			const TQuat& q);
 
 		std::shared_ptr<PdActor> createRigidBody(
-			const RigidBodyInfo& bodyDef);
+			const RigidBodyInfo& bodyDef,
+			bool isInitial = true);
 
 		void bindBox(
 			const std::shared_ptr<PdActor> actor,
@@ -101,6 +102,17 @@ namespace dyno
 			const std::shared_ptr<PdActor> actor,
 			const TetInfo& tet,
 			const Real density = Real(100));
+
+		void bindMedialCone(
+			const std::shared_ptr<PdActor> actor,
+			const MedialConeInfo& medialcone,
+			const Real density = Real(100));
+
+		void bindMedialSlab(
+			const std::shared_ptr<PdActor> actor,
+			const MedialSlabInfo& medialslab,
+			const Real density = Real(100)
+		);
 
 		BallAndSocketJoint& createBallAndSocketJoint(
 			std::shared_ptr<PdActor> actor1,
@@ -232,6 +244,8 @@ namespace dyno
 		std::vector<BoxInfo> mHostBoxes;
 		std::vector<TetInfo> mHostTets;
 		std::vector<CapsuleInfo> mHostCapsules;
+		std::vector<MedialConeInfo> mHostMedialCones;
+		std::vector<MedialSlabInfo> mHostMedialSlabs;
 
 		DArray<RigidBodyInfo> mDeviceRigidBodyStates;
 
@@ -239,6 +253,8 @@ namespace dyno
 		DArray<BoxInfo> mDeviceBoxes;
 		DArray<TetInfo> mDeviceTets;
 		DArray<CapsuleInfo> mDeviceCapsules;
+		DArray<MedialConeInfo> mDeviceMedialCones;
+		DArray<MedialSlabInfo> mDeviceMedialSlabs;
 
 		std::vector<BallAndSocketJoint> mHostJointsBallAndSocket;
 		std::vector<SliderJoint> mHostJointsSlider;

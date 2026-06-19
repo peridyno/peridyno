@@ -13,6 +13,9 @@
 
 #include "Collision/Attribute.h"
 
+#include <thrust/sort.h>
+#include <thrust/execution_policy.h>
+
 
 namespace dyno 
 {
@@ -147,6 +150,12 @@ namespace dyno
 		DArray<TContactPair<float>> contactsInGlobalFrame,
 		DArray<Vec3f> pos,
 		DArray<Mat3f> rotMat
+	);
+
+	void filterContactsByCollisionGroup(
+		DArray<TContactPair<float>>& filteredContacts,
+		DArray<TContactPair<float>> contacts,
+		DArray<Attribute> attributes
 	);
 	
 	void setUpContactAndFrictionConstraints(
@@ -474,7 +483,8 @@ namespace dyno
 		DArray<TConstraintPair<float>> constraints,
 		DArray<TContactPair<float>> contactsInLocalFrame,
 		DArray<Vec3f> pos,
-		DArray<Mat3f> rotMat
+		DArray<Mat3f> rotMat,
+		bool hasFriction
 	);
 
 	void calculateKBlock(
@@ -486,7 +496,8 @@ namespace dyno
 		DArray<float> mass,
 		DArray<float> K_1,
 		DArray<Mat2f> K_2,
-		DArray<Mat3f> K_3
+		DArray<Mat3f> K_3,
+		bool hasFriction
 	);
 
 	void JacobiIterationForSoftBlock(
@@ -505,6 +516,52 @@ namespace dyno
 		float g,
 		float dt,
 		float zeta,
-		float hertz
+		float hertz,
+		bool hasFriction
+	);
+
+
+	void warmStartLambda(
+		DArray<Vec3f>& B,
+		DArray<float>& lambda,
+		DArray<TConstraintPair<float>>& constraints,
+		DArray<Vec3f>& impulse,
+		float gamma
+	);
+
+	void StoreCacheKernel(
+		DArray<TContactPair<Real>> oldContacts,
+		DArray<float> oldLambdas,
+		DArray<CacheContact> cacheBuffer,
+		int contactConstraintStride
+	);
+
+	void RunWarmStart(
+		DArray<TContactPair<float>>& newContacts,
+		DArray<Real>& lambdaOld,
+		DArray<Real>& lambda,
+		DArray<CacheContact>& cacheBuffer,
+		Real distThreshold,
+		Real gamma,
+		int contactConstraintStride,
+		int previousContactLambdaCount
+	);
+
+	void reduceContacts(
+		DArray<TContactPair<float>>& reducedContacts,
+		DArray<TContactPair<float>>& contactsInLocalFrame,
+		uint maxContactsPerPair,
+		float positionThreshold,
+		float normalCosThreshold
+	);
+
+	float calculateAverageVelocityMagnitude(
+		DArray<Vec3f>& velocity
+	);
+
+	void calculatePenetration(
+		DArray<TContactPair<float>>& contacts,
+		float& average,
+		float& max
 	);
 }

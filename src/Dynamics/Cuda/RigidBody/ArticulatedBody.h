@@ -24,8 +24,11 @@
 #include "Field/FilePath.h"
 #include "MultiBodyTuple.h"
 
-namespace dyno 
+#include "helpers/tinyobj_helper.h"
+
+namespace dyno
 {
+
 	template<typename TDataType>
 	class ArticulatedBody : virtual public ParametricModel<TDataType>, virtual public RigidBodySystem<TDataType>
 	{
@@ -39,7 +42,7 @@ namespace dyno
 		~ArticulatedBody() override;
 
 		//Bind rigid body to a shape in TextureMesh
-		void bindShape(std::shared_ptr<PdActor> actor, Pair<uint, uint> shapeId);
+		void bindShape(std::shared_ptr<PdActor> actor, Pair<uint, uint> shapeId, const Vec3f& scale = Vec3f(1.0f));
 
 	public:
 		DEF_VAR(FilePath, FilePath, FilePath(std::string(""), std::string("gltf ACSII (*.gltf);;glb (*.glb);;obj (*.obj);;fbx (*.fbx)")), "");
@@ -60,6 +63,8 @@ namespace dyno
 
 		DEF_ARRAY_STATE(int, BindingTag, DeviceType::GPU, "");
 
+		DEF_VAR(bool, DoTransform, true, "");
+
 	protected:
 		void resetStates() override;
 
@@ -78,7 +83,7 @@ namespace dyno
 
 	protected:
 
-		std::vector<Quat<Real>> getInstanceRotation() 
+		std::vector<Quat<Real>> getInstanceRotation()
 		{
 			std::vector<Quat<Real>> instanceQ;
 
@@ -92,11 +97,16 @@ namespace dyno
 
 			return instanceQ;
 		}
-
+	public:
+		std::vector<SceneObject> mObjects;
+		std::vector<Asset> mAssets;
+		std::vector<SceneJoint> mJoints;
 	private:
 		std::vector<Pair<uint, uint>> mBindingPair;
+		std::vector<Vec3f> mBindingScale;
 
 		std::vector<std::shared_ptr<PdActor>> mActors;
+
 	};
 
 

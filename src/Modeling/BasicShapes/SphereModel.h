@@ -69,6 +69,91 @@ namespace dyno
 
 		DEF_VAR_OUT(TSphere3D<Real>, Sphere, "");
 
+
+	public:
+
+		static void generateIcosahedron(std::vector<Vec3f>& vertices, std::vector<Topology::Triangle>& triangles, Real sphereRadius, uint step, Vec3f offset = Vec3f(0));
+
+		static void generateStandardSphere(std::vector<Vec3f>& vertices, std::vector<Topology::Triangle>& triangles, Real radius, Vec3f offset = Vec3f(0), uint latitude = 24, uint longitude = 24)
+		{
+			uint offsetIndex = vertices.size() + 1;
+
+			Real deltaTheta = M_PI / latitude;
+			Real deltaPhi = 2 * M_PI / longitude;
+
+			//Setup vertices
+			vertices.push_back(Coord(0, radius, 0) + offset);
+
+			Real theta = 0;
+			for (uint i = 0; i < latitude - 1; i++)
+			{
+				theta += deltaTheta;
+
+				Real phi = 0;
+				for (uint j = 0; j < longitude; j++)
+				{
+					phi += deltaPhi;
+
+					Real y = radius * std::cos(theta);
+					Real x = (std::sin(theta) * radius) * std::sin(phi);
+					Real z = (std::sin(theta) * radius) * std::cos(phi);
+
+					vertices.push_back(Coord(x, y, z) + offset);
+				}
+			}
+
+			vertices.push_back(Coord(0, -radius, 0) + offset);
+
+			//Setup polygon indices
+			uint numOfPolygon = latitude * longitude;
+
+			CArray<uint> counter(numOfPolygon);
+
+			uint incre = 0;
+			for (uint j = 0; j < longitude; j++)
+			{
+				counter[incre] = 3;
+				incre++;
+			}
+
+			for (uint i = 0; i < latitude - 2; i++)
+			{
+				for (uint j = 0; j < longitude; j++)
+				{
+					counter[incre] = 4;
+					incre++;
+				}
+			}
+
+			for (uint j = 0; j < longitude; j++)
+			{
+				counter[incre] = 3;
+				incre++;
+			}
+
+
+
+			for (uint j = 0; j < longitude; j++)
+			{
+				triangles.push_back(Topology::Triangle(offsetIndex - 1, offsetIndex + j, offsetIndex + (j + 1) % longitude));
+			}
+
+			for (uint i = 0; i < latitude - 2; i++)
+			{
+				for (uint j = 0; j < longitude; j++)
+				{
+					triangles.push_back(Topology::Triangle(offsetIndex + j, offsetIndex + j + longitude, offsetIndex + (j + 1) % longitude + longitude));
+					triangles.push_back(Topology::Triangle(offsetIndex + j, offsetIndex + (j + 1) % longitude + longitude, offsetIndex + (j + 1) % longitude));
+				}
+				offsetIndex += longitude;
+			}
+
+			for (uint j = 0; j < longitude; j++)
+			{
+				triangles.push_back(Topology::Triangle(offsetIndex + j, vertices.size() - 1, offsetIndex + (j + 1) % longitude));
+			}
+		}
+
 	protected:
 		void resetStates() override;
 

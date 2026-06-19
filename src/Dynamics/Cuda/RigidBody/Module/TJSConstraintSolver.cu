@@ -18,10 +18,11 @@ namespace dyno
 	}
 
 	template<typename TDataType>
-	void TJSConstraintSolver<TDataType>::initializeJacobian(Real dt)
+	void TJSConstraintSolver<TDataType>::initializeJacobian(Real dt, bool resetLambda, DArray<ContactPair> contactsInLocalFrame, bool hasFriction)
 	{
 		int constraint_size = 0;
-		int contact_size = this->inContacts()->size();
+		int contact_size = contactsInLocalFrame.size();
+		int contact_constraint_size = hasFriction ? 3 * contact_size : contact_size;
 
 		auto topo = this->inDiscreteElements()->constDataPtr();
 
@@ -31,13 +32,7 @@ namespace dyno
 		int fixedJoint_size = topo->fixedJoints().size();
 		int pointJoint_size = topo->pointJoints().size();
 
-		if (this->varFrictionEnabled()->getValue()) {
-			constraint_size += 3 * contact_size;
-		}
-		else {
-			constraint_size += contact_size;
-		}
-
+		constraint_size += contact_constraint_size;
 		constraint_size += 3 * ballAndSocketJoint_size;
 		constraint_size += 8 * sliderJoint_size;
 		constraint_size += 8 * hingeJoint_size;
@@ -51,19 +46,15 @@ namespace dyno
 
 		if (contact_size != 0)
 		{
-			auto& contacts = this->inContacts()->getData();
 			setUpContactAndFrictionConstraintsBlock(
 				mVelocityConstraints,
-				mContactsInLocalFrame,
+				contactsInLocalFrame,
 				this->inCenter()->getData(),
-				this->inRotationMatrix()->getData()
+				this->inRotationMatrix()->getData(),
+				hasFriction
 			);
 
-			current_index += contact_size;
-			if (this->varFrictionEnabled()->getData())
-			{
-				current_index += 2 * contact_size;
-			}
+			current_index += contact_constraint_size;
 		}
 
 		if (ballAndSocketJoint_size != 0)
@@ -155,7 +146,8 @@ namespace dyno
 		mK_2.reset();
 		mK_3.reset();
 		mEta.reset();
-		mLambda.reset();
+		
+		if(resetLambda) mLambda.reset();
 
 		calculateJacobianMatrix(
 			mJ,
@@ -176,7 +168,8 @@ namespace dyno
 			this->inMass()->getData(),
 			mK_1,
 			mK_2,
-			mK_3
+			mK_3,
+			hasFriction
 		);
 
 		calculateEtaVectorForPJSoft(
@@ -201,9 +194,11 @@ namespace dyno
 	void TJSConstraintSolver<TDataType>::constrain()
 	{
 		uint bodyNum = this->inCenter()->size();
+		const bool hasFriction = this->varFrictionEnabled()->getData();
+		const int contactConstraintStride = hasFriction ? 3 : 1;
 
 		auto topo = this->inDiscreteElements()->constDataPtr();
-		
+
 		if (mImpulseC.size() != bodyNum * 2) {
 			mImpulseC.resize(bodyNum * 2);
 			mImpulseExt.resize(bodyNum * 2);
@@ -212,6 +207,7 @@ namespace dyno
 		mImpulseExt.reset();
 
 		Real dt = this->inTimeStep()->getData();
+		DArray<ContactPair>* activeContactsPtr = nullptr;
 
 		if (!this->inContacts()->isEmpty() || topo->totalJointSize() > 0) {
 			if (mContactsInLocalFrame.size() != this->inContacts()->size()) {
@@ -225,6 +221,39 @@ namespace dyno
 				this->inRotationMatrix()->getData()
 			);
 
+			DArray<ContactPair>* solverContactsPtr = &mContactsInLocalFrame;
+			if (!this->inAttribute()->isEmpty() && mContactsInLocalFrame.size() > 0)
+			{
+				filterContactsByCollisionGroup(
+					mFilteredContacts,
+					mContactsInLocalFrame,
+					this->inAttribute()->getData());
+				solverContactsPtr = &mFilteredContacts;
+			}
+			else
+			{
+				mFilteredContacts.resize(0);
+			}
+
+			if (this->varContactReductionEnabled()->getValue() && solverContactsPtr->size() > 0) {
+				reduceContacts(
+					mReducedContacts,
+					*solverContactsPtr,
+					this->varMaxReducedContactsPerPair()->getValue(),
+					this->varContactReductionDistance()->getValue(),
+					this->varContactReductionNormalCosThreshold()->getValue()
+				);
+				if (mReducedContacts.size() > 0) {
+					solverContactsPtr = &mReducedContacts;
+				}
+			}
+			else {
+				mReducedContacts.resize(0);
+			}
+
+			auto& solverContacts = *solverContactsPtr;
+			activeContactsPtr = &solverContacts;
+
 			if (mContactNumber.size() != bodyNum) {
 				mContactNumber.resize(bodyNum);
 			}
@@ -232,7 +261,7 @@ namespace dyno
 			mContactNumber.reset();
 
 			calculateContactPoints(
-				this->inContacts()->getData(),
+				solverContacts,
 				mContactNumber);
 
 			Real dh = dt / this->varSubStepping()->getValue();
@@ -257,8 +286,38 @@ namespace dyno
 				);
 
 				mImpulseC.reset();
-				initializeJacobian(dh);
-
+				
+				if (i == 0) {
+					initializeJacobian(dh, true, solverContacts, hasFriction);
+					if (this->varwarmStartEnabled()->getValue() && (cacheContacts.size() != 0 || mLambdaOld.size() != 0)) {
+						RunWarmStart(
+							solverContacts,
+							mLambdaOld,
+							mLambda,
+							cacheContacts,
+							this->vardistThreshold()->getValue(),
+							this->varGamma()->getValue(),
+							contactConstraintStride,
+							mPrevContactLambdaCount
+						);
+					}
+				}
+				else {
+					if (this->varwarmStartEnabled()->getValue()) {
+						initializeJacobian(dh, false, solverContacts, hasFriction);
+						warmStartLambda(
+							mB,
+							mLambda,
+							mVelocityConstraints,
+							mImpulseC,
+							this->varGamma()->getValue()
+						);
+					}
+					else {
+						initializeJacobian(dh, true, solverContacts, hasFriction);
+					}
+					
+				}
 				for (int j = 0; j < this->varIterationNumberForVelocitySolver()->getValue(); j++) {
 					JacobiIterationForSoftBlock(
 						mLambda,
@@ -276,9 +335,11 @@ namespace dyno
 						this->varGravityValue()->getValue(),
 						dh,
 						this->varDampingRatio()->getValue(),
-						this->varHertz()->getValue()
+						this->varHertz()->getValue(),
+						hasFriction
 					);
 				}
+
 
 				updateVelocity(
 					this->inAttribute()->getData(),
@@ -337,6 +398,29 @@ namespace dyno
 				dt
 			);
 		}
+		
+		if (activeContactsPtr == nullptr)
+		{
+			mFilteredContacts.resize(0);
+			mReducedContacts.resize(0);
+			cacheContacts.resize(0);
+			mPrevContactLambdaCount = 0;
+			mLambdaOld.assign(mLambda);
+			return;
+		}
+
+		auto& cachedContacts = *activeContactsPtr;
+
+		cacheContacts.resize(cachedContacts.size());
+		StoreCacheKernel(
+			cachedContacts,
+			mLambda,
+			cacheContacts,
+			contactConstraintStride
+		);
+
+		mPrevContactLambdaCount = cachedContacts.size() * contactConstraintStride;
+		mLambdaOld.assign(mLambda);
 	}
 	DEFINE_CLASS(TJSConstraintSolver);
 }

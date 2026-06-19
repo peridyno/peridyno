@@ -121,9 +121,6 @@ namespace dyno
 		DArray<Mat2f> mK_2;
 		DArray<Matrix> mK_3;	
 
-		std::vector<float> errors;
-		int cnt = 0;
-
 		DArray<Real> mErrors;
 		DArray<Real> mA;
 

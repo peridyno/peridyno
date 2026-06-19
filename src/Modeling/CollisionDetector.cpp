@@ -8,6 +8,8 @@
 #include "BasicShapes/CubeModel.h"
 #include "BasicShapes/SphereModel.h"
 #include "BasicShapes/CapsuleModel.h"
+#include "BasicShapes/MedialConeModel.h"
+#include "BasicShapes/MedialSlabModel.h"
 
 #include "GLPointVisualModule.h"
 #include "GLWireframeVisualModule.h"
@@ -16,7 +18,7 @@ namespace dyno
 {
 	IMPLEMENT_TCLASS(CollisionDetector, TDataType)
 
-	template<typename TDataType>
+		template<typename TDataType>
 	CollisionDetector<TDataType>::CollisionDetector() {
 		this->setAutoSync(true);
 
@@ -77,7 +79,7 @@ namespace dyno
 
 			auto sA = modelA->outCapsule()->getValue();
 			auto sB = modelB->outCapsule()->getValue();
-			
+
 			Segment3D segA = sA.centerline();
 			Segment3D segB = sB.centerline();
 
@@ -157,6 +159,36 @@ namespace dyno
 
 			//CollisionDetection<Real>::request(manifold, sA, sB);
 			CollisionDetection<Real>::request(manifold, seg, sB, radius1, 0.f);
+		}
+
+		else if (shapeA->getShapeType() == BasicShapeType::MEDIALCONE && shapeB->getShapeType() == BasicShapeType::MEDIALCONE)		//sphere-cube
+		{
+			auto modelA = dynamic_cast<MedialConeModel<TDataType>*>(shapeA);
+			auto modelB = dynamic_cast<MedialConeModel<TDataType>*>(shapeB);
+
+			auto sA = modelA->outMedialCone()->getValue();
+			auto sB = modelB->outMedialCone()->getValue();
+
+			//CollisionDetection<Real>::request(manifold, sA, sB);
+			CollisionDetection<Real>::request(manifold, sA, sB);
+		}
+		else if (shapeA->getShapeType() == BasicShapeType::MEDIALSLAB && shapeB->getShapeType() == BasicShapeType::MEDIALCONE)
+		{
+			auto modelA = dynamic_cast<MedialSlabModel<TDataType>*>(shapeA);
+			auto modelB = dynamic_cast<MedialConeModel<TDataType>*>(shapeB);
+
+			auto sA = modelA->outMedialSlab()->getValue();
+			auto sB = modelB->outMedialCone()->getValue();
+			CollisionDetection<Real>::request(manifold, sA, sB);
+		}
+		else if (shapeA->getShapeType() == BasicShapeType::MEDIALSLAB && shapeB->getShapeType() == BasicShapeType::MEDIALSLAB)
+		{
+			auto modelA = dynamic_cast<MedialSlabModel<TDataType>*>(shapeA);
+			auto modelB = dynamic_cast<MedialSlabModel<TDataType>*>(shapeB);
+
+			auto sA = modelA->outMedialSlab()->getValue();
+			auto sB = modelB->outMedialSlab()->getValue();
+			CollisionDetection<Real>::request(manifold, sA, sB);
 		}
 		else
 			std::cout << "Not supported yet" << std::endl;

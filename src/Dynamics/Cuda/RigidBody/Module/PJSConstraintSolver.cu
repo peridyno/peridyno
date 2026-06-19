@@ -1,7 +1,7 @@
 #include "PJSConstraintSolver.h"
 #include "SharedFuncsForRigidBody.h"
 //#define USE_RELAXATION
-#define FILE_NAME "D:/Work Code/peridyno/Data/v2.txt"
+
 namespace dyno
 {
 	IMPLEMENT_TCLASS(PJSConstraintSolver, TDataType)
@@ -504,7 +504,6 @@ namespace dyno
 		{
 			int contact_size = this->inContacts()->size();
 			initializeJacobian(dt);
-			errors.push_back(checkOutErrors(mErrors));
 			int constraint_size = mVelocityConstraints.size();
 
 
@@ -538,7 +537,6 @@ namespace dyno
 			);
 
 			
-			errors.push_back(norm);
 
 			updateVelocity(
 				this->inAttribute()->getData(),
@@ -614,10 +612,6 @@ namespace dyno
 				dt
 			);
 		}
-
-
-		
-		
 	}
 
 	DEFINE_CLASS(PJSConstraintSolver);

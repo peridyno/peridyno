@@ -1213,9 +1213,9 @@ namespace dyno
 			}
 			else
 				pt[axis] = extent[axis];
-			
+
 			pt = clamp(pt, -extent, extent);
-		};
+			};
 
 		auto case0 = [](Coord3D& pt, Real& t, const Coord3D dir, const Coord3D extent, const int i0, const int i1, const int i2) {
 			Real PmE0 = pt[i0] - extent[i0];
@@ -1272,102 +1272,34 @@ namespace dyno
 			{
 				pt[i2] = extent[i2];
 			}
-		};
+			};
 
 		auto face = [](Coord3D& pnt, Real& final_t,
 			const Coord3D& dir, const Coord3D& PmE, const Coord3D& boxExtent,
 			int i0, int i1, int i2)
-		{
-			Coord3D PpE;
-			Real lenSqr, inv, tmp, param, t, delta;
-
-			PpE[i1] = pnt[i1] + boxExtent[i1];
-			PpE[i2] = pnt[i2] + boxExtent[i2];
-			if (dir[i0] * PpE[i1] >= dir[i1] * PmE[i0])
 			{
-				if (dir[i0] * PpE[i2] >= dir[i2] * PmE[i0])
-				{
-					// v[i1] >= -e[i1], v[i2] >= -e[i2] (distance = 0)
-					pnt[i0] = boxExtent[i0];
-					inv = ((Real)1) / dir[i0];
-					pnt[i1] -= dir[i1] * PmE[i0] * inv;
-					pnt[i2] -= dir[i2] * PmE[i0] * inv;
-					final_t = -PmE[i0] * inv;
-				}
-				else
-				{
-					// v[i1] >= -e[i1], v[i2] < -e[i2]
-					lenSqr = dir[i0] * dir[i0] + dir[i2] * dir[i2];
-					tmp = lenSqr * PpE[i1] - dir[i1] * (dir[i0] * PmE[i0] +
-						dir[i2] * PpE[i2]);
-					if (tmp <= ((Real)2) * lenSqr * boxExtent[i1])
-					{
-						t = tmp / lenSqr;
-						lenSqr += dir[i1] * dir[i1];
-						tmp = PpE[i1] - t;
-						delta = dir[i0] * PmE[i0] + dir[i1] * tmp + dir[i2] * PpE[i2];
-						param = -delta / lenSqr;
+				Coord3D PpE;
+				Real lenSqr, inv, tmp, param, t, delta;
 
-						final_t = param;
+				PpE[i1] = pnt[i1] + boxExtent[i1];
+				PpE[i2] = pnt[i2] + boxExtent[i2];
+				if (dir[i0] * PpE[i1] >= dir[i1] * PmE[i0])
+				{
+					if (dir[i0] * PpE[i2] >= dir[i2] * PmE[i0])
+					{
+						// v[i1] >= -e[i1], v[i2] >= -e[i2] (distance = 0)
 						pnt[i0] = boxExtent[i0];
-						pnt[i1] = t - boxExtent[i1];
-						pnt[i2] = -boxExtent[i2];
+						inv = ((Real)1) / dir[i0];
+						pnt[i1] -= dir[i1] * PmE[i0] * inv;
+						pnt[i2] -= dir[i2] * PmE[i0] * inv;
+						final_t = -PmE[i0] * inv;
 					}
 					else
 					{
-						lenSqr += dir[i1] * dir[i1];
-						delta = dir[i0] * PmE[i0] + dir[i1] * PmE[i1] + dir[i2] * PpE[i2];
-						param = -delta / lenSqr;
-
-						final_t = param;
-						pnt[i0] = boxExtent[i0];
-						pnt[i1] = boxExtent[i1];
-						pnt[i2] = -boxExtent[i2];
-					}
-				}
-			}
-			else
-			{
-				if (dir[i0] * PpE[i2] >= dir[i2] * PmE[i0])
-				{
-					// v[i1] < -e[i1], v[i2] >= -e[i2]
-					lenSqr = dir[i0] * dir[i0] + dir[i1] * dir[i1];
-					tmp = lenSqr * PpE[i2] - dir[i2] * (dir[i0] * PmE[i0] +
-						dir[i1] * PpE[i1]);
-					if (tmp <= ((Real)2) * lenSqr * boxExtent[i2])
-					{
-						t = tmp / lenSqr;
-						lenSqr += dir[i2] * dir[i2];
-						tmp = PpE[i2] - t;
-						delta = dir[i0] * PmE[i0] + dir[i1] * PpE[i1] + dir[i2] * tmp;
-						param = -delta / lenSqr;
-
-						final_t = param;
-						pnt[i0] = boxExtent[i0];
-						pnt[i1] = -boxExtent[i1];
-						pnt[i2] = t - boxExtent[i2];
-					}
-					else
-					{
-						lenSqr += dir[i2] * dir[i2];
-						delta = dir[i0] * PmE[i0] + dir[i1] * PpE[i1] + dir[i2] * PmE[i2];
-						param = -delta / lenSqr;
-
-						final_t = param;
-						pnt[i0] = boxExtent[i0];
-						pnt[i1] = -boxExtent[i1];
-						pnt[i2] = boxExtent[i2];
-					}
-				}
-				else
-				{
-					// v[i1] < -e[i1], v[i2] < -e[i2]
-					lenSqr = dir[i0] * dir[i0] + dir[i2] * dir[i2];
-					tmp = lenSqr * PpE[i1] - dir[i1] * (dir[i0] * PmE[i0] +
-						dir[i2] * PpE[i2]);
-					if (tmp >= (Real)0)
-					{
-						// v[i1]-edge is closest
+						// v[i1] >= -e[i1], v[i2] < -e[i2]
+						lenSqr = dir[i0] * dir[i0] + dir[i2] * dir[i2];
+						tmp = lenSqr * PpE[i1] - dir[i1] * (dir[i0] * PmE[i0] +
+							dir[i2] * PpE[i2]);
 						if (tmp <= ((Real)2) * lenSqr * boxExtent[i1])
 						{
 							t = tmp / lenSqr;
@@ -1384,8 +1316,7 @@ namespace dyno
 						else
 						{
 							lenSqr += dir[i1] * dir[i1];
-							delta = dir[i0] * PmE[i0] + dir[i1] * PmE[i1]
-								+ dir[i2] * PpE[i2];
+							delta = dir[i0] * PmE[i0] + dir[i1] * PmE[i1] + dir[i2] * PpE[i2];
 							param = -delta / lenSqr;
 
 							final_t = param;
@@ -1393,15 +1324,16 @@ namespace dyno
 							pnt[i1] = boxExtent[i1];
 							pnt[i2] = -boxExtent[i2];
 						}
-						return;
 					}
-
-					lenSqr = dir[i0] * dir[i0] + dir[i1] * dir[i1];
-					tmp = lenSqr * PpE[i2] - dir[i2] * (dir[i0] * PmE[i0] +
-						dir[i1] * PpE[i1]);
-					if (tmp >= (Real)0)
+				}
+				else
+				{
+					if (dir[i0] * PpE[i2] >= dir[i2] * PmE[i0])
 					{
-						// v[i2]-edge is closest
+						// v[i1] < -e[i1], v[i2] >= -e[i2]
+						lenSqr = dir[i0] * dir[i0] + dir[i1] * dir[i1];
+						tmp = lenSqr * PpE[i2] - dir[i2] * (dir[i0] * PmE[i0] +
+							dir[i1] * PpE[i1]);
 						if (tmp <= ((Real)2) * lenSqr * boxExtent[i2])
 						{
 							t = tmp / lenSqr;
@@ -1418,8 +1350,7 @@ namespace dyno
 						else
 						{
 							lenSqr += dir[i2] * dir[i2];
-							delta = dir[i0] * PmE[i0] + dir[i1] * PpE[i1]
-								+ dir[i2] * PmE[i2];
+							delta = dir[i0] * PmE[i0] + dir[i1] * PpE[i1] + dir[i2] * PmE[i2];
 							param = -delta / lenSqr;
 
 							final_t = param;
@@ -1427,21 +1358,90 @@ namespace dyno
 							pnt[i1] = -boxExtent[i1];
 							pnt[i2] = boxExtent[i2];
 						}
-						return;
 					}
+					else
+					{
+						// v[i1] < -e[i1], v[i2] < -e[i2]
+						lenSqr = dir[i0] * dir[i0] + dir[i2] * dir[i2];
+						tmp = lenSqr * PpE[i1] - dir[i1] * (dir[i0] * PmE[i0] +
+							dir[i2] * PpE[i2]);
+						if (tmp >= (Real)0)
+						{
+							// v[i1]-edge is closest
+							if (tmp <= ((Real)2) * lenSqr * boxExtent[i1])
+							{
+								t = tmp / lenSqr;
+								lenSqr += dir[i1] * dir[i1];
+								tmp = PpE[i1] - t;
+								delta = dir[i0] * PmE[i0] + dir[i1] * tmp + dir[i2] * PpE[i2];
+								param = -delta / lenSqr;
 
-					// (v[i1],v[i2])-corner is closest
-					lenSqr += dir[i2] * dir[i2];
-					delta = dir[i0] * PmE[i0] + dir[i1] * PpE[i1] + dir[i2] * PpE[i2];
-					param = -delta / lenSqr;
+								final_t = param;
+								pnt[i0] = boxExtent[i0];
+								pnt[i1] = t - boxExtent[i1];
+								pnt[i2] = -boxExtent[i2];
+							}
+							else
+							{
+								lenSqr += dir[i1] * dir[i1];
+								delta = dir[i0] * PmE[i0] + dir[i1] * PmE[i1]
+									+ dir[i2] * PpE[i2];
+								param = -delta / lenSqr;
 
-					final_t = param;
-					pnt[i0] = boxExtent[i0];
-					pnt[i1] = -boxExtent[i1];
-					pnt[i2] = -boxExtent[i2];
+								final_t = param;
+								pnt[i0] = boxExtent[i0];
+								pnt[i1] = boxExtent[i1];
+								pnt[i2] = -boxExtent[i2];
+							}
+							return;
+						}
+
+						lenSqr = dir[i0] * dir[i0] + dir[i1] * dir[i1];
+						tmp = lenSqr * PpE[i2] - dir[i2] * (dir[i0] * PmE[i0] +
+							dir[i1] * PpE[i1]);
+						if (tmp >= (Real)0)
+						{
+							// v[i2]-edge is closest
+							if (tmp <= ((Real)2) * lenSqr * boxExtent[i2])
+							{
+								t = tmp / lenSqr;
+								lenSqr += dir[i2] * dir[i2];
+								tmp = PpE[i2] - t;
+								delta = dir[i0] * PmE[i0] + dir[i1] * PpE[i1] + dir[i2] * tmp;
+								param = -delta / lenSqr;
+
+								final_t = param;
+								pnt[i0] = boxExtent[i0];
+								pnt[i1] = -boxExtent[i1];
+								pnt[i2] = t - boxExtent[i2];
+							}
+							else
+							{
+								lenSqr += dir[i2] * dir[i2];
+								delta = dir[i0] * PmE[i0] + dir[i1] * PpE[i1]
+									+ dir[i2] * PmE[i2];
+								param = -delta / lenSqr;
+
+								final_t = param;
+								pnt[i0] = boxExtent[i0];
+								pnt[i1] = -boxExtent[i1];
+								pnt[i2] = boxExtent[i2];
+							}
+							return;
+						}
+
+						// (v[i1],v[i2])-corner is closest
+						lenSqr += dir[i2] * dir[i2];
+						delta = dir[i0] * PmE[i0] + dir[i1] * PpE[i1] + dir[i2] * PpE[i2];
+						param = -delta / lenSqr;
+
+						final_t = param;
+						pnt[i0] = boxExtent[i0];
+						pnt[i1] = -boxExtent[i1];
+						pnt[i2] = -boxExtent[i2];
+					}
 				}
-			}
-		};
+			};
 
 
 		// Apply reflections so that direction vector has nonnegative
@@ -1813,36 +1813,36 @@ namespace dyno
 		Real t1 = REAL_MAX;
 
 		auto clip = [](Real denom, Real numer, Real& t0, Real& t1) -> bool
-		{
-			if (denom > REAL_EPSILON)
 			{
-				if (numer > denom * t1)
+				if (denom > REAL_EPSILON)
 				{
-					return false;
+					if (numer > denom * t1)
+					{
+						return false;
+					}
+					if (numer > denom * t0)
+					{
+						t0 = numer / denom;
+					}
+					return true;
 				}
-				if (numer > denom * t0)
+				else if (denom < -REAL_EPSILON)
 				{
-					t0 = numer / denom;
+					if (numer > denom * t0)
+					{
+						return false;
+					}
+					if (numer > denom * t1)
+					{
+						t1 = numer / denom;
+					}
+					return true;
 				}
-				return true;
-			}
-			else if (denom < -REAL_EPSILON)
-			{
-				if (numer > denom * t0)
+				else
 				{
-					return false;
+					return numer <= -REAL_EPSILON;
 				}
-				if (numer > denom * t1)
-				{
-					t1 = numer / denom;
-				}
-				return true;
-			}
-			else
-			{
-				return numer <= -REAL_EPSILON;
-			}
-		};
+			};
 
 		Coord3D boxCenter = 0.5 * (abox.v0 + abox.v1);
 		Coord3D boxExtent = 0.5 * (abox.v1 - abox.v0);
@@ -1887,36 +1887,36 @@ namespace dyno
 		Real t1 = REAL_MAX;
 
 		auto clip = [](Real denom, Real numer, Real& t0, Real& t1) -> bool
-		{
-			if (denom > REAL_EPSILON)
 			{
-				if (numer > denom * t1)
+				if (denom > REAL_EPSILON)
 				{
-					return false;
+					if (numer > denom * t1)
+					{
+						return false;
+					}
+					if (numer > denom * t0)
+					{
+						t0 = numer / denom;
+					}
+					return true;
 				}
-				if (numer > denom * t0)
+				else if (denom < -REAL_EPSILON)
 				{
-					t0 = numer / denom;
+					if (numer > denom * t0)
+					{
+						return false;
+					}
+					if (numer > denom * t1)
+					{
+						t1 = numer / denom;
+					}
+					return true;
 				}
-				return true;
-			}
-			else if (denom < -REAL_EPSILON)
-			{
-				if (numer > denom * t0)
+				else
 				{
-					return false;
+					return numer <= -REAL_EPSILON;
 				}
-				if (numer > denom * t1)
-				{
-					t1 = numer / denom;
-				}
-				return true;
-			}
-			else
-			{
-				return numer <= -REAL_EPSILON;
-			}
-		};
+			};
 
 		Coord3D boxCenter = obb.center;
 		Coord3D boxExtent = obb.extent;
@@ -2558,7 +2558,7 @@ namespace dyno
 		Coord3D D = v1 - v0;
 		Real maxT = D.norm();
 		D.normalize();
-		
+
 		Coord3D Q = v0 - rectangle.center;
 		Real DdN = D.dot(N);
 		Real absDdN = abs(DdN);
@@ -2607,7 +2607,7 @@ namespace dyno
 		// Point - Face
 		for (int i = 0; i < 2; i++)
 		{
-			Coord3D v = (i == 0)? v0 : v1;
+			Coord3D v = (i == 0) ? v0 : v1;
 			TPoint3D<Real> p(v);
 			TPoint3D<Real> q = TPoint3D<Real>(p).project(rectangle);
 			TSegment3D<Real> pq = q - p;
@@ -3100,18 +3100,18 @@ namespace dyno
 			minD = minimum(minD, TSegment3D<Real>(q[ind0], q[ind1]).distanceSquared(*this));
 		}
 
-// 		for (int st = 0; st < 3; st++)
-// 		{
-// 			int ind0 = st;
-// 			int ind1 = (st + 1) % 3;
-// 			for (int ss = 0; ss < 3; ss++)
-// 			{
-// 				int ind2 = st;
-// 				int ind3 = (st + 1) % 3;
-// 
-// 				minD = minimum(minD, TSegment3D<Real>(p[ind0], p[ind1]).distanceSquared(TSegment3D<Real>(p[ind2], p[ind3])));
-// 			}
-// 		}
+		// 		for (int st = 0; st < 3; st++)
+		// 		{
+		// 			int ind0 = st;
+		// 			int ind1 = (st + 1) % 3;
+		// 			for (int ss = 0; ss < 3; ss++)
+		// 			{
+		// 				int ind2 = st;
+		// 				int ind3 = (st + 1) % 3;
+		// 
+		// 				minD = minimum(minD, TSegment3D<Real>(p[ind0], p[ind1]).distanceSquared(TSegment3D<Real>(p[ind2], p[ind3])));
+		// 			}
+		// 		}
 
 		return minD;
 	}
@@ -3304,8 +3304,8 @@ namespace dyno
 		return radius >= REAL_EPSILON;
 	}
 
-//***********************  Cylinder3D  **************************
-		template<typename Real>
+	//***********************  Cylinder3D  **************************
+	template<typename Real>
 	DYN_FUNC TCylinder3D<Real>::TCylinder3D()
 	{
 		center = Coord3D(0);
@@ -3336,7 +3336,7 @@ namespace dyno
 	}
 
 	//***********************  Cone3D  **************************
-		template<typename Real>
+	template<typename Real>
 	DYN_FUNC TCone3D<Real>::TCone3D()
 	{
 		center = Coord3D(0);
@@ -3975,14 +3975,127 @@ namespace dyno
 	DYN_FUNC Vector<Real, 4> TTet3D<Real>::computeBarycentricCoordinates(const Coord3D& p)
 	{
 		SquareMatrix<Real, 3> T(v[0].x - v[3].x, v[1].x - v[3].x, v[2].x - v[3].x,
-								v[0].y - v[3].y, v[1].y - v[3].y, v[2].y - v[3].y,
-								v[0].z - v[3].z, v[1].z - v[3].z, v[2].z - v[3].z);
+			v[0].y - v[3].y, v[1].y - v[3].y, v[2].y - v[3].y,
+			v[0].z - v[3].z, v[1].z - v[3].z, v[2].z - v[3].z);
 
 		Vector<Real, 3> b(p.x - v[3].x, p.y - v[3].y, p.z - v[3].z);
 
 		Vector<Real, 3> lambda = T.inverse() * b;
 
 		return Vector<Real, 4>(lambda.x, lambda.y, lambda.z, Real(1) - lambda.x - lambda.y - lambda.z);
+	}
+
+	template<typename Real>
+	DYN_FUNC TMedialCone3D<Real>::TMedialCone3D()
+	{
+		this->v[0] = Coord3D(Real(0));
+		this->v[1] = Coord3D(Real(0), Real(1), Real(0));
+		this->radius[0] = Real(1);
+		this->radius[1] = Real(1);
+	}
+
+	template<typename Real>
+	DYN_FUNC TMedialCone3D<Real>::TMedialCone3D(const Coord3D& v0, const Coord3D& v1, const Real& r0, const Real& r1)
+	{
+		this->v[0] = v0;
+		this->v[1] = v1;
+		this->radius[0] = r0;
+		this->radius[1] = r1;
+	}
+
+	template<typename Real>
+	DYN_FUNC TMedialCone3D<Real>::TMedialCone3D(const TMedialCone3D& cone)
+	{
+		this->v[0] = cone.v[0];
+		this->v[1] = cone.v[1];
+		this->radius[0] = cone.radius[0];
+		this->radius[1] = cone.radius[1];
+	}
+
+	template<typename Real>
+	DYN_FUNC TAlignedBox3D<Real> TMedialCone3D<Real>::aabb() const
+	{
+		TAlignedBox3D<Real> abox;
+		Vec3f min_sphere_0 = this->v[0] - radius[0];
+		Vec3f max_sphere_0 = this->v[0] + radius[0];
+		Vec3f min_sphere_1 = this->v[1] - radius[1];
+		Vec3f max_sphere_1 = this->v[1] + radius[1];
+
+		abox.v0 = minimum(min_sphere_0, min_sphere_1);
+		abox.v1 = maximum(max_sphere_0, max_sphere_1);
+
+		return abox;
+	}
+
+	template<typename Real>
+	DYN_FUNC Real TMedialCone3D<Real>::volume() const
+	{
+		Real v_hemi1 = Real(2.0 / 3.0) * M_PI * radius[0] * radius[0] * radius[0];
+		Real v_frustum = Real(1.0 / 3.0) * M_PI * (radius[0] * radius[0] + radius[0] * radius[1] + radius[1] * radius[1]) * (this->v[1] - this->v[0]).norm();
+		Real v_hemi2 = Real(2.0 / 3.0) * M_PI * radius[1] * radius[1] * radius[1];
+		return v_frustum + v_hemi1 + v_hemi2;
+	}
+
+	template<typename Real>
+	DYN_FUNC bool TMedialCone3D<Real>::isValid() const
+	{
+		return this->radius[0] >= EPSILON && this->radius[1] >= EPSILON && (this->v[1] - this->v[0]).norm() >= EPSILON;
+	}
+
+	template<typename Real>
+	DYN_FUNC TMedialSlab3D<Real>::TMedialSlab3D()
+	{
+		this->v[0] = Coord3D(Real(0));
+		this->v[1] = Coord3D(Real(0), Real(1), Real(0));
+		this->v[2] = Coord3D(Real(0), Real(-1), Real(0));
+		this->radius[0] = Real(1);
+		this->radius[1] = Real(1);
+		this->radius[2] = Real(1);
+	}
+
+	template<typename Real>
+	DYN_FUNC TMedialSlab3D<Real>::TMedialSlab3D(const Coord3D& v0, const Coord3D& v1, const Coord3D& v2, const Real& r0, const Real& r1, const Real& r2)
+	{
+		this->v[0] = v0;
+		this->v[1] = v1;
+		this->v[2] = v2;
+		this->radius[0] = r0;
+		this->radius[1] = r1;
+		this->radius[2] = r2;
+	}
+
+	template<typename Real>
+	DYN_FUNC TMedialSlab3D<Real>::TMedialSlab3D(const TMedialSlab3D& slab)
+	{
+		this->v[0] = slab.v[0];
+		this->v[1] = slab.v[1];
+		this->v[2] = slab.v[2];
+		this->radius[0] = slab.radius[0];
+		this->radius[1] = slab.radius[1];
+		this->radius[2] = slab.radius[2];
+	}
+
+	template<typename Real>
+	DYN_FUNC Real TMedialSlab3D<Real>::volume() const
+	{
+		return Real(1.0);
+	}
+
+	template<typename Real>
+	DYN_FUNC TAlignedBox3D<Real> TMedialSlab3D<Real>::aabb() const
+	{
+		TAlignedBox3D<Real> abox;
+		Vec3f min_sphere_0 = this->v[0] - radius[0];
+		Vec3f max_sphere_0 = this->v[0] + radius[0];
+		Vec3f min_sphere_1 = this->v[1] - radius[1];
+		Vec3f max_sphere_1 = this->v[1] + radius[1];
+		Vec3f min_sphere_2 = this->v[2] - radius[2];
+		Vec3f max_sphere_2 = this->v[2] + radius[2];
+
+		abox.v0 = minimum(minimum(min_sphere_0, min_sphere_1), min_sphere_2);
+		abox.v1 = maximum(maximum(max_sphere_0, max_sphere_1), max_sphere_2);
+
+		return abox;
 	}
 
 	template<typename Real>
@@ -4254,7 +4367,7 @@ namespace dyno
 		int id = i % 12;
 		Vec2u table[12] = { Vec2u(0, 1), Vec2u(1, 3), Vec2u(2, 3), Vec2u(0, 2),
 			Vec2u(0, 4), Vec2u(1, 5), Vec2u(2, 6), Vec2u(3, 7),
-			Vec2u(4, 5), Vec2u(5, 7), Vec2u(6, 7), Vec2u(4, 6)};
+			Vec2u(4, 5), Vec2u(5, 7), Vec2u(6, 7), Vec2u(4, 6) };
 		return vertex(table[id][0]) - vertex(table[id][1]);
 	}
 
@@ -4286,7 +4399,7 @@ namespace dyno
 			c += u * extent[0];
 			Nx = v; Ny = w;
 			Ext = Coord2D(extent[1], extent[2]);
-			break; 
+			break;
 		case 4:
 			c -= w * extent[2];
 			Nx = v; Ny = u;

@@ -11,7 +11,7 @@ namespace dyno
 {
 	IMPLEMENT_TCLASS(NeighborElementQuery, TDataType)
 
-	struct ContactId
+		struct ContactId
 	{
 		int bodyId1 = INVLIDA_ID;
 		int bodyId2 = INVLIDA_ID;
@@ -75,6 +75,8 @@ namespace dyno
 		DArray<Tet3D> tets,
 		DArray<Capsule3D> caps,
 		DArray<Triangle3D> tris,
+		DArray<MedialCone3D> cones,
+		DArray<MedialSlab3D> slabs,
 		ElementOffset elementOffset,
 		Real boundary_expand)
 	{
@@ -112,6 +114,16 @@ namespace dyno
 			box = tris[tId - elementOffset.triangleIndex()].aabb();
 			break;
 		}
+		case ET_MEDIALCONE:
+		{
+			box = cones[tId - elementOffset.medialConeIndex()].aabb();
+			break;
+		}
+		case ET_MEDIALSLAB:
+		{
+			box = slabs[tId - elementOffset.medialSlabIndex()].aabb();
+			break;
+		}
 		default:
 			break;
 		}
@@ -145,10 +157,13 @@ namespace dyno
 		DArray<Topology::Tetrahedron> tet_element_ids,
 		DArray<Capsule3D> caps,
 		DArray<Triangle3D> triangles,
+		DArray<MedialCone3D> cones,
+		DArray<MedialSlab3D> slabs,
 		DArray<Attribute> attribute,
 		DArray<Pair<uint, uint>> shape2RigidBodyMapping,
 		ElementOffset elementOffset,
 		Real dHat,
+		bool enableAttribute,
 		bool enableSelfCollision,
 		bool enableCollisionMask)
 	{
@@ -156,6 +171,8 @@ namespace dyno
 		if (tId >= nbr.size()) return;
 
 		ContactId ids = nbr[tId];
+
+
 		ElementType eleType_i = elementOffset.checkElementType(ids.bodyId1);
 		ElementType eleType_j = elementOffset.checkElementType(ids.bodyId2);
 
@@ -173,12 +190,17 @@ namespace dyno
 		if (mappedId1 == mappedId2)
 			return;
 
-		if (!enableSelfCollision)
+		if (enableAttribute)
 		{
 			Attribute att_i = attribute[mappedId1];
 			Attribute att_j = attribute[mappedId2];
 
-			if (att_i.objectId() == att_j.objectId())
+			const uint collisionGroup_i = att_i.collisionGroup();
+			const uint collisionGroup_j = att_j.collisionGroup();
+			if (collisionGroup_i != 0 && collisionGroup_i == collisionGroup_j)
+				return;
+
+			if (!enableSelfCollision && att_i.objectId() == att_j.objectId())
 				return;
 		}
 
@@ -244,14 +266,14 @@ namespace dyno
 			//CollisionDetection<Real>::request(manifold, sphereA, sphereB);
 			CollisionDetection<Real>::request(manifold, sphereA, sphereB, dHat, dHat);
 		}
-		else if(eleType_i == ET_TET && eleType_j == ET_TET && checkCollision(mask_i, mask_j, ET_TET, ET_TET))
+		else if (eleType_i == ET_TET && eleType_j == ET_TET && checkCollision(mask_i, mask_j, ET_TET, ET_TET))
 		{
 			//TODO: consider dHat
 			auto tetA = tets[ids.bodyId1 - elementOffset.tetIndex()];
 			auto tetB = tets[ids.bodyId2 - elementOffset.tetIndex()];
 			//CollisionDetection<Real>::request(manifold, tetA, tetB);
 
- 			CollisionDetection<Real>::request(manifold, tetA, tetB, dHat, dHat);
+			CollisionDetection<Real>::request(manifold, tetA, tetB, dHat, dHat);
 		}
 		else if (eleType_i == ET_TET && eleType_j == ET_BOX && checkCollision(mask_i, mask_j, ET_TET, ET_BOX))
 		{
@@ -277,7 +299,7 @@ namespace dyno
 			auto sphere = spheres[ids.bodyId1];
 			auto tet = tets[ids.bodyId2 - elementOffset.tetIndex()];
 			//CollisionDetection<Real>::request(manifold, sphere, tet);
-			
+
 			CollisionDetection<Real>::request(manifold, sphere, tet, dHat, dHat);
 		}
 		else if (eleType_i == ET_TET && eleType_j == ET_SPHERE && checkCollision(mask_i, mask_j, ET_TET, ET_SPHERE))
@@ -320,13 +342,13 @@ namespace dyno
 		}
 		else if (eleType_i == ET_TRI && eleType_j == ET_TET && checkCollision(mask_i, mask_j, ET_TRI, ET_TET))
 		{
-		//TODO: consider dHat
+			//TODO: consider dHat
 			auto tri = triangles[ids.bodyId1 - elementOffset.triangleIndex()];
 			auto tet = tets[ids.bodyId2 - elementOffset.tetIndex()];
 			//CollisionDetection<Real>::request(manifold, tri, tet);
 
 			CollisionDetection<Real>::request(manifold, tri, tet, dHat, dHat);
-			
+
 		}
 		//Capsule with other primitives
 		else if (eleType_i == ET_TET && eleType_j == ET_CAPSULE && checkCollision(mask_i, mask_j, ET_TET, ET_CAPSULE))		//tet-capsule
@@ -334,7 +356,7 @@ namespace dyno
 			//TODO: consider dHat
 			auto cap = caps[ids.bodyId2 - elementOffset.capsuleIndex()];
 			auto tet = tets[ids.bodyId1 - elementOffset.tetIndex()];
-			 //CollisionDetection<Real>::request(manifold, tet, cap);
+			//CollisionDetection<Real>::request(manifold, tet, cap);
 
 			Segment3D seg = cap.centerline();
 			Real radius = cap.radius;
@@ -363,7 +385,7 @@ namespace dyno
 			Segment3D seg1 = cap1.centerline(); Real radius1 = cap1.radius;
 			Segment3D seg2 = cap2.centerline(); Real radius2 = cap2.radius;
 			CollisionDetection<Real>::request(manifold, seg1, seg2, radius1 + dHat, radius2 + dHat);
-			
+
 		}
 		else if (eleType_i == ET_BOX && eleType_j == ET_CAPSULE && checkCollision(mask_i, mask_j, ET_BOX, ET_CAPSULE))			//box-capsule
 		{
@@ -403,7 +425,7 @@ namespace dyno
 			Segment3D seg = cap.centerline();
 			Real radius = cap.radius;
 			CollisionDetection<Real>::request(manifold, sphere, seg, dHat, radius + dHat);
-			
+
 		}
 		else if (eleType_j == ET_SPHERE && eleType_i == ET_CAPSULE && checkCollision(mask_i, mask_j, ET_CAPSULE, ET_SPHERE))
 		{
@@ -418,7 +440,63 @@ namespace dyno
 			Real radius = cap.radius;
 			CollisionDetection<Real>::request(manifold, seg, sphere, radius + dHat, dHat);
 		}
-		
+		else if (eleType_i == ET_MEDIALCONE && eleType_j == ET_MEDIALCONE && checkCollision(mask_i, mask_j, ET_MEDIALCONE, ET_MEDIALCONE))			//medial-cone-cone
+		{
+			auto cone1 = cones[ids.bodyId1 - elementOffset.medialConeIndex()];
+			auto cone2 = cones[ids.bodyId2 - elementOffset.medialConeIndex()];
+
+			CollisionDetection<Real>::request(manifold, cone1, cone2);
+		}
+		else if (eleType_i == ET_BOX && eleType_j == ET_MEDIALCONE && checkCollision(mask_i, mask_j, ET_BOX, ET_MEDIALCONE))
+		{
+			auto box = boxes[ids.bodyId1 - elementOffset.boxIndex()];
+			auto cone = cones[ids.bodyId2 - elementOffset.medialConeIndex()];
+
+			CollisionDetection<Real>::request(manifold, box, cone);
+		}
+		else if (eleType_i == ET_MEDIALCONE && eleType_j == ET_BOX && checkCollision(mask_i, mask_j, ET_MEDIALCONE, ET_BOX))
+		{
+			auto cone = cones[ids.bodyId1 - elementOffset.medialConeIndex()];
+			auto box = boxes[ids.bodyId2 - elementOffset.boxIndex()];
+
+			CollisionDetection<Real>::request(manifold, cone, box);
+		}
+		else if (eleType_i == ET_MEDIALCONE && eleType_j == ET_MEDIALSLAB && checkCollision(mask_i, mask_j, ET_MEDIALCONE, ET_MEDIALSLAB))			//medial-cone-slab
+		{
+			auto cone = cones[ids.bodyId1 - elementOffset.medialConeIndex()];
+			auto slab = slabs[ids.bodyId2 - elementOffset.medialSlabIndex()];
+
+			CollisionDetection<Real>::request(manifold, cone, slab);
+		}
+		else if (eleType_i == ET_BOX && eleType_j == ET_MEDIALSLAB && checkCollision(mask_i, mask_j, ET_BOX, ET_MEDIALSLAB))
+		{
+			auto box = boxes[ids.bodyId1 - elementOffset.boxIndex()];
+			auto slab = slabs[ids.bodyId2 - elementOffset.medialSlabIndex()];
+
+			CollisionDetection<Real>::request(manifold, box, slab);
+		}
+		else if (eleType_i == ET_MEDIALSLAB && eleType_j == ET_BOX && checkCollision(mask_i, mask_j, ET_MEDIALSLAB, ET_BOX))
+		{
+			auto slab = slabs[ids.bodyId1 - elementOffset.medialSlabIndex()];
+			auto box = boxes[ids.bodyId2 - elementOffset.boxIndex()];
+
+			CollisionDetection<Real>::request(manifold, slab, box);
+		}
+		else if (eleType_i == ET_MEDIALSLAB && eleType_j == ET_MEDIALCONE && checkCollision(mask_i, mask_j, ET_MEDIALSLAB, ET_MEDIALCONE))			//medial-slab-cone
+		{
+			auto cone = cones[ids.bodyId2 - elementOffset.medialConeIndex()];
+			auto slab = slabs[ids.bodyId1 - elementOffset.medialSlabIndex()];
+
+			CollisionDetection<Real>::request(manifold, slab, cone);
+		}
+		else if (eleType_i == ET_MEDIALSLAB && eleType_j == ET_MEDIALSLAB && checkCollision(mask_i, mask_j, ET_MEDIALSLAB, ET_MEDIALSLAB))			//medial-slab-slab
+		{
+			auto slab1 = slabs[ids.bodyId1 - elementOffset.medialSlabIndex()];
+			auto slab2 = slabs[ids.bodyId2 - elementOffset.medialSlabIndex()];
+
+			CollisionDetection<Real>::request(manifold, slab1, slab2);
+		}
+
 		count[tId] = manifold.contactCount;
 
 		//printf("%d %d; num: %d \n", mappedId1, mappedId2, manifold.contactCount);
@@ -513,11 +591,11 @@ namespace dyno
 			return;
 		}
 
-		if (mQueriedAABB.size() != t_num){
+		if (mQueriedAABB.size() != t_num) {
 			mQueriedAABB.resize(t_num);
 		}
 
-		if (mQueryAABB.size() != t_num){
+		if (mQueryAABB.size() != t_num) {
 			mQueryAABB.resize(t_num);
 		}
 		//printf("=========== ============= INSIDE SELF COLLISION %d\n", t_num);
@@ -533,6 +611,8 @@ namespace dyno
 		DArray<Tet3D>& tetInGlobal = inTopo->tetsInGlobal();
 		DArray<Capsule3D>& capsuleInGlobal = inTopo->capsulesInGlobal();
 		DArray<Triangle3D>& triangleInGlobal = inTopo->trianglesInGlobal();
+		DArray<MedialCone3D>& coneInGlobal = inTopo->medialConesInGlobal();
+		DArray<MedialSlab3D>& slabInGlobal = inTopo->medialSlabsInGlobal();
 
 		cuExecute(t_num,
 			NEQ_SetupAABB,
@@ -542,6 +622,8 @@ namespace dyno
 			tetInGlobal,
 			capsuleInGlobal,
 			triangleInGlobal,
+			coneInGlobal,
+			slabInGlobal,
 			elementOffset,
 			dHat);
 
@@ -582,8 +664,6 @@ namespace dyno
 
 		count.clear();
 
-		Real zero = 0;
-
 		DArray<int> contactNum;
 		DArray<int> contactNumCpy;
 
@@ -599,7 +679,7 @@ namespace dyno
 		if (this->inCollisionMask()->isEmpty())
 		{
 			DArray<CollisionMask> dummyCollisionMask;
-			if (!this->varSelfCollision()->getValue() && !this->inAttribute()->isEmpty())
+			if (!this->inAttribute()->isEmpty())
 			{
 				cuExecute(deviceIds.size(),
 					NEQ_Narrow_Count,
@@ -615,11 +695,14 @@ namespace dyno
 					inTopo->getTetElementMapping(),
 					capsuleInGlobal,
 					triangleInGlobal,
+					coneInGlobal,
+					slabInGlobal,
 					this->inAttribute()->getData(),
 					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
 					dHat,
-					false,
+					true,
+					this->varSelfCollision()->getValue(),
 					false);
 			}
 			else
@@ -639,10 +722,13 @@ namespace dyno
 					inTopo->getTetElementMapping(),
 					capsuleInGlobal,
 					triangleInGlobal,
+					coneInGlobal,
+					slabInGlobal,
 					dummyAttribute,
 					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
 					dHat,
+					false,
 					true,
 					false);
 			}
@@ -650,7 +736,7 @@ namespace dyno
 		}
 		else
 		{
-			if (!this->varSelfCollision()->getValue() && !this->inAttribute()->isEmpty())
+			if (!this->inAttribute()->isEmpty())
 			{
 				cuExecute(deviceIds.size(),
 					NEQ_Narrow_Count,
@@ -666,11 +752,14 @@ namespace dyno
 					inTopo->getTetElementMapping(),
 					capsuleInGlobal,
 					triangleInGlobal,
+					coneInGlobal,
+					slabInGlobal,
 					this->inAttribute()->getData(),
 					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
 					dHat,
-					false,
+					true,
+					this->varSelfCollision()->getValue(),
 					true);
 			}
 			else
@@ -690,17 +779,20 @@ namespace dyno
 					inTopo->getTetElementMapping(),
 					capsuleInGlobal,
 					triangleInGlobal,
+					coneInGlobal,
+					slabInGlobal,
 					dummyAttribute,
 					inTopo->shape2RigidBodyMapping(),
 					elementOffset,
 					dHat,
+					false,
 					true,
 					true);
 			}
 		}
 
 		contactNumCpy.assign(contactNum);
-		
+
 		int sum = mReduce.accumulate(contactNum.begin(), contactNum.size());
 
 		auto& contacts = this->outContacts()->getData();

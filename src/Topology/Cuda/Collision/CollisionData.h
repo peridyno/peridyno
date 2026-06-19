@@ -128,6 +128,33 @@ namespace dyno
 		Vector<Real, 3> v[4];
 	};
 
+	struct MedialConeInfo {
+		MedialConeInfo()
+		{
+			v[0] = Vec3f(0);
+			v[1] = Vec3f(1, 0, 0);
+			radius[0] = 1.0;
+			radius[1] = 1.0;
+
+		}
+		Vector<Real, 3> v[2];
+		Real radius[2];
+	};
+
+	struct MedialSlabInfo {
+		MedialSlabInfo()
+		{
+			v[0] = Vec3f(0);
+			v[1] = Vec3f(1, 0, 0);
+			v[2] = Vec3f(0, 1, 0);
+			radius[0] = 1.0;
+			radius[1] = 1.0;
+			radius[2] = 1.0;
+		}
+		Vector<Real, 3> v[3];
+		Real radius[3];
+	};
+
 	struct CapsuleInfo
 	{
 		CapsuleInfo()
@@ -165,6 +192,13 @@ namespace dyno
 			contacts[contactCount].position = pos;
 			contacts[contactCount].penetration = dep;
 			contactCount++;
+		}
+
+		DYN_FUNC void pushContactReWrite(const Vector<Real, 3>& pos, const Real& dep)
+		{
+			contacts[0].position = pos;
+			contacts[0].penetration = dep;
+			contactCount = 1;
 		}
 
 		DYN_FUNC void pushContact(const TContact<Real>& contact)
@@ -281,5 +315,13 @@ namespace dyno
 
 		Quat1f rotQuat;
 
+	};
+
+	struct CacheContact {
+		unsigned long long sortKey;
+		Vec3f localPos;
+		Real lambda1;
+		Real lambda2;
+		Real lambda3;
 	};
 }

@@ -25,6 +25,8 @@ namespace dyno
 	public:
 		GLPhotorealisticInstanceRender();
 
+		DEF_VAR(bool, UseGlobalAlpha, false, "");
+
 	public:
 		virtual std::string caption() override;
 

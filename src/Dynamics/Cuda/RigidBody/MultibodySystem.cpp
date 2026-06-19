@@ -1,6 +1,9 @@
 #include "MultibodySystem.h"
 
+#include "Module/TJSConstraintSolver.h"
+#include "Module/PJSConstraintSolver.h"
 #include "Module/TJSoftConstraintSolver.h"
+#include "Module/TJConstraintSolver.h"
 #include "Module/ContactsUnion.h"
 
 #include "Collision/NeighborElementQuery.h"
@@ -19,79 +22,6 @@
 
 namespace dyno
 {
-	namespace
-	{
-		template<typename TDataType>
-		void syncVehicleStatesToMultibody(MultibodySystem<TDataType>* system)
-		{
-			auto& vehicles = system->getVehicles();
-
-			if (vehicles.size() <= 0)
-			{
-				return;
-			}
-
-			uint sizeOfRigidBodies = 0;
-			for (uint i = 0; i < vehicles.size(); i++)
-			{
-				sizeOfRigidBodies += vehicles[i]->stateMass()->size();
-			}
-
-			if (sizeOfRigidBodies <= 0)
-			{
-				return;
-			}
-
-			if (system->stateMass()->size() != sizeOfRigidBodies)
-			{
-				system->stateMass()->resize(sizeOfRigidBodies);
-				system->stateCenter()->resize(sizeOfRigidBodies);
-				system->stateVelocity()->resize(sizeOfRigidBodies);
-				system->stateAngularVelocity()->resize(sizeOfRigidBodies);
-				system->stateRotationMatrix()->resize(sizeOfRigidBodies);
-				system->stateInertia()->resize(sizeOfRigidBodies);
-				system->stateInitialInertia()->resize(sizeOfRigidBodies);
-				system->stateQuaternion()->resize(sizeOfRigidBodies);
-				system->stateCollisionMask()->resize(sizeOfRigidBodies);
-				system->stateAttribute()->resize(sizeOfRigidBodies);
-				system->stateFrictionCoefficients()->resize(sizeOfRigidBodies);
-			}
-
-			auto& stateMass = system->stateMass()->getData();
-			auto& stateCenter = system->stateCenter()->getData();
-			auto& stateVelocity = system->stateVelocity()->getData();
-			auto& stateAngularVelocity = system->stateAngularVelocity()->getData();
-			auto& stateRotationMatrix = system->stateRotationMatrix()->getData();
-			auto& stateInertia = system->stateInertia()->getData();
-			auto& stateInitialInertia = system->stateInitialInertia()->getData();
-			auto& stateQuaternion = system->stateQuaternion()->getData();
-			auto& stateCollisionMask = system->stateCollisionMask()->getData();
-			auto& stateFrictionCoefficients = system->stateFrictionCoefficients()->getData();
-
-			uint offset = 0;
-			for (uint i = 0; i < vehicles.size(); i++)
-			{
-				auto vehicle = vehicles[i];
-				uint num = vehicle->stateMass()->size();
-
-				if (num > 0)
-				{
-					stateMass.assign(vehicle->stateMass()->constData(), num, offset, 0);
-					stateCenter.assign(vehicle->stateCenter()->constData(), num, offset, 0);
-					stateVelocity.assign(vehicle->stateVelocity()->constData(), num, offset, 0);
-					stateAngularVelocity.assign(vehicle->stateAngularVelocity()->constData(), num, offset, 0);
-					stateRotationMatrix.assign(vehicle->stateRotationMatrix()->constData(), num, offset, 0);
-					stateInertia.assign(vehicle->stateInertia()->constData(), num, offset, 0);
-					stateInitialInertia.assign(vehicle->stateInitialInertia()->constData(), num, offset, 0);
-					stateQuaternion.assign(vehicle->stateQuaternion()->constData(), num, offset, 0);
-					stateCollisionMask.assign(vehicle->stateCollisionMask()->constData(), num, offset, 0);
-					stateFrictionCoefficients.assign(vehicle->stateFrictionCoefficients()->constData(), num, offset, 0);
-					offset += num;
-				}
-			}
-		}
-	}
-
 	IMPLEMENT_TCLASS(MultibodySystem, TDataType)
 
 		template<typename TDataType>
@@ -106,10 +36,14 @@ namespace dyno
 		this->stateCollisionMask()->connect(elementQuery->inCollisionMask());
 		this->stateAttribute()->connect(elementQuery->inAttribute());
 		this->animationPipeline()->pushModule(elementQuery);
-
+		/*
 		auto cdBV = std::make_shared<CollistionDetectionTriangleSet<TDataType>>();
 		this->stateTopology()->connect(cdBV->inDiscreteElements());
 		this->inTriangleSet()->connect(cdBV->inTriangleSet());
+		this->animationPipeline()->pushModule(cdBV);
+		*/
+		auto cdBV = std::make_shared<CollistionDetectionBoundingBox<TDataType>>();
+		this->stateTopology()->connect(cdBV->inDiscreteElements());
 		this->animationPipeline()->pushModule(cdBV);
 
 		auto merge = std::make_shared<ContactsUnion<TDataType>>();
@@ -117,7 +51,7 @@ namespace dyno
 		cdBV->outContacts()->connect(merge->inContactsB());
 		this->animationPipeline()->pushModule(merge);
 
-		auto iterSolver = std::make_shared<TJSoftConstraintSolver<TDataType>>();
+		auto iterSolver = std::make_shared<TJSConstraintSolver<TDataType>>();
 		this->stateTimeStep()->connect(iterSolver->inTimeStep());
 		this->varFrictionEnabled()->quote(iterSolver->varFrictionEnabled());
 		this->varGravityEnabled()->quote(iterSolver->varGravityEnabled());
@@ -232,6 +166,7 @@ namespace dyno
 			hAttributes.assign(stateAttribute);
 
 			uint offsetBodyId = 0;
+			uint offsetCollisionGroup = 0;
 			uint offsetOfRigidBody = 0;
 			for (uint i = 0; i < vehicles.size(); i++)
 			{
@@ -240,10 +175,18 @@ namespace dyno
 				uint num = vehicle->stateMass()->size();
 
 				uint maxBodyId = 0;
+				uint maxCollisionGroup = 0;
 				for (uint j = 0; j < num; j++)
 				{
 					Attribute att = hAttributes[offsetOfRigidBody + j];
 					att.setObjectId(att.objectId() + offsetBodyId);
+
+					const uint collisionGroup = att.collisionGroup();
+					if (collisionGroup != 0)
+					{
+						att.setCollisionGroup(collisionGroup + offsetCollisionGroup);
+						maxCollisionGroup = std::max(maxCollisionGroup, collisionGroup);
+					}
 
 					hAttributes[offsetOfRigidBody + j] = att;
 
@@ -252,10 +195,84 @@ namespace dyno
 
 				offsetOfRigidBody += num;
 				offsetBodyId += (maxBodyId + 1);
+				offsetCollisionGroup += maxCollisionGroup;
 			}
 
 			stateAttribute.assign(hAttributes);
 			hAttributes.clear();
+		}
+	}
+
+	namespace
+	{
+		template<typename TDataType>
+		void syncVehicleStatesToMultibody(MultibodySystem<TDataType>* system)
+		{
+			auto& vehicles = system->getVehicles();
+
+			if (vehicles.size() <= 0)
+			{
+				return;
+			}
+
+			uint sizeOfRigidBodies = 0;
+			for (uint i = 0; i < vehicles.size(); i++)
+			{
+				sizeOfRigidBodies += vehicles[i]->stateMass()->size();
+			}
+
+			if (sizeOfRigidBodies <= 0)
+			{
+				return;
+			}
+
+			if (system->stateMass()->size() != sizeOfRigidBodies)
+			{
+				system->stateMass()->resize(sizeOfRigidBodies);
+				system->stateCenter()->resize(sizeOfRigidBodies);
+				system->stateVelocity()->resize(sizeOfRigidBodies);
+				system->stateAngularVelocity()->resize(sizeOfRigidBodies);
+				system->stateRotationMatrix()->resize(sizeOfRigidBodies);
+				system->stateInertia()->resize(sizeOfRigidBodies);
+				system->stateInitialInertia()->resize(sizeOfRigidBodies);
+				system->stateQuaternion()->resize(sizeOfRigidBodies);
+				system->stateCollisionMask()->resize(sizeOfRigidBodies);
+				system->stateAttribute()->resize(sizeOfRigidBodies);
+				system->stateFrictionCoefficients()->resize(sizeOfRigidBodies);
+			}
+
+			auto& stateMass = system->stateMass()->getData();
+			auto& stateCenter = system->stateCenter()->getData();
+			auto& stateVelocity = system->stateVelocity()->getData();
+			auto& stateAngularVelocity = system->stateAngularVelocity()->getData();
+			auto& stateRotationMatrix = system->stateRotationMatrix()->getData();
+			auto& stateInertia = system->stateInertia()->getData();
+			auto& stateInitialInertia = system->stateInitialInertia()->getData();
+			auto& stateQuaternion = system->stateQuaternion()->getData();
+			auto& stateCollisionMask = system->stateCollisionMask()->getData();
+			auto& stateFrictionCoefficients = system->stateFrictionCoefficients()->getData();
+
+			uint offset = 0;
+			for (uint i = 0; i < vehicles.size(); i++)
+			{
+				auto vehicle = vehicles[i];
+				uint num = vehicle->stateMass()->size();
+
+				if (num > 0)
+				{
+					stateMass.assign(vehicle->stateMass()->constData(), num, offset, 0);
+					stateCenter.assign(vehicle->stateCenter()->constData(), num, offset, 0);
+					stateVelocity.assign(vehicle->stateVelocity()->constData(), num, offset, 0);
+					stateAngularVelocity.assign(vehicle->stateAngularVelocity()->constData(), num, offset, 0);
+					stateRotationMatrix.assign(vehicle->stateRotationMatrix()->constData(), num, offset, 0);
+					stateInertia.assign(vehicle->stateInertia()->constData(), num, offset, 0);
+					stateInitialInertia.assign(vehicle->stateInitialInertia()->constData(), num, offset, 0);
+					stateQuaternion.assign(vehicle->stateQuaternion()->constData(), num, offset, 0);
+					stateCollisionMask.assign(vehicle->stateCollisionMask()->constData(), num, offset, 0);
+					stateFrictionCoefficients.assign(vehicle->stateFrictionCoefficients()->constData(), num, offset, 0);
+					offset += num;
+				}
+			}
 		}
 	}
 

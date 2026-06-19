@@ -6,10 +6,10 @@
 namespace dyno
 {
 
-    #define REAL_infinity 1.0e30
-    #define	REAL_EQUAL(a,b)  (((a < b + EPSILON) && (a > b - EPSILON)) ? true : false)
-    #define REAL_GREAT(a,b) ((a > EPSILON + b)? true: false) 
-    #define REAL_LESS(a,b) ((a + EPSILON < b)? true: false)
+#define REAL_infinity 1.0e30
+#define	REAL_EQUAL(a,b)  (((a < b + EPSILON) && (a > b - EPSILON)) ? true : false)
+#define REAL_GREAT(a,b) ((a > EPSILON + b)? true: false) 
+#define REAL_LESS(a,b) ((a + EPSILON < b)? true: false)
 
     struct ClipVertex
     {
@@ -70,30 +70,30 @@ namespace dyno
 
         return false;
     }
-    
-    
+
+
     /**
      *		Ordering of the edges
-     *					   ---2  --- 
+     *					   ---2  ---
      *				   /			 /
      *				  3			    1
      *				 /			   /
-     *				  ---   0  --- 
+     *				  ---   0  ---
      *					|			 |
-     *					10			 9	
+     *					10			 9
      *					|			 |
      *	 				 ---- 4  --- ----->x
      *				|   /       |   /
      *			   11  5		8  7
      *				| /			| /
-     *				 / --- 6 --- 
+     *				 / --- 6 ---
      *             z
      */
     template<typename Real>
     //--------------------------------------------------------------------------------------------------
     DYN_FUNC void computeReferenceEdgesAndBasis(unsigned char* out, SquareMatrix<Real, 3>* basis, Vector<Real, 3>* e, const Vector<Real, 3>& eR, const Transform<Real, 3>& rtx, Vector<Real, 3> n, int axis)
     {
-        n = rtx.rotation().transpose()*n;
+        n = rtx.rotation().transpose() * n;
 
         if (axis >= 3)
             axis -= 3;
@@ -198,7 +198,7 @@ namespace dyno
     template<typename Real>
     DYN_FUNC void computeIncidentFace(ClipVertex* out, const Transform<Real, 3>& itx, const Vector<Real, 3>& e, Vector<Real, 3> n)
     {
-        n = -itx.rotation().transpose()*n;
+        n = -itx.rotation().transpose() * n;
         Vector<Real, 3> absN = abs(n);
 
         if (absN.x > absN.y && absN.x > absN.z)
@@ -285,7 +285,7 @@ namespace dyno
             // B
             if (On(da) || On(db))
             {
-                if (InFront(db) || On(db)) 
+                if (InFront(db) || On(db))
                     out[outCount++] = b;
             }
             else if ((InFront(da) && InFront(db)))
@@ -299,13 +299,13 @@ namespace dyno
                 out[outCount++] = cv;
             }
             else if (Behind(da) && InFront(db))
-			{
-				//Remove the duplicated point in case inCount == 2
-                if (inCount > 2) { 
-                    cv.v = a.v + (b.v - a.v) * (da / (da - db)); 
-                    out[outCount++] = cv; 
+            {
+                //Remove the duplicated point in case inCount == 2
+                if (inCount > 2) {
+                    cv.v = a.v + (b.v - a.v) * (da / (da - db));
+                    out[outCount++] = cv;
                 }
-				out[outCount++] = b;
+                out[outCount++] = b;
             }
 
             a = b;
@@ -325,7 +325,7 @@ namespace dyno
         ClipVertex out[8];
 
         for (int i = 0; i < 4; ++i)
-            in[i].v = basis.transpose()*(incident[i].v - rPos);
+            in[i].v = basis.transpose() * (incident[i].v - rPos);
 
         outCount = orthographic(out, Real(1.0), e.x, 0, clipEdges[0], in, inCount);
 
@@ -362,49 +362,49 @@ namespace dyno
         return outCount;
     }
 
-	template<typename Real>
-	DYN_FUNC int clipEdgeAgainstRectangle(ClipVertex* outVerts, float* outDepths, const Vector<Real, 3>& rPos, const Vector<Real, 3>& e, unsigned char* clipEdges, const SquareMatrix<Real, 3>& basis, ClipVertex* incident)
-	{
-		int inCount = 2;
-		int outCount;
-		ClipVertex in[2];
-		ClipVertex out[2];
+    template<typename Real>
+    DYN_FUNC int clipEdgeAgainstRectangle(ClipVertex* outVerts, float* outDepths, const Vector<Real, 3>& rPos, const Vector<Real, 3>& e, unsigned char* clipEdges, const SquareMatrix<Real, 3>& basis, ClipVertex* incident)
+    {
+        int inCount = 2;
+        int outCount;
+        ClipVertex in[2];
+        ClipVertex out[2];
 
-		for (int i = 0; i < inCount; ++i)
-			in[i].v = basis.transpose() * (incident[i].v - rPos);
+        for (int i = 0; i < inCount; ++i)
+            in[i].v = basis.transpose() * (incident[i].v - rPos);
 
-		outCount = orthographic(out, Real(1.0), e.x, 0, clipEdges[0], in, inCount);
+        outCount = orthographic(out, Real(1.0), e.x, 0, clipEdges[0], in, inCount);
 
-		if (outCount == 0)
-			return 0;
+        if (outCount == 0)
+            return 0;
 
-		inCount = orthographic(in, Real(1.0), e.y, 1, clipEdges[1], out, outCount);
+        inCount = orthographic(in, Real(1.0), e.y, 1, clipEdges[1], out, outCount);
 
-		if (inCount == 0)
-			return 0;
+        if (inCount == 0)
+            return 0;
 
-		outCount = orthographic(out, Real(-1.0), e.x, 0, clipEdges[2], in, inCount);
+        outCount = orthographic(out, Real(-1.0), e.x, 0, clipEdges[2], in, inCount);
 
-		if (outCount == 0)
-			return 0;
+        if (outCount == 0)
+            return 0;
 
-		inCount = orthographic(in, Real(-1.0), e.y, 1, clipEdges[3], out, outCount);
+        inCount = orthographic(in, Real(-1.0), e.y, 1, clipEdges[3], out, outCount);
 
-		// Keep incident vertices behind the reference face
-		outCount = 0;
-		for (int i = 0; i < inCount; ++i)
-		{
-			Real d = in[i].v.z - e.z;
+        // Keep incident vertices behind the reference face
+        outCount = 0;
+        for (int i = 0; i < inCount; ++i)
+        {
+            Real d = in[i].v.z - e.z;
 
-			if (d <= Real(0.0))
-			{
-				outVerts[outCount].v = basis * in[i].v + rPos;
-				outDepths[outCount++] = d;
-			}
-		}
+            if (d <= Real(0.0))
+            {
+                outVerts[outCount].v = basis * in[i].v + rPos;
+                outDepths[outCount++] = d;
+            }
+        }
 
-		return outCount;
-	}
+        return outCount;
+    }
 
     //--------------------------------------------------------------------------------------------------
     template<typename Real>
@@ -456,7 +456,7 @@ namespace dyno
                         //   |-----A-----|
                         boundaryA = upperBoundaryA;
                         boundaryB = lowerBoundaryB;
-                        intersectionDistance = - (upperBoundaryA - lowerBoundaryB);
+                        intersectionDistance = -(upperBoundaryA - lowerBoundaryB);
                     }
                     else
                     {
@@ -464,7 +464,7 @@ namespace dyno
                         //    |-----A-----|
                         boundaryA = lowerBoundaryA;
                         boundaryB = upperBoundaryB;
-                        intersectionDistance = - (upperBoundaryB - lowerBoundaryA);
+                        intersectionDistance = -(upperBoundaryB - lowerBoundaryA);
                     }
                 }
                 else
@@ -473,7 +473,7 @@ namespace dyno
                     //   |----A----|
                     boundaryA = upperBoundaryA;
                     boundaryB = lowerBoundaryB;
-                    intersectionDistance = - (upperBoundaryA - lowerBoundaryB);
+                    intersectionDistance = -(upperBoundaryA - lowerBoundaryB);
                 }
             }
             else
@@ -484,7 +484,7 @@ namespace dyno
                     //            |----A----|
                     boundaryA = lowerBoundaryA;
                     boundaryB = upperBoundaryB;
-                    intersectionDistance = - (upperBoundaryB - lowerBoundaryA);
+                    intersectionDistance = -(upperBoundaryB - lowerBoundaryA);
                 }
                 else
                 {
@@ -497,7 +497,7 @@ namespace dyno
                         //      |---A---|
                         boundaryA = upperBoundaryA;
                         boundaryB = lowerBoundaryB;
-                        intersectionDistance = - (upperBoundaryA - lowerBoundaryB);
+                        intersectionDistance = -(upperBoundaryA - lowerBoundaryB);
                     }
                     else
                     {
@@ -505,7 +505,7 @@ namespace dyno
                         //              |---A---|
                         boundaryA = lowerBoundaryA;
                         boundaryB = upperBoundaryB;
-                        intersectionDistance = - (upperBoundaryB - lowerBoundaryA);
+                        intersectionDistance = -(upperBoundaryB - lowerBoundaryA);
                     }
                 }
             }
@@ -553,8 +553,8 @@ namespace dyno
         // SDF Calculate on Convex Hull
         // - : minimum distance
         // + : maximum distance
-        currentN = ( (currentBoundaryB < currentBoundaryA) ^ (REAL_LESS(currentDepth, 0)) ) ? -currentN : currentN;
-        if (REAL_LESS(currentDepth, 0) && REAL_GREAT(currentDepth , depth))
+        currentN = ((currentBoundaryB < currentBoundaryA) ^ (REAL_LESS(currentDepth, 0))) ? -currentN : currentN;
+        if (REAL_LESS(currentDepth, 0) && REAL_GREAT(currentDepth, depth))
         {
             depth = currentDepth;
             normal = currentN;
@@ -588,7 +588,7 @@ namespace dyno
         Vec3f pB,
         const Real rA = 0.f,
         const Real rB = 0.f // for Sphere
-        )
+    )
     {
         Vec3f N = pB - pA;
         Real D = 0;
@@ -615,7 +615,7 @@ namespace dyno
         Vec3f dirA = edgeA.direction();
         Vec3f dirB = edgeB.direction();
         Segment3D proj = edgeA.proximity(edgeB);
-		Vec3f N = dirA.cross(dirB);
+        Vec3f N = dirA.cross(dirB);
         Real D = 0;
         Real bA, bB;
         if (N.norm() > EPSILON) N /= N.norm(); else return;
@@ -632,15 +632,15 @@ namespace dyno
         ShapeB& shapeB,
         const Real radiusA,
         const Real radiusB,
-		Triangle3D tri,
+        Triangle3D tri,
         SeparationType type // [faceA or faceB]
     )
-	{
-		Vec3f N = tri.normal();
-		Real D = 0;
-		Real bA, bB;
-		if (N.norm() > EPSILON) N /= N.norm(); else return;
-		checkSignedDistanceAxis(D, bA, bB, N, shapeA, shapeB, radiusA, radiusB);
+    {
+        Vec3f N = tri.normal();
+        Real D = 0;
+        Real bA, bB;
+        if (N.norm() > EPSILON) N /= N.norm(); else return;
+        checkSignedDistanceAxis(D, bA, bB, N, shapeA, shapeB, radiusA, radiusB);
         Real bb = (type == CT_TRIA) ? bA : bB;
         Real rr = (type == CT_TRIA) ? radiusA : radiusB;
         for (int i = 0; i < 3; ++i)
@@ -666,7 +666,7 @@ namespace dyno
         checkSignedDistanceAxis(D, bA, bB, N, shapeA, shapeB, radiusA, radiusB);
         Real bb = (type == CT_RECTA) ? bA : bB;
         Real rr = (type == CT_RECTA) ? radiusA : radiusB;
-        for (int i = 0; i < 4; ++i) 
+        for (int i = 0; i < 4; ++i)
             if (!checkPointInBoundary(rect.vertex(i).origin, N, bb, rr)) return;
         sat.update(type, bA, bB, D, N, rect.center, rect.axis[0], rect.axis[1], Vec3f(rect.extent[0], rect.extent[1], 0.f));
     }
@@ -751,13 +751,13 @@ namespace dyno
     {
         Triangle3D triT = Triangle3D(triA.v[0] + transA, triA.v[1] + transA, triA.v[2] + transA);
         Segment3D segT = Segment3D(segB.v0 + transB, segB.v1 + transB);
-        
+
         int num = 0;
-		Vec3f oA = triT.v[0];
-		Vec3f nA = triT.normal();
+        Vec3f oA = triT.v[0];
+        Vec3f nA = triT.normal();
         Vec3f poly[2];
 
-		num = cgeo::intrSegWithPlane(poly, oA, nA, segT.v0, segT.v1);
+        num = cgeo::intrSegWithPlane(poly, oA, nA, segT.v0, segT.v1);
         if (num > 0) num = cgeo::intrPolyWithTri(q, num, poly, triT.v[0], triT.v[1], triT.v[2]);
 
         return num;
@@ -772,7 +772,7 @@ namespace dyno
         const Vector<Real, 3>& transB
     )
     {
-        Rectangle3D rectT = rectA; rectT.center+= transA;
+        Rectangle3D rectT = rectA; rectT.center += transA;
         Segment3D segT = Segment3D(segB.v0 + transB, segB.v1 + transB);
 
         int num = 0;
@@ -781,7 +781,7 @@ namespace dyno
         Vec3f poly[2];
 
         num = cgeo::intrSegWithPlane(poly, oA, nA, segT.v0, segT.v1);
-        if(num > 0) num = cgeo::intrPolyWithRect(q, num, poly, rectT.vertex(0).origin, rectT.vertex(1).origin, rectT.vertex(2).origin, rectT.vertex(3).origin);
+        if (num > 0) num = cgeo::intrPolyWithRect(q, num, poly, rectT.vertex(0).origin, rectT.vertex(1).origin, rectT.vertex(2).origin, rectT.vertex(3).origin);
         return num;
     }
 
@@ -793,7 +793,7 @@ namespace dyno
         const Real radiusA,
         const Real radiusB)
     {
-		Real depth = sat.depth();
+        Real depth = sat.depth();
         if (sat.type() == CT_POINT || sat.type() == CT_EDGE)
         {
             Vec3f contactPoint = sat.pointB() - m.normal * radiusB;
@@ -821,35 +821,35 @@ namespace dyno
     // return the closest point on the ray
     template<typename Real>
     DYN_FUNC inline Real rayInterRound2DHalfSeg(
-		const Vec2f rayO,       //  Ray's Origin arbitraryon 2D Material Space
-		const Vec2f rayD,       //  Ray's Direction arbitraryon 2D Material Space
-		const Real halfl,	   
+        const Vec2f rayO,       //  Ray's Origin arbitraryon 2D Material Space
+        const Vec2f rayD,       //  Ray's Direction arbitraryon 2D Material Space
+        const Real halfl,
         const Real radius)      // 2D HalfSeg Space (-halfl, 0) - (halfl,0), Normal: (0,1)
     {
-		if (REAL_LESS(rayO.y, 0.f) && REAL_LESS(rayD.y, 0.f)) return -1.f;
+        if (REAL_LESS(rayO.y, 0.f) && REAL_LESS(rayD.y, 0.f)) return -1.f;
         Real t = -1.f, para = REAL_infinity; Vec2f p;
-        // check body line 
+        // check body line
         if (!REAL_EQUAL(rayD.y, 0.f))
         {
-			t = (radius - rayO.y) / rayD.y;
+            t = (radius - rayO.y) / rayD.y;
             p = rayO + rayD * t;
             if (REAL_GREAT(t, 0.f) && REAL_LESS(t, para) && REAL_GREAT(p.x, - halfl) && REAL_LESS(p.x, +halfl)) para = t;
         }
         // check left caps
-		Real a = rayD.x * rayD.x + rayD.y * rayD.y;
+        Real a = rayD.x * rayD.x + rayD.y * rayD.y;
         Real b = 2 * ((rayO.x - halfl) * rayD.x + rayO.y * rayD.y);
-		Real c = (rayO.x - halfl) * (rayO.x - halfl) + rayO.y * rayO.y - radius * radius;
-		Real h = b * b - 4 * a * c;
-		if (REAL_GREAT(h, 0.f))
-		{
+        Real c = (rayO.x - halfl) * (rayO.x - halfl) + rayO.y * rayO.y - radius * radius;
+        Real h = b * b - 4 * a * c;
+        if (REAL_GREAT(h, 0.f))
+        {
             Real sh = sqrt(h);
-			t = (-b - sh) / (2 * a);
-			p = rayO + rayD * t;
+            t = (-b - sh) / (2 * a);
+            p = rayO + rayD * t;
             if (REAL_GREAT(t, 0.f) && REAL_LESS(t, para) && REAL_GREAT(p.y, 0.f) && REAL_LESS(p.x, -halfl)) para = t;
             t = (-b + sh) / (2 * a);
             p = rayO + rayD * t;
             if (REAL_GREAT(t, 0.f) && REAL_LESS(t, para) && REAL_GREAT(p.y, 0.f) && REAL_LESS(p.x, -halfl)) para = t;
-		}
+        }
         // check right caps
         b += 4 * halfl * rayD.x;
         c += halfl * halfl + 4 * halfl * rayD.x;
@@ -871,7 +871,7 @@ namespace dyno
     template<typename Real>
     DYN_FUNC inline Vec3f rayInterRoundSeg(
         const Vec3f rayOrigin, // on seg
-		const Vec3f rayDir, // along outside normal
+        const Vec3f rayDir, // along outside normal
         Segment3D seg,
         Real radius // radius > 0
         )
@@ -882,14 +882,14 @@ namespace dyno
         if (REAL_LESS(t, 0.f))
         {
             if (REAL_EQUAL(t, -1.f) || REAL_EQUAL((rayOrigin - seg.v0).normSquared(), 0.f)) return seg.v0 + rayDir * radius;
-			d = seg.v0 - rayOrigin;
+            d = seg.v0 - rayOrigin;
         }
-        else 
+        else
         {
             if (REAL_EQUAL(t, 1.f) || REAL_EQUAL((rayOrigin - seg.v1).normSquared(), 0.f)) return seg.v1 + rayDir * radius;
             d = seg.v1 - rayOrigin;
         }
-        
+
 
         f = d.cross(rayDir);
 
@@ -899,11 +899,11 @@ namespace dyno
 
         c = d + a;
 
-		t = c.dot(a) / rayDir.dot(a);
+        t = c.dot(a) / rayDir.dot(a);
         len2 = c.normSquared();
         if (t * t < len2)
         {
-			return rayOrigin + rayDir * t;
+            return rayOrigin + rayDir * t;
         }
 
         len2 = d.normSquared();
@@ -1149,20 +1149,20 @@ namespace dyno
         p = (center - u * extent[0] + v * extent[1] - w * extent[2]);
         t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
-		p = (center - u * extent[0] + v * extent[1] + w * extent[2]);
-		t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
+        p = (center - u * extent[0] + v * extent[1] + w * extent[2]);
+        t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
-		p = (center + u * extent[0] - v * extent[1] - w * extent[2]);
-		t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
+        p = (center + u * extent[0] - v * extent[1] - w * extent[2]);
+        t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
-		p = (center + u * extent[0] - v * extent[1] + w * extent[2]);
-		t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
+        p = (center + u * extent[0] - v * extent[1] + w * extent[2]);
+        t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
-		p = (center + u * extent[0] + v * extent[1] - w * extent[2]);
-		t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
+        p = (center + u * extent[0] + v * extent[1] - w * extent[2]);
+        t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
-		p = (center + u * extent[0] + v * extent[1] + w * extent[2]);
-		t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
+        p = (center + u * extent[0] + v * extent[1] + w * extent[2]);
+        t = p.dot(axisNormal); lowerBoundary = glm::min(lowerBoundary, t); upperBoundary = glm::max(upperBoundary, t);
 
         lowerBoundary -= radius;
         upperBoundary += radius;
@@ -1258,10 +1258,10 @@ namespace dyno
     // ---------------------------------------- [Sphere - Sphere] ----------------------------------------
 
     template<typename Real>
-    DYN_FUNC void CollisionDetection<Real>::MSDF(SeparationData& sat, const Sphere3D& sphereA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB) 
+    DYN_FUNC void CollisionDetection<Real>::MSDF(SeparationData& sat, const Sphere3D& sphereA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB)
     {
         auto checkAxisP = [&](Vec3f pA, Vec3f pB) { checkAxisPoint(sat, sphereA, sphereB, radiusA, radiusB, pA, pB, sphereA.radius, sphereB.radius); };
-        
+
         // Minkowski Point-Point Normal
         // check direction of minimum distance from B's Point to A's Point
         checkAxisP(sphereA.center, sphereB.center);
@@ -1307,16 +1307,16 @@ namespace dyno
         SeparationData sat;
         // Contact normal on sphereA
         MSDF(sat, segB, sphereA, radiusB, radiusA);
-		
+
         Real depth = sat.depth();
         if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
         {
             sat.reverse();              // contact normal on segB
-            m.normal = sat.normal(); 
+            m.normal = sat.normal();
             /*
             auto setupContactOnSeg = [&]()
             {
-				Vec3f contactPoint = sat.pointB() - m.normal * (radiusB);
+                Vec3f contactPoint = sat.pointB() - m.normal * (radiusB);
                 m.pushContact(contactPoint, depth);
             };
             */
@@ -1378,8 +1378,8 @@ namespace dyno
 
         if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
         {
-			sat.reverse();              // contact normal on triB
-            m.normal = sat.normal(); 
+            sat.reverse();              // contact normal on triB
+            m.normal = sat.normal();
 
             setupContactOnTri(m, sat, sphereA, triB, radiusA, radiusB);
         }
@@ -1524,7 +1524,7 @@ namespace dyno
     DYN_FUNC void CollisionDetection<Real>::MSDF(SeparationData& sat, const Segment3D& segA, const Segment3D& segB, const Real radiusA, const Real radiusB)
     {
         auto checkAxisP = [&](Vec3f pA, Vec3f pB) { checkAxisPoint(sat, segA, segB, radiusA, radiusB, pA, pB); };
-        auto checkAxisE = [&](Segment3D edgeA, Segment3D edgeB) { checkAxisEdge(sat, segA, segB, radiusA, radiusB, edgeA, edgeB);};
+        auto checkAxisE = [&](Segment3D edgeA, Segment3D edgeB) { checkAxisEdge(sat, segA, segB, radiusA, radiusB, edgeA, edgeB); };
 
         // Minkowski Point-Point Normal
         // check direction of minimum distance from B's point to A's edge
@@ -1598,10 +1598,10 @@ namespace dyno
             m.normal = sat.normal(); // contact normal on segB
             /*
             auto setupContactOnSeg = [&]()
-			{
+            {
                 Vec3f contactPoint = sat.pointB() - m.normal * radiusB;
-				m.pushContact(contactPoint, depth);
-			};
+                m.pushContact(contactPoint, depth);
+            };
             */
 
             setupContactOnSeg(m, sat, segB, radiusA, radiusB);
@@ -1621,7 +1621,7 @@ namespace dyno
         // Minkowski Face Normal
         // tri face
         checkAxisT(triA);
-        
+
         // Minkowski Edge-Edge Normal
         // segA x segB
         checkAxisE(Segment3D(triA.v[0], triA.v[1]), segB);
@@ -1669,7 +1669,7 @@ namespace dyno
         Vec3f axisTmp;
 
         // Minkowski Face Normal
-        // 1. tri face 
+        // 1. tri face
         axisTmp = triA.normal();
         checkAxis(axisTmp);
 
@@ -1725,7 +1725,7 @@ namespace dyno
 
         if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
         {
-			sat.reverse();              // contact normal on triB
+            sat.reverse();              // contact normal on triB
             m.normal = sat.normal(); // contact normal on triB
 
             setupContactOnTri(m, sat, segA, triB, radiusA, radiusB);
@@ -1741,14 +1741,14 @@ namespace dyno
         auto checkAxisP = [&](Vec3f pA, Vec3f pB) { checkAxisPoint(sat, tetA, segB, radiusA, radiusB, pA, pB); };
         auto checkAxisE = [&](Segment3D edgeA, Segment3D edgeB) { checkAxisEdge(sat, tetA, segB, radiusA, radiusB, edgeA, edgeB); };
         auto checkAxisT = [&](Triangle3D face) { checkAxisTri(sat, tetA, segB, radiusA, radiusB, face, SeparationType::CT_TRIA); };
-        
+
         // Minkowski Face Normal
         // tet face
         checkAxisT(tetA.face(0));
         checkAxisT(tetA.face(1));
         checkAxisT(tetA.face(2));
         checkAxisT(tetA.face(3));
-        
+
         // Minkowski Edge-Edge Normal
         // tetA x segB
         checkAxisE(Segment3D(tetA.v[0], tetA.v[1]), segB);
@@ -1831,7 +1831,7 @@ namespace dyno
         Tet3D tet,
         const Real radiusA,
         const Real radiusB,
-        const Real depth, // <0 
+        const Real depth, // <0
         TManifold<Real>& m)
     {
         //Gen contact point on tet
@@ -1857,7 +1857,7 @@ namespace dyno
             // inter & prox
             auto minPQ = seg.proximity(tri);
             // -: outside
-            // +: inside 
+            // +: inside
             Real gap = (Nz.dot(minPQ.direction()) < 0) ? radiusA + radiusB : radiusB;
             setContact(minPQ, gap);
 
@@ -2012,7 +2012,7 @@ namespace dyno
             checkAxis(axisTmp);
         }
     }
-    
+
 
     template<typename Real>
     DYN_FUNC inline void setupContactOnBox(
@@ -2020,7 +2020,7 @@ namespace dyno
         OrientedBox3D box,
         const Real radiusA,
         const Real radiusB,
-        const Real depth, // <0 
+        const Real depth, // <0
         TManifold<Real>& m)
     {
         //Gen contact point on box
@@ -2137,7 +2137,7 @@ namespace dyno
         auto checkAxisP = [&](Vec3f pA, Vec3f pB) { checkAxisPoint(sat, triA, triB, radiusA, radiusB, pA, pB); };
         auto checkAxisE = [&](Segment3D edgeA, Segment3D edgeB) { checkAxisEdge(sat, triA, triB, radiusA, radiusB, edgeA, edgeB); };
         auto checkAxisT = [&](Triangle3D face, auto type) { checkAxisTri(sat, triA, triB, radiusA, radiusB, face, type); };
-        
+
         // Minkowski Face Normal
         // tri face
         checkAxisT(triA, SeparationType::CT_TRIA);
@@ -2146,13 +2146,13 @@ namespace dyno
 
         // Minkowski Edge-Edge Normal
         // triA x triB
-		for (int i = 0; i < 3; i++)
-			for (int j = 0; j < 3; j++)
-			{
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+            {
                 int ni = (i == 2) ? 0 : i + 1;
                 int nj = (j == 2) ? 0 : j + 1;
-				checkAxisE(Segment3D(triA.v[i], triA.v[ni]), Segment3D(triB.v[j], triB.v[nj]));
-			}
+                checkAxisE(Segment3D(triA.v[i], triA.v[ni]), Segment3D(triB.v[j], triB.v[nj]));
+            }
 
         // Minkowski Point-Point Normal
         for (int j = 0; j < 3; j++)
@@ -2350,7 +2350,7 @@ namespace dyno
         if (REAL_LESS(depth, 0) && REAL_GREAT(depth, -REAL_infinity))
         {
             sat.reverse();          // contact normal on tetB
-            m.normal = sat.normal(); 
+            m.normal = sat.normal();
 
             setupContactOnTet(m, sat, triA, tetB, radiusA, radiusB);
         }
@@ -2454,7 +2454,7 @@ namespace dyno
                 checkAxis(axisTmp);
             }
         }
-        
+
         // Minkowski Point-Edge Normal
         // check direction of minimum distance from B's point to A's edge
         for (int j = 0; j < 3; j++)
@@ -2527,13 +2527,13 @@ namespace dyno
 
         // Minkowski Edge-Edge Normal
         // tetA x tetB
-		for (int i = 0; i < 6; i++)
+        for (int i = 0; i < 6; i++)
             for (int j = 0; j < 6; j++)
             {
-				Segment3D edgeA = tetA.edge(i);
-				Segment3D edgeB = tetB.edge(j);
-				checkAxisE(edgeA, edgeB);
-			}
+                Segment3D edgeA = tetA.edge(i);
+                Segment3D edgeB = tetB.edge(j);
+                checkAxisE(edgeA, edgeB);
+            }
 
         // Minkowski Point-Point Normal
         // check direction of minimum distance from B's point to A's edge
@@ -2768,7 +2768,7 @@ namespace dyno
     }
 
     // ---------------------------------------- [Box - Box] ----------------------------------------
-    
+
     template<typename Real>
     DYN_FUNC void CollisionDetection<Real>::MSDF(SeparationData& sat, const OBox3D& boxA, const OBox3D& boxB, const Real radiusA, const Real radiusB)
     {
@@ -2886,7 +2886,7 @@ namespace dyno
     template<typename Real>
     DYN_FUNC void computeSupportEdge(Vector<Real, 3>& aOut, Vector<Real, 3>& bOut, const SquareMatrix<Real, 3>& rot, const Vector<Real, 3>& trans, const Vector<Real, 3>& e, Vector<Real, 3> n)
     {
-        n = rot.transpose()*n;
+        n = rot.transpose() * n;
         Vector<Real, 3> absN = abs(n);
         Vector<Real, 3> a, b;
 
@@ -3253,11 +3253,11 @@ namespace dyno
         bool overlap = true;
         //If parallel
         if (parallel)
-		{
+        {
             TLine3D<Real> line(s0.v0, s0.direction());
 
-			TPoint3D<Real> p0 = TPoint3D<Real>(s1.v0).project(line);
-			TPoint3D<Real> p1 = TPoint3D<Real>(s1.v1).project(line);
+            TPoint3D<Real> p0 = TPoint3D<Real>(s1.v0).project(line);
+            TPoint3D<Real> p1 = TPoint3D<Real>(s1.v1).project(line);
 
             Vector<Real, 3> dir = s1.v0 - p0.origin;
             Real d = dir.norm();
@@ -3266,21 +3266,21 @@ namespace dyno
             if (interpenetration >= 0)
                 return;
 
-			Real t0 = s0.parameter(p0.origin);
-			Real t1 = s0.parameter(p1.origin);
+            Real t0 = s0.parameter(p0.origin);
+            Real t1 = s0.parameter(p1.origin);
 
             auto interval = Interval<Real>(0, 1).intersect(Interval<Real>(t0, t1));
 
             if (!interval.isEmpty())
             {
-				Vector<Real, 3> clamp_p0 = s0.v0 + interval.leftLimit() * s0.direction();
-				Vector<Real, 3> clamp_p1 = s0.v0 + interval.rightLimit() * s0.direction();
+                Vector<Real, 3> clamp_p0 = s0.v0 + interval.leftLimit() * s0.direction();
+                Vector<Real, 3> clamp_p1 = s0.v0 + interval.rightLimit() * s0.direction();
 
-				m.normal = dir.normalize();
-				m.contacts[0].penetration = interpenetration;
-				m.contacts[0].position = clamp_p0 + (cap0.radius + interpenetration) * m.normal;
-				m.contacts[1].penetration = interpenetration;
-				m.contacts[1].position = clamp_p1 + (cap0.radius + interpenetration) * m.normal;
+                m.normal = dir.normalize();
+                m.contacts[0].penetration = interpenetration;
+                m.contacts[0].position = clamp_p0 + (cap0.radius + interpenetration) * m.normal;
+                m.contacts[1].penetration = interpenetration;
+                m.contacts[1].position = clamp_p1 + (cap0.radius + interpenetration) * m.normal;
                 m.contactCount = 2;
             }
             else
@@ -3288,22 +3288,22 @@ namespace dyno
                 overlap = false;
             }
         }
-       
+
         if (!parallel || (parallel && !overlap))
         {
-			// From cap0 to cap1
-			Segment3D dir = s0.proximity(s1);
+            // From cap0 to cap1
+            Segment3D dir = s0.proximity(s1);
 
-			dir = Point3D(dir.endPoint()) - Point3D(dir.startPoint());
+            dir = Point3D(dir.endPoint()) - Point3D(dir.startPoint());
 
-			Real sMax = dir.direction().norm() - r0;
-			if (sMax >= 0)
-				return;
+            Real sMax = dir.direction().norm() - r0;
+            if (sMax >= 0)
+                return;
 
-			m.normal = dir.direction().normalize();
-			m.contacts[0].penetration = sMax;
-			m.contacts[0].position = dir.v0 + (cap0.radius + sMax) * m.normal;
-			m.contactCount = 1;
+            m.normal = dir.direction().normalize();
+            m.contacts[0].penetration = sMax;
+            m.contacts[0].position = dir.v0 + (cap0.radius + sMax) * m.normal;
+            m.contactCount = 1;
         }
     }
 
@@ -3352,7 +3352,7 @@ namespace dyno
         const Vector<Real, 3> axisNormal,
         OrientedBox3D box,
         Capsule3D cap
-        )
+    )
     {
 
         //projection to axis
@@ -3362,7 +3362,7 @@ namespace dyno
         upperBoundary1 = seg.v0.dot(axisNormal) + cap.radius;
         lowerBoundary1 = glm::min(lowerBoundary1, seg.v1.dot(axisNormal) - cap.radius);
         upperBoundary1 = glm::max(upperBoundary1, seg.v1.dot(axisNormal) + cap.radius);
-        
+
 
         Vector<Real, 3> center = box.center;
         Vector<Real, 3> u = box.u;
@@ -3498,7 +3498,7 @@ namespace dyno
         {
             if (i == 0)
             {
-                
+
                 lowerBoundary2 = upperBoundary2 = tet.v[0].dot(axisNormal);
             }
             else
@@ -3508,7 +3508,7 @@ namespace dyno
             }
         }
 
-        
+
         return checkOverlapTetTri(lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2, intersectionDistance, boundary1, boundary2);
     }
 
@@ -3527,11 +3527,11 @@ namespace dyno
         // On box vertex
 
         // On box edge
-        
+
         // On box face
 
         int cnt1, cnt2;
-        Vector<Real, 3> boundaryPoints1[4]; 
+        Vector<Real, 3> boundaryPoints1[4];
         Vector<Real, 3> boundaryPoints2[8];
         cnt1 = cnt2 = 0;
 
@@ -3539,9 +3539,9 @@ namespace dyno
         Real boundaryMax = glm::max(boundary1, boundary2);
         if (abs(cap.startPoint().dot(axisNormal) - boundaryMin) < abs(depth))
             boundaryPoints1[cnt1++] = cap.startPoint();
-        if (abs(cap.endPoint().dot(axisNormal)  - boundaryMin) < abs(depth))
+        if (abs(cap.endPoint().dot(axisNormal) - boundaryMin) < abs(depth))
             boundaryPoints1[cnt1++] = cap.endPoint();
-        
+
 
         Vector<Real, 3> center = box.center;
         Vector<Real, 3> u = box.u;
@@ -3698,7 +3698,7 @@ namespace dyno
                 }
             }
         }
-        
+
     }
 
     template<typename Real>
@@ -3720,14 +3720,14 @@ namespace dyno
         for (unsigned char i = 0; i < 4; i++)
         {
             if (abs(tet.v[i].dot(axisNormal) - boundary1) < abs(sMax))
-                boundaryPoints1[cnt1 ++] = i;
+                boundaryPoints1[cnt1++] = i;
         }
 
         if (abs(cap.startPoint().dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
             ||
             abs(cap.startPoint().dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
-            boundaryPoints2[cnt2 ++] = 0;
-        
+            boundaryPoints2[cnt2++] = 0;
+
         if (abs(cap.endPoint().dot(axisNormal) + cap.radius - boundary1) < abs(sMax)
             ||
             abs(cap.endPoint().dot(axisNormal) - cap.radius - boundary1) < abs(sMax))
@@ -3803,7 +3803,7 @@ namespace dyno
                     }
                 }
             }
-            
+
         }
     }
 
@@ -3883,7 +3883,7 @@ namespace dyno
                 {
                     Segment3D s2(t2.v[(i + 1) % 3], t2.v[(i + 2) % 3]);
                     Segment3D dir = s1.proximity(s2);
-                    
+
                     if ((!dir.isValid()) || dir.direction().normalize().cross(axisNormal).norm() < 1e-5)
                     {
                         //printf("Yes\n");
@@ -3993,13 +3993,13 @@ namespace dyno
 
         Vector<Real, 3> boxExt = box.extent;
 
-		Matrix3D rotBox;
+        Matrix3D rotBox;
         rotBox.setCol(0, box.u);
         rotBox.setCol(1, box.v);
         rotBox.setCol(2, box.w);
 
-		// Vector from capsule to box in box's space
-		Vector<Real, 3> t = rotBox.transpose() * v;
+        // Vector from capsule to box in box's space
+        Vector<Real, 3> t = rotBox.transpose() * v;
 
         // Rotation of capsule in box's space
         Matrix3D C = rotBox.transpose() * rotCap;
@@ -4007,14 +4007,14 @@ namespace dyno
         auto centerline = cap.centerline().direction();
         Vector<Real, 3> nCapLocal = rotBox.transpose() * centerline.normalize();
 
-		bool parallel = false;
-		const float kCosTol = float(1.0e-6);
+        bool parallel = false;
+        const float kCosTol = float(1.0e-6);
         Matrix3D absC;
         for (int i = 0; i < 3; ++i)
         {
             float val = abs(nCapLocal[i]);
-			if (val <= kCosTol)
-				parallel = true;
+            if (val <= kCosTol)
+                parallel = true;
 
             for (int j = 0; j < 3; ++j)
             {
@@ -4024,63 +4024,63 @@ namespace dyno
 
         Matrix3D absC_t = absC.transpose();
 
-		// Query states
-		Real s;
-		Real bMax = -REAL_MAX;
+        // Query states
+        Real s;
+        Real bMax = -REAL_MAX;
         Real eMax = -REAL_MAX;
         Real dirMax = -REAL_MAX;
-		int bAxis = ~0;
-		int eAxis = ~0;
+        int bAxis = ~0;
+        int eAxis = ~0;
         int dirAxis = ~0;
-		Vector<Real, 3> nB;
-		Vector<Real, 3> nE;
+        Vector<Real, 3> nB;
+        Vector<Real, 3> nE;
         Vector<Real, 3> nDir;
 
         // box's x axis
         s = abs(t.x) - (box.extent.x + absC_t.col(0).dot(Vector<Real, 3>(0, capExtent, 0))) - radius;
-		if (trackFaceAxis(bAxis, bMax, nB, 0, s, rotBox.col(0)))
-			return;
+        if (trackFaceAxis(bAxis, bMax, nB, 0, s, rotBox.col(0)))
+            return;
 
         // box's y axis
-		s = abs(t.y) - (box.extent.y + absC_t.col(1).dot(Vector<Real, 3>(0, capExtent, 0))) - radius;
-		if (trackFaceAxis(bAxis, bMax, nB, 1, s, rotBox.col(1)))
+        s = abs(t.y) - (box.extent.y + absC_t.col(1).dot(Vector<Real, 3>(0, capExtent, 0))) - radius;
+        if (trackFaceAxis(bAxis, bMax, nB, 1, s, rotBox.col(1)))
             return;
 
         // box's z axis
-		s = abs(t.z) - (box.extent.z + absC_t.col(2).dot(Vector<Real, 3>(0, capExtent, 0))) - radius;
-		if (trackFaceAxis(bAxis, bMax, nB, 2, s, rotBox.col(2)))
+        s = abs(t.z) - (box.extent.z + absC_t.col(2).dot(Vector<Real, 3>(0, capExtent, 0))) - radius;
+        if (trackFaceAxis(bAxis, bMax, nB, 2, s, rotBox.col(2)))
             return;
-		
+
         if (!parallel)
         {
-			// Edge axis checks
-			float rA;
-			float rB;
+            // Edge axis checks
+            float rA;
+            float rB;
             Vector<Real, 3> eSepAxis;
 
             // Cross( box.x, centerline )
             eSepAxis = Vector<Real, 3>(Real(0), -nCapLocal.z, nCapLocal.y);
-			rA = boxExt.y * abs(nCapLocal.z) + boxExt.z * abs(nCapLocal.y);
-			rB = radius * eSepAxis.norm();
-			s = abs(t.z * nCapLocal.y - t.y * nCapLocal.z) - (rA + rB);
-			if (trackEdgeAxis(eAxis, eMax, nE, 3, s, eSepAxis))
-				return;
+            rA = boxExt.y * abs(nCapLocal.z) + boxExt.z * abs(nCapLocal.y);
+            rB = radius * eSepAxis.norm();
+            s = abs(t.z * nCapLocal.y - t.y * nCapLocal.z) - (rA + rB);
+            if (trackEdgeAxis(eAxis, eMax, nE, 3, s, eSepAxis))
+                return;
 
-			// Cross( box.y, centerline )
-			eSepAxis = Vector<Real, 3>(nCapLocal.z, Real(0), -nCapLocal.x);
-			rA = boxExt.x * abs(nCapLocal.z) + boxExt.z * abs(nCapLocal.x);
-			rB = radius * eSepAxis.norm();
-			s = abs(t.x * nCapLocal.z - t.z * nCapLocal.x) - (rA + rB);
-			if (trackEdgeAxis(eAxis, eMax, nE, 4, s, eSepAxis))
-				return;
+            // Cross( box.y, centerline )
+            eSepAxis = Vector<Real, 3>(nCapLocal.z, Real(0), -nCapLocal.x);
+            rA = boxExt.x * abs(nCapLocal.z) + boxExt.z * abs(nCapLocal.x);
+            rB = radius * eSepAxis.norm();
+            s = abs(t.x * nCapLocal.z - t.z * nCapLocal.x) - (rA + rB);
+            if (trackEdgeAxis(eAxis, eMax, nE, 4, s, eSepAxis))
+                return;
 
-			// Cross( box.z, centerline )
-			eSepAxis = Vector<Real, 3>(-nCapLocal.y, nCapLocal.x, Real(0));
-			rA = boxExt.x * abs(nCapLocal.y) + boxExt.y * abs(nCapLocal.x);
-			rB = radius * eSepAxis.norm();
-			s = abs(t.y * nCapLocal.x - t.x * nCapLocal.y) - (rA + rB);
-			if (trackEdgeAxis(eAxis, eMax, nE, 5, s, eSepAxis))
-				return;
+            // Cross( box.z, centerline )
+            eSepAxis = Vector<Real, 3>(-nCapLocal.y, nCapLocal.x, Real(0));
+            rA = boxExt.x * abs(nCapLocal.y) + boxExt.y * abs(nCapLocal.x);
+            rB = radius * eSepAxis.norm();
+            s = abs(t.y * nCapLocal.x - t.x * nCapLocal.y) - (rA + rB);
+            if (trackEdgeAxis(eAxis, eMax, nE, 5, s, eSepAxis))
+                return;
         }
 
         TSegment3D<Real> interSeg(Vector<Real, 3>(0), Vector<Real, 3>(0));
@@ -4095,52 +4095,52 @@ namespace dyno
 
             Vector<Real, 3> dirSepAxis = prox.direction();
             s = dirSepAxis.norm() * dirSepAxis.norm() - radius * dirSepAxis.norm();
-			if (trackEdgeAxis(dirAxis, dirMax, nDir, 6, s, dirSepAxis))
-				return;
-		}
+            if (trackEdgeAxis(dirAxis, dirMax, nDir, 6, s, dirSepAxis))
+                return;
+        }
 
-		// Artificial axis bias to improve frame coherence
-		const float kRelTol = float(0.95);
-		const float kAbsTol = float(0.01);
+        // Artificial axis bias to improve frame coherence
+        const float kRelTol = float(0.95);
+        const float kAbsTol = float(0.01);
         const float kAbsTol2 = float(0.00001);
-		int axis;
-		float sMax;
+        int axis;
+        float sMax;
         float ebMax = std::max(eMax, bMax);
-		Vector<Real, 3> n;
+        Vector<Real, 3> n;
 
         if (intersected)
-		{
-			axis = bAxis;
-			sMax = bMax;
-			n = nB;
+        {
+            axis = bAxis;
+            sMax = bMax;
+            n = nB;
         }
         else
         {
-			if (dirMax > ebMax + kAbsTol2)
-			{
-				axis = dirAxis;
-				sMax = dirMax;
-				n = nDir;
-			}
-			else
-			{
-				if (kRelTol * eMax > bMax + kAbsTol)
-				{
-					axis = eAxis;
-					sMax = eMax;
-					n = nE;
-				}
-				else
-				{
-					axis = bAxis;
-					sMax = bMax;
-					n = nB;
-				}
-			}
+            if (dirMax > ebMax + kAbsTol2)
+            {
+                axis = dirAxis;
+                sMax = dirMax;
+                n = nDir;
+            }
+            else
+            {
+                if (kRelTol * eMax > bMax + kAbsTol)
+                {
+                    axis = eAxis;
+                    sMax = eMax;
+                    n = nE;
+                }
+                else
+                {
+                    axis = bAxis;
+                    sMax = bMax;
+                    n = nB;
+                }
+            }
         }
 
-		if (n.dot(v) < float(0.0))
-			n = -n;
+        if (n.dot(v) < float(0.0))
+            n = -n;
 
         if (axis < 3)
         {
@@ -4152,62 +4152,62 @@ namespace dyno
 
             TSegment3D<Real> centerline_inter;
             auto num = centerline_translated.intersect(box, centerline_inter);
-            
+
             ClipVertex incident[2];
             incident[0].v = p0;
             incident[1].v = p1;
 
             Transform3D rtx(box.center, rotBox);
 
-			unsigned char clipEdges[4];
-			Matrix3D basis;
-			Vector<Real, 3> e;
-			computeReferenceEdgesAndBasis(clipEdges, &basis, &e, boxExt, rtx, n, axis);
+            unsigned char clipEdges[4];
+            Matrix3D basis;
+            Vector<Real, 3> e;
+            computeReferenceEdgesAndBasis(clipEdges, &basis, &e, boxExt, rtx, n, axis);
 
-			// Clip the incident face against the reference face side planes
-			ClipVertex out[2];
-			float depths[2];
-			int outNum;
-			outNum = clipEdgeAgainstRectangle(out, depths, rtx.translation(), e, clipEdges, basis, incident);
+            // Clip the incident face against the reference face side planes
+            ClipVertex out[2];
+            float depths[2];
+            int outNum;
+            outNum = clipEdgeAgainstRectangle(out, depths, rtx.translation(), e, clipEdges, basis, incident);
 
-			if (outNum)
-			{
-				m.contactCount = outNum;
-				m.normal = n;
+            if (outNum)
+            {
+                m.contactCount = outNum;
+                m.normal = n;
 
-				for (int i = 0; i < outNum; ++i)
-				{
+                for (int i = 0; i < outNum; ++i)
+                {
                     m.contacts[i].position = out[i].v;
-					m.contacts[i].penetration = depths[i];
-				}
-			}
+                    m.contacts[i].penetration = depths[i];
+                }
+            }
         }
         else if (axis < 6)
         {
-			n = rotBox * n;
+            n = rotBox * n;
 
-			Vector<Real, 3> PA, QA;
-			computeSupportEdge(PA, QA, rotBox, box.center, boxExt, n);
+            Vector<Real, 3> PA, QA;
+            computeSupportEdge(PA, QA, rotBox, box.center, boxExt, n);
 
             Vector<Real, 3> PB = cap.startPoint();
             Vector<Real, 3> QB = cap.endPoint();
 
-			Vector<Real, 3> CA, CB;
-			edgesContact(CA, CB, PA, QA, PB, QB);
+            Vector<Real, 3> CA, CB;
+            edgesContact(CA, CB, PA, QA, PB, QB);
 
-			m.normal = n;
-			m.contactCount = 1;
+            m.normal = n;
+            m.contactCount = 1;
 
-			m.contacts[0].penetration = sMax;
-			m.contacts[0].position = CB - radius * n;
+            m.contacts[0].penetration = sMax;
+            m.contacts[0].position = CB - radius * n;
         }
         else
         {
-			m.normal = n;
-			m.contactCount = 1;
+            m.normal = n;
+            m.contactCount = 1;
 
-			m.contacts[0].penetration = sMax;
-			m.contacts[0].position = prox.v0 - radius * n;
+            m.contacts[0].penetration = sMax;
+            m.contacts[0].position = prox.v0 - radius * n;
         }
     }
 
@@ -4215,7 +4215,7 @@ namespace dyno
     DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Capsule3D& cap, const OBox3D& box)
     {
         request(m, box, cap);
-        
+
         swapContactPair(m);
     }
 
@@ -4233,7 +4233,7 @@ namespace dyno
 
         Real boundary1, boundary2, b1, b2;
 
-    
+
 
         for (int i = 0; i < 4; i++)
         {
@@ -4301,7 +4301,7 @@ namespace dyno
         };
 
         for (int i = 0; i < 6; i++)
-            for(int j = 0; j < 3; j ++)
+            for (int j = 0; j < 3; j++)
             {
                 Vector<Real, 3> dirTet = tet.v[segmentIndex[i][0]] - tet.v[segmentIndex[i][1]];
                 Vector<Real, 3> dirTri = tri.v[triIndex[j][0]] - tri.v[triIndex[j][1]];
@@ -4477,7 +4477,7 @@ namespace dyno
             Vector<Real, 3> dirTet = tet.v[segmentIndex[i][0]] - tet.v[segmentIndex[i][1]];
             Vector<Real, 3> dirCap = cap.centerline().direction();
 
-            
+
 
             axisTmp = dirTet.cross(dirCap);
             if (axisTmp.norm() > EPSILON)
@@ -4512,7 +4512,7 @@ namespace dyno
                 }
             }
         }
-        
+
         setupContactTets(boundary1, boundary2, axis, tet, cap, -sMax, m);
 
         for (uint i = 0; i < m.contactCount; i++)
@@ -4525,7 +4525,7 @@ namespace dyno
     DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const Tet3D& tet, const Capsule3D& cap)
     {
         request(m, cap, tet);
-        
+
         swapContactPair(m);
     }
 
@@ -4561,7 +4561,7 @@ namespace dyno
 
     template<typename Real>
     DYN_FUNC inline bool checkOverlap(
-        Real lowerBoundary1, 
+        Real lowerBoundary1,
         Real upperBoundary1, // A
         Real lowerBoundary2,
         Real upperBoundary2, // B
@@ -4677,7 +4677,7 @@ namespace dyno
             }
         }
 
-        /*printf(" axis = %.3lf  %.3lf  %.3lf\nlb1 = %.3lf lb2 = %.3lf\nub1 = %.3lf ub2 = %.3lf\n", 
+        /*printf(" axis = %.3lf  %.3lf  %.3lf\nlb1 = %.3lf lb2 = %.3lf\nub1 = %.3lf ub2 = %.3lf\n",
             axisNormal[0], axisNormal[1], axisNormal[2],
             lowerBoundary1, lowerBoundary2,
             upperBoundary1, upperBoundary2
@@ -4716,7 +4716,7 @@ namespace dyno
 
         for (int i = 0; i < 3; i++)
         {
-            if(i == 0)
+            if (i == 0)
                 lowerBoundary2 = upperBoundary2 = tri.v[i].dot(axisNormal);
             else
             {
@@ -4724,7 +4724,7 @@ namespace dyno
                 upperBoundary2 = glm::max(upperBoundary2, tri.v[i].dot(axisNormal));
             }
         }
-        
+
         return false;//(lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2, intersectionDistance, boundary1, boundary2);
     }
 
@@ -4763,7 +4763,7 @@ namespace dyno
         Vector<Real, 3> p;
         p = (center - u * extent[0] - v * extent[1] - w * extent[2]);
         lowerBoundary2 = upperBoundary2 = p.dot(axisNormal);
-        
+
         p = (center - u * extent[0] - v * extent[1] + w * extent[2]);
         lowerBoundary2 = glm::min(lowerBoundary2, p.dot(axisNormal));
         upperBoundary2 = glm::max(upperBoundary2, p.dot(axisNormal));
@@ -4771,11 +4771,11 @@ namespace dyno
         p = (center - u * extent[0] + v * extent[1] - w * extent[2]);
         lowerBoundary2 = glm::min(lowerBoundary2, p.dot(axisNormal));
         upperBoundary2 = glm::max(upperBoundary2, p.dot(axisNormal));
-        
+
         p = (center - u * extent[0] + v * extent[1] + w * extent[2]);
         lowerBoundary2 = glm::min(lowerBoundary2, p.dot(axisNormal));
         upperBoundary2 = glm::max(upperBoundary2, p.dot(axisNormal));
-        
+
         p = (center + u * extent[0] - v * extent[1] - w * extent[2]);
         lowerBoundary2 = glm::min(lowerBoundary2, p.dot(axisNormal));
         upperBoundary2 = glm::max(upperBoundary2, p.dot(axisNormal));
@@ -4791,7 +4791,7 @@ namespace dyno
         p = (center + u * extent[0] + v * extent[1] + w * extent[2]);
         lowerBoundary2 = glm::min(lowerBoundary2, p.dot(axisNormal));
         upperBoundary2 = glm::max(upperBoundary2, p.dot(axisNormal));
-        
+
         return checkOverlap(lowerBoundary1, upperBoundary1, lowerBoundary2, upperBoundary2, intersectionDistance, boundary1, boundary2);
     }
 
@@ -4810,20 +4810,20 @@ namespace dyno
         unsigned char boundaryPoints1[4], boundaryPoints2[4];
         cnt1 = cnt2 = 0;
 
-        
+
 
         for (unsigned char i = 0; i < 4; i++)
         {
             if (abs(tet1.v[i].dot(axisNormal) - boundary1) < abs(sMax))
-                boundaryPoints1[cnt1 ++] = i;
+                boundaryPoints1[cnt1++] = i;
             if (abs(tet2.v[i].dot(axisNormal) - boundary2) < abs(sMax))
-                boundaryPoints2[cnt2 ++] = i;
+                boundaryPoints2[cnt2++] = i;
         }
         //printf("cnt1 = %d, cnt2 = %d\n", cnt1, cnt2);
         if (cnt1 == 1 || cnt2 == 1)
         {
-            
-            m.normal = (boundary1 > boundary2) ? axisNormal : - axisNormal;
+
+            m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
             m.contacts[0].penetration = sMax;
             m.contacts[0].position = (cnt1 == 1) ? tet1.v[boundaryPoints1[0]] : tet2.v[boundaryPoints2[0]];
             m.contactCount = 1;
@@ -4832,7 +4832,7 @@ namespace dyno
         else if (cnt1 == 2)
         {
             Segment3D s1(tet1.v[boundaryPoints1[0]], tet1.v[boundaryPoints1[1]]);
-            
+
             if (cnt2 == 2)
             {
                 Segment3D s2(tet2.v[boundaryPoints2[0]], tet2.v[boundaryPoints2[1]]);
@@ -4850,12 +4850,12 @@ namespace dyno
                 Triangle3D t2(tet2.v[boundaryPoints2[0]], tet2.v[boundaryPoints2[1]], tet2.v[boundaryPoints2[2]]);
                 Vector<Real, 3> dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
                 Vector<Real, 3> dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
-                
+
                 if (dirTmp1.cross(axisNormal).norm() < 1e-5)
                 {
                     m.contacts[m.contactCount].penetration = sMax;
                     m.contacts[m.contactCount].position = s1.v0;
-                    m.contactCount ++;
+                    m.contactCount++;
                 }
                 if (dirTmp2.cross(axisNormal).norm() < 1e-5)
                 {
@@ -4863,7 +4863,7 @@ namespace dyno
                     m.contacts[m.contactCount].position = s1.v1;
                     m.contactCount++;
                 }
-                
+
                 for (int i = 0; i < 3; i++)
                 {
                     Segment3D s2(t2.v[(i + 1) % 3], t2.v[(i + 2) % 3]);
@@ -4874,9 +4874,9 @@ namespace dyno
                         dir.direction().normalize().cross(axisNormal).norm());*/
                     if ((!dir.isValid()) ||
                         (
-                        (dir.direction().dot(s1.direction()) < 1e-5) && (dir.direction().dot(s2.direction()) < 1e-5)
+                            (dir.direction().dot(s1.direction()) < 1e-5) && (dir.direction().dot(s2.direction()) < 1e-5)
                             ))
-                    //if(dir.norm() < 1e5)
+                        //if(dir.norm() < 1e5)
                     {
                         //printf("Yes\n");
                         if ((dir.v0 - s1.v0).norm() > 1e-5 && (dir.v0 - s1.v1).norm() > 1e-5)
@@ -4898,7 +4898,7 @@ namespace dyno
                 Segment3D s2(tet2.v[boundaryPoints2[0]], tet2.v[boundaryPoints2[1]]);
                 m.contactCount = 0;
                 m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
-                
+
                 Vector<Real, 3> dirTmp1 = Point3D(s2.v0).project(t1).origin - s2.v0;
                 Vector<Real, 3> dirTmp2 = Point3D(s2.v1).project(t1).origin - s2.v1;
                 if (dirTmp1.cross(axisNormal).norm() < 1e-5)
@@ -4914,15 +4914,15 @@ namespace dyno
                     m.contacts[m.contactCount].position = s2.v1;
                     m.contactCount++;
                 }
-                
+
                 for (int i = 0; i < 3; i++)
                 {
                     Segment3D s1(t1.v[(i + 1) % 3], t1.v[(i + 2) % 3]);
                     Segment3D dir = s2.proximity(s1);
                     if ((!dir.isValid()) ||
                         (
-                        (dir.direction().dot(s1.direction()) < 1e-5) && (dir.direction().dot(s2.direction()) < 1e-5)
-                        ))
+                            (dir.direction().dot(s1.direction()) < 1e-5) && (dir.direction().dot(s2.direction()) < 1e-5)
+                            ))
                     {
                         if ((dir.v0 - s2.v0).norm() > 1e-5 && (dir.v0 - s2.v1).norm() > 1e-5)
                         {
@@ -4955,18 +4955,18 @@ namespace dyno
                         m.contacts[m.contactCount].position = t2.v[i];
                         m.contactCount++;
                     }
-                    
+
                     for (int j = 0; j < 3; j++)
                     {
                         Segment3D s1(t1.v[(i + 1) % 3], t1.v[(i + 2) % 3]);
                         Segment3D s2(t2.v[(j + 1) % 3], t2.v[(j + 2) % 3]);
                         Segment3D dir = s1.proximity(s2);
-                        
+
 
                         if ((!dir.isValid()) ||
                             (
-                            (dir.direction().dot(s1.direction()) < 1e-5) && (dir.direction().dot(s2.direction()) < 1e-5)
-                            )
+                                (dir.direction().dot(s1.direction()) < 1e-5) && (dir.direction().dot(s2.direction()) < 1e-5)
+                                )
                             )
                         {
                             if ((dir.v0 - s1.v0).norm() > 1e-5 && (dir.v0 - s1.v1).norm() > 1e-5)
@@ -4977,7 +4977,7 @@ namespace dyno
                             }
                         }
                     }
-                    
+
                 }
 
             }
@@ -5074,22 +5074,22 @@ namespace dyno
                 //if (cnt2 != 4)
                 //	printf("?????????\n");
 
-                
-                for(int tmp_i = 1; tmp_i < 4; tmp_i ++)
+
+                for (int tmp_i = 1; tmp_i < 4; tmp_i++)
                     for (int tmp_j = tmp_i + 1; tmp_j < 4; tmp_j++)
+                    {
+                        if ((boundaryPoints2[tmp_i] - boundaryPoints2[0]).dot(boundaryPoints2[tmp_j] - boundaryPoints2[0]) < EPSILON)
                         {
-                            if ((boundaryPoints2[tmp_i] - boundaryPoints2[0]).dot(boundaryPoints2[tmp_j] - boundaryPoints2[0]) < EPSILON)
-                            {
-                                int tmp_k = 1 + 2 + 3 - tmp_i - tmp_j;
-                                Vector<Real, 3> p2 = boundaryPoints2[tmp_i];
-                                Vector<Real, 3> p3 = boundaryPoints2[tmp_j];
-                                Vector<Real, 3> p4 = boundaryPoints2[tmp_k];
-                                boundaryPoints2[1] = p2;
-                                boundaryPoints2[2] = p3;
-                                boundaryPoints2[3] = p4;
-                                break;
-                            }
+                            int tmp_k = 1 + 2 + 3 - tmp_i - tmp_j;
+                            Vector<Real, 3> p2 = boundaryPoints2[tmp_i];
+                            Vector<Real, 3> p3 = boundaryPoints2[tmp_j];
+                            Vector<Real, 3> p4 = boundaryPoints2[tmp_k];
+                            boundaryPoints2[1] = p2;
+                            boundaryPoints2[2] = p3;
+                            boundaryPoints2[3] = p4;
+                            break;
                         }
+                    }
 
                 //printf("%.3lf %.3lf %.3lf\n", boundaryPoints2[0][0], boundaryPoints2[0][1], boundaryPoints2[0][2]);
                 //printf("%.3lf %.3lf %.3lf\n", boundaryPoints2[1][0], boundaryPoints2[1][1], boundaryPoints2[1][2]);
@@ -5122,7 +5122,7 @@ namespace dyno
                 t2 = Triangle3D(boundaryPoints2[3], boundaryPoints2[1], boundaryPoints2[2]);
                 dirTmp1 = Point3D(s1.v0).project(t2).origin - s1.v0;
                 dirTmp2 = Point3D(s1.v1).project(t2).origin - s1.v1;
-                
+
                 /*printf("%.3lf %.3lf %.3lf\n", dirTmp1[0], dirTmp1[1], dirTmp1[2]);
                 printf("%.3lf %.3lf %.3lf\n", dirTmp2[0], dirTmp2[1], dirTmp2[2]);*/
 
@@ -5233,7 +5233,7 @@ namespace dyno
                 m.contactCount = 0;
                 m.normal = (boundary1 > boundary2) ? axisNormal : -axisNormal;
 
-                for(int i = 0; i < 4; i ++)
+                for (int i = 0; i < 4; i++)
                     if ((Point3D(boundaryPoints2[i]).project(t1).origin - boundaryPoints2[i]).cross(t1.normal()).norm() < 1e-4)
                     {
                         m.contacts[m.contactCount].penetration = sMax;
@@ -5260,7 +5260,7 @@ namespace dyno
                         m.contactCount++;
                         //printf("a2");
                     }
-                    
+
 
                     Segment3D s1(t1.v[(i + 1) % 3], t1.v[(i + 2) % 3]);
                     Segment3D s2(boundaryPoints2[0], boundaryPoints2[1]);
@@ -5313,7 +5313,7 @@ namespace dyno
                             //printf("c");
                         }
                     }
-                    
+
                 }
 
             }
@@ -5339,9 +5339,9 @@ namespace dyno
         // no penetration when the tets are illegal
         if (abs(tet0.volume()) < EPSILON || abs(tet1.volume()) < EPSILON)
             return;
-        
-        for(int i = 0; i < 4; i ++)
-        { 
+
+        for (int i = 0; i < 4; i++)
+        {
             //tet0 face axis i
             axisTmp = tet0.face(i).normal();
             if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, tet0, tet1) == false)
@@ -5366,7 +5366,7 @@ namespace dyno
             //tet1 face axis i
             axisTmp = tet1.face(i).normal();
             if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, tet0, tet1) == false)
-            { 
+            {
                 m.contactCount = 0;
                 return;
             }
@@ -5395,7 +5395,7 @@ namespace dyno
         2, 3
         };
 
-        for(int i = 0; i < 6; i ++)
+        for (int i = 0; i < 6; i++)
             for (int j = 0; j < 6; j++)
             {
                 Vector<Real, 3> dirTet1 = tet0.v[segmentIndex[i][0]] - tet0.v[segmentIndex[i][1]];
@@ -5414,7 +5414,7 @@ namespace dyno
                     axisTmp /= axisTmp.norm();
                 }
                 if (checkOverlapAxis(l1, u1, l2, u2, sIntersect, b1, b2, axisTmp, tet0, tet1) == false)
-                { 
+                {
                     m.contactCount = 0;
                     return;
                 }
@@ -5559,8 +5559,8 @@ namespace dyno
         for (int i = 0; i < 6; i++)
         {
             Vector<Real, 3> dirTet = tet.v[segmentIndex[i][0]] - tet.v[segmentIndex[i][1]];
-            for(int j = 0; j < 3; j ++)
-            { 
+            for (int j = 0; j < 3; j++)
+            {
                 Vector<Real, 3> boxDir = (j == 0) ? (box.u) : ((j == 1) ? (box.v) : (box.w));
                 axisTmp = dirTet.cross(boxDir);
                 if (axisTmp.norm() > EPSILON)
@@ -5647,7 +5647,7 @@ namespace dyno
         Real r0 = sphere.radius;
 
         Point3D vproj = c0.project(tri);
-        
+
 
         Segment3D dir = vproj - c0;
         Real sMax = dir.direction().norm() - r0;
@@ -5658,8 +5658,8 @@ namespace dyno
         /*if (dir.direction().norm() < EPSILON)
             return;*/
 
-        /*if ((dir.direction().normalize().cross(tri.normal().normalize())).norm() > EPSILON)
-            return;*/
+            /*if ((dir.direction().normalize().cross(tri.normal().normalize())).norm() > EPSILON)
+                return;*/
 
         m.normal = dir.direction().normalize();
         m.contacts[0].penetration = sMax;
@@ -5672,5 +5672,2032 @@ namespace dyno
     {
         request(m, sphere, tri);
         m.normal *= -1;
+    }
+
+    template<typename Real>
+    __forceinline__ DYN_FUNC bool solveLinearSystem22(
+        Real m00, Real m01,
+        Real m10, Real m11,
+        Real v0, Real v1,
+        Real& s, Real& t)
+    {
+        const Real det = fma(m00, m11, -m01 * m10);
+
+
+        if (abs(det) < Real(100) * std::numeric_limits<Real>::epsilon()) {
+            return false;
+        }
+
+
+        const Real invDet = Real(1) / det;
+
+        s = fma(m11, v0, -m01 * v1) * invDet;
+        t = fma(m00, v1, -m10 * v0) * invDet;
+
+        return true;
+    }
+
+    template<typename Real>
+    DYN_FUNC Real minimizeQuardratic1D(Real a, Real b, Real c, Real& t_min)
+    {
+        const Real t_linear = (b > Real(0)) ? Real(0) : Real(1);
+        const Real val_linear = fma(b, t_linear, c);
+
+        const Real inv2a = Real(1) / (Real(2) * a);
+        const Real t_vertex = -b * inv2a;
+
+        const Real t_clamped = std::max(Real(0), std::min(Real(1), t_vertex));
+
+        const Real val_quad = fma(fma(a, t_clamped, b), t_clamped, c);
+
+        const bool is_linear_case = (std::abs(a) < EPSILON);
+        t_min = is_linear_case ? t_linear : t_clamped;
+        return is_linear_case ? val_linear : val_quad;
+    }
+
+    template<typename Real>
+    struct MatContactCandidate
+    {
+        bool valid = false;
+        Vector<Real, 3> centerA = Vector<Real, 3>(Real(0));
+        Vector<Real, 3> centerB = Vector<Real, 3>(Real(0));
+        Vector<Real, 3> normal = Vector<Real, 3>(Real(0), Real(1), Real(0));
+        Real radiusA = Real(0);
+        Real radiusB = Real(0);
+        Real phi = REAL_infinity;
+    };
+
+    template<typename Real>
+    struct MatSlabInfo
+    {
+        bool valid = false;
+        Vector<Real, 3> p0 = Vector<Real, 3>(Real(0));
+        Vector<Real, 3> e1 = Vector<Real, 3>(Real(0));
+        Vector<Real, 3> e2 = Vector<Real, 3>(Real(0));
+        Vector<Real, 3> n = Vector<Real, 3>(Real(0), Real(1), Real(0));
+        Vector<Real, 3> g = Vector<Real, 3>(Real(0));
+        Real r0 = Real(0);
+        Real dr1 = Real(0);
+        Real dr2 = Real(0);
+        Real gNormSq = Real(0);
+        Real gram00 = Real(0);
+        Real gram01 = Real(0);
+        Real gram11 = Real(0);
+        Real invDet = Real(0);
+    };
+
+    template<typename Real>
+    struct MatSlabFacePoint
+    {
+        bool valid = false;
+        Vector<Real, 3> center = Vector<Real, 3>(Real(0));
+        Real radius = Real(0);
+        Real u = Real(0);
+        Real v = Real(0);
+    };
+
+    template<typename Real>
+    DYN_FUNC inline Real matAbs(Real x)
+    {
+        return x < Real(0) ? -x : x;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline Real matClamp01(Real x)
+    {
+        return x < Real(0) ? Real(0) : (x > Real(1) ? Real(1) : x);
+    }
+
+    template<typename Real>
+    DYN_FUNC inline Real matMax3(Real a, Real b, Real c)
+    {
+        return maximum(a, maximum(b, c));
+    }
+
+    template<typename Real>
+    DYN_FUNC inline Vector<Real, 3> matNormalizedOrFallback(
+        const Vector<Real, 3>& v,
+        const Vector<Real, 3>& fallback)
+    {
+        Vector<Real, 3> dir = v;
+        Real len = dir.norm();
+        if (len > EPSILON) {
+            dir /= len;
+            return dir;
+        }
+
+        dir = fallback;
+        len = dir.norm();
+        if (len > EPSILON) {
+            dir /= len;
+            return dir;
+        }
+
+        return Vector<Real, 3>(Real(0), Real(1), Real(0));
+    }
+
+    template<typename Real>
+    DYN_FUNC inline MatContactCandidate<Real> makeMatCandidate(
+        const Vector<Real, 3>& centerA,
+        const Real radiusA,
+        const Vector<Real, 3>& centerB,
+        const Real radiusB,
+        const Vector<Real, 3>& fallbackNormal)
+    {
+        MatContactCandidate<Real> cand;
+        cand.valid = true;
+        cand.centerA = centerA;
+        cand.centerB = centerB;
+        cand.radiusA = radiusA;
+        cand.radiusB = radiusB;
+
+        const Vector<Real, 3> delta = centerB - centerA;
+        const Real distSq = delta.dot(delta);
+        const Real dist = sqrt(distSq > Real(0) ? distSq : Real(0));
+
+        cand.normal = matNormalizedOrFallback(delta, fallbackNormal);
+        cand.phi = dist - (radiusA + radiusB);
+        return cand;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void updateMatCandidate(MatContactCandidate<Real>& best, const MatContactCandidate<Real>& cand)
+    {
+        if (!cand.valid) {
+            return;
+        }
+
+        if (!best.valid || cand.phi < best.phi) {
+            best = cand;
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline MatContactCandidate<Real> swapMatCandidate(const MatContactCandidate<Real>& cand)
+    {
+        MatContactCandidate<Real> swapped = cand;
+        swapped.centerA = cand.centerB;
+        swapped.centerB = cand.centerA;
+        swapped.radiusA = cand.radiusB;
+        swapped.radiusB = cand.radiusA;
+        swapped.normal = -cand.normal;
+        return swapped;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void writeMatCandidate(TManifold<Real>& m, const MatContactCandidate<Real>& cand, int tagOnAOrB)
+    {
+        if (!cand.valid || cand.phi > EPSILON) {
+            m.contactCount = 0;
+            return;
+        }
+
+        m.normal = cand.normal;
+
+        const Vector<Real, 3> posA = cand.centerA + cand.radiusA * cand.normal;
+        const Vector<Real, 3> posB = cand.centerB - cand.radiusB * cand.normal;
+        const Vector<Real, 3> contactPos = tagOnAOrB == 0 ? posA : posB;
+
+        m.pushContactReWrite(contactPos, cand.phi);
+    }
+
+    template<typename Real>
+    struct MatBoxProjection
+    {
+        bool inside = false;
+        Vector<Real, 3> closestPoint = Vector<Real, 3>(Real(0));
+        Vector<Real, 3> normal = Vector<Real, 3>(Real(1), Real(0), Real(0));
+        Real signedDistance = Real(0);
+    };
+
+    template<typename Real>
+    DYN_FUNC inline Vector<Real, 3> matBoxLocalToWorld(const TOrientedBox3D<Real>& box, const Vector<Real, 3>& local)
+    {
+        return box.u * local[0] + box.v * local[1] + box.w * local[2];
+    }
+
+    template<typename Real>
+    DYN_FUNC inline Vector<Real, 3> matBoxWorldToLocal(const TOrientedBox3D<Real>& box, const Vector<Real, 3>& point)
+    {
+        const Vector<Real, 3> offset = point - box.center;
+        return Vector<Real, 3>(
+            offset.dot(box.u),
+            offset.dot(box.v),
+            offset.dot(box.w));
+    }
+
+    template<typename Real>
+    DYN_FUNC inline Vector<Real, 3> matBoxLocalToWorldPoint(const TOrientedBox3D<Real>& box, const Vector<Real, 3>& local)
+    {
+        return box.center + matBoxLocalToWorld<Real>(box, local);
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void evaluateMatBoxProjection(
+        MatBoxProjection<Real>& proj,
+        const TOrientedBox3D<Real>& box,
+        const Vector<Real, 3>& point)
+    {
+        proj = MatBoxProjection<Real>();
+
+        const Vector<Real, 3> pLocal = matBoxWorldToLocal<Real>(box, point);
+
+        Vector<Real, 3> qLocal = pLocal;
+        bool inside = true;
+        for (int i = 0; i < 3; ++i) {
+            if (pLocal[i] < -box.extent[i] || pLocal[i] > box.extent[i]) {
+                inside = false;
+            }
+
+            if (qLocal[i] < -box.extent[i]) {
+                qLocal[i] = -box.extent[i];
+            }
+            else if (qLocal[i] > box.extent[i]) {
+                qLocal[i] = box.extent[i];
+            }
+        }
+
+        proj.inside = inside;
+        if (inside) {
+            int axis = 0;
+            Real minGap = REAL_infinity;
+            for (int i = 0; i < 3; ++i) {
+                const Real gap = box.extent[i] - matAbs(pLocal[i]);
+                if (gap < minGap) {
+                    minGap = gap;
+                    axis = i;
+                }
+            }
+
+            const Real sign = pLocal[axis] >= Real(0) ? Real(1) : Real(-1);
+            qLocal = pLocal;
+            qLocal[axis] = sign * box.extent[axis];
+
+            Vector<Real, 3> localNormal(Real(0));
+            localNormal[axis] = sign;
+            proj.normal = matBoxLocalToWorld<Real>(box, localNormal);
+
+            const Vector<Real, 3> deltaLocal = pLocal - qLocal;
+            const Real distSq = deltaLocal.dot(deltaLocal);
+            proj.signedDistance = -sqrt(distSq > Real(0) ? distSq : Real(0));
+        }
+        else {
+            const Vector<Real, 3> deltaLocal = pLocal - qLocal;
+            const Real distSq = deltaLocal.dot(deltaLocal);
+            const Real dist = sqrt(distSq > Real(0) ? distSq : Real(0));
+            proj.normal = dist > EPSILON ? matBoxLocalToWorld<Real>(box, deltaLocal / dist) : box.u;
+            proj.signedDistance = dist;
+        }
+
+        proj.closestPoint = matBoxLocalToWorldPoint<Real>(box, qLocal);
+    }
+
+    template<typename Real>
+    DYN_FUNC inline MatContactCandidate<Real> makeMatBoxCandidate(
+        const TOrientedBox3D<Real>& box,
+        const Vector<Real, 3>& matCenter,
+        const Real matRadius)
+    {
+        MatBoxProjection<Real> proj;
+        evaluateMatBoxProjection(proj, box, matCenter);
+
+        MatContactCandidate<Real> cand;
+        cand.valid = true;
+        cand.centerA = proj.closestPoint;
+        cand.centerB = matCenter;
+        cand.normal = proj.normal;
+        cand.radiusA = Real(0);
+        cand.radiusB = matRadius;
+
+        const Real rawPhi = proj.signedDistance - matRadius;
+        cand.phi = rawPhi;
+        if (proj.inside && matRadius > EPSILON) {
+            cand.phi = maximum(rawPhi, -Real(2) * matRadius);
+        }
+        return cand;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline bool matSegmentIntersectsBox(
+        const TOrientedBox3D<Real>& box,
+        const Vector<Real, 3>& p0,
+        const Vector<Real, 3>& p1,
+        Real& tHit)
+    {
+        const Vector<Real, 3> l0 = matBoxWorldToLocal<Real>(box, p0);
+        const Vector<Real, 3> l1 = matBoxWorldToLocal<Real>(box, p1);
+        const Vector<Real, 3> d = l1 - l0;
+
+        Real tMin = Real(0);
+        Real tMax = Real(1);
+        const Real tol = Real(64) * EPSILON;
+
+        for (int i = 0; i < 3; ++i) {
+            if (matAbs(d[i]) <= tol) {
+                if (l0[i] < -box.extent[i] || l0[i] > box.extent[i]) {
+                    return false;
+                }
+                continue;
+            }
+
+            Real t0 = (-box.extent[i] - l0[i]) / d[i];
+            Real t1 = (box.extent[i] - l0[i]) / d[i];
+            if (t0 > t1) {
+                const Real tmp = t0;
+                t0 = t1;
+                t1 = tmp;
+            }
+
+            if (t0 > tMin) {
+                tMin = t0;
+            }
+            if (t1 < tMax) {
+                tMax = t1;
+            }
+            if (tMin > tMax) {
+                return false;
+            }
+        }
+
+        tHit = matClamp01(Real(0.5) * (tMin + tMax));
+        return true;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void updateMatSegmentCandidate(
+        TSegment3D<Real>& best,
+        Real& bestDistSq,
+        const TSegment3D<Real>& cand)
+    {
+        const Real distSq = cand.lengthSquared();
+        if (distSq < bestDistSq) {
+            bestDistSq = distSq;
+            best = cand;
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void matSegmentBoxProximity(
+        TSegment3D<Real>& out,
+        const TOrientedBox3D<Real>& box,
+        const Vector<Real, 3>& p0,
+        const Vector<Real, 3>& p1)
+    {
+        const Vector<Real, 3> axis = p1 - p0;
+        const Real axisLenSq = axis.dot(axis);
+        if (axisLenSq <= EPSILON * EPSILON) {
+            MatBoxProjection<Real> proj;
+            evaluateMatBoxProjection(proj, box, p0);
+            out = TSegment3D<Real>(p0, proj.closestPoint);
+            return;
+        }
+
+        Real tHit = Real(0);
+        if (matSegmentIntersectsBox<Real>(box, p0, p1, tHit)) {
+            const Vector<Real, 3> p = p0 + axis * tHit;
+            out = TSegment3D<Real>(p, p);
+            return;
+        }
+
+        TSegment3D<Real> best;
+        Real bestDistSq = REAL_infinity;
+
+        MatBoxProjection<Real> proj0;
+        evaluateMatBoxProjection(proj0, box, p0);
+        updateMatSegmentCandidate(best, bestDistSq, TSegment3D<Real>(p0, proj0.closestPoint));
+
+        MatBoxProjection<Real> proj1;
+        evaluateMatBoxProjection(proj1, box, p1);
+        updateMatSegmentCandidate(best, bestDistSq, TSegment3D<Real>(p1, proj1.closestPoint));
+
+        const TSegment3D<Real> seg(p0, p1);
+        for (int i = 0; i < 12; ++i) {
+            updateMatSegmentCandidate(best, bestDistSq, seg.proximity(box.edge(i)));
+        }
+
+        out = best;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline Real evalMatConeParameter(const TMedialCone3D<Real>& cone, const Vector<Real, 3>& point)
+    {
+        const Vector<Real, 3> axis = cone.v[1] - cone.v[0];
+        const Real axisLenSq = axis.dot(axis);
+        if (axisLenSq <= EPSILON * EPSILON) {
+            return Real(0);
+        }
+
+        return matClamp01(axis.dot(point - cone.v[0]) / axisLenSq);
+    }
+
+    template<typename Real>
+    DYN_FUNC inline bool addMatPointCandidate(
+        Vector<Real, 3>* values,
+        int& count,
+        const int maxCount,
+        const Vector<Real, 3>& point)
+    {
+        const Real tolSq = Real(256) * EPSILON * EPSILON;
+        for (int i = 0; i < count; ++i) {
+            const Vector<Real, 3> diff = values[i] - point;
+            if (diff.dot(diff) <= tolSq) {
+                return false;
+            }
+        }
+
+        if (count >= maxCount) {
+            return false;
+        }
+
+        values[count++] = point;
+        return true;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline bool matCanRejectSphereCone(
+        const Sphere3D& sphere,
+        const MedialCone3D& cone)
+    {
+        const Segment3D axis(cone.v[0], cone.v[1]);
+        const Real radiusSum = sphere.radius + maximum(cone.radius[0], cone.radius[1]);
+        return Point3D(sphere.center).distanceSquared(axis) > radiusSum * radiusSum;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline bool matCanRejectSlabSphere(
+        const MedialSlab3D& slab,
+        const Sphere3D& sphere)
+    {
+        const Triangle3D tri(slab.v[0], slab.v[1], slab.v[2]);
+        const Real radiusSum = sphere.radius + matMax3(slab.radius[0], slab.radius[1], slab.radius[2]);
+        return Point3D(sphere.center).distanceSquared(tri) > radiusSum * radiusSum;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline bool matCanRejectSlabCone(
+        const MedialSlab3D& slab,
+        const MedialCone3D& cone)
+    {
+        const Triangle3D tri(slab.v[0], slab.v[1], slab.v[2]);
+        const Segment3D axis(cone.v[0], cone.v[1]);
+        const Real radiusSum = matMax3(slab.radius[0], slab.radius[1], slab.radius[2]) + maximum(cone.radius[0], cone.radius[1]);
+        return axis.distanceSquared(tri) > radiusSum * radiusSum;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline bool matCanRejectSlabSlab(
+        const MedialSlab3D& slab1,
+        const MedialSlab3D& slab2)
+    {
+        const Triangle3D tri1(slab1.v[0], slab1.v[1], slab1.v[2]);
+        const Triangle3D tri2(slab2.v[0], slab2.v[1], slab2.v[2]);
+        const Real radiusSum =
+            matMax3(slab1.radius[0], slab1.radius[1], slab1.radius[2]) +
+            matMax3(slab2.radius[0], slab2.radius[1], slab2.radius[2]);
+        return tri1.distanceSquared(tri2) > radiusSum * radiusSum;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline bool addMatScalarCandidate(Real* values, int& count, const int maxCount, Real t)
+    {
+        const Real tol = Real(32) * EPSILON;
+        if (t < -tol || t > Real(1) + tol) {
+            return false;
+        }
+
+        t = matClamp01(t);
+        for (int i = 0; i < count; ++i) {
+            if (matAbs(values[i] - t) <= tol) {
+                return false;
+            }
+        }
+
+        if (count >= maxCount) {
+            return false;
+        }
+
+        values[count++] = t;
+        return true;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline bool addMatScalarCandidateInInterval(
+        Real* values,
+        int& count,
+        const int maxCount,
+        Real t,
+        Real tMin,
+        Real tMax)
+    {
+        const Real tol = Real(32) * EPSILON;
+        if (t < tMin - tol || t > tMax + tol) {
+            return false;
+        }
+
+        return addMatScalarCandidate(values, count, maxCount, t);
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void addMatLinearRootCandidate(
+        Real* values,
+        int& count,
+        const int maxCount,
+        const Real base,
+        const Real slope,
+        const Real rhs,
+        const Real tMin,
+        const Real tMax)
+    {
+        const Real tol = Real(64) * EPSILON;
+        if (matAbs(slope) <= tol) {
+            return;
+        }
+
+        const Real t = (rhs - base) / slope;
+        addMatScalarCandidateInInterval(values, count, maxCount, t, tMin, tMax);
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void sortMatScalars(Real* values, const int count)
+    {
+        for (int i = 1; i < count; ++i) {
+            const Real v = values[i];
+            int j = i - 1;
+            while (j >= 0 && values[j] > v) {
+                values[j + 1] = values[j];
+                --j;
+            }
+            values[j + 1] = v;
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void addMatSqrtMinusLinearStationary(
+        Real* values,
+        int& count,
+        const int maxCount,
+        const Real a,
+        const Real b,
+        const Real c,
+        const Real linearSlope,
+        const Real xMin,
+        const Real xMax)
+    {
+        const Real tol = Real(128) * EPSILON;
+        if (xMax - xMin <= tol) {
+            return;
+        }
+
+        if (matAbs(a) <= tol) {
+            return;
+        }
+
+        if (matAbs(linearSlope) <= tol) {
+            addMatScalarCandidateInInterval(values, count, maxCount, -b / a, xMin, xMax);
+            return;
+        }
+
+        const Real aa = a * (a - linearSlope * linearSlope);
+        const Real bb = Real(2) * b * (a - linearSlope * linearSlope);
+        const Real cc = b * b - linearSlope * linearSlope * c;
+
+        if (matAbs(aa) <= tol) {
+            if (matAbs(bb) > tol) {
+                const Real x = -cc / bb;
+                const Real q = fma(fma(a, x, Real(2) * b), x, c);
+                if (q > tol) {
+                    const Real d = sqrt(q);
+                    if (matAbs((a * x + b) - linearSlope * d) <= Real(512) * EPSILON) {
+                        addMatScalarCandidateInInterval(values, count, maxCount, x, xMin, xMax);
+                    }
+                }
+            }
+            return;
+        }
+
+        const Real disc = bb * bb - Real(4) * aa * cc;
+        if (disc < -tol) {
+            return;
+        }
+
+        const Real sqrtDisc = sqrt(disc > Real(0) ? disc : Real(0));
+        const Real roots[2] = {
+            (-bb - sqrtDisc) / (Real(2) * aa),
+            (-bb + sqrtDisc) / (Real(2) * aa)
+        };
+
+        for (int i = 0; i < 2; ++i) {
+            const Real x = roots[i];
+            const Real q = fma(fma(a, x, Real(2) * b), x, c);
+            if (q <= tol) {
+                continue;
+            }
+
+            const Real d = sqrt(q);
+            if (matAbs((a * x + b) - linearSlope * d) <= Real(512) * EPSILON) {
+                addMatScalarCandidateInInterval(values, count, maxCount, x, xMin, xMax);
+            }
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline bool buildMatSlabInfo(MatSlabInfo<Real>& info, const MedialSlab3D& slab)
+    {
+        info = MatSlabInfo<Real>();
+        info.p0 = slab.v[0];
+        info.e1 = slab.v[1] - slab.v[0];
+        info.e2 = slab.v[2] - slab.v[0];
+        info.r0 = slab.radius[0];
+        info.dr1 = slab.radius[1] - slab.radius[0];
+        info.dr2 = slab.radius[2] - slab.radius[0];
+
+        const Vector<Real, 3> nRaw = info.e1.cross(info.e2);
+        const Real nLenSq = nRaw.dot(nRaw);
+        if (nLenSq <= EPSILON * EPSILON) {
+            return false;
+        }
+
+        const Real nLen = sqrt(nLenSq);
+        info.n = nRaw / nLen;
+
+        info.gram00 = info.e1.dot(info.e1);
+        info.gram01 = info.e1.dot(info.e2);
+        info.gram11 = info.e2.dot(info.e2);
+
+        const Real det = fma(info.gram00, info.gram11, -info.gram01 * info.gram01);
+        if (matAbs(det) <= Real(64) * EPSILON) {
+            return false;
+        }
+
+        info.invDet = Real(1) / det;
+
+        const Real alpha = (info.gram11 * info.dr1 - info.gram01 * info.dr2) * info.invDet;
+        const Real beta = (info.gram00 * info.dr2 - info.gram01 * info.dr1) * info.invDet;
+
+        info.g = info.e1 * alpha + info.e2 * beta;
+        info.gNormSq = info.g.dot(info.g);
+        info.valid = true;
+        return true;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline bool solveMatSlabBarycentric(
+        const MatSlabInfo<Real>& info,
+        const Vector<Real, 3>& p,
+        Real& u,
+        Real& v)
+    {
+        if (!info.valid) {
+            return false;
+        }
+
+        const Vector<Real, 3> d = p - info.p0;
+        const Real rhs0 = info.e1.dot(d);
+        const Real rhs1 = info.e2.dot(d);
+
+        u = (info.gram11 * rhs0 - info.gram01 * rhs1) * info.invDet;
+        v = (info.gram00 * rhs1 - info.gram01 * rhs0) * info.invDet;
+        return true;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void solveMatSlabCoefficients(
+        const MatSlabInfo<Real>& info,
+        const Vector<Real, 3>& vec,
+        Real& uCoeff,
+        Real& vCoeff)
+    {
+        const Real rhs0 = info.e1.dot(vec);
+        const Real rhs1 = info.e2.dot(vec);
+        uCoeff = (info.gram11 * rhs0 - info.gram01 * rhs1) * info.invDet;
+        vCoeff = (info.gram00 * rhs1 - info.gram01 * rhs0) * info.invDet;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline Vector<Real, 3> evalMatSlabPoint(const MatSlabInfo<Real>& info, Real u, Real v)
+    {
+        return info.p0 + info.e1 * u + info.e2 * v;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline Real evalMatSlabRadius(const MatSlabInfo<Real>& info, Real u, Real v)
+    {
+        return info.r0 + info.dr1 * u + info.dr2 * v;
+    }
+
+    template<typename Real>
+    struct MatParamPolygon
+    {
+        Vector<Real, 2> p[16];
+        int count = 0;
+    };
+
+    template<typename Real>
+    DYN_FUNC inline Vector<Real, 3> evalMatSlabLocalPoint(
+        const Vector<Real, 3>& p0,
+        const Vector<Real, 3>& e1,
+        const Vector<Real, 3>& e2,
+        const Vector<Real, 2>& uv)
+    {
+        return p0 + e1 * uv[0] + e2 * uv[1];
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void updateMatBoxSlabAt(
+        MatContactCandidate<Real>& best,
+        const TOrientedBox3D<Real>& box,
+        const MatSlabInfo<Real>& info,
+        Real u,
+        Real v)
+    {
+        const Real tol = Real(256) * EPSILON;
+        if (u < -tol || v < -tol || u + v > Real(1) + tol) {
+            return;
+        }
+
+        u = matClamp01(u);
+        v = matClamp01(v);
+        const Real uv = u + v;
+        if (uv > Real(1)) {
+            const Real inv = Real(1) / uv;
+            u *= inv;
+            v *= inv;
+        }
+
+        updateMatCandidate(best, makeMatBoxCandidate<Real>(
+            box,
+            evalMatSlabPoint(info, u, v),
+            evalMatSlabRadius(info, u, v)));
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void addMatParamPolygonPoint(
+        MatParamPolygon<Real>& poly,
+        const Vector<Real, 2>& p)
+    {
+        if (poly.count >= 16) {
+            return;
+        }
+
+        const Real tolSq = Real(256) * EPSILON * EPSILON;
+        for (int i = 0; i < poly.count; ++i) {
+            const Vector<Real, 2> d = poly.p[i] - p;
+            if (d.dot(d) <= tolSq) {
+                return;
+            }
+        }
+
+        poly.p[poly.count++] = p;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void clipMatParamPolygonLessEqual(
+        MatParamPolygon<Real>& dst,
+        const MatParamPolygon<Real>& src,
+        const Real a,
+        const Real b,
+        const Real c)
+    {
+        dst = MatParamPolygon<Real>();
+        if (src.count == 0) {
+            return;
+        }
+
+        const Real tol = Real(256) * EPSILON;
+        Vector<Real, 2> prev = src.p[src.count - 1];
+        Real prevVal = a * prev[0] + b * prev[1] + c;
+        bool prevInside = prevVal <= tol;
+
+        for (int i = 0; i < src.count; ++i) {
+            const Vector<Real, 2> curr = src.p[i];
+            const Real currVal = a * curr[0] + b * curr[1] + c;
+            const bool currInside = currVal <= tol;
+
+            if (prevInside != currInside) {
+                const Real denom = prevVal - currVal;
+                if (matAbs(denom) > tol) {
+                    const Real s = prevVal / denom;
+                    addMatParamPolygonPoint(dst, prev + (curr - prev) * s);
+                }
+            }
+
+            if (currInside) {
+                addMatParamPolygonPoint(dst, curr);
+            }
+
+            prev = curr;
+            prevVal = currVal;
+            prevInside = currInside;
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void buildMatSlabBoxCellPolygon(
+        MatParamPolygon<Real>& poly,
+        const Vector<Real, 3>& p0Local,
+        const Vector<Real, 3>& e1Local,
+        const Vector<Real, 3>& e2Local,
+        const Vector<Real, 3>& extent,
+        const int state[3])
+    {
+        poly = MatParamPolygon<Real>();
+        poly.p[0] = Vector<Real, 2>(Real(0), Real(0));
+        poly.p[1] = Vector<Real, 2>(Real(1), Real(0));
+        poly.p[2] = Vector<Real, 2>(Real(0), Real(1));
+        poly.count = 3;
+
+        MatParamPolygon<Real> tmp;
+        for (int axis = 0; axis < 3; ++axis) {
+            const Real a = e1Local[axis];
+            const Real b = e2Local[axis];
+            const Real c = p0Local[axis];
+
+            if (state[axis] > 0) {
+                clipMatParamPolygonLessEqual(tmp, poly, -a, -b, extent[axis] - c);
+                poly = tmp;
+            }
+            else if (state[axis] < 0) {
+                clipMatParamPolygonLessEqual(tmp, poly, a, b, c + extent[axis]);
+                poly = tmp;
+            }
+            else {
+                clipMatParamPolygonLessEqual(tmp, poly, a, b, c - extent[axis]);
+                poly = tmp;
+                clipMatParamPolygonLessEqual(tmp, poly, -a, -b, -c - extent[axis]);
+                poly = tmp;
+            }
+
+            if (poly.count == 0) {
+                return;
+            }
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline bool matSlabParamInCell(
+        const Vector<Real, 3>& p0Local,
+        const Vector<Real, 3>& e1Local,
+        const Vector<Real, 3>& e2Local,
+        const Vector<Real, 3>& extent,
+        const int state[3],
+        const Vector<Real, 2>& uv)
+    {
+        const Real tol = Real(512) * EPSILON;
+        if (uv[0] < -tol || uv[1] < -tol || uv[0] + uv[1] > Real(1) + tol) {
+            return false;
+        }
+
+        const Vector<Real, 3> p = evalMatSlabLocalPoint(p0Local, e1Local, e2Local, uv);
+        for (int axis = 0; axis < 3; ++axis) {
+            if (state[axis] > 0) {
+                if (p[axis] < extent[axis] - tol) {
+                    return false;
+                }
+            }
+            else if (state[axis] < 0) {
+                if (p[axis] > -extent[axis] + tol) {
+                    return false;
+                }
+            }
+            else {
+                if (p[axis] < -extent[axis] - tol || p[axis] > extent[axis] + tol) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void updateMatBoxSlabParamIfValid(
+        MatContactCandidate<Real>& best,
+        const TOrientedBox3D<Real>& box,
+        const MatSlabInfo<Real>& info,
+        const Vector<Real, 3>& p0Local,
+        const Vector<Real, 3>& e1Local,
+        const Vector<Real, 3>& e2Local,
+        const Vector<Real, 3>& extent,
+        const int state[3],
+        const Vector<Real, 2>& uv)
+    {
+        if (matSlabParamInCell(p0Local, e1Local, e2Local, extent, state, uv)) {
+            updateMatBoxSlabAt(best, box, info, uv[0], uv[1]);
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void minimizeMatBoxSlabEdge(
+        MatContactCandidate<Real>& best,
+        const TOrientedBox3D<Real>& box,
+        const MatSlabInfo<Real>& info,
+        const Vector<Real, 3>& p0Local,
+        const Vector<Real, 3>& e1Local,
+        const Vector<Real, 3>& e2Local,
+        const Vector<Real, 3>& extent,
+        const int state[3],
+        const Vector<Real, 2>& aUv,
+        const Vector<Real, 2>& bUv)
+    {
+        Real xs[8];
+        int xCount = 0;
+        addMatScalarCandidate(xs, xCount, 8, Real(0));
+        addMatScalarCandidate(xs, xCount, 8, Real(1));
+
+        const Vector<Real, 2> dirUv = bUv - aUv;
+        Real qa = Real(0);
+        Real qb = Real(0);
+        Real qc = Real(0);
+        int activeCount = 0;
+
+        for (int axis = 0; axis < 3; ++axis) {
+            if (state[axis] == 0) {
+                continue;
+            }
+
+            const Real sign = Real(state[axis]);
+            const Real y0 = sign * (p0Local[axis] + e1Local[axis] * aUv[0] + e2Local[axis] * aUv[1]) - extent[axis];
+            const Real yd = sign * (e1Local[axis] * dirUv[0] + e2Local[axis] * dirUv[1]);
+            qa += yd * yd;
+            qb += y0 * yd;
+            qc += y0 * y0;
+            ++activeCount;
+        }
+
+        if (activeCount > 0) {
+            const Real radiusSlope = info.dr1 * dirUv[0] + info.dr2 * dirUv[1];
+            addMatSqrtMinusLinearStationary(xs, xCount, 8, qa, qb, qc, radiusSlope, Real(0), Real(1));
+        }
+
+        for (int i = 0; i < xCount; ++i) {
+            updateMatBoxSlabParamIfValid(best, box, info, p0Local, e1Local, e2Local, extent, state, aUv + dirUv * xs[i]);
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void matSlabFaceAffine(
+        Real& a,
+        Real& b,
+        Real& c,
+        const Vector<Real, 3>& p0Local,
+        const Vector<Real, 3>& e1Local,
+        const Vector<Real, 3>& e2Local,
+        const Vector<Real, 3>& extent,
+        const MatSlabInfo<Real>& info,
+        const int faceId)
+    {
+        const int axis = faceId / 2;
+        const Real sign = (faceId & 1) ? Real(1) : Real(-1);
+        a = sign * e1Local[axis] - info.dr1;
+        b = sign * e2Local[axis] - info.dr2;
+        c = sign * p0Local[axis] - extent[axis] - info.r0;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void minimizeMatBoxSlabInsideCell(
+        MatContactCandidate<Real>& best,
+        const TOrientedBox3D<Real>& box,
+        const MatSlabInfo<Real>& info,
+        const Vector<Real, 3>& p0Local,
+        const Vector<Real, 3>& e1Local,
+        const Vector<Real, 3>& e2Local,
+        const Vector<Real, 3>& extent,
+        const int state[3],
+        const MatParamPolygon<Real>& poly)
+    {
+        Real fa[6], fb[6], fc[6];
+        for (int i = 0; i < 6; ++i) {
+            matSlabFaceAffine(fa[i], fb[i], fc[i], p0Local, e1Local, e2Local, extent, info, i);
+        }
+
+        for (int i = 0; i < poly.count; ++i) {
+            updateMatBoxSlabParamIfValid(best, box, info, p0Local, e1Local, e2Local, extent, state, poly.p[i]);
+        }
+
+        const Real tol = Real(256) * EPSILON;
+        for (int i = 0; i < 6; ++i) {
+            for (int j = i + 1; j < 6; ++j) {
+                const Real a0 = fa[i] - fa[j];
+                const Real b0 = fb[i] - fb[j];
+                const Real c0 = fc[i] - fc[j];
+
+                for (int edgeId = 0; edgeId < poly.count; ++edgeId) {
+                    const Vector<Real, 2> pA = poly.p[edgeId];
+                    const Vector<Real, 2> pB = poly.p[(edgeId + 1) % poly.count];
+                    const Vector<Real, 2> dir = pB - pA;
+                    const Real denom = a0 * dir[0] + b0 * dir[1];
+                    if (matAbs(denom) <= tol) {
+                        continue;
+                    }
+
+                    const Real s = -(a0 * pA[0] + b0 * pA[1] + c0) / denom;
+                    if (s >= -tol && s <= Real(1) + tol) {
+                        updateMatBoxSlabParamIfValid(best, box, info, p0Local, e1Local, e2Local, extent, state, pA + dir * matClamp01(s));
+                    }
+                }
+
+                for (int k = j + 1; k < 6; ++k) {
+                    const Real a1 = fa[i] - fa[k];
+                    const Real b1 = fb[i] - fb[k];
+                    const Real c1 = fc[i] - fc[k];
+                    Real u = Real(0);
+                    Real v = Real(0);
+                    if (solveLinearSystem22(a0, b0, a1, b1, -c0, -c1, u, v)) {
+                        updateMatBoxSlabParamIfValid(best, box, info, p0Local, e1Local, e2Local, extent, state, Vector<Real, 2>(u, v));
+                    }
+                }
+            }
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline Real evalMatSlabOutsideQuadratic(
+        const Real m00,
+        const Real m01,
+        const Real m11,
+        const Real h0,
+        const Real h1,
+        const Real k,
+        const Vector<Real, 2>& uv)
+    {
+        return m00 * uv[0] * uv[0] + Real(2) * m01 * uv[0] * uv[1] + m11 * uv[1] * uv[1]
+            + Real(2) * h0 * uv[0] + Real(2) * h1 * uv[1] + k;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void addMatBoxSlabOutsideInteriorCandidate(
+        MatContactCandidate<Real>& best,
+        const TOrientedBox3D<Real>& box,
+        const MatSlabInfo<Real>& info,
+        const Vector<Real, 3>& p0Local,
+        const Vector<Real, 3>& e1Local,
+        const Vector<Real, 3>& e2Local,
+        const Vector<Real, 3>& extent,
+        const int state[3])
+    {
+        Real m00 = Real(0), m01 = Real(0), m11 = Real(0);
+        Real h0 = Real(0), h1 = Real(0), k = Real(0);
+        int activeCount = 0;
+
+        for (int axis = 0; axis < 3; ++axis) {
+            if (state[axis] == 0) {
+                continue;
+            }
+
+            const Real sign = Real(state[axis]);
+            const Real a = sign * e1Local[axis];
+            const Real b = sign * e2Local[axis];
+            const Real c = sign * p0Local[axis] - extent[axis];
+
+            m00 += a * a;
+            m01 += a * b;
+            m11 += b * b;
+            h0 += a * c;
+            h1 += b * c;
+            k += c * c;
+            ++activeCount;
+        }
+
+        if (activeCount == 0) {
+            return;
+        }
+
+        const Real det = fma(m00, m11, -m01 * m01);
+        if (matAbs(det) <= Real(512) * EPSILON) {
+            return;
+        }
+
+        const Real inv00 = m11 / det;
+        const Real inv01 = -m01 / det;
+        const Real inv11 = m00 / det;
+
+        const Vector<Real, 2> y0(
+            -(inv00 * h0 + inv01 * h1),
+            -(inv01 * h0 + inv11 * h1));
+        const Vector<Real, 2> y1(
+            inv00 * info.dr1 + inv01 * info.dr2,
+            inv01 * info.dr1 + inv11 * info.dr2);
+
+        const Real qa =
+            m00 * y1[0] * y1[0] +
+            Real(2) * m01 * y1[0] * y1[1] +
+            m11 * y1[1] * y1[1];
+        const Real qb = Real(2) * (
+            m00 * y0[0] * y1[0] +
+            m01 * (y0[0] * y1[1] + y0[1] * y1[0]) +
+            m11 * y0[1] * y1[1] +
+            h0 * y1[0] +
+            h1 * y1[1]);
+        const Real qc = evalMatSlabOutsideQuadratic(m00, m01, m11, h0, h1, k, y0);
+
+        const Real aa = qa - Real(1);
+        const Real bb = qb;
+        const Real cc = qc;
+        const Real tol = Real(512) * EPSILON;
+
+        Real lambdas[2];
+        int lambdaCount = 0;
+        if (matAbs(aa) <= tol) {
+            if (matAbs(bb) > tol) {
+                lambdas[lambdaCount++] = -cc / bb;
+            }
+        }
+        else {
+            const Real disc = bb * bb - Real(4) * aa * cc;
+            if (disc >= -tol) {
+                const Real sqrtDisc = sqrt(disc > Real(0) ? disc : Real(0));
+                lambdas[lambdaCount++] = (-bb - sqrtDisc) / (Real(2) * aa);
+                lambdas[lambdaCount++] = (-bb + sqrtDisc) / (Real(2) * aa);
+            }
+        }
+
+        for (int i = 0; i < lambdaCount; ++i) {
+            const Real lambda = lambdas[i];
+            if (lambda < -tol) {
+                continue;
+            }
+
+            const Vector<Real, 2> uv = y0 + y1 * (lambda < Real(0) ? Real(0) : lambda);
+            const Real q = evalMatSlabOutsideQuadratic(m00, m01, m11, h0, h1, k, uv);
+            if (q < -tol) {
+                continue;
+            }
+
+            const Real d = sqrt(q > Real(0) ? q : Real(0));
+            if (matAbs(d - lambda) <= Real(1024) * EPSILON) {
+                updateMatBoxSlabParamIfValid(best, box, info, p0Local, e1Local, e2Local, extent, state, uv);
+            }
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void minimizeMatBoxSlabOutsideCell(
+        MatContactCandidate<Real>& best,
+        const TOrientedBox3D<Real>& box,
+        const MatSlabInfo<Real>& info,
+        const Vector<Real, 3>& p0Local,
+        const Vector<Real, 3>& e1Local,
+        const Vector<Real, 3>& e2Local,
+        const Vector<Real, 3>& extent,
+        const int state[3],
+        const MatParamPolygon<Real>& poly)
+    {
+        for (int i = 0; i < poly.count; ++i) {
+            updateMatBoxSlabParamIfValid(best, box, info, p0Local, e1Local, e2Local, extent, state, poly.p[i]);
+        }
+
+        for (int i = 0; i < poly.count; ++i) {
+            minimizeMatBoxSlabEdge(best, box, info, p0Local, e1Local, e2Local, extent, state, poly.p[i], poly.p[(i + 1) % poly.count]);
+        }
+
+        addMatBoxSlabOutsideInteriorCandidate(best, box, info, p0Local, e1Local, e2Local, extent, state);
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void findBestMatBoxSlabExact(
+        MatContactCandidate<Real>& best,
+        const TOrientedBox3D<Real>& box,
+        const TMedialSlab3D<Real>& slab,
+        const MatSlabInfo<Real>& info)
+    {
+        best = MatContactCandidate<Real>();
+
+        const Vector<Real, 3> p0Local = matBoxWorldToLocal<Real>(box, slab.v[0]);
+        const Vector<Real, 3> p1Local = matBoxWorldToLocal<Real>(box, slab.v[1]);
+        const Vector<Real, 3> p2Local = matBoxWorldToLocal<Real>(box, slab.v[2]);
+        const Vector<Real, 3> e1Local = p1Local - p0Local;
+        const Vector<Real, 3> e2Local = p2Local - p0Local;
+
+        for (int sx = -1; sx <= 1; ++sx) {
+            for (int sy = -1; sy <= 1; ++sy) {
+                for (int sz = -1; sz <= 1; ++sz) {
+                    const int state[3] = { sx, sy, sz };
+                    MatParamPolygon<Real> poly;
+                    buildMatSlabBoxCellPolygon(poly, p0Local, e1Local, e2Local, box.extent, state);
+                    if (poly.count == 0) {
+                        continue;
+                    }
+
+                    const int activeCount = (sx != 0 ? 1 : 0) + (sy != 0 ? 1 : 0) + (sz != 0 ? 1 : 0);
+                    if (activeCount == 0) {
+                        minimizeMatBoxSlabInsideCell(best, box, info, p0Local, e1Local, e2Local, box.extent, state, poly);
+                    }
+                    else {
+                        minimizeMatBoxSlabOutsideCell(best, box, info, p0Local, e1Local, e2Local, box.extent, state, poly);
+                    }
+                }
+            }
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline bool computeMatSlabFacePoint(
+        MatSlabFacePoint<Real>& face,
+        const MatSlabInfo<Real>& info,
+        const Sphere3D& sphere)
+    {
+        face = MatSlabFacePoint<Real>();
+        if (!info.valid) {
+            return false;
+        }
+
+        const Real oneMinusG2 = Real(1) - info.gNormSq;
+        if (oneMinusG2 <= Real(64) * EPSILON) {
+            return false;
+        }
+
+        const Real h = info.n.dot(sphere.center - info.p0);
+        Vector<Real, 3> cProj = sphere.center - info.n * h;
+        Vector<Real, 3> y = cProj;
+
+        if (matAbs(h) >= Real(16) * EPSILON) {
+            const Real denomSq = oneMinusG2 > Real(0) ? oneMinusG2 : Real(0);
+            const Real denom = sqrt(denomSq > Real(64) * EPSILON ? denomSq : Real(64) * EPSILON);
+            y += info.g * (matAbs(h) / denom);
+        }
+
+        Real u = Real(0);
+        Real v = Real(0);
+        solveMatSlabBarycentric(info, y, u, v);
+
+        const Real tol = Real(32) * EPSILON;
+        if (u < -tol || v < -tol || u + v > Real(1) + tol) {
+            return false;
+        }
+
+        u = u < Real(0) ? Real(0) : (u > Real(1) ? Real(1) : u);
+        v = v < Real(0) ? Real(0) : (v > Real(1) ? Real(1) : v);
+        const Real uv = u + v;
+        if (uv > Real(1)) {
+            const Real inv = Real(1) / uv;
+            u *= inv;
+            v *= inv;
+        }
+
+        face.valid = true;
+        face.u = u;
+        face.v = v;
+        face.center = evalMatSlabPoint(info, u, v);
+        face.radius = evalMatSlabRadius(info, u, v);
+        return true;
+    }
+
+    template<typename Real>
+    DYN_FUNC inline bool isValidMatSphereConeRoot(
+        const Vector<Real, 3>& w0,
+        const Vector<Real, 3>& d,
+        const Real dr,
+        const Real t)
+    {
+        const Real proj = d.dot(w0 + d * t);
+        const Real tol = Real(64) * EPSILON;
+        if (matAbs(proj) <= tol) {
+            return true;
+        }
+
+        if (matAbs(dr) <= tol) {
+            return false;
+        }
+
+        return proj * dr > Real(0);
+    }
+
+    template<typename Real>
+    DYN_FUNC inline MatContactCandidate<Real> evalMatSphereConeAt(
+        const Sphere3D& sphere,
+        const MedialCone3D& cone,
+        Real t)
+    {
+        const Vector<Real, 3> axis = cone.v[1] - cone.v[0];
+        const Real dr = cone.radius[1] - cone.radius[0];
+
+        t = matClamp01(t);
+        const Vector<Real, 3> coneCenter = cone.v[0] + axis * t;
+        const Real coneRadius = cone.radius[0] + dr * t;
+
+        return makeMatCandidate<Real>(sphere.center, sphere.radius, coneCenter, coneRadius, axis);
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void findBestMatSphereCone(
+        MatContactCandidate<Real>& best,
+        const Sphere3D& sphere,
+        const MedialCone3D& cone)
+    {
+        best = MatContactCandidate<Real>();
+        if (matCanRejectSphereCone<Real>(sphere, cone)) {
+            return;
+        }
+
+        Real params[4];
+        int paramCount = 0;
+        addMatScalarCandidate(params, paramCount, 4, Real(0));
+        addMatScalarCandidate(params, paramCount, 4, Real(1));
+
+        const Vector<Real, 3> d = cone.v[1] - cone.v[0];
+        const Vector<Real, 3> w0 = cone.v[0] - sphere.center;
+        const Real dr = cone.radius[1] - cone.radius[0];
+
+        const Real a = d.dot(d);
+        const Real b = d.dot(w0);
+        const Real c = w0.dot(w0);
+
+        const Real A = a * (a - dr * dr);
+        const Real B = Real(2) * b * (a - dr * dr);
+        const Real C = b * b - dr * dr * c;
+        const Real tol = Real(64) * EPSILON;
+
+        if (matAbs(A) <= tol) {
+            if (matAbs(B) > tol) {
+                const Real root = -C / B;
+                if (root > Real(0) && root < Real(1) && isValidMatSphereConeRoot(w0, d, dr, root)) {
+                    addMatScalarCandidate(params, paramCount, 4, root);
+                }
+            }
+        }
+        else {
+            const Real disc = B * B - Real(4) * A * C;
+            if (disc >= -tol) {
+                const Real sqrtDisc = sqrt(disc > Real(0) ? disc : Real(0));
+                const Real q = -Real(0.5) * (B + (B >= Real(0) ? sqrtDisc : -sqrtDisc));
+
+                if (matAbs(q) > tol) {
+                    const Real root0 = q / A;
+                    const Real root1 = C / q;
+
+                    if (root0 > Real(0) && root0 < Real(1) && isValidMatSphereConeRoot(w0, d, dr, root0)) {
+                        addMatScalarCandidate(params, paramCount, 4, root0);
+                    }
+                    if (root1 > Real(0) && root1 < Real(1) && isValidMatSphereConeRoot(w0, d, dr, root1)) {
+                        addMatScalarCandidate(params, paramCount, 4, root1);
+                    }
+                }
+                else {
+                    const Real root = -B / (Real(2) * A);
+                    if (root > Real(0) && root < Real(1) && isValidMatSphereConeRoot(w0, d, dr, root)) {
+                        addMatScalarCandidate(params, paramCount, 4, root);
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < paramCount; ++i) {
+            updateMatCandidate(best, evalMatSphereConeAt<Real>(sphere, cone, params[i]));
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void updateMatBoxConeAt(
+        MatContactCandidate<Real>& best,
+        const TOrientedBox3D<Real>& box,
+        const TMedialCone3D<Real>& cone,
+        Real t)
+    {
+        const Vector<Real, 3> axis = cone.v[1] - cone.v[0];
+        const Real dr = cone.radius[1] - cone.radius[0];
+
+        t = matClamp01(t);
+        updateMatCandidate(best, makeMatBoxCandidate<Real>(
+            box,
+            cone.v[0] + axis * t,
+            cone.radius[0] + dr * t));
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void minimizeMatBoxConeInterval(
+        MatContactCandidate<Real>& best,
+        const TOrientedBox3D<Real>& box,
+        const TMedialCone3D<Real>& cone,
+        const Vector<Real, 3>& p0Local,
+        const Vector<Real, 3>& dLocal,
+        const Real tMin,
+        const Real tMax)
+    {
+        const Real tol = Real(128) * EPSILON;
+        if (tMax < tMin + tol) {
+            updateMatBoxConeAt(best, box, cone, tMin);
+            return;
+        }
+
+        const Real tMid = Real(0.5) * (tMin + tMax);
+        const Vector<Real, 3> pMid = p0Local + dLocal * tMid;
+
+        int state[3] = { 0, 0, 0 };
+        int activeCount = 0;
+        for (int i = 0; i < 3; ++i) {
+            if (pMid[i] > box.extent[i]) {
+                state[i] = 1;
+                ++activeCount;
+            }
+            else if (pMid[i] < -box.extent[i]) {
+                state[i] = -1;
+                ++activeCount;
+            }
+        }
+
+        Real candidates[32];
+        int candidateCount = 0;
+        addMatScalarCandidateInInterval(candidates, candidateCount, 32, tMin, tMin, tMax);
+        addMatScalarCandidateInInterval(candidates, candidateCount, 32, tMax, tMin, tMax);
+
+        const Real dr = cone.radius[1] - cone.radius[0];
+        if (activeCount > 0) {
+            Real a = Real(0);
+            Real b = Real(0);
+            Real c = Real(0);
+
+            for (int i = 0; i < 3; ++i) {
+                if (state[i] == 0) {
+                    continue;
+                }
+
+                const Real y0 = Real(state[i]) * p0Local[i] - box.extent[i];
+                const Real yd = Real(state[i]) * dLocal[i];
+                a += yd * yd;
+                b += y0 * yd;
+                c += y0 * y0;
+            }
+
+            addMatSqrtMinusLinearStationary(candidates, candidateCount, 32, a, b, c, dr, tMin, tMax);
+        }
+        else {
+            const Real signs[2] = { Real(-1), Real(1) };
+            for (int axisA = 0; axisA < 3; ++axisA) {
+                for (int signAId = 0; signAId < 2; ++signAId) {
+                    const Real signA = signs[signAId];
+                    const Real a0 = signA * p0Local[axisA] - box.extent[axisA];
+                    const Real ad = signA * dLocal[axisA];
+
+                    for (int axisB = axisA; axisB < 3; ++axisB) {
+                        for (int signBId = 0; signBId < 2; ++signBId) {
+                            if (axisA == axisB && signAId == signBId) {
+                                continue;
+                            }
+
+                            const Real signB = signs[signBId];
+                            const Real b0 = signB * p0Local[axisB] - box.extent[axisB];
+                            const Real bd = signB * dLocal[axisB];
+                            const Real denom = ad - bd;
+                            if (matAbs(denom) <= tol) {
+                                continue;
+                            }
+
+                            addMatScalarCandidateInInterval(candidates, candidateCount, 32, (b0 - a0) / denom, tMin, tMax);
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < candidateCount; ++i) {
+            updateMatBoxConeAt(best, box, cone, candidates[i]);
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void findBestMatBoxConeExact(
+        MatContactCandidate<Real>& best,
+        const TOrientedBox3D<Real>& box,
+        const TMedialCone3D<Real>& cone)
+    {
+        best = MatContactCandidate<Real>();
+
+        const Real rMax = maximum(cone.radius[0], cone.radius[1]);
+        TSegment3D<Real> axisToBox;
+        matSegmentBoxProximity(axisToBox, box, cone.v[0], cone.v[1]);
+        if (axisToBox.lengthSquared() > rMax * rMax) {
+            return;
+        }
+
+        const Vector<Real, 3> p0Local = matBoxWorldToLocal<Real>(box, cone.v[0]);
+        const Vector<Real, 3> p1Local = matBoxWorldToLocal<Real>(box, cone.v[1]);
+        const Vector<Real, 3> dLocal = p1Local - p0Local;
+
+        Real breaks[16];
+        int breakCount = 0;
+        addMatScalarCandidate(breaks, breakCount, 16, Real(0));
+        addMatScalarCandidate(breaks, breakCount, 16, Real(1));
+
+        for (int axis = 0; axis < 3; ++axis) {
+            if (matAbs(dLocal[axis]) <= Real(128) * EPSILON) {
+                continue;
+            }
+
+            addMatScalarCandidate(breaks, breakCount, 16, (-box.extent[axis] - p0Local[axis]) / dLocal[axis]);
+            addMatScalarCandidate(breaks, breakCount, 16, ( box.extent[axis] - p0Local[axis]) / dLocal[axis]);
+        }
+
+        sortMatScalars(breaks, breakCount);
+        for (int i = 0; i + 1 < breakCount; ++i) {
+            minimizeMatBoxConeInterval(best, box, cone, p0Local, dLocal, breaks[i], breaks[i + 1]);
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void findBestMatBoxCone(
+        MatContactCandidate<Real>& best,
+        const TOrientedBox3D<Real>& box,
+        const TMedialCone3D<Real>& cone)
+    {
+        findBestMatBoxConeExact(best, box, cone);
+    }
+
+    template<typename Real>
+    DYN_FUNC inline MatContactCandidate<Real> evalMatConeConeAt(
+        const MedialCone3D& cone1,
+        const MedialCone3D& cone2,
+        Real s,
+        Real t)
+    {
+        const Vector<Real, 3> axis1 = cone1.v[1] - cone1.v[0];
+        const Vector<Real, 3> axis2 = cone2.v[1] - cone2.v[0];
+        const Real dr1 = cone1.radius[1] - cone1.radius[0];
+        const Real dr2 = cone2.radius[1] - cone2.radius[0];
+
+        s = matClamp01(s);
+        t = matClamp01(t);
+
+        const Vector<Real, 3> center1 = cone1.v[0] + axis1 * s;
+        const Vector<Real, 3> center2 = cone2.v[0] + axis2 * t;
+        const Real radius1 = cone1.radius[0] + dr1 * s;
+        const Real radius2 = cone2.radius[0] + dr2 * t;
+
+        Vector<Real, 3> fallback = center2 - center1;
+        if (fallback.dot(fallback) <= EPSILON * EPSILON) {
+            fallback = axis2 - axis1;
+        }
+        if (fallback.dot(fallback) <= EPSILON * EPSILON) {
+            fallback = cone2.v[0] - cone1.v[0];
+        }
+
+        return makeMatCandidate<Real>(center1, radius1, center2, radius2, fallback);
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void findBestMatConeCone(
+        MatContactCandidate<Real>& best,
+        const MedialCone3D& cone1,
+        const MedialCone3D& cone2)
+    {
+        best = MatContactCandidate<Real>();
+
+        {
+            Segment3D s0(cone1.v[0], cone1.v[1]);
+            Segment3D s1(cone2.v[0], cone2.v[1]);
+            const Real rMax1 = maximum(cone1.radius[0], cone1.radius[1]);
+            const Real rMax2 = maximum(cone2.radius[0], cone2.radius[1]);
+
+            Segment3D dir = s0.proximity(s1);
+            dir = Point3D(dir.endPoint()) - Point3D(dir.startPoint());
+            const Real segDistSq = dir.lengthSquared();
+            const Real radiusSum = rMax1 + rMax2;
+
+            if (segDistSq >= radiusSum * radiusSum) {
+                return;
+            }
+        }
+
+        MatContactCandidate<Real> cand;
+
+        findBestMatSphereCone(cand, Sphere3D(cone1.v[0], cone1.radius[0]), cone2);
+        updateMatCandidate(best, cand);
+        findBestMatSphereCone(cand, Sphere3D(cone1.v[1], cone1.radius[1]), cone2);
+        updateMatCandidate(best, cand);
+
+        findBestMatSphereCone(cand, Sphere3D(cone2.v[0], cone2.radius[0]), cone1);
+        updateMatCandidate(best, swapMatCandidate(cand));
+        findBestMatSphereCone(cand, Sphere3D(cone2.v[1], cone2.radius[1]), cone1);
+        updateMatCandidate(best, swapMatCandidate(cand));
+
+        const Vector<Real, 3> vA = cone1.v[1] - cone1.v[0];
+        const Vector<Real, 3> vB = cone2.v[1] - cone2.v[0];
+        const Vector<Real, 3> w0 = cone1.v[0] - cone2.v[0];
+
+        const Real drA = cone1.radius[1] - cone1.radius[0];
+        const Real drB = cone2.radius[1] - cone2.radius[0];
+
+        const Real vAdotvA = vA.dot(vA);
+        const Real vBdotvB = vB.dot(vB);
+        const Real vAdotvB = vA.dot(vB);
+        const Real vAdotw0 = vA.dot(w0);
+        const Real vBdotw0 = vB.dot(w0);
+
+        Real sSeed = Real(0);
+        Real tSeed = Real(0);
+        if (solveLinearSystem22(vAdotvA, -vAdotvB, -vAdotvB, vBdotvB, -vAdotw0, vBdotw0, sSeed, tSeed)) {
+            if (sSeed > EPSILON && sSeed < Real(1) - EPSILON && tSeed > EPSILON && tSeed < Real(1) - EPSILON) {
+                updateMatCandidate(best, evalMatConeConeAt<Real>(cone1, cone2, sSeed, tSeed));
+            }
+        }
+
+        const Real squaredTermS = fma(-drA, drA, vAdotvA);
+        const Real squaredTermT = fma(-drB, drB, vBdotvB);
+        const Real crossTermST = fma(Real(-2), drA * drB, Real(-2) * vAdotvB);
+        const Real linearTermS = Real(2) * (vAdotw0 - drA * (cone1.radius[0] + cone2.radius[0]));
+        const Real linearTermT = Real(-2) * (vBdotw0 + drB * (cone1.radius[0] + cone2.radius[0]));
+
+        if (solveLinearSystem22(
+            Real(2) * squaredTermS, crossTermST,
+            crossTermST, Real(2) * squaredTermT,
+            -linearTermS, -linearTermT,
+            sSeed, tSeed))
+        {
+            if (sSeed > EPSILON && sSeed < Real(1) - EPSILON && tSeed > EPSILON && tSeed < Real(1) - EPSILON) {
+                updateMatCandidate(best, evalMatConeConeAt<Real>(cone1, cone2, sSeed, tSeed));
+            }
+        }
+
+        updateMatCandidate(best, evalMatConeConeAt<Real>(cone1, cone2, Real(0.5), Real(0.5)));
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void findBestMatSlabSphere(
+        MatContactCandidate<Real>& best,
+        const MedialSlab3D& slab,
+        const Sphere3D& sphere)
+    {
+        best = MatContactCandidate<Real>();
+        if (matCanRejectSlabSphere<Real>(slab, sphere)) {
+            return;
+        }
+
+        MatSlabInfo<Real> info;
+        const bool slabValid = buildMatSlabInfo(info, slab);
+        if (slabValid) {
+            MatSlabFacePoint<Real> face;
+            if (computeMatSlabFacePoint(face, info, sphere)) {
+                updateMatCandidate(best, makeMatCandidate<Real>(face.center, face.radius, sphere.center, sphere.radius, info.n));
+            }
+        }
+
+        const MedialCone3D edges[3] = {
+            MedialCone3D(slab.v[0], slab.v[1], slab.radius[0], slab.radius[1]),
+            MedialCone3D(slab.v[1], slab.v[2], slab.radius[1], slab.radius[2]),
+            MedialCone3D(slab.v[2], slab.v[0], slab.radius[2], slab.radius[0])
+        };
+
+        Sphere3D sphereForBox = sphere;
+        const auto sphereBox = sphereForBox.aabb();
+        for (int i = 0; i < 3; ++i) {
+            if (!edges[i].aabb().checkOverlap(sphereBox)) {
+                continue;
+            }
+
+            MatContactCandidate<Real> edgeCand;
+            findBestMatSphereCone(edgeCand, sphere, edges[i]);
+            updateMatCandidate(best, swapMatCandidate(edgeCand));
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void findBestMatBoxSlab(
+        MatContactCandidate<Real>& best,
+        const TOrientedBox3D<Real>& box,
+        const TMedialSlab3D<Real>& slab)
+    {
+        best = MatContactCandidate<Real>();
+
+        MatSlabInfo<Real> info;
+        if (buildMatSlabInfo(info, slab)) {
+            findBestMatBoxSlabExact(best, box, slab, info);
+        }
+
+        if (!best.valid || best.phi > EPSILON) {
+            const TMedialCone3D<Real> edges[3] = {
+                TMedialCone3D<Real>(slab.v[0], slab.v[1], slab.radius[0], slab.radius[1]),
+                TMedialCone3D<Real>(slab.v[1], slab.v[2], slab.radius[1], slab.radius[2]),
+                TMedialCone3D<Real>(slab.v[2], slab.v[0], slab.radius[2], slab.radius[0])
+            };
+
+            for (int i = 0; i < 3; ++i) {
+                MatContactCandidate<Real> edgeCand;
+                findBestMatBoxCone(edgeCand, box, edges[i]);
+                updateMatCandidate(best, edgeCand);
+            }
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void findBestMatSlabCone(
+        MatContactCandidate<Real>& best,
+        const MedialSlab3D& slab,
+        const MedialCone3D& cone)
+    {
+        best = MatContactCandidate<Real>();
+        if (matCanRejectSlabCone<Real>(slab, cone)) {
+            return;
+        }
+
+        const auto slabBox = slab.aabb();
+        const auto coneBox = cone.aabb();
+        if (!slabBox.checkOverlap(coneBox)) {
+            return;
+        }
+
+        MatSlabInfo<Real> info;
+        const bool slabValid = buildMatSlabInfo(info, slab);
+
+        if (slabValid && info.gNormSq < Real(1) - Real(64) * EPSILON) {
+            const Vector<Real, 3> axis = cone.v[1] - cone.v[0];
+            const Real dr = cone.radius[1] - cone.radius[0];
+
+            const Real h0 = info.n.dot(cone.v[0] - info.p0);
+            const Real h1 = info.n.dot(axis);
+            const Vector<Real, 3> dProj = axis - info.n * h1;
+
+            Real tCandidates[16];
+            int tCount = 0;
+            addMatScalarCandidate(tCandidates, tCount, 16, Real(0));
+            addMatScalarCandidate(tCandidates, tCount, 16, Real(1));
+
+            const Real crossTol = Real(64) * EPSILON;
+            if (matAbs(h1) > crossTol) {
+                addMatScalarCandidate(tCandidates, tCount, 16, -h0 / h1);
+            }
+
+            const Real denomSq = Real(1) - info.gNormSq;
+            const Real denom = sqrt(denomSq > Real(64) * EPSILON ? denomSq : Real(64) * EPSILON);
+            const Vector<Real, 3> qProj0 = cone.v[0] - info.n * h0;
+
+            Real intervalStarts[2] = { Real(0), Real(0) };
+            Real intervalEnds[2] = { Real(1), Real(1) };
+            int intervalCount = 1;
+
+            if (matAbs(h1) > crossTol) {
+                const Real tCross = -h0 / h1;
+                if (tCross > Real(0) && tCross < Real(1)) {
+                    intervalStarts[0] = Real(0);
+                    intervalEnds[0] = tCross;
+                    intervalStarts[1] = tCross;
+                    intervalEnds[1] = Real(1);
+                    intervalCount = 2;
+                }
+            }
+
+            for (int intervalId = 0; intervalId < intervalCount; ++intervalId) {
+                const Real tMin = intervalStarts[intervalId];
+                const Real tMax = intervalEnds[intervalId];
+                if (tMax - tMin <= Real(64) * EPSILON) {
+                    continue;
+                }
+
+                const Real tMid = Real(0.5) * (tMin + tMax);
+                const Real hMid = h0 + h1 * tMid;
+                const Real sign = hMid < Real(0) ? Real(-1) : Real(1);
+
+                const Vector<Real, 3> pointBase = qProj0 + info.g * (sign * h0 / denom);
+                const Vector<Real, 3> pointStep = dProj + info.g * (sign * h1 / denom);
+
+                Real uBase = Real(0), vBase = Real(0);
+                solveMatSlabBarycentric(info, pointBase, uBase, vBase);
+
+                Real uStep = Real(0), vStep = Real(0);
+                solveMatSlabCoefficients(info, pointStep, uStep, vStep);
+
+                addMatLinearRootCandidate(tCandidates, tCount, 16, uBase, uStep, Real(0), tMin, tMax);
+                addMatLinearRootCandidate(tCandidates, tCount, 16, vBase, vStep, Real(0), tMin, tMax);
+                addMatLinearRootCandidate(tCandidates, tCount, 16, uBase + vBase, uStep + vStep, Real(1), tMin, tMax);
+            }
+
+            for (int i = 0; i < tCount; ++i) {
+                const Real t = tCandidates[i];
+                const Sphere3D movingSphere(cone.v[0] + axis * t, cone.radius[0] + dr * t);
+
+                MatSlabFacePoint<Real> face;
+                if (!computeMatSlabFacePoint(face, info, movingSphere)) {
+                    continue;
+                }
+
+                updateMatCandidate(best, makeMatCandidate<Real>(face.center, face.radius, movingSphere.center, movingSphere.radius, info.n));
+            }
+        }
+
+        Sphere3D coneCaps[2] = {
+            Sphere3D(cone.v[0], cone.radius[0]),
+            Sphere3D(cone.v[1], cone.radius[1])
+        };
+
+        for (int i = 0; i < 2; ++i) {
+            if (!coneCaps[i].aabb().checkOverlap(slabBox)) {
+                continue;
+            }
+
+            MatContactCandidate<Real> capCand;
+            findBestMatSlabSphere(capCand, slab, coneCaps[i]);
+            updateMatCandidate(best, capCand);
+        }
+
+        const MedialCone3D slabEdges[3] = {
+            MedialCone3D(slab.v[0], slab.v[1], slab.radius[0], slab.radius[1]),
+            MedialCone3D(slab.v[1], slab.v[2], slab.radius[1], slab.radius[2]),
+            MedialCone3D(slab.v[2], slab.v[0], slab.radius[2], slab.radius[0])
+        };
+
+        for (int i = 0; i < 3; ++i) {
+            if (!slabEdges[i].aabb().checkOverlap(coneBox)) {
+                continue;
+            }
+
+            MatContactCandidate<Real> edgeCand;
+            findBestMatConeCone(edgeCand, slabEdges[i], cone);
+            updateMatCandidate(best, edgeCand);
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC inline void findBestMatSlabSlab(
+        MatContactCandidate<Real>& best,
+        const MedialSlab3D& slab1,
+        const MedialSlab3D& slab2)
+    {
+        best = MatContactCandidate<Real>();
+        if (matCanRejectSlabSlab<Real>(slab1, slab2)) {
+            return;
+        }
+
+        const auto box1 = slab1.aabb();
+        const auto box2 = slab2.aabb();
+        if (!box1.checkOverlap(box2)) {
+            return;
+        }
+
+        Sphere3D spheres1[3] = {
+            Sphere3D(slab1.v[0], slab1.radius[0]),
+            Sphere3D(slab1.v[1], slab1.radius[1]),
+            Sphere3D(slab1.v[2], slab1.radius[2])
+        };
+
+        Sphere3D spheres2[3] = {
+            Sphere3D(slab2.v[0], slab2.radius[0]),
+            Sphere3D(slab2.v[1], slab2.radius[1]),
+            Sphere3D(slab2.v[2], slab2.radius[2])
+        };
+
+        const MedialCone3D edges1[3] = {
+            MedialCone3D(slab1.v[0], slab1.v[1], slab1.radius[0], slab1.radius[1]),
+            MedialCone3D(slab1.v[1], slab1.v[2], slab1.radius[1], slab1.radius[2]),
+            MedialCone3D(slab1.v[2], slab1.v[0], slab1.radius[2], slab1.radius[0])
+        };
+
+        const MedialCone3D edges2[3] = {
+            MedialCone3D(slab2.v[0], slab2.v[1], slab2.radius[0], slab2.radius[1]),
+            MedialCone3D(slab2.v[1], slab2.v[2], slab2.radius[1], slab2.radius[2]),
+            MedialCone3D(slab2.v[2], slab2.v[0], slab2.radius[2], slab2.radius[0])
+        };
+
+        for (int i = 0; i < 3; ++i) {
+            if (spheres1[i].aabb().checkOverlap(box2)) {
+                MatContactCandidate<Real> cand;
+                findBestMatSlabSphere(cand, slab2, spheres1[i]);
+                updateMatCandidate(best, swapMatCandidate(cand));
+            }
+
+            if (spheres2[i].aabb().checkOverlap(box1)) {
+                MatContactCandidate<Real> cand;
+                findBestMatSlabSphere(cand, slab1, spheres2[i]);
+                updateMatCandidate(best, cand);
+            }
+        }
+
+        for (int i = 0; i < 3; ++i) {
+            const auto edgeBox1 = edges1[i].aabb();
+            const auto edgeBox2 = edges2[i].aabb();
+
+            if (edgeBox1.checkOverlap(box2)) {
+                MatContactCandidate<Real> cand;
+                findBestMatSlabCone(cand, slab2, edges1[i]);
+                updateMatCandidate(best, swapMatCandidate(cand));
+            }
+
+            if (edgeBox2.checkOverlap(box1)) {
+                MatContactCandidate<Real> cand;
+                findBestMatSlabCone(cand, slab1, edges2[i]);
+                updateMatCandidate(best, cand);
+            }
+        }
+
+        for (int i = 0; i < 3; ++i) {
+            const auto edgeBox1 = edges1[i].aabb();
+            if (!edgeBox1.checkOverlap(box2)) {
+                continue;
+            }
+
+            for (int j = 0; j < 3; ++j) {
+                if (!edgeBox1.checkOverlap(edges2[j].aabb())) {
+                    continue;
+                }
+
+                MatContactCandidate<Real> cand;
+                findBestMatConeCone(cand, edges1[i], edges2[j]);
+                updateMatCandidate(best, cand);
+            }
+        }
+
+        if (!best.valid) {
+            return;
+        }
+
+        Vector<Real, 3> currentCenterA = best.centerA;
+        Vector<Real, 3> currentCenterB = best.centerB;
+        Real currentRadiusA = best.radiusA;
+        Real currentRadiusB = best.radiusB;
+
+        for (int iter = 0; iter < 2; ++iter) {
+            MatContactCandidate<Real> cand;
+
+            findBestMatSlabSphere(cand, slab2, Sphere3D(currentCenterA, currentRadiusA));
+            cand = swapMatCandidate(cand);
+            updateMatCandidate(best, cand);
+            if (!cand.valid) {
+                break;
+            }
+
+            currentCenterB = cand.centerB;
+            currentRadiusB = cand.radiusB;
+
+            findBestMatSlabSphere(cand, slab1, Sphere3D(currentCenterB, currentRadiusB));
+            updateMatCandidate(best, cand);
+            if (!cand.valid) {
+                break;
+            }
+
+            currentCenterA = cand.centerA;
+            currentRadiusA = cand.radiusA;
+            currentCenterB = cand.centerB;
+            currentRadiusB = cand.radiusB;
+        }
+    }
+
+    template<typename Real>
+    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const MedialCone3D& cone1, const MedialCone3D& cone2)
+    {
+        MatContactCandidate<Real> best;
+        findBestMatConeCone(best, cone1, cone2);
+        writeMatCandidate(m, best, 1);
+    }
+
+    template<typename Real>
+    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const OBox3D& box, const MedialCone3D& cone)
+    {
+        MatContactCandidate<Real> best;
+        findBestMatBoxCone(best, box, cone);
+        writeMatCandidate(m, best, 1);
+    }
+
+    template<typename Real>
+    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const MedialCone3D& cone, const OBox3D& box)
+    {
+        MatContactCandidate<Real> best;
+        findBestMatBoxCone(best, box, cone);
+        writeMatCandidate(m, swapMatCandidate(best), 1);
+    }
+
+
+    template<typename Real>
+    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const MedialSlab3D& slab, const Sphere3D& sphere, int tag)
+    {
+        MatContactCandidate<Real> best;
+        findBestMatSlabSphere(best, slab, sphere);
+        writeMatCandidate(m, best, tag == 0 ? 0 : 1);
+    }
+
+    template<typename Real>
+    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const OBox3D& box, const MedialSlab3D& slab)
+    {
+        MatContactCandidate<Real> best;
+        findBestMatBoxSlab(best, box, slab);
+        writeMatCandidate(m, best, 1);
+    }
+
+    template<typename Real>
+    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const MedialSlab3D& slab, const OBox3D& box)
+    {
+        MatContactCandidate<Real> best;
+        findBestMatBoxSlab(best, box, slab);
+        writeMatCandidate(m, swapMatCandidate(best), 1);
+    }
+
+    template<typename Real>
+    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const MedialSlab3D& slab, const MedialCone3D& cone)
+    {
+        MatContactCandidate<Real> best;
+        findBestMatSlabCone(best, slab, cone);
+        writeMatCandidate(m, best, 1);
+    }
+
+    template<typename Real>
+    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const MedialCone3D& cone, const MedialSlab3D& slab)
+    {
+        MatContactCandidate<Real> best;
+        findBestMatSlabCone(best, slab, cone);
+        writeMatCandidate(m, swapMatCandidate(best), 1);
+    }
+
+    template<typename Real>
+    DYN_FUNC void CollisionDetection<Real>::request(Manifold& m, const MedialSlab3D& slab1, const MedialSlab3D& slab2)
+    {
+        MatContactCandidate<Real> best;
+        findBestMatSlabSlab(best, slab1, slab2);
+        writeMatCandidate(m, best, 1);
     }
 }
