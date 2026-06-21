@@ -508,10 +508,11 @@ namespace dyno
 			this->varFilePath()->setValue(FilePath(filename));
 		}
 
-		auto instances = this->varVehiclesTransform()->getValue();
-		uint vehicleNum = instances.size();
-		for (size_t i = 0; i < vehicleNum; i++)
+		auto instances = this->varVehiclesTransform();
+		int i = 0;
+		for (auto it = instances->begin(); it != instances->end(); it++,i++)
 		{
+			auto instance = instances->getElement(it);
 			RigidBodyInfo rigidbody;
 			rigidbody.bodyId = i;
 			rigidbody.friction = this->varFrictionCoefficient()->getValue();
@@ -530,8 +531,8 @@ namespace dyno
 					* Quat<Real>(Real(M_PI) * rot[0] / 180, Coord(1, 0, 0));
 				q.normalize();
 
-				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[id]->boundingTransform.translation()) + instances[i].translation();
-				rigidbody.angle = Quat1f(instances[i].rotation());
+				rigidbody.position = Quat1f(instance.rotation()).rotate(texMesh->shapes()[id]->boundingTransform.translation()) + instance.translation();
+				rigidbody.angle = Quat1f(instance.rotation());
 
 				std::shared_ptr<dyno::PdActor> wheelActor = this->createRigidBody(rigidbody);
 				wheelActors.push_back(wheelActor);
@@ -552,8 +553,8 @@ namespace dyno
 			std::vector<std::shared_ptr<dyno::PdActor>> undercartActors;
 			for (auto id : undercarts)
 			{
-				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[id]->boundingTransform.translation()) + instances[i].translation();
-				rigidbody.angle = Quat1f(instances[i].rotation());
+				rigidbody.position = Quat1f(instance.rotation()).rotate(texMesh->shapes()[id]->boundingTransform.translation()) + instance.translation();
+				rigidbody.angle = Quat1f(instance.rotation());
 
 				std::shared_ptr<dyno::PdActor> undercartActor = this->createRigidBody(rigidbody);
 				undercartActors.push_back(undercartActor);
@@ -579,8 +580,8 @@ namespace dyno
 					* Quat<Real>(Real(M_PI) * rot[0] / 180, Coord(1, 0, 0));
 				q.normalize();
 
-				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[bodyId]->boundingTransform.translation()) + instances[i].translation();
-				rigidbody.angle = Quat1f(instances[i].rotation());
+				rigidbody.position = Quat1f(instance.rotation()).rotate(texMesh->shapes()[bodyId]->boundingTransform.translation()) + instance.translation();
+				rigidbody.angle = Quat1f(instance.rotation());
 
 				bodyActor = this->createRigidBody(rigidbody);
 				CapsuleInfo capsule;
@@ -646,8 +647,8 @@ namespace dyno
 			int fCover = 0;
 			std::shared_ptr<dyno::PdActor> fCoverActor;
 			{
-				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[fCover]->boundingTransform.translation()) + instances[i].translation();
-				rigidbody.angle = Quat1f(instances[i].rotation());
+				rigidbody.position = Quat1f(instance.rotation()).rotate(texMesh->shapes()[fCover]->boundingTransform.translation()) + instance.translation();
+				rigidbody.angle = Quat1f(instance.rotation());
 
 				fCoverActor = this->createRigidBody(rigidbody);
 
@@ -683,7 +684,7 @@ namespace dyno
 			coverJoint.setRange(0.0f, 0.000001f);
 
 		}
-
+		
 		//**************************************************//
 		ArticulatedBody<TDataType>::resetStates();
 	}

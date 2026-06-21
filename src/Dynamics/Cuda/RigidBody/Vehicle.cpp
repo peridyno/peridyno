@@ -48,10 +48,11 @@ namespace dyno
 			this->varFilePath()->setValue(FilePath(filename));
 		}
 
-		auto instances = this->varVehiclesTransform()->getValue();
-		uint vehicleNum = instances.size();
-		for (size_t i = 0; i < vehicleNum; i++)
+		auto instances = this->varVehiclesTransform();
+		int i = 0;
+		for (auto it = instances->begin(); it != instances->end(); it++, i++)
 		{
+			auto instance = instances->getElement(it);
 			RigidBodyInfo rigidbody;
 			rigidbody.bodyId = i;
 			rigidbody.friction = this->varFrictionCoefficient()->getValue();
@@ -73,8 +74,8 @@ namespace dyno
 				wheels[it].halfLength = 0.1;
 				wheels[it].radius = std::abs(up.y - down.y) / 2;
 
-				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
-				rigidbody.angle = Quat1f(instances[i].rotation());
+				rigidbody.position = Quat1f(instance.rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instance.translation();
+				rigidbody.angle = Quat1f(instance.rotation());
 
 				actors[it] = this->addCapsule(wheels[it], rigidbody, 100);
 			}
@@ -97,8 +98,8 @@ namespace dyno
 				boxs[it].halfLength = (up - down) / 2;
 
 				rigidbody.offset = Vec3f(0.0f, 0.0f, 0.0f);
-				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
-				rigidbody.angle = Quat1f(instances[i].rotation());
+				rigidbody.position = Quat1f(instance.rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instance.translation();
+				rigidbody.angle = Quat1f(instance.rotation());
 				actors[it] = this->addBox(boxs[it], rigidbody, 100);
 			}
 
@@ -133,8 +134,8 @@ namespace dyno
 				steerWheels[actorid].halfLength = 0.03;
 				steerWheels[actorid].radius = std::abs(up.y - down.y) / 5;
 
-				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[shapeId]->boundingTransform.translation()) + instances[i].translation();
-				rigidbody.angle = Quat1f(instances[i].rotation());
+				rigidbody.position = Quat1f(instance.rotation()).rotate(texMesh->shapes()[shapeId]->boundingTransform.translation()) + instance.translation();
+				rigidbody.angle = Quat1f(instance.rotation());
 
 				actors[actorid] = this->addCapsule(steerWheels[actorid], rigidbody, 100);
 			}
@@ -144,14 +145,14 @@ namespace dyno
 				auto& joint = this->createHingeJoint(actors[id], actors[body]);
 				joint.setAnchorPoint(actors[id]->center);
 				joint.setRange(-M_PI * 1 / 100, M_PI * 1 / 100);
-				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(0, 1, 0)));
+				joint.setAxis(Quat1f(instance.rotation()).rotate(Vec3f(0, 1, 0)));
 			}
 			{
 				uint id = steer2;
 				auto& joint = this->createHingeJoint(actors[id], actors[body]);
 				joint.setAnchorPoint(actors[id]->center);
 				joint.setRange(-M_PI * 1 / 100, M_PI * 1 / 100);
-				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(0, 1, 0)));
+				joint.setAxis(Quat1f(instance.rotation()).rotate(Vec3f(0, 1, 0)));
 			}
 
 			rigidbody.offset = Vec3f(0);
@@ -164,28 +165,28 @@ namespace dyno
 				auto& joint = this->createHingeJoint(actors[id], actors[steer1]);
 				joint.setAnchorPoint(actors[id]->center);
 				joint.setMoter(wheel_velocity);
-				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(1, 0, 0)));
+				joint.setAxis(Quat1f(instance.rotation()).rotate(Vec3f(1, 0, 0)));
 			}
 			{
 				uint id = 1;
 				auto& joint = this->createHingeJoint(actors[id], actors[steer2]);
 				joint.setAnchorPoint(actors[id]->center);
 				joint.setMoter(wheel_velocity);
-				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(1, 0, 0)));
+				joint.setAxis(Quat1f(instance.rotation()).rotate(Vec3f(1, 0, 0)));
 			}
 			{
 				uint id = 2;
 				auto& joint = this->createHingeJoint(actors[id], actors[body]);
 				joint.setAnchorPoint(actors[id]->center);
 				joint.setMoter(wheel_velocity);
-				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(1, 0, 0)));
+				joint.setAxis(Quat1f(instance.rotation()).rotate(Vec3f(1, 0, 0)));
 			}
 			{
 				uint id = 3;
 				auto& joint = this->createHingeJoint(actors[id], actors[body]);
 				joint.setAnchorPoint(actors[id]->center);
 				joint.setMoter(wheel_velocity);
-				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(1, 0, 0)));
+				joint.setAxis(Quat1f(instance.rotation()).rotate(Vec3f(1, 0, 0)));
 			}
 
 			auto& jointBackWheel_Body = this->createFixedJoint(actors[backWheel], actors[body]);
@@ -239,10 +240,11 @@ namespace dyno
 			this->varFilePath()->setValue(FilePath(filename));
 		}
 
-		auto instances = this->varVehiclesTransform()->getValue();
-		uint vehicleNum = instances.size();
-		for (size_t i = 0; i < vehicleNum; i++)
+		auto instances = this->varVehiclesTransform();
+		int i = 0;
+		for (auto it = instances->begin(); it != instances->end(); it++, i++)
 		{
+			auto instance = instances->getElement(it);
 			RigidBodyInfo rigidbody;
 			rigidbody.bodyId = i;
 			rigidbody.friction = this->varFrictionCoefficient()->getValue();
@@ -264,8 +266,8 @@ namespace dyno
 				wheels[it].halfLength = 0.1;
 				wheels[it].radius = std::abs(up.y - down.y) / 2;
 
-				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
-				rigidbody.angle = Quat1f(instances[i].rotation());
+				rigidbody.position = Quat1f(instance.rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instance.translation();
+				rigidbody.angle = Quat1f(instance.rotation());
 				actors[it] = this->addCapsule(wheels[it], rigidbody, 100);
 			}
 
@@ -287,8 +289,8 @@ namespace dyno
 				boxs[it].halfLength = (up - down) / 2 * 0.5;
 
 				rigidbody.offset = Vec3f(0.0f, 0.0f, 0.0f);
-				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
-				rigidbody.angle = Quat1f(instances[i].rotation());
+				rigidbody.position = Quat1f(instance.rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instance.translation();
+				rigidbody.angle = Quat1f(instance.rotation());
 				actors[it] = this->addBox(boxs[it], rigidbody, 100);
 			}
 
@@ -313,7 +315,7 @@ namespace dyno
 				auto& joint = this->createHingeJoint(actors[it], actors[body]);
 				joint.setAnchorPoint(actors[it]->center);
 				joint.setMoter(wheel_velocity);
-				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(1, 0, 0)));
+				joint.setAxis(Quat1f(instance.rotation()).rotate(Vec3f(1, 0, 0)));
 			}
 
 			auto& jointGun_Body = this->createFixedJoint(actors[gun], actors[body]);
@@ -363,10 +365,11 @@ namespace dyno
 			this->varFilePath()->setValue(FilePath(filename));
 		}
 
-		auto instances = this->varVehiclesTransform()->getValue();
-		uint vehicleNum = instances.size();
-		for (size_t i = 0; i < vehicleNum; i++)
+		auto instances = this->varVehiclesTransform();
+		int i = 0;
+		for (auto it = instances->begin(); it != instances->end(); it++, i++)
 		{
+			auto instance = instances->getElement(it);
 			RigidBodyInfo rigidbody;
 			rigidbody.bodyId = i;
 			rigidbody.friction = this->varFrictionCoefficient()->getValue();
@@ -385,8 +388,8 @@ namespace dyno
 				auto up = texMesh->shapes()[it]->boundingBox.v1;
 				auto down = texMesh->shapes()[it]->boundingBox.v0;
 
-				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
-				rigidbody.angle = Quat1f(instances[i].rotation());
+				rigidbody.position = Quat1f(instance.rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instance.translation();
+				rigidbody.angle = Quat1f(instance.rotation());
 				rigidbody.motionType = BodyType::Dynamic;
 				auto actor = this->createRigidBody(rigidbody);
 				actors[it] = actor;
@@ -411,8 +414,8 @@ namespace dyno
 				auto up = texMesh->shapes()[cid]->boundingBox.v1;
 				auto down = texMesh->shapes()[cid]->boundingBox.v0;
 				//first gear
-				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[cid]->boundingTransform.translation()) + instances[i].translation();
-				rigidbody.angle = Quat1f(instances[i].rotation());
+				rigidbody.position = Quat1f(instance.rotation()).rotate(texMesh->shapes()[cid]->boundingTransform.translation()) + instance.translation();
+				rigidbody.angle = Quat1f(instance.rotation());
 
 				rigidbody.motionType = BodyType::Dynamic;
 				auto actor = this->createRigidBody(rigidbody);
@@ -454,8 +457,8 @@ namespace dyno
 				auto up = texMesh->shapes()[head]->boundingBox.v1;
 				auto down = texMesh->shapes()[head]->boundingBox.v0;
 
-				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[head]->boundingTransform.translation()) + instances[i].translation();
-				rigidbody.angle = Quat1f(instances[i].rotation());
+				rigidbody.position = Quat1f(instance.rotation()).rotate(texMesh->shapes()[head]->boundingTransform.translation()) + instance.translation();
+				rigidbody.angle = Quat1f(instance.rotation());
 
 				rigidbody.motionType = BodyType::Dynamic;
 				auto actor = this->createRigidBody(rigidbody);
@@ -484,8 +487,8 @@ namespace dyno
 				auto up = texMesh->shapes()[body]->boundingBox.v1;
 				auto down = texMesh->shapes()[body]->boundingBox.v0;
 
-				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[body]->boundingTransform.translation()) + instances[i].translation();
-				rigidbody.angle = Quat1f(instances[i].rotation());
+				rigidbody.position = Quat1f(instance.rotation()).rotate(texMesh->shapes()[body]->boundingTransform.translation()) + instance.translation();
+				rigidbody.angle = Quat1f(instance.rotation());
 
 				rigidbody.motionType = BodyType::Dynamic;
 				auto actor = this->createRigidBody(rigidbody);
@@ -508,8 +511,8 @@ namespace dyno
 				auto up = texMesh->shapes()[cid]->boundingBox.v1;
 				auto down = texMesh->shapes()[cid]->boundingBox.v0;
 
-				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[cid]->boundingTransform.translation()) + instances[i].translation();
-				rigidbody.angle = Quat1f(instances[i].rotation());
+				rigidbody.position = Quat1f(instance.rotation()).rotate(texMesh->shapes()[cid]->boundingTransform.translation()) + instance.translation();
+				rigidbody.angle = Quat1f(instance.rotation());
 
 				rigidbody.motionType = BodyType::Dynamic;
 				rigidbody.bodyId = i * 2 + 1;
@@ -546,7 +549,7 @@ namespace dyno
 				auto& joint = this->createHingeJoint(actors[it], actors[body]);
 				joint.setAnchorPoint(actors[it]->center);
 				//joint.setMoter(wheel_velocity);
-				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(1, 0, 0)));
+				joint.setAxis(Quat1f(instance.rotation()).rotate(Vec3f(1, 0, 0)));
 			}
 
 			//Gear to Body Joint
@@ -555,7 +558,7 @@ namespace dyno
 				auto& joint = this->createHingeJoint(actors[it], actors[body]);
 				joint.setAnchorPoint(actors[it]->center);
 				joint.setMoter(wheel_velocity);
-				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(1, 0, 0)));
+				joint.setAxis(Quat1f(instance.rotation()).rotate(Vec3f(1, 0, 0)));
 			}
 
 			auto& jointGun_Body = this->createFixedJoint(actors[head], actors[body]);
@@ -574,7 +577,7 @@ namespace dyno
 
 				auto& joint = this->createHingeJoint(actors[start], actors[end]);
 				joint.setAnchorPoint((actors[start]->center + actors[end]->center) / 2);
-				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(1, 0, 0)));
+				joint.setAxis(Quat1f(instance.rotation()).rotate(Vec3f(1, 0, 0)));
 
 				points.push_back(actors[start]->center);
 
@@ -593,7 +596,7 @@ namespace dyno
 
 				auto& joint = this->createHingeJoint(actors[start], actors[end]);
 				joint.setAnchorPoint((actors[start]->center + actors[end]->center) / 2);
-				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(1, 0, 0)));
+				joint.setAxis(Quat1f(instance.rotation()).rotate(Vec3f(1, 0, 0)));
 
 				points.push_back(actors[start]->center);
 
@@ -647,10 +650,11 @@ namespace dyno
 			this->varFilePath()->setValue(FilePath(filename));
 		}
 
-		auto instances = this->varVehiclesTransform()->getValue();
-		uint vehicleNum = instances.size();
-		for (size_t i = 0; i < vehicleNum; i++)
+		auto instances = this->varVehiclesTransform();
+		int i = 0;
+		for (auto it = instances->begin(); it != instances->end(); it++, i++)
 		{
+			auto instance = instances->getElement(it);
 			RigidBodyInfo rigidbody;
 			rigidbody.bodyId = i;
 			rigidbody.friction = this->varFrictionCoefficient()->getValue();
@@ -682,8 +686,8 @@ namespace dyno
 				wheels[it].halfLength = std::abs(up.x - down.x) / 1.5;
 				wheels[it].radius = std::abs(up.y - down.y) / 2;
 
-				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
-				rigidbody.angle = Quat1f(instances[i].rotation());
+				rigidbody.position = Quat1f(instance.rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instance.translation();
+				rigidbody.angle = Quat1f(instance.rotation());
 
 				actors[it] = this->addCapsule(wheels[it], rigidbody, 100);
 			}
@@ -705,8 +709,8 @@ namespace dyno
 				boxs[it].halfLength = (up - down) / 2;
 
 				rigidbody.offset = Vec3f(0.0f, 0.0f, 0.0f);
-				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
-				rigidbody.angle = Quat1f(instances[i].rotation());
+				rigidbody.position = Quat1f(instance.rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instance.translation();
+				rigidbody.angle = Quat1f(instance.rotation());
 
 				actors[it] = this->addBox(boxs[it], rigidbody, 100);
 			}
@@ -734,7 +738,7 @@ namespace dyno
 				auto& joint = this->createHingeJoint(actors[it], actors[body]);
 				joint.setAnchorPoint(actors[it]->center);
 				joint.setMoter(wheel_velocity);
-				joint.setAxis(Quat1f(instances[i].rotation()).rotate(Vec3f(0, 1, 0)));
+				joint.setAxis(Quat1f(instance.rotation()).rotate(Vec3f(0, 1, 0)));
 			}
 
 		}
@@ -776,10 +780,11 @@ namespace dyno
 			this->varFilePath()->setValue(FilePath(filename));
 		}
 
-		auto instances = this->varVehiclesTransform()->getValue();
-		uint vehicleNum = instances.size();
-		for (size_t i = 0; i < vehicleNum; i++)
+		auto instances = this->varVehiclesTransform();
+		int i = 0;
+		for (auto it = instances->begin(); it != instances->end(); it++, i++)
 		{
+			auto instance = instances->getElement(it);
 			RigidBodyInfo rigidbody;
 			rigidbody.bodyId = i;
 			rigidbody.friction = this->varFrictionCoefficient()->getValue();
@@ -811,8 +816,8 @@ namespace dyno
 				wheels[it].halfLength = 0.13;
 				wheels[it].radius = 0.03;
 
-				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
-				rigidbody.angle = Quat1f(instances[i].rotation());
+				rigidbody.position = Quat1f(instance.rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instance.translation();
+				rigidbody.angle = Quat1f(instance.rotation());
 
 				actors[it] = this->addCapsule(wheels[it], rigidbody, 100);
 			}
@@ -834,8 +839,8 @@ namespace dyno
 				boxs[it].halfLength = (up - down) / 2;
 
 				rigidbody.offset = Vec3f(0.0f, 0.0f, 0.0f);
-				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
-				rigidbody.angle = Quat1f(instances[i].rotation());
+				rigidbody.position = Quat1f(instance.rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instance.translation();
+				rigidbody.angle = Quat1f(instance.rotation());
 
 				actors[it] = this->addBox(boxs[it], rigidbody, 100);
 			}
@@ -864,7 +869,7 @@ namespace dyno
 				joint.setAnchorPoint(actors[it]->center);
 				joint.setMoter(wheel_velocity);
 				Vec3f axis = it == 1 || it == 2 ? Vec3f(0, 1, 0) : Vec3f(0, 0, 1);
-				joint.setAxis(Quat1f(instances[i].rotation()).rotate(axis));
+				joint.setAxis(Quat1f(instance.rotation()).rotate(axis));
 			}
 
 		}
@@ -916,11 +921,11 @@ namespace dyno
 			this->varFilePath()->setValue(FilePath(filename));
 		}
  
-		auto instances = this->varVehiclesTransform()->getValue();
-		uint vehicleNum = instances.size();
-
-		for (size_t i = 0; i < vehicleNum; i++)
+		auto instances = this->varVehiclesTransform();
+		int i = 0;
+		for (auto it = instances->begin(); it != instances->end(); it++, i++)
 		{
+			auto instance = instances->getElement(it);
 			RigidBodyInfo rigidbody;
 			rigidbody.bodyId = i;
 			rigidbody.friction = this->varFrictionCoefficient()->getValue();
@@ -936,8 +941,8 @@ namespace dyno
 				auto up = texMesh->shapes()[it]->boundingBox.v1;
 				auto down = texMesh->shapes()[it]->boundingBox.v0;
 
-				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
-				rigidbody.angle = Quat1f(instances[i].rotation());
+				rigidbody.position = Quat1f(instance.rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instance.translation();
+				rigidbody.angle = Quat1f(instance.rotation());
 				rigidbody.motionType = BodyType::Dynamic;
 				auto actor = this->createRigidBody(rigidbody);
 				actors[it] = actor;
@@ -990,8 +995,8 @@ namespace dyno
 				auto up = texMesh->shapes()[it]->boundingBox.v1;
 				auto down = texMesh->shapes()[it]->boundingBox.v0;
 
-				rigidbody.position = Quat1f(instances[i].rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instances[i].translation();
-				rigidbody.angle = Quat1f(instances[i].rotation());
+				rigidbody.position = Quat1f(instance.rotation()).rotate(texMesh->shapes()[it]->boundingTransform.translation()) + instance.translation();
+				rigidbody.angle = Quat1f(instance.rotation());
 
 				rigidbody.motionType = BodyType::Dynamic;
 				auto actor = this->createRigidBody(rigidbody);
@@ -1059,6 +1064,8 @@ namespace dyno
 	{
 		auto topo = this->stateTopology()->getDataPtr();
 		auto& hinges = topo->hingeJoints();
+		if (hinges.size() == 0)
+			return;
 
 		Real steeringAngle = this->stateSteeringAngle()->getValue();
 
@@ -1077,7 +1084,8 @@ namespace dyno
 	{
 		auto topo = this->stateTopology()->getDataPtr();
 		auto& hinges = topo->hingeJoints();
-
+		if (hinges.size() == 0)
+			return;
 		Real thrustMag = this->stateThrust()->getValue();
 
 		//TODO: remove the hard coding

@@ -15,6 +15,9 @@
 
 //Module headers
 #include "RigidBody/Module/ContactsUnion.h"
+#include "MultiBodyTuple.h"
+
+#include "SceneLoaderXML.h"
 
 namespace dyno
 {
@@ -678,391 +681,366 @@ namespace dyno
 	template<typename TDataType>
 	void RigidBodySystem<TDataType>::saveToFile()
 	{
-		/*auto Path = this->varSaveConfigPath()->getValue();
+		auto Path = this->varSaveConfigPath()->getValue();
 
-		MultiBodyBind vehicleBind = getMultiBodyBind();
+		auto bindTuple = getMultiBodyBind();
 
-		
+		auto tupleField = std::make_shared<TFTuple<MultiBodyTuple>>("var_Configuration", "", FieldTypeEnum::Param, nullptr);
+		tupleField->setValue(bindTuple);
 
+		SceneLoaderXML saveHelper;
+		FilePath path = this->varSaveConfigPath()->getValue();
+		tinyxml2::XMLDocument doc;
 
-		FVar<MultiBodyBind> fvarBind(vehicleBind, "tempBind", "", FieldTypeEnum::Param, NULL);
-		auto configStr = fvarBind.serialize();
+		tinyxml2::XMLElement* config = doc.NewElement("Configuration");
 
-		std::ofstream outFile(Path.string(), std::ios::out | std::ios::trunc);
-		if (!outFile.is_open())
-		{
-			throw std::runtime_error("Error Path : " + Path.string());
-		}
+		saveHelper.serializeField(tupleField.get(), config, doc);
+		doc.InsertFirstChild(config);
 
-		outFile << "TextureMesh File:\n" << "" << "\n\n";
-		outFile << "VehicleConfiguration:\n" << configStr << "\n\n";
-		outFile << "VehiclesTransform:\n" << "" << "\n";
+		doc.SaveFile(path.string().c_str());
 
-		outFile.close();*/
 	}
 
-	//void initialShapeConfig(
-	//	ShapeConfig& shapeRigid,
-	//	ConfigShapeType type,
-	//	Vec3f center,
-	//	Quat<Real> rot,
-	//	Vec3f halfLength,
-	//	Real radius,
-	//	Real capsuleLength,
-	//	Real density = 100,
-	//	std::vector<Vec3f> tet = std::vector<Vec3f>()
+	RigidMotionType ToConfigMotionType(BodyType bodyType)
+	{
+		switch (bodyType)
+		{
+		case Static: return RigidMotionType::RIGID_Static;
+		case Kinematic: return RigidMotionType::RIGID_Kinematic;
+		case Dynamic: return RigidMotionType::RIGID_Dynamic;
+		case NonRotatable: return RigidMotionType::RIGID_NonRotatable;
+		case NonGravitative: return RigidMotionType::RIGID_NonGravitative;
+		default: return RigidMotionType::RIGID_Dynamic;
+		}
+	}
 
-	//)
-	//{
-	//	shapeRigid.shapeType = type;
-	//	shapeRigid.center = center;
-	//	shapeRigid.rot = rot;
-	//	shapeRigid.halfLength = halfLength;
-	//	shapeRigid.radius = radius;
-	//	shapeRigid.capsuleLength = capsuleLength;
-	//	shapeRigid.density = density;
-	//	shapeRigid.tet = { Vec3f(0),Vec3f(0),Vec3f(0),Vec3f(0,1,0) };
-	//}
+	RigidShapeType ToConfigShapeType(ElementType element)
+	{
+		switch (element)
+		{
+		case ET_BOX:       return RigidShapeType::SHAPE_BOX;
+		case ET_TET:       return RigidShapeType::SHAPE_TET;
+		case ET_CAPSULE:   return RigidShapeType::SHAPE_CAPSULE;
+		case ET_SPHERE:    return RigidShapeType::SHAPE_SPHERE;
+		case ET_TRI:       return RigidShapeType::SHAPE_TRI;
+		case ET_COMPOUND:  return RigidShapeType::SHAPE_COMPOUND;
+		case ET_Other:     return RigidShapeType::SHAPE_Other;
+		default:           return RigidShapeType::SHAPE_Other; // 默认返回
+		}
+	}
 
-	//void initialRigidBodyConfig(
-	//	RigidBodyConfig& configRigid,
+	RigidCollisionMask ToConfigCollisionMask(CollisionMask mask)
+	{
+		switch (mask)
+		{
+		case CT_AllObjects:       return RigidCollisionMask::RIGID_AllObjects;
+		case CT_BoxExcluded:      return RigidCollisionMask::RIGID_BoxExcluded;
+		case CT_TetExcluded:      return RigidCollisionMask::RIGID_TetExcluded;
+		case CT_CapsuleExcluded:  return RigidCollisionMask::RIGID_CapsuleExcluded;
+		case CT_SphereExcluded:   return RigidCollisionMask::RIGID_SphereExcluded;
+		case CT_BoxOnly:          return RigidCollisionMask::RIGID_BoxOnly;
+		case CT_TetOnly:          return RigidCollisionMask::RIGID_TetOnly;
+		case CT_CapsuleOnly:      return RigidCollisionMask::RIGID_CapsuleOnly;
+		case CT_SphereOnly:       return RigidCollisionMask::RIGID_SphereOnly;
+		case CT_Disabled:         return RigidCollisionMask::RIGID_Disabled;
+		default:                  return RigidCollisionMask::RIGID_AllObjects;
+		}
+	}
 
-	//	std::string name,
-	//	int rigidbodyID,
-	//	Quat<Real> angle,
-	//	Vector<Real, 3> linearVelocity,
-	//	Vector<Real, 3> angularVelocity,
-	//	Vector<Real, 3> position,
-	//	Vector<Real, 3> offset,
-	//	SquareMatrix<Real, 3> inertia,
-	//	uint bodyId,
-	//	Real friction,
-	//	Real restitution,
-	//	ConfigMotionType motionType,
-	//	ConfigShapeType shapeType,
-	//	ConfigCollisionMask collisionMask,
-	//	int configGroup = 0,
-	//	std::vector<int> visualShapeIds = std::vector<int>(),
-	//	std::vector<ShapeConfig> shapeConfigs = std::vector<ShapeConfig>()
-	//)
-	//{
-	//	configRigid.shapeName = NameRigidID(name + std::to_string(rigidbodyID), rigidbodyID);
-	//	configRigid.angle = angle;
-	//	configRigid.linearVelocity = linearVelocity;
-	//	configRigid.angularVelocity = angularVelocity;
-	//	configRigid.position = position;
-	//	configRigid.offset = offset;
-	//	configRigid.inertia = inertia;
-	//	configRigid.ConfigGroup = bodyId;
-	//	configRigid.friction = friction;
-	//	configRigid.restitution = restitution;
-	//	configRigid.motionType = motionType;
-	//	configRigid.shapeType = shapeType;
-	//	configRigid.collisionMask = collisionMask;
-	//	configRigid.visualShapeIds = visualShapeIds;
-	//	configRigid.shapeConfigs = shapeConfigs;
-	//	configRigid.ConfigGroup = configGroup;
-	//}
+	template<typename TDataType>
+	MultiBodyTuple RigidBodySystem<TDataType>::getMultiBodyBind()
+	{
+		int rigidNum = getRigidBodyStates().size();
+		int jointNum = getJointsBallAndSocket().size() + getJointsSlider().size() + getJointsHinge().size() + getJointsFixed().size() + getJointsPoint().size();
 
-	//ConfigMotionType ToConfigMotionType(BodyType bodyType)
-	//{
-	//	switch (bodyType)
-	//	{
-	//	case Static: return CONFIG_Static;
-	//	case Kinematic: return CONFIG_Kinematic;
-	//	case Dynamic: return CONFIG_Dynamic;
-	//	case NonRotatable: return CONFIG_NonRotatable;
-	//	case NonGravitative: return CONFIG_NonGravitative;
-	//	default: return CONFIG_Dynamic;
-	//	}
-	//}
+		MultiBodyTuple config;
 
-	//ConfigShapeType ToConfigShapeType(ElementType element)
-	//{
-	//	switch (element)
-	//	{
-	//	case ET_BOX:       return CONFIG_BOX;
-	//	case ET_TET:       return CONFIG_TET;
-	//	case ET_CAPSULE:   return CONFIG_CAPSULE;
-	//	case ET_SPHERE:    return CONFIG_SPHERE;
-	//	case ET_TRI:       return CONFIG_TRI;
-	//	case ET_COMPOUND:  return CONFIG_COMPOUND;
-	//	case ET_Other:     return CONFIG_Other;
-	//	default:           return CONFIG_Other; // 默认返回
-	//	}
-	//}
 
-	//ConfigCollisionMask ToConfigCollisionMask(CollisionMask mask)
-	//{
-	//	switch (mask)
-	//	{
-	//	case CT_AllObjects:       return CONFIG_AllObjects;
-	//	case CT_BoxExcluded:      return CONFIG_BoxExcluded;
-	//	case CT_TetExcluded:      return CONFIG_TetExcluded;
-	//	case CT_CapsuleExcluded:  return CONFIG_CapsuleExcluded;
-	//	case CT_SphereExcluded:   return CONFIG_SphereExcluded;
-	//	case CT_BoxOnly:          return CONFIG_BoxOnly;
-	//	case CT_TetOnly:          return CONFIG_TetOnly;
-	//	case CT_CapsuleOnly:      return CONFIG_CapsuleOnly;
-	//	case CT_SphereOnly:       return CONFIG_SphereOnly;
-	//	case CT_Disabled:         return CONFIG_Disabled;
-	//	default:                  return CONFIG_AllObjects;
-	//	}
-	//}
+		for (uint rId = 0; rId < rigidNum; rId++)
+		{
+			auto rigidInfo = getRigidBodyStates()[rId];
 
-	//template<typename TDataType>
-	//MultiBodyBind RigidBodySystem<TDataType>::getMultiBodyBind()
-	//{
-	//	int rigidNum = getRigidBodyStates().size();
-	//	int jointNum = getJointsBallAndSocket().size() + getJointsSlider().size() + getJointsHinge().size() + getJointsFixed().size() + getJointsPoint().size();
+			std::list<ShapeTuple> shapes;
+			for (size_t i = 0; i < getSpheres().size(); i++)
+			{
+				auto pair = getShape2RigidBodyMapping()[i];
+				uint rId = pair.second;
+				auto sphereInfo = getSpheres()[i];
+				auto rigidInfo = getRigidBodyStates()[rId];
 
-	//	MultiBodyBind config;
-	//	config.rigidBodyConfigs.resize(rigidNum);
-	//	config.jointConfigs.resize(jointNum);
+				shapes.push_back(ShapeTuple(
+					RigidShapeType::SHAPE_SPHERE,
+					sphereInfo.center,
+					sphereInfo.rot,
+					rigidInfo.mass / ((4.0 / 3.0) * M_PI * sphereInfo.radius * sphereInfo.radius * sphereInfo.radius),
+					Vec3f(0),
+					sphereInfo.radius,
+					0,
+					std::list<Vec3f>()
+				));
+			}
 
-	//	for (size_t rId = 0; rId < rigidNum; rId++)
-	//	{
-	//		auto rigidInfo = getRigidBodyStates()[rId];
-	//		RigidBodyConfig& rigidConfig = config.rigidBodyConfigs[rId];
+			for (size_t i = 0; i < getBoxes().size(); i++)
+			{
+				auto pair = getShape2RigidBodyMapping()[getSpheres().size() + i];
+				uint rId = pair.second;
+				auto boxInfo = getBoxes()[i];
 
-	//		if (!rigidConfig.isValid())
-	//		{
-	//			initialRigidBodyConfig(
-	//				rigidConfig,
-	//				"Rigid",
-	//				rId,
-	//				rigidInfo.angle,
-	//				rigidInfo.linearVelocity,
-	//				rigidInfo.angularVelocity,
-	//				rigidInfo.position,
-	//				rigidInfo.offset,
-	//				rigidInfo.inertia,
-	//				rigidInfo.bodyId,
-	//				rigidInfo.friction,
-	//				rigidInfo.restitution,
-	//				ToConfigMotionType(rigidInfo.motionType),
-	//				ToConfigShapeType(rigidInfo.shapeType),
-	//				ToConfigCollisionMask(rigidInfo.collisionMask),
-	//				rigidInfo.bodyId
-	//			);
-	//		}
-	//	}
+				auto rigidInfo = getRigidBodyStates()[rId];
 
-	//	for (size_t i = 0; i < getSpheres().size(); i++)
-	//	{
-	//		auto pair = getShape2RigidBodyMapping()[i];
-	//		uint rId = pair.second;
-	//		auto sphereInfo = getSpheres()[i];
-	//		auto rigidInfo = getRigidBodyStates()[rId];
+				float lx = 2.0f * boxInfo.halfLength[0];
+				float ly = 2.0f * boxInfo.halfLength[1];
+				float lz = 2.0f * boxInfo.halfLength[2];
 
-	//		ShapeConfig sphereConfig;
-	//		initialShapeConfig(
-	//			sphereConfig,
-	//			ConfigShapeType::CONFIG_SPHERE,
-	//			sphereInfo.center,
-	//			sphereInfo.rot,
-	//			Vec3f(0),
-	//			sphereInfo.radius,
-	//			0,
-	//			rigidInfo.mass / ((4.0 / 3.0) * M_PI * sphereInfo.radius * sphereInfo.radius * sphereInfo.radius)
-	//		);
 
-	//		config.rigidBodyConfigs[rId].bindShapeConfig(sphereConfig);
+				shapes.push_back(ShapeTuple(
+					RigidShapeType::SHAPE_BOX,
+					boxInfo.center,
+					boxInfo.rot,
+					rigidInfo.mass / (lx * ly * lz),
+					boxInfo.halfLength,
+					0,
+					0,
+					std::list<Vec3f>()
+				));
+			}
 
-	//	}
+			for (size_t i = 0; i < getTets().size(); i++)
+			{
+				auto pair = getShape2RigidBodyMapping()[getSpheres().size() + getBoxes().size() + i];
+				uint rId = pair.second;
+				auto tetInfo = getTets()[i];
 
-	//	for (size_t i = 0; i < getBoxes().size(); i++)
-	//	{
-	//		auto pair = getShape2RigidBodyMapping()[getSpheres().size() + i];
-	//		uint rId = pair.second;
-	//		auto boxInfo = getBoxes()[i];
+				auto rigidInfo = getRigidBodyStates()[rId];
 
-	//		auto rigidInfo = getRigidBodyStates()[rId];
+				Coord centroid = (tetInfo.v[0] + tetInfo.v[1] + tetInfo.v[2] + tetInfo.v[3]) / 4;
 
-	//		float lx = 2.0f * boxInfo.halfLength[0];
-	//		float ly = 2.0f * boxInfo.halfLength[1];
-	//		float lz = 2.0f * boxInfo.halfLength[2];
+				Coord v0 = tetInfo.v[0] - centroid;
+				Coord v1 = tetInfo.v[1] - centroid;
+				Coord v2 = tetInfo.v[2] - centroid;
+				Coord v3 = tetInfo.v[3] - centroid;
 
-	//		ShapeConfig boxConfig;
-	//		initialShapeConfig(
-	//			boxConfig,
-	//			ConfigShapeType::CONFIG_BOX,
-	//			boxInfo.center,
-	//			boxInfo.rot,
-	//			boxInfo.halfLength,
-	//			0,
-	//			0,
-	//			rigidInfo.mass / (lx * ly * lz)
-	//		);
+				auto tmpMat = Mat3f(v1 - v0, v2 - v0, v3 - v0);
 
-	//		config.rigidBodyConfigs[rId].bindShapeConfig(boxConfig);
+				Real detJ = abs(tmpMat.determinant());
+				Real volume = (1.0 / 6.0) * detJ;
+				Real density = rigidInfo.mass / volume;
 
-	//	}
+				std::list<Vec3f> tet;
+				tet.push_back(tetInfo.v[0]);
+				tet.push_back(tetInfo.v[1]);
+				tet.push_back(tetInfo.v[2]);
+				tet.push_back(tetInfo.v[3]);
 
-	//	for (size_t i = 0; i < getTets().size(); i++)
-	//	{
-	//		auto pair = getShape2RigidBodyMapping()[getSpheres().size() + getBoxes().size() + i];
-	//		uint rId = pair.second;
-	//		auto tetInfo = getTets()[i];
+				shapes.push_back(ShapeTuple(
+					RigidShapeType::SHAPE_TET,
+					Vec3f(0),
+					Quat<Real>(),
+					density,
+					Vec3f(0),
+					0,
+					0,
+					tet
+				));
 
-	//		auto rigidInfo = getRigidBodyStates()[rId];
+			}
 
-	//		Coord centroid = (tetInfo.v[0] + tetInfo.v[1] + tetInfo.v[2] + tetInfo.v[3]) / 4;
+			for (size_t i = 0; i < getCapsules().size(); i++)
+			{
+				auto pair = getShape2RigidBodyMapping()[getSpheres().size() + getBoxes().size() + getTets().size() + i];
+				uint rId = pair.second;
+				auto capsuleInfo = getCapsules()[i];
+				auto rigidInfo = getRigidBodyStates()[rId];
 
-	//		Coord v0 = tetInfo.v[0] - centroid;
-	//		Coord v1 = tetInfo.v[1] - centroid;
-	//		Coord v2 = tetInfo.v[2] - centroid;
-	//		Coord v3 = tetInfo.v[3] - centroid;
+				Real r = capsuleInfo.radius;
+				Real h = capsuleInfo.halfLength * 2;
+				Real density = rigidInfo.mass / (2.0 / 3.0 * M_PI * r * r * r * 2 + M_PI * r * r * h);
 
-	//		auto tmpMat = Mat3f(v1 - v0, v2 - v0, v3 - v0);
 
-	//		Real detJ = abs(tmpMat.determinant());
-	//		Real volume = (1.0 / 6.0) * detJ;
-	//		Real density = rigidInfo.mass / volume;
+				shapes.push_back(ShapeTuple(
+					RigidShapeType::SHAPE_CAPSULE,
+					capsuleInfo.center,
+					capsuleInfo.rot,
+					density,
+					Vec3f(0),
+					capsuleInfo.radius,
+					capsuleInfo.halfLength,
+					std::list<Vec3f>()
+				));
+			}
 
-	//		std::vector<Vec3f> tet;
-	//		tet.push_back(tetInfo.v[0]);
-	//		tet.push_back(tetInfo.v[1]);
-	//		tet.push_back(tetInfo.v[2]);
-	//		tet.push_back(tetInfo.v[3]);
+			RigidBodyTuple rigid = RigidBodyTuple(
+				"Rigid",
+				rId,
+				rigidInfo.angle,
+				rigidInfo.linearVelocity,
+				rigidInfo.angularVelocity,
+				rigidInfo.position,
+				rigidInfo.offset,
+				rigidInfo.inertia,
+				rigidInfo.friction,
+				rigidInfo.restitution,
+				ToConfigMotionType(rigidInfo.motionType),
+				ToConfigShapeType(rigidInfo.shapeType),
+				ToConfigCollisionMask(rigidInfo.collisionMask),
+				rigidInfo.bodyId,
+				std::list<int>(),
+				shapes
+			);
 
-	//		ShapeConfig tetConfig;
-	//		initialShapeConfig(
-	//			tetConfig,
-	//			ConfigShapeType::CONFIG_TET,
-	//			Vec3f(0),
-	//			Quat<Real>(),
-	//			Vec3f(0),
-	//			0,
-	//			0,
-	//			density,
-	//			tet
-	//		);
+			config.varRigidBodyConfigs()->pushBack(rigid);
+		}
 
-	//		config.rigidBodyConfigs[rId].bindShapeConfig(tetConfig);
+		const std::vector<BallAndSocketJoint>& ballJoint = getJointsBallAndSocket();
+		const std::vector<SliderJoint>& sliderJoint = getJointsSlider();
+		const std::vector<HingeJoint>& hingeJoint = getJointsHinge();
+		const std::vector<FixedJoint>& fixedJoint = getJointsFixed();
+		const std::vector<PointJoint>& pointJoint = getJointsPoint();
 
-	//	}
 
-	//	for (size_t i = 0; i < getCapsules().size(); i++)
-	//	{
-	//		auto pair = getShape2RigidBodyMapping()[getSpheres().size() + getBoxes().size() + getTets().size() + i];
-	//		uint rId = pair.second;
-	//		auto capsuleInfo = getCapsules()[i];
-	//		auto rigidInfo = getRigidBodyStates()[rId];
+		int JointsNum = ballJoint.size() + sliderJoint.size() + hingeJoint.size() + fixedJoint.size() + pointJoint.size();
 
-	//		Real r = capsuleInfo.radius;
-	//		Real h = capsuleInfo.halfLength * 2;
-	//		Real density = rigidInfo.mass/ (2.0 / 3.0 * M_PI * r * r * r * 2 + M_PI * r * r * h);
+		for (size_t ejId = 0; ejId < ballJoint.size(); ejId++)
+		{
+			Vector<Real, 3> anchor_point = ballJoint[ejId].actor1->rot.rotate(ballJoint[ejId].r1);// + ballJoint[ejId].actor1->center;
 
-	//		ShapeConfig capsuleConfig;
-	//		initialShapeConfig(
-	//			capsuleConfig,
-	//			ConfigShapeType::CONFIG_CAPSULE,
-	//			capsuleInfo.center,
-	//			capsuleInfo.rot,
-	//			Vec3f(0),
-	//			capsuleInfo.radius,
-	//			capsuleInfo.halfLength,
-	//			density
-	//		);
+			config.varJointConfigs()->pushBack(
+				MultiBodyJointTuple
+				(
+					"",
+					ballJoint[ejId].bodyId1,
+					"",
+					ballJoint[ejId].bodyId2,
+					anchor_point,
+					true,
+					false,
+					false,
+					Vec2f(0),
+					0,
+					Vec3f(0),
+					Quat<Real>(),
+					Vec3f(0),
+					Vec3f(0),
+					0,
+					JointType::JOINT_BallAndSocket
+				)
+			);
+		}
 
-	//		config.rigidBodyConfigs[rId].bindShapeConfig(capsuleConfig);
+		for (size_t ejId = 0; ejId < sliderJoint.size(); ejId++)
+		{
+			Vector<Real, 3> anchor_point = sliderJoint[ejId].actor1->rot.rotate(sliderJoint[ejId].r1);// +sliderJoint[ejId].actor1->center;
 
-	//	}
+			Mat3f rotMat1 = sliderJoint[ejId].actor1->rot.toMatrix3x3();
+			Vector<Real, 3> axis = rotMat1 * sliderJoint[ejId].sliderAxis;
 
-	//	const std::vector<BallAndSocketJoint>& ballJoint = getJointsBallAndSocket();
-	//	const std::vector<SliderJoint>& sliderJoint = getJointsSlider();
-	//	const std::vector<HingeJoint>& hingeJoint = getJointsHinge();
-	//	const std::vector<FixedJoint>& fixedJoint = getJointsFixed();
-	//	const std::vector<PointJoint>& pointJoint = getJointsPoint();
+			config.varJointConfigs()->pushBack(
+				MultiBodyJointTuple
+				(
+					"",
+					sliderJoint[ejId].bodyId1,
+					"",
+					sliderJoint[ejId].bodyId2,
+					anchor_point,
+					true,
+					sliderJoint[ejId].useMoter,
+					sliderJoint[ejId].useRange,
+					Vec2f(sliderJoint[ejId].d_min, sliderJoint[ejId].d_max),
+					sliderJoint[ejId].v_moter,
+					axis,
+					Quat<Real>(),
+					Vec3f(0),
+					Vec3f(0),
+					0,
+					JointType::JOINT_Slider
+				)
+			);
+		}
 
-	//	int JointsNum = ballJoint.size() + sliderJoint.size() + hingeJoint.size() + fixedJoint.size() + pointJoint.size();
-	//	config.jointConfigs.resize(JointsNum);
-	//	int jId = 0;
+		for (size_t ejId = 0; ejId < hingeJoint.size(); ejId++)
+		{
+			Vector<Real, 3> anchor_point = hingeJoint[ejId].actor1->rot.rotate(hingeJoint[ejId].r1);// +hingeJoint[ejId].actor1->center;
 
-	//	for (size_t ejId = 0; ejId < ballJoint.size(); ejId++)
-	//	{
+			Mat3f rotMat1 = hingeJoint[ejId].actor1->rot.toMatrix3x3();
+			Vector<Real, 3> axis = rotMat1 * hingeJoint[ejId].hingeAxisBody1;
 
-	//		Vector<Real, 3> anchor_point = ballJoint[ejId].actor1->rot.rotate(ballJoint[ejId].r1);// + ballJoint[ejId].actor1->center;
+			config.varJointConfigs()->pushBack(
+				MultiBodyJointTuple
+				(
+					"",
+					hingeJoint[ejId].bodyId1,
+					"",
+					hingeJoint[ejId].bodyId2,
+					anchor_point,
+					true,
+					hingeJoint[ejId].useMoter,
+					hingeJoint[ejId].useRange,
+					Vec2f(hingeJoint[ejId].d_min, hingeJoint[ejId].d_max),
+					hingeJoint[ejId].v_moter,
+					axis,
+					Quat<Real>(),
+					Vec3f(0),
+					Vec3f(0),
+					0,
+					JointType::JOINT_Hinge
+				)
+			);
+		}
 
-	//		config.jointConfigs[jId].mJointType = ConfigJointType::CONFIG_BallAndSocket;
-	//		config.jointConfigs[jId].mAnchorPoint = anchor_point;
-	//		config.jointConfigs[jId].mRigidBodyName_1.rigidBodyId = ballJoint[ejId].bodyId1;
-	//		config.jointConfigs[jId].mRigidBodyName_2.rigidBodyId = ballJoint[ejId].bodyId2;
+		for (size_t ejId = 0; ejId < fixedJoint.size(); ejId++)
+		{
+			Vector<Real, 3> anchor_point = fixedJoint[ejId].actor1->rot.rotate(fixedJoint[ejId].r1);// +fixedJoint[ejId].actor1->center;
 
-	//		jId++;
-	//	}
+			config.varJointConfigs()->pushBack(
+				MultiBodyJointTuple
+				(
+					"",
+					fixedJoint[ejId].bodyId1,
+					"",
+					fixedJoint[ejId].bodyId2,
+					anchor_point,
+					true,
+					false,
+					false,
+					Vec2f(0),
+					0,
+					Vec3f(0),
+					fixedJoint[ejId].q,
+					Vec3f(0),
+					Vec3f(0),
+					0,
+					JointType::JOINT_Fixed
+				)
+			);
+		}
 
-	//	for (size_t ejId = 0; ejId < sliderJoint.size(); ejId++)
-	//	{
-	//		Vector<Real, 3> anchor_point = sliderJoint[ejId].actor1->rot.rotate(sliderJoint[ejId].r1);// +sliderJoint[ejId].actor1->center;
+		for (size_t ejId = 0; ejId < pointJoint.size(); ejId++)
+		{
+			config.varJointConfigs()->pushBack(
+				MultiBodyJointTuple
+				(
+					"",
+					pointJoint[ejId].bodyId1,
+					"",
+					pointJoint[ejId].bodyId2,
+					pointJoint[ejId].anchorPoint - pointJoint[ejId].actor1->center,
+					true,
+					false,
+					false,
+					Vec2f(0),
+					0,
+					Vec3f(0),
+					Quat<Real>(),
+					Vec3f(0),
+					Vec3f(0),
+					0,
+					JointType::JOINT_Point
+				)
+			);
+		}
 
-	//		config.jointConfigs[jId].mJointType = ConfigJointType::CONFIG_Slider;
-	//		config.jointConfigs[jId].mAnchorPoint = anchor_point;
-	//		config.jointConfigs[jId].mRigidBodyName_1.rigidBodyId = sliderJoint[ejId].bodyId1;
-	//		config.jointConfigs[jId].mRigidBodyName_2.rigidBodyId = sliderJoint[ejId].bodyId2;
-
-	//		Mat3f rotMat1 = sliderJoint[ejId].actor1->rot.toMatrix3x3();
-	//		Vector<Real, 3> axis = rotMat1 * sliderJoint[ejId].sliderAxis;
-	//		config.jointConfigs[jId].mAxis = axis;
-	//		config.jointConfigs[jId].mUseRange = sliderJoint[ejId].useRange;
-	//		config.jointConfigs[jId].mMin = sliderJoint[ejId].d_min;
-	//		config.jointConfigs[jId].mMax = sliderJoint[ejId].d_max;
-
-	//		config.jointConfigs[jId].mUseMoter = sliderJoint[ejId].useMoter;
-	//		config.jointConfigs[jId].mMoter = sliderJoint[ejId].v_moter;
-
-	//		jId++;
-	//	}
-
-	//	for (size_t ejId = 0; ejId < hingeJoint.size(); ejId++)
-	//	{
-	//		Vector<Real, 3> anchor_point = hingeJoint[ejId].actor1->rot.rotate(hingeJoint[ejId].r1);// +hingeJoint[ejId].actor1->center;
-
-	//		config.jointConfigs[jId].mJointType = ConfigJointType::CONFIG_Hinge;
-	//		config.jointConfigs[jId].mAnchorPoint = anchor_point;
-	//		config.jointConfigs[jId].mRigidBodyName_1.rigidBodyId = hingeJoint[ejId].bodyId1;
-	//		config.jointConfigs[jId].mRigidBodyName_2.rigidBodyId = hingeJoint[ejId].bodyId2;
-
-	//		Mat3f rotMat1 = hingeJoint[ejId].actor1->rot.toMatrix3x3();
-	//		Vector<Real, 3> axis = rotMat1 * hingeJoint[ejId].hingeAxisBody1;
-	//		config.jointConfigs[jId].mAxis = axis;
-	//		config.jointConfigs[jId].mUseRange = hingeJoint[ejId].useRange;
-	//		config.jointConfigs[jId].mMin = hingeJoint[ejId].d_min;
-	//		config.jointConfigs[jId].mMax = hingeJoint[ejId].d_max;
-
-	//		config.jointConfigs[jId].mUseMoter = hingeJoint[ejId].useMoter;
-	//		config.jointConfigs[jId].mMoter = hingeJoint[ejId].v_moter;
-
-	//		jId++;
-	//	}
-
-	//	for (size_t ejId = 0; ejId < fixedJoint.size(); ejId++)
-	//	{
-	//		Vector<Real, 3> anchor_point = fixedJoint[ejId].actor1->rot.rotate(fixedJoint[ejId].r1);// +fixedJoint[ejId].actor1->center;
-
-	//		config.jointConfigs[jId].mJointType = ConfigJointType::CONFIG_Fixed;
-	//		config.jointConfigs[jId].mAnchorPoint = anchor_point;
-	//		config.jointConfigs[jId].mRigidBodyName_1.rigidBodyId = fixedJoint[ejId].bodyId1;
-	//		config.jointConfigs[jId].mRigidBodyName_2.rigidBodyId = fixedJoint[ejId].bodyId2;
-
-	//		config.jointConfigs[jId].q = fixedJoint[ejId].q;
-
-	//		jId++;
-	//	}
-
-	//	for (size_t ejId = 0; ejId < pointJoint.size(); ejId++)
-	//	{
-	//		config.jointConfigs[jId].mJointType = ConfigJointType::CONFIG_Point;
-	//		config.jointConfigs[jId].mAnchorPoint = pointJoint[ejId].anchorPoint - pointJoint[ejId].actor1->center;
-	//		config.jointConfigs[jId].mRigidBodyName_1.rigidBodyId = pointJoint[ejId].bodyId1;
-	//		config.jointConfigs[jId].mRigidBodyName_2.rigidBodyId = pointJoint[ejId].bodyId2;
-
-	//		jId++;
-	//	}
-
-	//	return config;
-	//}
+		return config;
+	}
 
 	DEFINE_CLASS(RigidBodySystem);
 }

@@ -47,7 +47,7 @@ namespace dyno
 		/**
 		 * @brief Creates multiple vehicles and specifies the transformations for each vehicle
 		 */
-		DEF_VAR(std::vector<Transform3f>, VehiclesTransform, std::vector<Transform3f>{Transform3f()}, "");
+		DEF_LIST(Transform3f, VehiclesTransform, "");
 
 		DEF_INSTANCE_STATE(TextureMesh, TextureMesh, "Texture mesh of the vechicle");
 
@@ -73,20 +73,18 @@ namespace dyno
 
 		void varChanged();
 
-		virtual void saveToFile() override;
-
-
 	protected:
 
 		std::vector<Quat<Real>> getInstanceRotation() 
 		{
 			std::vector<Quat<Real>> instanceQ;
 
-			auto instances = this->varVehiclesTransform()->getValue();
+			auto instances = this->varVehiclesTransform();
 
-			for (auto it : instances)
+			for (auto it = instances->begin(); it != instances->end(); it++)
 			{
-				auto rot = it.rotation();
+				auto element = instances->getElement(it);
+				auto rot = element.rotation();
 				instanceQ.push_back(Quat<Real>(rot));
 			}
 

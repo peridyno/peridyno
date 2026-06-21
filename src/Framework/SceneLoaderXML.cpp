@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 #include <sstream>
+#include "Tuple.h"
+#include "Field/FList.h"
 
 namespace dyno
 {
@@ -177,15 +179,11 @@ namespace dyno
 
 			//write control variables
 			auto& params = node->getParameters();
+
+			
 			for (auto var : params)
 			{
-				tinyxml2::XMLElement* field = doc.NewElement("Field");
-				field->SetAttribute("Name", var->getObjectName().c_str());
-
-				tinyxml2::XMLText* val = doc.NewText(var->serialize().c_str());
-				field->InsertEndChild(val);
-
-				varsXml->InsertEndChild(field);
+				serializeField(var, varsXml,doc);
 			}
 
 			//write connections
@@ -418,13 +416,7 @@ namespace dyno
 					auto& params = m->getParameters();
 					for (auto var : params)
 					{
-						tinyxml2::XMLElement* field = doc.NewElement("Field");
-						field->SetAttribute("Name", var->getObjectName().c_str());
-
-						tinyxml2::XMLText* val = doc.NewText(var->serialize().c_str());
-						field->InsertEndChild(val);
-
-						varsModuleXml->InsertEndChild(field);
+						serializeField(var, varsModuleXml, doc);
 					}
 
 					ModuleIndices[m->objectId()] = radix;
@@ -605,17 +597,15 @@ namespace dyno
 		auto& params = node->getParameters();
 		for (auto var : params) {
 			str2Field[var->getObjectName()] = var;
+			FList* listPtr = dynamic_cast<FList*>(var);
+			if (listPtr)
+				listPtr->clear();
 		}
-		tinyxml2::XMLElement* varsXmls = nodeXML->FirstChildElement("Variables");
-		tinyxml2::XMLElement* fieldXml = varsXmls->FirstChildElement("Field");
-		while (fieldXml)
-		{
-			std::string name = fieldXml->Attribute("Name");
-			std::string str = fieldXml->GetText() == nullptr ? "" : fieldXml->GetText();
-			str2Field[name]->deserialize(str);
 
-			fieldXml = fieldXml->NextSiblingElement("Field");
-		}
+		tinyxml2::XMLElement* varsXmls = nodeXML->FirstChildElement("Variables");
+
+		deserializeField(varsXmls, str2Field);
+
 		str2Field.clear();
 
 		std::vector<ConnectionInfo> infoVec;
@@ -937,23 +927,126 @@ namespace dyno
 				auto& params = module->getParameters();
 				for (auto var : params) {
 					str2Field[var->getObjectName()] = var;
+					FList* listPtr = dynamic_cast<FList*>(var);
+					if (listPtr)
+						listPtr->clear();
 				}
 
-				tinyxml2::XMLElement* varsXml = moduleXml->FirstChildElement("Variables");
-				tinyxml2::XMLElement* varXml = varsXml->FirstChildElement("Field");
+				tinyxml2::XMLElement* varsXmls = moduleXml->FirstChildElement("Variables");
 
-				while (varXml)
-				{
-					std::string name = varXml->Attribute("Name");
-					std::string str = varXml->GetText();
-					str2Field[name]->deserialize(str);
-
-					varXml = varXml->NextSiblingElement("Field");
-				}
+				deserializeField(varsXmls, str2Field);
 
 				str2Field.clear();
+				
 			}
 		}
 	}
 
+
+	void SceneLoaderXML::serializeField(FBase* var, tinyxml2::XMLElement* parent, tinyxml2::XMLDocument& doc)
+	{
+		if (FTuple* tuplePtr = dynamic_cast<FTuple*>(var))
+		{
+			tinyxml2::XMLElement* tupleNode = doc.NewElement("Tuple");
+			tupleNode->SetAttribute("Name", var->getObjectName().c_str());
+
+			for (uint i = 0; i < tuplePtr->size(); i++)
+			{
+				auto field = tuplePtr->get(i);
+				serializeField(field, tupleNode, doc);
+				parent->InsertEndChild(tupleNode);
+			}
+		}
+		else if (FList* listPtr = dynamic_cast<FList*>(var))
+		{
+			tinyxml2::XMLElement* listNode = doc.NewElement("List");
+			listNode->SetAttribute("Name", var->getObjectName().c_str());
+			parent->InsertEndChild(listNode);
+
+			int id = 0;
+			for (auto it = listPtr->begin(); it != listPtr->end(); it++)
+			{
+				tinyxml2::XMLElement* elementNode = doc.NewElement("Element");
+				elementNode->SetAttribute("Id", std::to_string(id).c_str());
+				listNode->InsertEndChild(elementNode);
+
+				auto elementField = listPtr->get(id);
+				serializeField(elementField, elementNode, doc);
+
+				id++;
+			}
+		}
+		else
+		{
+			tinyxml2::XMLElement* field = doc.NewElement("Field");
+			field->SetAttribute("Name", var->getObjectName().c_str());
+			tinyxml2::XMLText* val = doc.NewText(var->serialize().c_str());
+			parent->InsertEndChild(field);
+			field->InsertEndChild(val);
+
+		}
+	}
+
+	void SceneLoaderXML::deserializeField(tinyxml2::XMLElement* parent, std::map<std::string, FBase*>& fieldMap)
+	{
+		tinyxml2::XMLElement* fieldXml = parent->FirstChildElement("Field");
+		tinyxml2::XMLElement* tupleXml = parent->FirstChildElement("Tuple");
+		tinyxml2::XMLElement* listXml = parent->FirstChildElement("List");
+
+		if (tupleXml)
+		{
+			while (tupleXml)
+			{
+				std::string tupleName = tupleXml->Attribute("Name");
+				FTuple* tuple = dynamic_cast<FTuple*>(fieldMap[tupleName]);
+				auto params = tuple->getParameters();
+
+				std::map<std::string, FBase*> str2tupleParam;
+				for (auto& var : params)
+				{
+					str2tupleParam[var->getObjectName()] = var;
+				}
+				deserializeField(tupleXml, str2tupleParam);
+				tupleXml = tupleXml->NextSiblingElement("Tuple");
+			}
+
+		}
+
+		if (listXml)
+		{
+			while (listXml)
+			{
+				std::string listName = listXml->Attribute("Name");
+				FList* list = dynamic_cast<FList*>(fieldMap[listName]);
+				tinyxml2::XMLElement* elementXml = listXml->FirstChildElement("Element");
+				uint id = 0;
+				while (elementXml)
+				{
+					list->pushBack();
+					auto elementField = list->get(id);
+					std::map<std::string, FBase*> str2elementField;
+					str2elementField[elementField->getObjectName()] = elementField;
+					deserializeField(elementXml, str2elementField);
+
+					id++;
+					elementXml = elementXml->NextSiblingElement("Element");
+				}
+				listXml = listXml->NextSiblingElement("List");
+			}
+		}
+
+		if (fieldXml)
+		{
+			while (fieldXml)
+			{
+				std::string fieldName = fieldXml->Attribute("Name");
+				std::string str = fieldXml->GetText() == nullptr ? "" : fieldXml->GetText();
+				if (fieldMap[fieldName])
+					fieldMap[fieldName]->deserialize(str);
+				else
+					std::cout << "Field == NULL :" << fieldName << "\n";
+				fieldXml = fieldXml->NextSiblingElement("Field");
+			}
+		}
+	};
 }

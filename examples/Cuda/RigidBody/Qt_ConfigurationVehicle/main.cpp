@@ -92,12 +92,12 @@ std::shared_ptr<SceneGraph> creatCar()
 
 
 
-	std::vector<Transform3f> vehicleTransforms;
+	std::list<Transform3f> vehicleTransforms;
 
 	vehicleTransforms.push_back(Transform3f(Vec3f(-1,0,0), Quat1f(0, Vec3f(0, 1, 0)).toMatrix3x3()));
 	vehicleTransforms.push_back(Transform3f(Vec3f(5, 0.5, -1), Quat1f(M_PI, Vec3f(0, 1, 0)).toMatrix3x3()));
 
-	configCar->varVehiclesTransform()->setValue(vehicleTransforms);
+	configCar->varVehiclesTransform()->assign(vehicleTransforms);
 
 	auto multibody = scn->addNode(std::make_shared<MultibodySystem<DataType3f>>());
 	configCar->connect(multibody->importVehicles());

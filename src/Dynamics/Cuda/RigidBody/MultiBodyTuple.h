@@ -76,6 +76,27 @@ namespace dyno
 			this->varTet()->assign(nonConstPtr->varTet());
 		}
 
+		ShapeTuple(
+			RigidShapeType shapeType,
+			Vec3f center,
+			Quat<Real> rot,
+			Real density,
+			Vec3f halfLength,
+			Real radius,
+			Real capsuleLength,
+			std::list<Vec3f> tet = std::list<Vec3f>()
+		)
+		{
+			this->varShapeType()->setCurrentKey(shapeType);
+			this->varCenter()->setValue(center);
+			this->varRot()->setValue(rot);
+			this->varDensity()->setValue(density);
+			this->varHalfLength()->setValue(halfLength);
+			this->varRadius()->setValue(radius);
+			this->varCapsuleLength()->setValue(capsuleLength);
+			this->varTet()->assign(tet);
+		};
+
 		//Shape:
 		DEF_ENUM(RigidShapeType, ShapeType, RigidShapeType::SHAPE_CAPSULE, "");
 		DEF_VAR(Vec3f, Center, Vec3f(0.0f, 0.0f, 0.0f), "");
@@ -175,6 +196,43 @@ namespace dyno
 			this->varShapeConfigs()->assign(nonConstPtr->varShapeConfigs());
 		}
 
+		RigidBodyTuple(
+			std::string name,
+			int rigidbodyID,
+			Quat<Real> angle,
+			Vec3f linearVelocity,
+			Vec3f angularVelocity,
+			Vec3f position,
+			Vec3f offset,
+			Mat3f inertia,
+			Real friction,
+			Real restitution,
+			RigidMotionType motionType,
+			RigidShapeType shapeType,
+			RigidCollisionMask collisionMask,
+			int configGroup = 0,
+			std::list<int> visualShapeIds = std::list<int>(),
+			std::list<ShapeTuple> shapeConfigs = std::list<ShapeTuple>()
+		)
+		{
+			this->varShapeName()->setValue(name);
+			this->varRigidBodyId()->setValue(rigidbodyID);
+			this->varAngel()->setValue(angle);
+			this->varLinearVelocity()->setValue(linearVelocity);
+			this->varAngularVelocity()->setValue(angularVelocity);
+			this->varPosition()->setValue(position);
+			this->varOffset()->setValue(offset);
+			this->varInertia()->setValue(inertia);
+			this->varFriction()->setValue(friction);
+			this->varRestitution()->setValue(restitution);
+			this->varMotionType()->setCurrentKey(motionType);
+			this->varShapeType()->setCurrentKey(shapeType);
+			this->varCollisionMask()->setCurrentKey(collisionMask);
+			this->varConfigGroup()->setValue(configGroup);
+			this->varVisualShapeIds()->assign(visualShapeIds);
+			this->varShapeConfigs()->assign(shapeConfigs);
+		}
+
 		DEF_VAR(std::string, ShapeName,"", "");
 		DEF_VAR(int, RigidBodyId,-1, "");
 
@@ -234,7 +292,7 @@ namespace dyno
 
 			return *this;
 		}
-		MultiBodyJointTuple(std::string AName, int ARigidId, std::string BName, int BRigidId, JointType type, Vec3f Axi = Vec3f(1, 0, 0), Vec3f Point = Vec3f(0), bool Moter = false, Real moter = 0, bool Range = false, Real min = 0, Real max = 0)
+		MultiBodyJointTuple(std::string AName, int ARigidId, std::string BName, int BRigidId, JointType type, Vec3f Axi = Vec3f(1, 0, 0), Vec3f Point = Vec3f(0), bool Moter = false, Real moter = 0, bool Range = false, Real min = 0, Real max = 0, bool relative = true)
 		{
 			this->varAShapeName()->setValue(AName);
 			this->varARigidBodyId()->setValue(ARigidId);
@@ -247,8 +305,8 @@ namespace dyno
 			this->varRange()->setValue(Vec2f(min,max));
 			this->varMoter()->setValue(moter);
 			this->varAxis()->setValue(Axi);
-			auto s = this->varJointType()->getValue();
 			this->varJointType()->setCurrentKey(type);
+			this->varRelativeAnchorPoint()->setValue(relative);
 		}
 
 		MultiBodyJointTuple(const MultiBodyJointTuple& other) 
@@ -272,7 +330,44 @@ namespace dyno
 			this->varR2()->setValue(nonConstPtr->varR2()->getValue());
 			this->varDistance()->setValue(nonConstPtr->varDistance()->getValue());
 		};
+
 		
+		MultiBodyJointTuple(
+		std::string aShapeName,
+		int aRigidBodyId,
+		std::string bShapeName,
+		int bRigidBodyId,
+		Vec3f anchorPoint,
+		bool relativeAnchorPoint,
+		bool useMoter,
+		bool useRange,
+		Vec2f range,
+		Real moter,
+		Vec3f axis,
+		Quat<Real> q,
+		Vec3f r1,
+		Vec3f r2,
+		Real distance,
+		JointType jointType
+		)
+		{
+			this->varAShapeName()->setValue(aShapeName);
+			this->varARigidBodyId()->setValue(aRigidBodyId);
+			this->varBShapeName()->setValue(bShapeName);
+			this->varBRigidBodyId()->setValue(bRigidBodyId);
+			this->varAnchorPoint()->setValue(anchorPoint);
+			this->varRelativeAnchorPoint()->setValue(relativeAnchorPoint);
+			this->varUseMoter()->setValue(useMoter);
+			this->varUseRange()->setValue(useRange);
+			this->varRange()->setValue(range);
+			this->varMoter()->setValue(moter);
+			this->varAxis()->setValue(axis);
+			this->varQ()->setValue(q);
+			this->varR1()->setValue(r1);
+			this->varR2()->setValue(r2);
+			this->varDistance()->setValue(distance);
+			this->varJointType()->setCurrentKey(jointType);
+		}
 
 		DEF_VAR(std::string, AShapeName, "", "");
 		DEF_VAR(int, ARigidBodyId, -1, "");

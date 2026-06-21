@@ -106,11 +106,11 @@ std::shared_ptr<ConfigurableBody<DataType3f>> getTank(std::shared_ptr<SceneGraph
 
 	vehicle->varRotation()->setValue(Vec3f(0, 0, 0));
 
-	std::vector<Transform3f> vehicleTransforms;
+	std::list<Transform3f> vehicleTransforms;
 
 	vehicleTransforms.push_back(Transform3f(Vec3f(1, 0, 0), Quat1f(0, Vec3f(0, 1, 0)).toMatrix3x3()));
 
-	vehicle->varVehiclesTransform()->setValue(vehicleTransforms);
+	vehicle->varVehiclesTransform()->assign(vehicleTransforms);
 
 	return vehicle;
 }
@@ -175,10 +175,10 @@ std::shared_ptr<ConfigurableBody<DataType3f>> getVehicle(std::shared_ptr<SceneGr
 	vehicle->varConfiguration()->setValue(configData);
 	vehicle->varRotation()->setValue(Vec3f(0, 0, 0));
 
-	std::vector<Transform3f> vehicleTransforms;
+	std::list<Transform3f> vehicleTransforms;
 
 	vehicleTransforms.push_back(Transform3f(Vec3f(1, 0, 0), Quat1f(0, Vec3f(0, 1, 0)).toMatrix3x3()));
-	vehicle->varVehiclesTransform()->setValue(vehicleTransforms);
+	vehicle->varVehiclesTransform()->assign(vehicleTransforms);
 
 	return vehicle;
 
