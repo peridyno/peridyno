@@ -5,7 +5,7 @@
 #include "Module/ElastoplasticityModule.h"
 
 #include "ParticleSystem/Module/ParticleIntegrator.h"
-#include "ParticleSystem/Module/ImplicitViscosity.h"
+#include "ParticleSystem/Viscosity/ImplicitViscosity.h"
 
 namespace dyno
 {

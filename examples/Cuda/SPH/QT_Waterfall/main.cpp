@@ -19,10 +19,10 @@
 
 //ParticleSystem
 #include "ParticleSystem/Module/ParticleIntegrator.h"
-#include "ParticleSystem/Module/ImplicitViscosity.h"
-#include "ParticleSystem/Module/SemiImplicitDensitySolver.h"
-#include "ParticleSystem/Module/IterativeDensitySolver.h"
-#include "ParticleSystem/Module/ApproximateImplicitViscosity.h"
+#include "ParticleSystem/Viscosity/ImplicitViscosity.h"
+#include "ParticleSystem/SISPH/SemiImplicitDensitySolver.h"
+#include "ParticleSystem/PBD/IterativeDensitySolver.h"
+#include "ParticleSystem/Viscosity/ApproximateImplicitViscosity.h"
 #include <ParticleSystem/Emitters/SquareEmitter.h>
 
 //Framework

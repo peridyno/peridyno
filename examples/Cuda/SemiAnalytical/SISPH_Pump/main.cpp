@@ -15,7 +15,7 @@
 #include <GLRenderEngine.h>
 #include <Commands/Merge.h>
 #include <ParticleSystem/Emitters/CircularEmitter.h>
-#include <ParticleSystem/Module/ImplicitViscosity.h>
+#include <ParticleSystem/Viscosity/ImplicitViscosity.h>
 #include <SemiAnalyticalScheme/Module/SemiAnalyticalDensitySolver.h>
 #include <ParticleSystem/Module/SurfaceEnergyForce.h>
 #include <Module/CalculateNorm.h>

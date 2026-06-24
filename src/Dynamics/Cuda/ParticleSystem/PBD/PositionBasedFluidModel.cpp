@@ -1,9 +1,9 @@
 #include "PositionBasedFluidModel.h"
 
-#include "ParticleIntegrator.h"
-#include "SummationDensity.h"
+#include "ParticleSystem/Module/ParticleIntegrator.h"
+#include "ParticleSystem/Module/SummationDensity.h"
+#include "ParticleSystem/Viscosity/ImplicitViscosity.h"
 #include "IterativeDensitySolver.h"
-#include "ImplicitViscosity.h"
 
 #include "Collision/NeighborPointQuery.h"
 

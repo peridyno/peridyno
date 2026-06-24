@@ -49,7 +49,7 @@
 
 #include <Auxiliary/DataSource.h>
 #include <ParticleSystem/Module/SurfaceEnergyForce.h>
-#include <ParticleSystem/Module/ImplicitViscosity.h>
+#include <ParticleSystem/Viscosity/ImplicitViscosity.h>
 
 
 using namespace std;

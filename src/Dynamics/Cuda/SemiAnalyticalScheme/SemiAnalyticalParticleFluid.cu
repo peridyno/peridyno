@@ -5,14 +5,15 @@
 
 #include "ParticleSystem/Module/ParticleIntegrator.h"
 #include "ParticleSystem/Module/ImplicitViscosity.h"
-#include "ParticleSystem/Module/SemiImplicitDensitySolver.h"
+
+#include "ParticleSystem/SISPH/SemiImplicitDensitySolver.h"
 
 #include "Collision/NeighborPointQuery.h"
 #include "Collision/DynamicNeighborTriangleQuery.h"
 #include "Collision/NeighborTriangleQuery.h"
 
 #include "ParticleSystem/Module//SurfaceEnergyForce.h"
-#include "ParticleSystem/Module/ProjectionBasedFluidModel.h"
+#include "ParticleSystem/Projection/ProjectionBasedFluidModel.h"
 
 #include "Module/SemiAnalyticalDensitySolver.h"
 

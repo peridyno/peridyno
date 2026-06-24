@@ -12,7 +12,7 @@
 #pragma once
 #include "LinearElasticitySolver.h"
 
-#include "ParticleSystem/Module/IterativeDensitySolver.h"
+#include "ParticleSystem/PBD/IterativeDensitySolver.h"
 
 namespace dyno {
 

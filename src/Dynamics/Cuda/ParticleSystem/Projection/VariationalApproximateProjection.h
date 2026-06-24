@@ -18,7 +18,7 @@
 #include "Collision/Attribute.h"
 
  //ParticleSystem
-#include "ParticleApproximation.h"
+#include "ParticleSystem/Module/ParticleApproximation.h"
 #include "ParticleSystem/Module/Kernel.h"
 
 namespace dyno

@@ -11,7 +11,7 @@
 #include <ParticleSystem/DualParticle/VirtualSpatiallyAdaptiveStrategy.h>
 #include <ParticleSystem/DualParticle/VirtualColocationStrategy.h>
 #include <ParticleSystem/DualParticle/DualParticleIsphModule.h>
-#include <ParticleSystem/Module/ImplicitViscosity.h>
+#include <ParticleSystem/Viscosity/ImplicitViscosity.h>
 #include <Collision/NeighborPointQuery.h>
 #include <ParticleSystem/ParticleFluid.h>
 

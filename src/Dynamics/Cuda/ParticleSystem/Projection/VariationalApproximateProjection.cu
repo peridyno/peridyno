@@ -1,5 +1,5 @@
 #include "VariationalApproximateProjection.h"
-#include "SummationDensity.h"
+#include "ParticleSystem/Module/SummationDensity.h"
 #include "Algorithm/Function2Pt.h"
 #include "Algorithm/Functional.h"
 #include "Algorithm/Arithmetic.h"

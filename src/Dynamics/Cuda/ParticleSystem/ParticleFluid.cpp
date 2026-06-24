@@ -3,13 +3,14 @@
 //ParticleSystem
 #include "Module/CalculateNorm.h"
 #include "Module/ParticleIntegrator.h"
-#include "Module/ImplicitViscosity.h"
+#include "Viscosity/ImplicitViscosity.h"
 
-#include "Module/SemiImplicitDensitySolver.h"
-#include "Module/IterativeDensitySolver.h"
-#include "Module/DivergenceFreeSphSolver.h"
-#include "Module/ImplicitISPH.h"
-#include "Module/VariationalApproximateProjection.h"
+#include "SISPH/SemiImplicitDensitySolver.h"
+#include "PBD/IterativeDensitySolver.h"
+#include "DFSPH/DivergenceFreeSphSolver.h"
+#include "IISPH/ImplicitISPH.h"
+#include "Projection/VariationalApproximateProjection.h"
+
 #include "DualParticle/DualParticleIsphModule.h"
 #include "DualParticle/VirtualSpatiallyAdaptiveStrategy.h"
 #include "DualParticle/VirtualFissionFusionStrategy.h"

@@ -13,9 +13,9 @@
 #include <Module/CalculateNorm.h>
 #include <GLRenderEngine.h>
 #include <GLPointVisualModule.h>
-#include "ParticleSystem/Module/SimpleVelocityConstraint.h"
-#include "ParticleSystem/Module/ParticleIntegrator.h"
-#include "Collision/NeighborPointQuery.h"
+#include <ParticleSystem/Projection/SimpleVelocityConstraint.h>
+#include <ParticleSystem/Module/ParticleIntegrator.h>
+#include <Collision/NeighborPointQuery.h>
 #include <ColorMapping.h>
 #include <ImColorbar.h>
 #include "Auxiliary/DataSource.h"

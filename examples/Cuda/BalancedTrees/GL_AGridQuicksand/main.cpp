@@ -18,8 +18,8 @@
 #include "ParticleSystem/MakeParticleSystem.h"
 #include "ParticleSystem/ParticleFluid.h"
 #include "ParticleSystem/Module/ParticleIntegrator.h"
-#include "ParticleSystem/Module/ImplicitViscosity.h"
-#include "ParticleSystem/Module/IterativeFrictionSolver.h"
+#include "ParticleSystem/Viscosity/ImplicitViscosity.h"
+#include "ParticleSystem/Viscosity/IterativeFrictionSolver.h"
 
 #include "Multiphysics/VolumeBoundary.h"
 

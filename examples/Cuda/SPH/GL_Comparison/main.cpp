@@ -4,11 +4,11 @@
 
 #include <ParticleSystem/ParticleFluid.h>
 #include <ParticleSystem/MakeParticleSystem.h>
-#include <ParticleSystem/Module/SemiImplicitDensitySolver.h>
-#include <ParticleSystem/Module/ImplicitISPH.h>
-#include <ParticleSystem/Module/IterativeDensitySolver.h>
-#include <ParticleSystem/Module/DivergenceFreeSphSolver.h>
-#include <ParticleSystem/Module/ImplicitViscosity.h>
+#include <ParticleSystem/SISPH/SemiImplicitDensitySolver.h>
+#include <ParticleSystem/IISPH/ImplicitISPH.h>
+#include <ParticleSystem/PBD/IterativeDensitySolver.h>
+#include <ParticleSystem/DFSPH/DivergenceFreeSphSolver.h>
+#include <ParticleSystem/Viscosity/ImplicitViscosity.h>
 #include <ParticleSystem/Module/ParticleIntegrator.h>
 
 #include <Collision/NeighborPointQuery.h>

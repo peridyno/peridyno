@@ -1,5 +1,5 @@
 #pragma once
-#include "ParticleApproximation.h"
+#include "ParticleSystem/Module/ParticleApproximation.h"
 
 namespace dyno {
 

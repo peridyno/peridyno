@@ -1,12 +1,14 @@
 #include "initializeParticleSystem.h"
 
-#include "Module/LinearDamping.h"
+#include "Viscosity/LinearDamping.h"
+#include "Viscosity/ImplicitViscosity.h"
+
 #include "Module/ParticleIntegrator.h"
-#include "Module/ImplicitViscosity.h"
 #include "Module/SummationDensity.h"
-#include "Module/IterativeDensitySolver.h"
 #include "Module/BoundaryConstraint.h"
-#include "Module/VariationalApproximateProjection.h"
+
+#include "PBD/IterativeDensitySolver.h"
+#include "Projection/VariationalApproximateProjection.h"
 
 #include "Emitters/CircularEmitter.h"
 #include "Emitters/SquareEmitter.h"

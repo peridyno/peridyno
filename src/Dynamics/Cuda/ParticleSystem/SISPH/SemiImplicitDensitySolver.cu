@@ -1,6 +1,6 @@
 #include "SemiImplicitDensitySolver.h"
 
-#include "SummationDensity.h"
+#include "ParticleSystem/Module/SummationDensity.h"
 
 namespace dyno
 {

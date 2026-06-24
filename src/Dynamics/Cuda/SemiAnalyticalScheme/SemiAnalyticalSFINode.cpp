@@ -10,7 +10,7 @@
 #include "ParticleSystem/ParticleSystem.h"
 
 #include "ParticleSystem/Module/ParticleIntegrator.h"
-#include "ParticleSystem/Module/ImplicitViscosity.h"
+#include "ParticleSystem/Viscosity/ImplicitViscosity.h"
 
 #include "Collision/NeighborPointQuery.h"
 #include "Collision/NeighborTriangleQuery.h"

@@ -1,6 +1,6 @@
 #include "IterativeFrictionSolver.h"
 
-#include "SummationDensity.h"
+#include "ParticleSystem/Module/SummationDensity.h"
 
 #include "Algorithm/CudaRand.h"
 

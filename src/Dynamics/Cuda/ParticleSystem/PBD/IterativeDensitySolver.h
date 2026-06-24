@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 #pragma once
-#include "ParticleApproximation.h"
+#include "ParticleSystem/Module/ParticleApproximation.h"
+
 #include "Algorithm/Arithmetic.h"
 
 #include "Collision/Attribute.h"

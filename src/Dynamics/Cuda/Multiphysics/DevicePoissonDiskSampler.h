@@ -16,7 +16,7 @@
 #pragma once
 #include "SdfSampler.h"
 #include "Collision/NeighborPointQuery.h"
-#include "ParticleSystem/Module/ImplicitViscosity.h"
+#include "ParticleSystem/Viscosity/ImplicitViscosity.h"
 #include "Module/PoissionDiskPositionShifting.h"
 
 namespace dyno

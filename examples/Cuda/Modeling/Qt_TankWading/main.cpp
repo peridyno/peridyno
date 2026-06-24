@@ -12,8 +12,8 @@
 #include <ParticleSystem/MakeParticleSystem.h>
 #include <ParticleSystem/Emitters/SquareEmitter.h>
 #include <ParticleSystem/Module/ParticleIntegrator.h>
-#include <ParticleSystem/Module/IterativeDensitySolver.h>
-#include <ParticleSystem/Module/ImplicitViscosity.h>
+#include <ParticleSystem/PBD/IterativeDensitySolver.h>
+#include <ParticleSystem/Viscosity/ImplicitViscosity.h>
 
 #include <Collision/NeighborPointQuery.h>
 
