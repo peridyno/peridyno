@@ -84,10 +84,10 @@ namespace dyno {
 		void updateVelocity();
 
 	private:
-		DArray<Coord> mPosBuf;
-		DArray<Coord> mPosOld;
+		DArray<Coord> mDx;
+		DArray<Coord> mPosStar;
 
-		DArray<Real> mDiagnals;
+		DArray<Real> mDiagonals;
 
 	private:
 		std::shared_ptr<SummationDensity<TDataType>> mSummation;

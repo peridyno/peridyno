@@ -26,8 +26,9 @@ namespace dyno
 	template<typename TDataType>
 	SemiImplicitDensitySolver<TDataType>::~SemiImplicitDensitySolver()
 	{
-		mPosBuf.clear();
-		mPosOld.clear();
+		mDx.clear();
+		mPosStar.clear();
+		mDiagonals.clear();
 	}
 
 #define CONSERVE_MOMETNUM
@@ -96,13 +97,13 @@ namespace dyno
 	}
 #endif
 
-
+	//x_i^{k + 1} = \frac{{\left( {x_i^* - x_i^k} \right) + \sum {A_{ij}^{k - }\left( {x_j^k - x_i^k} \right)}  + \sum {A_{ij}^{k + }\left( {x_j^k - x_i^k} \right)} }}{{1 + \sum {A_{ij}^{k + }} }}
 	template <typename Real, typename Coord, typename Kernel>
 	__global__ void SSDS_OneJacobiStep(
-		DArray<Coord> posNext,
-		DArray<Coord> posBuf,
-		DArray<Coord> posOld,
-		DArray<Real> diagnals,
+		DArray<Coord> dx,
+		DArray<Real> diagonals,
+		DArray<Coord> x_k,
+		DArray<Coord> x_star,
 		DArray<Real> rho,
 		DArrayList<int> neighbors,
 		Real smoothingLength,
@@ -113,7 +114,7 @@ namespace dyno
 		Real scale)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= posNext.size()) return;
+		if (pId >= dx.size()) return;
 
 		Real rho_0 = Real(1000);
 
@@ -124,18 +125,18 @@ namespace dyno
 		Real C_plus = rho_i / rho_0;
 		Real C_minus = Real(-1);
 
-		Coord pos_i = posBuf[pId];
+		Coord pos_i = x_k[pId];
 
 		List<int>& list_i = neighbors[pId];
 		int nbSize = list_i.size();
 
 		Real a_i = Real(1);
-		Coord posAcc_i = posOld[pId];
+		Coord posAcc_i = x_star[pId] - pos_i;
 		Coord deltaPos_i = Coord(0);
 		for (int ne = 0; ne < nbSize; ne++)
 		{
 			int j = list_i[ne];
-			Coord pos_j = posBuf[j];
+			Coord pos_j = x_k[j];
 			Real r = (pos_i - pos_j).norm();
 
 			if (r > EPSILON)
@@ -143,15 +144,15 @@ namespace dyno
 				Real a_ij = A * gradient(r, smoothingLength, scale) * (1.0f / r);
 				
 #ifdef CONSERVE_MOMETNUM
-				posAcc_i += C_minus * a_ij * pos_j + C_plus * a_ij * (pos_j - pos_i);
+				posAcc_i += C_minus * a_ij * (pos_j - pos_i) + C_plus * a_ij * (pos_j - pos_i);
 
-				Coord posAcc_ji = C_minus * a_ij * (pos_i) + C_plus * a_ij * (pos_i - pos_j);
+				Coord posAcc_ji = C_minus * a_ij * (pos_i - pos_j) + C_plus * a_ij * (pos_i - pos_j);
 				Real a_ji = C_minus * a_ij;
 
-				atomicAdd(&posNext[j][0], posAcc_ji[0]);
-				atomicAdd(&posNext[j][1], posAcc_ji[1]);
-				atomicAdd(&posNext[j][2], posAcc_ji[2]);
-				atomicAdd(&diagnals[j], a_ji);
+				atomicAdd(&dx[j][0], posAcc_ji[0]);
+				atomicAdd(&dx[j][1], posAcc_ji[1]);
+				atomicAdd(&dx[j][2], posAcc_ji[2]);
+				atomicAdd(&diagonals[j], a_ji);
 #else
 				posAcc_i += C_minus * a_ij * pos_j + C_plus * a_ij * (pos_j - pos_i);
 #endif // CONSERVE_MOMETNUM
@@ -161,38 +162,43 @@ namespace dyno
 
 #ifdef CONSERVE_MOMETNUM
 		//To ensure momentum conservation
-		atomicAdd(&posNext[pId][0], posAcc_i[0]);
-		atomicAdd(&posNext[pId][1], posAcc_i[1]);
-		atomicAdd(&posNext[pId][2], posAcc_i[2]);
+		atomicAdd(&dx[pId][0], posAcc_i[0]);
+		atomicAdd(&dx[pId][1], posAcc_i[1]);
+		atomicAdd(&dx[pId][2], posAcc_i[2]);
 
-		atomicAdd(&diagnals[pId], a_i);
+		atomicAdd(&diagonals[pId], a_i);
 #else
-		posNext[pId] = posAcc_i / a_i;;
+		dx[pId] = posAcc_i / a_i;
 #endif // CONSERVE_MOMETNUM
 	}
 
 	template <typename Real, typename Coord>
 	__global__ void SSDS_ComputeNewPos(
-		DArray<Coord> posNext,
-		DArray<Real> diagnals)
+		DArray<Coord> x,
+		DArray<Coord> dx,
+		DArray<Real> diagonals)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= posNext.size()) return;
+		if (pId >= x.size()) return;
 
-		posNext[pId] = posNext[pId] / diagnals[pId];
+		Coord dx_i = dx[pId] / diagonals[pId];
+
+		x[pId] += dx_i;
 	}
 
 	template <typename Real, typename Coord>
 	__global__ void SSDS_ComputeNewPos(
-		DArray<Coord> posNext,
-		DArray<Coord> posOld,
+		DArray<Coord> x,	//In/Out
+		DArray<Coord> dx,
+		DArray<Coord> x_star,
 		DArray<Attribute> attributes,
-		DArray<Real> diagnals)
+		DArray<Real> diagonals)
 	{
 		int pId = threadIdx.x + (blockIdx.x * blockDim.x);
-		if (pId >= posNext.size()) return;
+		if (pId >= x.size()) return;
 
-		posNext[pId] = attributes[pId].isDynamic() ? posNext[pId] / diagnals[pId] : posOld[pId];
+		Coord dx_i = dx[pId] / diagonals[pId];
+		x[pId] = attributes[pId].isDynamic() ? (x[pId] + dx_i) : x_star[pId];
 	}
 
 	template<typename TDataType>
@@ -211,16 +217,16 @@ namespace dyno
 		Real dt = this->inTimeStep()->getValue();
 		auto& inPos = this->inPosition()->getData();
 
-		if (mPosOld.size() != num)
-			mPosOld.resize(num);
+		if (mPosStar.size() != num)
+			mPosStar.resize(num);
 
-		if (mPosBuf.size() != num)
-			mPosBuf.resize(num);
+		if (mDx.size() != num)
+			mDx.resize(num);
 
-		if (mDiagnals.size() != num)
-			mDiagnals.resize(num);
+		if (mDiagonals.size() != num)
+			mDiagonals.resize(num);
 
-		mPosOld.assign(inPos);
+		mPosStar.assign(inPos);
 
 		int itNum = this->varIterationNumber()->getValue();
 		int it = 0;
@@ -230,17 +236,14 @@ namespace dyno
 			mSummation->varKernelType()->setCurrentKey(this->varKernelType()->currentKey());
 			mSummation->update();
 
-			mPosBuf.assign(inPos);
-#ifdef CONSERVE_MOMETNUM
-			inPos.reset();
-#endif
-			mDiagnals.reset();
+			mDx.reset();
+			mDiagonals.reset();
 			cuFirstOrder(num, this->varKernelType()->getDataPtr()->currentKey(), this->mScalingFactor,
 				SSDS_OneJacobiStep,
+				mDx,
+				mDiagonals,
 				inPos,
-				mPosBuf,
-				mPosOld,
-				mDiagnals,
+				mPosStar,
 				mSummation->outDensity()->getData(),
 				this->inNeighborIds()->getData(),
 				this->inSmoothingLength()->getValue(),
@@ -254,20 +257,21 @@ namespace dyno
 				cuExecute(num,
 					SSDS_ComputeNewPos,
 					inPos,
-					mDiagnals);
+					mDx,
+					mDiagonals);
 			}
 			else
 			{
 				cuExecute(num,
 					SSDS_ComputeNewPos,
 					inPos,
-					mPosOld,
+					mDx,
+					mPosStar,
 					this->inAttribute()->constData(),
-					mDiagnals);
+					mDiagonals);
 			}
 			
 #endif
-
 			it++;
 		}
 	}
@@ -295,7 +299,7 @@ namespace dyno
 		cuExecute(num, SSDS_UpdateVelocity,
 			this->inVelocity()->getData(),
 			this->inPosition()->getData(),
-			mPosOld,
+			mPosStar,
 			dt);
 	}
 
