@@ -33,6 +33,7 @@ static const size_t NODE_SIZE = 32;
 static unsigned MAX_NODES = 8u * 1024u * 1024u;   // node budget (overridable via --nodes M)
 
 static std::string g_shaderDir = "shaders";
+static float g_radius = 14.f;   // camera orbit distance (overridable via --radius)
 
 static std::string readFile(const std::string& p) {
     std::ifstream f(p);
@@ -87,6 +88,13 @@ static void buildCube(GLuint& vao, GLuint& vbo) {
     glBindVertexArray(0);
 }
 
+// deterministic pseudo-random in [-1,1] from an integer + salt (no rng needed,
+// reproducible across runs so the "physics pile" view is stable)
+static float jit(int i, int salt) {
+    float v = std::sin((float)i * 12.9898f + (float)salt * 78.233f) * 43758.5453f;
+    return 2.f * (v - std::floor(v)) - 1.f;
+}
+
 // rainbow color for box i of n
 static glm::vec3 hue(float t) {
     float r = 0.5f + 0.5f * std::cos(6.2831853f * (t + 0.00f));
@@ -102,6 +110,8 @@ int main(int argc, char** argv) {
     bool  fixed = false;
     bool  reverse = false;   // draw far->near (default) or near->far (--reverse)
     int   W = 900, H = 700;
+    std::string scene = "slabs"; // "slabs" | "nested" | "cluster" | "packed"
+    float boxAlpha = 0.35f;
 
     for (int i = 1; i < argc; i++) {
         std::string a = argv[i];
@@ -110,6 +120,9 @@ int main(int argc, char** argv) {
         else if (a == "--pitch" && i + 1 < argc) pitch = atof(argv[++i]);
         else if (a == "--fixed") fixed = true;
         else if (a == "--reverse") reverse = true;
+        else if (a == "--scene" && i + 1 < argc) scene = argv[++i];
+        else if (a == "--alpha" && i + 1 < argc) boxAlpha = atof(argv[++i]);
+        else if (a == "--radius" && i + 1 < argc) g_radius = atof(argv[++i]);
         else if (a == "--shaders" && i + 1 < argc) g_shaderDir = argv[++i];
         else if (a == "--nodes" && i + 1 < argc) MAX_NODES = (unsigned)atoi(argv[++i]) * 1024u * 1024u;
         else if (a == "--size" && i + 1 < argc) { sscanf(argv[++i], "%dx%d", &W, &H); }
@@ -219,7 +232,7 @@ int main(int argc, char** argv) {
 
     // ---- camera ----
     glm::vec3 target(0, 0, 0);
-    float radius = 14.f;
+    float radius = g_radius;
     float yr = glm::radians(yaw), pr = glm::radians(pitch);
     glm::vec3 eye = target + radius * glm::vec3(std::cos(pr) * std::sin(yr),
                                                std::sin(pr),
@@ -232,17 +245,58 @@ int main(int argc, char** argv) {
     std::vector<glm::vec3> colors;
     for (int i = 0; i < nBoxes; i++) {
         float t = (nBoxes > 1) ? (float)i / (nBoxes - 1) : 0.f;
-        // stack thin slabs along depth with a small lateral drift: heavy screen-space
-        // overlap (so central pixels accumulate many fragments) while the drift keeps
-        // each layer's front/back order visible at the margins.
-        glm::vec3 pos((t - 0.5f) * 3.0f, (t - 0.5f) * 3.0f, (t - 0.5f) * 13.f);
-        glm::mat4 m = glm::translate(glm::mat4(1.f), pos);
-        m = glm::scale(m, glm::vec3(3.0f, 3.0f, 0.12f)); // thin slabs -> many depth layers
+        glm::mat4 m(1.f);
+        if (scene == "nested") {
+            // concentric SOLID cubes of growing size, all centered: looks like real
+            // boxes one-inside-another; every pixel through the center pierces all of
+            // them (front + back face) -> ~2*nBoxes overlapping layers, clearly boxes.
+            float s = 1.0f + t * 5.0f;           // 1 .. 6 half-extent
+            m = glm::scale(glm::mat4(1.f), glm::vec3(s));
+        } else if (scene == "cluster") {
+            // a settled "physics pile": independent solid cubes that DO NOT
+            // interpenetrate in 3D (grid spacing > cube size + jitter + rotation
+            // slack) but still overlap in SCREEN space, so OIT must correctly
+            // composite a box seen through another box. Some stacked, some scattered.
+            const float half    = 1.1f;          // cube half-extent (size 2.2)
+            const float spacing = 4.3f;          // > size*sqrt(2)+jitter (no interpenetration)
+            int perLayer = 9;                    // 3x3 footprint per layer
+            int idx = i % perLayer, layer = i / perLayer;
+            int gx = idx % 3, gz = idx / 3;
+            // each higher layer rests on the one below, with a lateral drift like
+            // cubes that came to rest slightly off-center
+            glm::vec3 pos(
+                (gx - 1) * spacing + jit(i, 1) * 0.35f + layer * 0.8f,
+                layer * (2.f * half + 0.4f) - 1.5f,                  // stacked, clear vertical gap
+                (gz - 1) * spacing + jit(i, 2) * 0.35f - layer * 0.5f);
+            m = glm::translate(glm::mat4(1.f), pos);
+            // small settle rotation; kept within the spacing slack so cubes never touch
+            m = glm::rotate(m, glm::radians(jit(i, 3) * 12.f), glm::vec3(0, 1, 0));
+            m = glm::rotate(m, glm::radians(jit(i, 4) * 6.f),  glm::vec3(1, 0, 0));
+            m = glm::scale(m, glm::vec3(half));
+        } else if (scene == "packed") {
+            // dense 3D grid of solid cubes packed face-to-face with a hair of gap so
+            // they read as separate boxes and never interpenetrate. Increasing
+            // --boxes packs more layers along every view ray (heavier OIT load).
+            int side = (int)std::ceil(std::cbrt((double)nBoxes));
+            int gx = i % side, gy = (i / side) % side, gz = i / (side * side);
+            const float half = 1.0f;                 // cube half-extent (size 2.0)
+            const float step = 2.0f * half * 1.05f;  // 5% gap -> visibly separate, no overlap
+            float c = (side - 1) * 0.5f;             // center the grid on origin
+            glm::vec3 pos((gx - c) * step, (gy - c) * step, (gz - c) * step);
+            m = glm::translate(glm::mat4(1.f), pos);
+            m = glm::scale(m, glm::vec3(half));
+        } else {
+            // default "slabs": thin plates stacked along depth with lateral drift ->
+            // heavy single-pixel layer count for OIT stress testing.
+            glm::vec3 pos((t - 0.5f) * 3.0f, (t - 0.5f) * 3.0f, (t - 0.5f) * 13.f);
+            m = glm::translate(glm::mat4(1.f), pos);
+            m = glm::scale(m, glm::vec3(3.0f, 3.0f, 0.12f));
+        }
         models.push_back(m);
         colors.push_back(hue(t));
     }
 
-    const float alpha = 0.35f;
+    const float alpha = boxAlpha;
     glm::vec3 bg(0.12f, 0.13f, 0.16f);
 
     GLint uMVP   = glGetUniformLocation(buildProg, "uMVP");

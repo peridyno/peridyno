@@ -11,6 +11,7 @@
 // dyno
 #include "SceneGraph.h"
 #include "Action.h"
+#include "Log.h"
 
 // GLM
 #define GLM_ENABLE_EXPERIMENTAL
@@ -438,6 +439,38 @@ namespace dyno
 				GL_SHADER_IMAGE_ACCESS_BARRIER_BIT |
 				GL_ATOMIC_COUNTER_BARRIER_BIT |
 				GL_TEXTURE_FETCH_BARRIER_BIT);
+
+			// OIT overflow check: read back the free-node counter. If it reached the
+			// node budget the build pass dropped transparent fragments (the shader's
+			// `if (freeNodeIndex < uMaxNodes)` guard), which shows up as view-dependent
+			// transparency ordering artifacts. Warn (edge-triggered, so the log isn't
+			// spammed every frame). NOTE: the readback forces a GPU sync (~build-pass
+			// time), so it is sampled only every mOITCheckInterval frames; set
+			// mReportOITOverflow=false to disable it entirely.
+			if (mReportOITOverflow && (mOITFrameCounter++ % mOITCheckInterval == 0))
+			{
+				GLuint usedNodes = 0;
+				mFreeNodeIdx.bind();
+				glGetBufferSubData(GL_ATOMIC_COUNTER_BUFFER, 0, sizeof(GLuint), &usedNodes);
+				mFreeNodeIdx.unbind();
+
+				bool overflow = usedNodes >= (GLuint)MAX_OIT_NODES;
+				if (overflow && !mOITOverflowState)
+				{
+					char msg[256];
+					snprintf(msg, sizeof(msg),
+						"OIT fragment-node pool OVERFLOW: %u >= %d nodes (%d MB) - transparent "
+						"fragments are being DROPPED, causing order-dependent artifacts. Increase "
+						"MAX_OIT_NODES (and uMaxNodes in transparency.glsl) or reduce transparent overlap.",
+						usedNodes, MAX_OIT_NODES, (int)((long long)MAX_OIT_NODES * 32 / (1024 * 1024)));
+					Log::sendMessage(Log::Error, msg);
+				}
+				else if (!overflow && mOITOverflowState)
+				{
+					Log::sendMessage(Log::Info, "OIT fragment-node pool back within budget.");
+				}
+				mOITOverflowState = overflow;
+			}
 
 			// OIT: blend alpha
 			mFramebuffer.drawBuffers(2, attachments);

@@ -1,2 +1,4 @@
 build/
 out/
+viewer/frames/
+viewer/manifest.json
