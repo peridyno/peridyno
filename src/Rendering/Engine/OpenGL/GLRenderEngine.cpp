@@ -430,6 +430,15 @@ namespace dyno
 			}
 			glDepthMask(true);
 
+			// Ensure all linked-list writes (head-index image, atomic counter and
+			// node SSBO) from the first pass are visible to the blend pass below.
+			// Without this barrier the reads in blend.frag are undefined, which can
+			// produce stale/unstable transparency ordering across frames and views.
+			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT |
+				GL_SHADER_IMAGE_ACCESS_BARRIER_BIT |
+				GL_ATOMIC_COUNTER_BARRIER_BIT |
+				GL_TEXTURE_FETCH_BARRIER_BIT);
+
 			// OIT: blend alpha
 			mFramebuffer.drawBuffers(2, attachments);
 			mBlendProgram->use();
