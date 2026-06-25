@@ -132,7 +132,7 @@ namespace dyno
 		mHeadIndexTex.format = GL_RED_INTEGER;
 		mHeadIndexTex.type = GL_UNSIGNED_INT;
 		mHeadIndexTex.create();
-		mHeadIndexTex.resize(1, 1, 1);
+		mHeadIndexTex.resize(1, 1);
 
 		mBlendProgram = Program::createProgramSPIRV(
 			SCREEN_VERT, sizeof(SCREEN_VERT),
@@ -530,7 +530,9 @@ namespace dyno
 		mColorTex.resize(w, h, samples);
 		mDepthTex.resize(w, h, samples);
 		mIndexTex.resize(w, h, samples);
-		mHeadIndexTex.resize(w, h, samples);
+		// head-index is single-sample on purpose (see GLRenderEngine.h); it is NOT a
+		// framebuffer attachment, so it does not need to match the MSAA sample count.
+		mHeadIndexTex.resize(w, h);
 
 		mSelectIndexTex.resize(w, h);
 

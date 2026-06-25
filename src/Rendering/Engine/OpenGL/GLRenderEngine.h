@@ -120,7 +120,13 @@ namespace dyno
 		const int				MAX_OIT_NODES = 1024 * 1024 * 32;
 		Buffer					mFreeNodeIdx;
 		Buffer					mLinkedListBuffer;
-		Texture2DMultiSample	mHeadIndexTex;
+		// Per-pixel OIT linked-list head. MUST be single-sample: the build/resolve
+		// shaders access it as a non-multisample `uimage2D`, and binding a multisample
+		// texture to a uimage2D is undefined behavior per the GL spec (GLSL 4.60 / the
+		// Image Load Store rules). It was previously a Texture2DMultiSample resized with
+		// the framebuffer's MSAA sample count, which is both conceptually wrong (the head
+		// index is per-pixel, not per-sample) and the spec violation above.
+		Texture2D				mHeadIndexTex;
 		Program*				mBlendProgram;
 		// OIT overflow telemetry: when set, Step 4 reads back the free-node counter
 		// and logs once on overflow (a fragment-node-pool overflow silently drops
