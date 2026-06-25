@@ -4,7 +4,7 @@
 #include "ParticleSystem/ParticleSystem.h"
 
 #include "ParticleSystem/Module/ParticleIntegrator.h"
-#include "ParticleSystem/Module/ImplicitViscosity.h"
+#include "ParticleSystem/Viscosity/ImplicitViscosity.h"
 
 #include "ParticleSystem/SISPH/SemiImplicitDensitySolver.h"
 
