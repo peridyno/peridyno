@@ -48,7 +48,7 @@ namespace dyno
 
         DYN_FUNC void update(SeparationType type, Real BoundaryA, Real BoundaryB, Real Depth, Vec3f N, Vec3f a0, Vec3f a1, Vec3f a2 = Vec3f(0.), Vec3f a3 = Vec3f(0.))
         {
-			N = ((BoundaryA < BoundaryB) ^ (isless(Depth, 0.f))) ? N : -N;  // [Question: why -N]
+            N = ((BoundaryA < BoundaryB) ^ (isless(Depth, 0.f))) ? N : -N;  // [Question: why -N]
             if (!isless(Depth, 0.f))
             {
                 separation_distance = Depth;
@@ -81,6 +81,8 @@ namespace dyno
         using OBox3D = TOrientedBox3D<Real>;
         using Capsule3D = TCapsule3D<Real>;
         using Triangle3D = TTriangle3D<Real>;
+        using MedialCone3D = TMedialCone3D<Real>;
+        using MedialSlab3D = TMedialSlab3D<Real>;
 
         using Manifold = TManifold<Real>;
         using SeparationData = TSeparationData<Real>;
@@ -91,7 +93,7 @@ namespace dyno
 
         // MSDF(A, B)		: Minkowski Sum Signed Distance Function, return the depth and normal on B's boundary.
         // request(A, B)	: Generate contact points, depth and normal on B's boundary.
-        
+
         // [Sphere - Sphere]
         DYN_FUNC static void MSDF(SeparationData& sat, const Sphere3D& sphereA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Sphere3D& sphereA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
@@ -100,7 +102,7 @@ namespace dyno
         DYN_FUNC static void MSDF(SeparationData& sat, const Segment3D& segA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Segment3D& segA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Sphere3D& sphereA, const Segment3D& segB, const Real radiusA, const Real radiusB);
-        
+
         // [Tri - Sphere]
         DYN_FUNC static void MSDF(SeparationData& sat, const Triangle3D& triA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Triangle3D& triA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
@@ -112,13 +114,13 @@ namespace dyno
         DYN_FUNC static void request(Manifold& m, const Sphere3D& sphereA, const Tet3D& tetB, const Real radiusA, const Real radiusB);
 
         // [Box - Sphere]
-		DYN_FUNC static void MSDF(SeparationData& sat, const OBox3D& boxA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
+        DYN_FUNC static void MSDF(SeparationData& sat, const OBox3D& boxA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const OBox3D& boxA, const Sphere3D& sphereB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Sphere3D& sphereA, const OBox3D& boxB, const Real radiusA, const Real radiusB);
 
 
         // [Seg - Seg]
-		DYN_FUNC static void MSDF(SeparationData& sat, const Segment3D& segA, const Segment3D& segB, const Real radiusA, const Real radiusB);
+        DYN_FUNC static void MSDF(SeparationData& sat, const Segment3D& segA, const Segment3D& segB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Segment3D& segA, const Segment3D& segB, const Real radiusA, const Real radiusB);
 
         // [Tri - Seg]
@@ -129,7 +131,7 @@ namespace dyno
         // [Tet- Seg]
         DYN_FUNC static void MSDF(SeparationData& sat, const Tet3D& tetA, const Segment3D& segB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Tet3D& tetA, const Segment3D& segB, const Real radiusA, const Real radiusB);
-        DYN_FUNC static void request(Manifold& m, const Segment3D& segA, const Tet3D& tetB, const Real radiusA, const Real radiusB); 
+        DYN_FUNC static void request(Manifold& m, const Segment3D& segA, const Tet3D& tetB, const Real radiusA, const Real radiusB);
 
         // [Box - Seg]
         DYN_FUNC static void MSDF(SeparationData& sat, const OBox3D& boxA, const Segment3D& segB, const Real radiusA, const Real radiusB);
@@ -161,7 +163,7 @@ namespace dyno
         DYN_FUNC static void request(Manifold& m, const OBox3D& boxA, const Tet3D& tetB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const Tet3D& tetA, const OBox3D& boxB, const Real radiusA, const Real radiusB);
 
-        
+
         // [Box - Box]
         DYN_FUNC static void MSDF(SeparationData& sat, const OBox3D& boxA, const OBox3D& boxB, const Real radiusA, const Real radiusB);
         DYN_FUNC static void request(Manifold& m, const OBox3D& boxA, const OBox3D& boxB, const Real radiusA, const Real radiusB);
@@ -188,7 +190,7 @@ namespace dyno
 
         DYN_FUNC static void request(Manifold& m, const Sphere3D& sphere, const Capsule3D& cap);
         DYN_FUNC static void request(Manifold& m, const Capsule3D& cap, const Sphere3D& sphere);
-        
+
         //=========================================
         DYN_FUNC static void request(Manifold& m, const Capsule3D& cap0, const Capsule3D& cap1);
 
@@ -211,10 +213,24 @@ namespace dyno
         DYN_FUNC static void request(Manifold& m, const OBox3D& box, const Triangle3D& tri);//unfinished
 
         //=========================================
+        DYN_FUNC static void request(Manifold& m, const MedialCone3D& medialcone1, const MedialCone3D& medialcone2);
 
+        DYN_FUNC static void request(Manifold& m, const OBox3D& box, const MedialCone3D& medialcone);
+        DYN_FUNC static void request(Manifold& m, const MedialCone3D& medialcone, const OBox3D& box);
 
+        // contact pos : tag = 0: on slab | tag = 1: on sphere
+        DYN_FUNC static void request(Manifold& m, const MedialSlab3D& medialslab, const Sphere3D& sphere, int tag);
+
+        DYN_FUNC static void request(Manifold& m, const OBox3D& box, const MedialSlab3D& medialslab);
+        DYN_FUNC static void request(Manifold& m, const MedialSlab3D& medialslab, const OBox3D& box);
+
+        DYN_FUNC static void request(Manifold& m, const MedialSlab3D& medialslab, const MedialCone3D& medialcone);
+
+        DYN_FUNC static void request(Manifold& m, const MedialCone3D& medialcone, const MedialSlab3D& medialslab);
+
+        DYN_FUNC static void request(Manifold& m, const MedialSlab3D& medialcone, const MedialSlab3D& medialslab);
     private:
-        
+
 
     };
 }

@@ -10,6 +10,7 @@ file(
 )
 
 list(FILTER LIB_SRC EXCLUDE REGEX Platform.h.in)
+list(FILTER LIB_SRC EXCLUDE REGEX "\\.tmp$")
 list(FILTER LIB_SRC EXCLUDE REGEX "${CMAKE_CURRENT_SOURCE_DIR}/Backend/*.*")
 
 if(WIN32)

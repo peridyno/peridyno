@@ -16,8 +16,10 @@
  */
 
 #pragma once
+#include "ConstraintInfo.h"
+
 #include "Module/ConstraintModule.h"
-#include "RigidBody/RigidBodyShared.h"
+#include "RigidBody/RigidBodyInfo.h"
 
 #include "Topology/DiscreteElements.h"
 #include "Collision/Attribute.h"
@@ -120,9 +122,6 @@ namespace dyno
 		DArray<Real> mK_1;
 		DArray<Mat2f> mK_2;
 		DArray<Matrix> mK_3;	
-
-		std::vector<float> errors;
-		int cnt = 0;
 
 		DArray<Real> mErrors;
 		DArray<Real> mA;

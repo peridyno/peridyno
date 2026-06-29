@@ -16,8 +16,10 @@
  */
 
 #pragma once
+#include "ConstraintInfo.h"
+
 #include "Module/ConstraintModule.h"
-#include "RigidBody/RigidBodyShared.h"
+#include "RigidBody/RigidBodyInfo.h"
 
 #include "Topology/DiscreteElements.h"
 
@@ -123,5 +125,6 @@ namespace dyno
 		DArray<Matrix> mK_3;
 
 		DArray<Real> mErrors;
+
 	};
 }

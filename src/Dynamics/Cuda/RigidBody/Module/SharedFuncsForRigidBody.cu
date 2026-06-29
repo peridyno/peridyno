@@ -1,7 +1,12 @@
 #include "SharedFuncsForRigidBody.h"
 
+#include <thrust/scan.h>
+#include <thrust/reduce.h>
+
 namespace dyno
 {
+	DYN_FUNC unsigned long long GenerateKey(int idA, int idB);
+
 	  __global__ void SF_ApplyTransform(
 		DArrayList<Transform3f> instanceTransform,
 		const DArray<Vec3f> translate,
@@ -19,7 +24,9 @@ namespace dyno
 
 		Mat3f rot = rotation[tId];
 
-		Transform3f ti = Transform3f(translate[tId], rot);
+		Transform3f ti = instanceTransform[pair.first][pair.second];
+		ti.translation() = translate[tId];
+		ti.rotation() = rot;
 
 		instanceTransform[pair.first][pair.second] = ti;
 	}
@@ -4806,6 +4813,46 @@ namespace dyno
 	}
 
 	template<typename Real, typename Coord, typename Constraint>
+	__global__ void SF_warmStartLambdaBuildImpulse(
+		DArray<Coord> B,
+		DArray<Real> lambda,
+		DArray<Coord> impulse,
+		DArray<Constraint> constraints,
+		float gamma
+	)
+	{
+		int tId = threadIdx.x + blockIdx.x * blockDim.x;
+		if (tId >= lambda.size())
+			return;
+		if (!constraints[tId].isValid)
+			return;
+
+		int idx1 = constraints[tId].bodyId1;
+		int idx2 = constraints[tId].bodyId2;
+
+		lambda[tId] *= gamma;
+
+		Real lambda_i = lambda[tId];
+
+		atomicAdd(&impulse[2 * idx1][0], B[4 * tId][0] * lambda_i);
+		atomicAdd(&impulse[2 * idx1][1], B[4 * tId][1] * lambda_i);
+		atomicAdd(&impulse[2 * idx1][2], B[4 * tId][2] * lambda_i);
+		atomicAdd(&impulse[2 * idx1 + 1][0], B[4 * tId + 1][0] * lambda_i);
+		atomicAdd(&impulse[2 * idx1 + 1][1], B[4 * tId + 1][1] * lambda_i);
+		atomicAdd(&impulse[2 * idx1 + 1][2], B[4 * tId + 1][2] * lambda_i);
+
+		if (idx2 != INVALID)
+		{
+			atomicAdd(&impulse[2 * idx2][0], B[4 * tId + 2][0] * lambda_i);
+			atomicAdd(&impulse[2 * idx2][1], B[4 * tId + 2][1] * lambda_i);
+			atomicAdd(&impulse[2 * idx2][2], B[4 * tId + 2][2] * lambda_i);
+			atomicAdd(&impulse[2 * idx2 + 1][0], B[4 * tId + 3][0] * lambda_i);
+			atomicAdd(&impulse[2 * idx2 + 1][1], B[4 * tId + 3][1] * lambda_i);
+			atomicAdd(&impulse[2 * idx2 + 1][2], B[4 * tId + 3][2] * lambda_i);
+		}
+	}
+
+	template<typename Real, typename Coord, typename Constraint>
 	__global__ void SF_matrixMultiplyVecUseImpulse(
 		DArray<Coord> J,
 		DArray<Coord> impulse,
@@ -4833,6 +4880,23 @@ namespace dyno
 
 		ans[tId] = tmp;
 		
+	}
+
+	void warmStartLambda(
+		DArray<Vec3f>& B,
+		DArray<float>& lambda,
+		DArray<TConstraintPair<float>>& constraints,
+		DArray<Vec3f>& impulse,
+		float gamma
+	)
+	{
+		cuExecute(constraints.size(),
+			SF_warmStartLambdaBuildImpulse,
+			B,
+			lambda,
+			impulse,
+			constraints,
+			gamma);
 	}
 
 
@@ -5298,7 +5362,8 @@ namespace dyno
 		DArray<Constraint> constraints,
 		DArray<Contact> contactsInLocalFrame,
 		DArray<Coord> pos,
-		DArray<Matrix> rotMat
+		DArray<Matrix> rotMat,
+		bool hasFriction
 	)
 	{
 		int tId = threadIdx.x + blockIdx.x * blockDim.x;
@@ -5335,6 +5400,10 @@ namespace dyno
 		constraints[baseIndex].interpenetration = minimum(0.0f, contactsInLocalFrame[tId].interpenetration + (constraints[baseIndex].pos2 - constraints[baseIndex].pos1).dot(contactsInLocalFrame[tId].normal1));
 		constraints[baseIndex].type = ConstraintType::CN_NONPENETRATION;
 		constraints[baseIndex].isValid = true;
+
+		if (!hasFriction) {
+			return;
+		}
 
 		Coord normal1 = constraints[baseIndex].normal1;
 
@@ -5374,7 +5443,8 @@ namespace dyno
 		DArray<TConstraintPair<float>> constraints,
 		DArray<TContactPair<float>> contactsInLocalFrame,
 		DArray<Vec3f> pos,
-		DArray<Mat3f> rotMat
+		DArray<Mat3f> rotMat,
+		bool hasFriction
 	)
 	{
 		cuExecute(contactsInLocalFrame.size(),
@@ -5382,8 +5452,24 @@ namespace dyno
 			constraints,
 			contactsInLocalFrame,
 			pos,
-			rotMat);
+			rotMat,
+			hasFriction);
 
+	}
+
+	DYN_FUNC inline unsigned long long GetContactPairKey(const TContactPair<float>& contact)
+	{
+		return GenerateKey(contact.bodyId1, contact.bodyId2);
+	}
+
+	DYN_FUNC inline Vec3f GetReferenceLocalPos(const TContactPair<float>& contact)
+	{
+		return (contact.bodyId2 == INVALID || contact.bodyId1 <= contact.bodyId2) ? contact.pos1 : contact.pos2;
+	}
+
+	DYN_FUNC inline Vec3f GetReferenceNormal(const TContactPair<float>& contact)
+	{
+		return (contact.bodyId2 == INVALID || contact.bodyId1 <= contact.bodyId2) ? contact.normal1 : contact.normal2;
 	}
 
 	template<typename Coord, typename Constraint, typename Matrix>
@@ -5396,7 +5482,8 @@ namespace dyno
 		DArray<Real> mass,
 		DArray<Real> K_1,
 		DArray<Mat2f> K_2,
-		DArray<Matrix> K_3
+		DArray<Matrix> K_3,
+		bool hasFriction
 	)
 	{
 		int tId = threadIdx.x + blockIdx.x * blockDim.x;
@@ -5405,6 +5492,17 @@ namespace dyno
 
 		int idx1 = constraints[tId].bodyId1;
 		int idx2 = constraints[tId].bodyId2;
+
+		auto type = constraints[tId].type;
+		if (type == ConstraintType::CN_FRICTION
+			|| type == ConstraintType::CN_ANCHOR_EQUAL_2 || type == ConstraintType::CN_ANCHOR_EQUAL_3
+			|| type == ConstraintType::CN_ALLOW_ROT1D_2
+			|| type == ConstraintType::CN_ANCHOR_TRANS_2
+			|| type == ConstraintType::CN_BAN_ROT_2 || type == ConstraintType::CN_BAN_ROT_3
+			|| type == ConstraintType::CN_JOINT_NO_MOVE_2 || type == ConstraintType::CN_JOINT_NO_MOVE_3)
+		{
+			return;
+		}
 
 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_1)
 		{
@@ -5416,12 +5514,12 @@ namespace dyno
 				Coord r2 = constraints[tId].normal2;
 				Matrix r2x(0.0f, -r2[2], r2[1], r2[2], 0, -r2[0], -r2[1], r2[0], 0);
 				Matrix K = (1 / mass[idx1]) * E + (r1x * inertia[idx1].inverse()) * r1x.transpose() + (1 / mass[idx2]) * E + (r2x * inertia[idx2].inverse()) * r2x.transpose();
-				K_3[tId] = K;
+				K_3[tId] = K.inverse();
 			}
 			else
 			{
 				Matrix K = (1 / mass[idx1]) * E + (r1x * inertia[idx1].inverse()) * r1x.transpose();
-				K_3[tId] = K;
+				K_3[tId] = K.inverse();
 			}
 
 		}
@@ -5438,13 +5536,13 @@ namespace dyno
 			Real c = c2_c_a1.dot(inertia[idx1].inverse() * b2_c_a1) + c2_c_a1.dot(inertia[idx2].inverse() * b2_c_a1);
 			Real d = c2_c_a1.dot(inertia[idx1].inverse() * c2_c_a1) + c2_c_a1.dot(inertia[idx2].inverse() * c2_c_a1);
 			Mat2f K(a, b, c, d);
-			K_2[tId] = K;
+			K_2[tId] = K.inverse();
 		}
 
 		else if (constraints[tId].type == ConstraintType::CN_JOINT_NO_MOVE_1)
 		{
 			Matrix K = (1 / mass[idx1]) * Matrix(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
-			K_3[tId] = K;
+			K_3[tId] = K.inverse();
 		}
 
 		else if (constraints[tId].type == ConstraintType::CN_ANCHOR_TRANS_1)
@@ -5463,7 +5561,7 @@ namespace dyno
 			Real c = r1u_c_n2.dot(inertia[idx1].inverse() * r1u_c_n1) + r2_c_n2.dot(inertia[idx2].inverse() * r2_c_n1);
 			Real d = 1 / mass[idx1] + 1 / mass[idx2] + r1u_c_n2.dot(inertia[idx1].inverse() * r1u_c_n2) + r2_c_n2.dot(inertia[idx2].inverse() * r2_c_n2);
 			Mat2f K(a, b, c, d);
-			K_2[tId] = K;
+			K_2[tId] = K.inverse();
 
 		}
 
@@ -5472,12 +5570,12 @@ namespace dyno
 			if (idx2 != INVALID)
 			{
 				Matrix K = inertia[idx1].inverse() + inertia[idx2].inverse();
-				K_3[tId] = K;
+				K_3[tId] = K.inverse();
 			}
 			else
 			{
 				Matrix K = inertia[idx1].inverse();
-				K_3[tId] = K;
+				K_3[tId] = K.inverse();
 			}
 		}
 
@@ -5485,84 +5583,81 @@ namespace dyno
 		{
 			if (constraints[tId].isValid)
 			{
-
 				Coord normal = constraints[tId].normal1;
-				Coord tangent1 = constraints[tId + 1].normal1; 
-				Coord tangent2 = constraints[tId + 2].normal1; 
-
 				Coord leverArm1 = constraints[tId].pos1 - pos[idx1];
-
 				Coord r1_cross_n = leverArm1.cross(normal);
-				Coord r1_cross_t1 = leverArm1.cross(tangent1);
-				Coord r1_cross_t2 = leverArm1.cross(tangent2);
-
-
 				const Real invMass1 = 1.0 / mass[idx1];
-
 				const Mat3f invInertia1 = inertia[idx1].inverse();
-
-				Real k11, k12, k13, k21, k22, k23, k31, k32, k33;
+				Real k11 = 0.0f;
 
 				if (idx2 != INVALID)
 				{
 					Coord leverArm2 = constraints[tId].pos2 - pos[idx2];
+					Coord r2_cross_n = leverArm2.cross(normal);
 
+					const Real invMass2 = 1.0 / mass[idx2];
+					const Mat3f invInertia2 = inertia[idx2].inverse();
+					const Real totalInvMass = invMass1 + invMass2;
+					k11 = totalInvMass + r1_cross_n.dot(invInertia1 * r1_cross_n) + r2_cross_n.dot(invInertia2 * r2_cross_n);
+				}
+				else 
+				{
+					k11 = invMass1 + r1_cross_n.dot(invInertia1 * r1_cross_n);
+				}
+
+				if (!hasFriction)
+				{
+					K_1[tId] = (k11 > EPSILON || k11 < -EPSILON) ? Real(1) / k11 : Real(0);
+					return;
+				}
+
+				Coord tangent1 = constraints[tId + 1].normal1;
+				Coord tangent2 = constraints[tId + 2].normal1;
+				Coord r1_cross_t1 = leverArm1.cross(tangent1);
+				Coord r1_cross_t2 = leverArm1.cross(tangent2);
+				Real k22, k23, k32, k33;
+
+				if (idx2 != INVALID)
+				{
+					Coord leverArm2 = constraints[tId].pos2 - pos[idx2];
 					Coord r2_cross_n = leverArm2.cross(normal);
 					Coord r2_cross_t1 = leverArm2.cross(tangent1);
 					Coord r2_cross_t2 = leverArm2.cross(tangent2);
 
 					const Real invMass2 = 1.0 / mass[idx2];
 					const Mat3f invInertia2 = inertia[idx2].inverse();
-
-
 					const Real totalInvMass = invMass1 + invMass2;
 
-
-					k11 = totalInvMass + r1_cross_n.dot(invInertia1 * r1_cross_n) + r2_cross_n.dot(invInertia2 * r2_cross_n);
 					k22 = totalInvMass + r1_cross_t1.dot(invInertia1 * r1_cross_t1) + r2_cross_t1.dot(invInertia2 * r2_cross_t1);
-
 					k33 = totalInvMass + r1_cross_t2.dot(invInertia1 * r1_cross_t2) + r2_cross_t2.dot(invInertia2 * r2_cross_t2);
-
-					k12 = r1_cross_n.dot(invInertia1 * r1_cross_t1) + r2_cross_n.dot(invInertia2 * r2_cross_t1);
-					k13 = r1_cross_n.dot(invInertia1 * r1_cross_t2) + r2_cross_n.dot(invInertia2 * r2_cross_t2);
-
-					k21 = r1_cross_t1.dot(invInertia1 * r1_cross_n) + r2_cross_t1.dot(invInertia2 * r2_cross_n);
-
 					k23 = r1_cross_t1.dot(invInertia1 * r1_cross_t2) + r2_cross_t1.dot(invInertia2 * r2_cross_t2);
-
-					k31 = r1_cross_t2.dot(invInertia1 * r1_cross_n) + r2_cross_t2.dot(invInertia2 * r2_cross_n);
-
 					k32 = r1_cross_t2.dot(invInertia1 * r1_cross_t1) + r2_cross_t2.dot(invInertia2 * r2_cross_t1);
 				}
-				else 
+				else
 				{
-
-					k11 = invMass1 + r1_cross_n.dot(invInertia1 * r1_cross_n);
 					k22 = invMass1 + r1_cross_t1.dot(invInertia1 * r1_cross_t1);
 					k33 = invMass1 + r1_cross_t2.dot(invInertia1 * r1_cross_t2);
-
-					k12 = r1_cross_n.dot(invInertia1 * r1_cross_t1);
-					k13 = r1_cross_n.dot(invInertia1 * r1_cross_t2);
-
-					k21 = r1_cross_t1.dot(invInertia1 * r1_cross_n);
 					k23 = r1_cross_t1.dot(invInertia1 * r1_cross_t2);
-
-					k31 = r1_cross_t2.dot(invInertia1 * r1_cross_n);
 					k32 = r1_cross_t2.dot(invInertia1 * r1_cross_t1);
 				}
 
 
-				K_3[tId] = Mat3f(k11, k12, k13,
-					k21, k22, k23,
-					k31, k32, k33);
+				const Real invKnn = (k11 > EPSILON || k11 < -EPSILON) ? Real(1) / k11 : Real(0);
+				const Mat2f fricInv = Mat2f(k22, k23, k32, k33).inverse();
+
+				K_3[tId] = Mat3f(
+					invKnn, Real(0), Real(0),
+					Real(0), fricInv(0, 0), fricInv(0, 1),
+					Real(0), fricInv(1, 0), fricInv(1, 1));
 			}
 		}
+
 		else
 		{
 			if (constraints[tId].isValid)
 			{
 				Real K = J[4 * tId].dot(B[4 * tId]) + J[4 * tId + 1].dot(B[4 * tId + 1]) + J[4 * tId + 2].dot(B[4 * tId + 2]) + J[4 * tId + 3].dot(B[4 * tId + 3]);
-				K_1[tId] = K;
+				K_1[tId] = (K > EPSILON || K < -EPSILON) ? Real(1) / K : Real(0);
 			}
 		}
 	}
@@ -5575,7 +5670,8 @@ namespace dyno
 		DArray<float> mass,
 		DArray<float> K_1,
 		DArray<Mat2f> K_2,
-		DArray<Mat3f> K_3
+		DArray<Mat3f> K_3,
+		bool hasFriction
 	)
 	{
 		cuExecute(constraints.size(),
@@ -5588,7 +5684,8 @@ namespace dyno
 			mass,
 			K_1,
 			K_2,
-			K_3);
+			K_3,
+			hasFriction);
 	}
 
 	template<typename Real, typename Coord, typename Constraint, typename Matrix3, typename Matrix2>
@@ -5608,7 +5705,8 @@ namespace dyno
 		Real g,
 		Real dt,
 		Real zeta,
-		Real hertz
+		Real hertz,
+		bool hasFriction
 	)
 	{
 		int tId = threadIdx.x + blockIdx.x * blockDim.x;
@@ -5646,7 +5744,7 @@ namespace dyno
 
 		Real omega = Real(1) / stepInverse;
 
-		if (constraints[tId].type == ConstraintType::CN_NONPENETRATION)
+		if (constraints[tId].type == ConstraintType::CN_NONPENETRATION && hasFriction)
 		{
 			Coord tmp(eta[tId], eta[tId + 1], eta[tId + 2]);
 			if (idx2 != INVALID)
@@ -5670,14 +5768,14 @@ namespace dyno
 			Coord lambda_old(lambda[tId], lambda[tId + 1], lambda[tId + 2]);
 			Vec2f lambda_old_fric(lambda[tId + 1], lambda[tId + 2]);
 
-			Real k_nn = K_3[tId](0, 0);
+			const Real inv_k_nn = K_3[tId](0, 0);
 
 			Coord delta_lambda;
-			delta_lambda[0] = omega * (massCoeff * tmp[0] / k_nn - impulseCoeff * lambda_old[0]);
+			delta_lambda[0] = omega * (massCoeff * tmp[0] * inv_k_nn - impulseCoeff * lambda_old[0]);
 
-			Mat2f k_fric(K_3[tId](1, 1), K_3[tId](1, 2), K_3[tId](2, 1), K_3[tId](2, 2));
+			const Mat2f k_fric_inv(K_3[tId](1, 1), K_3[tId](1, 2), K_3[tId](2, 1), K_3[tId](2, 2));
 
-			Vec2f delta_lambda_fric = omega * (massCoeff * k_fric.inverse() * Vec2f(tmp[1],tmp[2]) - impulseCoeff * lambda_old_fric);
+			Vec2f delta_lambda_fric = omega * (massCoeff * (k_fric_inv * Vec2f(tmp[1], tmp[2])) - impulseCoeff * lambda_old_fric);
 			
 			delta_lambda[1] = delta_lambda_fric[0];
 			delta_lambda[2] = delta_lambda_fric[1];
@@ -5720,6 +5818,50 @@ namespace dyno
 				}
 			}
 		}
+		else if (constraints[tId].type == ConstraintType::CN_NONPENETRATION)
+		{
+			Real tmp = eta[tId];
+			if (idx2 != INVALID)
+			{
+				tmp -= J[4 * tId].dot(impulse[idx1 * 2]) + J[4 * tId + 2].dot(impulse[idx2 * 2]);
+				tmp -= J[4 * tId + 1].dot(impulse[idx1 * 2 + 1]) + J[4 * tId + 3].dot(impulse[idx2 * 2 + 1]);
+			}
+			else
+			{
+				tmp -= J[4 * tId].dot(impulse[idx1 * 2]);
+				tmp -= J[4 * tId + 1].dot(impulse[idx1 * 2 + 1]);
+			}
+
+			Real lambda_old = lambda[tId];
+			Real delta_lambda = omega * (massCoeff * tmp * K_1[tId] - impulseCoeff * lambda_old);
+			Real lambda_new = lambda_old + delta_lambda;
+
+			if (lambda_new < 0.0f) {
+				lambda_new = 0.0f;
+			}
+
+			delta_lambda = lambda_new - lambda_old;
+			lambda[tId] = lambda_new;
+
+			atomicAdd(&impulse[idx1 * 2][0], B[4 * tId][0] * delta_lambda);
+			atomicAdd(&impulse[idx1 * 2][1], B[4 * tId][1] * delta_lambda);
+			atomicAdd(&impulse[idx1 * 2][2], B[4 * tId][2] * delta_lambda);
+
+			atomicAdd(&impulse[idx1 * 2 + 1][0], B[4 * tId + 1][0] * delta_lambda);
+			atomicAdd(&impulse[idx1 * 2 + 1][1], B[4 * tId + 1][1] * delta_lambda);
+			atomicAdd(&impulse[idx1 * 2 + 1][2], B[4 * tId + 1][2] * delta_lambda);
+
+			if (idx2 != INVALID)
+			{
+				atomicAdd(&impulse[idx2 * 2][0], B[4 * tId + 2][0] * delta_lambda);
+				atomicAdd(&impulse[idx2 * 2][1], B[4 * tId + 2][1] * delta_lambda);
+				atomicAdd(&impulse[idx2 * 2][2], B[4 * tId + 2][2] * delta_lambda);
+
+				atomicAdd(&impulse[idx2 * 2 + 1][0], B[4 * tId + 3][0] * delta_lambda);
+				atomicAdd(&impulse[idx2 * 2 + 1][1], B[4 * tId + 3][1] * delta_lambda);
+				atomicAdd(&impulse[idx2 * 2 + 1][2], B[4 * tId + 3][2] * delta_lambda);
+			}
+		}
 		if (constraints[tId].type == ConstraintType::CN_ANCHOR_EQUAL_1 || constraints[tId].type == ConstraintType::CN_BAN_ROT_1)
 		{
 			Coord tmp(eta[tId], eta[tId + 1], eta[tId + 2]);
@@ -5740,7 +5882,7 @@ namespace dyno
 				}
 			}
 			Coord tmp_lambda(lambda[tId], lambda[tId + 1], lambda[tId + 2]);
-			Coord delta_lambda = omega * (massCoeff * K_3[tId].inverse() * tmp - impulseCoeff * tmp_lambda);
+			Coord delta_lambda = omega * (massCoeff * K_3[tId] * tmp - impulseCoeff * tmp_lambda);
 
 			for (int i = 0; i < 3; i++)
 			{
@@ -5776,7 +5918,7 @@ namespace dyno
 				tmp[i] -= J[4 * (tId + i) + 1].dot(impulse[idx1 * 2 + 1]) + J[4 * (tId + i) + 3].dot(impulse[idx2 * 2 + 1]);
 			}
 			Vec2f oldLambda(lambda[tId], lambda[tId + 1]);
-			Vec2f delta_lambda = omega * (massCoeff * K_2[tId].inverse() * tmp - impulseCoeff * oldLambda);
+			Vec2f delta_lambda = omega * (massCoeff * K_2[tId] * tmp - impulseCoeff * oldLambda);
 
 
 			for (int i = 0; i < 2; i++)
@@ -5807,7 +5949,7 @@ namespace dyno
 			tmp -= J[4 * tId + 1].dot(impulse[idx1 * 2 + 1]) + J[4 * tId + 3].dot(impulse[idx2 * 2 + 1]);
 			if (K_1[tId] > 0)
 			{
-				Real delta_lambda = omega * (massCoeff * tmp / K_1[tId] - impulseCoeff * lambda[tId]);
+				Real delta_lambda = omega * (massCoeff * tmp * K_1[tId] - impulseCoeff * lambda[tId]);
 				lambda[tId] += delta_lambda;
 				atomicAdd(&impulse[idx1 * 2][0], B[4 * tId][0] * delta_lambda);
 				atomicAdd(&impulse[idx1 * 2][1], B[4 * tId][1] * delta_lambda);
@@ -5835,7 +5977,7 @@ namespace dyno
 				tmp[i] -= J[4 * (tId + i)].dot(impulse[idx1 * 2]);
 			}
 			Coord oldLambda(lambda[tId], lambda[tId + 1], lambda[tId + 2]);
-			Coord delta_lambda = omega * (massCoeff * K_3[tId].inverse() * tmp - impulseCoeff * oldLambda);
+			Coord delta_lambda = omega * (massCoeff * K_3[tId] * tmp - impulseCoeff * oldLambda);
 			for (int i = 0; i < 3; i++)
 			{
 				lambda[tId + i] += delta_lambda[i];
@@ -5866,7 +6008,8 @@ namespace dyno
 		float g,
 		float dt,
 		float zeta,
-		float hertz
+		float hertz,
+		bool hasFriction
 	)
 	{
 		cuExecute(constraints.size(),
@@ -5886,8 +6029,461 @@ namespace dyno
 			g,
 			dt,
 			zeta,
-			hertz);
+			hertz,
+			hasFriction);
 	}
 
+
+	DYN_FUNC unsigned long long GenerateKey(int idA, int idB) {
+		int minId = (idA < idB) ? idA : idB;
+		int maxId = (idA < idB) ? idB : idA;
+		return ((unsigned long long)(unsigned int)minId << 32) | (unsigned int)maxId;
+	}
+
+	__global__ void SF_StoreCacheKernel(
+		DArray<TContactPair<Real>> oldContacts,
+		DArray<float> oldLambdas,
+		DArray<CacheContact> cacheBuffer,
+		int contactConstraintStride
+	) {
+		int idx = threadIdx.x + blockIdx.x * blockDim.x;
+		if (idx >= oldContacts.size()) return;
+
+		const TContactPair<Real>& contact = oldContacts[idx];
+
+		int idA = contact.bodyId1;
+		int idB = contact.bodyId2;
+		Vec3f localP = GetReferenceLocalPos(contact);
+		int lambdaOffset = idx * contactConstraintStride;
+
+		cacheBuffer[idx].sortKey = GenerateKey(idA, idB);
+		cacheBuffer[idx].localPos = localP;
+		cacheBuffer[idx].lambda1 = oldLambdas[lambdaOffset];
+		cacheBuffer[idx].lambda2 = contactConstraintStride > 1 ? oldLambdas[lambdaOffset + 1] : 0.0f;
+		cacheBuffer[idx].lambda3 = contactConstraintStride > 2 ? oldLambdas[lambdaOffset + 2] : 0.0f;
+	}
+
+	void StoreCacheKernel(
+		DArray<TContactPair<Real>> oldContacts,
+		DArray<float> oldLambdas,
+		DArray<CacheContact> cacheBuffer,
+		int contactConstraintStride
+	)
+	{
+		cuExecute(oldContacts.size(),
+			SF_StoreCacheKernel,
+			oldContacts,
+			oldLambdas,
+			cacheBuffer,
+			contactConstraintStride);
+	}
+
+	struct ContactComparator {
+		DYN_FUNC bool operator()(const CacheContact& a, const CacheContact& b) {
+			return a.sortKey < b.sortKey;
+		}
+	};
+
+
+	void sortCacheOnGPU(DArray<CacheContact>& d_cacheBuffer)
+	{
+		thrust::sort(thrust::device, d_cacheBuffer.begin(), d_cacheBuffer.begin() + d_cacheBuffer.size(),ContactComparator());
+	}
+
+
+	__global__ void MatchAndWarmStartKernel(
+		DArray<TContactPair<float>> newContacts,
+		DArray<Real> lambda,
+		DArray<CacheContact> sortedCache,
+		Real distThreshold,
+		Real gamma,
+		int contactConstraintStride
+	)
+	{
+		int idx = threadIdx.x + blockIdx.x * blockDim.x;
+
+		if (idx >= newContacts.size()) return;
+
+		TContactPair<Real>& curr = newContacts[idx];
+		unsigned long long key = GetContactPairKey(curr);
+		Vec3f localP = GetReferenceLocalPos(curr);
+		
+		int l = 0, r = sortedCache.size() - 1;
+		while (l <= r) {
+			int mid = l + (r - l) / 2;
+			if (sortedCache[mid].sortKey >= key) {
+				r = mid - 1; 
+			}
+			else {
+				l = mid + 1;
+			}
+		}
+
+		int startIdx = l;
+	
+		int bestMatchIdx = -1;
+
+		Real bestDistSq = distThreshold * distThreshold;
+
+		if (startIdx != -1) {
+			for (int i = startIdx; i < sortedCache.size(); i++) {
+				if (sortedCache[i].sortKey != key) break;
+
+				Vec3f diff = localP - sortedCache[i].localPos;
+				Real distSq = diff.normSquared();
+
+				if (distSq < bestDistSq) {
+					bestDistSq = distSq;
+					bestMatchIdx = i;
+				}
+			}
+		}
+
+		int outIdx = idx * contactConstraintStride;
+		if (bestMatchIdx != -1) {
+			lambda[outIdx] = sortedCache[bestMatchIdx].lambda1 * gamma;
+			if (contactConstraintStride > 1) {
+				lambda[outIdx + 1] = sortedCache[bestMatchIdx].lambda2 * gamma;
+			}
+			if (contactConstraintStride > 2) {
+				lambda[outIdx + 2] = sortedCache[bestMatchIdx].lambda3 * gamma;
+			}
+		}
+	}
+
+
+	void RunWarmStart(
+		DArray<TContactPair<float>>& newContacts,
+		DArray<Real>& lambdaOld,
+		DArray<Real>& lambda,
+		DArray<CacheContact>& cacheBuffer,
+		Real distThreshold,
+		Real gamma,
+		int contactConstraintStride,
+		int previousContactLambdaCount
+	)
+	{
+		if (cacheBuffer.size() > 0) {
+			sortCacheOnGPU(cacheBuffer);
+
+			cuExecute(newContacts.size(),
+				MatchAndWarmStartKernel,
+				newContacts,
+				lambda,
+				cacheBuffer,
+				distThreshold,
+				gamma,
+				contactConstraintStride);
+		}
+
+		int currentContactLambdaCount = newContacts.size() * contactConstraintStride;
+		if (lambdaOld.size() > 0 && currentContactLambdaCount < lambda.size() && previousContactLambdaCount <= lambdaOld.size()) {
+			int currentJointLambdaCount = lambda.size() - currentContactLambdaCount;
+			int previousJointLambdaCount = lambdaOld.size() - previousContactLambdaCount;
+			int jointLambdaCount = currentJointLambdaCount < previousJointLambdaCount ? currentJointLambdaCount : previousJointLambdaCount;
+			if (jointLambdaCount > 0) {
+				lambda.assign(lambdaOld, jointLambdaCount, currentContactLambdaCount, previousContactLambdaCount);
+			}
+		}
+	}
+
+	struct ContactReductionComparator {
+		DYN_FUNC bool operator()(const TContactPair<float>& a, const TContactPair<float>& b) const
+		{
+			unsigned long long keyA = GetContactPairKey(a);
+			unsigned long long keyB = GetContactPairKey(b);
+			if (keyA != keyB) {
+				return keyA < keyB;
+			}
+			return a.interpenetration > b.interpenetration;
+		}
+	};
+
+	__global__ void SF_markContactReductionGroups(
+		DArray<TContactPair<float>> contactsInLocalFrame,
+		DArray<int> groupHeads)
+	{
+		int tId = threadIdx.x + blockIdx.x * blockDim.x;
+		if (tId >= contactsInLocalFrame.size())
+			return;
+
+		if (tId == 0) {
+			groupHeads[tId] = 1;
+			return;
+		}
+
+		groupHeads[tId] = GetContactPairKey(contactsInLocalFrame[tId]) != GetContactPairKey(contactsInLocalFrame[tId - 1]) ? 1 : 0;
+	}
+
+	__global__ void SF_scatterContactReductionStarts(
+		DArray<int> groupHeads,
+		DArray<int> groupIds,
+		DArray<int> groupStarts)
+	{
+		int tId = threadIdx.x + blockIdx.x * blockDim.x;
+		if (tId >= groupHeads.size())
+			return;
+
+		if (groupHeads[tId] != 0) {
+			groupStarts[groupIds[tId] - 1] = tId;
+		}
+	}
+
+	template<int MaxReducedContactsPerPair>
+	__global__ void SF_selectReducedContacts(
+		DArray<TContactPair<float>> contactsInLocalFrame,
+		DArray<int> groupStarts,
+		int groupCount,
+		DArray<TContactPair<float>> reducedContactsTemp,
+		DArray<int> reducedCounts,
+		int maxContactsPerPair,
+		float positionThresholdSq,
+		float normalCosThreshold)
+	{
+		int tId = threadIdx.x + blockIdx.x * blockDim.x;
+		if (tId >= groupCount)
+			return;
+
+		int start = groupStarts[tId];
+		int end = groupStarts[tId + 1];
+		int outBase = tId * MaxReducedContactsPerPair;
+		int selectedCount = 0;
+		Vec3f selectedPositions[MaxReducedContactsPerPair];
+		Vec3f selectedNormals[MaxReducedContactsPerPair];
+
+		for (int i = start; i < end; ++i)
+		{
+			const TContactPair<float>& candidate = contactsInLocalFrame[i];
+			Vec3f candidatePos = GetReferenceLocalPos(candidate);
+			Vec3f candidateNormal = GetReferenceNormal(candidate);
+			bool keep = true;
+
+			for (int j = 0; j < selectedCount; ++j)
+			{
+				Vec3f diff = candidatePos - selectedPositions[j];
+				if (diff.normSquared() <= positionThresholdSq && candidateNormal.dot(selectedNormals[j]) >= normalCosThreshold)
+				{
+					keep = false;
+					break;
+				}
+			}
+
+			if (!keep) {
+				continue;
+			}
+
+			reducedContactsTemp[outBase + selectedCount] = candidate;
+			selectedPositions[selectedCount] = candidatePos;
+			selectedNormals[selectedCount] = candidateNormal;
+			selectedCount++;
+
+			if (selectedCount >= maxContactsPerPair) {
+				break;
+			}
+		}
+
+		reducedCounts[tId] = selectedCount;
+	}
+
+	template<int MaxReducedContactsPerPair>
+	__global__ void SF_compactReducedContacts(
+		DArray<TContactPair<float>> reducedContacts,
+		DArray<TContactPair<float>> reducedContactsTemp,
+		DArray<int> reducedCounts,
+		DArray<int> reducedOffsets)
+	{
+		int tId = threadIdx.x + blockIdx.x * blockDim.x;
+		if (tId >= reducedCounts.size())
+			return;
+
+		int srcBase = tId * MaxReducedContactsPerPair;
+		int dstBase = reducedOffsets[tId];
+		for (int i = 0; i < reducedCounts[tId]; ++i)
+		{
+			reducedContacts[dstBase + i] = reducedContactsTemp[srcBase + i];
+		}
+	}
+
+	void reduceContacts(
+		DArray<TContactPair<float>>& reducedContacts,
+		DArray<TContactPair<float>>& contactsInLocalFrame,
+		uint maxContactsPerPair,
+		float positionThreshold,
+		float normalCosThreshold
+	)
+	{
+		constexpr int kMaxReducedContactsPerPair = 8;
+		int contactCount = contactsInLocalFrame.size();
+		if (contactCount == 0) {
+			reducedContacts.resize(0);
+			return;
+		}
+
+		int clampedMaxContactsPerPair = static_cast<int>(maxContactsPerPair);
+		if (clampedMaxContactsPerPair < 1) {
+			clampedMaxContactsPerPair = 1;
+		}
+		if (clampedMaxContactsPerPair > kMaxReducedContactsPerPair) {
+			clampedMaxContactsPerPair = kMaxReducedContactsPerPair;
+		}
+
+		thrust::sort(
+			thrust::device,
+			contactsInLocalFrame.begin(),
+			contactsInLocalFrame.begin() + contactCount,
+			ContactReductionComparator());
+
+		DArray<int> groupHeads;
+		DArray<int> groupIds;
+		groupHeads.resize(contactCount);
+		groupIds.resize(contactCount);
+
+		cuExecute(contactCount,
+			SF_markContactReductionGroups,
+			contactsInLocalFrame,
+			groupHeads);
+
+		thrust::inclusive_scan(
+			thrust::device,
+			groupHeads.begin(),
+			groupHeads.begin() + contactCount,
+			groupIds.begin());
+
+		int groupCount = thrust::reduce(
+			thrust::device,
+			groupHeads.begin(),
+			groupHeads.begin() + contactCount,
+			0);
+
+		DArray<int> groupStarts;
+		groupStarts.resize(groupCount + 1);
+
+		cuExecute(contactCount,
+			SF_scatterContactReductionStarts,
+			groupHeads,
+			groupIds,
+			groupStarts);
+
+		groupStarts.set(groupCount, contactCount);
+
+		DArray<TContactPair<float>> reducedContactsTemp;
+		reducedContactsTemp.resize(groupCount * kMaxReducedContactsPerPair);
+
+		DArray<int> reducedCounts;
+		reducedCounts.resize(groupCount);
+		reducedCounts.reset();
+
+		cuExecute(groupCount,
+			SF_selectReducedContacts<kMaxReducedContactsPerPair>,
+			contactsInLocalFrame,
+			groupStarts,
+			groupCount,
+			reducedContactsTemp,
+			reducedCounts,
+			clampedMaxContactsPerPair,
+			positionThreshold * positionThreshold,
+			normalCosThreshold);
+
+		DArray<int> reducedOffsets;
+		reducedOffsets.resize(groupCount);
+
+		if (groupCount > 0) {
+			thrust::exclusive_scan(
+				thrust::device,
+				reducedCounts.begin(),
+				reducedCounts.begin() + groupCount,
+				reducedOffsets.begin());
+		}
+
+		int reducedCount = thrust::reduce(
+			thrust::device,
+			reducedCounts.begin(),
+			reducedCounts.begin() + groupCount,
+			0);
+
+		reducedContacts.resize(reducedCount);
+		if (reducedCount > 0) {
+			cuExecute(groupCount,
+				SF_compactReducedContacts<kMaxReducedContactsPerPair>,
+				reducedContacts,
+				reducedContactsTemp,
+				reducedCounts,
+				reducedOffsets);
+		}
+
+		groupHeads.clear();
+		groupIds.clear();
+		groupStarts.clear();
+		reducedContactsTemp.clear();
+		reducedCounts.clear();
+		reducedOffsets.clear();
+	}
+
+	__global__ void SF_ComputeVelocityMagnitude(
+		DArray<Vec3f> velocity,
+		DArray<float> magnitude)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= velocity.size())
+			return;
+
+		magnitude[tId] = velocity[tId].norm();
+	}
+
+	float calculateAverageVelocityMagnitude(
+		DArray<Vec3f>& velocity)
+	{
+		DArray<float> magnitude;
+		magnitude.resize(velocity.size());
+
+		cuExecute(velocity.size(),
+			SF_ComputeVelocityMagnitude,
+			velocity,
+			magnitude);
+
+		Reduction<float> reduce;
+		float avg = reduce.average(magnitude.begin(), magnitude.size());
+
+		magnitude.clear();
+
+		return avg;
+	}
+
+	__global__ void SF_ExtractPenetration(
+		DArray<TContactPair<float>> contacts,
+		DArray<float> penetration)
+	{
+		int tId = threadIdx.x + (blockIdx.x * blockDim.x);
+		if (tId >= contacts.size())
+			return;
+
+		penetration[tId] = contacts[tId].interpenetration;
+	}
+
+	void calculatePenetration(
+		DArray<TContactPair<float>>& contacts,
+		float& average,
+		float& max)
+	{
+		if (contacts.size() == 0) {
+			average = 0;
+			max = 0;
+			return;
+		}
+
+		DArray<float> penetration;
+		penetration.resize(contacts.size());
+
+		cuExecute(contacts.size(),
+			SF_ExtractPenetration,
+			contacts,
+			penetration);
+
+		Reduction<float> reduce;
+		average = reduce.average(penetration.begin(), penetration.size());
+		max = reduce.maximum(penetration.begin(), penetration.size());
+
+		penetration.clear();
+	}
 
 }

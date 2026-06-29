@@ -14,6 +14,8 @@ namespace dyno
 		ET_SPHERE = 8,
 		ET_TRI = 16,
 		ET_COMPOUND = 32,
+		ET_MEDIALCONE = 64,
+		ET_MEDIALSLAB = 128,
 		ET_Other = 0x80000000
 	};
 
@@ -25,8 +27,10 @@ namespace dyno
 		DYN_FUNC inline uint tetIndex() { return tetStart; }
 		DYN_FUNC inline uint capsuleIndex() { return capStart; }
 		DYN_FUNC inline uint triangleIndex() { return triStart; }
+		DYN_FUNC inline uint medialConeIndex() { return medialConeStart; }
+		DYN_FUNC inline uint medialSlabIndex() { return medialSlabStart; }
 
-		DYN_FUNC inline void setSphereRange(uint startIndex, uint endIndex) { 
+		DYN_FUNC inline void setSphereRange(uint startIndex, uint endIndex) {
 			sphereStart = startIndex;
 			sphereEnd = endIndex;
 		}
@@ -51,6 +55,16 @@ namespace dyno
 			triEnd = endIndex;
 		}
 
+		DYN_FUNC inline void setMedialConeRange(uint startIndex, uint endIndex) {
+			medialConeStart = startIndex;
+			medialConeEnd = endIndex;
+		}
+
+		DYN_FUNC inline void setMedialSlabRange(uint startIndex, uint endIndex) {
+			medialSlabStart = startIndex;
+			medialSlabEnd = endIndex;
+		}
+
 		DYN_FUNC inline uint checkElementOffset(ElementType eleType)
 		{
 			if (eleType == ET_SPHERE)
@@ -67,6 +81,12 @@ namespace dyno
 
 			if (eleType == ET_TRI)
 				return triStart;
+
+			if (eleType == ET_MEDIALCONE)
+				return medialConeStart;
+
+			if (eleType == ET_MEDIALSLAB)
+				return medialSlabStart;
 
 			return 0;
 		}
@@ -88,6 +108,12 @@ namespace dyno
 			if (id >= triStart && id < triEnd)
 				return ET_TRI;
 
+			if (id >= medialConeStart && id < medialConeEnd)
+				return ET_MEDIALCONE;
+
+			if (id >= medialSlabStart && id < medialSlabEnd)
+				return ET_MEDIALSLAB;
+
 			return ET_Other;
 		}
 
@@ -102,6 +128,10 @@ namespace dyno
 		uint capEnd;
 		uint triStart;
 		uint triEnd;
+		uint medialConeStart;
+		uint medialConeEnd;
+		uint medialSlabStart;
+		uint medialSlabEnd;
 	};
 
 	class PdActor
@@ -111,7 +141,7 @@ namespace dyno
 
 		ElementType shapeType = ET_Other;
 
-		
+
 
 		Vec3f center;
 
@@ -504,7 +534,7 @@ namespace dyno
 	};
 
 	/**
-	 * Discrete elements will arranged in the order of sphere, box, tet, capsule, triangle
+	 * Discrete elements will arranged in the order of sphere, box, tet, capsule, triangle, medialCone, medialSlab
 	 */
 	template<typename TDataType>
 	class DiscreteElements : public Topology
@@ -540,6 +570,8 @@ namespace dyno
 		uint tetIndex();
 		uint capsuleIndex();
 		uint triangleIndex();
+		uint medialConeIndex();
+		uint medialSlabIndex();
 
 		ElementOffset calculateElementOffset();
 
@@ -550,18 +582,24 @@ namespace dyno
 		void setCapsules(DArray<Capsule3D>& capsules);
 		void setTriangles(DArray<Triangle3D>& triangles);
 		void setTetSDF(DArray<Real>& sdf);
+		void setMedialCones(DArray<MedialCone3D>& medialcones);
+		void setMedialSlabs(DArray<MedialSlab3D>& medialsalbs);
 
-		DArray<Sphere3D>&	spheresInLocal() { return mSpheresInLocal; }
-		DArray<Box3D>&		boxesInLocal() { return mBoxesInLocal; }
-		DArray<Tet3D>&		tetsInLocal() { return mTetsInLocal; }
-		DArray<Capsule3D>&	capsulesInLocal() { return mCapsulesInLocal; }
-		DArray<Triangle3D>&	trianglesInLocal() { return mTrianglesInLocal; }
+		DArray<Sphere3D>& spheresInLocal() { return mSpheresInLocal; }
+		DArray<Box3D>& boxesInLocal() { return mBoxesInLocal; }
+		DArray<Tet3D>& tetsInLocal() { return mTetsInLocal; }
+		DArray<Capsule3D>& capsulesInLocal() { return mCapsulesInLocal; }
+		DArray<Triangle3D>& trianglesInLocal() { return mTrianglesInLocal; }
+		DArray<MedialCone3D>& medialConesInLocal() { return mMedialConesInLocal; }
+		DArray<MedialSlab3D>& medialSlabsInLocal() { return mMedialSlabsInLocal; }
 
-		DArray<Sphere3D>&	spheresInGlobal() { return mSphereInGlobal; }
-		DArray<Box3D>&		boxesInGlobal() { return mBoxInGlobal; }
-		DArray<Tet3D>&		tetsInGlobal() { return mTetInGlobal; }
-		DArray<Capsule3D>&	capsulesInGlobal() { return mCapsuleInGlobal; }
+		DArray<Sphere3D>& spheresInGlobal() { return mSphereInGlobal; }
+		DArray<Box3D>& boxesInGlobal() { return mBoxInGlobal; }
+		DArray<Tet3D>& tetsInGlobal() { return mTetInGlobal; }
+		DArray<Capsule3D>& capsulesInGlobal() { return mCapsuleInGlobal; }
 		DArray<Triangle3D>& trianglesInGlobal() { return mTriangleInGlobal; }
+		DArray<MedialCone3D>& medialConesInGlobal() { return mMedialConesInGlobal; }
+		DArray<MedialSlab3D>& medialSlabsInGlobal() { return mMedialSlabsInGlobal; }
 
 		DArray<Pair<uint, uint>>& shape2RigidBodyMapping() { return mShape2RigidBody; };
 
@@ -594,7 +632,9 @@ namespace dyno
 			DArray<Sphere3D>& sphereInGlobal,
 			DArray<Tet3D>& tetInGlobal,
 			DArray<Capsule3D>& capInGlobal,
-			DArray<Triangle3D>& triInGlobal);
+			DArray<Triangle3D>& triInGlobal,
+			DArray<MedialCone3D>& medialConeInGlobal,
+			DArray<MedialSlab3D>& medialSlabInGlobal);
 
 		void requestBoxInGlobal(DArray<Box3D>& boxInGlobal);
 		void requestSphereInGlobal(DArray<Sphere3D>& sphereInGlobal);
@@ -611,12 +651,16 @@ namespace dyno
 		DArray<Tet3D> mTetsInLocal;
 		DArray<Capsule3D> mCapsulesInLocal;
 		DArray<Triangle3D> mTrianglesInLocal;
+		DArray<MedialCone3D> mMedialConesInLocal;
+		DArray<MedialSlab3D> mMedialSlabsInLocal;
 
 		DArray<Sphere3D> mSphereInGlobal;
 		DArray<Box3D> mBoxInGlobal;
 		DArray<Tet3D> mTetInGlobal;
 		DArray<Capsule3D> mCapsuleInGlobal;
 		DArray<Triangle3D> mTriangleInGlobal;
+		DArray<MedialCone3D> mMedialConesInGlobal;
+		DArray<MedialSlab3D> mMedialSlabsInGlobal;
 
 		DArray<BallAndSocketJoint> mBallAndSocketJoints;
 		DArray<SliderJoint> mSliderJoints;
@@ -635,4 +679,3 @@ namespace dyno
 		DArray<Topology::Tetrahedron> m_tet_element_id;
 	};
 }
-
