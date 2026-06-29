@@ -76,7 +76,8 @@ namespace dyno
 		Real motorValue = Real(0);
 	};
 
-	bool loadTextureMeshFromXml(std::shared_ptr<TextureMesh> texMesh, const std::string& xmlPath, bool doTransform = true);
+	bool loadTextureMeshFromXml(std::shared_ptr<TextureMesh> texMesh, const std::string& xmlPath, 
+		std::vector<SceneObject>& sceneObjects, std::vector<Asset>& assets, std::vector<SceneJoint>& sceneJoints, bool doTransform = true);
 
 	bool loadTextureMeshFromObj(std::shared_ptr<TextureMesh> texMesh, const FilePath& fullname,bool useToCenter = true);
 

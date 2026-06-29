@@ -98,9 +98,11 @@ namespace dyno
 			return instanceQ;
 		}
 	public:
+		//TODO: Temporarily used codes, move to its subclass in the future
 		std::vector<SceneObject> mObjects;
 		std::vector<Asset> mAssets;
 		std::vector<SceneJoint> mJoints;
+
 	private:
 		std::vector<Pair<uint, uint>> mBindingPair;
 		std::vector<Vec3f> mBindingScale;

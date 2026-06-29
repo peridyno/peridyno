@@ -16,6 +16,8 @@
  */
 
 #pragma once
+#include "ConstraintInfo.h"
+
 #include "Module/ConstraintModule.h"
 #include "RigidBody/RigidBodyShared.h"
 #include "Topology/DiscreteElements.h"
@@ -126,7 +128,7 @@ namespace dyno
 		DArray<Real> mLambda;
 
 		DArray<ContactPair> mContactsInLocalFrame;
-		DArray<ContactPair> mFilteredContacts;
+		//DArray<ContactPair> mFilteredContacts;
 		DArray<ContactPair> mReducedContacts;
 
 		DArray<Constraint> mVelocityConstraints;

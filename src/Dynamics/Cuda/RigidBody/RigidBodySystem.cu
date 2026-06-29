@@ -440,7 +440,6 @@ namespace dyno
 
 		Attribute att_i;
 		att_i.setObjectId(states[tId].bodyId);
-		att_i.setCollisionGroup(states[tId].collisionGroup);
 		if (states[tId].motionType == BodyType::Static)
 		{
 			att_i.setFixed();

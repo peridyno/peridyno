@@ -195,11 +195,6 @@ namespace dyno
 			Attribute att_i = attribute[mappedId1];
 			Attribute att_j = attribute[mappedId2];
 
-			const uint collisionGroup_i = att_i.collisionGroup();
-			const uint collisionGroup_j = att_j.collisionGroup();
-			if (collisionGroup_i != 0 && collisionGroup_i == collisionGroup_j)
-				return;
-
 			if (!enableSelfCollision && att_i.objectId() == att_j.objectId())
 				return;
 		}

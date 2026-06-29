@@ -680,12 +680,8 @@ namespace dyno
     }
 
 
-    bool loadTextureMeshFromXml(std::shared_ptr<TextureMesh> texMesh, const std::string& xmlPath, bool doTransform)
+    bool loadTextureMeshFromXml(std::shared_ptr<TextureMesh> texMesh, const std::string& xmlPath, std::vector<SceneObject>& sceneObjects, std::vector<Asset>& assets, std::vector<SceneJoint>& sceneJoints, bool doTransform)
     {
-        std::vector<SceneObject> sceneObjects;
-        std::vector<Asset> assets;
-        std::vector<SceneJoint> sceneJoints;
-
         manualParseSceneConfig(xmlPath, sceneObjects, assets, sceneJoints);
 
         std::vector<dyno::Vec3f> allVertices;

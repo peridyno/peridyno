@@ -1,4 +1,6 @@
 #pragma once
+#include "ConstraintInfo.h"
+
 #include "Array/ArrayList.h"
 
 #include "STL/Pair.h"
@@ -150,12 +152,6 @@ namespace dyno
 		DArray<TContactPair<float>> contactsInGlobalFrame,
 		DArray<Vec3f> pos,
 		DArray<Mat3f> rotMat
-	);
-
-	void filterContactsByCollisionGroup(
-		DArray<TContactPair<float>>& filteredContacts,
-		DArray<TContactPair<float>> contacts,
-		DArray<Attribute> attributes
 	);
 	
 	void setUpContactAndFrictionConstraints(

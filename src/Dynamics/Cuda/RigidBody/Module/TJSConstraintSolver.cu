@@ -194,7 +194,7 @@ namespace dyno
 	void TJSConstraintSolver<TDataType>::constrain()
 	{
 		uint bodyNum = this->inCenter()->size();
-		const bool hasFriction = this->varFrictionEnabled()->getData();
+		const bool hasFriction = this->varFrictionEnabled()->getValue();
 		const int contactConstraintStride = hasFriction ? 3 : 1;
 
 		auto topo = this->inDiscreteElements()->constDataPtr();
@@ -206,7 +206,7 @@ namespace dyno
 		mImpulseC.reset();
 		mImpulseExt.reset();
 
-		Real dt = this->inTimeStep()->getData();
+		Real dt = this->inTimeStep()->getValue();
 		DArray<ContactPair>* activeContactsPtr = nullptr;
 
 		if (!this->inContacts()->isEmpty() || topo->totalJointSize() > 0) {
@@ -222,18 +222,18 @@ namespace dyno
 			);
 
 			DArray<ContactPair>* solverContactsPtr = &mContactsInLocalFrame;
-			if (!this->inAttribute()->isEmpty() && mContactsInLocalFrame.size() > 0)
-			{
-				filterContactsByCollisionGroup(
-					mFilteredContacts,
-					mContactsInLocalFrame,
-					this->inAttribute()->getData());
-				solverContactsPtr = &mFilteredContacts;
-			}
-			else
-			{
-				mFilteredContacts.resize(0);
-			}
+// 			if (!this->inAttribute()->isEmpty() && mContactsInLocalFrame.size() > 0)
+// 			{
+// 				filterContactsByCollisionGroup(
+// 					mFilteredContacts,
+// 					mContactsInLocalFrame,
+// 					this->inAttribute()->getData());
+// 				solverContactsPtr = &mFilteredContacts;
+// 			}
+// 			else
+// 			{
+// 				mFilteredContacts.resize(0);
+// 			}
 
 			if (this->varContactReductionEnabled()->getValue() && solverContactsPtr->size() > 0) {
 				reduceContacts(
@@ -401,7 +401,7 @@ namespace dyno
 		
 		if (activeContactsPtr == nullptr)
 		{
-			mFilteredContacts.resize(0);
+			//mFilteredContacts.resize(0);
 			mReducedContacts.resize(0);
 			cacheContacts.resize(0);
 			mPrevContactLambdaCount = 0;

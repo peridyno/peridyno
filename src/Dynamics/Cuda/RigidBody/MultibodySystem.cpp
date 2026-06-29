@@ -166,7 +166,6 @@ namespace dyno
 			hAttributes.assign(stateAttribute);
 
 			uint offsetBodyId = 0;
-			uint offsetCollisionGroup = 0;
 			uint offsetOfRigidBody = 0;
 			for (uint i = 0; i < vehicles.size(); i++)
 			{
@@ -175,18 +174,10 @@ namespace dyno
 				uint num = vehicle->stateMass()->size();
 
 				uint maxBodyId = 0;
-				uint maxCollisionGroup = 0;
 				for (uint j = 0; j < num; j++)
 				{
 					Attribute att = hAttributes[offsetOfRigidBody + j];
 					att.setObjectId(att.objectId() + offsetBodyId);
-
-					const uint collisionGroup = att.collisionGroup();
-					if (collisionGroup != 0)
-					{
-						att.setCollisionGroup(collisionGroup + offsetCollisionGroup);
-						maxCollisionGroup = std::max(maxCollisionGroup, collisionGroup);
-					}
 
 					hAttributes[offsetOfRigidBody + j] = att;
 
@@ -195,7 +186,6 @@ namespace dyno
 
 				offsetOfRigidBody += num;
 				offsetBodyId += (maxBodyId + 1);
-				offsetCollisionGroup += maxCollisionGroup;
 			}
 
 			stateAttribute.assign(hAttributes);

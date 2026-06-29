@@ -56,6 +56,6 @@ namespace dyno {
 		Reduction<int> mReduce;
 
 		std::shared_ptr<CollisionDetectionBroadPhase<TDataType>> mBroadPhaseCD;
-		std::shared_ptr<DiscreteElements<TDataType>> mDiscreteElements;		
+		std::shared_ptr<DiscreteElements<TDataType>> mDiscreteElements;
 	};
 }

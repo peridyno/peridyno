@@ -20,7 +20,7 @@ namespace dyno
 {
 	/*!
 	*	\class	Attribute
-	*	\brief	particle attribute 0x00000000: [31-30]material; [29]motion; [28]Dynamic; [27-8]undefined yet, for future use; [7-0]corresponding to the id of a fluid phase in multiphase fluid or an object in a multibody system
+	*	\brief	particle attribute 0x00000000: [31-30]material; [29]motion; [28]Dynamic; [27-16]undefined yet, for future use; [15-0]corresponding to the id of a fluid phase in multiphase fluid or an object in a multibody system
 	*/
 	class Attribute
 	{
@@ -52,20 +52,13 @@ namespace dyno
 
 		enum ObjectID
 		{
-			OBJECTID_MASK = 0x000000FF,
-			OBJECTID_INVALID = 0x000000FF,
-		};
-
-		enum CollisionGroup
-		{
-			COLLISION_GROUP_SHIFT = 8,
-			COLLISION_GROUP_MASK = 0x0FFFFF00,
+			OBJECTID_MASK = 0x0000FFFF,
+			OBJECTID_INVALID = 0x0000FFFF,
 		};
 
 		DYN_FUNC inline void setMaterialType(MaterialType type) { m_tag = ((~MATERIAL_MASK) & m_tag) | type; }
 		DYN_FUNC inline void setKinematicType(KinematicType type) { m_tag = ((~KINEMATIC_MASK) & m_tag) | type; }
 		DYN_FUNC inline void setObjectId(unsigned id) { m_tag = ((~OBJECTID_MASK) & m_tag) | ((OBJECTID_MASK)& id); }
-		DYN_FUNC inline void setCollisionGroup(unsigned id) { m_tag = ((~COLLISION_GROUP_MASK) & m_tag) | ((id << COLLISION_GROUP_SHIFT) & COLLISION_GROUP_MASK); }
 
 		DYN_FUNC inline MaterialType materialType() const { return (MaterialType)(m_tag&MATERIAL_MASK); }
 		DYN_FUNC inline KinematicType kinematicType() const { return (KinematicType)(m_tag&KINEMATIC_MASK); }
@@ -89,7 +82,6 @@ namespace dyno
 		DYN_FUNC inline void setDynamic() { setKinematicType(KinematicType::KINEMATIC_POSITIVE); }
 
 		DYN_FUNC inline unsigned objectId() const { return (unsigned)(m_tag&OBJECTID_MASK); }
-		DYN_FUNC inline unsigned collisionGroup() const { return (unsigned)((m_tag&COLLISION_GROUP_MASK) >> COLLISION_GROUP_SHIFT); }
 
 	private:
 		uint m_tag;

@@ -43,7 +43,6 @@ namespace dyno
 			position = Vector<Real, 3>(0.0f);
 			offset = Vector<Real, 3>(0.0f);
 			bodyId = 0;
-			collisionGroup = 0;
 			mass = -1.0f;
 			inertia = SquareMatrix<Real, 3>(0.0f);
 			friction = 1.0f;
@@ -61,7 +60,6 @@ namespace dyno
 			position = p;
 			offset = Vector<Real, 3>(0.0f);
 			bodyId = 0;
-			collisionGroup = 0;
 			mass = -1.0f;
 			inertia = SquareMatrix<Real, 3>(0.0f);
 			friction = 1.0f;
@@ -90,7 +88,6 @@ namespace dyno
 		SquareMatrix<Real, 3> inertia;
 
 		uint bodyId;
-		uint collisionGroup;
 
  		Real mass;
 

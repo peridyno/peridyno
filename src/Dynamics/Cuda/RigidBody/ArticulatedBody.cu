@@ -168,7 +168,7 @@ namespace dyno
 				this->stateTextureMesh()->getDataPtr();
 		}
 		else if (ext == ".xml") {
-			loadTextureMeshFromXml(texMesh, name, this->varDoTransform()->getValue());
+			loadTextureMeshFromXml(texMesh, name, mObjects, mAssets, mJoints, this->varDoTransform()->getValue());
 		}
 	}
 

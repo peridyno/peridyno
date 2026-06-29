@@ -16,6 +16,7 @@
  */
 
 #pragma once
+#include "ConstraintInfo.h"
 
 #include "Module/ConstraintModule.h"
 #include "RigidBody/RigidBodyShared.h"

@@ -353,12 +353,6 @@ namespace dyno
 			info.motionType = toBodyType(object.motionType);
 			info.bodyId = i;
 
-			const auto collisionGroupIt = collisionGroupsByObjectName.find(object.name);
-			if (collisionGroupIt != collisionGroupsByObjectName.end())
-			{
-				info.collisionGroup = collisionGroupIt->second;
-			}
-
 			std::shared_ptr<PdActor> actor = nullptr;
 			Vec3f renderScale = object.scale;
 			if (collisionProxy == SceneCollisionProxyType::Box)
