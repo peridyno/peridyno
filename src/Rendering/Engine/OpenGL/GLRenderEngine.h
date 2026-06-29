@@ -112,11 +112,34 @@ namespace dyno
 		Texture2D				mSelectIndexTex;
 
 		// for linked-list OIT
-		const int				MAX_OIT_NODES = 1024 * 1024 * 8;
+		// Per-pixel fragment-node budget for Order-Independent Transparency.
+		// Memory = 32 bytes/node, so 32M nodes = 1 GB. IMPORTANT: this MUST stay in
+		// sync with `uMaxNodes` in shader/transparency.glsl (the shader's write guard);
+		// after changing that .glsl the engine must be rebuilt so the embedded SPIR-V
+		// is regenerated. See setupTransparencyPass()/Step 4 overflow check.
+		const int				MAX_OIT_NODES = 1024 * 1024 * 32;
 		Buffer					mFreeNodeIdx;
 		Buffer					mLinkedListBuffer;
-		Texture2DMultiSample	mHeadIndexTex;
+		// Per-pixel OIT linked-list head. MUST be single-sample: the build/resolve
+		// shaders access it as a non-multisample `uimage2D`, and binding a multisample
+		// texture to a uimage2D is undefined behavior per the GL spec (GLSL 4.60 / the
+		// Image Load Store rules). It was previously a Texture2DMultiSample resized with
+		// the framebuffer's MSAA sample count, which is both conceptually wrong (the head
+		// index is per-pixel, not per-sample) and the spec violation above.
+		Texture2D				mHeadIndexTex;
 		Program*				mBlendProgram;
+		// OIT overflow telemetry: when set, Step 4 reads back the free-node counter
+		// and logs once on overflow (a fragment-node-pool overflow silently drops
+		// transparent fragments -> view-dependent ordering artifacts). The readback
+		// forces a GPU sync, so this can be disabled for max throughput.
+		// The readback forces a GPU sync (stall ~= the OIT build-pass GPU time), so it is
+		// sampled only every mOITCheckInterval frames rather than every frame. Overflow is
+		// a slow-changing condition, so a few-frame detection latency is fine and keeps the
+		// stall cost negligible. Set mReportOITOverflow=false to disable entirely.
+		bool					mReportOITOverflow = true;
+		int						mOITCheckInterval = 30;		// frames between counter readbacks
+		int						mOITFrameCounter = 0;
+		bool					mOITOverflowState = false;	// last-sample overflow state (edge-triggered logging)
 
 		GLRenderHelper*			mRenderHelper;
 		ShadowMap*				mShadowMap = NULL;

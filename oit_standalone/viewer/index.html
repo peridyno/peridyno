@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OIT viewer — drag to orbit</title>
+<style>
+  :root { color-scheme: dark; }
+  html,body { margin:0; height:100%; background:#1f2126; color:#e6e6e6;
+              font:13px/1.5 -apple-system,Segoe UI,Roboto,sans-serif; }
+  #wrap { display:flex; flex-direction:column; align-items:center; height:100%; }
+  #stage { position:relative; margin-top:14px; touch-action:none; cursor:grab; user-select:none; }
+  #stage.drag { cursor:grabbing; }
+  #view { display:block; border-radius:10px; box-shadow:0 8px 30px rgba(0,0,0,.5);
+          background:#1e2025; image-rendering:auto; }
+  #hud { position:absolute; left:10px; top:10px; padding:6px 10px; border-radius:8px;
+         background:rgba(0,0,0,.45); font-variant-numeric:tabular-nums; pointer-events:none; }
+  #hint { position:absolute; right:10px; bottom:10px; padding:5px 9px; border-radius:8px;
+          background:rgba(0,0,0,.4); color:#b9c0cc; pointer-events:none; }
+  #bar { margin:12px; display:flex; gap:14px; align-items:center; color:#aeb6c2; }
+  #load { position:absolute; inset:0; display:grid; place-items:center; background:#1e2025;
+          border-radius:10px; font-size:14px; }
+  b { color:#fff; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="stage">
+    <canvas id="view"></canvas>
+    <div id="hud"></div>
+    <div id="hint">drag: orbit · wheel: pitch</div>
+    <div id="load">loading frames…</div>
+  </div>
+  <div id="bar">
+    <span id="meta"></span>
+    <label>sensitivity <input id="sens" type="range" min="0.2" max="3" step="0.1" value="1"></label>
+  </div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const canvas = $('#view'), ctx = canvas.getContext('2d');
+
+async function main() {
+  const mf = await (await fetch('manifest.json?_=' + Date.now())).json();
+  canvas.width = mf.w; canvas.height = mf.h;
+  $('#meta').innerHTML =
+    `<b>${mf.boxes}</b> boxes · scene <b>${mf.scene}</b> · α <b>${mf.alpha}</b> · resolve <b>${mf.resolve}</b>`;
+
+  // preload every frame into imgs[p][y]
+  const P = mf.pitches.length, Y = mf.yaws.length;
+  const imgs = Array.from({length:P}, () => new Array(Y));
+  let loaded = 0, totalN = P * Y;
+  await new Promise(res => {
+    for (let p = 0; p < P; p++) for (let y = 0; y < Y; y++) {
+      const im = new Image();
+      im.onload = im.onerror = () => { if (++loaded === totalN) res(); };
+      im.src = mf.pattern.replace('{p}', p).replace('{y}', y);
+      imgs[p][y] = im;
+    }
+  });
+  $('#load').style.display = 'none';
+
+  // start looking from a 3/4 angle
+  let yi = Math.round(Y * 0.10) % Y;
+  let pi = Math.min(P - 1, 2);
+
+  function draw() {
+    const im = imgs[pi][yi];
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (im && im.complete && im.naturalWidth) ctx.drawImage(im, 0, 0, canvas.width, canvas.height);
+    $('#hud').innerHTML = `yaw <b>${mf.yaws[yi]}°</b><br>pitch <b>${mf.pitches[pi]}°</b>`;
+  }
+  draw();
+
+  // drag to orbit: horizontal -> yaw (wraps), vertical -> pitch (clamps)
+  const stage = $('#stage');
+  let drag = false, lx = 0, ly = 0, ay = 0, ap = 0;
+  const sens = () => parseFloat($('#sens').value);
+  const degPerPxYaw = 0.6, degPerPxPitch = 0.5;
+
+  const nearest = (arr, v) => {
+    let bi = 0, bd = Infinity;
+    for (let i = 0; i < arr.length; i++) { const d = Math.abs(arr[i] - v); if (d < bd) { bd = d; bi = i; } }
+    return bi;
+  };
+
+  stage.addEventListener('pointerdown', e => {
+    drag = true; stage.classList.add('drag'); stage.setPointerCapture(e.pointerId);
+    lx = e.clientX; ly = e.clientY; ay = mf.yaws[yi]; ap = mf.pitches[pi];
+  });
+  stage.addEventListener('pointermove', e => {
+    if (!drag) return;
+    ay += (e.clientX - lx) * degPerPxYaw * sens();
+    ap -= (e.clientY - ly) * degPerPxPitch * sens();
+    lx = e.clientX; ly = e.clientY;
+    let yw = ((ay % 360) + 360) % 360;
+    yi = nearest(mf.yaws, yw);
+    ap = Math.max(mf.pitches[0], Math.min(mf.pitches[P - 1], ap));
+    pi = nearest(mf.pitches, ap);
+    draw();
+  });
+  const end = e => { drag = false; stage.classList.remove('drag'); };
+  stage.addEventListener('pointerup', end);
+  stage.addEventListener('pointercancel', end);
+  stage.addEventListener('wheel', e => {
+    e.preventDefault();
+    pi = Math.max(0, Math.min(P - 1, pi + (e.deltaY > 0 ? -1 : 1)));
+    draw();
+  }, {passive:false});
+}
+main().catch(e => { $('#load').textContent = 'error: ' + e.message; });
+</script>
+</body>
+</html>

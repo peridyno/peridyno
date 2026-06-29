@@ -11,6 +11,7 @@
 // dyno
 #include "SceneGraph.h"
 #include "Action.h"
+#include "Log.h"
 
 // GLM
 #define GLM_ENABLE_EXPERIMENTAL
@@ -131,7 +132,7 @@ namespace dyno
 		mHeadIndexTex.format = GL_RED_INTEGER;
 		mHeadIndexTex.type = GL_UNSIGNED_INT;
 		mHeadIndexTex.create();
-		mHeadIndexTex.resize(1, 1, 1);
+		mHeadIndexTex.resize(1, 1);
 
 		mBlendProgram = Program::createProgramSPIRV(
 			SCREEN_VERT, sizeof(SCREEN_VERT),
@@ -430,6 +431,47 @@ namespace dyno
 			}
 			glDepthMask(true);
 
+			// Ensure all linked-list writes (head-index image, atomic counter and
+			// node SSBO) from the first pass are visible to the blend pass below.
+			// Without this barrier the reads in blend.frag are undefined, which can
+			// produce stale/unstable transparency ordering across frames and views.
+			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT |
+				GL_SHADER_IMAGE_ACCESS_BARRIER_BIT |
+				GL_ATOMIC_COUNTER_BARRIER_BIT |
+				GL_TEXTURE_FETCH_BARRIER_BIT);
+
+			// OIT overflow check: read back the free-node counter. If it reached the
+			// node budget the build pass dropped transparent fragments (the shader's
+			// `if (freeNodeIndex < uMaxNodes)` guard), which shows up as view-dependent
+			// transparency ordering artifacts. Warn (edge-triggered, so the log isn't
+			// spammed every frame). NOTE: the readback forces a GPU sync (~build-pass
+			// time), so it is sampled only every mOITCheckInterval frames; set
+			// mReportOITOverflow=false to disable it entirely.
+			if (mReportOITOverflow && (mOITFrameCounter++ % mOITCheckInterval == 0))
+			{
+				GLuint usedNodes = 0;
+				mFreeNodeIdx.bind();
+				glGetBufferSubData(GL_ATOMIC_COUNTER_BUFFER, 0, sizeof(GLuint), &usedNodes);
+				mFreeNodeIdx.unbind();
+
+				bool overflow = usedNodes >= (GLuint)MAX_OIT_NODES;
+				if (overflow && !mOITOverflowState)
+				{
+					char msg[256];
+					snprintf(msg, sizeof(msg),
+						"OIT fragment-node pool OVERFLOW: %u >= %d nodes (%d MB) - transparent "
+						"fragments are being DROPPED, causing order-dependent artifacts. Increase "
+						"MAX_OIT_NODES (and uMaxNodes in transparency.glsl) or reduce transparent overlap.",
+						usedNodes, MAX_OIT_NODES, (int)((long long)MAX_OIT_NODES * 32 / (1024 * 1024)));
+					Log::sendMessage(Log::Error, msg);
+				}
+				else if (!overflow && mOITOverflowState)
+				{
+					Log::sendMessage(Log::Info, "OIT fragment-node pool back within budget.");
+				}
+				mOITOverflowState = overflow;
+			}
+
 			// OIT: blend alpha
 			mFramebuffer.drawBuffers(2, attachments);
 			mBlendProgram->use();
@@ -488,7 +530,9 @@ namespace dyno
 		mColorTex.resize(w, h, samples);
 		mDepthTex.resize(w, h, samples);
 		mIndexTex.resize(w, h, samples);
-		mHeadIndexTex.resize(w, h, samples);
+		// head-index is single-sample on purpose (see GLRenderEngine.h); it is NOT a
+		// framebuffer attachment, so it does not need to match the MSAA sample count.
+		mHeadIndexTex.resize(w, h);
 
 		mSelectIndexTex.resize(w, h);
 
