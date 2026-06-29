@@ -19,7 +19,7 @@
 #include "ConstraintInfo.h"
 
 #include "Module/ConstraintModule.h"
-#include "RigidBody/RigidBodyShared.h"
+#include "RigidBody/RigidBodyInfo.h"
 
 #include "Topology/DiscreteElements.h"
 

@@ -15,7 +15,7 @@
  */
 #pragma once
 #include "Node.h"
-#include "RigidBodyShared.h"
+#include "RigidBodyInfo.h"
 
 #include "Collision/Attribute.h"
 #include "Collision/CollisionData.h"
