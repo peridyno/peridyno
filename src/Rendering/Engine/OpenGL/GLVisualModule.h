@@ -53,6 +53,15 @@ namespace dyno
 		DEF_VAR(Real, Roughness, 0.5f, "");
 		DEF_VAR(Real, Alpha, 1.0f, "");
 
+		// When enabled, the module is rendered on top of all other modules
+		// (ignoring depth written by other modules), while still preserving
+		// its own intra-module depth/occlusion relationships.
+		DEF_VAR(bool, RenderToFront, false, "Render on top of other modules");
+
+		// When disabled, the module will not be darkened by shadows cast by
+		// other objects (still receives direct light, just no shadowing).
+		DEF_VAR(bool, ReceiveShadow, true, "Receive shadows from other objects");
+
 	protected:
 		// override methods from Module
 		virtual void updateImpl() override;

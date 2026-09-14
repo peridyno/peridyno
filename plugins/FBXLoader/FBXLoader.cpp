@@ -1164,7 +1164,6 @@ namespace dyno
 	{
 		if(this->varImportAnimation()->getValue()&&!this->varUseInstanceTransform()->getValue())
 			updateAnimation(this->stateElapsedTime()->getValue() * this->varAnimationSpeed()->getValue());
-		Node::updateStates();
 	}
 
 	template<typename TDataType>

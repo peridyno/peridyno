@@ -369,6 +369,17 @@ namespace dyno
 		params.light.mainLightDirection = glm::normalize(glm::vec3(
 				params.transforms.view * glm::vec4(params.light.mainLightDirection, 0)));
 
+		// Helper: set the main-light shadow flag on params according to whether
+		// the module wants to receive shadows. Returns the previous value so the
+		// caller can restore it (params is reused across draw calls).
+		auto applyReceiveShadow = [&params](const std::shared_ptr<GLVisualModule>& vm) -> float
+		{
+			float prev = params.light.mainLightShadow;
+			if (!vm->varReceiveShadow()->getValue())
+				params.light.mainLightShadow = 0.f;
+			return prev;
+		};
+
 		// bind internal framebuffer for rendering
 		mFramebuffer.bind(GL_DRAW_FRAMEBUFFER);
 
@@ -408,10 +419,14 @@ namespace dyno
 
 			for (int i = 0; i < mRenderItems.size(); i++) 
 			{
-				if (mRenderItems[i].node->isVisible() && !mRenderItems[i].visualModule->isTransparent())
+				if (mRenderItems[i].node->isVisible()
+					&& !mRenderItems[i].visualModule->isTransparent()
+					&& !mRenderItems[i].visualModule->varRenderToFront()->getValue())
 				{
 					params.index = i;
+					float savedShadow = applyReceiveShadow(mRenderItems[i].visualModule);
 					mRenderItems[i].visualModule->draw(params);
+					params.light.mainLightShadow = savedShadow;
 				}
 			}
 		}
@@ -470,10 +485,14 @@ namespace dyno
 
 			for (int i = 0; i < mRenderItems.size(); i++)
 			{
-				if (mRenderItems[i].node->isVisible() && mRenderItems[i].visualModule->isTransparent())
+				if (mRenderItems[i].node->isVisible()
+					&& mRenderItems[i].visualModule->isTransparent()
+					&& !mRenderItems[i].visualModule->varRenderToFront()->getValue())
 				{
 					params.index = i;
+					float savedShadow = applyReceiveShadow(mRenderItems[i].visualModule);
 					mRenderItems[i].visualModule->draw(params);
+					params.light.mainLightShadow = savedShadow;
 				}
 			}
 
@@ -520,6 +539,107 @@ namespace dyno
 			auto p0 = scene->getLowerBound();
 			auto p1 = scene->getUpperBound();
 			mRenderHelper->drawBBox(params, p0, p1);
+		}
+
+		// Step 5.5: render "render-to-front" modules on top of everything.
+		// These modules ignore depth written by other modules (rendered after
+		// a depth-buffer clear), but still keep their own intra-module depth
+		// relationships (depth test is enabled). Opaque and transparent
+		// render-to-front modules are drawn in two separate passes.
+		{
+			// --- Opaque render-to-front modules (write depth) ---
+			mFramebuffer.bind(GL_DRAW_FRAMEBUFFER);
+			mFramebuffer.drawBuffers(2, attachments); // color + index
+
+			// Clear depth only (keep color/index) so render-to-front modules
+			// are drawn on top of the existing scene.
+			glClear(GL_DEPTH_BUFFER_BIT);
+			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LEQUAL);
+			glDepthMask(GL_TRUE);
+
+			params.mode = GLRenderMode::COLOR;
+			for (int i = 0; i < mRenderItems.size(); i++)
+			{
+				if (mRenderItems[i].node->isVisible()
+					&& !mRenderItems[i].visualModule->isTransparent()
+					&& mRenderItems[i].visualModule->varRenderToFront()->getValue())
+				{
+					params.index = i;
+					float savedShadow = applyReceiveShadow(mRenderItems[i].visualModule);
+					mRenderItems[i].visualModule->draw(params);
+					params.light.mainLightShadow = savedShadow;
+				}
+			}
+
+			// --- Transparent render-to-front modules (WBOIT, depth-tested
+			//     against the opaque render-to-front depth written above) ---
+			params.mode = GLRenderMode::TRANSPARENCY;
+
+			mWBOITFramebuffer.bind(GL_DRAW_FRAMEBUFFER);
+			const unsigned int wboitBuffersRtf[] = { GL_COLOR_ATTACHMENT0, GL_NONE, GL_COLOR_ATTACHMENT2 };
+			mWBOITFramebuffer.drawBuffers(3, wboitBuffersRtf);
+
+			const float accumClearRtf[4] = { 0.f, 0.f, 0.f, 0.f };
+			const float revealClearRtf[4] = { 1.f, 1.f, 1.f, 1.f };
+			glClearBufferfv(GL_COLOR, 0, accumClearRtf);
+			glClearBufferfv(GL_COLOR, 2, revealClearRtf);
+
+			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LESS);
+			glDepthMask(GL_FALSE);
+
+			glEnable(GL_BLEND);
+			glBlendFunci(0, GL_ONE, GL_ONE);
+			glBlendFunci(2, GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
+
+			for (int i = 0; i < mRenderItems.size(); i++)
+			{
+				if (mRenderItems[i].node->isVisible()
+					&& mRenderItems[i].visualModule->isTransparent()
+					&& mRenderItems[i].visualModule->varRenderToFront()->getValue())
+				{
+					params.index = i;
+					float savedShadow = applyReceiveShadow(mRenderItems[i].visualModule);
+					mRenderItems[i].visualModule->draw(params);
+					params.light.mainLightShadow = savedShadow;
+				}
+			}
+
+			glDisable(GL_BLEND);
+			glDepthMask(GL_TRUE);
+
+			// resolve WBOIT G-buffers to single-sample targets
+			mWBOITFramebuffer.bind(GL_READ_FRAMEBUFFER);
+			mWBOITResolveFBO.bind(GL_DRAW_FRAMEBUFFER);
+			glReadBuffer(GL_COLOR_ATTACHMENT0);
+			glDrawBuffer(GL_COLOR_ATTACHMENT0);
+			glBlitFramebuffer(0, 0, rparams.width, rparams.height,
+				0, 0, rparams.width, rparams.height,
+				GL_COLOR_BUFFER_BIT, GL_LINEAR);
+			glReadBuffer(GL_COLOR_ATTACHMENT2);
+			glDrawBuffer(GL_COLOR_ATTACHMENT2);
+			glBlitFramebuffer(0, 0, rparams.width, rparams.height,
+				0, 0, rparams.width, rparams.height,
+				GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+			// composite the transparent render-to-front layer over the
+			// current color buffer (which already contains the scene +
+			// opaque render-to-front modules)
+			mFramebuffer.bind(GL_DRAW_FRAMEBUFFER);
+			mFramebuffer.drawBuffers(1, attachments); // color only
+			glDisable(GL_DEPTH_TEST);
+			glEnable(GL_BLEND);
+			glBlendFunci(0, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			mWBOITCompositeProgram->use();
+			mAccumResolveTex.bind(GL_TEXTURE0);
+			mWBOITCompositeProgram->setInt("uAccum", 0);
+			mRevealResolveTex.bind(GL_TEXTURE1);
+			mWBOITCompositeProgram->setInt("uReveal", 1);
+			mScreenQuad->draw();
+			glDisable(GL_BLEND);
+			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LEQUAL);
 		}
 
 

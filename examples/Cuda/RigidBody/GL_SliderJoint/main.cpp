@@ -1,4 +1,4 @@
-#include <GlfwApp.h>
+#include <UbiApp.h>
 
 #include <SceneGraph.h>
 
@@ -113,7 +113,7 @@ std::shared_ptr<SceneGraph> creatBricks()
 
 int main()
 {
-	GlfwApp app;
+	UbiApp app(GUIType::GUI_QT);
 	app.setSceneGraph(creatBricks());
 	app.initialize(1280, 768);
 	app.mainLoop();

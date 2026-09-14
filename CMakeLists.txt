@@ -51,7 +51,7 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	#	Using the traditional preprocessor can lead to unexpected compilation errors during CUDA builds on Windows 
 	set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Xcompiler=/Zc:preprocessor")
 
-	set(PERIDYNO_CUDA_ARCH "89" CACHE STRING "Comptue Capability")
+	set(PERIDYNO_CUDA_ARCH "75" CACHE STRING "Comptue Capability")
 	set_property(CACHE PERIDYNO_CUDA_ARCH PROPERTY STRINGS "60;61;62;70;72;75;80;86;87;89;90;100;103;110;120")
 
 	set(CMAKE_POSITION_INDEPENDENT_CODE ON)                                                         #默认为本项目下各编译目标开启fPIC模式，cuda下面会开启rdc模式
