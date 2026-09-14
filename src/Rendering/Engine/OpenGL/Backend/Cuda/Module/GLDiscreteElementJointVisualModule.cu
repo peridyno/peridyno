@@ -681,6 +681,9 @@ namespace dyno
 		this->varLength()->setRange(0, 10);
 		this->varThicknessScale()->setRange(0, 10);
 		this->varBaseColor()->setValue(Color(0.5, 0.721, 1));
+
+		this->varAlpha()->setValue(0.5);
+
 	}
 
 	template<typename TDataType>

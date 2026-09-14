@@ -25,6 +25,8 @@
 #include "Mapping/DiscreteElementsToTriangleSet.h"
 #include "MultiBodyTuple.h"
 #include "SceneLoaderXML.h"
+#include "GLDiscreteElementVisualModule.h"
+#include "GLDiscreteElementJointVisualModule.h"
 
 namespace dyno
 {
@@ -151,13 +153,13 @@ namespace dyno
 		this->varFilePath()->attach(updateCallback);
 		this->varConfiguration()->attach(updateCallback);
 
-		auto triElement = std::make_shared<DiscreteElementsToTriangleSet<TDataType>>();
-		this->stateTopology()->connect(triElement->inDiscreteElements());
-		auto surfaceRender = std::make_shared<GLSurfaceVisualModule>();
-		triElement->outTriangleSet()->connect(surfaceRender->inTriangleSet());
-		surfaceRender->varAlpha()->setValue(0.5);
-		this->graphicsPipeline()->pushModule(triElement);
-		this->graphicsPipeline()->pushModule(surfaceRender);
+		auto elementRender = std::make_shared<GLDiscreteElementVisualModule<TDataType>>();
+		this->stateTopology()->connect(elementRender->inDiscreteElements());
+		this->graphicsPipeline()->pushModule(elementRender);
+
+		auto jointRender = std::make_shared<GLDiscreteElementJointVisualModule<TDataType>>();
+		this->stateTopology()->connect(jointRender->inDiscreteElements());
+		this->graphicsPipeline()->pushModule(jointRender);
 
 		auto assetCallback = std::make_shared<FCallBackFunc>(std::bind(&ConfigurableBody<TDataType>::onTexMeshLoad, this));
 		this->varConfiguration()->getValue().varAssetConfigs()->attach(assetCallback);

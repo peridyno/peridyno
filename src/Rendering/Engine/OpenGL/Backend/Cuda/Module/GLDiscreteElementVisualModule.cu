@@ -281,7 +281,7 @@ namespace dyno
 		tfRot(2, 0) = float(rot(2, 0)); tfRot(2, 1) = float(rot(2, 1)); tfRot(2, 2) = float(rot(2, 2));
 
 		float r = float(sphere.radius);
-		tf.scale() = Vec3f(r * 2.0f, r * 2.0f, r * 2.0f);
+		tf.scale() = Vec3f(r, r, r);
 
 		transforms[tId] = tf;
 	}
@@ -306,7 +306,7 @@ namespace dyno
 
 		float r = float(capsule.radius);
 		float h = float(capsule.halfLength);
-		tf.scale() = Vec3f(r * 2.0f, h * 2.0f, r * 2.0f);
+		tf.scale() = Vec3f(r, h, r);
 
 		transforms[tId] = tf;
 	}
@@ -668,6 +668,7 @@ namespace dyno
 		mStandardCapsule.loadObjFile(getAssetPath() + "standard/standard_capsule.obj");
 
 		this->varBaseColor()->setValue(Color(0.5, 0.721, 1));
+		this->varAlpha()->setValue(0.5);
 	}
 
 	template<typename TDataType>
