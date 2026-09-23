@@ -312,8 +312,8 @@ namespace dyno
 		uint offset = idx * 4 + pointOffset;
 
 		indices[indexOffset + idx * 4] = Triangle(offset + 0, offset + 1, offset + 2);
-		indices[indexOffset + idx * 4 + 1] = Triangle(offset + 0, offset + 1, offset + 3);
-		indices[indexOffset + idx * 4 + 2] = Triangle(offset + 1, offset + 2, offset + 3);
+		indices[indexOffset + idx * 4 + 1] = Triangle(offset + 0, offset + 3, offset + 1);
+		indices[indexOffset + idx * 4 + 2] = Triangle(offset + 1, offset + 3, offset + 2);
 		indices[indexOffset + idx * 4 + 3] = Triangle(offset + 0, offset + 2, offset + 3);
 	}
 

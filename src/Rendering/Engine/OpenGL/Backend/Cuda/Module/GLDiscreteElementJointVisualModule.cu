@@ -643,40 +643,6 @@ namespace dyno
 	{
 		this->setName("discrete_element_joint_visual");
 
-		// Create unit box [-0.5, 0.5]^3: 8 vertices, 12 triangles
-		std::vector<Vec3f> pts;
-		pts.resize(8);
-		pts[0] = Vec3f(-0.5f, -0.5f, -0.5f);
-		pts[1] = Vec3f(0.5f, -0.5f, -0.5f);
-		pts[2] = Vec3f(0.5f, 0.5f, -0.5f);
-		pts[3] = Vec3f(-0.5f, 0.5f, -0.5f);
-		pts[4] = Vec3f(-0.5f, -0.5f, 0.5f);
-		pts[5] = Vec3f(0.5f, -0.5f, 0.5f);
-		pts[6] = Vec3f(0.5f, 0.5f, 0.5f);
-		pts[7] = Vec3f(-0.5f, 0.5f, 0.5f);
-		mStandardBox.setPoints(pts);
-		pts.clear();
-
-		std::vector<Topology::Triangle> tris;
-		tris.resize(12);
-		tris[0]  = Topology::Triangle(0, 1, 2);
-		tris[1]  = Topology::Triangle(0, 2, 3);
-		tris[2]  = Topology::Triangle(0, 4, 5);
-		tris[3]  = Topology::Triangle(0, 5, 1);
-		tris[4]  = Topology::Triangle(4, 7, 6);
-		tris[5]  = Topology::Triangle(4, 6, 5);
-		tris[6]  = Topology::Triangle(1, 5, 6);
-		tris[7]  = Topology::Triangle(1, 6, 2);
-		tris[8]  = Topology::Triangle(2, 6, 7);
-		tris[9]  = Topology::Triangle(2, 7, 3);
-		tris[10] = Topology::Triangle(0, 3, 7);
-		tris[11] = Topology::Triangle(0, 7, 4);
-		mStandardBox.setTriangles(tris);
-		tris.clear();
-
-		// Load sphere from OBJ file
-		mStandardSphere.loadObjFile(getAssetPath() + "standard/standard_icosahedron.obj");
-
 		// Set ranges for scale variables
 		this->varLength()->setRange(0, 10);
 		this->varThicknessScale()->setRange(0, 10);
@@ -826,6 +792,41 @@ namespace dyno
 		};
 		initPass(mJointPass);
 		initPass(mJointSpherePass);
+
+		// Create unit box [-0.5, 0.5]^3: 8 vertices, 12 triangles
+		std::vector<Vec3f> pts;
+		pts.resize(8);
+		pts[0] = Vec3f(-0.5f, -0.5f, -0.5f);
+		pts[1] = Vec3f(0.5f, -0.5f, -0.5f);
+		pts[2] = Vec3f(0.5f, 0.5f, -0.5f);
+		pts[3] = Vec3f(-0.5f, 0.5f, -0.5f);
+		pts[4] = Vec3f(-0.5f, -0.5f, 0.5f);
+		pts[5] = Vec3f(0.5f, -0.5f, 0.5f);
+		pts[6] = Vec3f(0.5f, 0.5f, 0.5f);
+		pts[7] = Vec3f(-0.5f, 0.5f, 0.5f);
+		mStandardBox.setPoints(pts);
+		pts.clear();
+
+		std::vector<Topology::Triangle> tris;
+		tris.resize(12);
+		tris[0] = Topology::Triangle(0, 1, 2);
+		tris[1] = Topology::Triangle(0, 2, 3);
+		tris[2] = Topology::Triangle(0, 4, 5);
+		tris[3] = Topology::Triangle(0, 5, 1);
+		tris[4] = Topology::Triangle(4, 7, 6);
+		tris[5] = Topology::Triangle(4, 6, 5);
+		tris[6] = Topology::Triangle(1, 5, 6);
+		tris[7] = Topology::Triangle(1, 6, 2);
+		tris[8] = Topology::Triangle(2, 6, 7);
+		tris[9] = Topology::Triangle(2, 7, 3);
+		tris[10] = Topology::Triangle(0, 3, 7);
+		tris[11] = Topology::Triangle(0, 7, 4);
+		mStandardBox.setTriangles(tris);
+		tris.clear();
+
+		// Load sphere from OBJ file
+		mStandardSphere.loadObjFile(getAssetPath() + "standard/standard_icosahedron.obj");
+
 		return true;
 	}
 
