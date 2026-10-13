@@ -112,7 +112,7 @@ namespace dyno
 			mPropertyLabel[i] = new LockerButton;
 			mPropertyLabel[i]->setContentsMargins(8, 0, 0, 0);
 			mPropertyLabel[i]->SetTextLabel(QString::fromStdString(mLabel[i]));
-			mPropertyLabel[i]->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_down_pressed.png").c_str()));
+			mPropertyLabel[i]->SetImageLabel(QPixmap((getDefaultPath() + "/icon/arrow_down_pressed.png").c_str()));
 			mPropertyLabel[i]->GetTextHandle()->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 			mPropertyLabel[i]->GetImageHandle()->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
@@ -157,12 +157,12 @@ namespace dyno
 			connect(mPropertyLabel[i], &LockerButton::clicked, [this, i, vlayout]() {
 				if (!mFlag[i])
 				{
-					mPropertyLabel[i]->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_right_pressed.png").c_str()));
+					mPropertyLabel[i]->SetImageLabel(QPixmap((getDefaultPath() + "/icon/arrow_right_pressed.png").c_str()));
 					mPropertyWidget[i]->setVisible(false);
 				}
 				else
 				{
-					mPropertyLabel[i]->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_down_pressed.png").c_str()));
+					mPropertyLabel[i]->SetImageLabel(QPixmap((getDefaultPath() + "/icon/arrow_down_pressed.png").c_str()));
 					mPropertyWidget[i]->setVisible(true);
 				}
 				mFlag[i] = !mFlag[i];
@@ -195,7 +195,7 @@ namespace dyno
 			mPropertyLabel[i] = new LockerButton;
 			mPropertyLabel[i]->setContentsMargins(8, 0, 0, 0);
 			mPropertyLabel[i]->SetTextLabel(QString::fromStdString(mLabel[i]));
-			mPropertyLabel[i]->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_down_pressed.png").c_str()));
+			mPropertyLabel[i]->SetImageLabel(QPixmap((getDefaultPath() + "/icon/arrow_down_pressed.png").c_str()));
 			mPropertyLabel[i]->GetTextHandle()->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 			mPropertyLabel[i]->GetImageHandle()->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
@@ -265,12 +265,12 @@ namespace dyno
 			connect(mPropertyLabel[i], &LockerButton::clicked, [this, i, vlayout]() {
 				if (!mFlag[i])
 				{
-					mPropertyLabel[i]->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_right_pressed.png").c_str()));
+					mPropertyLabel[i]->SetImageLabel(QPixmap((getDefaultPath() + "/icon/arrow_right_pressed.png").c_str()));
 					mPropertyWidget[i]->setVisible(false);
 				}
 				else
 				{
-					mPropertyLabel[i]->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_down_pressed.png").c_str()));
+					mPropertyLabel[i]->SetImageLabel(QPixmap((getDefaultPath() + "/icon/arrow_down_pressed.png").c_str()));
 					mPropertyWidget[i]->setVisible(true);
 				}
 				mFlag[i] = !mFlag[i];
@@ -408,7 +408,7 @@ namespace dyno
 		QVBoxLayout* mainLayout = new QVBoxLayout;
 
 		LockerButton* toggleButton = new LockerButton;
-		toggleButton->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_right_pressed.png").c_str()));
+		toggleButton->SetImageLabel(QPixmap((getDefaultPath() + "/icon/arrow_right_pressed.png").c_str()));
 		toggleButton->SetTextLabel(QString("[ ") + FormatFieldWidgetName(tuple->getObjectName()) + QString(" Fields") + QString("]"));
 		setContentsMargins(8, 0, 0, 0);
 		toggleButton->setCheckable(true);
@@ -487,7 +487,7 @@ namespace dyno
 			vbl->setContentsMargins(4, 4, 4, 4);
 
 			g->button = new LockerButton;
-			g->button->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_right_pressed.png").c_str()));
+			g->button->SetImageLabel(QPixmap((getDefaultPath() + "/icon/arrow_right_pressed.png").c_str()));
 			g->button->SetTextLabel(QString::fromStdString(groupName));
 			g->button->setCheckable(true);
 			g->button->setChecked(false);
@@ -522,10 +522,10 @@ namespace dyno
 			QWidget* cw = g->content;
 			connect(btn, &LockerButton::clicked, [btn, cw]() {
 				if (cw->isVisible()) {
-					btn->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_right_pressed.png").c_str()));
+					btn->SetImageLabel(QPixmap((getDefaultPath() + "/icon/arrow_right_pressed.png").c_str()));
 					cw->setVisible(false);
 				} else {
-					btn->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_down_pressed.png").c_str()));
+					btn->SetImageLabel(QPixmap((getDefaultPath() + "/icon/arrow_down_pressed.png").c_str()));
 					cw->setVisible(true);
 				}
 			});
@@ -660,12 +660,12 @@ namespace dyno
 			bool visible = contentWidget->isVisible();
 			if (visible)
 			{
-				toggleButton->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_right_pressed.png").c_str()));
+				toggleButton->SetImageLabel(QPixmap((getDefaultPath() + "/icon/arrow_right_pressed.png").c_str()));
 				contentWidget->setVisible(false);
 			}
 			else
 			{
-				toggleButton->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_down_pressed.png").c_str()));
+				toggleButton->SetImageLabel(QPixmap((getDefaultPath() + "/icon/arrow_down_pressed.png").c_str()));
 				contentWidget->setVisible(true);
 			}
 		});

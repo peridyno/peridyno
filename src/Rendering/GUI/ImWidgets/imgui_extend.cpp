@@ -332,7 +332,7 @@ void ImGui::initializeStyle(float scale)
 	//ImFont* font = io.Fonts->AddFontDefault();
     //Default font as Qt
 	
-	std::string arialPath = getAssetPath() + "font/arial.ttf";
+	std::string arialPath = getDefaultPath() + "font/arial.ttf";
 	io.Fonts->AddFontFromFileTTF(arialPath.c_str(), 13.0f);
 	// IconFont
 	ImFontConfig config;
@@ -340,7 +340,7 @@ void ImGui::initializeStyle(float scale)
 	config.GlyphMinAdvanceX = 13.0f; // Use if you want to make the icon monospaced
 	static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
 	
-	std::string solidPath = getAssetPath() + "font/fa-solid-900.ttf";
+	std::string solidPath = getDefaultPath() + "font/fa-solid-900.ttf";
 	io.Fonts->AddFontFromFileTTF(solidPath.c_str(), 13.0f, &config, icon_ranges);
 	io.Fonts->Build();
 

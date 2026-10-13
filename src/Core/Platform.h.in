@@ -51,8 +51,12 @@ const inline std::string getAssetPath() {
 #elif defined(VK_EXAMPLE_DATA_DIR)
 	return VK_EXAMPLE_DATA_DIR;
 #else
-	return "${PERIDYNO_ASSET_PATH}/";
+	return "${PERIDYNO_DATA_PATH}/";
 #endif
+}
+
+const inline std::string getDefaultPath() {
+	return "${PERIDYNO_ASSET_PATH}/";
 }
 
 const inline std::string getPluginPath() {

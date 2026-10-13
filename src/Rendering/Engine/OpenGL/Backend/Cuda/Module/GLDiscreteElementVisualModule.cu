@@ -715,8 +715,8 @@ namespace dyno
 		// 2. Generate TriangleSet for MedialCone/MedialSlab/Tet/Triangle
 		if (mStandardSphere.isEmpty())
 		{
-			mStandardSphere.loadObjFile(getAssetPath() + "standard/standard_icosahedron.obj");
-			mStandardCapsule.loadObjFile(getAssetPath() + "standard/standard_capsule.obj");
+			mStandardSphere.loadObjFile(getDefaultPath() + "standard/standard_icosahedron.obj");
+			mStandardCapsule.loadObjFile(getDefaultPath() + "standard/standard_capsule.obj");
 		}
 
 		auto& sphereVertices = mStandardSphere.getPoints();
@@ -968,8 +968,8 @@ namespace dyno
 		tris.clear();
 
 		// Load sphere and capsule from OBJ files
-		mStandardSphere.loadObjFile(getAssetPath() + "standard/standard_icosahedron.obj");
-		mStandardCapsule.loadObjFile(getAssetPath() + "standard/standard_capsule.obj");
+		mStandardSphere.loadObjFile(getDefaultPath() + "standard/standard_icosahedron.obj");
+		mStandardCapsule.loadObjFile(getDefaultPath() + "standard/standard_capsule.obj");
 
 		return true;
 	}

@@ -825,7 +825,7 @@ namespace dyno
 		tris.clear();
 
 		// Load sphere from OBJ file
-		mStandardSphere.loadObjFile(getAssetPath() + "standard/standard_icosahedron.obj");
+		mStandardSphere.loadObjFile(getDefaultPath() + "standard/standard_icosahedron.obj");
 
 		return true;
 	}

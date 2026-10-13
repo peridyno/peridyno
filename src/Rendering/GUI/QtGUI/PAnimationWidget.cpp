@@ -61,11 +61,11 @@ namespace dyno
 
 		mStartSim->setShortcut(QKeySequence(Qt::Key_Space));
 
-		mStartIcon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Start.png"));
-		mPauseIcon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Pause.png"));
-		mResetIcon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Reset.png"));
-		mFinishIcon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Finish.png"));
-		mNextStepIcon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/NextFrame.png"));
+		mStartIcon = new QPixmap(QString::fromStdString(getDefaultPath() + "icon/ToolBarIco/AnimationSlider/Start.png"));
+		mPauseIcon = new QPixmap(QString::fromStdString(getDefaultPath() + "icon/ToolBarIco/AnimationSlider/Pause.png"));
+		mResetIcon = new QPixmap(QString::fromStdString(getDefaultPath() + "icon/ToolBarIco/AnimationSlider/Reset.png"));
+		mFinishIcon = new QPixmap(QString::fromStdString(getDefaultPath() + "icon/ToolBarIco/AnimationSlider/Finish.png"));
+		mNextStepIcon = new QPixmap(QString::fromStdString(getDefaultPath() + "icon/ToolBarIco/AnimationSlider/NextFrame.png"));
 
 		mStartLabel = new QLabel;
 		PAnimationWidget::buildIconLabel(mStartLabel,mStartIcon, mStartSim, 30);

@@ -30,7 +30,7 @@ namespace dyno
 		setupFileMenu();
 		setupEditMenu();
 
-		QString mediaDir = QString::fromLocal8Bit(getAssetPath().c_str()) + "icon/";
+		QString mediaDir = QString::fromLocal8Bit(getDefaultPath().c_str()) + "icon/";
 
 		auto convertIcon = [&](QString path) -> QIcon
 			{
@@ -175,7 +175,7 @@ namespace dyno
 
 	void PMainToolBar::setupFileMenu()
 	{
-		QString path = QString::fromStdString(getAssetPath());
+		QString path = QString::fromStdString(getDefaultPath());
 		tt::Page* filePage = this->AddPage(QPixmap(path + "icon/ToolBarIco/File/Open.png"), "File");
 
 		auto fileGroup = filePage->AddGroup("File");
@@ -208,7 +208,7 @@ namespace dyno
 
 	void PMainToolBar::setupEditMenu()
 	{
-		QString path = QString::fromStdString(getAssetPath());
+		QString path = QString::fromStdString(getDefaultPath());
 		tt::Page* filePage = this->AddPage(QPixmap(path + "icon/ToolBarIco/Edit/Settings_v2.png"), "Edit");
 
 		auto configGroup = filePage->AddGroup("Config");

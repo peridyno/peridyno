@@ -57,7 +57,8 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	set(CMAKE_POSITION_INDEPENDENT_CODE ON)                                                         #默认为本项目下各编译目标开启fPIC模式，cuda下面会开启rdc模式
 	set(CUDA_ARCH_FLAGS "${PERIDYNO_CUDA_ARCH}" CACHE STRING "cuda architectures" FORCE)
 
-	set(PERIDYNO_ASSET_PATH "${PERIDYNO_ROOT}/data" CACHE PATH "")	#python 发布需要改为非强制
+	set(PERIDYNO_ASSET_PATH "${PERIDYNO_ROOT}/assets" CACHE PATH "")
+	set(PERIDYNO_DATA_PATH "${PERIDYNO_ROOT}/data" CACHE PATH "")	#python 发布需要改为非强制
 	set(PERIDYNO_PLUGIN_PATH "${CMAKE_BINARY_DIR}/bin"  CACHE PATH "" FORCE)
 	#file(COPY "data/" DESTINATION "data")
 else()
@@ -196,7 +197,8 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 
 elseif("${PERIDYNO_GPU_BACKEND}" STREQUAL "Vulkan")
 
-	set(PERIDYNO_ASSET_PATH "${PERIDYNO_ROOT}/data" CACHE PATH "" FORCE)
+	set(PERIDYNO_ASSET_PATH "${PERIDYNO_ROOT}/assets" CACHE PATH "" FORCE)
+	set(PERIDYNO_DATA_PATH "${PERIDYNO_ROOT}/data" CACHE PATH "" FORCE)
 	option(PERIDYNO_LIBRARY_IO "Enable binding the io library" ON)
 	option(PERIDYNO_LIBRARY_RENDERING "Enable binding the rendering library" ON)
 	option(PERIDYNO_PLUGIN_ALL "Enable binding the plugin libraries" OFF)
@@ -385,5 +387,3 @@ else()
 		add_subdirectory(examples)
 	endif()
 endif()
-
-

@@ -52,7 +52,7 @@ namespace dyno
 
         mResetSim->setFixedSize(QSize(30,30));
         mResetSim->setStyleSheet("padding: 0px;");
-        auto mResetIcon = new QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/AnimationSlider/Reset.png"));
+        auto mResetIcon = new QPixmap(QString::fromStdString(getDefaultPath() + "icon/ToolBarIco/AnimationSlider/Reset.png"));
         connect(mResetSim, SIGNAL(released()), this, SLOT(resetSimulation()));
 
         auto mResetLabel = new QLabel;
@@ -222,7 +222,7 @@ namespace dyno
 	{
         mModel->clear();
         auto matModules = MaterialManager::materialManagedModules();
-        std::string iconPath = getAssetPath() + "/icon/ContentBrowser/3dModel.png";
+        std::string iconPath = getDefaultPath() + "/icon/ContentBrowser/3dModel.png";
 
         QIcon icon(QString::fromStdString(iconPath));
         

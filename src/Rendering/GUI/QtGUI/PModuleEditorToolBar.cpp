@@ -15,15 +15,15 @@ namespace dyno
 	{
 		mLayout = new QHBoxLayout;
 
-		mActionSave = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/File/Save.png")), tr("&Save...")));
-		mActionUpdate = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Node/refresh_green.png")), tr("&Update...")));
-		mActionReorder = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Node/realign_v2.png")), tr("&Realign...")));
+		mActionSave = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getDefaultPath() + "icon/ToolBarIco/File/Save.png")), tr("&Save...")));
+		mActionUpdate = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getDefaultPath() + "icon/ToolBarIco/Node/refresh_green.png")), tr("&Update...")));
+		mActionReorder = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getDefaultPath() + "icon/ToolBarIco/Node/realign_v2.png")), tr("&Realign...")));
 
 		mLayout->addStretch();
 
-		mResetButton = this->addPushButton(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Node/refresh_blue.png")), "Reset");
-		mAnimationButton = this->addPushButton(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Node/animation.png")), "Animation");
-		mRenderingButton = this->addPushButton(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Node/Display.png")), "Rendering");
+		mResetButton = this->addPushButton(QPixmap(QString::fromStdString(getDefaultPath() + "icon/ToolBarIco/Node/refresh_blue.png")), "Reset");
+		mAnimationButton = this->addPushButton(QPixmap(QString::fromStdString(getDefaultPath() + "icon/ToolBarIco/Node/animation.png")), "Animation");
+		mRenderingButton = this->addPushButton(QPixmap(QString::fromStdString(getDefaultPath() + "icon/ToolBarIco/Node/Display.png")), "Rendering");
 
 		mResetButton->setObjectName("mResetButton");
 		mAnimationButton->setObjectName("mAnimationButton");
