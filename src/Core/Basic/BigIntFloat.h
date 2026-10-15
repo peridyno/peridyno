@@ -3,10 +3,12 @@
 
 #include <cassert>
 #include <cmath>
+#include <cstdint>
 #include "BigInt.h"
+#include "BigIntSigned.h"
 #include "BigIntUtils.h"
 
-// Bridge utilities to convert high-precision unsigned ints to floating point and do fp division.
+// Bridge utilities to convert high-precision unsigned/signed ints to floating point and do fp division.
 namespace dyno
 {
     // Convert uint128 to long double (keeps ~64+ bits of precision; exponent is ample for double/float division)
@@ -71,6 +73,314 @@ namespace dyno
         long double num = uint128_to_long_double(numerator);
         long double den = uint128_to_long_double(denominator);
         return static_cast<float>(num / den);
+    }
+
+
+    // =====================================================================
+    // Generic BigInt -> floating point conversion
+    //
+    // Every conversion walks the limbs explicitly, most-significant limb first
+    // (Horner scheme), so the accumulated rounding error stays within a couple
+    // of ulp of the intermediate type even when the value far exceeds its
+    // mantissa width (e.g. uint512_t).
+    //
+    // The resolution is folded into every limb before the accumulation instead
+    // of being applied to the finished value: that keeps the running value
+    // close to the final magnitude, so a 512-bit integer can still be scaled
+    // back into double range even though long double is only 64 bits wide on
+    // MSVC and CUDA (converting the value first would overflow to infinity).
+    // =====================================================================
+
+    static constexpr long double BIGINT_TWO64 = 18446744073709551616.0L; // 2^64
+
+    // ---- uint128_t ------------------------------------------------------
+
+    inline DYN_FUNC long double to_long_double(const uint128_t& x)
+    {
+        return static_cast<long double>(x.hi) * BIGINT_TWO64 + static_cast<long double>(x.lo);
+    }
+
+    // value * resolution
+    inline DYN_FUNC long double to_long_double_scaled_by(const uint128_t& x, long double resolution)
+    {
+        long double value = static_cast<long double>(x.hi) * resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo) * resolution;
+        return value;
+    }
+
+    // value / resolution
+    inline DYN_FUNC long double to_long_double_divided_by(const uint128_t& x, long double resolution)
+    {
+        assert(resolution != 0.0L);
+        long double value = static_cast<long double>(x.hi) / resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo) / resolution;
+        return value;
+    }
+
+    // ---- uint192_t ------------------------------------------------------
+
+    inline DYN_FUNC long double to_long_double(const uint192_t& x)
+    {
+        long double value = static_cast<long double>(x.hi);
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.mi);
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo);
+        return value;
+    }
+
+    // value * resolution
+    inline DYN_FUNC long double to_long_double_scaled_by(const uint192_t& x, long double resolution)
+    {
+        long double value = static_cast<long double>(x.hi) * resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.mi) * resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo) * resolution;
+        return value;
+    }
+
+    // value / resolution
+    inline DYN_FUNC long double to_long_double_divided_by(const uint192_t& x, long double resolution)
+    {
+        assert(resolution != 0.0L);
+        long double value = static_cast<long double>(x.hi) / resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.mi) / resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo) / resolution;
+        return value;
+    }
+
+    // ---- uint256_t ------------------------------------------------------
+
+    inline DYN_FUNC long double to_long_double(const uint256_t& x)
+    {
+        long double value = static_cast<long double>(x.hi1);
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.hi0);
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo1);
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo0);
+        return value;
+    }
+
+    // value * resolution
+    inline DYN_FUNC long double to_long_double_scaled_by(const uint256_t& x, long double resolution)
+    {
+        long double value = static_cast<long double>(x.hi1) * resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.hi0) * resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo1) * resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo0) * resolution;
+        return value;
+    }
+
+    // value / resolution
+    inline DYN_FUNC long double to_long_double_divided_by(const uint256_t& x, long double resolution)
+    {
+        assert(resolution != 0.0L);
+        long double value = static_cast<long double>(x.hi1) / resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.hi0) / resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo1) / resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo0) / resolution;
+        return value;
+    }
+
+    // ---- uint512_t ------------------------------------------------------
+
+    inline DYN_FUNC long double to_long_double(const uint512_t& x)
+    {
+        long double value = static_cast<long double>(x.lo7);
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo6);
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo5);
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo4);
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo3);
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo2);
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo1);
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo0);
+        return value;
+    }
+
+    // value * resolution
+    inline DYN_FUNC long double to_long_double_scaled_by(const uint512_t& x, long double resolution)
+    {
+        long double value = static_cast<long double>(x.lo7) * resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo6) * resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo5) * resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo4) * resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo3) * resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo2) * resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo1) * resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo0) * resolution;
+        return value;
+    }
+
+    // value / resolution
+    inline DYN_FUNC long double to_long_double_divided_by(const uint512_t& x, long double resolution)
+    {
+        assert(resolution != 0.0L);
+        long double value = static_cast<long double>(x.lo7) / resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo6) / resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo5) / resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo4) / resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo3) / resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo2) / resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo1) / resolution;
+        value = value * BIGINT_TWO64 + static_cast<long double>(x.lo0) / resolution;
+        return value;
+    }
+
+    // ---- signed, sign-magnitude encoding (neg_mask) ----------------------
+
+    inline DYN_FUNC long double to_long_double(const ext_sgn_int128_t& x)
+    {
+        const long double magnitude = to_long_double(uint128_t{x.lo, x.hi});
+        return (x.neg_mask != 0 && magnitude != 0.0L) ? -magnitude : magnitude;
+    }
+
+    inline DYN_FUNC long double to_long_double_scaled_by(const ext_sgn_int128_t& x, long double resolution)
+    {
+        const long double magnitude = to_long_double_scaled_by(uint128_t{x.lo, x.hi}, resolution);
+        return (x.neg_mask != 0 && magnitude != 0.0L) ? -magnitude : magnitude;
+    }
+
+    inline DYN_FUNC long double to_long_double_divided_by(const ext_sgn_int128_t& x, long double resolution)
+    {
+        const long double magnitude = to_long_double_divided_by(uint128_t{x.lo, x.hi}, resolution);
+        return (x.neg_mask != 0 && magnitude != 0.0L) ? -magnitude : magnitude;
+    }
+
+    inline DYN_FUNC long double to_long_double(const ext_sgn_int192_t& x)
+    {
+        const long double magnitude = to_long_double(uint192_t(x.limb0, x.limb1, x.limb2));
+        return (x.neg_mask != 0 && magnitude != 0.0L) ? -magnitude : magnitude;
+    }
+
+    inline DYN_FUNC long double to_long_double_scaled_by(const ext_sgn_int192_t& x, long double resolution)
+    {
+        const long double magnitude = to_long_double_scaled_by(uint192_t(x.limb0, x.limb1, x.limb2), resolution);
+        return (x.neg_mask != 0 && magnitude != 0.0L) ? -magnitude : magnitude;
+    }
+
+    inline DYN_FUNC long double to_long_double_divided_by(const ext_sgn_int192_t& x, long double resolution)
+    {
+        const long double magnitude = to_long_double_divided_by(uint192_t(x.limb0, x.limb1, x.limb2), resolution);
+        return (x.neg_mask != 0 && magnitude != 0.0L) ? -magnitude : magnitude;
+    }
+
+    inline DYN_FUNC long double to_long_double(const ext_sgn_int256_t& x)
+    {
+        const long double magnitude = to_long_double(uint256_t(x.lo0, x.lo1, x.hi0, x.hi1));
+        return (x.neg_mask != 0 && magnitude != 0.0L) ? -magnitude : magnitude;
+    }
+
+    inline DYN_FUNC long double to_long_double_scaled_by(const ext_sgn_int256_t& x, long double resolution)
+    {
+        const long double magnitude = to_long_double_scaled_by(uint256_t(x.lo0, x.lo1, x.hi0, x.hi1), resolution);
+        return (x.neg_mask != 0 && magnitude != 0.0L) ? -magnitude : magnitude;
+    }
+
+    inline DYN_FUNC long double to_long_double_divided_by(const ext_sgn_int256_t& x, long double resolution)
+    {
+        const long double magnitude = to_long_double_divided_by(uint256_t(x.lo0, x.lo1, x.hi0, x.hi1), resolution);
+        return (x.neg_mask != 0 && magnitude != 0.0L) ? -magnitude : magnitude;
+    }
+
+    inline DYN_FUNC long double to_long_double(const ext_sgn_int512_t& x)
+    {
+        const long double magnitude = to_long_double(x.abs_val);
+        return (x.neg_mask != 0 && magnitude != 0.0L) ? -magnitude : magnitude;
+    }
+
+    inline DYN_FUNC long double to_long_double_scaled_by(const ext_sgn_int512_t& x, long double resolution)
+    {
+        const long double magnitude = to_long_double_scaled_by(x.abs_val, resolution);
+        return (x.neg_mask != 0 && magnitude != 0.0L) ? -magnitude : magnitude;
+    }
+
+    inline DYN_FUNC long double to_long_double_divided_by(const ext_sgn_int512_t& x, long double resolution)
+    {
+        const long double magnitude = to_long_double_divided_by(x.abs_val, resolution);
+        return (x.neg_mask != 0 && magnitude != 0.0L) ? -magnitude : magnitude;
+    }
+
+    // ---- signed, two's-complement encoding -------------------------------
+
+    inline DYN_FUNC long double to_long_double(const int128_t& x)
+    {
+        const long double magnitude = to_long_double(x.abs_u());
+        return x.is_negative() ? -magnitude : magnitude;
+    }
+
+    inline DYN_FUNC long double to_long_double_scaled_by(const int128_t& x, long double resolution)
+    {
+        const long double magnitude = to_long_double_scaled_by(x.abs_u(), resolution);
+        return x.is_negative() ? -magnitude : magnitude;
+    }
+
+    inline DYN_FUNC long double to_long_double_divided_by(const int128_t& x, long double resolution)
+    {
+        const long double magnitude = to_long_double_divided_by(x.abs_u(), resolution);
+        return x.is_negative() ? -magnitude : magnitude;
+    }
+
+    inline DYN_FUNC long double to_long_double(const int192_t& x)
+    {
+        const long double magnitude = to_long_double(x.abs_u());
+        return x.is_negative() ? -magnitude : magnitude;
+    }
+
+    inline DYN_FUNC long double to_long_double_scaled_by(const int192_t& x, long double resolution)
+    {
+        const long double magnitude = to_long_double_scaled_by(x.abs_u(), resolution);
+        return x.is_negative() ? -magnitude : magnitude;
+    }
+
+    inline DYN_FUNC long double to_long_double_divided_by(const int192_t& x, long double resolution)
+    {
+        const long double magnitude = to_long_double_divided_by(x.abs_u(), resolution);
+        return x.is_negative() ? -magnitude : magnitude;
+    }
+
+    inline DYN_FUNC long double to_long_double(const int256_t& x)
+    {
+        const long double magnitude = to_long_double(x.abs_u());
+        return x.is_negative() ? -magnitude : magnitude;
+    }
+
+    inline DYN_FUNC long double to_long_double_scaled_by(const int256_t& x, long double resolution)
+    {
+        const long double magnitude = to_long_double_scaled_by(x.abs_u(), resolution);
+        return x.is_negative() ? -magnitude : magnitude;
+    }
+
+    inline DYN_FUNC long double to_long_double_divided_by(const int256_t& x, long double resolution)
+    {
+        const long double magnitude = to_long_double_divided_by(x.abs_u(), resolution);
+        return x.is_negative() ? -magnitude : magnitude;
+    }
+
+    // ---- public helpers --------------------------------------------------
+
+    template <typename T>
+    inline DYN_FUNC double to_double(const T& value)
+    {
+        return static_cast<double>(to_long_double(value));
+    }
+
+    template <typename T>
+    inline DYN_FUNC float to_float(const T& value)
+    {
+        return static_cast<float>(to_long_double(value));
+    }
+
+    // Scale by a resolution: result = value * resolution, where `resolution` is
+    // the real-world size of one integer unit (e.g. 1e-6).
+    template <typename T>
+    inline DYN_FUNC double to_double_scaled_by(const T& value, double resolution)
+    {
+        return static_cast<double>(to_long_double_scaled_by(value, static_cast<long double>(resolution)));
+    }
+
+    // Inverse scaling: result = value / resolution, where `resolution` is the
+    // number of integer units per real-world unit (e.g. 1e6).
+    template <typename T>
+    inline DYN_FUNC double to_double_divided_by(const T& value, double resolution)
+    {
+        assert(resolution != 0.0);
+        return static_cast<double>(to_long_double_divided_by(value, static_cast<long double>(resolution)));
     }
 }
 
