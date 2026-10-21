@@ -24,9 +24,9 @@ using namespace dyno;
 namespace
 {
 // Compares `actual` against the correctly rounded reference `expected`, allowing
-// `max_ulps` units in the last place of `expected`.  The slack covers the rounding
-// of the limb-by-limb accumulation, which runs in long double -- only 64 bits wide
-// on MSVC and on the CUDA device.
+// `max_ulps` units in the last place of `expected`.  The conversion runs in `double`,
+// the only type available on the CUDA device; one ulp of slack is measured, two is
+// the margin we allow here.
 void expect_close_double(double actual, double expected, double max_ulps,
                          const std::string& context)
 {
