@@ -23,6 +23,8 @@
 #include "PropertyItem/QArrayWidget.h"
 #include "PropertyItem/DescriptionHelper.h"
 
+#include "PropertyItem/QEnumFieldWidget.h"
+
 namespace dyno
 {
 	std::map<std::string, PPropertyWidget::FieldWidgetMeta> PPropertyWidget::sFieldWidgetMeta {};
@@ -314,6 +316,26 @@ namespace dyno
 		this->removeAllWidgets();
 	}
 
+	void PPropertyWidget::reBuildItem()
+	{
+		clearProperty();
+
+		if (mSeleted) 
+		{
+			std::shared_ptr<Node> nodePtr = std::dynamic_pointer_cast<Node>(mSeleted);
+			if (nodePtr)
+			{
+				showNodeProperty(nodePtr);
+			}
+
+			std::shared_ptr<Module> modulePtr = std::dynamic_pointer_cast<Module>(mSeleted);
+			if (modulePtr)
+			{
+				this->showModuleProperty(modulePtr);
+			}
+		}
+	}
+
 	void PPropertyWidget::contentUpdated()
 	{
 		auto node = std::dynamic_pointer_cast<Node>(mSeleted);
@@ -365,6 +387,14 @@ namespace dyno
 
 		QWidget* fw = createFieldWidget(field);
 		
+		QEnumFieldWidget* enumWidget = qobject_cast<QEnumFieldWidget*>(fw);
+		if (enumWidget)
+		{
+			connect(enumWidget, &QFieldWidget::fieldChanged, this, [this]() {
+				QMetaObject::invokeMethod(this, &PPropertyWidget::reBuildItem, Qt::QueuedConnection);
+				}, Qt::DirectConnection);
+		}
+
 		if(fw != nullptr) {
 			this->connect(fw, SIGNAL(fieldChanged()), this, SLOT(contentUpdated()));
 

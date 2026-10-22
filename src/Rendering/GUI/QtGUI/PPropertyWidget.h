@@ -74,6 +74,8 @@ namespace dyno
 		//A slot to receive a message when any field widget is updated
 		void contentUpdated();
 
+		void reBuildItem();
+
 	public:
 		struct FieldWidgetMeta {
 			using constructor_t = QWidget* (*)(FBase*);
