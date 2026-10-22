@@ -45,11 +45,102 @@ enum DeviceType
 #define PRECISION_FLOAT
 
 #include "Typedef.inl"
+
+#if defined(PERIDYNO_PATHS_FROM_CONFIG)
+#include <cstdlib>
+#include <filesystem>
+#include <fstream>
+#include <string>
+
+#if defined(__linux__)
+#include <unistd.h>
+#endif
+
+namespace dyno {
+namespace config {
+
+inline std::filesystem::path executableDir() {
+#if defined(_WIN32)
+	return _pgmptr ? std::filesystem::path(_pgmptr).parent_path() : std::filesystem::path();
+#elif defined(__linux__)
+	char buffer[4096];
+	ssize_t length = readlink("/proc/self/exe", buffer, sizeof(buffer));
+	if (length <= 0)
+		return {};
+	return std::filesystem::path(std::string(buffer, static_cast<size_t>(length))).parent_path();
+#else
+	return {};
+#endif
+}
+
+inline std::string trim(std::string text) {
+	static const char bom[] = "\xEF\xBB\xBF";
+	if (text.compare(0, sizeof(bom) - 1, bom) == 0)
+		text.erase(0, sizeof(bom) - 1);
+	const size_t begin = text.find_first_not_of(" \t\r\n");
+	if (begin == std::string::npos)
+		return "";
+	return text.substr(begin, text.find_last_not_of(" \t\r\n") - begin + 1);
+}
+
+inline std::filesystem::path configEntry(const char* key, const std::filesystem::path& fallback) {
+	const std::filesystem::path exeDir = executableDir();
+	std::ifstream file(exeDir / "peridyno.ini");
+
+	std::string line;
+	while (std::getline(file, line)) {
+		const std::string entry = trim(line);
+		if (entry.empty() || entry[0] == '#' || entry[0] == ';')
+			continue;
+
+		const size_t equals = entry.find('=');
+		if (equals == std::string::npos || trim(entry.substr(0, equals)) != key)
+			continue;
+
+		const std::string value = trim(entry.substr(equals + 1));
+		if (!value.empty())
+			return exeDir / value;
+	}
+
+	return fallback;
+}
+
+inline std::string withTrailingSlash(const std::filesystem::path& dir) {
+	std::string text = dir.generic_string();
+	if (!text.empty() && text.back() != '/')
+		text += '/';
+	return text;
+}
+
+inline const std::string& resolvedAssetPath() {
+	static const std::string path = withTrailingSlash(configEntry("asset", executableDir() / "assets"));
+	return path;
+}
+
+inline const std::string& resolvedDataPath() {
+	static const std::string path = withTrailingSlash(configEntry("data", executableDir() / "data"));
+	return path;
+}
+
+} 
+}
+#endif	// PERIDYNO_PATHS_FROM_CONFIG
+
 const inline std::string getAssetPath() {
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
 	return "";
 #elif defined(VK_EXAMPLE_DATA_DIR)
 	return VK_EXAMPLE_DATA_DIR;
+#elif defined(PERIDYNO_PATHS_FROM_CONFIG)
+	return dyno::config::resolvedDataPath();
+#else
+	return "${PERIDYNO_DATA_PATH}/";
+#endif
+}
+
+const inline std::string getDefaultPath() {
+#if defined(PERIDYNO_PATHS_FROM_CONFIG)
+	return dyno::config::resolvedAssetPath();
 #else
 	return "${PERIDYNO_ASSET_PATH}/";
 #endif

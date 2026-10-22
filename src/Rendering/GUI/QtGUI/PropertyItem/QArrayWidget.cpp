@@ -25,7 +25,7 @@ namespace dyno
         auto button = new LockerButton;
         button->setContentsMargins(8, 0, 0, 0);
         button->SetTextLabel(QString("[ ") + FormatFieldWidgetName(t->getObjectName()) + QString(" Elements") + QString("]"));
-        button->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_right_pressed.png").c_str()));
+        button->SetImageLabel(QPixmap((getDefaultPath() + "/icon/arrow_right_pressed.png").c_str()));
         button->GetTextHandle()->setAttribute(Qt::WA_TransparentForMouseEvents, true);
         button->GetImageHandle()->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
@@ -106,12 +106,12 @@ namespace dyno
         connect(button, &LockerButton::clicked, [this, button, elementWidget]() {
             if (!mFlag)
             {
-                button->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_right_pressed.png").c_str()));
+                button->SetImageLabel(QPixmap((getDefaultPath() + "/icon/arrow_right_pressed.png").c_str()));
                 elementWidget->setVisible(false);
             }
             else
             {
-                button->SetImageLabel(QPixmap((getAssetPath() + "/icon/arrow_down_pressed.png").c_str()));
+                button->SetImageLabel(QPixmap((getDefaultPath() + "/icon/arrow_down_pressed.png").c_str()));
                 if (mItemMapper.size() == 0)
                     emit onExpandList();
                 elementWidget->setVisible(true);

@@ -15,10 +15,10 @@ namespace dyno
 	{
 		mLayout = new QHBoxLayout;
 
-		mActionSave = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/File/Save.png")), tr("&Save...")));
-		mActionUpdate = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Node/refresh_green.png")), tr("&Update...")));
-		mActionReorder = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Node/realign_v2.png")), tr("&Realign...")));
-		mActionRealtime = new QAction(QPixmap(QString::fromStdString(getAssetPath() + "icon/ToolBarIco/Edit/Edit.png")), "RealTime");
+		mActionSave = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getDefaultPath() + "icon/ToolBarIco/File/Save.png")), tr("&Save...")));
+		mActionUpdate = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getDefaultPath() + "icon/ToolBarIco/Node/refresh_green.png")), tr("&Update...")));
+		mActionReorder = this->addAction(QToolButton::InstantPopup, new QAction(QPixmap(QString::fromStdString(getDefaultPath() + "icon/ToolBarIco/Node/realign_v2.png")), tr("&Realign...")));
+		mActionRealtime = new QAction(QPixmap(QString::fromStdString(getDefaultPath() + "icon/ToolBarIco/Edit/Edit.png")), "RealTime");
 		mActionRealtime->setCheckable(true);
 		this->addAction(QToolButton::DelayedPopup, mActionRealtime);
 

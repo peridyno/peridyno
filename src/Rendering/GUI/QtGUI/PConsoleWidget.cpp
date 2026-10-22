@@ -34,17 +34,17 @@ namespace dyno
 					{
 						if (info.suffix() == "png" || info.suffix() == "jpg" || info.suffix() == "bmp")
 						{
-							std::string iconPath = getAssetPath() + "/icon/ContentBrowser/image.png";
+							std::string iconPath = getDefaultPath() + "/icon/ContentBrowser/image.png";
 							return QPixmap(iconPath.c_str());
 						}
 						else if (info.suffix() == "obj" || info.suffix() == "gltf" || info.suffix() == "glb" || info.suffix() == "fbx" || info.suffix() == "STL" || info.suffix() == "stl" )
 						{
-							std::string iconPath = getAssetPath() + "/icon/ContentBrowser/3dModel.png";
+							std::string iconPath = getDefaultPath() + "/icon/ContentBrowser/3dModel.png";
 							return QPixmap(iconPath.c_str());
 						}
 						else if (info.suffix() == "pdm")
 						{
-							std::string iconPath = getAssetPath() + "/icon/ContentBrowser/pdm.png";
+							std::string iconPath = getDefaultPath() + "/icon/ContentBrowser/pdm.png";
 							return QPixmap(iconPath.c_str());
 						}
 					}
@@ -86,7 +86,7 @@ namespace dyno
 		apis->add(QString("setValue"));
 		apis->add(QString("Vector3f"));
 		 
-		if (!apis->load(QString::fromStdString(getAssetPath() + "PromptFunctionName")))
+		if (!apis->load(QString::fromStdString(getDefaultPath() + "PromptFunctionName")))
 			QMessageBox::warning(this, QString("提示"), QString("读取文件失败"));
 
 		apis->prepare();
@@ -412,7 +412,7 @@ namespace dyno
 		QHBoxLayout* layout = new QHBoxLayout(this);
 		this->setLayout(layout);
 
-		std::string path = getAssetPath();
+		std::string path = getDefaultPath();
 		QDir root(path.c_str());
 
 		//Add file browser

@@ -266,7 +266,7 @@ namespace dyno
 		layout->addRow("Env Map", hLayout);
 
 		connect(open, &QPushButton::clicked, this, [=]() {
-			QString path = QFileDialog::getOpenFileName(this, tr("Open File"), QString::fromStdString(getAssetPath()), tr("Text Files(*.hdr)"));
+			QString path = QFileDialog::getOpenFileName(this, tr("Open File"), QString::fromStdString(getDefaultPath()), tr("Text Files(*.hdr)"));
 			if (!path.isEmpty()) {
 				//Windows: "\\"; Linux: "/"
 				path = QDir::toNativeSeparators(path);

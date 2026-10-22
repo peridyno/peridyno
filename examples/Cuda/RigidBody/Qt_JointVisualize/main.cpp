@@ -3,12 +3,10 @@
 #include <SceneGraph.h>
 #include <HeightField/GranularMedia.h>
 #include <BasicShapes/PlaneModel.h>
-#include <BasicShapes/PlaneModel.h>
 
 #include <RigidBody/ConfigurableBody.h>
 #include <RigidBody/Module/CarDriver.h>
 
-#include "BasicShapes/PlaneModel.h"
 #include "FBXLoader/FBXLoader.h"
 #include "RigidBody/Module/AnimationDriver.h"
 #include "RigidBody/MultibodySystem.h"
@@ -16,7 +14,6 @@
 #include <HeightField/RigidSandCoupling.h>
 #include "GLWireframeVisualModule.h"
 #include "GLInstanceVisualModule.h"
-#include "Mapping/DiscreteElementsJointToInstance.h"
 #include "Mapping/DiscreteElementsToTriangleSet.h"
 #include "GLDiscreteElementVisualModule.h"
 #include "GLDiscreteElementJointVisualModule.h"

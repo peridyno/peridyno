@@ -239,6 +239,11 @@ namespace dyno
         DYN_FUNC int256_t() : lo0(0), lo1(0), hi0(0), hi1(0) {}
         DYN_FUNC int256_t(uint64_t l0, uint64_t l1, uint64_t h0, uint64_t h1)
             : lo0(l0), lo1(l1), hi0(h0), hi1(h1) {}
+        DYN_FUNC int256_t(const int128_t& a)
+            : lo0(a.lo),
+              lo1(a.hi),
+              hi0((a.hi >> 63) ? ~0ULL : 0ULL),
+              hi1((a.hi >> 63) ? ~0ULL : 0ULL) {}
         DYN_FUNC int256_t(int64_t a)
             : lo0(static_cast<uint64_t>(a)),
               lo1(a < 0 ? ~0ULL : 0ULL), hi0(a < 0 ? ~0ULL : 0ULL), hi1(a < 0 ? ~0ULL : 0ULL) {}

@@ -441,6 +441,11 @@ namespace dyno
         {
         }
 
+        DYN_FUNC uint256_t(const uint128_t& value)
+            : lo0(value.lo), lo1(value.hi), hi0(0), hi1(0)
+        {
+        }
+
         DYN_FUNC uint256_t operator*(const uint256_t& other) const
         {
             uint64_t r0, r1, r2, r3;

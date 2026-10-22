@@ -62,7 +62,7 @@ namespace dyno
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         stbi_set_flip_vertically_on_load(true);
-        std::string path = getAssetPath() + "digitNums/textures/v1_0123456789.png";
+        std::string path = getDefaultPath() + "digitNums/textures/v1_0123456789.png";
         int width, height, nrChannels;
         unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
         if (data) {

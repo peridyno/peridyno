@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="30px" height="30px" viewBox="0 0 30 30" enable-background="new 0 0 30 30" xml:space="preserve">
+<g>
+	
+		<image overflow="visible" width="96" height="77" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABNCAYAAABZqmHQAAAACXBIWXMAAAsSAAALEgHS3X78AAAA
+GXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAmFJREFUeNrs181u2kAUhuH4D2PH
+QGlKpdJEoZfAHXC/uQlugCV02UVbqWqkViFgB/BPvhO5i1aqQM1mUr2PdDQztrHMOWOPfXYGAAAA
+AAAAAAAAAAAAAAAAAACAZ/Fe8HUeu/bmj5YC/OP1+YpwPB4Hh8PBb5rG6/f7fl3XnkWv1/Oqqvrt
+f0RRpF31Qd39crksXS6G53rih8Nh1/O8nu/754puHMcdtZG2RWrDNgILK47Uigf1f6pg39Wu9zIY
+DKrRaFTP5/PKpUK4WABLfKCIsyxLlfDXmuHvNKvfhmH4qi1GFgRBamFFUcQ28bUvUNiMv1P7SXfB
+R+37okLc6Tzb3W6XqxDFYrEoXSlC4OjMj9M07SuJb9Qfq71U8i+tVdKvtO1K7bWSO7HQeKJ9HxTX
+iveKC207t/Oon+jYblmWOkVYq5j72WxWrVYrJwoQOvr4CTR7YyUssxmvsGQmitRC40xtT9FvE23b
+u/Y7PXKeZreO2ai9t7GiVhF2Oufa1g+X/qyLBbCZac9xe1bbjK00y/dK4k7j3BKtftTeKcaOswXX
+9v96BK11TGF9S75+X6pv+/ebzaZmET6+BkR6u7FZbo+SC90Jw06nM1Ai+8fWACuIxlsl/ofGtxp/
+U/tVs/+z1pFbtVu9GR1cWQNcfQuyInS0YCZaQBMlrqsixEp455S3oPaOeFCyc/12q233eZ6vkyQp
+2tfSmjvgtCI8xWQy8fUm6Z/6HaBCNfYtUBRFpYLVSn45nU7Lm5ub2rVvgZfwJew949qbv/QBAAAA
+AAAAAAAAAAAAAAAAAADwv3gUYAAV4vSwXn4fBgAAAABJRU5ErkJggg==" transform="matrix(1 0 0 1 -33.2275 -13.0127)">
+	</image>
+</g>
+<radialGradient id="SVGID_1_" cx="11.0684" cy="10.2578" r="12.401" gradientTransform="matrix(0.7745 0.6326 -0.6439 0.7883 9.1016 -4.8303)" gradientUnits="userSpaceOnUse">
+	<stop  offset="0" style="stop-color:#FFDC98;stop-opacity:0.9"/>
+	<stop  offset="0.2959" style="stop-color:#EAB74C"/>
+	<stop  offset="0.6578" style="stop-color:#DC941B"/>
+	<stop  offset="0.9949" style="stop-color:#C07017"/>
+</radialGradient>
+<circle fill="url(#SVGID_1_)" stroke="#282828" stroke-miterlimit="10" cx="14.416" cy="14.365" r="11.865"/>
+</svg>

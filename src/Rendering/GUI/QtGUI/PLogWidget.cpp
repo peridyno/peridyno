@@ -220,7 +220,7 @@ namespace dyno
 
 	QIcon PLogWidget::getIcon(const QString& name)
 	{
-		return QIcon(QString::fromLocal8Bit(getAssetPath().c_str()) + "icon/" + name + ".png");
+		return QIcon(QString::fromLocal8Bit(getDefaultPath().c_str()) + "icon/" + name + ".png");
 	}
 
 	QSize PLogWidget::sizeHint() const
