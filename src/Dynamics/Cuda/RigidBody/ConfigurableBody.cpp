@@ -367,10 +367,7 @@ namespace dyno
 					{
 						visualShapePtr = texMesh->shapes()[visualId];
 					}
-					else
-					{
-						visualId = texMesh->shapes().size() - 1;
-					}
+
 				}
 
 				RigidBodyInfo rigidbody;
