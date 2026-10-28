@@ -29,6 +29,8 @@ namespace dyno
 
 		void apply(int width, int height);
 
+		void release();
+
 	public:
 		float RelativeContrastThreshold;
 		float HardContrastThreshold;

@@ -246,9 +246,7 @@ namespace dyno
 
 	GLRenderHelper::~GLRenderHelper()
 	{
-		if (mBBoxRenderer) delete mBBoxRenderer;
-		if (mGroundRenderer) delete mGroundRenderer;
-		if (mBackgroundRenderer) delete mBackgroundRenderer;
+		release();
 	}
 
 	void GLRenderHelper::drawGround(const RenderParams& rparams,
@@ -271,4 +269,23 @@ namespace dyno
 		if (mBackgroundRenderer != NULL)
 			mBackgroundRenderer->draw(color0, color1);
 	}
+
+	void GLRenderHelper::release()
+	{
+		if (mBBoxRenderer) {
+			delete mBBoxRenderer; 
+			mBBoxRenderer = NULL;
+		}
+
+		if (mGroundRenderer) {
+			delete mGroundRenderer;
+			mGroundRenderer = NULL;
+		}
+			
+		if (mBackgroundRenderer) {
+			delete mBackgroundRenderer;
+			mBackgroundRenderer = NULL;
+		};
+	}
+
 }

@@ -110,7 +110,8 @@ namespace dyno
 
 		// release other objects
 		mScreenQuad->release();
-
+		mRenderHelper->release();
+		mFXAAFilter->release();
 	}
 
 	void GLRenderEngine::setupTransparencyPass()

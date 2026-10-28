@@ -23,14 +23,7 @@ namespace dyno
 
 	FXAA::~FXAA()
 	{
-		if (mScreenQuad) {
-			mScreenQuad->release();
-			delete mScreenQuad;
-		}
-		if (mShaderProgram) {
-			mShaderProgram->release();
-			delete mShaderProgram;
-		}
+		release();
 	}
 
 	void FXAA::apply(int width, int height)
@@ -48,4 +41,21 @@ namespace dyno
 		
 		mScreenQuad->draw();
 	}
+
+	void FXAA::release()
+	{
+		if (mScreenQuad) {
+			mScreenQuad->release();
+			delete mScreenQuad;
+
+			mScreenQuad = NULL;
+		}
+		if (mShaderProgram) {
+			mShaderProgram->release();
+			delete mShaderProgram;
+
+			mShaderProgram = NULL;
+		}
+	}
+
 }
