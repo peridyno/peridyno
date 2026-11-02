@@ -13,7 +13,7 @@ namespace dyno {
 	 */
 
 	template <typename T>
-	class Vector<T, 4>
+	class DYN_ALIGN_16 Vector<T, 4>
 	{
 	public:
 		typedef T VarType;

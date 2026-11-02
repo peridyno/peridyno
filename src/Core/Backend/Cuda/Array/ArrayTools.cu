@@ -70,6 +70,26 @@ namespace dyno
 	template struct SpaceHolder<58>;
 	template struct SpaceHolder<59>;
 	template struct SpaceHolder<60>;
+	template struct SpaceHolder<61>;
+	template struct SpaceHolder<62>;
+	template struct SpaceHolder<63>;
+	template struct SpaceHolder<64>;
+	template struct SpaceHolder<65>;
+	template struct SpaceHolder<66>;
+	template struct SpaceHolder<67>;
+	template struct SpaceHolder<68>;
+	template struct SpaceHolder<69>;
+	template struct SpaceHolder<70>;
+	template struct SpaceHolder<71>;
+	template struct SpaceHolder<72>;
+	template struct SpaceHolder<73>;
+	template struct SpaceHolder<74>;
+	template struct SpaceHolder<75>;
+	template struct SpaceHolder<76>;
+	template struct SpaceHolder<77>;
+	template struct SpaceHolder<78>;
+	template struct SpaceHolder<79>;
+	template struct SpaceHolder<80>;
 
 
 	template<uint N>
@@ -172,6 +192,28 @@ namespace dyno
 	template void parallel_allocate_for_list<59>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
 	template void parallel_allocate_for_list<60>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
 
+	template void parallel_allocate_for_list<61>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_allocate_for_list<62>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_allocate_for_list<63>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_allocate_for_list<64>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_allocate_for_list<65>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_allocate_for_list<66>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_allocate_for_list<67>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_allocate_for_list<68>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_allocate_for_list<69>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_allocate_for_list<70>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+
+	template void parallel_allocate_for_list<71>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_allocate_for_list<72>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_allocate_for_list<73>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_allocate_for_list<74>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_allocate_for_list<75>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_allocate_for_list<76>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_allocate_for_list<77>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_allocate_for_list<78>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_allocate_for_list<79>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_allocate_for_list<80>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+
 	template<uint N>
 	__global__ void AT_Assign(
 		void* lists,
@@ -258,9 +300,9 @@ namespace dyno
 	template void parallel_init_for_list<46>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
 	template void parallel_init_for_list<47>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
 	template void parallel_init_for_list<48>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
-
 	template void parallel_init_for_list<49>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
 	template void parallel_init_for_list<50>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+
 	template void parallel_init_for_list<51>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
 	template void parallel_init_for_list<52>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
 	template void parallel_init_for_list<53>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
@@ -272,7 +314,27 @@ namespace dyno
 	template void parallel_init_for_list<59>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
 	template void parallel_init_for_list<60>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
 
+	template void parallel_init_for_list<61>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_init_for_list<62>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_init_for_list<63>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_init_for_list<64>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_init_for_list<65>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_init_for_list<66>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_init_for_list<67>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_init_for_list<68>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_init_for_list<69>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_init_for_list<70>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
 
+	template void parallel_init_for_list<71>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_init_for_list<72>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_init_for_list<73>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_init_for_list<74>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_init_for_list<75>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_init_for_list<76>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_init_for_list<77>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_init_for_list<78>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_init_for_list<79>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
+	template void parallel_init_for_list<80>(void* lists, void* elements, size_t ele_size, DArray<uint>& index);
 
 	template<uint N>
 	__global__ void AT_Allocate_Map(
