@@ -355,7 +355,7 @@ namespace dyno
 			// external framebuffer MSAA is enabled,
 			resizeFramebuffer(rparams.width, rparams.height, samples);
 		}
-		else {
+		else{
 			// target framebuffer is non-multisample, and FXAA is disabled...
 			resizeFramebuffer(rparams.width, rparams.height, mMSAASamples);
 		}

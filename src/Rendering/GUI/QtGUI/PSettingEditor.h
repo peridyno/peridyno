@@ -138,7 +138,7 @@ namespace dyno
 		std::shared_ptr<GLRenderEngine> mRenderEngine = nullptr;
 		RenderWindow* mRenderWindow = nullptr;
 		QCheckBox* fxaaEnabled;
-		QComboBox* msaaSamples;
+		QSpinBox* msaaSamples;
 		QComboBox* shadowMapSize;
 		//QComboBox* shadowType;
 		QSpinBox*  shadowBlurIters;

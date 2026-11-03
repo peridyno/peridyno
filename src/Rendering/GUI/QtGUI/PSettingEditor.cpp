@@ -227,8 +227,8 @@ namespace dyno
 
 		fxaaEnabled = new QCheckBox(this);
 		
-		msaaSamples = new QComboBox(this);
-		msaaSamples->addItems({"Disable", "2", "4", "8"});
+		msaaSamples = new QSpinBox(this);
+		msaaSamples->setRange(1,32);
 
 		shadowMapSize = new QComboBox(this);
 		shadowMapSize->addItems({ "256", "512", "1024", "2048", "4096" , "8192"});
@@ -302,7 +302,7 @@ namespace dyno
 		{
 			// update values
 			fxaaEnabled->setChecked(mRenderEngine->getFXAA());
-			msaaSamples->setCurrentText(QString::number(mRenderEngine->getMSAA()));
+			msaaSamples->setValue(mRenderEngine->getMSAA());
 			shadowMapSize->setCurrentText(QString::number(mRenderEngine->getShadowMapSize()));
 
 			shadowBlurIters->setValue(mRenderEngine->getShadowBlurIters());
@@ -313,7 +313,7 @@ namespace dyno
 				mRenderEngine->setFXAA(fxaaEnabled->isChecked());
 				});
 
-			connect(msaaSamples, SIGNAL(currentIndexChanged(int)), this, SLOT(setMSAA(int)));
+			connect(msaaSamples, SIGNAL(valueChanged(int)), this, SLOT(setMSAA(int)));
 
 			connect(shadowMapSize, SIGNAL(currentIndexChanged(int)), this, SLOT(setShadowMapSize(int)));
 
@@ -338,7 +338,7 @@ namespace dyno
 
 	void PRenderSetting::setMSAA(int idx)
 	{
-		mRenderEngine->setFXAA(fxaaEnabled->isChecked());
+		mRenderEngine->setMSAA(idx);
 	}
 
 	void PRenderSetting::setShadowMapSize(int idx)
