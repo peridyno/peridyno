@@ -111,6 +111,19 @@ namespace dyno
 		DYN_FUNC bool operator != (const Quat<Real>&) const;
 		DYN_FUNC Real dot(const Quat<Real> &) const;
 
+		// Return normalize(q + 0.5 * Quat<Real>(w, 0) * q), typically used for integrating the angular velocity, where w is the angular velocity vector
+		DYN_FUNC static inline Quat<Real> plus(const Quat<Real>& q, const Vector<Real, 3>& v) {
+			auto ret = q + Quat<Real>(v.x, v.y, v.z, 0) * q * 0.5f;
+			ret.normalize();
+			return ret;
+		}
+
+		// Return (2 * q_i * q_j)_v, typically used for calculating the relative rotation between two quaternions, where q_i and q_j are two quaternions, and (2 * q_i * q_j)_v is the vector part of 2 * q_i * q_j
+		DYN_FUNC static inline Vector<Real, 3> minus(const Quat<Real>& q0, const Quat<Real>& q1) {
+			auto ret = q0 * q1.inverse();
+			return Vector<Real, 3>(2 * ret.x, 2 * ret.y, 2 * ret.z);
+		}
+
 		DYN_FUNC static inline Quat<Real> identity() { return Quat<Real>(0, 0, 0, 1); }
 		DYN_FUNC static inline Quat<Real> fromEulerAngles(const Real& yaw, const Real& pitch, const Real& roll) {
 			Real cr = glm::cos(roll * Real(0.5));

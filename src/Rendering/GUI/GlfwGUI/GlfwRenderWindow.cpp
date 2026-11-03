@@ -72,6 +72,8 @@ namespace dyno
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 
+		this->getRenderEngine()->terminate();
+
 		glfwDestroyWindow(mWindow);
 		glfwTerminate();
 	}

@@ -37,6 +37,8 @@ namespace dyno
 		void drawBBox(const RenderParams& rparams, Vec3f pmin, Vec3f pmax, int type = 0);
 		void drawBackground(Vec3f color0, Vec3f color1);
 
+		void release();
+
 	private:
 		BBoxRenderer*			mBBoxRenderer = NULL;
 		GroundRenderer*			mGroundRenderer = NULL;

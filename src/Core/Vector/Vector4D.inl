@@ -203,7 +203,7 @@ namespace dyno
 	template <typename T>
 	DYN_FUNC T Vector<T, 4>::dot(const Vector<T, 4>& vec2) const
 	{
-		return glm::dot(data_, vec2.data_);
+		return x * vec2.x + y * vec2.y + z * vec2.z + w * vec2.w;
 	}
 
 	template <typename T>

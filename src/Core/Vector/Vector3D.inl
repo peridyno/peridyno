@@ -199,15 +199,16 @@ namespace dyno {
 	template <typename T>
 	DYN_FUNC Vector<T, 3> Vector<T, 3>::cross(const Vector<T, 3>& vec2) const
 	{
-		Vector<T, 3> res;
-		res.data_ = glm::cross(data_, vec2.data_);
-		return res;
+		return Vector<T, 3>(
+			y * vec2.z - z * vec2.y,
+			z * vec2.x - x * vec2.z,
+			x * vec2.y - y * vec2.x);
 	}
 
 	template <typename T>
 	DYN_FUNC T Vector<T, 3>::dot(const Vector<T, 3>& vec2) const
 	{
-		return glm::dot(data_, vec2.data_);
+		return x * vec2.x + y * vec2.y + z * vec2.z;
 	}
 
 	template <typename T>
