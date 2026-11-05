@@ -150,6 +150,8 @@ namespace dyno {
 		DYN_FUNC void clear() noexcept; //clear will not change m_Begin and capacity, only change size and m_End
 
 		private:
+		using base_type::m_startLoc;
+		using base_type::m_maxSize;
 		size_type	m_size = 0;
 		iterator	m_bufferEnd = nullptr;
 		iterator	m_End = nullptr;

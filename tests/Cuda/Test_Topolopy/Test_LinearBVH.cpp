@@ -4,7 +4,7 @@
 
 using namespace dyno;
 
-typedef typename TAlignedBox3D<float> AABB;
+using AABB = TAlignedBox3D<float>;
 
 TEST(BVH, construct)
 {

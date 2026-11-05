@@ -948,7 +948,7 @@ namespace dyno
 			m_node,
 			m_velocity,
 			m_identifier,
-			0.5*dt);
+			Real(0.5)*dt);
 
 		DArray<int> pos_index(m_identifier.size());
 		auto nodeSet = this->inAdaptiveVolume2D()->getDataPtr();

@@ -49,10 +49,12 @@ if("${PERIDYNO_GPU_BACKEND}" STREQUAL "CUDA")
 	#set(CMAKE_C_CREATE_STATIC_LIBRARY "")
 	#set(CMAKE_C_COMPILE_OBJECT  "")
 
-	# Fix the following error:The error #error: "MSVC/cl.exe with traditional preprocessor is used"
-	#  	which occurs because CUDA 13.x CCCL headers require a standard conforming preprocessor, while older MSVC builds default to the traditional, non-conforming preprocessor. 
-	#	Using the traditional preprocessor can lead to unexpected compilation errors during CUDA builds on Windows 
-	set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Xcompiler=/Zc:preprocessor")
+	if(MSVC)
+		# Fix the following error:The error #error: "MSVC/cl.exe with traditional preprocessor is used"
+		#  	which occurs because CUDA 13.x CCCL headers require a standard conforming preprocessor, while older MSVC builds default to the traditional, non-conforming preprocessor. 
+		#	Using the traditional preprocessor can lead to unexpected compilation errors during CUDA builds on Windows 
+		set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Xcompiler=/Zc:preprocessor")
+	endif()
 
 	set(PERIDYNO_CUDA_ARCH "89" CACHE STRING "Comptue Capability")
 	set_property(CACHE PERIDYNO_CUDA_ARCH PROPERTY STRINGS "60;61;62;70;72;75;80;86;87;89;90;100;103;110;120")

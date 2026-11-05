@@ -338,7 +338,7 @@ namespace dyno
 
 
 		int j = 0;
-		for (auto it = varVehiclesTransform()->begin(); it != varVehiclesTransform()->end(); it++, j++)
+		for (auto it = this->varVehiclesTransform()->begin(); it != this->varVehiclesTransform()->end(); it++, j++)
 		{
 			auto instance = instances->getElement(it);
 

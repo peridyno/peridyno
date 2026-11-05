@@ -25,7 +25,16 @@ namespace dyno {
         QApplication::setAttribute(Qt::AA_Use96Dpi);
         qputenv("QT_ENABLE_HIGHDPI_SCALING", "0");
 
-        mQApp = std::make_shared<QApplication>(argc, argv);
+        static char defaultArg0[] = "peridyno";
+        static char* defaultArgv[] = { defaultArg0, nullptr };
+        if (argc > 0 && argv != nullptr) {
+            mQAppArgc = argc;
+            mQAppArgv = argv;
+        } else {
+            mQAppArgc = 1;
+            mQAppArgv = defaultArgv;
+        }
+        mQApp = std::make_shared<QApplication>(mQAppArgc, mQAppArgv);
 
         #ifdef CUDA_BACKEND
         auto status = cudaSetDevice(0);

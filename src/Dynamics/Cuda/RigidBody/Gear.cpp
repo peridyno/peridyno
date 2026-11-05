@@ -337,13 +337,13 @@ namespace dyno
 		for (int i = 0; i < this->mObjects.size(); i++)
 		{
 			auto& object = this->mObjects[i];
-			if (object.asset_id < 0 || object.asset_id >= static_cast<int>(mAssets.size()))
+			if (object.asset_id < 0 || object.asset_id >= static_cast<int>(this->mAssets.size()))
 			{
 				std::cerr << "Warning: Skip object '" << object.name << "' due to invalid asset index." << std::endl;
 				continue;
 			}
 
-			auto& currentAsset = mAssets[object.asset_id];
+			auto& currentAsset = this->mAssets[object.asset_id];
 			SceneCollisionProxyType collisionProxy = resolveCollisionProxy(object, currentAsset);
 			if (collisionProxy == SceneCollisionProxyType::Mat && currentAsset.matPath.empty())
 			{
