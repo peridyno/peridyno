@@ -81,11 +81,12 @@ namespace dyno
 	template <typename MKey, typename T>
 	DYN_FUNC uint MultiMap<MKey, T>::count(MKey key)
 	{
-		int ind = leftBound(Pair<MKey, T>(key, T(0)), m_startLoc, m_size);
+		Pair<MKey, T> probe(key, T());
+		int ind = leftBound(probe, m_startLoc, m_size);
 		if (ind >= m_size) return 0;
 
 		size_t num = 0;
-		while (m_startLoc[ind] == val && ind < m_size)
+		while (m_startLoc[ind] == probe && ind < m_size)
 		{
 			num++;
 			ind++;

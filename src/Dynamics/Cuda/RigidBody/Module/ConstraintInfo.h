@@ -3,6 +3,7 @@
 #include "Vector.h"
 #include "Matrix.h"
 #include "Quat.h"
+#include "Collision/CollisionData.h"
 
 namespace dyno
 {

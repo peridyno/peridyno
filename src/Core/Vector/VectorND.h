@@ -246,15 +246,15 @@ namespace dyno
 		{
 			static_assert(N > 0, "Cannot create a zero size arrays");
 			for (size_type i = 0; i < N - 1; i++)
-				out << a.elems[i] << " ";
-			out << a.elems[N - 1];
+				out << a.data[i] << " ";
+			out << a.data[N - 1];
 			return out;
 		}
 
 		CPU_FUNC inline friend std::istream& operator >> (std::istream& in, VectorND<T, N>& a)
 		{
 			for (size_type i = 0; i < N; i++)
-				in >> a.elems[i];
+				in >> a.data[i];
 			return in;
 		}
 
