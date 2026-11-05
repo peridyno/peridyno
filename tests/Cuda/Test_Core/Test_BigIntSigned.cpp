@@ -102,6 +102,54 @@ TEST(Int128Signed, TryMulOverflow)
     EXPECT_FALSE(min_value.try_mul(int128_t(-1), res));
 }
 
+TEST(Int128Signed, CrossLocalPointsOverflow)
+{
+    // Reproduces APB_CrossLocalPoints() (the GPU_FUNC in the intersection code)
+    // with the values of a case that computes a wrong result:
+    //
+    //     pa = (157479, 18746978)
+    //     pb = (2545264, 22632724)
+    //     cx = { hi = 0, lo = 811874791654865148 }
+    //     cy = { hi = 5, lo = 16261481622337981762 }
+    //     cw = { hi = 0, lo = 4794071381389 }
+    //
+    //   return (pa.x*cw - cx) * (pb.y*cw - cy)
+    //        - (pb.x*cw - cx) * (pa.y*cw - cy);
+    //
+    // Every sub-expression still fits in a signed 128-bit integer
+    // (  ax = -56909224585106817,  by = 7692420390233794,
+    //    bx =  11390302508824826548,  ay = -18620851273556547400 )
+    // but the products do NOT: |bx * ay| ~ 2.12e38 > INT128_MAX ~ 1.70e38,
+    // so the 128-bit evaluation wraps around and the result is off by 2^128.
+    const int128_t pa_x(157479), pa_y(18746978);
+    const int128_t pb_x(2545264), pb_y(22632724);
+    const int128_t cx(811874791654865148ULL, 0ULL);
+    const int128_t cy(16261481622337981762ULL, 5ULL);
+    const int128_t cw(4794071381389ULL, 0ULL);
+
+    // Intermediates: representable in 128 bits.
+    const int128_t ax = pa_x * cw - cx;
+    const int128_t by = pb_y * cw - cy;
+    const int128_t bx = pb_x * cw - cx;
+    const int128_t ay = pa_y * cw - cy;
+
+    EXPECT_TRUE(ax == int128_t(-56909224585106817LL)); // hi = -1
+    EXPECT_TRUE(by == int128_t(7692420390233794LL));   // hi = 0
+    EXPECT_EQ(bx.lo, 11390302508824826548ULL);        // hi = 0
+    EXPECT_EQ(bx.hi, 0ULL);
+    EXPECT_EQ(ay.lo, 18272636873862555832ULL);        // hi = -2
+    EXPECT_EQ(ay.hi, 0xFFFFFFFFFFFFFFFEULL);
+
+    // 128-bit evaluation, exactly what the kernel does.
+    const int128_t result = ax * by - bx * ay;
+
+    // Exact reference: the same expression evaluated in 256-bit, where
+    // |bx * ay| is comfortably representable.
+    const int256_t ref = int256_t(ax) * int256_t(by) - int256_t(bx) * int256_t(ay);
+
+    EXPECT_TRUE(int256_t(result) == ref);
+}
+
 // ============================================================
 // int192_t tests
 // ============================================================
