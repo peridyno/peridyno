@@ -58,6 +58,26 @@ TEST(Int128Signed, Arithmetic)
     EXPECT_TRUE((int128_t(-1000) / int128_t(-10)) == int128_t(100));
 }
 
+TEST(Int128Signed, CompoundAssignment)
+{
+    int128_t value(100);
+
+    EXPECT_EQ(&(value += int128_t(-42)), &value);
+    EXPECT_TRUE(value == int128_t(58));
+
+    EXPECT_EQ(&(value -= int128_t(100)), &value);
+    EXPECT_TRUE(value == int128_t(-42));
+
+    EXPECT_EQ(&(value *= int128_t(-5)), &value);
+    EXPECT_TRUE(value == int128_t(210));
+
+    EXPECT_EQ(&(value /= int128_t(-4)), &value);
+    EXPECT_TRUE(value == int128_t(-52));
+
+    EXPECT_EQ(&(value %= int128_t(10)), &value);
+    EXPECT_TRUE(value == int128_t(-2));
+}
+
 TEST(Int128Signed, Comparison)
 {
     EXPECT_TRUE(int128_t(-200) < int128_t(-100));
