@@ -89,6 +89,36 @@ namespace dyno
             return is_negative() ? -r : r;
         }
 
+        DYN_FUNC int128_t& operator+=(const int128_t& b)
+        {
+            *this = *this + b;
+            return *this;
+        }
+
+        DYN_FUNC int128_t& operator-=(const int128_t& b)
+        {
+            *this = *this - b;
+            return *this;
+        }
+
+        DYN_FUNC int128_t& operator*=(const int128_t& b)
+        {
+            *this = *this * b;
+            return *this;
+        }
+
+        DYN_FUNC int128_t& operator/=(const int128_t& b)
+        {
+            *this = *this / b;
+            return *this;
+        }
+
+        DYN_FUNC int128_t& operator%=(const int128_t& b)
+        {
+            *this = *this % b;
+            return *this;
+        }
+
         DYN_FUNC bool operator==(const int128_t& b) const { return lo == b.lo && hi == b.hi; }
         DYN_FUNC bool operator!=(const int128_t& b) const { return !(*this == b); }
         DYN_FUNC bool operator<(const int128_t& b) const
