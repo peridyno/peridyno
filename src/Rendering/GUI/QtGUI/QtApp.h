@@ -30,8 +30,6 @@ namespace dyno {
         RenderWindow* renderWindow() override;
 
     private:
-        int mQAppArgc = 0;
-        char** mQAppArgv = nullptr;
         std::shared_ptr<QApplication> mQApp;
         std::shared_ptr<PMainWindow> mMainWindow;
     };
