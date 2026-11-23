@@ -140,6 +140,7 @@ namespace dyno
 		timer.start(16);
 
 		setFocusPolicy(Qt::StrongFocus);
+		setMouseTracking(true);
 
 		this->setRenderEngine(std::make_shared<GLRenderEngine>());
 	}
@@ -189,6 +190,11 @@ namespace dyno
 		//QtImGui
 		QtImGui::newFrame();
 
+		// Draw ImGui
+		if (showImGUI()) {
+			mImWindow.draw(this);
+		}
+
 		// update rendering params
 		mRenderParams.width = mCamera->viewportWidth();
 		mRenderParams.height = mCamera->viewportHeight();
@@ -200,11 +206,6 @@ namespace dyno
 
 		// Draw scene		
 		mRenderEngine->draw(SceneGraphFactory::instance()->active().get(), mRenderParams);
-
-		// Draw ImGui
-		if (showImGUI()) {
-			mImWindow.draw(this);
-		}
 			
 		ImGui::Render();
 		// Do QtImgui Render After Glfw Render
