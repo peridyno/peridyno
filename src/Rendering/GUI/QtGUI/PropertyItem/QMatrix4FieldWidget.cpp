@@ -111,7 +111,7 @@ namespace dyno
 				}
 			}
 			
-			f->setValue(mat, false);
+			f->setValue(mat);
 		}
 		else if (template_name == std::string(typeid(Mat4d).name()))
 		{
@@ -124,10 +124,8 @@ namespace dyno
 				}
 			}
 			
-			f->setValue(mat, false);
+			f->setValue(mat);
 		}
-
-		emit fieldChanged();
 	}
 
 	void QMatrix4FieldWidget::updateWidget()

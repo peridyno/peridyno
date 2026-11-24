@@ -62,7 +62,5 @@ namespace dyno
 		}
 
 		f->setCurrentKey(mComboxIndexMap[index]);
-
-		emit fieldChanged();
 	}
 }

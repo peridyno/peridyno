@@ -65,9 +65,7 @@ namespace dyno
 		if (f == nullptr)
 			return;
 
-		f->setValue(value,false);
-		emit fieldChanged();
-
+		f->setValue(value);
 	}
 
 	QUIntegerFieldWidget::QUIntegerFieldWidget(FBase* field)
@@ -115,8 +113,7 @@ namespace dyno
 		if (f == nullptr)
 			return;
 
-		f->setValue(value,false);
-		emit fieldChanged();
+		f->setValue(value);
 	}
 
 	bool QIntegerFieldWidget::eventFilter(QObject* watched, QEvent* event)

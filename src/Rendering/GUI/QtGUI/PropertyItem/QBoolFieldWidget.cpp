@@ -51,7 +51,7 @@ namespace dyno
 
 		if (status == Qt::Checked)
 		{
-			f->setValue(true,false);
+			f->setValue(true);
 		}
 		else if (status == Qt::PartiallyChecked)
 		{
@@ -59,10 +59,8 @@ namespace dyno
 		}
 		else
 		{
-			f->setValue(false,false);
+			f->setValue(false);
 		}
-
-		emit fieldChanged();
 	}
 
 }

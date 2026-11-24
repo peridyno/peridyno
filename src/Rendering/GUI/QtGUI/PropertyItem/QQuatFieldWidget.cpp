@@ -123,13 +123,13 @@ namespace dyno
 		{
 			FVar<Quat1f>* f = TypeInfo::cast<FVar<Quat1f>>(field());
 			Quat1f q = Quat1f::fromEulerAngles((float)yaw, (float)pitch, (float)roll);
-			f->setValue(q, false);
+			f->setValue(q);
 		}
 		else if (template_name == std::string(typeid(Quat1d).name()))
 		{
 			FVar<Quat1d>* f = TypeInfo::cast<FVar<Quat1d>>(field());
 			Quat1d q = Quat1d::fromEulerAngles(yaw, pitch, roll);
-			f->setValue(q, false);
+			f->setValue(q);
 		}
 
 		emit fieldChanged();

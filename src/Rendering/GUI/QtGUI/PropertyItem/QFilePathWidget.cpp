@@ -56,7 +56,10 @@ namespace dyno
 	void QStringFieldWidget::updateWidget()
 	{
 		std::string str = f->getValue();
+
+		fieldname->blockSignals(true);
 		fieldname->setText(QString::fromStdString(str));
+		fieldname->blockSignals(false);
 	}
 
 	QFilePathWidget::QFilePathWidget(FBase* field)
@@ -143,8 +146,6 @@ namespace dyno
 		path.setFilter(path.getFileFilter());
 
 		f->setValue(path);
-
-		emit fieldChanged();
 	}
 
 
@@ -212,8 +213,6 @@ namespace dyno
 		}
 
 		f->setValue(SaveFilePath(path,f->getValue().getFileFilter()));
-
-		emit fieldChanged();
 	}
 }
 

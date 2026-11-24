@@ -194,7 +194,6 @@ namespace dyno
 		}
 
 		colorButton->setColor(QColor(v1, v2, v3), true);
-		emit fieldChanged();
 	}
 
 	void QColorWidget::updateColorWidget(const QColor& color)

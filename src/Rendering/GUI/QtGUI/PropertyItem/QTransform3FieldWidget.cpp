@@ -305,7 +305,7 @@ namespace dyno
 				transform.rotation() = rot;
 			}
 			
-			f->setValue(transform, false);
+			f->setValue(transform);
 		}
 		else if (template_name == std::string(typeid(Transform3d).name()))
 		{
@@ -348,10 +348,8 @@ namespace dyno
 				transform.rotation() = rot;
 			}
 			
-			f->setValue(transform, false);
+			f->setValue(transform);
 		}
-
-		emit fieldChanged();
 	}
 
 	void QTransform3FieldWidget::updateWidget()

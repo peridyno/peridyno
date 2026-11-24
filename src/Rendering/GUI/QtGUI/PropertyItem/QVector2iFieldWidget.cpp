@@ -98,15 +98,13 @@ namespace dyno
 		if (template_name == std::string(typeid(Vec2i).name()))
 		{
 			FVar<Vec2i>* f = TypeInfo::cast<FVar<Vec2i>>(field());
-			f->setValue(Vec2i(v1, v2),false);
+			f->setValue(Vec2i(v1, v2));
 		}
 		else if (template_name == std::string(typeid(Vec2u).name()))
 		{
 			FVar<Vec2u>* f = TypeInfo::cast<FVar<Vec2u>>(field());
-			f->setValue(Vec2u(v1, v2),false);
+			f->setValue(Vec2u(v1, v2));
 		}
-
-		emit fieldChanged();
 	}
 
 	void QVector2iFieldWidget::updateWidget()

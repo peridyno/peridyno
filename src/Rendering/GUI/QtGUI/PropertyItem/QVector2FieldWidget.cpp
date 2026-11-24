@@ -127,6 +127,8 @@ namespace dyno
 
 		QObject::connect(spinner1, SIGNAL(valueChanged(double)), this, SLOT(vec2fValueChange(double)));
 		QObject::connect(spinner2, SIGNAL(valueChanged(double)), this, SLOT(vec2fValueChange(double)));
+
+		QObject::connect(this, SIGNAL(fieldChanged()), this, SLOT(updateWidget()));
 	}
 
 
@@ -144,12 +146,12 @@ namespace dyno
 		if (template_name == std::string(typeid(Vec2f).name()))
 		{
 			FVar<Vec2f>* f = TypeInfo::cast<FVar<Vec2f>>(field());
-			f->setValue(Vec2f((float)v1, (float)v2),false);
+			f->setValue(Vec2f((float)v1, (float)v2));
 		}
 		else if (template_name == std::string(typeid(Vec2d).name()))
 		{
 			FVar<Vec2d>* f = TypeInfo::cast<FVar<Vec2d>>(field());
-			f->setValue(Vec2d(v1, v2), false);
+			f->setValue(Vec2d(v1, v2));
 		}
 
 		emit fieldChanged();

@@ -79,6 +79,8 @@ namespace dyno
 
 		QObject::connect(name, SIGNAL(toggle(bool)), spinner, SLOT(toggleDecimals(bool)));
 
+		QObject::connect(this, SIGNAL(fieldChanged()), this, SLOT(updateWidget()));
+
 		mRightMenu = new QMenu(this);
 		mRightMenu->addAction("Set Range", this, &QRealFieldWidget::editRange);
 
@@ -98,15 +100,13 @@ namespace dyno
 		if (template_name == std::string(typeid(float).name()))
 		{
 			FVar<float>* f = TypeInfo::cast<FVar<float>>(field());
-			f->setValue((float)v, false);
+			f->setValue((float)v);
 		}
 		else if (template_name == std::string(typeid(double).name()))
 		{
 			FVar<double>* f = TypeInfo::cast<FVar<double>>(field());
-			f->setValue(v, false);
+			f->setValue(v);
 		}
-
-		emit fieldChanged();
 	}
 
 	void QRealFieldWidget::updateWidget()
@@ -117,7 +117,7 @@ namespace dyno
 			FVar<float>* f = TypeInfo::cast<FVar<float>>(field());
 
 			slider->blockSignals(true);
-			slider->setValue((double)f->getValue());
+			slider->setValue((double)f->getValue(), true);
 			slider->blockSignals(false);
 		}
 		else if (template_name == std::string(typeid(double).name()))
@@ -125,7 +125,7 @@ namespace dyno
 			FVar<double>* f = TypeInfo::cast<FVar<double>>(field());
 
 			slider->blockSignals(true);
-			slider->setValue(f->getValue());
+			slider->setValue(f->getValue(), true);
 			slider->blockSignals(false);
 		}
 	}
