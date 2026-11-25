@@ -83,8 +83,12 @@ namespace dyno {
 	template class Vector<float, 4>;
 	template class Vector<double, 4>;
 	//convenient typedefs
-	typedef Vector<float, 4> Vec4f;
-	typedef Vector<double, 4> Vec4d;
+	typedef Vector<float, 4>	Vec4f;
+	typedef Vector<double, 4>	Vec4d;
+	typedef Vector<int, 4>		Vec4i;
+	typedef Vector<uint, 4>		Vec4u;
+	typedef Vector<char, 4>		Vec4c;
+	typedef Vector<uchar, 4>	Vec4uc;
 
 } //end of namespace dyno
 

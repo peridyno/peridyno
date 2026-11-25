@@ -95,7 +95,7 @@ namespace dyno {
 	typedef Vector<int, 3>		Vec3i;
 	typedef Vector<uint, 3>		Vec3u;
 	typedef Vector<char, 3>		Vec3c;
-	typedef Vector<uchar, 3> Vec3uc;
+	typedef Vector<uchar, 3>	Vec3uc;
 
 } //end of namespace dyno
 

@@ -3,21 +3,21 @@
 namespace dyno
 {
 	template<typename Integer>
-	DYN_FUNC Fraction<Integer>::Fraction() :
+	DYN_FUNC Fraction<Integer, 1>::Fraction() :
 		mNumerator(0),
 		mDenominator(1)
 	{
 	}
 
 	template <typename Integer>
-	DYN_FUNC Fraction<Integer>::Fraction(Integer numerator)
+	DYN_FUNC Fraction<Integer, 1>::Fraction(Integer numerator)
 	{
 		mNumerator = numerator;
 		mDenominator = 1;
 	}
 
 	template<typename Integer>
-	DYN_FUNC Fraction<Integer>::Fraction(Integer numerator, Integer denominator)
+	DYN_FUNC Fraction<Integer, 1>::Fraction(Integer numerator, Integer denominator)
 	{
 		Integer divisor = gcd(abs(numerator), abs(denominator));
 
@@ -28,37 +28,37 @@ namespace dyno
 	}
 
 	template<typename Integer>
-	DYN_FUNC const Fraction<Integer> Fraction<Integer>::operator+ (const Fraction<Integer>& other) const 
+	DYN_FUNC const Fraction<Integer, 1> Fraction<Integer, 1>::operator+ (const Fraction<Integer, 1>& other) const
 	{
 		Integer numer = mNumerator * other.mDenominator + mDenominator * other.mNumerator;
 		Integer denom = mDenominator * other.mDenominator;
 
-		return Fraction<Integer>(numer, denom);
+		return Fraction<Integer, 1>(numer, denom);
 	}
 
 	template<typename Integer>
-	DYN_FUNC const Fraction<Integer> Fraction<Integer>::operator- (const Fraction<Integer>& other) const
+	DYN_FUNC const Fraction<Integer, 1> Fraction<Integer, 1>::operator- (const Fraction<Integer, 1>& other) const
 	{
 		Integer numer = mNumerator * other.mDenominator - mDenominator * other.mNumerator;
 		Integer denom = mDenominator * other.mDenominator;
 
-		return Fraction<Integer>(numer, denom);
+		return Fraction<Integer, 1>(numer, denom);
 	}
 
 	template<typename Integer>
-	DYN_FUNC const Fraction<Integer> Fraction<Integer>::operator* (const Fraction<Integer>& other) const
+	DYN_FUNC const Fraction<Integer, 1> Fraction<Integer, 1>::operator* (const Fraction<Integer, 1>& other) const
 	{
-		return Fraction<Integer>(mNumerator * other.mNumerator, mDenominator * other.mDenominator);
+		return Fraction<Integer, 1>(mNumerator * other.mNumerator, mDenominator * other.mDenominator);
 	}
 
 	template<typename Integer>
-	DYN_FUNC const Fraction<Integer> Fraction<Integer>::operator/(const Fraction<Integer>& other) const
+	DYN_FUNC const Fraction<Integer, 1> Fraction<Integer, 1>::operator/(const Fraction<Integer, 1>& other) const
 	{
-		return Fraction<Integer>(mNumerator * other.mDenominator, mDenominator * other.mNumerator);
+		return Fraction<Integer, 1>(mNumerator * other.mDenominator, mDenominator * other.mNumerator);
 	}
 
 	template<typename Integer>
-	DYN_FUNC Fraction<Integer>& Fraction<Integer>::operator+=(const Fraction<Integer>& other)
+	DYN_FUNC Fraction<Integer, 1>& Fraction<Integer, 1>::operator+=(const Fraction<Integer, 1>& other)
 	{
 		Integer numer = mNumerator * other.mDenominator + mDenominator * other.mNumerator;
 		Integer denom = mDenominator * other.mDenominator;
@@ -74,7 +74,7 @@ namespace dyno
 	}
 
 	template<typename Integer>
-	DYN_FUNC Fraction<Integer>& Fraction<Integer>::operator-=(const Fraction<Integer>& other)
+	DYN_FUNC Fraction<Integer, 1>& Fraction<Integer, 1>::operator-=(const Fraction<Integer, 1>& other)
 	{
 		Integer numer = mNumerator * other.mDenominator - mDenominator * other.mNumerator;
 		Integer denom = mDenominator * other.mDenominator;
@@ -90,7 +90,7 @@ namespace dyno
 	}
 
 	template<typename Integer>
-	DYN_FUNC Fraction<Integer>& Fraction<Integer>::operator*=(const Fraction<Integer>& other)
+	DYN_FUNC Fraction<Integer, 1>& Fraction<Integer, 1>::operator*=(const Fraction<Integer, 1>& other)
 	{
 		Integer numer = mNumerator * other.mNumerator;
 		Integer denom = mDenominator * other.mDenominator;
@@ -106,7 +106,7 @@ namespace dyno
 	}
 
 	template<typename Integer>
-	DYN_FUNC Fraction<Integer>& Fraction<Integer>::operator/=(const Fraction<Integer>& other)
+	DYN_FUNC Fraction<Integer, 1>& Fraction<Integer, 1>::operator/=(const Fraction<Integer, 1>& other)
 	{
 		Integer numer = mNumerator * other.mDenominator;
 		Integer denom = mDenominator * other.mNumerator;
@@ -122,7 +122,7 @@ namespace dyno
 	}
 
 	template<typename Integer>
-	DYN_FUNC Fraction<Integer>& Fraction<Integer>::operator=(const Fraction<Integer>& other)
+	DYN_FUNC Fraction<Integer, 1>& Fraction<Integer, 1>::operator=(const Fraction<Integer, 1>& other)
 	{
 		mNumerator = other.mNumerator;
 		mDenominator = other.mDenominator;
@@ -131,105 +131,105 @@ namespace dyno
 	}
 
 	template<typename Integer>
-	DYN_FUNC bool Fraction<Integer>::operator==(const Fraction<Integer>& other) const
+	DYN_FUNC bool Fraction<Integer, 1>::operator==(const Fraction<Integer, 1>& other) const
 	{
 		return mNumerator * other.mDenominator == mDenominator * other.mNumerator;
 	}
 
 	template<typename Integer>
-	DYN_FUNC bool Fraction<Integer>::operator!=(const Fraction<Integer>& other) const
+	DYN_FUNC bool Fraction<Integer, 1>::operator!=(const Fraction<Integer, 1>& other) const
 	{
 		return !(*this == other);
 	}
 
 	template <typename Integer>
-	DYN_FUNC bool Fraction<Integer>::operator>(const Fraction<Integer>& other) const
+	DYN_FUNC bool Fraction<Integer, 1>::operator>(const Fraction<Integer, 1>& other) const
 	{
 		return mNumerator * other.mDenominator > mDenominator * other.mNumerator;
 	}
 
 	template <typename Integer>
-	DYN_FUNC bool Fraction<Integer>::operator<(const Fraction<Integer>& other) const
+	DYN_FUNC bool Fraction<Integer, 1>::operator<(const Fraction<Integer, 1>& other) const
 	{
 		return mNumerator * other.mDenominator < mDenominator * other.mNumerator;
 	}
 
 	template <typename Integer>
-	DYN_FUNC bool Fraction<Integer>::operator>=(const Fraction<Integer>& other) const
+	DYN_FUNC bool Fraction<Integer, 1>::operator>=(const Fraction<Integer, 1>& other) const
 	{
 		return mNumerator * other.mDenominator >= mDenominator * other.mNumerator;
 	}
 
 	template <typename Integer>
-	DYN_FUNC bool Fraction<Integer>::operator<=(const Fraction<Integer>& other) const
+	DYN_FUNC bool Fraction<Integer, 1>::operator<=(const Fraction<Integer, 1>& other) const
 	{
 		return mNumerator * other.mDenominator <= mDenominator * other.mNumerator;
 	}
 
 	template<typename Integer>
-	DYN_FUNC const Fraction<Integer> Fraction<Integer>::operator+(const Integer& v) const
+	DYN_FUNC const Fraction<Integer, 1> Fraction<Integer, 1>::operator+(const Integer& v) const
 	{
-		Fraction<Integer> addition;
+		Fraction<Integer, 1> addition;
 		addition.mNumerator = mNumerator + v * mDenominator;
 		addition.mDenominator = mDenominator;
 		return addition;
 	}
 
 	template<typename Integer>
-	DYN_FUNC const Fraction<Integer> Fraction<Integer>::operator-(const Integer& v) const
+	DYN_FUNC const Fraction<Integer, 1> Fraction<Integer, 1>::operator-(const Integer& v) const
 	{
-		Fraction<Integer> sub;
+		Fraction<Integer, 1> sub;
 		sub.mNumerator = mNumerator - v * mDenominator;
 		sub.mDenominator = mDenominator;
 		return sub;
 	}
 
 	template<typename Integer>
-	DYN_FUNC const Fraction<Integer> Fraction<Integer>::operator*(const Integer& v) const
+	DYN_FUNC const Fraction<Integer, 1> Fraction<Integer, 1>::operator*(const Integer& v) const
 	{
-		return Fraction<Integer>(v * mNumerator, mDenominator);
+		return Fraction<Integer, 1>(v * mNumerator, mDenominator);
 	}
 
 	template<typename Integer>
-	DYN_FUNC const Fraction<Integer> Fraction<Integer>::operator/(const Integer& v) const
+	DYN_FUNC const Fraction<Integer, 1> Fraction<Integer, 1>::operator/(const Integer& v) const
 	{
-		return Fraction<Integer>(mNumerator, v * mDenominator);
+		return Fraction<Integer, 1>(mNumerator, v * mDenominator);
 	}
 
 	template<typename Integer>
-	DYN_FUNC Fraction<Integer>& Fraction<Integer>::operator+=(const Integer& v)
+	DYN_FUNC Fraction<Integer, 1>& Fraction<Integer, 1>::operator+=(const Integer& v)
 	{
 		mNumerator += v * mDenominator;
 		return *this;
 	}
 
 	template<typename Integer>
-	DYN_FUNC Fraction<Integer>& Fraction<Integer>::operator-=(const Integer& v)
+	DYN_FUNC Fraction<Integer, 1>& Fraction<Integer, 1>::operator-=(const Integer& v)
 	{
 		mNumerator -= v * mDenominator;
 		return *this;
 	}
 
 	template<typename Integer>
-	DYN_FUNC Fraction<Integer>& Fraction<Integer>::operator*=(const Integer& v)
+	DYN_FUNC Fraction<Integer, 1>& Fraction<Integer, 1>::operator*=(const Integer& v)
 	{
-		(*this) = Fraction<Integer>(v * mNumerator, mDenominator);
+		(*this) = Fraction<Integer, 1>(v * mNumerator, mDenominator);
 
 		return *this;
 	}
 
 	template<typename Integer>
-	DYN_FUNC Fraction<Integer>& Fraction<Integer>::operator/=(const Integer& v)
+	DYN_FUNC Fraction<Integer, 1>& Fraction<Integer, 1>::operator/=(const Integer& v)
 	{
-		(*this) = Fraction<Integer>(mNumerator, v * mDenominator);
+		(*this) = Fraction<Integer, 1>(mNumerator, v * mDenominator);
 
 		return *this;
 	}
 
 	template<typename Integer>
-	DYN_FUNC const Fraction<Integer> Fraction<Integer>::operator-(void) const
+	DYN_FUNC const Fraction<Integer, 1> Fraction<Integer, 1>::operator-(void) const
 	{
-		Fraction<Integer> neg;
+		Fraction<Integer, 1> neg;
 		neg.mNumerator = -mNumerator;
 		neg.mDenominator = mDenominator;
 		return neg;
